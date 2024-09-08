@@ -27,17 +27,9 @@ spec:
               customTokenUrl: 'https://auth.bhamm-lab.com/api/oidc/token'
               customProfileUrl: 'https://auth.bhamm-lab.com/api/oidc/userinfo'
               customEmailUrl: 'https://auth.bhamm-lab.com/api/oidc/userinfo'
-        config:
-          server:
-            ROOT_URL: https://git.bhamm-lab.com/
-          openid:
-            ENABLE_OPENID_SIGNIN: false
-            ENABLE_OPENID_SIGNUP: true
-            WHITELISTED_URIS: auth.bhamm-lab.com
-          service:
-            DISABLE_REGISTRATION: false
-            ALLOW_ONLY_EXTERNAL_REGISTRATION: true
-            SHOW_REGISTRATION_BUTTON: false
+        additionalConfigSources:
+          - configMap:
+              name: gitea-app-ini-plaintext
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
