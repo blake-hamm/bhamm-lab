@@ -19,7 +19,7 @@ spec:
         gitea:
           oauth:
             - name: 'authelia'
-              provider: 'OpenID Connect'
+              provider: 'openidConnect'
               existingSecret: 'gitea-external'
               autoDiscoverUrl: https://auth.bhamm-lab.com/.well-known/openid-configuration
         config:
