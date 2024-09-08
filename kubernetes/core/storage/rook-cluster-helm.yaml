@@ -1,0 +1,52 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rook-ceph-cluster
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "-150"
+spec:
+  destination:
+    namespace: rook-ceph
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: rook-ceph-cluster
+    repoURL: https://charts.rook.io/release
+    targetRevision: v1.14.9
+    helm:
+      valuesObject: # https://github.com/rook/rook/blob/release-1.9/deploy/charts/rook-ceph-cluster/values.yaml
+        toolbox:
+          enabled: true
+        monitoring:
+          enabled: true
+          createPrometheusRules: true
+        operatorNamespace: rook-ceph
+        clusterName: rook-ceph
+        cephClusterSpec:
+          labels:
+            monitoring:
+              release: monitor
+          storage:
+            useAllNodes: false
+            useAllDevices: false
+            nodes:
+              - name: "precision"
+                devices:
+                  - name: "/dev/disk/by-id/nvme-SHGP31-1000GM-2_AS0CN42841190CT25"
+              - name: "thinkpad"
+                devices:
+                  - name: "/dev/disk/by-id/nvme-CT1000P3PSSD8_2422492DF9B7"
+              - name: "elitebook"
+                devices:
+                  - name: "/dev/disk/by-id/nvme-CT1000P3PSSD8_2422492E9226"
+                    # config:
+                    #   osdsPerDevice: "5"
+                    #   storeType: bluestore
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

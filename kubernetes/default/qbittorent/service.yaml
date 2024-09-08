@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: qbittorrent
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "100"
+spec:
+  selector:
+    app: qbittorrent
+  ports:
+    - targetPort: 8080
+      port: 8080

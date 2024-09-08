@@ -1,0 +1,48 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: jellyfin
+  namespace: default
+  labels:
+    app: jellyfin
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jellyfin
+  template:
+    metadata:
+      labels:
+        app: jellyfin
+    spec:
+      containers:
+        - name: jellyfin
+          image: jellyfin/jellyfin:latest
+          ports:
+            - containerPort: 8096 # HTTP UI port
+            - containerPort: 1900 # DLNA SSDP port
+            - containerPort: 7359 # DLNA services port
+          volumeMounts:
+            - name: jellyfin-config-volume
+              mountPath: /config
+            - name: jellyfin-cache-volume
+              mountPath: /cache
+            - name: qbittorrent-downloads-volume
+              mountPath: /downloads
+          env:
+            - name: JELLYFIN_NETWORK_DISCOVERY_ENABLED
+              value: "true"
+            - name: JELLYFIN_PublishedServerUrl
+              value: https://jellyfin.bhamm-lab.com
+      volumes:
+        - name: jellyfin-config-volume
+          persistentVolumeClaim:
+            claimName: jellyfin-config-pvc
+        - name: jellyfin-cache-volume
+          persistentVolumeClaim:
+            claimName: jellyfin-cache-pvc
+        - name: qbittorrent-downloads-volume
+          persistentVolumeClaim:
+            claimName: qbittorrent-downloads-pvc

@@ -1,0 +1,36 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: audiobookshelf
+  namespace: default
+  labels:
+    app: audiobookshelf
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: audiobookshelf
+  template:
+    metadata:
+      labels:
+        app: audiobookshelf
+    spec:
+      containers:
+        - name: audiobookshelf
+          image: ghcr.io/advplyr/audiobookshelf
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: audiobookshelf-config-volume
+              mountPath: /config
+            - name: qbittorrent-downloads-volume
+              mountPath: /audiobooks
+      volumes:
+        - name: audiobookshelf-config-volume
+          persistentVolumeClaim:
+            claimName: audiobookshelf-config
+        - name: qbittorrent-downloads-volume
+          persistentVolumeClaim:
+            claimName: qbittorrent-downloads-pvc

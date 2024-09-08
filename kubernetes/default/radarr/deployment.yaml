@@ -1,0 +1,44 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: radarr
+  namespace: default
+  labels:
+    app: radarr
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: radarr
+  template:
+    metadata:
+      labels:
+        app: radarr
+    spec:
+      containers:
+        - name: radarr
+          image: lscr.io/linuxserver/radarr:latest
+          ports:
+            - containerPort: 7878
+          volumeMounts:
+            - name: radarr-config-volume
+              mountPath: /config
+          env:
+            - name: RADARR__APP__INSTANCENAME
+              value: radarr
+            - name: RADARR__APP__THEME
+              value: dark
+            - name: RADARR__AUTH__METHOD
+              value: External
+            - name: RADARR__AUTH__REQUIRED
+              value: DisabledForLocalAddresses
+            - name: RADARR__LOG__DBENABLED
+              value: "False"
+            - name: RADARR__LOG__LEVEL
+              value: info
+      volumes:
+        - name: radarr-config-volume
+          persistentVolumeClaim:
+            claimName: radarr-config

@@ -1,0 +1,44 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: prowlarr
+  namespace: default
+  labels:
+    app: prowlarr
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prowlarr
+  template:
+    metadata:
+      labels:
+        app: prowlarr
+    spec:
+      containers:
+        - name: prowlarr
+          image: lscr.io/linuxserver/prowlarr:latest
+          ports:
+            - containerPort: 9696
+          volumeMounts:
+            - name: prowlarr-config-volume
+              mountPath: /config
+          env:
+            - name: PROWLARR__APP__INSTANCENAME
+              value: Prowlarr
+            - name: PROWLARR__APP__THEME
+              value: dark
+            - name: PROWLARR__AUTH__METHOD
+              value: External
+            - name: PROWLARR__AUTH__REQUIRED
+              value: DisabledForLocalAddresses
+            - name: PROWLARR__LOG__DBENABLED
+              value: "False"
+            - name: PROWLARR__LOG__LEVEL
+              value: info
+      volumes:
+        - name: prowlarr-config-volume
+          persistentVolumeClaim:
+            claimName: prowlarr-config

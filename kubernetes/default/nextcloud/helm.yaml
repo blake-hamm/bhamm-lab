@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nextcloud
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10"
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: nextcloud
+    repoURL: https://nextcloud.github.io/helm/
+    targetRevision: 5.2.0
+    helm:
+      valuesObject:
+        nextcloud:
+          host: nextcloud.bhamm-lab.com
+          extraVolumes:
+            - name: qbittorrent-downloads-volume
+              persistentVolumeClaim:
+                claimName: qbittorrent-downloads-pvc
+          extraVolumeMounts:
+            - name: qbittorrent-downloads-volume
+              mountPath: /qbittorrent_downloads
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true

@@ -1,0 +1,49 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: readarr
+  namespace: default
+  labels:
+    app: readarr
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: readarr
+  template:
+    metadata:
+      labels:
+        app: readarr
+    spec:
+      containers:
+        - name: readarr
+          image: lscr.io/linuxserver/readarr:develop
+          ports:
+            - containerPort: 8787
+          volumeMounts:
+            - name: readarr-config-volume
+              mountPath: /config
+            - name: qbittorrent-downloads-volume
+              mountPath: /downloads
+          env:
+            - name: READARR__APP__INSTANCENAME
+              value: readarr
+            - name: READARR__APP__THEME
+              value: dark
+            - name: READARR__AUTH__METHOD
+              value: External
+            - name: READARR__AUTH__REQUIRED
+              value: DisabledForLocalAddresses
+            - name: READARR__LOG__DBENABLED
+              value: "False"
+            - name: READARR__LOG__LEVEL
+              value: info
+      volumes:
+        - name: readarr-config-volume
+          persistentVolumeClaim:
+            claimName: readarr-config
+        - name: qbittorrent-downloads-volume
+          persistentVolumeClaim:
+            claimName: qbittorrent-downloads-pvc

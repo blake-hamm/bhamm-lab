@@ -1,0 +1,49 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: sonarr
+  namespace: default
+  labels:
+    app: sonarr
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sonarr
+  template:
+    metadata:
+      labels:
+        app: sonarr
+    spec:
+      containers:
+        - name: sonarr
+          image: lscr.io/linuxserver/sonarr:latest
+          ports:
+            - containerPort: 8989
+          volumeMounts:
+            - name: sonarr-config-volume
+              mountPath: /config
+            - name: qbittorrent-downloads-volume
+              mountPath: /downloads
+          env:
+            - name: SONARR__APP__INSTANCENAME
+              value: sonarr
+            - name: SONARR__APP__THEME
+              value: dark
+            - name: SONARR__AUTH__METHOD
+              value: External
+            - name: SONARR__AUTH__REQUIRED
+              value: DisabledForLocalAddresses
+            - name: SONARR__LOG__DBENABLED
+              value: "False"
+            - name: SONARR__LOG__LEVEL
+              value: info
+      volumes:
+        - name: sonarr-config-volume
+          persistentVolumeClaim:
+            claimName: sonarr-config
+        - name: qbittorrent-downloads-volume
+          persistentVolumeClaim:
+            claimName: qbittorrent-downloads-pvc

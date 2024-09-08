@@ -1,0 +1,36 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: emby
+  namespace: default
+  labels:
+    app: emby
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: emby
+  template:
+    metadata:
+      labels:
+        app: emby
+    spec:
+      containers:
+        - name: emby
+          image: emby/embyserver
+          ports:
+            - containerPort: 8096
+          volumeMounts:
+            - name: emby-config-volume
+              mountPath: /config
+            - name: qbittorrent-downloads-volume
+              mountPath: /downloads
+      volumes:
+        - name: emby-config-volume
+          persistentVolumeClaim:
+            claimName: emby-config-pvc
+        - name: qbittorrent-downloads-volume
+          persistentVolumeClaim:
+            claimName: qbittorrent-downloads-pvc

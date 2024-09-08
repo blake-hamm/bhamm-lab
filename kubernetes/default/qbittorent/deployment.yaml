@@ -1,0 +1,86 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: qbittorrent
+  namespace: default
+  labels:
+    app: qbittorrent
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qbittorrent
+  template:
+    metadata:
+      labels:
+        app: qbittorrent
+    spec:
+      containers:
+        - name: qbittorrent
+          image: lscr.io/linuxserver/qbittorrent:latest
+          volumeMounts:
+            - name: qbittorrent-config-volume
+              mountPath: /config
+            - name: qbittorrent-downloads-volume
+              mountPath: /downloads
+          env:
+            - name: QBITTORRENT__PORT
+              value: "8080"
+        - name: gluetun
+          image: qmcgaw/gluetun:latest
+          env:
+            - name: VPN_SERVICE_PROVIDER
+              value: custom
+            - name: VPN_TYPE
+              value: wireguard
+            - name: VPN_INTERFACE
+              value: wg0
+            - name: VPN_ENDPOINT_PORT
+              value: "51820"
+            - name: VPN_PORT_FORWARDING
+              value: "on"
+            - name: VPN_PORT_FORWARDING_PROVIDER
+              value: protonvpn
+            - name: FIREWALL_INPUT_PORTS
+              value: "8080"
+            - name: FIREWALL_OUTBOUND_SUBNETS
+              value: 10.96.0.0/12,10.244.0.0/16,10.42.0.0/16 # Allow access to k8s subnets
+          envFrom:
+            - secretRef:
+                name: qbittorrent-secret
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+            allowPrivilegeEscalation: false
+        - name: port-forward
+          image: ghcr.io/bjw-s/gluetun-qb-port-sync
+          env:
+            - name: GLUETUN_CONTROL_SERVER_HOST
+              value: "localhost"
+            - name: GLUETUN_CONTROL_SERVER_PORT
+              value: "8000"
+            - name: QBITTORRENT_HOST
+              value: "localhost"
+            - name: QBITTORRENT_WEBUI_PORT
+              value: "8080"
+            - name: CRON_ENABLED
+              value: "true"
+            - name: CRON_SCHEDULE
+              value: "*/5 * * * *"
+            - name: LOG_TIMESTAMP
+              value: "false"
+          volumeMounts:
+            - name: port-forward-config
+              mountPath: /config
+      volumes:
+        - name: qbittorrent-config-volume
+          persistentVolumeClaim:
+            claimName: qbittorrent-config
+        - name: qbittorrent-downloads-volume
+          persistentVolumeClaim:
+            claimName: qbittorrent-downloads-pvc
+        - name: port-forward-config
+          emptyDir: {}

@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jellyfin
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "100"
+spec:
+  selector:
+    app: jellyfin
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8096
+      targetPort: 8096
+    - name: dlna-ssdp
+      protocol: TCP
+      port: 1900
+      targetPort: 1900
+    - name: dlna
+      protocol: UDP
+      port: 7359
+      targetPort: 7359

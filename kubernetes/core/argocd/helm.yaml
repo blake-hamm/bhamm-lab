@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "-200"
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: argo-cd
+    repoURL: https://argoproj.github.io/argo-helm
+    targetRevision: 7.1.0
+    helm:
+      valuesObject:
+        global:
+          domain: argocd.bhamm-lab.com
+          logging:
+            level: debug
+        redis-ha:
+          enabled: true
+        controller:
+          replicas: 2
+        server:
+          replicas: 2
+        applicationSet:
+          replicas: 2
+        repoServer:
+          replicas: 2
+        configs:
+          params:
+            server.insecure: true
+          rbac:
+            policy.default: 'role:admin'
+            policy.csv: |
+              p, role:admin, applications, *, */*, allow
+              p, role:admin, clusters, get, *, allow
+              p, role:admin, repositories, *, *, allow
+              p, role:admin, logs, get, *, allow
+              p, role:admin, exec, create, */*, allow
+              g, oidc:lldap_admin, role:admin
+          cm:
+            oidc.config: |
+              name: Authelia
+              issuer: https://auth.bhamm-lab.com
+              clientID: argocd
+              clientSecret: $argocd-external:oidc_client_secret
+              cliClientID: 'argocd-cli'
+              requestedScopes:
+                - 'openid'
+                - 'profile'
+                - 'email'
+                - 'groups'
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true
