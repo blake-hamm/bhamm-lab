@@ -17,6 +17,9 @@ spec:
     helm:
       valuesObject:
         gitea:
+          additionalConfigSources:
+            - configMap:
+                name: gitea-app-ini-plaintext
           oauth:
             - name: 'authelia'
               provider: 'openidConnect'
@@ -27,9 +30,6 @@ spec:
               customTokenUrl: 'https://auth.bhamm-lab.com/api/oidc/token'
               customProfileUrl: 'https://auth.bhamm-lab.com/api/oidc/userinfo'
               customEmailUrl: 'https://auth.bhamm-lab.com/api/oidc/userinfo'
-        additionalConfigSources:
-          - configMap:
-              name: gitea-app-ini-plaintext
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
