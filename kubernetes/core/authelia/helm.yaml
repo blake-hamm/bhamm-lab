@@ -189,6 +189,19 @@ spec:
                     email: uid # Map `uid` (or another LDAP attribute) to the `email` claim
                     preferred_username: uid # Ensure the username is set
                     name: displayName # Optionally map `displayName` or another attribute to the name claim
+                - client_id: 'gitea'
+                  client_name: 'Gitea'
+                  client_secret: '$pbkdf2-sha512$310000$OLMZifgp6Mmqs843wKvyJw$IgiDqe/OHN/fvGKtwEcdhOcwz8wkZ4RK8ExHoGwem3RUYAfD9Pp2VwGqno1bRNgjni4EfTUFWuB0bSHOU1Fw8Q'
+                  public: false
+                  authorization_policy: 'two_factor'
+                  redirect_uris:
+                    - 'https://gitea.bhamm-lab.com/user/oauth2/authelia/callback'
+                  scopes:
+                    - 'openid'
+                    - 'email'
+                    - 'profile'
+                  userinfo_signed_response_alg: 'none'
+                  token_endpoint_auth_method: 'client_secret_basic'
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

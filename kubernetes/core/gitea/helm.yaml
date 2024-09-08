@@ -14,8 +14,23 @@ spec:
     chart: gitea
     repoURL: https://dl.gitea.com/charts/
     targetRevision: v10.4.0
-    # helm:
-    #   valuesObject:
+    helm:
+      valuesObject:
+        gitea:
+          oauth:
+            - name: 'authelia'
+              provider: 'OpenID Connect'
+              existingSecret: 'gitea-external'
+              autoDiscoverUrl: https://auth.bhamm-lab.com/.well-known/openid-configuration
+        config:
+          openid:
+            ENABLE_OPENID_SIGNIN: false
+            ENABLE_OPENID_SIGNUP: true
+            WHITELISTED_URIS: auth.bhamm-lab.com
+          service:
+            DISABLE_REGISTRATION: false
+            ALLOW_ONLY_EXTERNAL_REGISTRATION: true
+            SHOW_REGISTRATION_BUTTON: false
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
