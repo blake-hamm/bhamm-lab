@@ -25,11 +25,7 @@ spec:
               provider: 'openidConnect'
               existingSecret: 'gitea-external'
               autoDiscoverUrl: https://auth.bhamm-lab.com/.well-known/openid-configuration
-              useCustomUrls: true
-              customAuthUrl: 'https://auth.bhamm-lab.com/api/oidc/authorize'
-              customTokenUrl: 'https://auth.bhamm-lab.com/api/oidc/token'
-              customProfileUrl: 'https://auth.bhamm-lab.com/api/oidc/userinfo'
-              customEmailUrl: 'https://auth.bhamm-lab.com/api/oidc/userinfo'
+              adminGroup: "lldap_admin"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
