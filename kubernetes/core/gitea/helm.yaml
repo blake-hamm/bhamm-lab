@@ -23,6 +23,8 @@ spec:
               existingSecret: 'gitea-external'
               autoDiscoverUrl: https://auth.bhamm-lab.com/.well-known/openid-configuration
         config:
+          server:
+            ROOT_URL: https://git.bhamm-lab.com/
           openid:
             ENABLE_OPENID_SIGNIN: false
             ENABLE_OPENID_SIGNUP: true

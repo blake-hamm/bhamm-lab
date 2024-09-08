@@ -12,7 +12,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`gitea.bhamm-lab.com`)
+      match: Host(`git.bhamm-lab.com`)
       middlewares:
         - name: default-headers
       services:
