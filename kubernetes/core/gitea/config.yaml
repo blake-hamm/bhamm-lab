@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitea-app-ini-plaintext
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+data:
+  server: |
+    ROOT_URL=https://git.bhamm-lab.com/
+  openid: |
+    ENABLE_OPENID_SIGNIN=false
+    ENABLE_OPENID_SIGNUP=true
+    WHITELISTED_URIS=auth.bhamm-lab.com
+  service: |
+    DISABLE_REGISTRATION=false
+    ALLOW_ONLY_EXTERNAL_REGISTRATION=true
+    SHOW_REGISTRATION_BUTTON=false
