@@ -1,0 +1,23 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: gitea
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "250"
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`gitea.bhamm-lab.com`)
+      middlewares:
+        - name: default-headers
+      services:
+        - name: gitea-http
+          port: 3000
+          scheme: http
+  tls:
+    secretName: bhamm-lab-tls
