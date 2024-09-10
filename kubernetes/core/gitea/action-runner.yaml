@@ -49,7 +49,7 @@ spec:
             - name: DOCKER_TLS_VERIFY
               value: "0"
             - name: GITEA_INSTANCE_URL
-              value: http://gitea:3000
+              value: http://gitea-http:3000
             - name: GITEA_RUNNER_REGISTRATION_TOKEN
               valueFrom:
                 secretKeyRef:
