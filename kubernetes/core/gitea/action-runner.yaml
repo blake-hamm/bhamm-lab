@@ -46,8 +46,10 @@ spec:
           env:
             - name: DOCKER_HOST
               value: tcp://localhost:2376
+            - name: DOCKER_CERT_PATH
+              value: /certs/client
             - name: DOCKER_TLS_VERIFY
-              value: "0"
+              value: "1"
             - name: GITEA_INSTANCE_URL
               value: http://gitea-http:3000
             - name: GITEA_RUNNER_REGISTRATION_TOKEN
