@@ -21,7 +21,7 @@ jobs:
         run: |
           mkdocs build --clean
       # Step 4: Deploy the static files to the Kubernetes PVC
-      - name: Get pod info
+      - name: Setup kubectl
         uses: actions-hub/kubectl@master
         env:
           KUBE_CONFIG: ${{ secrets.MKDOCS_KUBECONFIG }}
@@ -30,9 +30,9 @@ jobs:
           # KUBE_TOKEN: ${{ secrets.KUBE_TOKEN }}
         with:
           args: get pods -l app=mkdocs-nginx #-o jsonpath="{.items[0].metadata.name}"
-    # - name: Deploy to PVC
-    #   env:
-    #     KUBECONFIG: ${{ secrets.MKDOCS_KUBECONFIG }} # Store your Kubeconfig in Gitea secrets
-    #   run: |
-    #     POD_NAME=$(kubectl get pods -l app=mkdocs-nginx -o jsonpath="{.items[0].metadata.name}")
-    #     kubectl cp ./site/. default/$POD_NAME:/usr/share/nginx/html
+      - name: Copy docs to PVC
+        env:
+          KUBECONFIG: ${{ secrets.MKDOCS_KUBECONFIG }} # Store your Kubeconfig in Gitea secrets
+        run: |
+          POD_NAME=$(kubectl get pods -l app=mkdocs-nginx -o jsonpath="{.items[0].metadata.name}")
+          kubectl cp ./site/. default/$POD_NAME:/usr/share/nginx/html
