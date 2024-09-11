@@ -134,7 +134,7 @@ spec:
             ttl: 1h
       - type: approle
         roles:
-          - name: default
+          - name: approle-default
             policies: read_secrets
             secret_id_ttl: 10m
             token_num_uses: 10
