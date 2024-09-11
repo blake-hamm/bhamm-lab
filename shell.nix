@@ -13,5 +13,6 @@ pkgs.mkShell {
     colmena
     poetry
     sops
+    mkdocs
   ];
 }
