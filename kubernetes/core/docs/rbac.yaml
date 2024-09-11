@@ -33,3 +33,12 @@ roleRef:
   kind: ClusterRole
   name: mkdocs-action-role
   apiGroup: rbac.authorization.k8s.io
+---
+# Create secret for SA
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mkdocs-action-sa-token
+  annotations:
+    kubernetes.io/service-account.name: mkdocs-action-sa
+type: kubernetes.io/service-account-token
