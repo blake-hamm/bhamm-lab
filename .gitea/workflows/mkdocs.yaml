@@ -29,7 +29,7 @@ jobs:
           # KUBE_CERTIFICATE: ${{ secrets.KUBE_CERTIFICATE }}
           # KUBE_TOKEN: ${{ secrets.KUBE_TOKEN }}
         with:
-          args: get pods -l app=mkdocs-nginx -o jsonpath="{.items[0].metadata.name}"
+          args: get pods -l app=mkdocs-nginx #-o jsonpath="{.items[0].metadata.name}"
     # - name: Deploy to PVC
     #   env:
     #     KUBECONFIG: ${{ secrets.MKDOCS_KUBECONFIG }} # Store your Kubeconfig in Gitea secrets
