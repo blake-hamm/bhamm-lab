@@ -1,7 +1,7 @@
 name: Build MkDocs Site
 on: [push]
 jobs:
-  build:
+  CD-MkDocs:
     runs-on: ubuntu-latest
     steps:
       # Step 1: Checkout the code
