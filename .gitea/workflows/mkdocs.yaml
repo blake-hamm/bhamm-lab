@@ -24,7 +24,7 @@ jobs:
       - name: Get pod info
         uses: actions-hub/kubectl@master
         env:
-          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+          KUBE_CONFIG: ${{ secrets.MKDOCS_KUBECONFIG }}
         with:
           args: get pods -l app=mkdocs-nginx -o jsonpath="{.items[0].metadata.name}"
     # - name: Deploy to PVC
