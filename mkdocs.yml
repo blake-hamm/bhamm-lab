@@ -21,10 +21,3 @@ theme:
         name: Switch to light mode
 plugins:
   - search
-
-# nav:
-#   - Home: index.md
-#   - Kubernetes:
-#       - Overview: kubernetes/index.md
-#   - Nix:
-#       - Overview: nix/index.md
