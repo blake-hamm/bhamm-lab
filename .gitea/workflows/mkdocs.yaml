@@ -17,17 +17,17 @@ jobs:
       - name: Build MkDocs site
         run: |
           mkdocs build --clean
-      - name: Import Secrets
-        id: import-secrets
-        uses: hashicorp/vault-action@v2
-        with:
-          url: https://vault:8200
-          method: approle
-          roleId: ${{ secrets.VAULT_ROLE_ID }}
-          secretId: ${{ secrets.VAULT_SECRET_ID }}
-          tlsSkipVerify: true
-          secrets: |
-            secret/data/core/gitea KUBECONFIG;
+      # - name: Import Secrets
+      #   id: import-secrets
+      #   uses: hashicorp/vault-action@v2
+      #   with:
+      #     url: https://vault:8200
+      #     method: approle
+      #     roleId: ${{ secrets.VAULT_ROLE_ID }}
+      #     secretId: ${{ secrets.VAULT_SECRET_ID }}
+      #     tlsSkipVerify: true
+      #     secrets: |
+      #       secret/data/core/gitea KUBECONFIG;
       - name: Setup kubectl
         uses: tale/kubectl-action@v1
         with:
