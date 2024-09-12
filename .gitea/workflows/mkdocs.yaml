@@ -17,7 +17,7 @@ jobs:
       - name: Build MkDocs site
         run: |
           mkdocs build --clean
-      - name: Import Secrets
+      - name: Import Vault secrets
         id: import-secrets
         uses: hashicorp/vault-action@v2
         with:
@@ -28,13 +28,14 @@ jobs:
           tlsSkipVerify: true
           secrets: |
             secret/data/core/gitea KUBECONFIG
-      - name: Debug Kubeconfig
+      - name: Install kubectl and configure
         run: |
-          echo "KUBECONFIG_HACK=${{ env.KUBECONFIG }}" >> $GITHUB_ENV
-      - name: Setup kubectl
-        uses: tale/kubectl-action@v1
-        with:
-          base64-kube-config: '${{ env.KUBECONFIG_HACK }}'
+          sudo apt-get update && sudo apt-get install -y apt-transport-https
+          curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+          echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+          sudo apt-get update
+          sudo apt-get install -y kubectl
+          echo "${{ env.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
       - name: Copy docs to PVC
         run: |
           POD_NAME=$(kubectl get pods -l app=mkdocs-nginx -o jsonpath="{.items[0].metadata.name}")
