@@ -33,6 +33,11 @@ jobs:
         with: # defaults to latest kubectl binary version
           config: ${{ env.KUBECONFIG }}
           command: get pods -l app=mkdocs-nginx -o jsonpath="{.items[0].metadata.name}"
+      - name: Copy docs to pvc
+        uses: steebchen/kubectl@v2.0.0
+        with:
+          config: ${{ env.KUBECONFIG }}
+          command: cp ./site/. default/$(kubectl get pods -l app=mkdocs-nginx -o jsonpath="{.items[0].metadata.name}"):/usr/share/nginx/html
     # - name: Install kubectl and configure
     #   run: |
     #     curl -LO "https://dl.k8s.io/release/v1.22.0/bin/linux/amd64/kubectl"
