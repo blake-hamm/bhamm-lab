@@ -30,11 +30,10 @@ jobs:
             secret/data/core/gitea KUBECONFIG
       - name: Install kubectl and configure
         run: |
-          sudo apt-get update && sudo apt-get install -y apt-transport-https
-          curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-          echo "deb https://apt.kubernetes.io/ kubernetes main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
-          sudo apt-get update
-          sudo apt-get install -y kubectl
+          curl -LO "https://dl.k8s.io/release/v1.22.0/bin/linux/amd64/kubectl"
+          chmod +x ./kubectl
+          sudo mv ./kubectl /usr/local/bin/kubectl
+          kubectl version --client
           echo "${{ env.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
       - name: Copy docs to PVC
         run: |
