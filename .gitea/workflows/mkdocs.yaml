@@ -36,6 +36,7 @@ jobs:
           kubectl version --client
           mkdir -p $HOME/.kube
           echo "${{ env.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
+          cat $HOME/.kube/config
       - name: Copy docs to PVC
         run: |
           POD_NAME=$(kubectl get pods -l app=mkdocs-nginx -o jsonpath="{.items[0].metadata.name}")
