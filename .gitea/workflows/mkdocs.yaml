@@ -26,7 +26,7 @@ jobs:
           roleId: ${{ secrets.VAULT_ROLE_ID }}
           secretId: ${{ secrets.VAULT_SECRET_ID }}
           secrets: |
-            secret/data/example/foo my-value
+            secret/data/example/foo my-value MY_VALUE
       - name: Setup kubectl
         uses: tale/kubectl-action@v1
         with:
