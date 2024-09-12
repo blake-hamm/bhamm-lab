@@ -30,8 +30,7 @@ jobs:
             secret/data/core/gitea KUBECONFIG
       - name: Debug Kubeconfig
         run: |
-          echo "${{ env.KUBECONFIG }}" | base64 --decode > /tmp/kubeconfig
-          cat /tmp/kubeconfig
+          echo "KUBECONFIG=${{ env.KUBECONFIG }}" | base64 --decode  >> $GITHUB_OUTPUT
       - name: Setup kubectl
         uses: tale/kubectl-action@v1
         with:
