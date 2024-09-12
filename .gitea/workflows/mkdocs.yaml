@@ -31,7 +31,7 @@ jobs:
       - name: Setup kubectl
         uses: tale/kubectl-action@v1
         with:
-          base64-kube-config: ${{ env.KUBECONFIG }}
+          base64-kube-config: ${{ steps.import-secrets.outputs.KUBECONFIG }}
       - name: Copy docs to PVC
         run: |
           POD_NAME=$(kubectl get pods -l app=mkdocs-nginx -o jsonpath="{.items[0].metadata.name}")
