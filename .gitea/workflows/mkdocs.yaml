@@ -25,6 +25,7 @@ jobs:
           method: approle
           roleId: ${{ secrets.VAULT_ROLE_ID }}
           secretId: ${{ secrets.VAULT_SECRET_ID }}
+          tlsSkipVerify: true
           secrets: |
             secret/data/example/foo my-value | MY_VALUE;
       - name: Setup kubectl
