@@ -3,6 +3,7 @@
 
 ## `kuberenetes/core/vault/cr-raft.yaml`
 This file defines the config that vault operator applies to our vault instance. More details found here:
+
  - https://bank-vaults.dev/docs/concepts/external-configuration/
  - https://github.com/bank-vaults/vault-operator/tree/main/deploy/examples
  - https://github.com/bank-vaults/vault-operator/tree/main/test/deploy
