@@ -28,6 +28,10 @@ jobs:
           tlsSkipVerify: true
           secrets: |
             secret/data/core/gitea KUBECONFIG;
+      - name: Debug Kubeconfig
+        run: |
+          echo "${{ env.KUBECONFIG }}" | base64 --decode > /tmp/kubeconfig
+          cat /tmp/kubeconfig
       - name: Setup kubectl
         uses: tale/kubectl-action@v1
         with:
