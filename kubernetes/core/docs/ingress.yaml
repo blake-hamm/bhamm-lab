@@ -13,8 +13,8 @@ spec:
   routes:
     - match: Host(`docs.bhamm-lab.com`)
       kind: Rule
-      # middlewares:
-      #   - name: default-headers
+      middlewares:
+        - name: default-headers
       services:
         - name: mkdocs-nginx-service
           port: 80
