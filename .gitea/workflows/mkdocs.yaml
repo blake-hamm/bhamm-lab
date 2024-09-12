@@ -27,13 +27,12 @@ jobs:
           secretId: ${{ secrets.VAULT_SECRET_ID }}
           tlsSkipVerify: true
           secrets: |
-            secret/data/example/foo my-value | MY_VALUE;
+            secret/data/core/gitea KUBECONFIG;
       - name: Setup kubectl
         uses: tale/kubectl-action@v1
         with:
-          base64-kube-config: ${{ secrets.KUBECONFIG }}
+          base64-kube-config: ${{ env.KUBECONFIG }}
       - name: Copy docs to PVC
         run: |
           POD_NAME=$(kubectl get pods -l app=mkdocs-nginx -o jsonpath="{.items[0].metadata.name}")
           kubectl cp ./site/. default/$POD_NAME:/usr/share/nginx/html
-          echo '${{ env.MY_VALUE }}'
