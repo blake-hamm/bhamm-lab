@@ -30,11 +30,11 @@ jobs:
             secret/data/core/gitea KUBECONFIG
       - name: Debug Kubeconfig
         run: |
-          echo "KUBECONFIG=${{ env.KUBECONFIG }}" >> $GITHUB_OUTPUT
+          echo "KUBECONFIG_HACK=${{ env.KUBECONFIG }}" >> $GITHUB_OUTPUT
       - name: Setup kubectl
         uses: tale/kubectl-action@v1
         with:
-          base64-kube-config: '${{ env.KUBECONFIG }}'
+          base64-kube-config: '${{ env.KUBECONFIG_HACK }}'
       - name: Copy docs to PVC
         run: |
           POD_NAME=$(kubectl get pods -l app=mkdocs-nginx -o jsonpath="{.items[0].metadata.name}")
