@@ -30,7 +30,7 @@ jobs:
             secret/data/core/gitea KUBECONFIG
       - name: Debug Kubeconfig
         run: |
-          echo "KUBECONFIG_HACK=${{ env.KUBECONFIG }}" >> $GITHUB_OUTPUT
+          echo "KUBECONFIG_HACK=${{ env.KUBECONFIG }}" >> $GITHUB_ENV
       - name: Setup kubectl
         uses: tale/kubectl-action@v1
         with:
