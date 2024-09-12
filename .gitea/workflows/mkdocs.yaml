@@ -39,4 +39,5 @@ jobs:
       - name: Copy docs to PVC
         run: |
           POD_NAME=$(kubectl get pods -l app=mkdocs-nginx -o jsonpath="{.items[0].metadata.name}")
-          kubectl cp ./site/. default/$POD_NAME:/usr/share/nginx/html
+          # kubectl cp ./site/. default/$POD_NAME:/usr/share/nginx/html
+          echo '$PODNAME'
