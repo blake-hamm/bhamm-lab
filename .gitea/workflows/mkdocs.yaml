@@ -35,7 +35,7 @@ jobs:
           sudo mv ./kubectl /usr/local/bin/kubectl
           kubectl version --client
           mkdir -p $HOME/.kube
-          echo "${{ env.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
+          echo "${{ secret.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
           echo '$HOME/.kube/config file:'
           cat $HOME/.kube/config
       - name: Copy docs to PVC
