@@ -86,10 +86,16 @@ spec:
         address: "0.0.0.0:8200"
         tls_cert_file: /vault/tls/server.crt
         tls_key_file: /vault/tls/server.key
+        telemetry:
+          unauthenticated_metrics_access: true
+    telemetry:
+      prometheus_retention_time: "24h"
+      disable_hostname: true
     api_addr: https://vault.default:8200
     cluster_addr: "https://${.Env.POD_NAME}:8201"
     ui: true
-  statsdDisabled: true
+  statsdDisabled: false
+  serviceMonitorEnabled: true
   serviceRegistrationEnabled: true
   resources:
     vault:
@@ -113,6 +119,8 @@ spec:
         rules: path "secret/*" { capabilities = ["read", "list"] }
       - name: admin
         rules: path "*" { capabilities = ["create", "read", "update", "delete", "list", "sudo"] }
+      - name: prometheus-operator
+        rules: path "sys/metrics" { capabilities = ["list", "read"] }
     auth:
       - type: kubernetes
         roles:
@@ -121,6 +129,11 @@ spec:
             bound_service_account_namespaces: ["*"]
             policies: read_secrets
             ttl: 1h
+          - name: prometheus
+            bound_service_account_names: monitor-kube-prometheus-st-prometheus
+            bound_service_account_namespaces: default
+            policies: prometheus-operator
+            ttl: 4h
       - type: oidc
         config:
           oidc_discovery_url: https://auth.bhamm-lab.com
