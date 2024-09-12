@@ -1,0 +1,23 @@
+site_name: My Docs
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.tracking
+    - toc.integrate
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue-grey
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue-grey
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to light mode
+plugins:
+  - search
