@@ -1,17 +1,10 @@
-# Welcome to MkDocs
+# Welcome to my homelab `bhamm-lab.com`
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+This documentation is for server administrator (me) to organize, understand and reference operations on my homelab.
 
-## Commands
-
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
-
-## Project layout
-
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+### Manifesto
+This homelab prioritizes automation.
+Infrastructure as code is preferred for configuration and deployment patterns.
+When IaC is not possible, document deployment patterns that can be automated at a later time.
+Security is important, but learning new tools and deploying useful apps is more important.
+Only expose what is absolutely necessary to the public internet.
