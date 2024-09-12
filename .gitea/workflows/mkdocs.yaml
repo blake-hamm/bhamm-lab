@@ -17,25 +17,25 @@ jobs:
       - name: Build MkDocs site
         run: |
           mkdocs build --clean
-      - name: Import Secrets
-        id: import-secrets
-        uses: hashicorp/vault-action@v2
-        with:
-          url: https://vault:8200
-          method: approle
-          roleId: ${{ secrets.VAULT_ROLE_ID }}
-          secretId: ${{ secrets.VAULT_SECRET_ID }}
-          tlsSkipVerify: true
-          secrets: |
-            secret/data/core/gitea KUBECONFIG;
+      # - name: Import Secrets
+      #   id: import-secrets
+      #   uses: hashicorp/vault-action@v2
+      #   with:
+      #     url: https://vault:8200
+      #     method: approle
+      #     roleId: ${{ secrets.VAULT_ROLE_ID }}
+      #     secretId: ${{ secrets.VAULT_SECRET_ID }}
+      #     tlsSkipVerify: true
+      #     secrets: |
+      #       secret/data/core/gitea KUBECONFIG;
       - name: Debug Kubeconfig
         run: |
-          echo "${{ env.KUBECONFIG }}" | base64 --decode > /tmp/kubeconfig
+          echo "${{ secrets.KUBECONFIG }}" | base64 --decode > /tmp/kubeconfig
           cat /tmp/kubeconfig
       - name: Setup kubectl
         uses: tale/kubectl-action@v1
         with:
-          base64-kube-config: '${{ steps.import-secrets.outputs.KUBECONFIG }}'
+          base64-kube-config: '${{ secrets.KUBECONFIG }}'
       - name: Copy docs to PVC
         run: |
           POD_NAME=$(kubectl get pods -l app=mkdocs-nginx -o jsonpath="{.items[0].metadata.name}")
