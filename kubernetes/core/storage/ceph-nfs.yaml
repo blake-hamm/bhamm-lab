@@ -35,6 +35,9 @@ metadata:
     argocd.argoproj.io/sync-wave: "-70"
 rules:
   - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get"]
+  - apiGroups: [""]
     resources: ["pods/exec"]
     verbs: ["get", "create"]
 ---
