@@ -5,4 +5,9 @@
     fsType = "nfs";
     options = [ "x-systemd.automount" "noauto" "x-systemd.idle-timeout=600" ];
   };
+  fileSystems."/mnt/ceph" = {
+    device = "192.168.69.39:/ceph";
+    fsType = "nfs";
+    options = [ "x-systemd.automount" "noauto" "x-systemd.idle-timeout=600" ];
+  };
 }

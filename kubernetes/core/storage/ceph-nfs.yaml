@@ -58,6 +58,7 @@ roleRef:
   name: rook-ceph-tools-exec-role
   apiGroup: rbac.authorization.k8s.io
 ---
+# TODO: Find better way to manage with gitops (not declarative)
 apiVersion: batch/v1
 kind: Job
 metadata:
