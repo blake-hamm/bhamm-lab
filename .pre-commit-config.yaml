@@ -1,8 +1,5 @@
 repos:
-  - repo: https://github.com/nix-community/nixpkgs-fmt
-    rev: v1.3.0
-    hooks:
-      - id: nixpkgs-fmt
+  # Generic
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
@@ -38,3 +35,19 @@ repos:
     rev: v3.8.0-1
     hooks:
       - id: shfmt
+  # Nix
+  - repo: https://github.com/nix-community/nixpkgs-fmt
+    rev: v1.3.0
+    hooks:
+      - id: nixpkgs-fmt
+  # Terraform
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.95.0
+    hooks:
+      - id: terraform_fmt
+      - id: terraform_tflint
+      - id: terraform_trivy
+      - id: terraform_validate
+      - id: terrascan
+        args:
+          - --args=-d=terraform

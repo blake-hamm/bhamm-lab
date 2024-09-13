@@ -14,6 +14,10 @@ pkgs.mkShell {
     poetry
     sops
     mkdocs
+    terraform
+    tflint
+    trivy
+    terrascan
   ];
 
   packages = [
