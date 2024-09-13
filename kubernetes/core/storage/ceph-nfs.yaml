@@ -25,3 +25,24 @@ spec:
   selector:
     app: ceph-external-nfs
   type: LoadBalancer
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ceph-external-nfs-export-job
+  namespace: rook-ceph
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  template:
+    spec:
+      containers:
+        - name: ceph-external-nfs-export
+          image: bitnami/kubectl:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              kubectl exec -n rook-ceph rook-ceph-tools -- ceph nfs export create cephfs ceph-external-nfs /test ceph-filesystem
+      restartPolicy: OnFailure
