@@ -16,5 +16,57 @@ provider "libvirt" {
 resource "libvirt_pool" "default" {
   name = "default"
   type = "dir"
-  path = "/var/lib/libvirt/images"
+  path = "/mnt/ceph/libvirt_pool"
+}
+
+# Define the storage volume for OPNsense Serial Image
+resource "libvirt_volume" "opnsense_serial_img" {
+  name   = "opnsense_serial_img"
+  pool   = libvirt_pool.default.name
+  source = "https://mirrors.ocf.berkeley.edu/opnsense/releases/24.7/OPNsense-24.7-serial-amd64.img.bz2"
+}
+
+# Define the storage volume for the virtual disk
+resource "libvirt_volume" "opnsense_vm_disk" {
+  name = "opnsense_vm_disk"
+  pool = libvirt_pool.default.name
+  size = 10240 # 10 GB
+}
+
+# Define the domain with SR-IOV network interface passthrough
+resource "libvirt_domain" "vm" {
+  name   = "opnsense-vm"
+  memory = 2048
+  vcpu   = 2
+
+  # Attach disk volume
+  disk {
+    volume_id = libvirt_volume.opnsense_vm_disk.id
+  }
+
+  # Attach the OPNsense Serial Image
+  disk {
+    volume_id = libvirt_volume.opnsense_serial_img.id
+  }
+
+  # Network interfaces with SR-IOV passthrough for each NIC
+  network_interface {
+    passthrough = "enp5s0"
+  }
+  network_interface {
+    passthrough = "enp6s0"
+  }
+  network_interface {
+    passthrough = "enp7s0"
+  }
+  network_interface {
+    passthrough = "enp8s0"
+  }
+
+  # Serial console configuration for headless setup
+  console {
+    type        = "pty"
+    target_port = "0"
+    target_type = "serial"
+  }
 }
