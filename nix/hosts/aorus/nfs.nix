@@ -9,4 +9,9 @@
     /export           192.168.69.0/24(rw,fsid=0,no_subtree_check)
     /export/zpool_ssd 192.168.69.0/24(rw,sync,no_subtree_check,no_root_squash)
   '';
+  fileSystems."/mnt/ceph" = {
+    device = "192.168.69.39:/ceph";
+    fsType = "nfs";
+    options = [ "x-systemd.automount" "noauto" "x-systemd.idle-timeout=600" ];
+  };
 }
