@@ -9,5 +9,12 @@ terraform {
 }
 
 provider "libvirt" {
-  uri = "qemu+ssh://user@your_host/system"
+  uri = "qemu+ssh://bhamm@192.168.69.12:4185/system?no_verify=1&keyfile=/home/bhamm/.ssh/id_ed25519"
+}
+
+# Define the storage pool
+resource "libvirt_pool" "default" {
+  name = "default"
+  type = "dir"
+  path = "/var/lib/libvirt/images"
 }
