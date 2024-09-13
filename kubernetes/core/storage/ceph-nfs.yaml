@@ -1,0 +1,8 @@
+apiVersion: ceph.rook.io/v1
+kind: CephNFS
+metadata:
+  name: ceph-external-nfs
+  namespace: rook-ceph
+spec:
+  server:
+    active: 1
