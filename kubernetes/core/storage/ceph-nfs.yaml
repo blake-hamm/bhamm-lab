@@ -26,6 +26,34 @@ spec:
     app: ceph-external-nfs
   type: LoadBalancer
 ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: rook-ceph-tools-exec-role
+  namespace: rook-ceph
+  annotations:
+    argocd.argoproj.io/sync-wave: "-70"
+rules:
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["get", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: rook-ceph-tools-exec-binding
+  namespace: rook-ceph
+  annotations:
+    argocd.argoproj.io/sync-wave: "-60"
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: rook-ceph
+roleRef:
+  kind: Role
+  name: rook-ceph-tools-exec-role
+  apiGroup: rbac.authorization.k8s.io
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -34,6 +62,7 @@ metadata:
   annotations:
     argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "-50"
 spec:
   template:
     spec:
