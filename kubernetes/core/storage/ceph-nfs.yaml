@@ -20,11 +20,12 @@ spec:
   ports:
     - name: nfs
       port: 2049
-      protocol: TCP
-      targetPort: 2049
-  selector:
-    app: ceph-external-nfs
   type: LoadBalancer
+  externalTrafficPolicy: Local
+  selector:
+    app: rook-ceph-nfs-ceph-external-nfs-a
+    ceph_nfs: ceph-external-nfs
+    instance: a
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
