@@ -23,7 +23,7 @@ spec:
   type: LoadBalancer
   externalTrafficPolicy: Local
   selector:
-    app: rook-ceph-nfs-ceph-external-nfs-a
+    app: rook-ceph-nfs
     ceph_nfs: ceph-external-nfs
     instance: a
 ---
