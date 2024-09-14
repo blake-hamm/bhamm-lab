@@ -5,6 +5,6 @@
     ./disko.nix
     ./nfs.nix
     ./network.nix
-    ./../../modules/extras/libvirtd.nix
+    # ./../../modules/extras/libvirtd.nix
   ];
 }
