@@ -13,29 +13,29 @@ provider "libvirt" {
 }
 
 # Define the storage pool
-resource "libvirt_pool" "default" {
-  name = "default"
+resource "libvirt_pool" "aorus" {
+  name = "aorus"
   type = "dir"
-  path = "/mnt/ceph/libvirt_pool"
+  path = "/var/lib/libvirt/pool/aorus"
 }
 
 # Define the storage volume for OPNsense Serial Image
-resource "libvirt_volume" "opnsense_serial_img" {
-  name   = "opnsense_serial_img"
-  pool   = libvirt_pool.default.name
-  source = "https://mirrors.ocf.berkeley.edu/opnsense/releases/24.7/OPNsense-24.7-serial-amd64.img.bz2"
+resource "libvirt_volume" "opnsense_iso" {
+  name   = "opnsense_iso"
+  pool   = libvirt_pool.aorus.name
+  source = "https://mirrors.ocf.berkeley.edu/opnsense//releases/24.7/OPNsense-24.7-dvd-amd64.iso.bz2"
 }
 
 # Define the storage volume for the virtual disk
 resource "libvirt_volume" "opnsense_vm_disk" {
   name = "opnsense_vm_disk"
-  pool = libvirt_pool.default.name
+  pool = libvirt_pool.aorus.name
   size = 10240 # 10 GB
 }
 
 # Define the domain with SR-IOV network interface passthrough
 resource "libvirt_domain" "vm" {
-  name   = "opnsense-vm"
+  name   = "opnsense_vm"
   memory = 2048
   vcpu   = 2
 
@@ -46,7 +46,7 @@ resource "libvirt_domain" "vm" {
 
   # Attach the OPNsense Serial Image
   disk {
-    volume_id = libvirt_volume.opnsense_serial_img.id
+    file = libvirt_volume.opnsense_iso.id
   }
 
   # Network interfaces with SR-IOV passthrough for each NIC
@@ -68,5 +68,10 @@ resource "libvirt_domain" "vm" {
     type        = "pty"
     target_port = "0"
     target_type = "serial"
+  }
+
+  graphics {
+    type        = "vnc"
+    listen_type = "address"
   }
 }
