@@ -37,6 +37,10 @@ spec:
               value: "80"
             - name: WEB_APP_PORT
               value: "3000"
+            - name: PORT_RANGE
+              value: "30000:30010"
+            - name: SUBFOLDER
+              value: "/"
           volumeMounts:
             - mountPath: /config
               name: netbootxyz-config
