@@ -5,6 +5,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "120"
     metallb.universe.tf/allow-shared-ip: "gitea-netbootxyz"
+    metallb.universe.tf/loadBalancerIPs: 192.168.69.38
 spec:
   type: LoadBalancer
   loadBalancerIP: 192.168.69.38
