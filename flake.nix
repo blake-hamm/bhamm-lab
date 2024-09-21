@@ -33,6 +33,9 @@
 
     # Sops nix
     sops-nix.url = "github:Mic92/sops-nix";
+
+    # Proxmox nix
+    proxmox-nixos.url = "github:SaumonNet/proxmox-nixos";
   };
 
   outputs = { nixpkgs, self, ... } @ inputs:

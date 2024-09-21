@@ -6,5 +6,6 @@
     ./nfs.nix
     ./network.nix
     # ./../../modules/extras/libvirtd.nix
+    # ./../../modules/extras/proxmox.nix
   ];
 }
