@@ -34,9 +34,9 @@ spec:
             - name: TZ
               value: MDT
             - name: NGINX_PORT
-              value: 80
+              value: "80"
             - name: WEB_APP_PORT
-              value: 3000
+              value: "3000"
           volumeMounts:
             - mountPath: /config
               name: netbootxyz-config
