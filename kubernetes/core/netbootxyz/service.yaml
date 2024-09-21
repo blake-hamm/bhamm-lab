@@ -13,6 +13,6 @@ spec:
       protocol: UDP
     - name: http
       port: 80
-      protocol: HTTP
+      protocol: TCP
   selector:
     app: netbootxyz
