@@ -8,7 +8,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "100"
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 400Mi
@@ -23,7 +23,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "100"
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 10000Mi
