@@ -13,10 +13,10 @@ spec:
   routes:
     - match: Host(`netbootxyz.bhamm-lab.com`)
       kind: Rule
-      # middlewares:
-      #   - name: default-headers
+      middlewares:
+        - name: default-headers
       services:
-        - name: netbootxyz
+        - name: netbootxyz-web
           port: 3000
   tls:
     secretName: bhamm-lab-tls

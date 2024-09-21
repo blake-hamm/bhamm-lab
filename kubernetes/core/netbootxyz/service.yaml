@@ -17,3 +17,18 @@ spec:
       protocol: TCP
   selector:
     app: netbootxyz
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: netbootxyz-web
+  annotations:
+    argocd.argoproj.io/sync-wave: "120"
+spec:
+  type: ClusterIP
+  ports:
+    - name: web
+      port: 3000
+      protocol: TCP
+  selector:
+    app: netbootxyz
