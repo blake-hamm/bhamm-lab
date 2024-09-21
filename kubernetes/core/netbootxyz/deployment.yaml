@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netbootxyz
+  labels:
+    app: netbootxyz
+  annotations:
+    argocd.argoproj.io/sync-wave: "110"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: netbootxyz
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: netbootxyz
+    spec:
+      containers:
+        - name: netbootxyz
+          image: lscr.io/linuxserver/netbootxyz:latest
+          ports:
+            - containerPort: 3000
+            - containerPort: 69
+            - containerPort: 80
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: MDT
+          volumeMounts:
+            - mountPath: /config
+              name: netbootxyz-config
+            - mountPath: /assets
+              name: netbootxyz-assets
+      restartPolicy: Always
+      volumes:
+        - name: netbootxyz-config
+          persistentVolumeClaim:
+            claimName: netbootxyz-config
+        - name: netbootxyz-assets
+          persistentVolumeClaim:
+            claimName: netbootxyz-assets
