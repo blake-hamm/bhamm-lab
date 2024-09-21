@@ -20,17 +20,27 @@ spec:
     spec:
       containers:
         - name: netbootxyz
-          image: ghcr.io/netbootxyz/netbootxyz
+          image: lscr.io/linuxserver/netbootxyz:latest
           ports:
             - containerPort: 3000
             - containerPort: 69
               protocol: UDP
             - containerPort: 80
           env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: Etc/UTC
             - name: NGINX_PORT
               value: "80"
             - name: WEB_APP_PORT
               value: "3000"
+            - name: PORT_RANGE
+              value: "30000:30010"
+            - name: SUB_FOLDER
+              value: "/"
           volumeMounts:
             - mountPath: /config
               name: netbootxyz-config
