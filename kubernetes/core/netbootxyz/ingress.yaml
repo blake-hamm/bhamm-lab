@@ -15,6 +15,7 @@ spec:
       kind: Rule
       middlewares:
         - name: default-headers
+        - name: forwardauth-authelia
       services:
         - name: netbootxyz-web
           port: 3000
