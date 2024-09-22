@@ -11,5 +11,6 @@
     ./extras.nix
     ./uhk.nix
     ./docker.nix
+    ./virtualization.nix
   ];
 }
