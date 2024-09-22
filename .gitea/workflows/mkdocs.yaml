@@ -1,5 +1,11 @@
 name: Build MkDocs Site
-on: [push]
+on:
+  push:
+    paths:
+      - 'docs/**'
+  pull_request:
+    paths:
+      - 'docs/**'
 jobs:
   CD-MkDocs:
     runs-on: ubuntu-latest

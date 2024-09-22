@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netbootxyz
+  labels:
+    app: netbootxyz
+  annotations:
+    argocd.argoproj.io/sync-wave: "110"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: netbootxyz
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: netbootxyz
+    spec:
+      containers:
+        - name: netbootxyz
+          image: netbootxyz/netbootxyz:latest
+          ports:
+            - containerPort: 3000
+            - containerPort: 69
+              protocol: UDP
+            - containerPort: 80
+          env:
+            - name: NGINX_PORT
+              value: "80"
+            - name: WEB_APP_PORT
+              value: "3000"
+            - name: SUB_FOLDER
+              value: "/"
+            - name: TFTPD_OPTS
+              value: "--tftp-single-port"
+          volumeMounts:
+            - mountPath: /config
+              name: netbootxyz-config
+            - mountPath: /assets
+              name: netbootxyz-assets
+      restartPolicy: Always
+      volumes:
+        - name: netbootxyz-config
+          persistentVolumeClaim:
+            claimName: netbootxyz-config
+        - name: netbootxyz-assets
+          persistentVolumeClaim:
+            claimName: netbootxyz-assets

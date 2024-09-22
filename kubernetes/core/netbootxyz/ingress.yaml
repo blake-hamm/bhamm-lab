@@ -1,0 +1,23 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: netbootxyz
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "120"
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`netbootxyz.bhamm-lab.com`)
+      kind: Rule
+      middlewares:
+        - name: default-headers
+        - name: forwardauth-authelia
+      services:
+        - name: netbootxyz-web
+          port: 3000
+  tls:
+    secretName: bhamm-lab-tls
