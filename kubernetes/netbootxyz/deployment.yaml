@@ -20,19 +20,13 @@ spec:
     spec:
       containers:
         - name: netbootxyz
-          image: lscr.io/linuxserver/netbootxyz:latest
+          image: netbootxyz/netbootxyz:latest
           ports:
             - containerPort: 3000
             - containerPort: 69
               protocol: UDP
             - containerPort: 80
           env:
-            - name: PUID
-              value: "1000"
-            - name: PGID
-              value: "1000"
-            - name: TZ
-              value: Etc/UTC
             - name: NGINX_PORT
               value: "80"
             - name: WEB_APP_PORT
