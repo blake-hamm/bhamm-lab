@@ -1,5 +1,9 @@
-- name: Run debian_auto_install to template files
+- name: Run preseed to template files
   hosts: localhost
+  vars:
+    # This will create preseed files for each of these hosts in /tmp/<hostname>-preseed.cfg
+    preseed_hostname_disk_id_map:
+      "aorus": "/dev/disk/by-id/ata-KINGSTON_SA400S37240G_50026B77845B74E3"
   roles:
-    - debian_auto_install
-  tags: [debian_auto_install]
+    - preseed
+  tags: [preseed]

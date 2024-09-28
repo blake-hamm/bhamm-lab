@@ -1,0 +1,1 @@
+preseed_filename: "{{ hostname }}-preseed.cfg"

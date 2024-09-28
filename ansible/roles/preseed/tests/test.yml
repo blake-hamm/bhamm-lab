@@ -1,0 +1,5 @@
+- name: Test preseed
+  hosts: localhost
+  remote_user: root
+  roles:
+    - preseed

@@ -1,0 +1,17 @@
+- name: Make sure destination dir exists
+  ansible.builtin.file:
+    path: "./build"
+    state: directory
+    mode: "0755"
+- name: Generate preseed file
+  ansible.builtin.template:
+    src: "preseed.cfg.j2"
+    dest: "./build/{{ preseed_filename }}"
+    mode: "0755"
+  vars:
+    hostname: "{{ item.key }}"
+    disk_id: "{{ item.value }}"
+    # user_password: "{{ vault_secrets.data.KUBECONFIG }}"
+    username: test
+    user_password: password
+  with_dict: "{{ preseed_hostname_disk_id_map }}"

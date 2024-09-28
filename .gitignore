@@ -1,6 +1,7 @@
 *.img
 result
 secrets
+build
 
 # Python
 # Byte-compiled / optimized / DLL files
