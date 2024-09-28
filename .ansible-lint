@@ -1,0 +1,2 @@
+kinds:
+  - ansible: "ansible/**/*.{yml,yaml}"

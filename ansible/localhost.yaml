@@ -1,0 +1,5 @@
+- name: Run debian-auto-install to template files
+  hosts: localhost
+  roles:
+    - debian-auto-install
+  tags: [debian-auto-install]

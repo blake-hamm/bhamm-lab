@@ -38,3 +38,11 @@ repos:
     rev: v3.8.0-1
     hooks:
       - id: shfmt
+  - repo: https://github.com/ansible/ansible-lint
+    rev: v24.9.2
+    hooks:
+      - id: ansible-lint
+        name: ansible-lint
+        entry: ansible-lint
+        files: ^ansible/.*\.(yaml|yml)$ # Only lint YAML files in the ansible directory
+        pass_filenames: true

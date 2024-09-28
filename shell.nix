@@ -14,6 +14,8 @@ pkgs.mkShell {
     poetry
     sops
     mkdocs
+    ansible
+    ansible-lint
   ];
 
   packages = [
