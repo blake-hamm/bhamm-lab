@@ -1,5 +1,0 @@
-- name: Test debian-auto-install
-  hosts: localhost
-  remote_user: root
-  roles:
-    - debian-auto-install
