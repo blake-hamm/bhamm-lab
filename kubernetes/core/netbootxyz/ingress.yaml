@@ -23,6 +23,7 @@ spec:
       kind: Rule
       middlewares:
         - name: default-headers
+        - name: lan-ips
       services:
         - name: netbootxyz-web
           port: 80
