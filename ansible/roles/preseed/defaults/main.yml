@@ -1,1 +1,3 @@
+preseed_hostname_disk_id_map:
+  "<some_hostname>": "/dev/disk/by-id/<some_device_name>"
 preseed_filename: "{{ hostname }}-preseed.cfg"
