@@ -29,7 +29,7 @@ jobs:
       #   run: |
       #     nix-shell shell.nix --run "ansible-playbook -i inventories/hosts playbook.yml"
       - name: Install ansible role
-        run: ansible-galaxy role install -r ansible/requirements.yml
+        run: ansible-galaxy install -r ansible/requirements.yml
       - name: Run playbook
         uses: dawidd6/action-ansible-playbook@v2
         with:

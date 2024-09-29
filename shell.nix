@@ -21,6 +21,11 @@ pkgs.mkShell {
   packages = [
     (pkgs.python3.withPackages (python-pkgs: [
       python-pkgs."mkdocs-material"
+      python-pkgs."hvac"
     ]))
   ];
+
+  shellHook = ''
+    ansible-galaxy install -r ansible/requirements.yml
+  '';
 }
