@@ -42,8 +42,8 @@ jobs:
           tlsSkipVerify: true
           secrets: |
             secret/data/core/gitea KUBECONFIG
-      - name: Copy docs to pvc
+      - name: Copy preseed files to netboot.xyz assets pvc
         uses: steebchen/kubectl@v2.0.0
         with:
           config: ${{ env.KUBECONFIG }}
-          command: cp ./build/. default/$(kubectl get pods -l app=netbootxyz -o jsonpath="{.items[0].metadata.name}"):/assets
+          command: cp ./ansible/build/. default/$(kubectl get pods -l app=netbootxyz -o jsonpath="{.items[0].metadata.name}"):/assets
