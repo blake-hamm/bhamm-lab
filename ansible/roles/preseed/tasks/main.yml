@@ -20,6 +20,6 @@
   vars:
     hostname: "{{ item.key }}"
     disk_id: "{{ item.value }}"
-    username: "{{ vault_secrets.data.username }}"
-    user_password: "{{ vault_secrets.data.user_password }}"
+    username: "{{ vault_secrets.data.data.username }}"
+    user_password: "{{ vault_secrets.data.data.user_password }}"
   with_dict: "{{ preseed_hostname_disk_id_map }}"
