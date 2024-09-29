@@ -7,6 +7,9 @@
     path: secret/data/core/ansible/preseed
     validate_certs: false
   register: vault_secrets
+- name: Display the secret data
+  ansible.builtin.debug:
+    msg: "{{ vault_secrets.data.data.data }}"
 - name: Make sure destination dir exists
   ansible.builtin.file:
     path: "./build"
