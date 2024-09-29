@@ -14,4 +14,9 @@ jobs:
       - uses: cachix/install-nix-action@v27
         with:
           nix_path: nixpkgs=channel:nixos-unstable
-      - run: nix-shell
+      - name: Use shell.nix and Run Ansible Playbook
+        env:
+          VAULT_ROLE_ID: ${{ secrets.VAULT_ROLE_ID }}
+          VAULT_SECRET_ID: ${{ secrets.VAULT_SECRET_ID }}
+        run: |
+          nix-shell shell.nix --run "ansible-playbook -i inventories/hosts playbook.yml"
