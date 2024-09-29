@@ -7,9 +7,6 @@
     path: secret/data/core/ansible/preseed
     validate_certs: false
   register: vault_secrets
-- name: Display the secret data
-  ansible.builtin.debug:
-    msg: "{{ vault_secrets.data.data.data }}"
 - name: Make sure destination dir exists
   ansible.builtin.file:
     path: "./build"
@@ -23,6 +20,6 @@
   vars:
     hostname: "{{ item.key }}"
     disk_id: "{{ item.value }}"
-    username: "{{ vault_secrets.data.data.username }}"
-    user_password: "{{ vault_secrets.data.data.user_password }}"
+    username: "{{ vault_secrets.data.data.data.username }}"
+    user_password: "{{ vault_secrets.data.data.data.user_password }}"
   with_dict: "{{ preseed_hostname_disk_id_map }}"
