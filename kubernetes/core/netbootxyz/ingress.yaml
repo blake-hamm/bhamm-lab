@@ -19,5 +19,12 @@ spec:
       services:
         - name: netbootxyz-web
           port: 3000
+    - match: Host(`netbootxyz-assets.bhamm-lab.com`)
+      kind: Rule
+      middlewares:
+        - name: default-headers
+      services:
+        - name: netbootxyz-web
+          port: 80
   tls:
     secretName: bhamm-lab-tls

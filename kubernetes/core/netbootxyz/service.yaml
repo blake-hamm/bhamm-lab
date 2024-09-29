@@ -12,9 +12,6 @@ spec:
     - name: tftp
       port: 69
       protocol: UDP
-    - name: http
-      port: 80
-      protocol: TCP
   selector:
     app: netbootxyz
 ---
@@ -29,6 +26,9 @@ spec:
   ports:
     - name: web
       port: 3000
+      protocol: TCP
+    - name: http
+      port: 80
       protocol: TCP
   selector:
     app: netbootxyz
