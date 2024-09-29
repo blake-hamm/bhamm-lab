@@ -1,3 +1,7 @@
+# - name: Try to ping server; if available, finish task
+# - name: If not online, generate and serve preseed
+# - name: Wait for server to be online
+# - name: Once online, remove preseed assets from web server
 - name: Import Vault secrets
   community.hashi_vault.vault_read:
     url: https://vault:8200
