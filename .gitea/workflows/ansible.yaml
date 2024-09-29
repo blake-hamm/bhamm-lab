@@ -11,12 +11,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v27
+      - name: Set up Python
+        uses: actions/setup-python@v2
         with:
-          nix_path: nixpkgs=channel:nixos-unstable
-      - name: Use shell.nix and Run Ansible Playbook
-        env:
-          VAULT_ROLE_ID: ${{ secrets.VAULT_ROLE_ID }}
-          VAULT_SECRET_ID: ${{ secrets.VAULT_SECRET_ID }}
+          python-version: '3.x'
+      - name: Install Ansible
         run: |
-          nix-shell shell.nix --run "ansible-playbook -i inventories/hosts playbook.yml"
+          python3 -m pip install --upgrade pip
+          pip3 install ansible
+      # - uses: cachix/install-nix-action@v27
+      #   with:
+      #     nix_path: nixpkgs=channel:nixos-unstable
+      # - name: Use shell.nix and Run Ansible Playbook
+      #   env:
+      #     VAULT_ROLE_ID: ${{ secrets.VAULT_ROLE_ID }}
+      #     VAULT_SECRET_ID: ${{ secrets.VAULT_SECRET_ID }}
+      #   run: |
+      #     nix-shell shell.nix --run "ansible-playbook -i inventories/hosts playbook.yml"
+      - name: Run playbook
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          # Required, playbook filepath
+          playbook: main.yml
+          # Optional, directory where playbooks live
+          directory: ./ansible
