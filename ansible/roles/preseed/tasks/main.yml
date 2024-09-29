@@ -4,7 +4,7 @@
     auth_method: approle
     role_id: "{{ lookup('env', 'VAULT_ROLE_ID') }}"
     secret_id: "{{ lookup('env', 'VAULT_SECRET_ID') }}"
-    path: secret/data/core/ansible preseed
+    path: secret/data/core/ansible/preseed
     validate_certs: false
 - name: Make sure destination dir exists
   ansible.builtin.file:
