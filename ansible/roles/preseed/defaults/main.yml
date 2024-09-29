@@ -2,4 +2,6 @@ preseed_host_list:
   - name: "<some_hostname>"
     disk_id: "/dev/disk/by-id/<some_device_name>"
     nic_id: "<some_nic_name>"
+    ip_address: "<some_ip_address>"
+preseed_gateway_ip: "192.168.69.1"
 preseed_filename: "{{ hostname }}-preseed.cfg"
