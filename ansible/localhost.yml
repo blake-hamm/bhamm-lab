@@ -2,8 +2,8 @@
   hosts: localhost
   vars:
     # This will create preseed files for each of these hosts in /build/<hostname>-preseed.cfg
-    preseed_hostname_disk_id_map:
-      "aorus":
+    preseed_host_list:
+      - name: "aorus"
         disk_id: "/dev/disk/by-id/ata-KINGSTON_SA400S37240G_50026B77845B74E3"
         nic_id: "eno1"
   roles:

@@ -22,9 +22,9 @@
     dest: "./build/{{ preseed_filename }}"
     mode: "0755"
   vars:
-    hostname: "{{ item.key }}"
-    disk_id: "{{ item.value.disk_id }}"
-    nic_id: "{{ item.value.nic_id }}"
+    hostname: "{{ item.name }}"
+    disk_id: "{{ item.disk_id }}"
+    nic_id: "{{ item.nic_id }}"
     username: "{{ vault_secrets.data.data.data.username }}"
     user_password: "{{ vault_secrets.data.data.data.user_password }}"
-  with_dict: "{{ preseed_hostname_disk_id_map }}"
+  with_items: "{{ preseed_host_list }}"
