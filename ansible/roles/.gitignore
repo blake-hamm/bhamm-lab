@@ -1,0 +1,9 @@
+# Ignore everything in roles dir
+/*
+# Except:
+# the .gitignore file
+!.gitignore
+# the requirements file
+!requirements.yml
+# and any specific role we want to version locally
+!preseed*/

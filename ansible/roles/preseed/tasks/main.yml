@@ -1,3 +1,11 @@
+- name: Import Vault secrets
+  community.hashi_vault.vault_read:
+    url: http://vault:8200
+    method: approle
+    role_id: "{{ lookup('env', 'VAULT_ROLE_ID') }}"
+    secret_id: "{{ lookup('env', 'VAULT_SECRET_ID') }}"
+    secrets: |
+      secret/data/core/ansible preseed
 - name: Make sure destination dir exists
   ansible.builtin.file:
     path: "./build"
@@ -11,7 +19,8 @@
   vars:
     hostname: "{{ item.key }}"
     disk_id: "{{ item.value }}"
-    # user_password: "{{ vault_secrets.data.KUBECONFIG }}"
     username: test
+    # username: "{{ vault_secrets.data.username }}"
     user_password: password
+    # user_password: "{{ vault_secrets.data.user_password }}"
   with_dict: "{{ preseed_hostname_disk_id_map }}"

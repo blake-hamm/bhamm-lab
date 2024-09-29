@@ -1,0 +1,4 @@
+collections:
+  - name: community.hashi_vault
+    version: "6.2.0"
+    source: https://galaxy.ansible.com
