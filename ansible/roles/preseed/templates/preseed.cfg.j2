@@ -3,7 +3,7 @@
 ### Disk Selection
 # Automatically selects the disk specified by the ID passed as an environmental variable
 d-i partman/early_command \
-    string debconf-set partman-auto/disk "{{ disk_id }}"
+    string debconf-set partman-auto/disk {{ disk_id }}
 
 ### Localization
 d-i debian-installer/locale string en_US.UTF-8
