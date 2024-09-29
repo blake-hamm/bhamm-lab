@@ -1,6 +1,6 @@
 - name: Import Vault secrets
   community.hashi_vault.vault_read:
-    url: http://vault:8200
+    url: https://vault:8200
     auth_method: approle
     role_id: "{{ lookup('env', 'VAULT_ROLE_ID') }}"
     secret_id: "{{ lookup('env', 'VAULT_SECRET_ID') }}"
