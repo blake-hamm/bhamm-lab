@@ -6,6 +6,7 @@
     secret_id: "{{ lookup('env', 'VAULT_SECRET_ID') }}"
     path: secret/data/core/ansible/preseed
     validate_certs: false
+  register: vault_secrets
 - name: Make sure destination dir exists
   ansible.builtin.file:
     path: "./build"
