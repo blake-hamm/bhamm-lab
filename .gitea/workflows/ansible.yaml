@@ -31,3 +31,19 @@ jobs:
           playbook: main.yml
           # Optional, directory where playbooks live
           directory: ./ansible
+      - name: Import Vault secrets
+        id: import-secrets
+        uses: hashicorp/vault-action@v2
+        with:
+          url: https://vault:8200
+          method: approle
+          roleId: ${{ secrets.VAULT_ROLE_ID }}
+          secretId: ${{ secrets.VAULT_SECRET_ID }}
+          tlsSkipVerify: true
+          secrets: |
+            secret/data/core/gitea KUBECONFIG
+      - name: Copy docs to pvc
+        uses: steebchen/kubectl@v2.0.0
+        with:
+          config: ${{ env.KUBECONFIG }}
+          command: cp ./build/. default/$(kubectl get pods -l app=netbootxyz -o jsonpath="{.items[0].metadata.name}"):/assets
