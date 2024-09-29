@@ -10,10 +10,10 @@ d-i debian-installer/locale string en_US.UTF-8
 d-i keyboard-configuration/xkb-keymap select us
 
 ### Network configuration
+d-i netcfg/choose_interface select {{ nic_id }}
 d-i hw-detect/firmware-lookup string never
 d-i hw-detect/load_firmware boolean false
 d-i netcfg/disable_autoconfig boolean true
-d-i netcfg/choose_interface select {{ nic_id }}
 d-i netcfg/dhcp_failed note
 d-i netcfg/dhcp_options select Configure network manually
 d-i netcfg/get_ipaddress string {{ ip_address }}
