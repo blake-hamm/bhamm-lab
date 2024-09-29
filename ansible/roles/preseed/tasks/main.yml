@@ -25,6 +25,7 @@
     hostname: "{{ item.name }}"
     disk_id: "{{ item.disk_id }}"
     nic_id: "{{ item.nic_id }}"
+    ip_address: "{{ item.ip_address }}"
     username: "{{ vault_secrets.data.data.data.username }}"
     user_password: "{{ vault_secrets.data.data.data.user_password }}"
   with_items: "{{ preseed_host_list }}"
