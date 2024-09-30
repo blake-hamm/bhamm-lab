@@ -144,7 +144,7 @@ spec:
         roles:
           - name: default
             role_type: oidc
-            allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback"]
+            allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback", "https://vault.bhamm-lab.com:443/oidc/callback", "https://vault.bhamm-lab.com:443/ui/vault/auth/oidc/oidc/callback"]
             bound_audiences: vault
             user_claim: sub
             policies: admin
