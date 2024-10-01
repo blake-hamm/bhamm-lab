@@ -1,7 +1,3 @@
-# - name: Try to ping server; if available, finish task
-# - name: If not online, generate and serve preseed
-# - name: Wait for server to be online
-# - name: Once online, remove preseed assets from web server
 - name: Import Vault secrets
   community.hashi_vault.vault_read:
     url: https://vault:8200
@@ -24,8 +20,8 @@
   vars:
     hostname: "{{ item.name }}"
     disk_id: "{{ item.disk_id }}"
-    nic_id: "{{ item.nic_id }}"
-    ip_address: "{{ item.ip_address }}"
     username: "{{ vault_secrets.data.data.data.username }}"
     user_password: "{{ vault_secrets.data.data.data.user_password }}"
-  with_items: "{{ preseed_host_list }}"
+  with_items: "{{ bootstrap_host_list }}"
+
+# - name: Copy build directory to netboot.xyz asset persistent volume

@@ -16,6 +16,7 @@ pkgs.mkShell {
     mkdocs
     ansible
     ansible-lint
+    sshpass
   ];
 
   packages = [
@@ -26,6 +27,12 @@ pkgs.mkShell {
   ];
 
   shellHook = ''
+    # Install ansible galaxy requirements
     ansible-galaxy install -r ansible/requirements.yml
+
+    # Source .env file
+    if [ -f .env ]; then
+      export $(grep -v '^#' .env | xargs)
+    fi
   '';
 }

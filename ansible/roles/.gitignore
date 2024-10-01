@@ -6,4 +6,4 @@
 # the requirements file
 !requirements.yml
 # and any specific role we want to version locally
-!preseed*/
+!bootstrap*/

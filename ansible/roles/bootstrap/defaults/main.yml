@@ -1,0 +1,4 @@
+bootstrap_host_list:
+  - name: "<some_hostname>"
+    disk_id: "/dev/disk/by-id/<some_device_name>"
+bootstrap_filename: "{{ hostname }}-preseed.cfg"

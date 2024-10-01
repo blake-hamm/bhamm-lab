@@ -1,0 +1,36 @@
+- name: Check for vault ssh credentials
+  community.hashi_vault.vault_read:
+    url: https://vault.bhamm-lab.com
+    auth_method: approle
+    role_id: "{{ lookup('env', 'VAULT_ROLE_ID') }}"
+    secret_id: "{{ lookup('env', 'VAULT_SECRET_ID') }}"
+    path: secret/data/core/ansible/{{ item.name }}
+  with_items: "{{ bootstrap_host_list }}"
+  register: host_in_vault
+  ignore_errors: true
+- name: Check for vault ssh credentials
+  community.hashi_vault.vault_read:
+    url: https://vault.bhamm-lab.com
+    auth_method: approle
+    role_id: "{{ lookup('env', 'VAULT_ROLE_ID') }}"
+    secret_id: "{{ lookup('env', 'VAULT_SECRET_ID') }}"
+    path: secret/data/core/ansible/preseed
+  register: vault_preseed_secrets
+- name: Attempt to SSH into the remote host assuming vanila ssh config
+  ansible.builtin.command: |
+    sshpass -p "{{ vault_preseed_secrets.data.data.data.user_password }}" \
+      ssh -o StrictHostKeyChecking=no \
+      {{ vault_preseed_secrets.data.data.data.username }}@{{ hostvars[item.item.name].ansible_host }} \
+      -p 22 "echo Connection successful"
+  register: ssh_result
+  ignore_errors: true
+  with_items: "{{ host_in_vault.results }}"
+  when: "'seem to exist' in item.msg"
+  changed_when: false
+- name: Debug
+  ansible.builtin.debug:
+    msg: "{{ item.stdout }}"
+  with_items: "{{ ssh_result.results }}"
+
+# - name: If no ssh, create preseed assets and exit
+# - name: If online, handler remove preseed assets from web server and run ssh hardening role
