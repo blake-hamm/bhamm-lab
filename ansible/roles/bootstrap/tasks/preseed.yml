@@ -1,12 +1,3 @@
-- name: Import Vault secrets
-  community.hashi_vault.vault_read:
-    url: https://vault:8200
-    auth_method: approle
-    role_id: "{{ lookup('env', 'VAULT_ROLE_ID') }}"
-    secret_id: "{{ lookup('env', 'VAULT_SECRET_ID') }}"
-    path: secret/data/core/ansible/preseed
-    validate_certs: false
-  register: vault_secrets
 - name: Make sure destination dir exists
   ansible.builtin.file:
     path: "./build"
@@ -15,13 +6,7 @@
 - name: Generate preseed file
   ansible.builtin.template:
     src: "preseed.cfg.j2"
-    dest: "./build/{{ preseed_filename }}"
+    dest: "./build/{{ bootstrap_filename }}"
     mode: "0755"
-  vars:
-    hostname: "{{ item.name }}"
-    disk_id: "{{ item.disk_id }}"
-    username: "{{ vault_secrets.data.data.data.username }}"
-    user_password: "{{ vault_secrets.data.data.data.user_password }}"
-  with_items: "{{ bootstrap_host_list }}"
 
 # - name: Copy build directory to netboot.xyz asset persistent volume
