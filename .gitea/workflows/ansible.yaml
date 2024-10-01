@@ -19,7 +19,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           pip3 install ansible hvac
-          apt install sshpass
+          apt -y install sshpass
       - name: Install ansible role
         run: ansible-galaxy install -r ansible/requirements.yml
       - name: Run playbook
