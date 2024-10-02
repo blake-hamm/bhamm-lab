@@ -8,5 +8,48 @@
     src: "preseed.cfg.j2"
     dest: "./build/{{ bootstrap_filename }}"
     mode: "0755"
-
-# - name: Copy build directory to netboot.xyz asset persistent volume
+- name: Create a temporary kubeconfig file
+  ansible.builtin.tempfile:
+    state: file
+    suffix: ".kubeconfig"
+  register: kubeconfig_temp_file
+- name: Write kubeconfig to the temporary file
+  ansible.builtin.copy:
+    content: "{{ vault_preseed_secrets.data.data.data.KUBECONFIG }}"
+    dest: "{{ kubeconfig_temp_file.path }}"
+    mode: "0755"
+- name: Get the pod name
+  ansible.builtin.command: kubectl get pods -l app=netbootxyz -o jsonpath="{.items[0].metadata.name}"
+  register: pod_name
+  environment:
+    KUBECONFIG: "{{ kubeconfig_temp_file.path }}"
+  change_when: false
+- name: Copy files to the pod
+  ansible.builtin.command: |
+    kubectl cp ./build/{{ bootstrap_filename }} {{ pod_name.stdout }}:/assets
+  change_when: false
+  environment:
+    KUBECONFIG: "{{ kubeconfig_temp_file.path }}"
+- name: Attempt to SSH into the remote host assuming vanilla ssh config (retry)
+  ansible.builtin.command: |
+    sshpass -p "{{ vault_preseed_secrets.data.data.data.user_password }}" \
+      ssh -o StrictHostKeyChecking=no \
+      {{ vault_preseed_secrets.data.data.data.username }}@{{ hostvars[item.item.item.name].ansible_host }} \
+      -p 22 "echo Connection successful"
+  register: ssh_retry_result
+  until: ssh_retry_result.rc == 0
+  retries: 40
+  delay: 30
+  with_items: "{{ ssh_result.results }}"
+  when: item.failed
+  changed_when: false
+- name: Remove files to the pod
+  ansible.builtin.command: |
+    kubectl exec {{ pod_name.stdout }} -- rm /assets/{{ bootstrap_filename }}
+  environment:
+    KUBECONFIG: "{{ kubeconfig_temp_file.path }}"
+  change_when: false
+- name: Clean up the temporary kubeconfig file
+  ansible.builtin.file:
+    path: "{{ kubeconfig_temp_file.path }}"
+    state: absent
