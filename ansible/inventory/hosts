@@ -1,6 +1,5 @@
-#NEEDED FOR BOOTSTRAP: 22 ansible_ssh_common_args="-o PasswordAuthentication=yes"
 ansible_runner ansible_host=localhost ansible_port=4185
 aorus ansible_host=192.168.69.133 ansible_port=4185
 
-[servers]
+[debian]
 aorus

@@ -1,10 +1,5 @@
 - name: Bootstrap debian machines
   hosts: localhost
-  vars:
-    # Checks each host and if online, will skip; otherwise, will generate preseed file and install debian to disk
-    bootstrap_host_list:
-      - name: "aorus"
-        disk_id: "/dev/disk/by-id/ata-KINGSTON_SA400S37240G_50026B77845B74E3"
   roles:
     - bootstrap
   tags: [bootstrap]

@@ -1,3 +1,7 @@
+- name: Set facts for bootstrap host list
+  ansible.builtin.set_fact:
+    bootstrap_host_list: "{{ bootstrap_host_list | default([]) + [{'name': item, 'disk_id': hostvars[item].bootstrap_disk_id}] }}"
+  with_items: "{{ groups['debian'] }}"
 - name: Check for vault ssh credentials
   community.hashi_vault.vault_read:
     url: https://vault.bhamm-lab.com
@@ -28,14 +32,14 @@
   with_items: "{{ host_in_vault.results }}"
   when: "'seem to exist' in item.msg"
   changed_when: false
-- name: If no ssh, create preseed assets and exit
+- name: If no ssh, create preseed assets
   ansible.builtin.include_tasks: preseed.yml
   vars:
     hostname: "{{ item.item.item.name }}"
     disk_id: "{{ item.item.item.disk_id }}"
     username: "{{ vault_preseed_secrets.data.data.data.username }}"
     user_password: "{{ vault_preseed_secrets.data.data.data.user_password }}"
-  with_items: "{{ ssh_result.results}}"
+  with_items: "{{ ssh_result.results }}"
   when: item.failed
 - name: Retry SSH connection for 20 minutes and on success, remove preseed files
   block:
@@ -47,16 +51,28 @@
           -p 22 "echo Connection successful"
       register: ssh_retry_result
       until: ssh_retry_result.rc == 0
-      retries: 20
-      delay: 60
+      retries: 40
+      delay: 30
       with_items: "{{ ssh_result.results }}"
       when: item.failed
       changed_when: false
-      # always: # Remove preseed assets from pvc
+      # always:
+      # - name: Remove preseed assets
 - name: Debug
   ansible.builtin.debug:
     msg: "{{ item.failed }}"
   with_items: "{{ ssh_result.results }}"
   when: item.failed
 
-# - name: If online, handler remove preseed assets from web server and run ssh hardening role
+# - name: Delegate ssh hardening role to host with missing vault credentials
+#   ansible.builtin.command: "echo Connection successful"
+#   delegate_to: "{{ hostvars[item.item.name].ansible_hos }}"
+#   vars:
+#     ansible_user: "{{ hostvars.localhost.vault_preseed_secrets.data.data.data.username }}"
+#     ansible_ssh_pass: "{{ hostvars.localhost.vault_preseed_secrets.data.data.data.user_password }}"
+#     ansible_port: "22"
+#     custom_ssh_options: "-o StrictHostKeyChecking=no"
+#   register: ssh_result
+#   with_items: "{{ host_in_vault.results }}"
+#   when: "'seem to exist' in item.msg"
+#   changed_when: false
