@@ -55,6 +55,7 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "100"
     traefik.ingress.kubernetes.io/websocket: "true"
+    traefik.ingress.kubernetes.io/secure: "true"
 spec:
   entryPoints:
     - websecure
