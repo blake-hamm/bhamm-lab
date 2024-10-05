@@ -1,0 +1,9 @@
+# tasks file for ansible/roles/security
+- name: Create ~/.ssh directory if it doesn't exist
+  ansible.builtin.file:
+    path: "/home/{{ ansible_user }}/.ssh"
+    state: directory
+    mode: "0655"
+- name: Run devsec ssh hardening
+  ansible.builtin.import_role:
+    name: devsec.hardening.ssh_hardening

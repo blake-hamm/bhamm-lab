@@ -3,3 +3,8 @@
   roles:
     - bootstrap
   tags: [bootstrap]
+- name: Secure debian machines
+  hosts: debian
+  roles:
+    - security
+  tags: [security]

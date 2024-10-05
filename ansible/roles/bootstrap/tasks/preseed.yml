@@ -8,7 +8,6 @@
     src: "preseed.cfg.j2"
     dest: "./build/{{ bootstrap_filename }}"
     mode: "0755"
-  delegate_to: ansible_runner
 - name: Create a temporary kubeconfig file
   ansible.builtin.tempfile:
     state: file
