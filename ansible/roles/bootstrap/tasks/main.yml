@@ -1,7 +1,8 @@
 - name: Set facts for bootstrap host list
   ansible.builtin.set_fact:
-    bootstrap_host_list: "{{ bootstrap_host_list | default([]) + [{'name': item, 'disk_id': hostvars[item].bootstrap_disk_id}] }}"
+    debian_host_list: "{{ debian_host_list | default([]) + [{'name': item, 'disk_id': hostvars[item].bootstrap_disk_id}] }}"
   with_items: "{{ groups['debian'] }}"
+  delegate_to: localhost
 - name: Check for vault ssh credentials
   community.hashi_vault.vault_read:
     url: https://vault.bhamm-lab.com
@@ -9,10 +10,11 @@
     role_id: "{{ lookup('env', 'VAULT_ROLE_ID') }}"
     secret_id: "{{ lookup('env', 'VAULT_SECRET_ID') }}"
     path: secret/data/core/ansible/{{ item.name }}
-  with_items: "{{ bootstrap_host_list }}"
+  with_items: "{{ debian_host_list }}"
   register: host_in_vault
   ignore_errors: true
-  retries: 2
+  retries: 1
+  delegate_to: localhost
 - name: Get preseed secret from vault
   community.hashi_vault.vault_read:
     url: https://vault.bhamm-lab.com
@@ -23,6 +25,7 @@
   register: vault_preseed_secrets
   when: host_in_vault.failed
   retries: 2
+  delegate_to: localhost
 - name: Attempt to SSH into the remote host assuming vanila ssh config
   ansible.builtin.command: |
     sshpass -p "{{ vault_preseed_secrets.data.data.data.user_password }}" \
@@ -34,8 +37,12 @@
   with_items: "{{ host_in_vault.results }}"
   when: "'seem to exist' in item.msg"
   changed_when: false
-- name: If no ssh, create preseed assets and wait for ssh
-  ansible.builtin.include_tasks: preseed.yml
+  delegate_to: localhost
+- name: If no ssh, create preseed assets, wait for ssh and remove preseed assets
+  ansible.builtin.include_tasks:
+    file: preseed.yml
+    apply:
+      delegate_to: localhost
   vars:
     hostname: "{{ item.item.item.name }}"
     disk_id: "{{ item.item.item.disk_id }}"
@@ -43,21 +50,3 @@
     user_password: "{{ vault_preseed_secrets.data.data.data.user_password }}"
   with_items: "{{ ssh_result.results }}"
   when: item.failed
-- name: Debug
-  ansible.builtin.debug:
-    msg: "{{ item.failed }}"
-  with_items: "{{ ssh_result.results }}"
-  when: item.failed
-
-# - name: Delegate ssh hardening role to host with missing vault credentials
-#   ansible.builtin.command: "echo Connection successful"
-#   delegate_to: "{{ hostvars[item.item.name].ansible_hos }}"
-#   vars:
-#     ansible_user: "{{ hostvars.localhost.vault_preseed_secrets.data.data.data.username }}"
-#     ansible_ssh_pass: "{{ hostvars.localhost.vault_preseed_secrets.data.data.data.user_password }}"
-#     ansible_port: "22"
-#     custom_ssh_options: "-o StrictHostKeyChecking=no"
-#   register: ssh_result
-#   with_items: "{{ host_in_vault.results }}"
-#   when: "'seem to exist' in item.msg"
-#   changed_when: false

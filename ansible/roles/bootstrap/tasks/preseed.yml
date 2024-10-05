@@ -8,6 +8,7 @@
     src: "preseed.cfg.j2"
     dest: "./build/{{ bootstrap_filename }}"
     mode: "0755"
+  delegate_to: ansible_runner
 - name: Create a temporary kubeconfig file
   ansible.builtin.tempfile:
     state: file
@@ -23,11 +24,11 @@
   register: pod_name
   environment:
     KUBECONFIG: "{{ kubeconfig_temp_file.path }}"
-  change_when: false
+  changed_when: false
 - name: Copy files to the pod
   ansible.builtin.command: |
     kubectl cp ./build/{{ bootstrap_filename }} {{ pod_name.stdout }}:/assets
-  change_when: false
+  changed_when: false
   environment:
     KUBECONFIG: "{{ kubeconfig_temp_file.path }}"
 - name: Attempt to SSH into the remote host assuming vanilla ssh config (retry)
@@ -48,7 +49,7 @@
     kubectl exec {{ pod_name.stdout }} -- rm /assets/{{ bootstrap_filename }}
   environment:
     KUBECONFIG: "{{ kubeconfig_temp_file.path }}"
-  change_when: false
+  changed_when: false
 - name: Clean up the temporary kubeconfig file
   ansible.builtin.file:
     path: "{{ kubeconfig_temp_file.path }}"

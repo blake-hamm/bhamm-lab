@@ -1,0 +1,7 @@
+# Vars for devsec ssh hardening
+ssh_server_ports: ["4185"]
+ssh_client_port: "4185"
+ssh_allow_tcp_forwarding: true
+ssh_trusted_user_ca_keys:
+  # bhamm
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKsS2H4frdi7AvzkGMPMRaQ+B46Af5oaRFtNJY3uCHt blake.j.hamm@gmail.com
