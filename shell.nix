@@ -34,5 +34,9 @@ pkgs.mkShell {
     if [ -f .env ]; then
       export $(grep -v '^#' .env | xargs)
     fi
+
+    # Define python intepreter for ansible
+    export NIX_PYTHON_INTERPRETER=$(which python)
+
   '';
 }
