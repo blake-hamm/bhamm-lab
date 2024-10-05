@@ -6,8 +6,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
-  forwardAuth:
-    timeout: 600000ms
+  # forwardAuth:
+  #   timeout: 600000ms
   headers:
     # Security Headers
     browserXssFilter: true # Prevents some types of XSS attacks by enabling the XSS filter in browsers
