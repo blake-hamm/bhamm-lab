@@ -1,0 +1,13 @@
+- name: Remove files from the pod
+  ansible.builtin.command: |
+    kubectl exec {{ pod_name.stdout }} -- /bin/sh -c "rm /assets/*preseed.cfg"
+  environment:
+    KUBECONFIG: "{{ kubeconfig_temp_file.path }}"
+  changed_when: false
+  register: remove_preseed_files
+  failed_when: "'No such file or directory' not in remove_preseed_files.stderr"
+- name: Clean up the temporary kubeconfig file
+  ansible.builtin.file:
+    path: "{{ kubeconfig_temp_file.path }}"
+    state: absent
+  changed_when: false

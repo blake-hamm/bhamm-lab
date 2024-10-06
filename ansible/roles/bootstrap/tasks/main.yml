@@ -1,8 +1,5 @@
-- name: Set facts for bootstrap host list
-  ansible.builtin.set_fact:
-    debian_host_list: "{{ debian_host_list | default([]) + [{'name': item, 'disk_id': hostvars[item].bootstrap_disk_id}] }}"
-  with_items: "{{ groups['debian'] }}"
-  delegate_to: localhost
+- name: Run pre-task
+  ansible.builtin.include_tasks: pre.yml
 - name: Check for vault ssh credentials
   community.hashi_vault.vault_read:
     url: https://vault.bhamm-lab.com
@@ -13,17 +10,6 @@
   with_items: "{{ debian_host_list }}"
   register: host_in_vault
   ignore_errors: true
-  retries: 1
-  delegate_to: localhost
-- name: Get preseed secret from vault
-  community.hashi_vault.vault_read:
-    url: https://vault.bhamm-lab.com
-    auth_method: approle
-    role_id: "{{ lookup('env', 'VAULT_ROLE_ID') }}"
-    secret_id: "{{ lookup('env', 'VAULT_SECRET_ID') }}"
-    path: secret/data/core/ansible/preseed
-  register: vault_preseed_secrets
-  when: host_in_vault.failed | default(false)
   retries: 1
   delegate_to: localhost
 - name: Attempt to SSH into the remote host assuming vanila ssh config
@@ -51,3 +37,5 @@
     user_password: "{{ vault_preseed_secrets.data.data.data.user_password }}"
   with_items: "{{ ssh_result.results }}"
   when: host_in_vault.failed | default(false)
+- name: Run post-tasks
+  ansible.builtin.include_tasks: post.yml

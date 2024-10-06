@@ -24,3 +24,4 @@
       data:
         public_ssh_key: "{{ public_ssh_key.content | b64decode | trim }}"
   retries: 1
+  changed_when: false

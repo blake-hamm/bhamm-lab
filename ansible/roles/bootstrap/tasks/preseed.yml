@@ -10,22 +10,6 @@
     dest: "./build/{{ bootstrap_filename }}"
     mode: "0755"
   when: host_in_vault.failed | default(false)
-- name: Create a temporary kubeconfig file
-  ansible.builtin.tempfile:
-    state: file
-    suffix: ".kubeconfig"
-  register: kubeconfig_temp_file
-- name: Write kubeconfig to the temporary file
-  ansible.builtin.copy:
-    content: "{{ vault_preseed_secrets.data.data.data.KUBECONFIG }}"
-    dest: "{{ kubeconfig_temp_file.path }}"
-    mode: "0755"
-- name: Get the pod name
-  ansible.builtin.command: kubectl get pods -l app=netbootxyz -o jsonpath="{.items[0].metadata.name}"
-  register: pod_name
-  environment:
-    KUBECONFIG: "{{ kubeconfig_temp_file.path }}"
-  changed_when: false
 - name: Copy files to the pod
   ansible.builtin.command: |
     kubectl cp ./build/{{ bootstrap_filename }} {{ pod_name.stdout }}:/assets
@@ -46,14 +30,3 @@
   with_items: "{{ ssh_result.results }}"
   changed_when: false
   when: host_in_vault.failed | default(false)
-- name: Remove files to the pod
-  ansible.builtin.command: |
-    kubectl exec {{ pod_name.stdout }} -- rm /assets/{{ bootstrap_filename }}
-  environment:
-    KUBECONFIG: "{{ kubeconfig_temp_file.path }}"
-  changed_when: false
-  when: host_in_vault.failed | default(true)
-- name: Clean up the temporary kubeconfig file
-  ansible.builtin.file:
-    path: "{{ kubeconfig_temp_file.path }}"
-    state: absent
