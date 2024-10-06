@@ -23,8 +23,8 @@
     secret_id: "{{ lookup('env', 'VAULT_SECRET_ID') }}"
     path: secret/data/core/ansible/preseed
   register: vault_preseed_secrets
-  when: host_in_vault.failed
-  retries: 2
+  when: host_in_vault.failed | default(false)
+  retries: 1
   delegate_to: localhost
 - name: Attempt to SSH into the remote host assuming vanila ssh config
   ansible.builtin.command: |
@@ -35,9 +35,10 @@
   register: ssh_result
   ignore_errors: true
   with_items: "{{ host_in_vault.results }}"
-  when: "'seem to exist' in item.msg"
+  when: host_in_vault.failed | default(false)
   changed_when: false
   delegate_to: localhost
+# TODO: Ensure preseed assets can be removed every time
 - name: If no ssh, create preseed assets, wait for ssh and remove preseed assets
   ansible.builtin.include_tasks:
     file: preseed.yml
@@ -49,4 +50,4 @@
     username: "{{ vault_preseed_secrets.data.data.data.username }}"
     user_password: "{{ vault_preseed_secrets.data.data.data.user_password }}"
   with_items: "{{ ssh_result.results }}"
-  when: item.failed
+  when: host_in_vault.failed | default(false)

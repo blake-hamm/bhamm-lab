@@ -3,11 +3,13 @@
     path: "./build"
     state: directory
     mode: "0755"
+  when: host_in_vault.failed | default(false)
 - name: Generate preseed file
   ansible.builtin.template:
     src: "preseed.cfg.j2"
     dest: "./build/{{ bootstrap_filename }}"
     mode: "0755"
+  when: host_in_vault.failed | default(false)
 - name: Create a temporary kubeconfig file
   ansible.builtin.tempfile:
     state: file
@@ -30,6 +32,7 @@
   changed_when: false
   environment:
     KUBECONFIG: "{{ kubeconfig_temp_file.path }}"
+  when: host_in_vault.failed | default(false)
 - name: Attempt to SSH into the remote host assuming vanilla ssh config (retry)
   ansible.builtin.command: |
     sshpass -p "{{ vault_preseed_secrets.data.data.data.user_password }}" \
@@ -41,14 +44,15 @@
   retries: 40
   delay: 30
   with_items: "{{ ssh_result.results }}"
-  when: item.failed
   changed_when: false
+  when: host_in_vault.failed | default(false)
 - name: Remove files to the pod
   ansible.builtin.command: |
     kubectl exec {{ pod_name.stdout }} -- rm /assets/{{ bootstrap_filename }}
   environment:
     KUBECONFIG: "{{ kubeconfig_temp_file.path }}"
   changed_when: false
+  when: host_in_vault.failed | default(true)
 - name: Clean up the temporary kubeconfig file
   ansible.builtin.file:
     path: "{{ kubeconfig_temp_file.path }}"

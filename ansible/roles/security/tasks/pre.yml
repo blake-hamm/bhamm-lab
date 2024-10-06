@@ -1,0 +1,9 @@
+- name: Install pip3 to install python packages
+  ansible.builtin.package:
+    name: python3-pip
+    state: present
+  become: true
+- name: Install hvac Python package for vault interactions on ansible
+  ansible.builtin.pip:
+    name: hvac
+    state: present

@@ -15,7 +15,7 @@ d-i netcfg/choose_interface select auto
 d-i hw-detect/firmware-lookup string never
 d-i hw-detect/load_firmware boolean false
 d-i netcfg/get_hostname string {{ hostname }}
-d-i netcfg/get_domain string debian
+d-i netcfg/get_domain string  {{ hostname }}
 d-i netcfg/wireless_wep string
 
 ### Mirror settings

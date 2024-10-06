@@ -1,9 +1,26 @@
 # tasks file for ansible/roles/security
+- name: Run pre tasks
+  ansible.builtin.include_tasks: pre.yml
 - name: Create ~/.ssh directory if it doesn't exist
   ansible.builtin.file:
     path: "/home/{{ ansible_user }}/.ssh"
     state: directory
-    mode: "0655"
+    mode: "0755"
 - name: Run devsec ssh hardening
   ansible.builtin.import_role:
     name: devsec.hardening.ssh_hardening
+- name: Read the public SSH key
+  ansible.builtin.slurp:
+    src: /etc/ssh/ssh_host_ed25519_key.pub
+  register: public_ssh_key
+- name: Add ssh keys to hashicorp vault
+  community.hashi_vault.vault_write:
+    url: https://vault.bhamm-lab.com
+    auth_method: approle
+    role_id: "{{ lookup('env', 'VAULT_ROLE_ID') }}"
+    secret_id: "{{ lookup('env', 'VAULT_SECRET_ID') }}"
+    path: "secret/data/core/ansible/{{ inventory_hostname }}"
+    data:
+      data:
+        public_ssh_key: "{{ public_ssh_key.content | b64decode | trim }}"
+  retries: 1
