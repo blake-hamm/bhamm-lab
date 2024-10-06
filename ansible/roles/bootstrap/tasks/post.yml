@@ -5,7 +5,9 @@
     KUBECONFIG: "{{ kubeconfig_temp_file.path }}"
   changed_when: false
   register: remove_preseed_files
-  failed_when: "'No such file or directory' not in remove_preseed_files.stderr"
+  failed_when:
+    - "'No such file or directory' not in remove_preseed_files.stderr"
+    - "remove_preseed_files.stderr != ''"
 - name: Clean up the temporary kubeconfig file
   ansible.builtin.file:
     path: "{{ kubeconfig_temp_file.path }}"

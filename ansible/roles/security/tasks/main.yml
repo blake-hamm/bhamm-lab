@@ -1,7 +1,7 @@
 # tasks file for ansible/roles/security
 - name: Run pre tasks
   ansible.builtin.include_tasks: pre.yml
-- name: Create ~/.ssh directory if it doesn't exist
+- name: Create ssh directory if it doesn't exist
   ansible.builtin.file:
     path: "/home/{{ ansible_user }}/.ssh"
     state: directory

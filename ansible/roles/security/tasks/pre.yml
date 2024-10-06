@@ -7,3 +7,8 @@
   ansible.builtin.pip:
     name: hvac
     state: present
+- name: Set a hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+    use: debian
+  become: true
