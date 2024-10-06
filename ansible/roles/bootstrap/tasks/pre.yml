@@ -1,0 +1,33 @@
+- name: Set facts for bootstrap host list
+  ansible.builtin.set_fact:
+    debian_host_list: "{{ debian_host_list | default([]) + [{'name': item, 'disk_id': hostvars[item].bootstrap_disk_id}] }}"
+  with_items: "{{ groups['debian'] }}"
+  delegate_to: localhost
+- name: Get preseed secret from vault
+  community.hashi_vault.vault_read:
+    url: https://vault.bhamm-lab.com
+    auth_method: approle
+    role_id: "{{ lookup('env', 'VAULT_ROLE_ID') }}"
+    secret_id: "{{ lookup('env', 'VAULT_SECRET_ID') }}"
+    path: secret/data/core/ansible/preseed
+  register: vault_preseed_secrets
+  retries: 1
+  delegate_to: localhost
+- name: Create a temporary kubeconfig file
+  ansible.builtin.tempfile:
+    state: file
+    suffix: ".kubeconfig"
+  register: kubeconfig_temp_file
+  changed_when: false
+- name: Write kubeconfig to the temporary file
+  ansible.builtin.copy:
+    content: "{{ vault_preseed_secrets.data.data.data.KUBECONFIG }}"
+    dest: "{{ kubeconfig_temp_file.path }}"
+    mode: "0755"
+  changed_when: false
+- name: Get the pod name
+  ansible.builtin.command: kubectl get pods -l app=netbootxyz -o jsonpath="{.items[0].metadata.name}"
+  register: pod_name
+  environment:
+    KUBECONFIG: "{{ kubeconfig_temp_file.path }}"
+  changed_when: false

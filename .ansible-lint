@@ -1,0 +1,6 @@
+exclude_paths:
+  - kubernetes
+  - nix
+  - .gitea
+kinds:
+  - ansible: "ansible/**/*.{yml,yaml}"

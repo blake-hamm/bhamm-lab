@@ -1,0 +1,7 @@
+collections:
+  - name: community.hashi_vault
+    version: "6.2.0"
+    source: https://galaxy.ansible.com
+  - name: devsec.hardening
+    version: "10.0.0"
+    source: https://galaxy.ansible.com

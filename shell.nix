@@ -14,11 +14,29 @@ pkgs.mkShell {
     poetry
     sops
     mkdocs
+    ansible
+    ansible-lint
+    sshpass
   ];
 
   packages = [
     (pkgs.python3.withPackages (python-pkgs: [
       python-pkgs."mkdocs-material"
+      python-pkgs."hvac"
     ]))
   ];
+
+  shellHook = ''
+    # Install ansible galaxy requirements
+    ansible-galaxy install -r ansible/requirements.yml
+
+    # Source .env file
+    if [ -f .env ]; then
+      export $(grep -v '^#' .env | xargs)
+    fi
+
+    # Define python intepreter for ansible
+    export NIX_PYTHON_INTERPRETER=$(which python)
+
+  '';
 }

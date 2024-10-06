@@ -1,0 +1,32 @@
+name: Run ansible playbook
+on:
+  push:
+    paths:
+      - 'ansible/**'
+  pull_request:
+    paths:
+      - 'ansible/**'
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Prepare container
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install ansible hvac
+          sudo apt-get update && apt-get -y install sshpass
+      - name: Install ansible role
+        run: ansible-galaxy install -r ansible/requirements.yml
+      - name: Run playbook
+        env:
+          VAULT_ROLE_ID: ${{ secrets.VAULT_ROLE_ID }}
+          VAULT_SECRET_ID: ${{ secrets.VAULT_SECRET_ID }}
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          # Required, playbook filepath
+          playbook: ./ansible/main.yml

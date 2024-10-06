@@ -136,6 +136,7 @@ spec:
                   redirect_uris:
                     - 'https://vault.bhamm-lab.com/oidc/callback'
                     - 'https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback'
+                    - 'http://localhost:8250/oidc/callback'
                   scopes:
                     - 'openid'
                     - 'profile'

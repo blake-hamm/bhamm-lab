@@ -1,0 +1,3 @@
+- name: Run roles for debian hosts
+  import_playbook: debian.yml
+  tags: [debian]

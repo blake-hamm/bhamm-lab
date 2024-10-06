@@ -1,0 +1,46 @@
+- name: Run pre-task
+  ansible.builtin.include_tasks: pre.yml
+- name: Check for vault ssh credentials
+  community.hashi_vault.vault_read:
+    url: https://vault.bhamm-lab.com
+    auth_method: approle
+    role_id: "{{ lookup('env', 'VAULT_ROLE_ID') }}"
+    secret_id: "{{ lookup('env', 'VAULT_SECRET_ID') }}"
+    path: secret/data/core/ansible/{{ debian_host.name }}
+  loop: "{{ debian_host_list }}"
+  loop_control:
+    loop_var: debian_host
+  register: host_in_vault
+  ignore_errors: true
+  retries: 1
+  delegate_to: localhost
+- name: Attempt to SSH into the remote host assuming vanila ssh config
+  ansible.builtin.command: |
+    sshpass -p "{{ vault_preseed_secrets.data.data.data.user_password }}" \
+      ssh -o StrictHostKeyChecking=no \
+      {{ vault_preseed_secrets.data.data.data.username }}@{{ hostvars[host_result.debian_host.name].ansible_host }} \
+      -p 22 "echo Connection successful"
+  register: ssh_result
+  ignore_errors: true
+  loop: "{{ host_in_vault.results }}"
+  loop_control:
+    loop_var: host_result
+  when: "'seem to exist' in host_result.msg | default('', false)"
+  changed_when: false
+  delegate_to: localhost
+- name: If no ssh, include preseed task
+  ansible.builtin.include_tasks:
+    file: preseed.yml
+    apply:
+      delegate_to: localhost
+  vars:
+    hostname: "{{ host_ssh_result.host_result.debian_host.name }}"
+    disk_id: "{{ host_ssh_result.host_result.debian_host.disk_id }}"
+    username: "{{ vault_preseed_secrets.data.data.data.username }}"
+    user_password: "{{ vault_preseed_secrets.data.data.data.user_password }}"
+  loop: "{{ ssh_result.results }}"
+  loop_control:
+    loop_var: host_ssh_result
+  when: "'No route to host' in host_ssh_result.stderr | default('', false)"
+- name: Run post-tasks
+  ansible.builtin.include_tasks: post.yml

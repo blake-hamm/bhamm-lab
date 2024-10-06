@@ -1,0 +1,30 @@
+- name: Make sure destination dir exists
+  ansible.builtin.file:
+    path: "./build"
+    state: directory
+    mode: "0755"
+- name: Generate preseed file
+  ansible.builtin.template:
+    src: "preseed.cfg.j2"
+    dest: "./build/{{ bootstrap_filename }}"
+    mode: "0755"
+- name: Copy files to the pod
+  ansible.builtin.command: |
+    kubectl cp ./build/{{ bootstrap_filename }} {{ pod_name.stdout }}:/assets
+  changed_when: false
+  environment:
+    KUBECONFIG: "{{ kubeconfig_temp_file.path }}"
+- name: Attempt to SSH into the remote host assuming vanilla ssh config (retry)
+  ansible.builtin.command: |
+    sshpass -p "{{ vault_preseed_secrets.data.data.data.user_password }}" \
+      ssh -o StrictHostKeyChecking=no \
+      {{ vault_preseed_secrets.data.data.data.username }}@{{ hostvars[hostname].ansible_host }} \
+      -p 22 "echo Connection successful"
+  register: ssh_retry_result
+  until: ssh_retry_result.rc == 0
+  retries: 40
+  delay: 30
+  loop: "{{ ssh_result.results }}"
+  loop_control:
+    loop_var: host_ssh_result_retry
+  changed_when: false
