@@ -121,6 +121,8 @@ spec:
         rules: path "*" { capabilities = ["create", "read", "update", "delete", "list", "sudo"] }
       - name: prometheus-operator
         rules: path "sys/metrics" { capabilities = ["list", "read"] }
+      - name: ansible
+        rules: path "secret/core/ansible/*" { capabilities = ["create", "read", "update", "delete", "list"] }
     auth:
       - type: kubernetes
         roles:
@@ -155,6 +157,13 @@ spec:
             policies: read_secrets
             secret_id_ttl: 1440h
             secret_id_num_uses: 200
+            token_num_uses: 10
+            token_ttl: 20m
+            token_max_ttl: 30m
+          - name: ansible
+            policies: ansible
+            secret_id_ttl: 1440h
+            secret_id_num_uses: 1000
             token_num_uses: 10
             token_ttl: 20m
             token_max_ttl: 30m
