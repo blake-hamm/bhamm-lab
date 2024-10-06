@@ -46,3 +46,13 @@ repos:
         entry: ansible-lint
         files: ^ansible/.*\.(yaml|yml)$ # Only lint YAML files in the ansible directory
         pass_filenames: true
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.95.0
+    hooks:
+      - id: terraform_fmt
+      - id: terraform_tflint
+      - id: terraform_trivy
+      - id: terraform_validate
+      - id: terrascan
+        args:
+          - --args=-d=tofu/vault

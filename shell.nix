@@ -17,6 +17,11 @@ pkgs.mkShell {
     ansible
     ansible-lint
     sshpass
+    opentofu
+    terraform
+    tflint
+    trivy
+    terrascan
   ];
 
   packages = [
