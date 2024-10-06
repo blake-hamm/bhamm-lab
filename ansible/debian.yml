@@ -8,6 +8,11 @@
   roles:
     - security
   tags: [security]
+- name: Configure debian machine network
+  hosts: debian
+  roles:
+    - network
+  tags: [network]
 - name: Install proxmox
   hosts: proxmox
   roles:

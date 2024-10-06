@@ -1,0 +1,12 @@
+# handlers file for network
+- name: Reload and restart network
+  become: true
+  block:
+    - name: Reload network interfaces
+      ansible.builtin.command: ifreload -a
+      changed_when: false
+    - name: Restart networking service
+      ansible.builtin.systemd:
+        name: networking
+        state: restarted
+        enabled: true

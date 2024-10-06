@@ -1,0 +1,12 @@
+- name: Backup current network config
+  ansible.builtin.copy:
+    src: /etc/network/interfaces
+    dest: /etc/network/interfaces.bak
+    remote_src: true
+    mode: "644"
+  become: true
+- name: Install ifupdown2
+  ansible.builtin.package:
+    name: ifupdown2
+    state: present
+  become: true

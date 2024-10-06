@@ -1,0 +1,40 @@
+auto lo
+iface lo inet loopback
+
+# 10g bond
+auto bond0
+iface bond0 inet manual
+    bond-slaves enp12s0f1 enp12s0f0
+    bond-mode 802.3ad
+    bond-miimon 100
+    bond-lacp-rate fast
+    bond-min-links 1
+
+# Bridge that uses the bond (renamed to vmbr0)
+auto vmbr0
+iface vmbr0 inet dhcp
+    bridge-ports bond0
+    bridge-stp off
+    bridge-fd 0
+    bridge-maxwait 0
+
+# Interface configurations for individual NICs used in the bond
+auto enp12s0f1
+iface enp12s0f1 inet manual
+    bond-master bond0
+
+auto enp12s0f0
+iface enp12s0f0 inet manual
+    bond-master bond0
+
+# Motherboard interface (bastion)
+iface eno1 inet manual
+
+# Opnsense nic
+iface enp6s0 inet manual
+
+iface enp7s0 inet manual
+
+iface enp8s0 inet manual
+
+iface enp9s0 inet manual

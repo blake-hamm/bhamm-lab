@@ -1,0 +1,5 @@
+- name: Test network
+  hosts: localhost
+  remote_user: root
+  roles:
+    - network
