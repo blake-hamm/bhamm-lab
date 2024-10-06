@@ -1,11 +1,11 @@
 name: Run ansible playbook
 on:
   push:
-  # paths:
-  #   - 'ansible/**'
+    paths:
+      - 'ansible/**'
   pull_request:
-  # paths:
-  #   - 'ansible/**'
+    paths:
+      - 'ansible/**'
 jobs:
   tests:
     runs-on: ubuntu-latest
