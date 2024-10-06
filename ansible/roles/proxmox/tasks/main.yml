@@ -1,0 +1,8 @@
+# tasks file for ansible/roles/proxmox
+- name: Run pre tasks
+  ansible.builtin.include_tasks: pre.yml
+- name: Run lae proxmox ansible role
+  ansible.builtin.include_role:
+    name: lae.proxmox
+    apply:
+      become: true

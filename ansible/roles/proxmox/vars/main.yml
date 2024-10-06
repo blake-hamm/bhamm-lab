@@ -1,0 +1,20 @@
+# vars file for ansible/roles/proxmox
+ntp_enabled: true # noqa: var-naming[no-role-prefix]
+ntp_manage_config: true # noqa: var-naming[no-role-prefix]
+ntp_servers: # noqa: var-naming[no-role-prefix]
+  - time.nist.gov
+  - us.pool.ntp.org
+ntp_timezone: America/Denver # noqa: var-naming[no-role-prefix]
+pve_reboot_on_kernel_update: true # noqa: var-naming[no-role-prefix]
+# pve_cluster_enabled: yes
+pve_group: all # noqa: var-naming[no-role-prefix]
+pve_groups: # noqa: var-naming[no-role-prefix]
+  - name: Admins
+    comment: Administrators of the PVE cluster
+pve_users: # noqa: var-naming[no-role-prefix]
+  - name: "{{ ansible_user }}@pam"
+    groups: ["Admins"]
+pve_acls: # noqa: var-naming[no-role-prefix]
+  - path: /
+    roles: ["Administrator"]
+    groups: ["Admins"]

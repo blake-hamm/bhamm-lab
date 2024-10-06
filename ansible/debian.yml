@@ -8,3 +8,8 @@
   roles:
     - security
   tags: [security]
+- name: Install proxmox
+  hosts: proxmox
+  roles:
+    - proxmox
+  tags: [proxmox]

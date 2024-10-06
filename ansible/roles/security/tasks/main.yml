@@ -7,7 +7,7 @@
     state: directory
     mode: "0755"
 - name: Run devsec ssh hardening
-  ansible.builtin.import_role:
+  ansible.builtin.include_role:
     name: devsec.hardening.ssh_hardening
 - name: Read the public SSH key
   ansible.builtin.slurp:
