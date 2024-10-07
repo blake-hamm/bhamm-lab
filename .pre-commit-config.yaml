@@ -46,6 +46,7 @@ repos:
         entry: ansible-lint
         files: ^ansible/.*\.(yaml|yml)$ # Only lint YAML files in the ansible directory
         pass_filenames: true
+        always_run: false
   - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: v1.95.0
     hooks:
