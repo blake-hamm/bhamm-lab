@@ -122,9 +122,12 @@ spec:
       - name: prometheus-operator
         rules: path "sys/metrics" { capabilities = ["list", "read"] }
       - name: ansible
-        rules: path "secret/data/core/ansible/*" { capabilities = ["create", "read", "update", "delete", "list"] }
-      - name: create_token
-        rules: path "auth/token/create" { capabilities = ["create", "update"] }
+        rules: |
+          path "secret/data/core/ansible/*" { capabilities = ["create", "read", "update", "delete", "list"] }
+          path "auth/token/create" { capabilities = ["create", "update"] }
+          path "auth/token/roles/ansible" { capabilities = ["read", "create", "update"] }
+          path "auth/token/lookup-self" { capabilities = ["read"] }
+          path "auth/approle/role/ansible" { capabilities = ["read"] }
     auth:
       - type: kubernetes
         roles:
