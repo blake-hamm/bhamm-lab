@@ -54,5 +54,3 @@ repos:
       - id: terraform_tflint
       - id: terraform_trivy
       - id: terrascan
-        args:
-          - --args=-d=tofu
