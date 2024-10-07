@@ -1,6 +1,6 @@
 # Open Tofu (Terraform)
 ```bash
-tofu -chdir=tofu/vault init
-tofu -chdir=tofu/vault plan
-tofu -chdir=tofu/vault apply
+tofu -chdir=tofu init
+tofu -chdir=tofu plan
+tofu -chdir=tofu apply
 ```

@@ -7,4 +7,4 @@
     dest: /etc/network/interfaces
     mode: "644"
   become: true
-  notify: Reload and restart network
+  notify: Restart network

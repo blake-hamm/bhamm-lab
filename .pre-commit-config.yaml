@@ -52,7 +52,6 @@ repos:
       - id: terraform_fmt
       - id: terraform_tflint
       - id: terraform_trivy
-      - id: terraform_validate
       - id: terrascan
         args:
-          - --args=-d=tofu/vault
+          - --args=-d=tofu

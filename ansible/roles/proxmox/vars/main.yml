@@ -14,9 +14,38 @@ pve_groups: # noqa: var-naming[no-role-prefix]
 pve_users: # noqa: var-naming[no-role-prefix]
   - name: "{{ ansible_user }}@pam"
     groups: ["Admins"]
+  - name: tofu@pve
 pve_acls: # noqa: var-naming[no-role-prefix]
   - path: /
     roles: ["Administrator"]
     groups: ["Admins"]
+  - path: /
+    roles: ["Tofu"]
+    users: ["tofu@pve"]
+pve_roles: # noqa: var-naming[no-role-prefix]
+  - name: Tofu
+    privileges:
+      - "Datastore.AllocateSpace"
+      - "Datastore.AllocateTemplate"
+      - "Datastore.Audit"
+      - "Pool.Allocate"
+      - "Sys.Audit"
+      - "Sys.Console"
+      - "Sys.Modify"
+      - "VM.Allocate"
+      - "VM.Audit"
+      - "VM.Clone"
+      - "VM.Config.CDROM"
+      - "VM.Config.Cloudinit"
+      - "VM.Config.CPU"
+      - "VM.Config.Disk"
+      - "VM.Config.HWType"
+      - "VM.Config.Memory"
+      - "VM.Config.Network"
+      - "VM.Config.Options"
+      - "VM.Migrate"
+      - "VM.Monitor"
+      - "VM.PowerMgmt"
+      - "SDN.Use"
 pve_ssh_port: "{{ ssh_client_port }}" # noqa: var-naming[no-role-prefix]
 pve_manage_ssh: false # noqa: var-naming[no-role-prefix]
