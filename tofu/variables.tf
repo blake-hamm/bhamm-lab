@@ -7,6 +7,6 @@ variable "vault_secret_id" {
 }
 
 variable "proxmox_url" {
-  default = "https://192.168.69.12:8006/api2/json"
+  default = "https://192.168.69.12:8006"
   type    = string
 }

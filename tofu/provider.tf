@@ -6,8 +6,8 @@ terraform {
       version = "4.4.0"
     }
     proxmox = {
-      source  = "Telmate/proxmox"
-      version = "3.0.1-rc4"
+      source  = "bpg/proxmox"
+      version = "0.66.1"
     }
   }
 }
@@ -26,5 +26,15 @@ provider "vault" {
 }
 
 provider "proxmox" {
-  pm_api_url = var.proxmox_url
+  endpoint = var.proxmox_url
+  insecure = true
+  ssh {
+    agent    = true
+    username = "bhamm"
+    node {
+      name    = "aorus"
+      address = "192.168.69.12"
+      port    = "4185"
+    }
+  }
 }
