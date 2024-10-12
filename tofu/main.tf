@@ -10,6 +10,7 @@ output "example_secret_output" {
 resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
   name      = "test-ubuntu"
   node_name = "aorus"
+  started   = false
 
   agent {
     enabled = false
