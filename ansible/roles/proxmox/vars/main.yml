@@ -5,6 +5,7 @@ ntp_servers: # noqa: var-naming[no-role-prefix]
   - time.nist.gov
   - us.pool.ntp.org
 ntp_timezone: America/Denver # noqa: var-naming[no-role-prefix]
+pve_check_for_kernel_update: true # noqa: var-naming[no-role-prefix]
 pve_reboot_on_kernel_update: true # noqa: var-naming[no-role-prefix]
 # pve_cluster_enabled: yes
 pve_group: all # noqa: var-naming[no-role-prefix]

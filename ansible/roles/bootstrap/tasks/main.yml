@@ -38,6 +38,7 @@
     disk_id: "{{ host_ssh_result.host_result.debian_host.disk_id }}"
     username: "{{ vault_preseed_secrets.data.data.data.username }}"
     user_password: "{{ vault_preseed_secrets.data.data.data.user_password }}"
+    ip_address: "{{ hostvars[host_ssh_result.host_result.debian_host.name].ansible_host }}"
   loop: "{{ ssh_result.results }}"
   loop_control:
     loop_var: host_ssh_result

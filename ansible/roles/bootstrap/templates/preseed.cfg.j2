@@ -5,18 +5,31 @@
 d-i partman/early_command \
     string debconf-set partman-auto/disk {{ disk_id }}
 
+### Install settings
+d-i debconf/priority string critical
+d-i debian-installer/interactive boolean true
+
+### Hardware detection and firmware handling
+d-i hw-detect/load_firmware boolean false
+d-i anna/choose_modules string
+d-i hw-detect/start_pcmcia boolean false
+
+### Network config
+# Disable DHCP to prevent conflicts and timeouts.
+d-i netcfg/choose_interface select eno1
+d-i netcfg/disable_autoconfig boolean true
+# Configure a static IP for the installation.
+d-i netcfg/get_ipaddress string {{ ip_address }}
+d-i netcfg/get_netmask string 255.255.255.0
+d-i netcfg/get_gateway string 192.168.69.1
+d-i netcfg/get_nameservers string 192.168.69.1
+d-i netcfg/get_hostname string {{ hostname }}
+d-i netcfg/get_domain string {{ hostname }}.bhamm-lab.com
+d-i netcfg/confirm_static boolean true
+
 ### Localization
 d-i debian-installer/locale string en_US.UTF-8
 d-i keyboard-configuration/xkb-keymap select us
-
-### Network configuration
-d-i netcfg/enable boolean false
-d-i netcfg/choose_interface select auto
-d-i hw-detect/firmware-lookup string never
-d-i hw-detect/load_firmware boolean false
-d-i netcfg/get_hostname string {{ hostname }}
-d-i netcfg/get_domain string  {{ hostname }}
-d-i netcfg/wireless_wep string
 
 ### Mirror settings
 d-i mirror/country string manual
@@ -60,6 +73,8 @@ tasksel tasksel/first multiselect standard, ssh-server
 d-i pkgsel/include string haveged openssh-server sudo
 d-i pkgsel/upgrade select full-upgrade
 popularity-contest popularity-contest/participate boolean false
+d-i apt-setup/non-free-firmware boolean true
+d-i apt-setup/contrib boolean true
 
 ### Boot loader installation
 d-i grub-installer/only_debian boolean true
