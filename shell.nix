@@ -28,6 +28,7 @@ pkgs.mkShell {
     (pkgs.python3.withPackages (python-pkgs: [
       python-pkgs."mkdocs-material"
       python-pkgs."hvac"
+      python-pkgs."httpx"
     ]))
   ];
 
