@@ -13,3 +13,5 @@ roles:
     version: "2.5.0"
   - name: lae.proxmox
     version: "v1.9.0"
+  - name: aeriscloud.disk
+    version: "v2.6.4"
