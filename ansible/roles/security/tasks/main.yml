@@ -1,13 +1,28 @@
 # tasks file for ansible/roles/security
 - name: Run pre tasks
   ansible.builtin.include_tasks: pre.yml
+- name: Update and upgrade packages
+  ansible.builtin.package:
+    upgrade: true
+    update_cache: true
+    cache_valid_time: 86400 # One day
+  become: true
+- name: Permit passwordless sudo
+  ansible.builtin.lineinfile:
+    dest: /etc/sudoers.d/{{ ansible_user }}
+    line: "{{ ansible_user }} ALL=(ALL) NOPASSWD: ALL"
+    state: present
+    create: true
+    validate: visudo -cf %s
+    mode: "0755"
+  become: true
 - name: Create ssh directory if it doesn't exist
   ansible.builtin.file:
     path: "/home/{{ ansible_user }}/.ssh"
     state: directory
     mode: "0755"
 - name: Run devsec ssh hardening
-  ansible.builtin.import_role:
+  ansible.builtin.include_role:
     name: devsec.hardening.ssh_hardening
 - name: Read the public SSH key
   ansible.builtin.slurp:

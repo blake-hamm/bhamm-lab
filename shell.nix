@@ -17,12 +17,18 @@ pkgs.mkShell {
     ansible
     ansible-lint
     sshpass
+    opentofu
+    terraform
+    tflint
+    trivy
+    terrascan
   ];
 
   packages = [
     (pkgs.python3.withPackages (python-pkgs: [
       python-pkgs."mkdocs-material"
       python-pkgs."hvac"
+      python-pkgs."httpx"
     ]))
   ];
 

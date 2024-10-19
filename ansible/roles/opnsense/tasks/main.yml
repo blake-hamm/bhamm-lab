@@ -1,0 +1,6 @@
+# tasks file for opnsense
+- name: Example
+  ansibleguy.opnsense.alias:
+    name: 'ANSIBLE_TEST1'
+    description: 'just a test'
+    content: ['1.1.1.1']

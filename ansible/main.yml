@@ -1,3 +1,6 @@
 - name: Run roles for debian hosts
   import_playbook: debian.yml
   tags: [debian]
+- name: Run roles for opnsense
+  import_playbook: opnsense.yml
+  tags: [opnsense]

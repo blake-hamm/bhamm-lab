@@ -123,6 +123,8 @@ spec:
         rules: path "sys/metrics" { capabilities = ["list", "read"] }
       - name: ansible
         rules: path "secret/data/core/ansible/*" { capabilities = ["create", "read", "update", "delete", "list"] }
+      - name: create_token
+        rules: path "auth/token/create" { capabilities = ["create", "update"] }
     auth:
       - type: kubernetes
         roles:
@@ -164,7 +166,7 @@ spec:
             policies: read_secrets, ansible
             secret_id_ttl: 1440h
             secret_id_num_uses: 1000
-            token_num_uses: 10
+            token_num_uses: 0
             token_ttl: 20m
             token_max_ttl: 30m
     secrets:

@@ -1,0 +1,17 @@
+# tasks file for network
+- name: Run pre tasks
+  ansible.builtin.include_tasks: pre.yml
+- name: Disable ipv6
+  ansible.builtin.copy:
+    src: 99-disable-ipv6.conf
+    dest: /etc/sysctl.d/99-disable-ipv6.conf
+    mode: "644"
+  become: true
+  notify: Restart network
+- name: Setup network interface
+  ansible.builtin.template:
+    src: "{{ inventory_hostname }}.j2"
+    dest: /etc/network/interfaces
+    mode: "644"
+  become: true
+  notify: Restart network

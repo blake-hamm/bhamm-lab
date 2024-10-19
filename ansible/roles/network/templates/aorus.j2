@@ -1,0 +1,66 @@
+# localhost network
+auto lo
+iface lo inet loopback
+
+## 10g
+auto enp4s0f0
+iface enp4s0f0 inet manual
+    bond-master bond0
+auto enp4s0f1
+iface enp4s0f1 inet manual
+    bond-master bond0
+auto bond0
+iface bond0 inet manual
+    bond-slaves enp4s0f0 enp4s0f1
+    bond-mode 802.3ad
+    bond-miimon 100
+    bond-lacp-rate fast
+    bond-min-links 1
+auto vmbr0
+iface vmbr0 inet dhcp
+    bridge-ports bond0
+    bridge-stp off
+    bridge-fd 0
+    bridge-maxwait 0
+
+
+# Bridges for 4 port ethernet nic
+auto enp9s0
+iface enp9s0 inet manual
+auto enp10s0
+iface enp10s0 inet manual
+auto enp11s0
+iface enp11s0 inet manual
+auto enp12s0
+iface enp12s0 inet manual
+auto bond1
+iface bond1 inet manual
+    bond-slaves enp9s0 enp10s0
+    bond-mode 802.3ad
+    bond-miimon 100
+    bond-lacp-rate fast
+    bond-min-links 1
+auto vmbr1
+iface vmbr1 inet manual
+    bridge-ports bond1
+    bridge-stp off
+    bridge-fd 0
+    bridge-maxwait 0
+auto bond2
+iface bond2 inet manual
+    bond-slaves enp11s0 enp12s0
+    bond-mode 802.3ad
+    bond-miimon 100
+    bond-lacp-rate fast
+    bond-min-links 1
+auto vmbr2
+iface vmbr2 inet manual
+    bridge-ports bond2
+    bridge-stp off
+    bridge-fd 0
+    bridge-maxwait 0
+
+
+# Motherboard interface (bastion)
+auto eno1
+iface eno1 inet manual

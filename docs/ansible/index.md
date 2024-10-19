@@ -16,3 +16,6 @@ This role bootstraps a new debian host; however, it requires some manual steps:
 5. Update `hosts` file with correct ip address and run :
   - `ansible-playbook ansible/main.yml --ask-pass --ask-become-pass`
 6. Once this completes, you can remove bootstrap args and the machine should be good to got
+
+## Proxmox
+Configured with this: https://github.com/lae/ansible-role-proxmox

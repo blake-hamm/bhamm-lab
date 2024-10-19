@@ -5,3 +5,11 @@ collections:
   - name: devsec.hardening
     version: "10.0.0"
     source: https://galaxy.ansible.com
+  - name: ansibleguy.opnsense
+    version: "1.2.10"
+    source: https://galaxy.ansible.com
+roles:
+  - name: geerlingguy.ntp
+    version: "2.5.0"
+  - name: lae.proxmox
+    version: "v1.9.0"

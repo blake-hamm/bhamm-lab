@@ -1,0 +1,3 @@
+# handlers file for network
+- name: Restart network
+  ansible.builtin.include_tasks: restart_network.yml

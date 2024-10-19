@@ -3,10 +3,11 @@
     name: python3-pip
     state: present
   become: true
-- name: Install hvac Python package for vault interactions on ansible
-  ansible.builtin.pip:
-    name: hvac
+- name: Install python3-hvac
+  ansible.builtin.package:
+    name: python3-hvac
     state: present
+  become: true
 - name: Set a hostname
   ansible.builtin.hostname:
     name: "{{ inventory_hostname }}"

@@ -14,6 +14,7 @@
         jnoortheen.nix-ide
         catppuccin.catppuccin-vsc
         catppuccin.catppuccin-vsc-icons
+        hashicorp.terraform
         # dracula-theme.theme-dracula
         # vscodevim.vim
         # yzhang.markdown-all-in-one
