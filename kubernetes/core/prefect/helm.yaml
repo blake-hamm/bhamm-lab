@@ -17,7 +17,7 @@ spec:
     helm:
       valuesObject:
         server:
-          prefectApiUrl: http://prefect-server:4200/api
+          prefectApiUrl: https://prefect.bhamm-lab.com/api
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
