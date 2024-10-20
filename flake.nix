@@ -54,9 +54,9 @@
           nodeSpecialArgs.framework = {
             host = "framework";
           };
-          nodeSpecialArgs.aorus = {
-            host = "aorus";
-          };
+          # nodeSpecialArgs.aorus = {
+          #   host = "aorus";
+          # };
           nodeSpecialArgs.precision = {
             host = "precision";
           };
@@ -79,15 +79,15 @@
           imports = [ ./nix/hosts/framework ];
         };
 
-        aorus = { name, nodes, pkgs, ... }: {
-          deployment = {
-            tags = [ "aorus" "server" ];
-            targetUser = "${username}";
-            targetHost = "192.168.69.12";
-            targetPort = sshPort;
-          };
-          imports = [ ./nix/hosts/aorus ];
-        };
+        # aorus = { name, nodes, pkgs, ... }: {
+        #   deployment = {
+        #     tags = [ "aorus" "server" ];
+        #     targetUser = "${username}";
+        #     targetHost = "192.168.69.12";
+        #     targetPort = sshPort;
+        #   };
+        #   imports = [ ./nix/hosts/aorus ];
+        # };
 
         precision = { name, nodes, pkgs, ... }: {
           deployment = {

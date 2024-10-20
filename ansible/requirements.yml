@@ -13,3 +13,11 @@ roles:
     version: "2.5.0"
   - name: lae.proxmox
     version: "v1.9.0"
+  - name: aeriscloud.disk
+    version: "v2.6.4"
+  - name: tigattack.mergerfs
+    version: "1.3.1"
+  - name: ironicbadger.snapraid
+    version: "1.0.0"
+  - name: geerlingguy.nfs
+    version: "2.1.0"

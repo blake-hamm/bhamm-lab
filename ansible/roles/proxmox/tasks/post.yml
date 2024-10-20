@@ -1,0 +1,46 @@
+- name: Install docker requirements
+  ansible.builtin.package:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+      - python3-docker
+      - pipx
+      - git
+    state: present
+    update_cache: true
+- name: Add Dockers official GPG key
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    state: present
+- name: Verify that we have the key with the fingerprint
+  ansible.builtin.apt_key:
+    id: "0EBFCD88"
+    state: present
+- name: Set up the stable repository
+  ansible.builtin.apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable
+    state: present
+    update_cache: true
+- name: Update apt packages
+  ansible.builtin.apt:
+    update_cache: true
+- name: Install docker
+  ansible.builtin.package:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: present
+    update_cache: true
+- name: Add user to docker group
+  ansible.builtin.user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: true
+- name: Enable Docker service
+  ansible.builtin.systemd:
+    name: docker
+    enabled: true
+    state: started

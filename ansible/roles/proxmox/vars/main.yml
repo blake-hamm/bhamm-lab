@@ -50,3 +50,9 @@ pve_roles: # noqa: var-naming[no-role-prefix]
       - "SDN.Use"
 pve_ssh_port: "{{ ssh_client_port }}" # noqa: var-naming[no-role-prefix]
 pve_manage_ssh: false # noqa: var-naming[no-role-prefix]
+pve_storages: # noqa: var-naming[no-role-prefix]
+  - name: nfs
+    type: nfs
+    content: ["images", "iso", "backup", "snippets", "vztmpl"]
+    server: 192.168.69.12
+    export: /mnt/storage/proxmox

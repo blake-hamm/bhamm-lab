@@ -18,3 +18,12 @@
   roles:
     - proxmox
   tags: [proxmox]
+- name: Configure Storage
+  hosts: debian
+  become: true
+  roles:
+    - aeriscloud.disk
+    - tigattack.mergerfs
+    - ironicbadger.snapraid
+    - geerlingguy.nfs
+  tags: [storage]
