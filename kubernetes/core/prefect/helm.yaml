@@ -39,8 +39,14 @@ spec:
     chart: prefect-worker
     repoURL: https://prefecthq.github.io/prefect-helm
     targetRevision: 2024.10.15184517
-    # helm:
-    #   valuesObject:
+    helm:
+      valuesObject:
+        worker:
+          apiConfig: server
+          config:
+            workPool: default
+          serverApiConfig:
+            apiUrl: http://prefect-server:4200/api
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
