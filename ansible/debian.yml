@@ -25,4 +25,5 @@
     - aeriscloud.disk
     - tigattack.mergerfs
     - ironicbadger.snapraid
+    - geerlingguy.nfs
   tags: [storage]
