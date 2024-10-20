@@ -43,7 +43,10 @@ snapraid_content_files:
 snapraid_runner_path: /opt/snapraid-runner/snapraid-runner
 snapraid_runner_conf: "{{ snapraid_runner_path }}.conf"
 snapraid_runner_bin: "{{ snapraid_runner_path }}.py"
-snapraid_runner_command: "python3 {{ snapraid_runner_bin }} -c {{ snapraid_runner_conf }} {% if snapraid_runner_healthcheck_io_uuid %}&& curl -fsS -m 10 --retry 5 -o /dev/null {{ snapraid_healthcheck_io_host }}/{{ snapraid_runner_healthcheck_io_uuid }} > /dev/null{% endif %}"
+snapraid_runner_command: |
+  python3 {{ snapraid_runner_bin }} -c {{ snapraid_runner_conf }} \
+    {% if snapraid_runner_healthcheck_io_uuid %}&& curl -fsS -m 10 --retry 5 \
+    -o /dev/null {{ snapraid_healthcheck_io_host }}/{{ snapraid_runner_healthcheck_io_uuid }} > /dev/null{% endif %}"
 snapraid_runner_scrub: true
 snapraid_scrub_percent: 22
 snapraid_scrub_age: 8
@@ -62,4 +65,7 @@ snapraid_scrub_schedule:
 snapraid_scrub_healthcheck_io_uuid: ""
 # https://github.com/geerlingguy/ansible-role-nfs
 nfs_exports:
-  - /mnt/storage *(rw,sync,no_subtree_check,no_root_squash,fsid=0)
+  - /mnt/storage/kubernetes *(rw,sync,no_subtree_check,no_root_squash,fsid=0)
+  - /mnt/storage/proxmox *(rw,sync,no_subtree_check,no_root_squash,fsid=1)
+  - /mnt/storage/backups *(rw,sync,no_subtree_check,no_root_squash,fsid=2)
+  - /mnt/storage/shared *(rw,sync,no_subtree_check,no_root_squash,fsid=3)
