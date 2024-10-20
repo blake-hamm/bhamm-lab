@@ -14,8 +14,10 @@ spec:
     chart: prefect-server
     repoURL: https://prefecthq.github.io/prefect-helm
     targetRevision: 2024.10.15184517
-    # helm:
-    #   valuesObject:
+    helm:
+      valuesObject:
+        server:
+          prefectApiUrl: http://prefect-server:4200/api
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
