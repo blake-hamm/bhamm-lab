@@ -20,5 +20,12 @@ spec:
       services:
         - name: prefect-server
           port: 4200
+    - kind: Rule
+      match: Host(`prefect-db.bhamm-lab.com`)
+      middlewares:
+        - name: default-headers
+      services:
+        - name: prefect-server-postgresql
+          port: 5432
   tls:
     secretName: bhamm-lab-tls
