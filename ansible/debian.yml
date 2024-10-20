@@ -23,4 +23,6 @@
   become: true
   roles:
     - aeriscloud.disk
+    - tigattack.mergerfs
+    - ironicbadger.snapraid
   tags: [storage]

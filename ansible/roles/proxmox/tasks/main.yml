@@ -6,3 +6,8 @@
     name: lae.proxmox
     apply:
       become: true
+- name: Run post tasks
+  ansible.builtin.include_tasks:
+    file: post.yml
+    apply:
+      become: true
