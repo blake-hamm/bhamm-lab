@@ -1,9 +1,17 @@
 bootstrap_disk_id: "/dev/disk/by-id/ata-KINGSTON_SA400S37240G_50026B77845B74E3"
 # https://github.com/AerisCloud/ansible-disk
 disk_additional_disks:
+  - disk: /dev/sdc
+    fstype: xfs
+    mount_options: defaults,noatime,nodiratime
+    mount: /mnt/disk1
   - disk: /dev/sdb
     fstype: xfs
     mount_options: defaults,noatime,nodiratime
     mount: /mnt/disk2
+  - disk: /dev/sdd
+    fstype: xfs
+    mount_options: defaults,noatime,nodiratime
+    mount: /mnt/partition1
 additional_fs_utils:
   - xfsprogs
