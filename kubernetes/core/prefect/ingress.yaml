@@ -38,7 +38,6 @@ spec:
     - websecure
   routes:
     - kind: Rule
-    - kind: Rule
       match: Host(`prefect-db.bhamm-lab.com`)
       middlewares:
         - name: default-headers
