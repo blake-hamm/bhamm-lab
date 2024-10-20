@@ -21,7 +21,7 @@ spec:
             type: LoadBalancer
             port: 4185
             annotations:
-              metallb.universe.tf/allow-shared-ip: "gitea-netbootxyz"
+              metallb.universe.tf/allow-shared-ip: "shared-ip"
               metallb.universe.tf/loadBalancerIPs: 192.168.69.38
         gitea:
           additionalConfigSources:
