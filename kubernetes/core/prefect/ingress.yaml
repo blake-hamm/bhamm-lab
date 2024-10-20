@@ -16,6 +16,7 @@ spec:
       match: Host(`prefect.bhamm-lab.com`)
       middlewares:
         - name: default-headers
+        - name: 'forwardauth-authelia'
       services:
         - name: prefect-server
           port: 4200
