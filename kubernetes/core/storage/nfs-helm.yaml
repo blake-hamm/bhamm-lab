@@ -20,7 +20,7 @@ spec:
           defaultClass: false
         nfs:
           server: 192.168.69.12
-          path: /mnt/storage/kubernetes
+          path: /mnt/storage
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
