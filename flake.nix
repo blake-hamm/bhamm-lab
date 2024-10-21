@@ -33,6 +33,9 @@
 
     # Sops nix
     sops-nix.url = "github:Mic92/sops-nix";
+
+    # For development environment
+    poetry2nix.url = "github:nix-community/poetry2nix";
   };
 
   outputs = { nixpkgs, self, ... } @ inputs:
@@ -150,5 +153,82 @@
         # };
 
       };
+
+      devShells."${system}".default =
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+            config = { allowUnfree = true; };
+            overlays = [ ];
+          };
+          inherit (inputs.poetry2nix.lib.mkPoetry2Nix { inherit pkgs; }) mkPoetryEnv defaultPoetryOverrides;
+          pythonPoetryEnv =
+            let
+              pypkgs-build-requirements = {
+                mkdocs-material = [ "hatchling" ];
+              };
+              p2n-overrides = defaultPoetryOverrides.extend (final: prev:
+                builtins.mapAttrs
+                  (package: build-requirements:
+                    (builtins.getAttr package prev).overridePythonAttrs (old: {
+                      buildInputs = (old.buildInputs or [ ]) ++ (builtins.map (pkg: if builtins.isString pkg then builtins.getAttr pkg prev else pkg) build-requirements);
+                    })
+                  )
+                  pypkgs-build-requirements
+              );
+            in
+            mkPoetryEnv {
+              projectDir = ./python/.;
+              overrides = p2n-overrides;
+            };
+        in
+        pkgs.mkShell {
+          # packages = [ pythonPoetryEnv ];
+          packages = [
+            (pkgs.python3.withPackages (python-pkgs: [
+              python-pkgs."mkdocs-material"
+              python-pkgs."hvac"
+              python-pkgs."httpx"
+            ]))
+          ];
+
+          nativeBuildInputs = with pkgs; [
+            vault
+            kubectl
+            kubernetes-helm
+            argocd
+            k9s
+            colmena
+            poetry
+            sops
+            mkdocs
+            ansible
+            ansible-lint
+            sshpass
+            opentofu
+            terraform
+            tflint
+            trivy
+            terrascan
+          ];
+
+          shellHook = ''
+            # Install ansible galaxy requirements
+            ansible-galaxy install -r ansible/requirements.yml
+
+            # Source .env file
+            if [ -f .env ]; then
+              export $(grep -v '^#' .env | xargs)
+            fi
+
+            # Define python intepreter for ansible
+            export NIX_PYTHON_INTERPRETER=$(which python)
+
+            # Prefect server vars
+            export PREFECT_API_URL=https://prefect.bhamm-lab.com/api
+            export PREFECT_UI_API_URL=https://prefect.bhamm-lab.com/api
+            export PREFECT_API_TLS_INSECURE_SKIP_VERIFY=true
+          '';
+        };
     };
 }
