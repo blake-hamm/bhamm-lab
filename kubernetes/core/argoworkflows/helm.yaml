@@ -16,6 +16,9 @@ spec:
     targetRevision: 0.42.5
     helm:
       valuesObject:
+        worklow:
+          serviceAccount:
+            create: true
         controller:
           metricsConfig:
             enabled: false
