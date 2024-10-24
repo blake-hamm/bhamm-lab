@@ -24,7 +24,7 @@ spec:
           logging:
             level: info
           sso:
-            enabled: false
+            enabled: true
             issuer: https://auth.bhamm-lab.com
             clientId:
               name: /core/argoworkflows
@@ -36,7 +36,11 @@ spec:
             rbac:
               enabled: true
               secretWhitelist: []
-            scopes: []
+            scopes:
+              - 'openid'
+              - 'groups'
+              - 'email'
+              - 'profile'
             sessionExpiry: ""
             issuerAlias: ""
             customGroupClaimName: ""
