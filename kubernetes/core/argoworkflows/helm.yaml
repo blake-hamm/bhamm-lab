@@ -24,6 +24,8 @@ spec:
           logging:
             level: info
         server:
+          authModes:
+            - sso
           sso:
             enabled: true
             issuer: https://auth.bhamm-lab.com
