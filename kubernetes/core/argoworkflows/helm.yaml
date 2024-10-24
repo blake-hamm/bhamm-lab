@@ -23,6 +23,7 @@ spec:
             enabled: false
           logging:
             level: info
+        server:
           sso:
             enabled: true
             issuer: https://auth.bhamm-lab.com
