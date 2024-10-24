@@ -37,7 +37,7 @@ spec:
               key: client-secret
             redirectUrl: "https://argoworkflows.bhamm-lab.com/oauth2/callback"
             rbac:
-              enabled: true
+              enabled: false
               secretWhitelist: []
             scopes:
               - 'openid'
