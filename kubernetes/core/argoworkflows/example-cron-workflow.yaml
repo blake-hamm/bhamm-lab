@@ -15,6 +15,7 @@ spec:
   suspend: false # Set to "true" to suspend scheduling
   serviceAccountName: argo-workflow
   workflowSpec:
+    serviceAccountName: argo-workflow
     entrypoint: hello-world-with-time
     templates:
       - name: hello-world-with-time
