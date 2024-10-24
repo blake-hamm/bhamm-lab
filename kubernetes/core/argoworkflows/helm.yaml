@@ -20,9 +20,29 @@ spec:
           metricsConfig:
             enabled: false
           telemetryConfig:
-            enabled: fals
+            enabled: false
           logging:
             level: info
+          sso:
+            enabled: false
+            issuer: https://auth.bhamm-lab.com
+            clientId:
+              name: /core/argoworkflows
+              key: client-id
+            clientSecret:
+              name: /core/argoworkflows
+              key: client-secret
+            redirectUrl: "argoworkflows.bhamm-lab.com/oauth2/callback"
+            rbac:
+              enabled: true
+              secretWhitelist: []
+            scopes: []
+            sessionExpiry: ""
+            issuerAlias: ""
+            customGroupClaimName: ""
+            userInfoPath: ""
+            insecureSkipVerify: true
+            filterGroupsRegex:
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
