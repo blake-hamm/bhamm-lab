@@ -19,6 +19,10 @@ spec:
         controller:
           metricsConfig:
             enabled: false
+          telemetryConfig:
+            enabled: fals
+          logging:
+            level: info
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
