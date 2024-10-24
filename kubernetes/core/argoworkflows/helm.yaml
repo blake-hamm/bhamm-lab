@@ -48,7 +48,7 @@ spec:
             issuerAlias: ""
             customGroupClaimName: ""
             userInfoPath: ""
-            insecureSkipVerify: true
+            insecureSkipVerify: false
             filterGroupsRegex:
   syncPolicy:
     syncOptions:
