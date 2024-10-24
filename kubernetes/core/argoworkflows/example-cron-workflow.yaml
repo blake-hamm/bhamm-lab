@@ -13,7 +13,7 @@ spec:
   successfulJobsHistoryLimit: 4 # Default 3
   failedJobsHistoryLimit: 4 # Default 1
   suspend: false # Set to "true" to suspend scheduling
-  serviceAccountName: argoworkflows-argo-workflows-workflow
+  serviceAccountName: argo-workflow
   workflowSpec:
     entrypoint: hello-world-with-time
     templates:
