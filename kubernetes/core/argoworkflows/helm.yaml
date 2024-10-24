@@ -35,7 +35,7 @@ spec:
             clientSecret:
               name: argoworkflows-external
               key: client-secret
-            redirectUrl: "argoworkflows.bhamm-lab.com/oauth2/callback"
+            redirectUrl: "https://argoworkflows.bhamm-lab.com/oauth2/callback"
             rbac:
               enabled: true
               secretWhitelist: []
