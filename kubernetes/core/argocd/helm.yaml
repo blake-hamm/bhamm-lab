@@ -32,7 +32,7 @@ spec:
           replicas: 2
         configs:
           params:
-            server.insecure: true
+            server.insecure: false
           rbac:
             policy.default: 'role:admin'
             policy.csv: |
