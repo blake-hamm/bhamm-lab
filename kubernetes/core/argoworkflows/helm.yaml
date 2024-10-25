@@ -1,0 +1,64 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argoworkflows
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: argo-workflows
+    repoURL: https://argoproj.github.io/argo-helm
+    targetRevision: 0.42.5
+    helm:
+      valuesObject:
+        workflow:
+          serviceAccount:
+            create: true
+        controller:
+          metricsConfig:
+            enabled: false
+          telemetryConfig:
+            enabled: false
+          logging:
+            level: info
+          workflowDefaults:
+            spec:
+              serviceAccountName: argo-workflow
+        server:
+          authModes:
+            - sso
+          sso:
+            enabled: true
+            issuer: https://auth.bhamm-lab.com
+            clientId:
+              name: argoworkflows-external
+              key: client-id
+            clientSecret:
+              name: argoworkflows-external
+              key: client-secret
+            redirectUrl: "https://argoworkflows.bhamm-lab.com/oauth2/callback"
+            rbac:
+              enabled: false
+              secretWhitelist: []
+            scopes:
+              - 'openid'
+              - 'groups'
+              - 'email'
+              - 'profile'
+            sessionExpiry: ""
+            issuerAlias: ""
+            customGroupClaimName: ""
+            userInfoPath: ""
+            insecureSkipVerify: false
+            filterGroupsRegex:
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true
