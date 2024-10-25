@@ -26,6 +26,9 @@ spec:
             enabled: false
           logging:
             level: info
+          workflowDefaults:
+            spec:
+              serviceAccountName: argo-workflow
         server:
           authModes:
             - sso
