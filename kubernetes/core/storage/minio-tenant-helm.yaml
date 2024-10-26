@@ -1,0 +1,54 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: minio-tenant
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "-150"
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: tenant
+    repoURL: https://operator.min.io/
+    targetRevision: v6.0.4
+    helm:
+      valuesObject:
+        tenant:
+          name: minio-tenant
+          pools:
+            - servers: 4
+              name: backups
+              volumesPerServer: 4
+              size: 10Gi
+              volumeClaimTemplate:
+                apiVersion: v1
+                kind: PersistentVolumeClaim
+                metadata: {}
+                spec:
+                  accessModes:
+                    - ReadWriteOnce
+                  resources:
+                    requests:
+                      storage: 50Gi
+                  storageClassName: standard
+                status: {}
+          metrics:
+            enabled: true
+            port: 9000
+            protocol: http
+          features:
+            bucketDNS: false
+            domains: {}
+            enableSFTP: false
+          buckets: []
+          users: []
+          prometheusOperator: false
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true
