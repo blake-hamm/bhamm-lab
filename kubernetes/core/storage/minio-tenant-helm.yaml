@@ -20,9 +20,9 @@ spec:
           name: minio-tenant
           configuration:
             name: minio-tenant-secrets
-          configSecret:
-            name: minio-external-secret
-            existingSecret: true
+          # configSecret:
+          #   name: minio-external-secret
+          #   existingSecret: true
           pools:
             - servers: 4
               name: backups
