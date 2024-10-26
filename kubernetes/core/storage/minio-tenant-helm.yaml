@@ -71,7 +71,7 @@ spec:
   target:
     name: minio-external-secret
   data:
-    - secretKey: admin-user
+    - secretKey: config.env
       remoteRef:
         key: /core/minio
         property: config.env
