@@ -9,3 +9,20 @@ spec:
     requests:
       storage: 1Gi
   storageClassName: nfs-client
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pod
+spec:
+  containers:
+    - name: test-container
+      image: busybox
+      command: ["/bin/sh", "-c", "echo 'Hello, World!' > /data/hello.txt && sleep 3600"]
+      volumeMounts:
+        - mountPath: /data
+          name: test-storage
+  volumes:
+    - name: test-storage
+      persistentVolumeClaim:
+        claimName: test-pvc
