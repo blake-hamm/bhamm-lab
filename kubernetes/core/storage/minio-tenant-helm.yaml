@@ -18,6 +18,11 @@ spec:
       valuesObject:
         tenant:
           name: minio-tenant
+          configuration:
+            name: minio-tenant-secrets
+          configSecret:
+            name: minio-external-secret
+            existingSecret: true
           pools:
             - servers: 4
               name: backups
@@ -33,7 +38,7 @@ spec:
                   resources:
                     requests:
                       storage: 50Gi
-                  storageClassName: standard
+                  storageClassName: nfs-client
                 status: {}
           metrics:
             enabled: true
