@@ -11,7 +11,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    chart: minio-operator
+    chart: operator
     repoURL: https://operator.min.io/
     targetRevision: v6.0.4
     # helm:
