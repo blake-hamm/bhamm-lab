@@ -13,7 +13,7 @@ spec:
   source:
     chart: minio-operator
     repoURL: https://operator.min.io/
-    targetRevision: 6.0.4
+    targetRevision: v6.0.4
     # helm:
     #   valuesObject:
   syncPolicy:
