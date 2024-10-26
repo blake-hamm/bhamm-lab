@@ -48,6 +48,25 @@ spec:
           buckets: []
           users: []
           prometheusOperator: false
+          extraResources: |
+            apiVersion: external-secrets.io/v1beta1
+            kind: ExternalSecret
+            metadata:
+              name: minio-external-secret
+              namespace: default
+              annotations:
+            spec:
+              refreshInterval: 5m
+              secretStoreRef:
+                name: vault-backend
+                kind: SecretStore
+              target:
+                name: minio-external-secret
+              data:
+                - secretKey: admin-user
+                  remoteRef:
+                    key: /core/minio
+                    property: config.env
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
