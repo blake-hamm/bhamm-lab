@@ -30,12 +30,12 @@ spec:
                 kind: PersistentVolumeClaim
                 metadata: {}
                 spec:
+                  storageClassName: nfs-client
                   accessModes:
                     - ReadWriteOnce
                   resources:
                     requests:
                       storage: 10Gi
-                  storageClassName: nfs-client
                 status: {}
           metrics:
             enabled: true
