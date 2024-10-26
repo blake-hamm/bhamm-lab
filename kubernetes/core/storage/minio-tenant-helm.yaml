@@ -48,28 +48,30 @@ spec:
           buckets: []
           users: []
           prometheusOperator: false
-          extraResources: |
-            apiVersion: external-secrets.io/v1beta1
-            kind: ExternalSecret
-            metadata:
-              name: minio-external-secret
-              namespace: default
-              annotations:
-            spec:
-              refreshInterval: 5m
-              secretStoreRef:
-                name: vault-backend
-                kind: SecretStore
-              target:
-                name: minio-external-secret
-              data:
-                - secretKey: admin-user
-                  remoteRef:
-                    key: /core/minio
-                    property: config.env
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
     automated:
       prune: true
       selfHeal: true
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: minio-external-secret
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "105"
+spec:
+  refreshInterval: 5m
+  secretStoreRef:
+    name: vault-backend
+    kind: SecretStore
+  target:
+    name: minio-external-secret
+  data:
+    - secretKey: admin-user
+      remoteRef:
+        key: /core/minio
+        property: config.env
