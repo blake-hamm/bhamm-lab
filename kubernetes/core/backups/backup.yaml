@@ -1,0 +1,52 @@
+apiVersion: k8up.io/v1
+kind: Backup
+metadata:
+  name: backup-test
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "100"
+spec:
+  failedJobsHistoryLimit: 2
+  successfulJobsHistoryLimit: 2
+  backend:
+    repoPasswordSecretRef:
+      name: backup-external-secret
+      key: repo-password
+    s3:
+      endpoint: http://minio-tenant-hl:9000
+      bucket: backups
+      accessKeyIDSecretRef:
+        name: backup-external-secret
+        key: username
+      secretAccessKeySecretRef:
+        name: backup-external-secret
+        key: password
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: backup-external-secret
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "95"
+spec:
+  refreshInterval: 5m
+  secretStoreRef:
+    name: vault-backend
+    kind: SecretStore
+  target:
+    name: backup-external-secret
+  data:
+    - secretKey: username
+      remoteRef:
+        key: /core/minio
+        property: username
+    - secretKey: password
+      remoteRef:
+        key: /core/minio
+        property: password
+    - secretKey: repo-password
+      remoteRef:
+        key: /core/lldap
+        property: admin-password
