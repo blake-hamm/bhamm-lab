@@ -29,7 +29,9 @@ spec:
               volumeClaimTemplate:
                 apiVersion: v1
                 kind: PersistentVolumeClaim
-                metadata: {}
+                metadata:
+                  annotations:
+                    k8up.io/backup-exclude: "true"
                 spec:
                   accessModes:
                     - ReadWriteOnce
