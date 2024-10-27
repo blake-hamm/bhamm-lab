@@ -26,12 +26,11 @@ spec:
               volumesPerServer: 4
               size: 10Gi
               storageClassName: nfs-client
+              storageAnnotations:
+                k8up.io/backup-exclude: "true"
               volumeClaimTemplate:
                 apiVersion: v1
                 kind: PersistentVolumeClaim
-                metadata:
-                  annotations:
-                    k8up.io/backup-exclude: "true"
                 spec:
                   accessModes:
                     - ReadWriteOnce
