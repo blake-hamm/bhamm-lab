@@ -21,3 +21,25 @@ spec:
           port: 9443
   tls:
     secretName: bhamm-lab-tls
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: minio-api
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "0"
+    traefik.ingress.kubernetes.io/websocket: "true"
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`minio-api.bhamm-lab.com`)
+      services:
+        - name: minio
+          port: 443
+  tls:
+    secretName: bhamm-lab-tls
