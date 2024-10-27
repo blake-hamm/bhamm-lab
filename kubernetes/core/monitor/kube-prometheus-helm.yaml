@@ -16,6 +16,8 @@ spec:
     targetRevision: 61.2.0
     helm:
       valuesObject:
+        nameOverride: "monitoring"
+        fullnameOverride: "monitoring-stack"
         prometheus:
           prometheusSpec:
             serviceMonitorSelector:
