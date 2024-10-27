@@ -22,7 +22,7 @@ spec:
             name: minio-external-secret
           pools:
             - servers: 4
-              name: backups
+              name: minio
               volumesPerServer: 4
               size: 10Gi
               storageClassName: nfs-client
