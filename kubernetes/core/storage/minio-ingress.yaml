@@ -17,7 +17,7 @@ spec:
       middlewares:
         - name: default-headers
       services:
-        - name: minio
-          port: 443
+        - name: minio-tenant-console
+          port: 9443
   tls:
     secretName: bhamm-lab-tls
