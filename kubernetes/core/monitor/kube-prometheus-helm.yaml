@@ -24,7 +24,7 @@ spec:
             storageSpec:
               volumeClaimTemplate:
                 metadata:
-                  name: prometheus-pvc
+                  name: ""
                 spec:
                   accessModes: ["ReadWriteOnce"]
                   resources:
