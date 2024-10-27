@@ -19,6 +19,5 @@ spec:
       services:
         - name: minio
           port: 443
-          scheme: https
   tls:
     secretName: bhamm-lab-tls
