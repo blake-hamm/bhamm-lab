@@ -25,12 +25,12 @@ spec:
               name: backups
               volumesPerServer: 4
               size: 10Gi
+              storageClassName: nfs-client
               volumeClaimTemplate:
                 apiVersion: v1
                 kind: PersistentVolumeClaim
                 metadata: {}
                 spec:
-                  storageClassName: nfs-client
                   accessModes:
                     - ReadWriteOnce
                   resources:
