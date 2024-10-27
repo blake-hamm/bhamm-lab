@@ -21,6 +21,7 @@ spec:
       secretAccessKeySecretRef:
         name: backup-external-secret
         key: password
+  volumeSnapshotClassName: "ceph-block"
 ---
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
