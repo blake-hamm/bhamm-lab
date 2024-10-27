@@ -13,7 +13,7 @@ spec:
       name: backup-external-secret
       key: repo-password
     s3:
-      endpoint: http://minio-tenant-hl:9000
+      endpoint: https://minio.default.svc.cluster.local:443
       bucket: backups
       accessKeyIDSecretRef:
         name: backup-external-secret
