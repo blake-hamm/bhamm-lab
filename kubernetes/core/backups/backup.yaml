@@ -17,7 +17,7 @@ spec:
       bucket: backups
       accessKeyIDSecretRef:
         name: backup-external-secret
-        key: username
+        key: user
       secretAccessKeySecretRef:
         name: backup-external-secret
         key: password
@@ -38,10 +38,10 @@ spec:
   target:
     name: backup-external-secret
   data:
-    - secretKey: username
+    - secretKey: user
       remoteRef:
         key: /core/minio
-        property: username
+        property: user
     - secretKey: password
       remoteRef:
         key: /core/minio
