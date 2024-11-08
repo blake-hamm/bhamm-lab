@@ -33,122 +33,130 @@
 
     # Sops nix
     sops-nix.url = "github:Mic92/sops-nix";
+
+    flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { nixpkgs, self, ... } @ inputs:
-    let
-      username = "bhamm";
-      system = "x86_64-linux";
-      sshPort = 4185;
-    in
-    {
-      # Bare metal
-      colmena = {
-        meta = {
-          nixpkgs = import nixpkgs {
-            inherit system;
-          };
-          specialArgs = {
-            inherit self inputs username system;
-          };
-          nodeSpecialArgs.framework = {
-            host = "framework";
-          };
-          # nodeSpecialArgs.aorus = {
-          #   host = "aorus";
-          # };
-          nodeSpecialArgs.precision = {
-            host = "precision";
-          };
-          nodeSpecialArgs.thinkpad = {
-            host = "thinkpad";
-          };
-          nodeSpecialArgs.elitebook = {
-            host = "elitebook";
-          };
+  outputs = { self, ... } @ inputs:
+    inputs.flake-utils.lib.eachDefaultSystem (system:
+      let
+        username = "bhamm";
+        sshPort = 4185;
+        pkgs = import inputs.nixpkgs { inherit system; config = { allowUnfree = true; }; };
+      in
+      {
+        devShells = {
+          default = import ./nix/shell.nix { inherit pkgs; };
         };
+      }
+    );
+#     {
+#       # Bare metal
+#       colmena = {
+#         meta = {
+#           nixpkgs = import nixpkgs {
+#             inherit system;
+#           };
+#           specialArgs = {
+#             inherit self inputs username system;
+#           };
+#           nodeSpecialArgs.framework = {
+#             host = "framework";
+#           };
+#           # nodeSpecialArgs.aorus = {
+#           #   host = "aorus";
+#           # };
+#           nodeSpecialArgs.precision = {
+#             host = "precision";
+#           };
+#           nodeSpecialArgs.thinkpad = {
+#             host = "thinkpad";
+#           };
+#           nodeSpecialArgs.elitebook = {
+#             host = "elitebook";
+#           };
+#         };
 
-        framework = { name, nodes, pkgs, ... }: {
-          deployment = {
-            allowLocalDeployment = true;
-            tags = [ "framework" "local" "desktop" ];
-            targetUser = "${username}";
-            targetHost = "localhost";
-            targetPort = sshPort;
-          };
-          imports = [ ./nix/hosts/framework ];
-        };
+#         framework = { name, nodes, pkgs, ... }: {
+#           deployment = {
+#             allowLocalDeployment = true;
+#             tags = [ "framework" "local" "desktop" ];
+#             targetUser = "${username}";
+#             targetHost = "localhost";
+#             targetPort = sshPort;
+#           };
+#           imports = [ ./nix/hosts/framework ];
+#         };
 
-        # aorus = { name, nodes, pkgs, ... }: {
-        #   deployment = {
-        #     tags = [ "aorus" "server" ];
-        #     targetUser = "${username}";
-        #     targetHost = "192.168.69.12";
-        #     targetPort = sshPort;
-        #   };
-        #   imports = [ ./nix/hosts/aorus ];
-        # };
+#         # aorus = { name, nodes, pkgs, ... }: {
+#         #   deployment = {
+#         #     tags = [ "aorus" "server" ];
+#         #     targetUser = "${username}";
+#         #     targetHost = "192.168.69.12";
+#         #     targetPort = sshPort;
+#         #   };
+#         #   imports = [ ./nix/hosts/aorus ];
+#         # };
 
-        precision = { name, nodes, pkgs, ... }: {
-          deployment = {
-            tags = [ "precision" "server" ];
-            targetUser = "${username}";
-            targetHost = "192.168.69.13";
-            targetPort = sshPort;
-          };
-          imports = [ ./nix/hosts/precision ];
-        };
+#         precision = { name, nodes, pkgs, ... }: {
+#           deployment = {
+#             tags = [ "precision" "server" ];
+#             targetUser = "${username}";
+#             targetHost = "192.168.69.13";
+#             targetPort = sshPort;
+#           };
+#           imports = [ ./nix/hosts/precision ];
+#         };
 
-        thinkpad = { name, nodes, pkgs, ... }: {
-          deployment = {
-            tags = [ "thinkpad" "server" "k3s" ];
-            targetUser = "${username}";
-            targetHost = "192.168.69.14";
-            targetPort = sshPort;
-          };
-          imports = [ ./nix/hosts/thinkpad ];
-        };
+#         thinkpad = { name, nodes, pkgs, ... }: {
+#           deployment = {
+#             tags = [ "thinkpad" "server" "k3s" ];
+#             targetUser = "${username}";
+#             targetHost = "192.168.69.14";
+#             targetPort = sshPort;
+#           };
+#           imports = [ ./nix/hosts/thinkpad ];
+#         };
 
-        elitebook = { name, nodes, pkgs, ... }: {
-          deployment = {
-            tags = [ "elitebook" "server" ];
-            targetUser = "${username}";
-            targetHost = "192.168.69.15";
-            targetPort = sshPort;
-          };
-          imports = [ ./nix/hosts/elitebook ];
-        };
-      };
+#         elitebook = { name, nodes, pkgs, ... }: {
+#           deployment = {
+#             tags = [ "elitebook" "server" ];
+#             targetUser = "${username}";
+#             targetHost = "192.168.69.15";
+#             targetPort = sshPort;
+#           };
+#           imports = [ ./nix/hosts/elitebook ];
+#         };
+#       };
 
-      # VM and iso configs without colmena
-      nixosConfigurations = {
-        # ISO image
-        minimal-iso = nixpkgs.lib.nixosSystem {
-          inherit system;
-          modules = [
-            "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
-            (import ./nix/hosts/iso)
-            {
-              nixpkgs.config.allowBroken = true;
-            }
-          ];
-          specialArgs = {
-            host = "minimal-iso";
-            inherit self inputs username;
-          };
-        };
+#       # VM and iso configs without colmena
+#       nixosConfigurations = {
+#         # ISO image
+#         minimal-iso = nixpkgs.lib.nixosSystem {
+#           inherit system;
+#           modules = [
+#             "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+#             (import ./nix/hosts/iso)
+#             {
+#               nixpkgs.config.allowBroken = true;
+#             }
+#           ];
+#           specialArgs = {
+#             host = "minimal-iso";
+#             inherit self inputs username;
+#           };
+#         };
 
-        # example = nixpkgs.lib.nixosSystem {
-        #   inherit system;
-        #   modules = [
-        #     (import ./nix/hosts/example)
-        #   ];
-        #   specialArgs = {
-        #     host = "example";
-        #     inherit self inputs username system;
-        #   };
-        # };
+#         # example = nixpkgs.lib.nixosSystem {
+#         #   inherit system;
+#         #   modules = [
+#         #     (import ./nix/hosts/example)
+#         #   ];
+#         #   specialArgs = {
+#         #     host = "example";
+#         #     inherit self inputs username system;
+#         #   };
+#         # };
 
-      };
-    };
+#       };
 }
