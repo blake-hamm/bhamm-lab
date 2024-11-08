@@ -2,6 +2,7 @@
 
 pkgs.mkShell {
   buildInputs = with pkgs; [
+    pre-commit
     vault
     kubectl
     kubernetes-helm
@@ -41,5 +42,8 @@ pkgs.mkShell {
 
     # Define python interpreter for ansible
     export NIX_PYTHON_INTERPRETER=$(which python)
+
+    # Install pre commit
+    pre-commit install
   '';
 }
