@@ -10,6 +10,7 @@
     home.packages = with pkgs; [
       drawio
       dbeaver-bin
+      virt-manager
       # etcher
       # kubectl
       # kubernetes-helm
