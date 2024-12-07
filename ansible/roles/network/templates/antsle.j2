@@ -4,4 +4,21 @@ iface lo inet loopback
 
 # 10gb network
 auto eno3
-iface eno3 inet dhcp
+iface eno3 inet manual
+    bond-master bond0
+auto eno4
+iface eno4 inet manual
+    bond-master bond0
+auto bond0
+iface bond0 inet manual
+    bond-slaves eno3 eno4
+    bond-mode 802.3ad
+    bond-miimon 100
+    bond-lacp-rate fast
+    bond-min-links 1
+auto vmbr0
+iface vmbr0 inet dhcp
+    bridge-ports bond0
+    bridge-stp off
+    bridge-fd 0
+    bridge-maxwait 0
