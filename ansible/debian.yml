@@ -1,8 +1,8 @@
-- name: Bootstrap debian machines
-  hosts: localhost
-  roles:
-    - bootstrap
-  tags: [bootstrap]
+# - name: Bootstrap debian machines
+#   hosts: localhost
+#   roles:
+#     - bootstrap
+#   tags: [bootstrap]
 - name: Secure debian machines
   hosts: debian
   roles:
@@ -13,13 +13,8 @@
   roles:
     - network
   tags: [network]
-- name: Install proxmox
-  hosts: proxmox
-  roles:
-    - proxmox
-  tags: [proxmox]
 - name: Configure Storage
-  hosts: debian
+  hosts: aorus
   become: true
   roles:
     - aeriscloud.disk
@@ -27,3 +22,8 @@
     - ironicbadger.snapraid
     - geerlingguy.nfs
   tags: [storage]
+- name: Install proxmox
+  hosts: proxmox
+  roles:
+    - proxmox
+  tags: [proxmox]

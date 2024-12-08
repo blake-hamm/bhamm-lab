@@ -1,0 +1,2 @@
+# Ceph config for proxmox
+ceph_device: /dev/nvme0n1
