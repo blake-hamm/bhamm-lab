@@ -27,3 +27,8 @@
   roles:
     - proxmox
   tags: [proxmox]
+- name: Install k3s
+  hosts: k3s
+  roles:
+    - xanmanning.k3s
+  tags: [k3s]

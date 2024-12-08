@@ -108,7 +108,7 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
   name      = "k3s-master-${count.index}"
   node_name = var.k3s_nodes[count.index % length(var.k3s_nodes)]
   vm_id     = 110 + count.index
-  tags      = ["debian", "k3s-master"]
+  tags      = ["debian", "k3s", "k3s-master"]
 
   started         = true
   stop_on_destroy = true
