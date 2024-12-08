@@ -28,6 +28,7 @@ pve_acls:
 pve_roles:
   - name: Tofu
     privileges:
+      - "Datastore.Allocate"
       - "Datastore.AllocateSpace"
       - "Datastore.AllocateTemplate"
       - "Datastore.Audit"

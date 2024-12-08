@@ -1,44 +1,92 @@
-data "vault_kv_secret_v2" "example" {
-  mount = "secret"
-  name  = "example/foo"
-}
-output "example_secret_output" {
-  value     = data.vault_kv_secret_v2.example
-  sensitive = true
+# data "vault_kv_secret_v2" "example" {
+#   mount = "secret"
+#   name  = "example/foo"
+# }
+# output "example_secret_output" {
+#   value     = data.vault_kv_secret_v2.example
+#   sensitive = true
+# }
+
+data "local_file" "ssh_public_key" {
+  filename = "/home/${var.user}/.ssh/id_ed25519.pub"
 }
 
-resource "proxmox_virtual_environment_download_file" "ubuntu_cloud_image" {
-  content_type = "iso"
-  datastore_id = "local"
+resource "proxmox_virtual_environment_file" "cloud_config" {
+  content_type = "snippets"
+  datastore_id = "nfs"
   node_name    = "aorus"
 
-  url = "https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img"
+  source_raw {
+    data = <<-EOF
+    #cloud-config
+    set_hostname: debian-vm
+    users:
+      - default
+      - name: ${var.user}
+        groups:
+          - sudo
+        shell: /bin/bash
+        ssh_authorized_keys:
+          - ${trimspace(data.local_file.ssh_public_key.content)}
+        sudo: ALL=(ALL) NOPASSWD:ALL
+    runcmd:
+        - apt update
+        - apt install -y qemu-guest-agent net-tools
+        - timedatectl set-timezone America/Denver
+        - sed -i 's/^#Port 22/Port 4185/' /etc/ssh/sshd_config
+        - systemctl restart ssh
+        - systemctl enable qemu-guest-agent
+        - systemctl start qemu-guest-agent
+        - echo "done" > /tmp/cloud-config.done
+    EOF
+
+    file_name = "cloud-config.yaml"
+  }
 }
 
-resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
-  name      = "test-ubuntu"
-  node_name = "aorus"
-  started   = false
+resource "proxmox_virtual_environment_download_file" "latest_debian_12_bookworm_qcow2_img" {
+  content_type = "iso"
+  datastore_id = "nfs"
+  node_name    = "aorus"
+  url          = "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-generic-amd64.qcow2"
+  file_name    = "debian-12-generic-amd64.qcow2.img"
+}
+
+resource "proxmox_virtual_environment_vm" "debian_vm_template" {
+  name            = "debian"
+  node_name       = "aorus"
+  vm_id           = 100
+  started         = true
+  template        = true
+  stop_on_destroy = true
 
   agent {
-    enabled = false
+    enabled = true
   }
 
   initialization {
-    datastore_id = "local"
-    user_account {
-      username = "ubuntu"
-    }
+    datastore_id = "ceph_pool"
     ip_config {
       ipv4 {
         address = "dhcp"
       }
     }
+    user_data_file_id = proxmox_virtual_environment_file.cloud_config.id
+  }
+
+  cpu {
+    cores = 4
+    type  = "host"
+  }
+
+  memory {
+    dedicated = 6144
+    floating  = 1
   }
 
   disk {
-    datastore_id = "local"
-    file_id      = proxmox_virtual_environment_download_file.ubuntu_cloud_image.id
+    datastore_id = "ceph_pool"
+    file_id      = proxmox_virtual_environment_download_file.latest_debian_12_bookworm_qcow2_img.id
     interface    = "scsi0"
     size         = 15
   }
@@ -47,42 +95,95 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
     model  = "virtio"
     bridge = "vmbr0"
   }
+
+  serial_device {
+    device = "socket"
+  }
 }
 
-resource "proxmox_virtual_environment_vm" "opnsense" {
-  name       = "opnsense"
-  node_name  = "aorus"
-  started    = true
-  boot_order = ["scsi0"]
+resource "proxmox_virtual_environment_vm" "k3s_master" {
+  count           = 3
+  name            = "k3s-master-${count.index}"
+  node_name       = var.k3s_nodes[count.index % length(var.k3s_nodes)]
+  started         = true
+  stop_on_destroy = true
+  reboot          = true
+  migrate         = true
+
+  agent {
+    enabled = true
+  }
+
+  clone {
+    datastore_id = "ceph_pool"
+    node_name    = "aorus"
+    vm_id        = 100
+  }
 
   cpu {
-    cores = 2
-    type  = "x86-64-v2-AES"
+    cores = 4
+    type  = "host"
   }
 
   memory {
     dedicated = 6144
+    floating  = 1
   }
 
-  disk {
-    datastore_id = "local"
-    interface    = "scsi0"
-    size         = 15
-  }
-  # cdrom {
-  #   enabled = true
-  #   file_id = "local:iso/OPNsense-24.7-dvd-amd64.iso"
-  #   interface="ide0"
-  # }
-
-  network_device {
-    model  = "virtio"
-    bridge = "vmbr1"
+  serial_device {
+    device = "socket"
   }
 
-  network_device {
-    model  = "virtio"
-    bridge = "vmbr2"
-  }
-
+  depends_on = [proxmox_virtual_environment_vm.debian_vm_template]
 }
+
+# resource "proxmox_virtual_environment_vm" "k3s" {
+#   count     = 3
+#   name      = "k3s-master-${count.index}"
+#   node_name = "precision"
+#   clone {
+#     node_name = "aorus"
+#     datastore_id = "nfs"
+#     vm_id        = 100
+#   }
+#   tags = ["k3s","master","k3s-master"]
+# }
+
+# resource "proxmox_virtual_environment_vm" "opnsense" {
+#   name       = "opnsense"
+#   node_name  = "aorus"
+#   started    = false
+#   on_boot    = false
+#   boot_order = ["scsi0"]
+
+#   cpu {
+#     cores = 2
+#     type  = "x86-64-v2-AES"
+#   }
+
+#   memory {
+#     dedicated = 6144
+#   }
+
+#   disk {
+#     datastore_id = "ceph_pool"
+#     interface    = "scsi0"
+#     size         = 15
+#   }
+#   cdrom {
+#     enabled = true
+#     file_id = "nfs:iso/OPNsense-24.7-dvd-amd64.iso"
+#     interface="ide0"
+#   }
+
+#   network_device {
+#     model  = "virtio"
+#     bridge = "vmbr1"
+#   }
+
+#   network_device {
+#     model  = "virtio"
+#     bridge = "vmbr2"
+#   }
+
+# }
