@@ -12,6 +12,7 @@ keyed_groups:
     prefix: group
 groups:
   debian: "'debian' in (proxmox_tags_parsed|list)"
+  k3s_master: "'k3s-master' in (proxmox_tags_parsed|list)"
 compose:
   ansible_port: 4185
   ansible_host: proxmox_net0["ip"].split('/')[0] if 'ip' in proxmox_net0 else proxmox_agent_interfaces[1]["ip-addresses"][0].split('/')[0]

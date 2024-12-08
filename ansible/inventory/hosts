@@ -7,6 +7,10 @@ opnsense ansible_host=192.168.23.1
 aorus
 antsle
 
+[debian_bare_metal]
+aorus
+antsle
+
 [proxmox]
 aorus
 antsle

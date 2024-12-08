@@ -53,9 +53,11 @@ resource "proxmox_virtual_environment_download_file" "latest_debian_12_bookworm_
 }
 
 resource "proxmox_virtual_environment_vm" "debian_vm_template" {
-  name            = "debian"
-  node_name       = "aorus"
-  vm_id           = 100
+  name      = "debian"
+  node_name = "aorus"
+  vm_id     = 100
+  tags      = ["debian"]
+
   started         = true
   template        = true
   stop_on_destroy = true
@@ -150,7 +152,7 @@ resource "proxmox_virtual_environment_haresource" "k3s_master_ha" {
   depends_on  = [proxmox_virtual_environment_vm.debian_vm_template, proxmox_virtual_environment_vm.k3s_master]
   resource_id = "vm:${110 + count.index}"
   state       = "started"
-  group       = "k3s_master"
+  group       = "k3s-master"
   comment     = "Managed by Tofu"
 }
 

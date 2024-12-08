@@ -8,8 +8,8 @@
   roles:
     - security
   tags: [security]
-- name: Configure debian machine network
-  hosts: debian
+- name: Configure debian bare metal machine networks
+  hosts: debian_bare_metal
   roles:
     - network
   tags: [network]
