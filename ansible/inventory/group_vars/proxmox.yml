@@ -74,3 +74,7 @@ pve_ceph_fs:
     pgs: 64 # adjust later
     rule: replicated_rule
     storage: true
+pve_cluster_ha_groups:
+  - name: main
+    comment: "HA group"
+    nodes: "aorus,antsle"
