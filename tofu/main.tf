@@ -102,9 +102,10 @@ resource "proxmox_virtual_environment_vm" "debian_vm_template" {
 }
 
 resource "proxmox_virtual_environment_vm" "k3s_master" {
-  count           = 3
+  count           = var.count_k3s_master
   name            = "k3s-master-${count.index}"
   node_name       = var.k3s_nodes[count.index % length(var.k3s_nodes)]
+  vm_id           = 110 + count.index
   started         = true
   stop_on_destroy = true
   reboot          = true
@@ -135,6 +136,15 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
   }
 
   depends_on = [proxmox_virtual_environment_vm.debian_vm_template]
+}
+
+resource "proxmox_virtual_environment_haresource" "k3s_master_ha" {
+  count       = var.count_k3s_master
+  depends_on  = [proxmox_virtual_environment_vm.debian_vm_template, proxmox_virtual_environment_vm.k3s_master]
+  resource_id = "vm:${110 + count.index}"
+  state       = "started"
+  group       = "example"
+  comment     = "Managed by Terraform"
 }
 
 # resource "proxmox_virtual_environment_vm" "k3s" {
