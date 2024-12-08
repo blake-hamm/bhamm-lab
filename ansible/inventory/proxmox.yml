@@ -1,0 +1,17 @@
+plugin: community.general.proxmox
+url: https://192.168.69.12:8006
+user: tofu@pve
+token_id: main
+validate_certs: false
+exclude_nodes: true
+want_facts: true
+want_proxmox_nodes_ansible_host: true
+keyed_groups:
+  - key: proxmox_tags_parsed
+    separator: ""
+    prefix: group
+groups:
+  debian: "'debian' in (proxmox_tags_parsed|list)"
+compose:
+  ansible_port: 4185
+  ansible_host: proxmox_net0["ip"].split('/')[0] if 'ip' in proxmox_net0 else proxmox_agent_interfaces[1]["ip-addresses"][0].split('/')[0]

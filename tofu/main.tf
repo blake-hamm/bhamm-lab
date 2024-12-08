@@ -102,10 +102,12 @@ resource "proxmox_virtual_environment_vm" "debian_vm_template" {
 }
 
 resource "proxmox_virtual_environment_vm" "k3s_master" {
-  count           = var.count_k3s_master
-  name            = "k3s-master-${count.index}"
-  node_name       = var.k3s_nodes[count.index % length(var.k3s_nodes)]
-  vm_id           = 110 + count.index
+  count     = var.count_k3s_master
+  name      = "k3s-master-${count.index}"
+  node_name = var.k3s_nodes[count.index % length(var.k3s_nodes)]
+  vm_id     = 110 + count.index
+  tags      = ["debian", "k3s-master"]
+
   started         = true
   stop_on_destroy = true
   reboot          = true
@@ -131,6 +133,11 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
     floating  = 1
   }
 
+  network_device {
+    model  = "virtio"
+    bridge = "vmbr0"
+  }
+
   serial_device {
     device = "socket"
   }
@@ -143,8 +150,8 @@ resource "proxmox_virtual_environment_haresource" "k3s_master_ha" {
   depends_on  = [proxmox_virtual_environment_vm.debian_vm_template, proxmox_virtual_environment_vm.k3s_master]
   resource_id = "vm:${110 + count.index}"
   state       = "started"
-  group       = "example"
-  comment     = "Managed by Terraform"
+  group       = "k3s_master"
+  comment     = "Managed by Tofu"
 }
 
 # resource "proxmox_virtual_environment_vm" "k3s" {
