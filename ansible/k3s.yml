@@ -1,0 +1,7 @@
+# Start k3s vms
+- name: Install k3s and copy .kube/config
+  hosts: k3s
+  roles:
+    - xanmanning.k3s
+  tags: [k3s]
+  # Start argocd apps

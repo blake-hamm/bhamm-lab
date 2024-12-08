@@ -1,6 +1,9 @@
 - name: Run roles for debian hosts
   import_playbook: debian.yml
   tags: [debian]
+- name: Install k3s cluster
+  import_playbook: k3s.yml
+  tags: [k3s]
 - name: Run roles for opnsense
   import_playbook: opnsense.yml
   tags: [opnsense]
