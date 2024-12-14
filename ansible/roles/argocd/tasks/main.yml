@@ -7,7 +7,7 @@
     state: present
 - name: Install ArgoCD with Helm
   kubernetes.core.helm:
-    name: argo-cd
+    name: default
     chart_ref: argo/argo-cd
     chart_version: 7.1.0
     release_namespace: default
