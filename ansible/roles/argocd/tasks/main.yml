@@ -36,10 +36,9 @@
     wait: true
     wait_sleep: 10
     wait_timeout: 360
-
-# - name: Create ArgoCD application from manifest
-#   ansible.builtin.k8s:
-#     state: present
-#     definition: "{{ lookup('file', 'path/to/your/argocd-app-manifest.yaml') }}"
-#   namespace: argocd
-#   become: yes
+- name: Deploy core apps
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    template: core.yaml.j2
+    wait: true

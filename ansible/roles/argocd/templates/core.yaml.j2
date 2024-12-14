@@ -8,9 +8,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL:
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
     path: kubernets/core
-    targetRevision: feature/k3s
+    targetRevision: {{ argocd_branch }}
     directory:
       recurse: true
   destination:
