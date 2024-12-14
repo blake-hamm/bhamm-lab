@@ -1,0 +1,12 @@
+- name: Transfer file from master to nodes
+  ansible.builtin.fetch:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: "/home/{{ ansible_user }}/.kube/config"
+    flat: true
+  become: true
+- name: Replace server address in kubeconfig
+  ansible.builtin.replace:
+    path: "/home/{{ ansible_user }}/.kube/config"
+    regexp: "server: https://127.0.0.1:6443"
+    replace: 'server: https://{{ k3s_server["tls-san"] }}:6443'
+  delegate_to: localhost

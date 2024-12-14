@@ -5,5 +5,10 @@
     - xanmanning.k3s
     - kubeconfig
   tags: [bootstrap]
+- name: Copy .kube/config
+  hosts: k3s-master-0
+  roles:
+    - kubeconfig
+  tags: [bootstrap, kubeconfig]
 
 # Start argocd apps
