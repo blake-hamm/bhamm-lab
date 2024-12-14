@@ -10,16 +10,17 @@
     name: argo-cd
     chart_ref: argo/argo-cd
     chart_version: 7.1.0
-    release_namespace: argocd
+    release_namespace: default
     create_namespace: true
     kubeconfig: /etc/rancher/k3s/k3s.yaml
+    wait: true
     # values:
     #   - "{{ argo_cd_values | default([]) }}"
 - name: Wait for ArgoCD server to be ready
   kubernetes.core.k8s_info:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     kind: Pod
-    namespace: argocd
+    namespace: default
     label_selectors:
       - app.kubernetes.io/name=argocd-server
     wait: true
@@ -29,7 +30,7 @@
   kubernetes.core.k8s_info:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     kind: Pod
-    namespace: argocd
+    namespace: default
     label_selectors:
       - app.kubernetes.io/name=argocd-repo-server
     wait: true

@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: core
+  namespace: default
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL:
+    path: kubernets/core
+    targetRevision: feature/k3s
+    directory:
+      recurse: true
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: default
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true
