@@ -3,5 +3,7 @@
   hosts: k3s
   roles:
     - xanmanning.k3s
-  tags: [k3s]
-  # Start argocd apps
+    - kubeconfig
+  tags: [bootstrap]
+
+# Start argocd apps
