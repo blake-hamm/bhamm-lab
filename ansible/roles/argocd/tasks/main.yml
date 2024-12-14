@@ -1,0 +1,44 @@
+- name: Run pre tasks
+  ansible.builtin.include_tasks: pre.yml
+- name: Add ArgoCD Helm chart repository
+  kubernetes.core.helm_repository:
+    name: argo
+    repo_url: https://argoproj.github.io/argo-helm
+    state: present
+- name: Install ArgoCD with Helm
+  kubernetes.core.helm:
+    name: argo-cd
+    chart_ref: argo/argo-cd
+    chart_version: 7.1.0
+    release_namespace: argocd
+    create_namespace: true
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    # values:
+    #   - "{{ argo_cd_values | default([]) }}"
+- name: Wait for ArgoCD server to be ready
+  kubernetes.core.k8s_info:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    kind: Pod
+    namespace: argocd
+    label_selectors:
+      - app.kubernetes.io/name=argocd-server
+    wait: true
+    wait_sleep: 10
+    wait_timeout: 360
+- name: Wait for ArgoCD repo server to be ready
+  kubernetes.core.k8s_info:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    kind: Pod
+    namespace: argocd
+    label_selectors:
+      - app.kubernetes.io/name=argocd-repo-server
+    wait: true
+    wait_sleep: 10
+    wait_timeout: 360
+
+# - name: Create ArgoCD application from manifest
+#   ansible.builtin.k8s:
+#     state: present
+#     definition: "{{ lookup('file', 'path/to/your/argocd-app-manifest.yaml') }}"
+#   namespace: argocd
+#   become: yes

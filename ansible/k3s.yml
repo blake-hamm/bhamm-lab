@@ -3,12 +3,15 @@
   hosts: k3s
   roles:
     - xanmanning.k3s
-    - kubeconfig
   tags: [bootstrap]
 - name: Copy .kube/config
   hosts: k3s-master-0
   roles:
     - kubeconfig
-  tags: [bootstrap, kubeconfig]
-
-# Start argocd apps
+  tags: [kubeconfig]
+- name: Deploy argocd and apps
+  hosts: k3s-master-0
+  roles:
+    - argocd
+  become: true
+  tags: [argocd]
