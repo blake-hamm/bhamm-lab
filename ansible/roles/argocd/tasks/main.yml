@@ -7,12 +7,13 @@
     state: present
 - name: Install ArgoCD with Helm
   kubernetes.core.helm:
-    name: default
+    release_name: default
+    release_namespace: default
     chart_ref: argo/argo-cd
     chart_version: 7.1.0
-    release_namespace: default
     create_namespace: true
     kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
     wait: true
     # values:
     #   - "{{ argo_cd_values | default([]) }}"
