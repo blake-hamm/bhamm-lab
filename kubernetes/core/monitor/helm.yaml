@@ -114,7 +114,6 @@ spec:
     syncOptions:
       - ApplyOutOfSyncOnly=true
       - ServerSideApply=true
-      # - Replace=true # https://github.com/argoproj/argo-cd/issues/8128
     automated:
       prune: true
       selfHeal: true
