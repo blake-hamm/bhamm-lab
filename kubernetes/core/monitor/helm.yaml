@@ -21,13 +21,13 @@ spec:
             serviceMonitorSelector:
               matchLabels:
                 release: monitor
-                # storageSpec:
-                #   volumeClaimTemplate:
-                #     spec:
-                #       accessModes: ["ReadWriteOnce"]
-                #       resources:
-                #         requests:
-                #           storage: 50Gi
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 50Gi
         grafana:
           # envValueFrom:
           #   GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
