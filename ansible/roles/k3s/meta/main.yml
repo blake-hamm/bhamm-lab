@@ -1,6 +1,6 @@
 galaxy_info:
   author: bhamm
-  description: Copy kubeconfig to localhost and save to vault
+  description: Install k3s and configure storage
   company: bhamm-lab
   license: BSD-3-Clause
   min_ansible_version: "2.1"

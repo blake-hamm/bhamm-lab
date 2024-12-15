@@ -1,0 +1,12 @@
+# tasks file for k3s
+- name: Run pre tasks
+  ansible.builtin.include_tasks: pre.yml
+- name: Include xanmanning.k3s role
+  ansible.builtin.include_role:
+    name: xanmanning.k3s
+- name: Patch k3s manifests
+  ansible.builtin.include_tasks: patches.yml
+- name: Copy kubeconfig to local
+  ansible.builtin.include_tasks: kubeconfig.yml
+- name: Setup argocd
+  ansible.builtin.include_tasks: argocd.yml

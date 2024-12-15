@@ -11,5 +11,4 @@
 !network*/
 !proxmox*/
 !opnsense*/
-!kubeconfig*/
-!argocd*/
+!k3s*/

@@ -1,5 +1,3 @@
-- name: Run pre tasks
-  ansible.builtin.include_tasks: pre.yml
 - name: Add ArgoCD Helm chart repository
   kubernetes.core.helm_repository:
     name: argo

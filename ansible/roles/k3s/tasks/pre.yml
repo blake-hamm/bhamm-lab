@@ -1,0 +1,28 @@
+- name: Install curl, ceph-common and python kubernetes
+  ansible.builtin.package:
+    name:
+      - curl
+      - ceph-common
+      - python3-kubernetes
+    state: present
+- name: Download and install Helm
+  ansible.builtin.get_url:
+    url: https://get.helm.sh/helm-v3.10.0-linux-amd64.tar.gz
+    dest: /tmp/helm-v3.10.0-linux-amd64.tar.gz
+    owner: root
+    group: root
+    mode: '0755'
+- name: Extract Helm tarball
+  ansible.builtin.unarchive:
+    src: /tmp/helm-v3.10.0-linux-amd64.tar.gz
+    dest: /tmp/
+    remote_src: true
+- name: Move Helm to /usr/local/bin
+  ansible.builtin.command:
+    cmd: mv /tmp/linux-amd64/helm /usr/local/bin/helm
+    creates: /usr/local/bin/helm
+- name: Verify Helm installation
+  ansible.builtin.command:
+    cmd: helm version
+  register: helm_version
+  changed_when: false
