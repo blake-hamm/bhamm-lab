@@ -6,6 +6,15 @@
     name: lae.proxmox
     apply:
       become: true
+- name: Prepare ceph for kubernetes
+  ansible.builtin.include_tasks:
+    file: ceph.yml
+    apply:
+      become: true
+      tags: [ceph]
+      delegate_to: aorus
+      run_once: true
+  tags: [ceph]
 - name: Run post tasks
   ansible.builtin.include_tasks:
     file: post.yml
