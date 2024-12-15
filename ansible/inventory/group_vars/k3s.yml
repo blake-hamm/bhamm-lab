@@ -21,8 +21,6 @@ k3s_server:
 k3s_server_manifests_urls:
   - url: https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/tigera-operator.yaml
     filename: tigera-operator.yaml
-  - url: https://raw.githubusercontent.com/metallb/metallb/v0.14.5/config/manifests/metallb-native.yaml
-    filename: metallb-native.yaml
   - url: https://kube-vip.io/manifests/rbac.yaml
     filename: kube-vip-rbac.yaml
 k3s_server_manifests_templates:
