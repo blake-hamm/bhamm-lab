@@ -1,7 +1,8 @@
-- name: Install curl and python kubernetes
+- name: Install curl, ceph-common python kubernetes
   ansible.builtin.package:
     name:
       - curl
+      - ceph-common
       - python3-kubernetes
     state: present
 - name: Download and install Helm
