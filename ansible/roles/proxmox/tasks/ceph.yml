@@ -13,7 +13,7 @@
 - name: Collect IP addresses of proxmox hosts
   ansible.builtin.set_fact:
     monitor_ips: >
-      {{ groups['proxmox'] | map('extract', hostvars, ['ansible_host'])  | map('regex_replace', '$', ':6789') | list }}
+      {{ groups['proxmox'] | map('extract', hostvars, ['ansible_host']) | map('regex_replace', '$', ':6789') | list }}
 - name: Generate Ceph ConfigMap JSON
   ansible.builtin.set_fact:
     ceph_csi_config_json: >-
