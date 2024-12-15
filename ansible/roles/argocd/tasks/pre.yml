@@ -25,3 +25,16 @@
     cmd: helm version
   register: helm_version
   changed_when: false
+- name: Patch FelixConfiguration to enable Prometheus metrics
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    definition:
+      apiVersion: crd.projectcalico.org/v1
+      kind: FelixConfiguration
+      metadata:
+        name: default
+      spec:
+        prometheusMetricsEnabled: true
+    merge_type: merge
+    wait: true
