@@ -22,19 +22,19 @@ spec:
     targetRevision: 0.14.8
     helm:
       valuesObject:
-        prometheus:
-          serviceAccount: "monitor-kube-prometheus-st-prometheus"
-          namespace: "default"
-          serviceMonitor:
-            enabled: true
-            speaker:
-              additionalLabels:
-                release: monitor
-            controller:
-              additionalLabels:
-                release: monitor
-          prometheusRule:
-            enabled: true
+      # prometheus:
+      #   serviceAccount: "monitor-kube-prometheus-st-prometheus"
+      #   namespace: "default"
+      #   serviceMonitor:
+      #     enabled: true
+      #     speaker:
+      #       additionalLabels:
+      #         release: monitor
+      #     controller:
+      #       additionalLabels:
+      #         release: monitor
+      #   prometheusRule:
+      #     enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
