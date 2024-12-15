@@ -46,7 +46,7 @@ resource "proxmox_virtual_environment_file" "cloud_config" {
 
 resource "proxmox_virtual_environment_download_file" "latest_debian_12_bookworm_qcow2_img" {
   content_type = "iso"
-  datastore_id = "nfs"
+  datastore_id = "ceph_fs"
   node_name    = "aorus"
   url          = "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-generic-amd64.qcow2"
   file_name    = "debian-12-generic-amd64.qcow2.img"
@@ -162,7 +162,7 @@ resource "proxmox_virtual_environment_haresource" "k3s_master_ha" {
 #   node_name = "precision"
 #   clone {
 #     node_name = "aorus"
-#     datastore_id = "nfs"
+#     datastore_id = "ceph"
 #     vm_id        = 100
 #   }
 #   tags = ["k3s","master","k3s-master"]
@@ -191,7 +191,7 @@ resource "proxmox_virtual_environment_haresource" "k3s_master_ha" {
 #   }
 #   cdrom {
 #     enabled = true
-#     file_id = "nfs:iso/OPNsense-24.7-dvd-amd64.iso"
+#     file_id = "ceph:iso/OPNsense-24.7-dvd-amd64.iso"
 #     interface="ide0"
 #   }
 
