@@ -15,7 +15,7 @@ spec:
     repoURL: https://argoproj.github.io/argo-helm
     targetRevision: 7.1.0
     helm:
-      releaseName: default
+      releaseName: argocd
       valuesObject:
         global:
           domain: argocd.bhamm-lab.com
