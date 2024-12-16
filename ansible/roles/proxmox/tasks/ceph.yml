@@ -1,3 +1,9 @@
+- name: Update kubernetes ceph permisions
+  ansible.builtin.shell: >
+    ceph auth caps client.kubernetes mon 'profile rbd' osd 'profile rbd pool=kubernetes' mgr 'profile rbd pool=kubernetes'
+  register: ceph_update_k8s_client
+  failed_when: "'Error' in ceph_update_k8s_client.stderr"
+  changed_when: false
 - name: Populate ceph_k8s_key
   ansible.builtin.shell: >
     ceph auth get-key client.kubernetes
