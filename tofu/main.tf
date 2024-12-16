@@ -126,7 +126,7 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
   }
 
   cpu {
-    cores = 4
+    cores = 3
     type  = "host"
   }
 
@@ -153,6 +153,59 @@ resource "proxmox_virtual_environment_haresource" "k3s_master_ha" {
   resource_id = "vm:${110 + count.index}"
   state       = "started"
   group       = "k3s-master"
+  comment     = "Managed by Tofu"
+}
+
+resource "proxmox_virtual_environment_vm" "k3s_worker" {
+  count     = var.count_k3s_worker
+  name      = "k3s-worker-${count.index}"
+  node_name = "antsle"
+  vm_id     = 120 + count.index
+  tags      = ["debian", "k3s", "k3s-worker"]
+
+  started         = true
+  stop_on_destroy = true
+  reboot          = true
+  migrate         = true
+
+  agent {
+    enabled = true
+  }
+
+  clone {
+    datastore_id = "ceph_pool"
+    node_name    = "aorus"
+    vm_id        = 100
+  }
+
+  cpu {
+    cores = 2
+    type  = "host"
+  }
+
+  memory {
+    dedicated = 12288
+    floating  = 1
+  }
+
+  network_device {
+    model  = "virtio"
+    bridge = "vmbr0"
+  }
+
+  serial_device {
+    device = "socket"
+  }
+
+  depends_on = [proxmox_virtual_environment_vm.debian_vm_template]
+}
+
+resource "proxmox_virtual_environment_haresource" "k3s_worker_ha" {
+  count       = var.count_k3s_worker
+  depends_on  = [proxmox_virtual_environment_vm.debian_vm_template, proxmox_virtual_environment_vm.k3s_worker]
+  resource_id = "vm:${120 + count.index}"
+  state       = "started"
+  group       = "k3s-worker"
   comment     = "Managed by Tofu"
 }
 

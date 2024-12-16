@@ -27,3 +27,9 @@ variable "k3s_nodes" {
   type        = list(string)
   default     = ["antsle", "aorus"]
 }
+
+variable "count_k3s_worker" {
+  description = "Number of k3s worker nodes"
+  type        = number
+  default     = 1
+}
