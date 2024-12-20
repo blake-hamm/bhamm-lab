@@ -19,8 +19,6 @@ spec:
       valuesObject:
         global:
           domain: argocd.bhamm-lab.com
-          logging:
-            level: debug
         redis-ha:
           enabled: true
         controller:
