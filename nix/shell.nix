@@ -20,6 +20,7 @@ pkgs.mkShell {
     tflint
     trivy
     terrascan
+    restic
   ];
 
   packages = [
