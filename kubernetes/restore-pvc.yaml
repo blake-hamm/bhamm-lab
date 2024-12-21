@@ -1,0 +1,22 @@
+apiVersion: k8up.io/v1
+kind: Restore
+metadata:
+  name: restore-vault
+  namespace: snapshot-test
+spec:
+  restoreMethod:
+    folder:
+      claimName: vault-raft-vault-0
+  backend:
+    repoPasswordSecretRef:
+      name: backup-repo
+      key: password
+    s3:
+      endpoint: https://minio:443
+      bucket: backups
+      accessKeyIDSecretRef:
+        name: backup-credentials
+        key: username
+      secretAccessKeySecretRef:
+        name: backup-credentials
+        key: password
