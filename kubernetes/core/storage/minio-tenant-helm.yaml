@@ -18,8 +18,8 @@ spec:
       valuesObject:
         tenant:
           name: minio-tenant
-          configuration:
-            name: minio-external-secret
+          # configuration:
+          #   name: minio-external-secret
           pools:
             - servers: 4
               name: backups
