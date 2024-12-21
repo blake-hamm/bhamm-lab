@@ -1,12 +1,12 @@
 apiVersion: k8up.io/v1
 kind: Restore
 metadata:
-  name: restore-vault
+  name: restore
   namespace: default
 spec:
   restoreMethod:
     folder:
-      claimName: vault-raft-vault-0
+      claimName: redis-data-gitea-redis-cluster-0
   backend:
     repoPasswordSecretRef:
       name: backup-credentials

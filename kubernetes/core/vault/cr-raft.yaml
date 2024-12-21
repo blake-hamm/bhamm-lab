@@ -9,7 +9,7 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "0"
 spec:
-  size: 0
+  size: 3
   image: hashicorp/vault:1.14.8
   annotations:
     common/annotation: "true"
