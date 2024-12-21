@@ -2,17 +2,17 @@ apiVersion: k8up.io/v1
 kind: Restore
 metadata:
   name: restore-vault
-  namespace: snapshot-test
+  namespace: default
 spec:
   restoreMethod:
     folder:
       claimName: vault-raft-vault-0
   backend:
     repoPasswordSecretRef:
-      name: backup-repo
-      key: password
+      name: backup-credentials
+      key: repo-pass
     s3:
-      endpoint: https://minio:443
+      endpoint: https://minio.default:443
       bucket: backups
       accessKeyIDSecretRef:
         name: backup-credentials
@@ -20,3 +20,16 @@ spec:
       secretAccessKeySecretRef:
         name: backup-credentials
         key: password
+    tlsOptions:
+      caCert: /mnt/ca/public.crt
+    volumeMounts:
+      - name: ca-tls
+        mountPath: /mnt/ca/
+  podSecurityContext:
+    fsGroup: 1000
+    runAsUser: 1000
+  volumes:
+    - name: ca-tls
+      secret:
+        secretName: minio-tenant-tls
+        defaultMode: 420
