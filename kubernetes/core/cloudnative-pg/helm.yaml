@@ -23,6 +23,7 @@ spec:
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
+      - ServerSideApply=true
       - CreateNamespace=true
     automated:
       prune: true
