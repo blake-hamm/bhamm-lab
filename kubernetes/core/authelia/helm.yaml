@@ -69,10 +69,8 @@ spec:
               password:
                 disabled: false
           storage:
-            postgres:
+            local:
               enabled: true
-              deploy: true
-              address: 'tcp://authelia-postgresql-hl:5432'
           notifier:
             filesystem:
               enabled: true
