@@ -67,7 +67,7 @@ spec:
                 mail: mail
               user: 'uid=authelia,ou=users,DC=bhamm-lab,DC=com'
               password:
-                disabled: false
+                disabled: true
           storage:
             local:
               enabled: true
