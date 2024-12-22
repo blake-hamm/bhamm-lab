@@ -20,5 +20,5 @@ spec:
         - name: vault
           port: 8200
           scheme: https
-  # tls:
-  #   secretName: bhamm-lab-tls
+  tls:
+    secretName: bhamm-lab-tls
