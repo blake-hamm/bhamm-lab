@@ -19,5 +19,5 @@ spec:
       services:
         - name: api@internal
           kind: TraefikService
-  # tls:
-  #   secretName: bhamm-lab-tls
+  tls:
+    secretName: bhamm-lab-tls
