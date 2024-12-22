@@ -23,21 +23,6 @@ spec:
         image:
           repository: "lldap/lldap"
           tag: "latest"
-        ingress:
-          enabled: false
-          name: lldap-web-ingress
-          ingressClassName: nginx
-          annotations: {}
-          labels: {}
-          hosts:
-            - host: "lldap.test.com"
-              paths:
-                - path: "/"
-                  pathType: "Prefix"
-          tls:
-            - secretName: "lldap-secret-tls"
-              hosts:
-                - "lldap.test.com"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
