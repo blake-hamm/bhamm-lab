@@ -38,8 +38,6 @@ spec:
             - name: AUTHELIA_IDENTITY_PROVIDERS_OIDC_ISSUER_PRIVATE_KEY_FILE
               value: /app/external-secrets/jwks_key
         configMap:
-          log:
-            level: 'debug'
           disabled: false
           telemetry:
             metrics:
