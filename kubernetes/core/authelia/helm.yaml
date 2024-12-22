@@ -56,7 +56,7 @@ spec:
               implementation: 'custom'
               address: 'ldap://lldap-service.default:3890'
               base_dn: 'DC=bhamm-lab,DC=com'
-              additional_users_dn: ou=people
+              additional_users_dn: ou=users
               users_filter: "(&({username_attribute}={input})(objectClass=person))"
               additional_groups_dn: ou=groups
               groups_filter: "(member={dn})"
@@ -65,7 +65,7 @@ spec:
                 username: uid
                 group_name: cn
                 mail: mail
-              user: 'uid=authelia,ou=people,DC=bhamm-lab,DC=com'
+              user: 'uid=authelia,ou=users,DC=bhamm-lab,DC=com'
               password:
                 disabled: false
           storage:
