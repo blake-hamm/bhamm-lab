@@ -83,6 +83,9 @@ spec:
               deploy: false
               address: 'tcp://authelia-pg-cluster-rw:5432'
               timeout: '5 seconds'
+              database: 'authelia'
+              schema: 'public'
+              username: 'authelia'
               password:
                 disabled: true
               tls:
