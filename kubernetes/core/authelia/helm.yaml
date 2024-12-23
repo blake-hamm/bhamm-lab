@@ -17,6 +17,13 @@ spec:
     helm:
       valuesObject:
         pod:
+          initContainers:
+            - name: check-password-file
+              image: busybox
+              command: ["sh", "-c", "cat /app/external-secrets/postgres_password && sleep 3600"]
+              volumeMounts:
+                - name: password-volume
+                  mountPath: /app/external-secrets/postgres_password
           extraVolumeMounts:
             - mountPath: '/app/external-secrets'
               name: 'external-secrets'
