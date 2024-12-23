@@ -36,7 +36,7 @@ spec:
                       name: authelia-pg-external-secrets
                       items:
                         - key: password
-                          path: pg_password
+                          path: password
           env:
             - name: AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD_FILE
               value: /app/external-secrets/lldap_password
