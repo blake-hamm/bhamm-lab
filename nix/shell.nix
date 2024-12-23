@@ -21,6 +21,7 @@ pkgs.mkShell {
     trivy
     terrascan
     restic
+    openssl
   ];
 
   packages = [
