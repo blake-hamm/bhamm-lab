@@ -10,15 +10,11 @@ spec:
   instances: 3
   storage:
     size: 1Gi
-    pvcTemplate:
-      accessModes:
-        - ReadWriteOnce
-      resources:
-        requests:
-          storage: 1Gi
-      volumeMode: Filesystem
   monitoring:
     enablePodMonitor: true
+  postgresql:
+    pg_hba:
+      - host    authelia    authelia    10.42.0.0/16    md5
   bootstrap:
     initdb:
       database: authelia
