@@ -35,8 +35,6 @@ spec:
                   - secret:
                       name: authelia-pg-external-secrets
                       items:
-                        - key: username
-                          path: pg_username
                         - key: password
                           path: pg_password
           env:
@@ -44,8 +42,6 @@ spec:
               value: /app/external-secrets/lldap_password
             - name: AUTHELIA_IDENTITY_PROVIDERS_OIDC_ISSUER_PRIVATE_KEY_FILE
               value: /app/external-secrets/jwks_key
-            - name: AUTHELIA_STORAGE_POSTGRES_USERNAME_FILE
-              value: /app/external-secrets/pg_username
             - name: AUTHELIA_STORAGE_POSTGRES_PASSWORD_FILE
               value: /app/external-secrets/pg_password
         configMap:
