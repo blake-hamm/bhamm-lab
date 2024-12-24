@@ -32,6 +32,8 @@ spec:
                           path: lldap_password
                         - key: jwks_key
                           path: jwks_key
+                        - key: storage_encryption_key
+                          path: storage_encryption_key
                   - secret:
                       name: authelia-pg-external-secrets
                       items:
@@ -44,6 +46,8 @@ spec:
               value: /app/external-secrets/jwks_key
             - name: AUTHELIA_STORAGE_POSTGRES_PASSWORD_FILE
               value: /app/external-secrets/pg_password
+            - name: AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE
+              value: /app/external-secrets/storage_encryption_key
         configMap:
           server:
             timeouts:
