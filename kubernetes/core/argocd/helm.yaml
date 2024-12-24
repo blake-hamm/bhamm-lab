@@ -19,8 +19,6 @@ spec:
       valuesObject:
         global:
           domain: argocd.bhamm-lab.com
-        redis-ha:
-          enabled: true
         controller:
           replicas: 2
         server:

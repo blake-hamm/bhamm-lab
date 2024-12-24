@@ -27,7 +27,7 @@ spec:
           - "--log.level=DEBUG"
         deployment:
           enabled: true
-          replicas: 3
+          replicas: 2
           annotations: {}
           podAnnotations: {}
           additionalContainers: []
