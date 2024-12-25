@@ -30,8 +30,6 @@ spec:
             postgresql:
               auth:
                 existingSecret: "immich-pg-external-secrets"
-                usernameKey: "username"
-                passwordKey: "password"
         redis:
           enabled: true
   syncPolicy:
