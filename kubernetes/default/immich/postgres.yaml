@@ -30,6 +30,3 @@ spec:
         - CREATE EXTENSION IF NOT EXISTS "vectors";
         - CREATE EXTENSION IF NOT EXISTS "cube" CASCADE;
         - CREATE EXTENSION IF NOT EXISTS "earthdistance" CASCADE;
-  enableSuperuserAccess: true
-  superuserSecret:
-    name: pg-superuser-external-secret
