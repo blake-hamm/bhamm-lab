@@ -9,7 +9,7 @@ metadata:
 spec:
   instances: 1
   storage:
-    size: 1Gi
+    size: 4Gi
   monitoring:
     enablePodMonitor: true
   postgresql:
@@ -30,8 +30,6 @@ spec:
         - CREATE EXTENSION IF NOT EXISTS "vectors";
         - CREATE EXTENSION IF NOT EXISTS "cube" CASCADE;
         - CREATE EXTENSION IF NOT EXISTS "earthdistance" CASCADE;
-  storage:
-    size: 4Gi
   enableSuperuserAccess: true
   superuserSecret:
     name: pg-superuser-external-secret
