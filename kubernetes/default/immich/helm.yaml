@@ -17,8 +17,20 @@ spec:
     helm:
       valuesObject:
         env:
-          DB_HOSTNAME: "immich-pg-cluster-rw"
-          DB_DATABASE_NAME: "immich"
+          - name: DB_HOSTNAME
+            value: "immich-pg-cluster-rw"
+          - name: DB_DATABASE_NAME
+            value: "immich"
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: immich-pg-external-secrets
+                key: username
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: immich-pg-external-secrets
+                key: password
         immich:
           metrics:
             enabled: true
