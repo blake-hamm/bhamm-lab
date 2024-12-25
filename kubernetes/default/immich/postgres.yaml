@@ -1,0 +1,32 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: immich-pg-cluster
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "200"
+spec:
+  instances: 1
+  storage:
+    size: 1Gi
+  monitoring:
+    enablePodMonitor: true
+  postgresql:
+    shared_preload_libraries:
+      - "vectors.so"
+  bootstrap:
+    initdb:
+      database: immich
+      owner: immich
+      secret:
+        name: immich-pg-external-secrets
+      postInitSQL:
+        - CREATE EXTENSION IF NOT EXISTS "vectors";
+        - CREATE EXTENSION IF NOT EXISTS "cube" CASCADE;
+        - CREATE EXTENSION IF NOT EXISTS "earthdistance" CASCADE;
+  storage:
+    size: 4Gi
+  enableSuperuserAccess: true
+  superuserSecret:
+    name: pg-superuser-external-secret
