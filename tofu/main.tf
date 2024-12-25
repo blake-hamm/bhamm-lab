@@ -90,7 +90,7 @@ resource "proxmox_virtual_environment_vm" "debian_vm_template" {
     datastore_id = "ceph_pool"
     file_id      = proxmox_virtual_environment_download_file.latest_debian_12_bookworm_qcow2_img.id
     interface    = "scsi0"
-    size         = 15
+    size         = 10
   }
 
   network_device {
@@ -144,6 +144,12 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
     device = "socket"
   }
 
+  disk {
+    datastore_id = "ceph_pool"
+    interface    = "scsi0"
+    size         = 50
+  }
+
   depends_on = [proxmox_virtual_environment_vm.debian_vm_template]
 }
 
@@ -195,6 +201,12 @@ resource "proxmox_virtual_environment_vm" "k3s_worker" {
 
   serial_device {
     device = "socket"
+  }
+
+  disk {
+    datastore_id = "ceph_pool"
+    interface    = "scsi0"
+    size         = 50
   }
 
   depends_on = [proxmox_virtual_environment_vm.debian_vm_template]
