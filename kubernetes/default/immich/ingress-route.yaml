@@ -1,23 +1,23 @@
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: authelia
+  name: immich
   namespace: default
   annotations:
     kubernetes.io/ingress.class: traefik-external
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "250"
+    argocd.argoproj.io/sync-wave: "300"
 spec:
   entryPoints:
     - websecure
   routes:
-    - kind: Rule
-      match: Host(`auth.bhamm-lab.com`)
+    - match: Host(`immich.bhamm-lab.com`)
+      kind: Rule
       middlewares:
         - name: default-headers
+        - name: forwardauth-authelia
       services:
-        - name: authelia
-          port: 80
-          scheme: http
+        - name: api@internal
+          kind: TraefikService
   tls:
     secretName: bhamm-lab-tls
