@@ -133,7 +133,7 @@ spec:
               clients:
                 - client_id: 'immich'
                   client_name: 'immich'
-                  client_secret: '$pbkdf2-sha512$310000$g0o7yH3bIE84Rml/XpVRPQ$5zwbxODGRYPCH5IOm7n5ANSHwFGI0hOlgkHWPICCtLbaV4fCiwmA1XNgUmP94DbPfDDIa8jPSOHs.kP0nqqjBQ'
+                  client_secret: '$pbkdf2-sha512$310000$ePbXTUtLycJCNZKtD6/u1w$tfCj3diKcxbW6NkLAqm5Mkobi32JS0FNUauxj82rulq.6dT/kZ93SKrWHrkX8PmdreHkHkcv1Yfod.ODROpj8w'
                   public: false
                   authorization_policy: 'two_factor'
                   redirect_uris:
