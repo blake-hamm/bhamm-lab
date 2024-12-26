@@ -70,13 +70,13 @@ spec:
       secretShares: 5
       secretThreshold: 3
     kubernetes:
-  #     secretNamespace: default
-  # envsConfig:
-  #   - name: OIDC_VAULT_CLIENT_SECRET
-  #     valueFrom:
-  #       secretKeyRef:
-  #         name: authelia-external
-  #         key: vault_client_secret
+      secretNamespace: default
+  envsConfig:
+    - name: OIDC_VAULT_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: vault-external-secrets
+          key: OIDC_VAULT_CLIENT_SECRET
   config:
     storage:
       raft:
@@ -138,25 +138,25 @@ spec:
             bound_service_account_namespaces: default
             policies: prometheus-operator
             ttl: 4h
-      # - type: oidc
-      #   config:
-      #     oidc_discovery_url: https://auth.bhamm-lab.com
-      #     oidc_client_id: vault
-      #     oidc_client_secret: "${env `OIDC_VAULT_CLIENT_SECRET`}"
-      #     default_role: default
-      #     allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback"]
-      #   roles:
-      #     - name: default
-      #       role_type: oidc
-      #       allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback", "http://localhost:8250/oidc/callback"]
-      #       bound_audiences: vault
-      #       user_claim: sub
-      #       policies: admin
-      #       ttl: 1h
+      - type: oidc
+        config:
+          oidc_discovery_url: https://auth.bhamm-lab.com
+          oidc_client_id: vault
+          oidc_client_secret: "${env `OIDC_VAULT_CLIENT_SECRET`}"
+          default_role: default
+          allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback"]
+        roles:
+          - name: default
+            role_type: oidc
+            allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback", "http://localhost:8250/oidc/callback"]
+            bound_audiences: vault
+            user_claim: sub
+            policies: admin
+            ttl: 1h
       - type: approle
         roles:
           - name: default
-            policies: read_secrets
+            policies: allow_secrets
             secret_id_ttl: 1440h
             secret_id_num_uses: 200
             token_num_uses: 10
