@@ -17,7 +17,8 @@ spec:
         - name: default-headers
         - name: forwardauth-authelia
       services:
-        - name: api@internal
-          kind: TraefikService
+        - name: immich-server
+          port: 2283
+          scheme: http
   tls:
     secretName: bhamm-lab-tls
