@@ -106,7 +106,9 @@ spec:
           access_control:
             default_policy: deny
             rules:
-              - domain: '*.bhamm-lab.com'
+              - domain:
+                  - '*.bhamm-lab.com'
+                  - 'bhamm-lab.com'
                 policy: two_factor
           session:
             cookies:
