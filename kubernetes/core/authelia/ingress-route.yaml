@@ -15,7 +15,6 @@ spec:
       match: Host(`auth.bhamm-lab.com`)
       middlewares:
         - name: default-headers
-        - name: forwardauth-authelia
       services:
         - name: authelia
           port: 80
