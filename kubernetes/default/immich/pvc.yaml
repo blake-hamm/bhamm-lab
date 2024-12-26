@@ -3,7 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: immich-library-pvc
   annotations:
-    argocd.argoproj.io/sync-wave: "250"
+    argocd.argoproj.io/sync-wave: "-100"
 spec:
   accessModes:
     - ReadWriteOnce

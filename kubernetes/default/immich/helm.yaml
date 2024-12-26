@@ -4,7 +4,7 @@ metadata:
   name: immich
   namespace: default
   annotations:
-    argocd.argoproj.io/sync-wave: "300"
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   destination:
     namespace: default

@@ -6,7 +6,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: traefik-external
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "300"
+    argocd.argoproj.io/sync-wave: "100"
 spec:
   entryPoints:
     - websecure
