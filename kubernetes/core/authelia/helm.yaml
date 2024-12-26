@@ -54,6 +54,9 @@ spec:
               read: '15 seconds'
               write: '15 seconds'
               idle: '30 seconds'
+            buffers:
+              read: 8192
+              write: 8192
           disabled: false
           telemetry:
             metrics:
