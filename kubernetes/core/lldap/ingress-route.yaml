@@ -15,6 +15,7 @@ spec:
       kind: Rule
       middlewares:
         - name: default-headers
+        - name: forwardauth-authelia
       services:
         - name: lldap-service
           port: 17170
