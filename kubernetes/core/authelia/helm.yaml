@@ -110,9 +110,12 @@ spec:
             default_policy: deny
             rules:
               - domain:
-                  - '*.bhamm-lab.com'
-                  - 'bhamm-lab.com'
+                  - nginx.bhamm-lab.com
+                  - traefik.bhamm-lab.com
+                  - immich.bhamm-lab.com
                 policy: two_factor
+              - domain: 'auth.bhamm-lab.com'
+                policy: one_factor
           session:
             cookies:
               - subdomain: 'auth'
