@@ -22,6 +22,7 @@ pkgs.mkShell {
     terrascan
     restic
     openssl
+    google-cloud-sdk
   ];
 
   packages = [
