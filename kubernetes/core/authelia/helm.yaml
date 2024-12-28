@@ -162,7 +162,7 @@ spec:
                   userinfo_signed_response_alg: 'none'
                 - client_id: 'argocd'
                   client_name: 'Argo CD'
-                  client_secret: '$pbkdf2-sha512$310000$vTRm0rOurni/Lwor2mK3KQ$2nXfkw/gvB/TaZ.Be9mLQGQZOSXrvyihO95Heucf1S6m3YzcIbCf7V8C1smD/l42/.An42zknmMn6s1lzQDtHA'
+                  client_secret: '$pbkdf2-sha512$310000$zleQgxPmF81tKn7ZZCpiwA$H1xLnYHqIRewWJjBDJnljs/7Iyw7srK12.TUXDVDbFyyH4yonDOTWAUKQrazNUzm8tIW/0y36UAVe7dKNa/ymA'
                   public: false
                   authorization_policy: 'two_factor'
                   redirect_uris:
@@ -173,7 +173,7 @@ spec:
                     - 'email'
                     - 'profile'
                   userinfo_signed_response_alg: 'none'
-                  token_endpoint_auth_method: 'client_secret_basic'
+                  token_endpoint_auth_method: 'client_secret_post'
                 - client_id: 'argocd-cli'
                   client_name: 'Argo CD (CLI)'
                   public: true
