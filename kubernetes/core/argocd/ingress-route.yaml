@@ -14,11 +14,20 @@ spec:
   routes:
     - kind: Rule
       match: Host(`argocd.bhamm-lab.com`)
+      priority: 10
       middlewares:
         - name: default-headers
       services:
         - name: argocd-server
-          port: 443
-          scheme: https
+          port: 80
+    - kind: Rule
+      match: Host(`argocd.bhamm-lab.com`) && Header(`Content-Type`, `application/grpc`)
+      priority: 11
+      middlewares:
+        - name: default-headers
+      services:
+        - name: argocd-server
+          port: 80
+          scheme: h2c
   tls:
     secretName: bhamm-lab-tls

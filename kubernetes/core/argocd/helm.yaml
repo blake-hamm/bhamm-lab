@@ -28,8 +28,8 @@ spec:
         repoServer:
           replicas: 1
         configs:
-          # params:
-          #   server.insecure: true
+          params:
+            server.insecure: true
           rbac:
             policy.default: 'role:admin'
             policy.csv: |
