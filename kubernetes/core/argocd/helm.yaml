@@ -20,16 +20,16 @@ spec:
         global:
           domain: argocd.bhamm-lab.com
         controller:
-          replicas: 2
+          replicas: 1
         server:
-          replicas: 2
+          replicas: 1
         applicationSet:
-          replicas: 2
+          replicas: 1
         repoServer:
-          replicas: 2
+          replicas: 1
         configs:
-          params:
-            server.insecure: true
+          # params:
+          #   server.insecure: true
           rbac:
             policy.default: 'role:admin'
             policy.csv: |
@@ -39,18 +39,18 @@ spec:
               p, role:admin, logs, get, *, allow
               p, role:admin, exec, create, */*, allow
               g, oidc:lldap_admin, role:admin
-            # cm:
-            #   oidc.config: |
-            #     name: Authelia
-            #     issuer: https://auth.bhamm-lab.com
-            #     clientID: argocd
-            #     clientSecret: $argocd-external:oidc_client_secret
-            #     cliClientID: 'argocd-cli'
-            #     requestedScopes:
-            #       - 'openid'
-            #       - 'profile'
-            #       - 'email'
-            #       - 'groups'
+            cm:
+              oidc.config: |
+                name: Authelia
+                issuer: https://auth.bhamm-lab.com
+                clientID: argocd
+                clientSecret: $argocd-external-secrets:oidc_client_secret
+                cliClientID: 'argocd-cli'
+                requestedScopes:
+                  - 'openid'
+                  - 'profile'
+                  - 'email'
+                  - 'groups'
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

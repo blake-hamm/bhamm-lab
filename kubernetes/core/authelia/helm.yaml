@@ -160,20 +160,20 @@ spec:
                     - 'groups'
                     - 'email'
                   userinfo_signed_response_alg: 'none'
-                  # - client_id: 'argocd'
-                  #   client_name: 'Argo CD'
-                  #   client_secret: '$pbkdf2-sha512$310000$QHqC1iKGAK6QdZ3fAam/IQ$QnO.2EcfMwPpCp5j2RxqHz4ZU7mLYwUH3E1y9cOzk5X.HssuIgzGefBC99PIDJYzG9Lb5/VtfBZGTQJ4qKRDyQ'
-                  #   public: false
-                  #   authorization_policy: 'two_factor'
-                  #   redirect_uris:
-                  #     - 'https://argocd.bhamm-lab.com/auth/callback'
-                  #   scopes:
-                  #     - 'openid'
-                  #     - 'groups'
-                  #     - 'email'
-                  #     - 'profile'
-                  #   userinfo_signed_response_alg: 'none'
-                  #   token_endpoint_auth_method: 'client_secret_post'
+                - client_id: 'argocd'
+                  client_name: 'Argo CD'
+                  client_secret: '$pbkdf2-sha512$310000$vTRm0rOurni/Lwor2mK3KQ$2nXfkw/gvB/TaZ.Be9mLQGQZOSXrvyihO95Heucf1S6m3YzcIbCf7V8C1smD/l42/.An42zknmMn6s1lzQDtHA'
+                  public: false
+                  authorization_policy: 'two_factor'
+                  redirect_uris:
+                    - 'https://argocd.bhamm-lab.com/auth/callback'
+                  scopes:
+                    - 'openid'
+                    - 'groups'
+                    - 'email'
+                    - 'profile'
+                  userinfo_signed_response_alg: 'none'
+                  token_endpoint_auth_method: 'client_secret_post'
                   # - client_id: 'argocd-cli'
                   #   client_name: 'Argo CD (CLI)'
                   #   public: true
