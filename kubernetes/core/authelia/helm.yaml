@@ -13,7 +13,7 @@ spec:
   source:
     chart: authelia
     repoURL: https://charts.authelia.com
-    targetRevision: 0.9.5
+    targetRevision: 0.9.14
     helm:
       valuesObject:
         pod:
