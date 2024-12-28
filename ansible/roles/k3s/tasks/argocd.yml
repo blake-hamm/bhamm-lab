@@ -8,7 +8,8 @@
     release_name: argocd
     release_namespace: default
     chart_ref: argo/argo-cd
-    chart_version: 7.1.0
+    chart_version: 7.7.11
+    update_repo_cache: true
     create_namespace: true
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
