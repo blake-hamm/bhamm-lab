@@ -12,7 +12,7 @@ disk_additional_disks:
   - disk: /dev/sdd
     fstype: xfs
     mount_options: defaults,noatime,nodiratime
-    mount: /mnt/partition1
+    mount: /mnt/parity1
 additional_fs_utils:
   - xfsprogs
 # https://github.com/tigattack/ansible-role-mergerfs
