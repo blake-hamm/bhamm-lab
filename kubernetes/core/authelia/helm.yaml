@@ -90,7 +90,7 @@ spec:
                 disabled: true
           storage:
             encryption_key:
-              disabled: false
+              disabled: true
             postgres:
               enabled: true
               deploy: false
