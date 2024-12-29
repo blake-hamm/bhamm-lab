@@ -16,7 +16,7 @@ metadata:
 rules:
   - apiGroups: ["k8up.io"]
     resources: ["backups"]
-    verbs: ["create", "get", "watch", "list"]
+    verbs: ["create", "patch", "get", "watch", "list"]
   - apiGroups: [""]
     resources: ["pods"]
     verbs: ["patch"]
