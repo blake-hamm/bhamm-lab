@@ -23,7 +23,7 @@
     - geerlingguy.nfs
   tasks:
     - name: Create MinIO data directories
-      file:
+      ansible.builtin.file:
         path: "{{ item }}"
         state: directory
         mode: '0755'
