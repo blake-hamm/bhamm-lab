@@ -19,9 +19,11 @@ spec:
         workflow:
           serviceAccount:
             create: true
-            # rbac:
-            #   create: true
-            #   serviceAccounts: [k8up]
+            rbac:
+              create: true
+              serviceAccounts:
+                - name: k8up
+                  namespace: default
         controller:
           metricsConfig:
             enabled: false
