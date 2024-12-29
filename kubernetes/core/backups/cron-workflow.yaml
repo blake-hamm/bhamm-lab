@@ -15,6 +15,7 @@ spec:
   suspend: false
   workflowSpec:
     entrypoint: backup-workflow
+    serviceAccountName: argo-backup-workflow
     templates:
       - name: backup-workflow
         dag:
