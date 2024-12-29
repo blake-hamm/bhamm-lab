@@ -25,6 +25,9 @@ spec:
             - name: wait-for-k8up-pvc-backup
               template: wait-for-k8up-pvc-backup
               dependencies: [trigger-k8up-pvc-backup]
+            - name: delete-k8up-pvc-backup
+              template: delete-k8up-pvc-backup
+              dependencies: [wait-for-k8up-pvc-backup]
       - name: trigger-k8up-pvc-backup
         resource:
           action: apply
@@ -61,6 +64,14 @@ spec:
           action: get
           successCondition: status.finished == true
           failureCondition: status.finished == false
+          manifest: |
+            apiVersion: k8up.io/v1
+            kind: Backup
+            metadata:
+              name: pvc-backups
+      - name: delete-k8up-pvc-backup
+        resource:
+          action: delete
           manifest: |
             apiVersion: k8up.io/v1
             kind: Backup
