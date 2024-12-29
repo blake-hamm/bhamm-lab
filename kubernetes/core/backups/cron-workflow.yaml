@@ -25,7 +25,7 @@ spec:
               template: wait-for-k8up-pvc-backup
               dependencies: [trigger-k8up-pvc-backup]
       - name: trigger-k8up-pvc-backup
-        container:
+        resource:
           action: create
           manifest: |
             apiVersion: k8up.io/v1
