@@ -17,6 +17,9 @@ rules:
   - apiGroups: ["k8up.io"]
     resources: ["backups"]
     verbs: ["create", "get", "watch", "list"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["patch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
