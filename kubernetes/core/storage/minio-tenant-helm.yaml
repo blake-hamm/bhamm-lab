@@ -23,7 +23,7 @@ spec:
           pools:
             - servers: 2
               name: backup-pool
-              volumesPerServer: 1
+              volumesPerServer: 2
               size: 250Gi
               storageClassName: nfs-client
               storageAnnotations:
