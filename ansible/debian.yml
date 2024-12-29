@@ -21,15 +21,6 @@
     - tigattack.mergerfs
     - ironicbadger.snapraid
     - geerlingguy.nfs
-  tasks:
-    - name: Create MinIO data directories
-      ansible.builtin.file:
-        path: "{{ item }}"
-        state: directory
-        mode: '0755'
-      with_items:
-        - /mnt/storage/minio/backup-data-1
-        - /mnt/storage/minio/backup-data-2
   tags: [storage, nfs]
 - name: Install proxmox
   hosts: proxmox

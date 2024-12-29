@@ -25,9 +25,19 @@ spec:
               name: backup-pool
               volumesPerServer: 1
               size: 250Gi
-              storageClassName: manual
+              storageClassName: nfs-client
               storageAnnotations:
                 k8up.io/backup: "false"
+              volumeClaimTemplate:
+                apiVersion: v1
+                kind: PersistentVolumeClaim
+                spec:
+                  accessModes:
+                    - ReadWriteOnce
+                  resources:
+                    requests:
+                      storage: 10Gi
+                status: {}
           metrics:
             enabled: true
             port: 9000
