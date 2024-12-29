@@ -21,8 +21,7 @@ spec:
             create: true
           rbac:
             create: true
-            serviceAccounts:
-              - k8up
+            serviceAccounts: [k8up]
         controller:
           metricsConfig:
             enabled: false
