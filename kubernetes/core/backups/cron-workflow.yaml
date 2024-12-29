@@ -22,6 +22,9 @@ spec:
           tasks:
             - name: trigger-k8up-pvc-backup
               template: trigger-k8up-pvc-backup
+            - name: wait-for-k8up-pvc-backup
+              template: wait-for-k8up-pvc-backup
+              dependencies: [trigger-k8up-pvc-backup]
       - name: trigger-k8up-pvc-backup
         resource:
           action: apply
@@ -46,5 +49,23 @@ spec:
                   secretAccessKeySecretRef:
                     name: backup-external-secret
                     key: password
-          successCondition: "status.conditions[?(@.type=='Completed')].status == 'True'"
-          failureCondition: "status.conditions[?(@.type=='Failed')].status == 'True'"
+      - name: wait-for-k8up-pvc-backup
+        container:
+          image: bitnami/kubectl:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              while true; do
+                status=$(kubectl get backup pvc-backups -n default -o jsonpath='{.status.phase}')
+                if [ "$status" == "Succeeded" ]; then
+                  echo "Backup completed successfully."
+                  exit 0
+                elif [ "$status" == "Failed" ]; then
+                  echo "Backup failed."
+                  exit 1
+                else
+                  echo "Waiting for backup to complete..."
+                  echo "Current status: $status"
+                  sleep 10
+                fi
+              done
