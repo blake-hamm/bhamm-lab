@@ -50,6 +50,13 @@ spec:
                     name: backup-external-secret
                     key: password
       - name: wait-for-k8up-pvc-backup
+        retryStrategy:
+          limit: 20 # Will try approximately 20 times over 5 minutes
+          retryPolicy: "Always"
+          backoff:
+            duration: "15s" # Check every 15 seconds
+            factor: 1 # Don't increase the duration between retries
+            maxDuration: "15s" # Keep it at 15 seconds
         resource:
           action: get
           successCondition: "status.conditions[?(@.type=='Ready')].status == 'True' && status.conditions[?(@.type=='Progressing')].status == 'False'"
