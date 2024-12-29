@@ -59,8 +59,8 @@ spec:
             maxDuration: "15s" # Keep it at 15 seconds
         resource:
           action: get
-          successCondition: "status.started == true"
-          failureCondition: "status.started == false"
+          successCondition: status.finished == true
+          failureCondition: status.finished == false
           manifest: |
             apiVersion: k8up.io/v1
             kind: Backup
