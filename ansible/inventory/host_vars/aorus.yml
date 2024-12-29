@@ -52,9 +52,8 @@ snapraid_scrub_schedule:
 snapraid_scrub_healthcheck_io_uuid: ""
 # https://github.com/geerlingguy/ansible-role-nfs
 nfs_exports:
-  - /mnt/storage/kubernetes *(rw,sync,no_subtree_check,no_root_squash,fsid=0)
-  - /mnt/storage/proxmox *(rw,sync,no_subtree_check,no_root_squash,fsid=1)
-  - /mnt/storage/backups *(rw,sync,no_subtree_check,no_root_squash,fsid=2)
-  - /mnt/storage/shared *(rw,sync,no_subtree_check,no_root_squash,fsid=3)
+  - /mnt/storage/proxmox *(rw,sync,no_subtree_check,no_root_squash,fsid=0)
+  - /mnt/storage/shared *(rw,sync,no_subtree_check,no_root_squash,fsid=1)
+  - /mnt/storage/minio *(rw,sync,no_subtree_check,no_root_squash,fsid=2)
 # Ceph config for proxmox
 ceph_device: /dev/nvme0n1
