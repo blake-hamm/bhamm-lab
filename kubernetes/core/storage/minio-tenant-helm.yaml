@@ -24,7 +24,7 @@ spec:
             - servers: 2
               name: backup-pool
               volumesPerServer: 2
-              size: 250Gi
+              size: 100Gi
               storageClassName: nfs-client
               storageAnnotations:
                 k8up.io/backup: "false"
