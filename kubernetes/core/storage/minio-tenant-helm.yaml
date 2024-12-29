@@ -4,7 +4,7 @@ metadata:
   name: minio-tenant
   namespace: default
   annotations:
-    argocd.argoproj.io/sync-wave: "-150"
+    argocd.argoproj.io/sync-wave: "300"
 spec:
   destination:
     namespace: default
@@ -18,26 +18,16 @@ spec:
       valuesObject:
         tenant:
           name: minio-tenant
-          # configuration:
-          #   name: minio-external-secret
+          configuration:
+            name: minio-external-secret
           pools:
-            - servers: 4
-              name: backups
-              volumesPerServer: 4
-              size: 10Gi
-              storageClassName: nfs-client
+            - servers: 2
+              name: backup-pool
+              volumesPerServer: 1
+              size: 250Gi
+              storageClassName: manual
               storageAnnotations:
                 k8up.io/backup: "false"
-              volumeClaimTemplate:
-                apiVersion: v1
-                kind: PersistentVolumeClaim
-                spec:
-                  accessModes:
-                    - ReadWriteOnce
-                  resources:
-                    requests:
-                      storage: 10Gi
-                status: {}
           metrics:
             enabled: true
             port: 9000
