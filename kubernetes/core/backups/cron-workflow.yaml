@@ -27,7 +27,7 @@ spec:
               dependencies: [trigger-k8up-pvc-backup]
       - name: trigger-k8up-pvc-backup
         resource:
-          action: create
+          action: apply
           manifest: |
             apiVersion: k8up.io/v1
             kind: Backup
