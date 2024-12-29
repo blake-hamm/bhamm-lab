@@ -22,9 +22,6 @@ spec:
           tasks:
             - name: trigger-k8up-pvc-backup
               template: trigger-k8up-pvc-backup
-            - name: wait-for-k8up-pvc-backup
-              template: wait-for-k8up-pvc-backup
-              dependencies: [trigger-k8up-pvc-backup]
       - name: trigger-k8up-pvc-backup
         resource:
           action: apply
@@ -49,13 +46,5 @@ spec:
                   secretAccessKeySecretRef:
                     name: backup-external-secret
                     key: password
-      - name: wait-for-k8up-pvc-backup
-        resource:
-          action: get
-          successCondition: status.conditions[?(@.type=="Completed")].status == "True"
-          failureCondition: status.conditions[?(@.type=="Completed")].reason == "Failed"
-          manifest: |
-            apiVersion: k8up.io/v1
-            kind: Backup
-            metadata:
-              name: pvc-backups
+          successCondition: "status.conditions[?(@.type=='Completed')].status == 'True'"
+          failureCondition: "status.conditions[?(@.type=='Failed')].status == 'True'"
