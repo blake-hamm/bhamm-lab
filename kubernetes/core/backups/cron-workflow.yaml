@@ -48,7 +48,7 @@ spec:
                   key: repo-password
                 s3:
                   endpoint: https://minio-api.bhamm-lab.com:443
-                  bucket: backups
+                  bucket: pvc-backups
                   accessKeyIDSecretRef:
                     name: backup-external-secret
                     key: user
@@ -93,7 +93,7 @@ spec:
                   key: repo-password
                 s3:
                   endpoint: https://minio-api.bhamm-lab.com:443
-                  bucket: backups
+                  bucket: pvc-backups
                   accessKeyIDSecretRef:
                     name: backup-external-secret
                     key: user
