@@ -32,7 +32,7 @@ spec:
             apiVersion: k8up.io/v1
             kind: Backup
             metadata:
-              name: pvc-backups-{{ workflow.creationTimestamp }}
+              name: pvc-backups-{{ workflow.creationTimestamp.'%Y-%m-%d-%H-%M-%S' }}
             spec:
               failedJobsHistoryLimit: 2
               successfulJobsHistoryLimit: 2
@@ -65,4 +65,4 @@ spec:
             apiVersion: k8up.io/v1
             kind: Backup
             metadata:
-              name: pvc-backups-{{ workflow.creationTimestamp }}
+              name: pvc-backups-{{ workflow.creationTimestamp.'%Y-%m-%d-%H-%M-%S' }}
