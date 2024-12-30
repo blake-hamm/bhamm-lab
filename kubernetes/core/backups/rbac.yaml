@@ -15,7 +15,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "450"
 rules:
   - apiGroups: ["k8up.io"]
-    resources: ["backups"]
+    resources: ["backups", "prunes"]
     verbs: ["create", "patch", "get", "watch", "list"]
   - apiGroups:
       - ""
