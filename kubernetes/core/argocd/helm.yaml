@@ -30,7 +30,6 @@ spec:
         configs:
           params:
             server.insecure: true
-            server.x.frame.options: ""
           rbac:
             policy.default: 'role:admin'
             policy.csv: |
