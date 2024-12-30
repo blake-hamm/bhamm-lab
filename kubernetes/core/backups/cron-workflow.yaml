@@ -35,7 +35,7 @@ spec:
             apiVersion: k8up.io/v1
             kind: Backup
             metadata:
-              name: pvc-backups
+              name: pvc-backups-{{ workflow.creationTimestamp }}
             spec:
               failedJobsHistoryLimit: 2
               successfulJobsHistoryLimit: 2
@@ -68,12 +68,4 @@ spec:
             apiVersion: k8up.io/v1
             kind: Backup
             metadata:
-              name: pvc-backups
-      - name: delete-k8up-pvc-backup
-        resource:
-          action: delete
-          manifest: |
-            apiVersion: k8up.io/v1
-            kind: Backup
-            metadata:
-              name: pvc-backups
+              name: pvc-backups-{{ workflow.creationTimestamp }}
