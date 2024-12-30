@@ -24,6 +24,7 @@ spec:
         server:
           replicas: 1
           extraArgs:
+            - server
             - --auth-mode=sso
             - --access-control-allow-origin=*
         applicationSet:
