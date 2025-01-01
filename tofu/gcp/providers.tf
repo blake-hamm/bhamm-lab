@@ -5,10 +5,10 @@ terraform {
       source  = "hashicorp/google"
       version = "4.85.0"
     }
-    vault = {
-      source  = "hashicorp/vault"
-      version = "3.25.0"
-    }
+    # vault = {
+    #   source  = "hashicorp/vault"
+    #   version = "3.25.0"
+    # }
   }
 }
 
@@ -17,15 +17,15 @@ provider "google" {
   region  = var.region
 }
 
-provider "vault" {
-  add_address_to_env = true
-  skip_child_token   = true
-  auth_login {
-    path = "auth/approle/login"
+# provider "vault" {
+#   add_address_to_env = true
+#   skip_child_token   = true
+#   auth_login {
+#     path = "auth/approle/login"
 
-    parameters = {
-      role_id   = var.vault_role_id
-      secret_id = var.vault_secret_id
-    }
-  }
-}
+#     parameters = {
+#       role_id   = var.vault_role_id
+#       secret_id = var.vault_secret_id
+#     }
+#   }
+# }

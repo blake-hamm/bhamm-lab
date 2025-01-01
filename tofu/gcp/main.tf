@@ -1,3 +1,25 @@
+resource "google_project_iam_member" "storage_service_account_kms" {
+  project = var.project_id
+  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
+}
+
+resource "google_kms_key_ring" "backup_key_ring" {
+  name       = "${var.bucket_name}-key-ring"
+  location   = var.bucket_location
+  depends_on = [google_project_iam_member.storage_service_account_kms]
+}
+
+resource "google_kms_crypto_key" "backup_crypto_key" {
+  name            = "${var.bucket_name}-crypto-key"
+  key_ring        = google_kms_key_ring.backup_key_ring.id
+  rotation_period = "7776000s" # 90 days
+
+  lifecycle {
+    prevent_destroy = true # Protects the key from accidental deletion
+  }
+}
+
 resource "google_storage_bucket" "backup" {
   name          = var.bucket_name
   location      = var.bucket_location
@@ -9,9 +31,13 @@ resource "google_storage_bucket" "backup" {
     enabled = true
   }
 
+  encryption {
+    default_kms_key_name = google_kms_crypto_key.backup_crypto_key.id
+  }
+
   lifecycle_rule {
     condition {
-      age = 30
+      age = 120
     }
     action {
       type = "Delete"
@@ -21,9 +47,14 @@ resource "google_storage_bucket" "backup" {
 
 # Create service account for Argo Workflows
 resource "google_service_account" "argo_workflows" {
-  account_id   = var.service_account_id
-  display_name = "Argo Workflows Backup Service Account"
-  description  = "Service account for Argo Workflows to handle GCS backups"
+  account_id  = var.argo_service_account_id
+  description = "Service account for Argo Workflows to handle GCS backups"
+}
+
+resource "google_project_iam_member" "argo_workflows_kms" {
+  project = var.project_id
+  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member  = "serviceAccount:${google_service_account.argo_workflows.email}"
 }
 
 # Grant storage object admin permissions to the service account
@@ -39,12 +70,39 @@ resource "google_service_account_key" "argo_workflows_key" {
 }
 
 # Store credentials in Vault
-resource "vault_generic_secret" "argo_workflows_creds" {
-  path = "secret/core/argo-workflows"
+# resource "vault_generic_secret" "argo_workflows_creds" {
+#   path = "secret/core/argo-workflows"
 
-  data_json = jsonencode({
-    "gcp_credentials.json" = base64decode(google_service_account_key.argo_workflows_key.private_key),
-    "bucket_name"          = google_storage_bucket.backup.name,
-    "project_id"           = var.project_id
-  })
+#   data_json = jsonencode({
+#     "gcp_credentials.json" = base64decode(google_service_account_key.argo_workflows_key.private_key),
+#     "bucket_name"          = google_storage_bucket.backup.name,
+#     "project_id"           = var.project_id
+#   })
+# }
+
+# Create a Service Account
+resource "google_service_account" "vault_sa" {
+  account_id   = var.vault_service_account_id
+  display_name = "Vault Auto Unseal SA"
+}
+
+# Bind roles to the Service Account
+resource "google_project_iam_member" "vault_sa_roles" {
+  for_each = toset(var.vault_roles)
+  project  = var.project_id
+  role     = each.value
+  member   = "serviceAccount:${google_service_account.vault_sa.email}"
+}
+
+resource "google_service_account_key" "vault_sa_key" {
+  service_account_id = google_service_account.vault_sa.name
+
+  provisioner "local-exec" {
+    command = "echo '${self.private_key}' > ${var.vault_key_file_path}"
+  }
+}
+
+output "key_file_path" {
+  value       = var.vault_key_file_path
+  description = "Path to the generated Service Account key file."
 }
