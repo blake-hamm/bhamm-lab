@@ -55,7 +55,7 @@ spec:
   credentialsConfig:
     env: GOOGLE_APPLICATION_CREDENTIALS
     path: /etc/gcp/service-account.json
-    secretName: gcp-sa
+    secretName: gcp-unseal-sa
   config:
     storage:
       raft:

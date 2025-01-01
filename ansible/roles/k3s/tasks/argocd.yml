@@ -36,9 +36,31 @@
     wait: true
     wait_sleep: 10
     wait_timeout: 360
+- name: Check for kubernetes secrets
+  kubernetes.core.k8s_info:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    api_version: v1
+    kind: Secret
+    namespace: default
+    wait: true
+    wait_sleep: 10
+    wait_timeout: 360
+  register: secrets_info
+- name: Ensure gcp-unseal-sa and gcp-sops-sa secrets exist
+  ansible.builtin.fail:
+    msg: "Secret '{{ secret }}' must be manually created."
+  when:
+    - "'gcp-unseal-sa' not in secret_names"
+    - secret == 'gcp-unseal-sa'
+  loop:
+    - gcp-unseal-sa
+    - gcp-sops-sa
+  vars:
+    secret_names: "{{ secrets_info.resources | map(attribute='metadata.name') | list }}"
+    secret: "{{ item }}"
 - name: Deploy core apps
   kubernetes.core.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
-    template: infra.yaml.j2
+    template: core.yaml.j2
     wait: true
