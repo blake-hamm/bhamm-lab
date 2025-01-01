@@ -1,18 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: base
+  name: infra-base
   namespace: default
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1000"
 spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    path: kubernetes/base
+    path: kubernetes/infra
     targetRevision: {{ argocd_branch }}
     directory:
       recurse: true
+      include: "*/base/*"
   destination:
     server: "https://kubernetes.default.svc"
     namespace: default
