@@ -40,5 +40,5 @@
   kubernetes.core.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
-    template: core.yaml.j2
+    template: base.yaml.j2
     wait: true
