@@ -1,11 +1,11 @@
-data "vault_kv_secret_v2" "example" {
-  mount = "secret"
-  name  = "example/foo"
-}
-output "example_secret_output" {
-  value     = data.vault_kv_secret_v2.example
-  sensitive = true
-}
+# data "vault_kv_secret_v2" "example" {
+#   mount = "secret"
+#   name  = "example/foo"
+# }
+# output "example_secret_output" {
+#   value     = data.vault_kv_secret_v2.example
+#   sensitive = true
+# }
 
 data "local_file" "ssh_public_key" {
   filename = "/home/${var.user}/.ssh/id_ed25519.pub"
