@@ -48,5 +48,8 @@ pkgs.mkShell {
 
     # Install pre commit
     pre-commit install
+
+    # Define sops key location
+    export SOPS_GCP_KMS_ARN=projects/deep-contact-445917-i9/locations/us-central1/keyRings/sops-key-ring/cryptoKeys/sops-key
   '';
 }
