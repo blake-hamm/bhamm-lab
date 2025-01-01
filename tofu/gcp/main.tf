@@ -87,14 +87,6 @@ resource "google_service_account" "vault_sa" {
   display_name = "Vault Auto Unseal SA"
 }
 
-# Bind roles to the Service Account
-resource "google_project_iam_member" "vault_sa_roles" {
-  for_each = toset(var.vault_roles)
-  project  = var.project_id
-  role     = each.value
-  member   = "serviceAccount:${google_service_account.vault_sa.email}"
-}
-
 resource "google_service_account_key" "vault_sa_key" {
   service_account_id = google_service_account.vault_sa.name
 
@@ -102,12 +94,6 @@ resource "google_service_account_key" "vault_sa_key" {
     command = "echo '${self.private_key}' | base64 --decode > ${var.vault_key_file_path}"
   }
 }
-
-output "key_file_path" {
-  value       = var.vault_key_file_path
-  description = "Path to the generated Service Account key file."
-}
-
 
 resource "google_kms_key_ring" "vault_key_ring" {
   name       = "vault"
@@ -123,6 +109,12 @@ resource "google_kms_crypto_key" "vault_crypto_key" {
   lifecycle {
     prevent_destroy = true # Protects the key from accidental deletion
   }
+}
+
+resource "google_kms_crypto_key_iam_member" "vault_sa_kms_access" {
+  crypto_key_id = google_kms_crypto_key.vault_crypto_key.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${google_service_account.vault_sa.email}"
 }
 
 resource "google_storage_bucket" "vault" {
@@ -154,10 +146,4 @@ resource "google_storage_bucket_iam_member" "vault_storage_admin" {
   bucket = google_storage_bucket.vault.name
   role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${google_service_account.vault_sa.email}"
-}
-
-resource "google_project_iam_member" "vault_kms" {
-  project = var.project_id
-  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member  = "serviceAccount:${google_service_account.vault_sa.email}"
 }

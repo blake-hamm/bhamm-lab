@@ -41,18 +41,8 @@ variable "vault_service_account_id" {
   default     = "vault-auto-unseal"
 }
 
-variable "vault_roles" {
-  description = "Roles to assign to the service account."
-  type        = list(string)
-  default = [
-    "roles/cloudkms.admin",
-    "roles/cloudkms.cryptoKeyEncrypterDecrypter",
-    "roles/storage.admin"
-  ]
-}
-
 variable "vault_key_file_path" {
   description = "Path to save the generated key file."
   type        = string
-  default     = "./vault-auto-unseal-sa-key.json"
+  default     = "./gcp-unseal-sa.json"
 }
