@@ -30,7 +30,7 @@ spec:
         args:
           - |
             git clone https://github.com/blake-hamm/bhamm-lab.git /workspace/repo
-            cp /workspace/repo/secrets.yaml /workspace/secrets.enc.yaml
+            cp /workspace/repo/secrets.enc.yaml /workspace/secrets.enc.yaml
         volumeMounts:
           - name: workspace
             mountPath: /workspace
