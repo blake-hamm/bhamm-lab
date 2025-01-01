@@ -69,6 +69,7 @@ resource "google_service_account_key" "argo_workflows_key" {
   service_account_id = google_service_account.argo_workflows.name
 }
 
+
 # Store credentials in Vault
 # resource "vault_generic_secret" "argo_workflows_creds" {
 #   path = "secret/core/argo-workflows"
@@ -98,11 +99,65 @@ resource "google_service_account_key" "vault_sa_key" {
   service_account_id = google_service_account.vault_sa.name
 
   provisioner "local-exec" {
-    command = "echo '${self.private_key}' > ${var.vault_key_file_path}"
+    command = "echo '${self.private_key}' | base64 --decode > ${var.vault_key_file_path}"
   }
 }
 
 output "key_file_path" {
   value       = var.vault_key_file_path
   description = "Path to the generated Service Account key file."
+}
+
+
+resource "google_kms_key_ring" "vault_key_ring" {
+  name       = "vault"
+  location   = var.region
+  depends_on = [google_project_iam_member.storage_service_account_kms]
+}
+
+resource "google_kms_crypto_key" "vault_crypto_key" {
+  name            = "vault-unsealer"
+  key_ring        = google_kms_key_ring.vault_key_ring.id
+  rotation_period = "7776000s" # 90 days
+
+  lifecycle {
+    prevent_destroy = true # Protects the key from accidental deletion
+  }
+}
+
+resource "google_storage_bucket" "vault" {
+  name          = "bhamm-lab-vault"
+  location      = var.bucket_location
+  force_destroy = true
+
+  uniform_bucket_level_access = true
+
+  versioning {
+    enabled = true
+  }
+
+  encryption {
+    default_kms_key_name = google_kms_crypto_key.vault_crypto_key.id
+  }
+
+  lifecycle_rule {
+    condition {
+      age = 120
+    }
+    action {
+      type = "Delete"
+    }
+  }
+}
+
+resource "google_storage_bucket_iam_member" "vault_storage_admin" {
+  bucket = google_storage_bucket.vault.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.vault_sa.email}"
+}
+
+resource "google_project_iam_member" "vault_kms" {
+  project = var.project_id
+  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member  = "serviceAccount:${google_service_account.vault_sa.email}"
 }
