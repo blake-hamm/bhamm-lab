@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: metallb
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "-350"
+spec:
+  destination:
+    namespace: metallb-system
+    server: https://kubernetes.default.svc
+  project: default
+  ignoreDifferences:
+    - group: "apiextensions.k8s.io"
+      kind: "CustomResourceDefinition"
+      name: "bgppeers.metallb.io"
+      jsonPointers:
+        - /spec/conversion/webhook/clientConfig/caBundle
+  source:
+    chart: metallb
+    repoURL: https://metallb.github.io/metallb
+    targetRevision: 0.14.8
+    # helm:
+    # valuesObject:
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - RespectIgnoreDifferences=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

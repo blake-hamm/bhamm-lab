@@ -1,0 +1,71 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "-200"
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: traefik
+    repoURL: https://traefik.github.io/charts
+    targetRevision: v29.0.0
+    helm:
+      valuesObject:
+        config:
+          params:
+            server.insecure: true
+        globalArguments:
+          - "--global.sendanonymoususage=false"
+          - "--global.checknewversion=false"
+        additionalArguments:
+          - "--serversTransport.insecureSkipVerify=true"
+        deployment:
+          enabled: true
+          replicas: 2
+          annotations: {}
+          podAnnotations: {}
+          additionalContainers: []
+          initContainers: []
+        ports:
+          web:
+            redirectTo:
+              port: websecure
+          websecure:
+            tls:
+              enabled: true
+        ingressRoute:
+          dashboard:
+            enabled: false
+        providers:
+          kubernetesCRD:
+            enabled: true
+            ingressClass: traefik-external
+            allowExternalNameServices: true
+          kubernetesIngress:
+            enabled: true
+            allowExternalNameServices: true
+            publishedService:
+              enabled: false
+        rbac:
+          enabled: true
+        service:
+          enabled: true
+          type: LoadBalancer
+          # annotations:
+          #   external-dns.alpha.kubernetes.io/hostname: local.bhamm-lab.com
+          labels: {}
+          loadBalancerSourceRanges: []
+          externalIPs: []
+          spec:
+            loadBalancerIP: 192.168.69.37 # this should be an IP in the MetalLB range
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true
