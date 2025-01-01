@@ -51,8 +51,7 @@ pve_roles:
       - "VM.Monitor"
       - "VM.PowerMgmt"
       - "SDN.Use"
-pve_ssh_port: "{{ ssh_client_port }}"
-pve_manage_ssh: true
+pve_manage_ssh: false
 pve_storages:
   - name: nfs
     type: nfs

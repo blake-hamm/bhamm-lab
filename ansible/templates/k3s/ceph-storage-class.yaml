@@ -6,7 +6,7 @@ metadata:
     storageclass.kubernetes.io/is-default-class: "true"
 provisioner: rbd.csi.ceph.com
 parameters:
-  clusterID: "{{ hostvars['aorus']['ceph_config']['stdout_lines'] | select('match', 'fsid') | first | regex_replace('fsid ', '') }}"
+  clusterID: "{{ ceph_config['stdout_lines'] | select('match', 'fsid') | first | regex_replace('fsid ', '') }}"
   pool: kubernetes
   imageFeatures: layering
   csi.storage.k8s.io/provisioner-secret-name: csi-rbd-secret

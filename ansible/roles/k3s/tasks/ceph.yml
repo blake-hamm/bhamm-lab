@@ -1,18 +1,21 @@
 - name: Update kubernetes ceph permisions
   ansible.builtin.shell: >
     ceph auth caps client.kubernetes mon 'profile rbd' osd 'profile rbd pool=kubernetes' mgr 'profile rbd pool=kubernetes'
+
   register: ceph_update_k8s_client
   failed_when: "'Error' in ceph_update_k8s_client.stderr"
   changed_when: false
 - name: Populate ceph_k8s_key
   ansible.builtin.shell: >
     ceph auth get-key client.kubernetes
+
   register: ceph_k8s_key
   failed_when: "'Error' in ceph_k8s_key.stderr"
   changed_when: false
 - name: Get ceph config
   ansible.builtin.shell: >
     ceph mon dump
+
   register: ceph_config
   failed_when: "'Error' in ceph_config.stderr"
   changed_when: false
@@ -20,6 +23,7 @@
   ansible.builtin.set_fact:
     monitor_ips: >
       {{ groups['proxmox'] | map('extract', hostvars, ['ansible_host']) | map('regex_replace', '$', ':6789') | list }}
+
 - name: Generate Ceph ConfigMap JSON
   ansible.builtin.set_fact:
     ceph_csi_config_json: >-

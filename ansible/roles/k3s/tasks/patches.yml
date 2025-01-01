@@ -11,6 +11,8 @@
         prometheusMetricsEnabled: true
     merge_type: merge
     wait: true
+  retries: 3
+  delay: 15
 - name: Patch KubeControllersConfiguration to enable prometheusMetricsPort
   kubernetes.core.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
@@ -24,3 +26,5 @@
         prometheusMetricsPort: 9095
     merge_type: merge
     wait: true
+  retries: 3
+  delay: 15

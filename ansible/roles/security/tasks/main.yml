@@ -7,37 +7,5 @@
     update_cache: true
     cache_valid_time: 86400 # One day
   become: true
-- name: Permit passwordless sudo
-  ansible.builtin.lineinfile:
-    dest: /etc/sudoers.d/{{ ansible_user }}
-    line: "{{ ansible_user }} ALL=(ALL) NOPASSWD: ALL"
-    state: present
-    create: true
-    validate: visudo -cf %s
-    mode: "0755"
-  become: true
-- name: Create ssh directory if it doesn't exist
-  ansible.builtin.file:
-    path: "/home/{{ ansible_user }}/.ssh"
-    state: directory
-    mode: "0755"
-- name: Run devsec ssh hardening
-  ansible.builtin.include_role:
-    name: devsec.hardening.ssh_hardening
-- name: Read the public SSH key
-  ansible.builtin.slurp:
-    src: /etc/ssh/ssh_host_ed25519_key.pub
-  register: public_ssh_key
-- name: Add ssh keys to hashicorp vault
-  community.hashi_vault.vault_write:
-    url: https://vault.bhamm-lab.com
-    auth_method: approle
-    role_id: "{{ lookup('env', 'VAULT_ROLE_ID') }}"
-    secret_id: "{{ lookup('env', 'VAULT_SECRET_ID') }}"
-    path: "secret/data/core/ansible/{{ inventory_hostname }}"
-    data:
-      data:
-        public_ssh_key: "{{ public_ssh_key.content | b64decode | trim }}"
-  retries: 1
-  changed_when: false
-  ignore_errors: true # noqa: ignore-errors
+- name: Run ssh tasks
+  ansible.builtin.include_tasks: ssh.yml
