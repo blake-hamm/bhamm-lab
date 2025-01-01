@@ -11,14 +11,14 @@ spec:
       steps:
         - - name: fetch-sops-file
             template: fetch-sops-file
-          - name: fetch-encryption-key
-            template: fetch-encryption-key
-          - name: decrypt-sops-file
-            template: decrypt-sops-file
-          - name: update-vault
-            template: update-vault
-        - - name: replace-core-base
-            template: replace-core-base
+            #   - name: fetch-encryption-key
+            #     template: fetch-encryption-key
+            #   - name: decrypt-sops-file
+            #     template: decrypt-sops-file
+            #   - name: update-vault
+            #     template: update-vault
+            # - - name: replace-core-base
+            #     template: replace-core-base
     - name: fetch-sops-file
       container:
         image: alpine/git:latest
