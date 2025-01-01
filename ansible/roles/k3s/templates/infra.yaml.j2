@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: infra-base
+  name: core-base
   namespace: default
   annotations:
     argocd.argoproj.io/sync-wave: "-1000"
@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    path: kubernetes/infra
+    path: kubernetes/core
     targetRevision: {{ argocd_branch }}
     directory:
       recurse: true
