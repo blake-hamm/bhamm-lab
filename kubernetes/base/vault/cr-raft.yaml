@@ -74,6 +74,7 @@ spec:
       kmsCryptoKey: "vault-unsealer"
       kmsLocation: "us-central1"
       kmsProject: "deep-contact-445917-i9"
+      storageBucket: "bhamm-lab-vault"
   credentialsConfig:
     env: GOOGLE_APPLICATION_CREDENTIALS
     path: /etc/gcp/service-account.json
