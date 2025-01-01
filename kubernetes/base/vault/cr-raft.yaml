@@ -21,31 +21,8 @@ spec:
     bhamm-lab.com/log-format: "json"
   vaultConfigurerLabels:
     bhamm-lab.com/log-format: "string"
-  # Support for affinity Rules
-  # affinity:
-  #   nodeAffinity:
-  #     requiredDuringSchedulingIgnoredDuringExecution:
-  #       nodeSelectorTerms:
-  #       - matchExpressions:
-  #         - key : "node-role.kubernetes.io/your_role"
-  #           operator: In
-  #           values: ["true"]
-
-  # Support for pod nodeSelector rules to control which nodes can be chosen to run
-  # the given pods
-  # nodeSelector:
-  #   "node-role.kubernetes.io/your_role": "true"
-
-  # Support for node tolerations that work together with node taints to control
-  # the pods that can like on a node
-  # tolerations:
-  # - effect: NoSchedule
-  #   key: node-role.kubernetes.io/your_role
-  #   operator: Equal
-  #   value: "true"
   serviceAccount: vault
   serviceType: ClusterIP
-  # Use local disk to store Vault raft data, see config section.
   volumeClaimTemplates:
     - metadata:
         name: vault-raft
@@ -102,12 +79,12 @@ spec:
     api_addr: https://vault.default:8200
     cluster_addr: "https://${.Env.POD_NAME}:8201"
     ui: true
-  # envsConfig:
-  #   - name: OIDC_VAULT_CLIENT_SECRET
-  #     valueFrom:
-  #       secretKeyRef:
-  #         name: vault-external-secrets
-  #         key: OIDC_VAULT_CLIENT_SECRET
+  envsConfig:
+    - name: OIDC_VAULT_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: vault-external-secrets
+          key: OIDC_VAULT_CLIENT_SECRET
   statsdDisabled: false
   serviceMonitorEnabled: true
   serviceRegistrationEnabled: true
@@ -119,8 +96,6 @@ spec:
       requests:
         memory: "256Mi"
         cpu: "100m"
-  # See: https://banzaicloud.com/docs/bank-vaults/cli-tool/#example-external-vault-configuration
-  # The repository also contains a lot examples in the test/deploy and operator/deploy directories.
   externalConfig:
     purgeUnmanagedConfig:
       enabled: true
@@ -152,21 +127,21 @@ spec:
             bound_service_account_namespaces: default
             policies: prometheus-operator
             ttl: 4h
-      # - type: oidc
-      #   config:
-      #     oidc_discovery_url: https://auth.bhamm-lab.com
-      #     oidc_client_id: vault
-      #     oidc_client_secret: "${env `OIDC_VAULT_CLIENT_SECRET`}"
-      #     default_role: default
-      #     allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback"]
-      #   roles:
-      #     - name: default
-      #       role_type: oidc
-      #       allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback", "http://localhost:8250/oidc/callback"]
-      #       bound_audiences: vault
-      #       user_claim: sub
-      #       policies: admin
-      #       ttl: 1h
+      - type: oidc
+        config:
+          oidc_discovery_url: https://auth.bhamm-lab.com
+          oidc_client_id: vault
+          oidc_client_secret: "${env `OIDC_VAULT_CLIENT_SECRET`}"
+          default_role: default
+          allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback"]
+        roles:
+          - name: default
+            role_type: oidc
+            allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback", "http://localhost:8250/oidc/callback"]
+            bound_audiences: vault
+            user_claim: sub
+            policies: admin
+            ttl: 1h
       - type: approle
         roles:
           - name: default
@@ -189,26 +164,3 @@ spec:
         description: General secrets.
         options:
           version: 2
-          # Allows writing some secrets to Vault (useful for development purposes).
-          # See https://www.vaultproject.io/docs/secrets/kv/index.html for more information.
-          # startupSecrets:
-          #   - type: kv
-          #     path: secret/data/accounts/aws
-          #     data:
-          #       data:
-          #         AWS_ACCESS_KEY_ID: secretId
-          #         AWS_SECRET_ACCESS_KEY: s3cr3t
-          #   - type: kv
-          #     path: secret/data/dockerrepo
-          #     data:
-          #       data:
-          #         DOCKER_REPO_USER: dockerrepouser
-          #         DOCKER_REPO_PASSWORD: dockerrepopassword
-          #   - type: kv
-          #     path: secret/data/mysql
-          #     data:
-          #       data:
-          #         MYSQL_ROOT_PASSWORD: s3cr3t
-  # secretInitsConfig:
-  #   - name: VAULT_LOG_LEVEL
-  #     value: debug
