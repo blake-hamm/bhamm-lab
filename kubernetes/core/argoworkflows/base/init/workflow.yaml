@@ -1,0 +1,110 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: core-config-workflow-
+  namespace: argo
+spec:
+  entrypoint: main
+  serviceAccountName: argo-sops-workflow-sa
+  templates:
+    - name: main
+      steps:
+        - - name: fetch-sops-file
+            template: fetch-sops-file
+          - name: fetch-encryption-key
+            template: fetch-encryption-key
+          - name: decrypt-sops-file
+            template: decrypt-sops-file
+          - name: update-vault
+            template: update-vault
+        - - name: replace-core-base
+            template: replace-core-base
+    - name: fetch-sops-file
+      container:
+        image: alpine/git:latest
+        command:
+          - sh
+          - -c
+        args:
+          - |
+            git clone https://github.com/blake-hamm/bhamm-lab.git /workspace/repo
+            cp /workspace/repo/secrets.yaml /workspace/secrets.enc.yaml
+        volumeMounts:
+          - name: workspace
+            mountPath: /workspace
+            # - name: fetch-encryption-key
+            #   container:
+            #     image: google/cloud-sdk:latest
+            #     command:
+            #       - sh
+            #       - -c
+            #     args:
+            #       - |
+            #         export GOOGLE_APPLICATION_CREDENTIALS=/secrets/gcp/gcp-sops-sa.json
+            #         gcloud kms decrypt \
+            #           --keyring=my-keyring \
+            #           --key=my-key \
+            #           --location=global \
+            #           --plaintext-file=/workspace/sops-key.txt \
+            #           --ciphertext-file=/workspace/sops-key.enc
+            #     env:
+            #       - name: GOOGLE_APPLICATION_CREDENTIALS
+            #         value: /secrets/gcp/gcp-sops-sa.json
+            #     volumeMounts:
+            #       - name: gcp-credentials
+            #         mountPath: /secrets/gcp
+            #         readOnly: true
+            #       - name: workspace
+            #         mountPath: /workspace
+  # - name: decrypt-sops-file
+  #   container:
+  #     image: mozilla/sops:latest
+  #     command:
+  #       - sh
+  #       - -c
+  #     args:
+  #       - |
+  #         SOPS_KMS_KEY=/workspace/sops-key.txt sops -d /workspace/sops-file.yaml > /workspace/decrypted-file.yaml
+  #     env:
+  #       - name: SOPS_KMS_KEY
+  #         value: /workspace/sops-key.txt
+  #     volumeMounts:
+  #       - name: workspace
+  #         mountPath: /workspace
+
+  # - name: update-vault
+  #   container:
+  #     image: hashicorp/vault:latest
+  #     command:
+  #       - sh
+  #       - -c
+  #     args:
+  #       - |
+  #         vault kv put secret/cluster-config @/workspace/decrypted-file.yaml
+  #     env:
+  #       - name: VAULT_ADDR
+  #         value: "http://vault.vault.svc.cluster.local:8200"
+  #     volumeMounts:
+  #       - name: workspace
+  #         mountPath: /workspace
+
+  # - name: replace-core-base
+  #   container:
+  #     image: argoproj/argocd-cli:latest
+  #     command:
+  #       - sh
+  #       - -c
+  #     args:
+  #       - |
+  #         argocd app delete core-base --yes
+  #         argocd app create core-configured \
+  #           --repo https://your-repo-url.git \
+  #           --path core-configured \
+  #           --dest-namespace default \
+  #           --dest-server https://kubernetes.default.svc
+  volumes:
+    - name: workspace
+      emptyDir: {}
+    - name: gcp-credentials
+      secret:
+        secretName: gcp-sops-sa
