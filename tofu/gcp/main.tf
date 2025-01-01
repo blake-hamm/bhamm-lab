@@ -4,9 +4,10 @@ resource "google_project_iam_member" "storage_service_account_kms" {
   member  = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
 }
 
+# kms, sa and bucket for backups
 resource "google_kms_key_ring" "backup_key_ring" {
   name       = "${var.bucket_name}-key-ring"
-  location   = var.bucket_location
+  location   = var.region
   depends_on = [google_project_iam_member.storage_service_account_kms]
 }
 
@@ -22,7 +23,7 @@ resource "google_kms_crypto_key" "backup_crypto_key" {
 
 resource "google_storage_bucket" "backup" {
   name          = var.bucket_name
-  location      = var.bucket_location
+  location      = var.region
   force_destroy = true
 
   uniform_bucket_level_access = true
@@ -45,10 +46,9 @@ resource "google_storage_bucket" "backup" {
   }
 }
 
-# Create service account for Argo Workflows
 resource "google_service_account" "argo_workflows" {
-  account_id  = var.argo_service_account_id
-  description = "Service account for Argo Workflows to handle GCS backups"
+  account_id   = var.argo_service_account_id
+  display_name = "Argo workflows backup SA"
 }
 
 resource "google_project_iam_member" "argo_workflows_kms" {
@@ -81,7 +81,7 @@ resource "google_service_account_key" "argo_workflows_key" {
 #   })
 # }
 
-# Create a Service Account
+# kms, sa and bucket for vault unseal
 resource "google_service_account" "vault_sa" {
   account_id   = var.vault_service_account_id
   display_name = "Vault Auto Unseal SA"
@@ -119,7 +119,7 @@ resource "google_kms_crypto_key_iam_member" "vault_sa_kms_access" {
 
 resource "google_storage_bucket" "vault" {
   name          = "bhamm-lab-vault"
-  location      = var.bucket_location
+  location      = var.region
   force_destroy = true
 
   uniform_bucket_level_access = true
@@ -146,4 +146,41 @@ resource "google_storage_bucket_iam_member" "vault_storage_admin" {
   bucket = google_storage_bucket.vault.name
   role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${google_service_account.vault_sa.email}"
+}
+
+
+# kms and sa for sops
+resource "google_kms_key_ring" "sops_key_ring" {
+  name       = "sops-key-ring"
+  location   = var.region
+  depends_on = [google_project_iam_member.storage_service_account_kms]
+}
+
+resource "google_kms_crypto_key" "sops_crypto_key" {
+  name            = "sops-key"
+  key_ring        = google_kms_key_ring.sops_key_ring.id
+  rotation_period = "7776000s" # 90 days
+
+  lifecycle {
+    prevent_destroy = true # Protects the key from accidental deletion
+  }
+}
+
+resource "google_service_account" "sops_sa" {
+  account_id   = "gcp-sops-decrypt"
+  display_name = "SOPS Decrypt Key"
+}
+
+resource "google_kms_crypto_key_iam_member" "sops_key_access" {
+  crypto_key_id = google_kms_crypto_key.sops_crypto_key.id
+  role          = "roles/cloudkms.cryptoKeyDecrypter"
+  member        = "serviceAccount:${google_service_account.sops_sa.email}"
+}
+
+resource "google_service_account_key" "sops_sa_key" {
+  service_account_id = google_service_account.sops_sa.name
+
+  provisioner "local-exec" {
+    command = "echo '${self.private_key}' | base64 --decode > ${var.sops_key_file_path}"
+  }
 }

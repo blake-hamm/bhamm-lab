@@ -23,12 +23,6 @@ variable "bucket_name" {
   default     = "bhamm-lab-backups"
 }
 
-variable "bucket_location" {
-  description = "The location for the GCS bucket"
-  type        = string
-  default     = "us-central1"
-}
-
 variable "argo_service_account_id" {
   description = "The ID for the Argo Workflows service account"
   type        = string
@@ -45,4 +39,10 @@ variable "vault_key_file_path" {
   description = "Path to save the generated key file."
   type        = string
   default     = "./gcp-unseal-sa.json"
+}
+
+variable "sops_key_file_path" {
+  description = "Path to save the generated key file."
+  type        = string
+  default     = "./gcp-sops-sa.json"
 }

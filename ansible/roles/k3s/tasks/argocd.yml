@@ -48,16 +48,14 @@
   register: secrets_info
 - name: Ensure gcp-unseal-sa and gcp-sops-sa secrets exist
   ansible.builtin.fail:
-    msg: "Secret '{{ secret }}' must be manually created."
+    msg: "Kubernetes secret '{{ item }}' must be manually created."
   when:
-    - "'gcp-unseal-sa' not in secret_names"
-    - secret == 'gcp-unseal-sa'
+    - item not in secret_names
   loop:
     - gcp-unseal-sa
     - gcp-sops-sa
   vars:
     secret_names: "{{ secrets_info.resources | map(attribute='metadata.name') | list }}"
-    secret: "{{ item }}"
 - name: Deploy core apps
   kubernetes.core.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
