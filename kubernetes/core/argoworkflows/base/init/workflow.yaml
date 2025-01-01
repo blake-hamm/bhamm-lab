@@ -1,8 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: core-config-workflow-
-  namespace: argo
+  namespace: default
 spec:
   entrypoint: main
   serviceAccountName: argo-sops-workflow-sa
