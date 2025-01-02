@@ -57,8 +57,7 @@ spec:
           - -c
         args:
           - |
-            sops --decrypt /workspace/secrets.enc.yaml > /workspace/secrets.bad.yaml
-            yq eval . /workspace/secrets.bad.yaml -o=yaml > /workspace/secrets.decrypted.yaml
+            sops --decrypt /workspace/secrets.enc.yaml > /workspace/secrets.decrypted.yaml
         env:
           - name: GOOGLE_APPLICATION_CREDENTIALS
             value: /secrets/gcp/service-account.json
@@ -84,14 +83,17 @@ spec:
           - -c
         args:
           - |
+            # Install yq
             apk update && apk add yq
             yq --version
+            # Fix the bad yaml
+            yq eval . /workspace/secrets.decrypted.yaml -o=yaml > /workspace/secrets.yaml
             # Loop through each app in the vault_secrets section
-            for app in $(yq e '.vault_secrets | keys | .[]' /workspace/secrets.decrypted.yaml); do
+            for app in $(yq e '.vault_secrets | keys | .[]' /workspace/secrets.yaml); do
               # Loop through each key-value pair for the current app
-              for key in $(yq e ".vault_secrets[$app] | keys | .[]" /workspace/secrets.decrypted.yaml); do
+              for key in $(yq e ".vault_secrets[$app] | keys | .[]" /workspace/secrets.yaml); do
                 # Extract the value for the current key
-                value=$(yq e ".vault_secrets[$app][$key]" /workspace/secrets.decrypted.yaml)
+                value=$(yq e ".vault_secrets[$app][$key]" /workspace/secrets.yaml)
 
                 # Set the secret in Vault
                 vault kv put "secret/$app/$key" value=$value
