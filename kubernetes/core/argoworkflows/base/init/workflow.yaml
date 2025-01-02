@@ -12,16 +12,14 @@ spec:
   templates:
     - name: main
       steps:
-        - - name: fetch-sops-file
-            template: fetch-sops-file
-            #   - name: fetch-encryption-key
-            #     template: fetch-encryption-key
-            #   - name: decrypt-sops-file
-            #     template: decrypt-sops-file
-            #   - name: update-vault
-            #     template: update-vault
-            # - - name: replace-core-base
-            #     template: replace-core-base
+        - name: fetch-sops-file
+          template: fetch-sops-file
+        - name: decrypt-sops-file
+          template: decrypt-sops-file
+          #   - name: update-vault
+          #     template: update-vault
+          # - - name: replace-core-base
+          #     template: replace-core-base
     - name: fetch-sops-file
       container:
         image: alpine/git:latest
@@ -31,35 +29,29 @@ spec:
         args:
           - |
             git clone -b feature/k3s https://github.com/blake-hamm/bhamm-lab.git /workspace/repo
-            ls -al /workspace/repo
             cp /workspace/repo/secrets.enc.yaml /workspace/secrets.enc.yaml
         volumeMounts:
           - name: workspace
             mountPath: /workspace
-            # - name: fetch-encryption-key
-            #   container:
-            #     image: google/cloud-sdk:latest
-            #     command:
-            #       - sh
-            #       - -c
-            #     args:
-            #       - |
-            #         export GOOGLE_APPLICATION_CREDENTIALS=/secrets/gcp/gcp-sops-sa.json
-            #         gcloud kms decrypt \
-            #           --keyring=my-keyring \
-            #           --key=my-key \
-            #           --location=global \
-            #           --plaintext-file=/workspace/sops-key.txt \
-            #           --ciphertext-file=/workspace/sops-key.enc
-            #     env:
-            #       - name: GOOGLE_APPLICATION_CREDENTIALS
-            #         value: /secrets/gcp/gcp-sops-sa.json
-            #     volumeMounts:
-            #       - name: gcp-credentials
-            #         mountPath: /secrets/gcp
-            #         readOnly: true
-            #       - name: workspace
-            #         mountPath: /workspace
+    - name: decrypt-sops-file
+      container:
+        image: mozilla/sops:latest
+        command:
+          - sh
+          - -c
+        args:
+          - |
+            export GOOGLE_APPLICATION_CREDENTIALS=/secrets/gcp/gcp-sops-sa.json
+            sops --decrypt /workspace/secrets.enc.yaml > /workspace/secrets.decrypted.yaml
+        env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /secrets/gcp/gcp-sops-sa.json
+        volumeMounts:
+          - name: gcp-credentials
+            mountPath: /secrets/gcp
+            readOnly: true
+          - name: workspace
+            mountPath: /workspace
   # - name: decrypt-sops-file
   #   container:
   #     image: mozilla/sops:latest
