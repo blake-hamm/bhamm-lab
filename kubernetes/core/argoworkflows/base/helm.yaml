@@ -27,7 +27,7 @@ spec:
               serviceAccountName: argo-workflow
         artifactRepository:
           s3:
-            endpoint: http://argo-artifacts:9000
+            endpoint: argo-artifacts:9000
             bucket: argo-artifacts
             accessKeySecret:
               name: argo-artifacts
