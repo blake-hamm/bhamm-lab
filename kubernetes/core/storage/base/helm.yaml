@@ -17,8 +17,12 @@ spec:
     helm:
       valuesObject:
         fullnameOverride: "argo-artifacts"
-        service:
-          type: LoadBalancer
+        replicas: 2
+        persistence:
+          size: 10Gi
+        resources:
+          requests:
+            memory: 512Mi
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
