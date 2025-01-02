@@ -86,10 +86,17 @@ spec:
             # Install curl and jq
             apk update && apk add curl jq
 
+            # Debug: Print starting environment
+            echo "Initial VAULT_ADDR: $VAULT_ADDR"
+
             # Authenticate with vault
             K8S_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
-            export VAULT_TOKEN=$(curl -s --request POST --data '{"jwt": "'"$K8S_TOKEN"'", "role": "init"}' \
-              "$VAULT_ADDR/v1/auth/kubernetes/login" | jq -r '.auth.client_token')
+            echo "Attempting Vault login..."
+            LOGIN_RESPONSE=$(curl -k -s --request POST \
+              --data "{\"jwt\": \"$K8S_TOKEN\", \"role\": \"init\"}" \
+              "$VAULT_ADDR/v1/auth/kubernetes/login")
+
+            export VAULT_TOKEN=$(echo $LOGIN_RESPONSE | jq -r '.auth.client_token')
 
             # Debug: Print token info
             echo "Checking token info:"
