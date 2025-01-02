@@ -83,9 +83,12 @@ spec:
           - -c
         args:
           - |
-            # Install jq
-            apk update && apk add jq
-            jq --version
+            # Install curl and jq
+            apk update && apk add curl jq
+            # Authenticate with vault
+            K8S_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+            export VAULT_TOKEN=$(curl -s --request POST --data '{"jwt": "'"$K8S_TOKEN"'", "role": "init"}' \
+              "$VAULT_ADDR/v1/auth/kubernetes/login" | jq -r '.auth.client_token')
             # Loop through each app in the vault_secrets section
             for app in $(jq -r '.vault_secrets | keys[]' /workspace/secrets.decrypted.json); do
               # Prepare a temporary JSON file for the app's secrets
