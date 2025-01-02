@@ -112,13 +112,13 @@ spec:
       - type: kubernetes
         roles:
           - name: default
-            bound_service_account_names: ["*"]
-            bound_service_account_namespaces: ["*"]
+            bound_service_account_names: "*"
+            bound_service_account_namespaces: "*"
             policies: read_secrets
             ttl: 1h
           - name: init
-            bound_service_account_names: ["argo-init-workflow-sa"]
-            bound_service_account_namespaces: ["default"]
+            bound_service_account_names: "argo-init-workflow-sa"
+            bound_service_account_namespaces: "default"
             policies: allow_secrets
             ttl: 1h
           - name: prometheus
