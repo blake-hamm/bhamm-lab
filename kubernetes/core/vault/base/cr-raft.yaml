@@ -111,37 +111,46 @@ spec:
     auth:
       - type: kubernetes
         roles:
+          # Allow every pod in the default namespace to use the secret kv store
           - name: default
-            bound_service_account_names: ["*"]
-            bound_service_account_namespaces: ["*"]
-            policies: read_secrets
+            bound_service_account_names: ["default", "secrets-webhook"]
+            bound_service_account_namespaces: ["default", "vswh"]
+            policies: ["allow_secrets", "allow_pki"]
             ttl: 1h
-            #     - name: init
-            #       bound_service_account_names: ["argo-init-workflow-sa"]
-            #       bound_service_account_namespaces: ["default"]
-            #       policies: allow_secrets
-            #       ttl: 1h
-            #     - name: prometheus
-            #       bound_service_account_names: monitor-kube-prometheus-st-prometheus
-            #       bound_service_account_namespaces: default
-            #       policies: prometheus-operator
-            #       ttl: 4h
-            # - type: approle
-            #   roles:
-            #     - name: default
-            #       policies: allow_secrets
-            #       secret_id_ttl: 1440h
-            #       secret_id_num_uses: 200
-            #       token_num_uses: 10
-            #       token_ttl: 20m
-            #       token_max_ttl: 30m
-            #     - name: ansible
-            #       policies: read_secrets, ansible
-            #       secret_id_ttl: 1440h
-            #       secret_id_num_uses: 1000
-            #       token_num_uses: 0
-            #       token_ttl: 20m
-            #       token_max_ttl: 30m
+    # auth:
+    #   - type: kubernetes
+    #     roles:
+    #       - name: default
+    #         bound_service_account_names: ["*"]
+    #         bound_service_account_namespaces: ["*"]
+    #         policies: read_secrets
+    #         ttl: 1h
+    #       - name: init
+    #         bound_service_account_names: ["argo-init-workflow-sa"]
+    #         bound_service_account_namespaces: ["default"]
+    #         policies: allow_secrets
+    #         ttl: 1h
+    #       - name: prometheus
+    #         bound_service_account_names: monitor-kube-prometheus-st-prometheus
+    #         bound_service_account_namespaces: default
+    #         policies: prometheus-operator
+    #         ttl: 4h
+    #   - type: approle
+    #     roles:
+    #       - name: default
+    #         policies: allow_secrets
+    #         secret_id_ttl: 1440h
+    #         secret_id_num_uses: 200
+    #         token_num_uses: 10
+    #         token_ttl: 20m
+    #         token_max_ttl: 30m
+    #       - name: ansible
+    #         policies: read_secrets, ansible
+    #         secret_id_ttl: 1440h
+    #         secret_id_num_uses: 1000
+    #         token_num_uses: 0
+    #         token_ttl: 20m
+    #         token_max_ttl: 30m
     secrets:
       - path: secret
         type: kv
