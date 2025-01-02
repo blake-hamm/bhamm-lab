@@ -16,10 +16,14 @@ spec:
             template: fetch-sops-file
         - - name: decrypt-sops-file
             template: decrypt-sops-file
-            #   - name: update-vault
-            #     template: update-vault
-            # - - name: replace-core-base
-            #     template: replace-core-base
+            arguments:
+              artifacts:
+                - name: secrets-artifact
+                  from: "{{steps.fetch-sops-file.outputs.artifacts.secrets}}"
+                  #   - name: update-vault
+                  #     template: update-vault
+                  # - - name: replace-core-base
+                  #     template: replace-core-base
     - name: fetch-sops-file
       container:
         image: alpine/git:v2.47.1
@@ -33,6 +37,10 @@ spec:
         volumeMounts:
           - name: workspace
             mountPath: /workspace
+      outputs:
+        artifacts:
+          - name: secrets
+            path: /workspace/secrets.enc.yaml
     - name: decrypt-sops-file
       container:
         image: mozilla/sops:v3-alpine
