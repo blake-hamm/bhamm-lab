@@ -88,13 +88,13 @@ spec:
             jq --version
             # Loop through each app in the vault_secrets section
             for app in $(jq -r '.vault_secrets | keys[]' /workspace/secrets.decrypted.json); do
-              # Loop through each key-value pair for the current app
-              for key in $(jq -r ".vault_secrets[\"$app\"] | keys[]" /workspace/secrets.decrypted.json); do
-                # Extract the value for the current key
-                value=$(jq -r ".vault_secrets[\"$app\"][\"$key\"]" /workspace/secrets.decrypted.json)
-                # Set the secret in Vault
-                vault kv put "secret/$app/$key" value=$value
-              done
+              # Prepare a temporary JSON file for the app's secrets
+              app_secrets="/workspace/${app}_secrets.json"
+              jq -r ".vault_secrets[\"$app\"]" /workspace/secrets.decrypted.json > "$app_secrets"
+              # Use Vault CLI to write all key-value pairs at once
+              vault kv put "secret/$app" @"$app_secrets"
+              # Clean up
+              rm -f "$app_secrets"
             done
         env:
           - name: VAULT_ADDR
