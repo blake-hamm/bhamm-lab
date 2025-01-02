@@ -20,7 +20,7 @@ spec:
           name: minio-tenant
           pools:
             - servers: 2
-              name: backup-pool
+              name: main-pool
               volumesPerServer: 2
               size: 10Gi
               volumeClaimTemplate:
