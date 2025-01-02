@@ -83,7 +83,9 @@ spec:
           - -c
         args:
           - |
-            dnf install yq
+            curl -L https://github.com/mikefarah/yq/releases/download/v4.24.5/yq_linux_amd64 -o /usr/local/bin/yq
+            chmod +x /usr/local/bin/yq
+            yq --version
             # Loop through each app in the vault_secrets section
             for app in $(yq e '.vault_secrets | keys | .[]' /workspace/secrets.decrypted.yaml); do
               # Loop through each key-value pair for the current app
