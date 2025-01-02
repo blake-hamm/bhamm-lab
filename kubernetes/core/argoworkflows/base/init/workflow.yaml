@@ -85,18 +85,34 @@ spec:
           - |
             # Install curl and jq
             apk update && apk add curl jq
+
             # Authenticate with vault
             K8S_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
             export VAULT_TOKEN=$(curl -s --request POST --data '{"jwt": "'"$K8S_TOKEN"'", "role": "init"}' \
               "$VAULT_ADDR/v1/auth/kubernetes/login" | jq -r '.auth.client_token')
-            # Loop through each app in the vault_secrets section
+
+            # Debug: Print token info
+            echo "Checking token info:"
+            vault token lookup || echo "Token lookup failed"
+
+            # Debug: List existing secrets
+            echo "Attempting to list secrets:"
+            vault kv list secret/ || echo "List failed"
+
+            # Loop through each app
             for app in $(jq -r '.vault_secrets | keys[]' /workspace/secrets.decrypted.json); do
-              # Prepare a temporary JSON file for the app's secrets
+              echo "Processing app: $app"
               app_secrets="/workspace/${app}_secrets.json"
               jq -r ".vault_secrets[\"$app\"]" /workspace/secrets.decrypted.json > "$app_secrets"
-              # Use Vault CLI to write all key-value pairs at once
-              vault kv put "secret/$app" @"$app_secrets"
-              # Clean up
+
+              # Debug: Show what we're trying to write (without sensitive values)
+              echo "Keys being written for $app:"
+              jq 'keys' "$app_secrets"
+
+              # Try the write operation with verbose output
+              echo "Attempting to write secrets for $app"
+              VAULT_LOG=debug vault kv put "secret/$app" @"$app_secrets"
+
               rm -f "$app_secrets"
             done
         env:
