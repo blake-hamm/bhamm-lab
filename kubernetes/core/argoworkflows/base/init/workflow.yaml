@@ -8,7 +8,7 @@ metadata:
     argocd.argoproj.io/sync-options: Replace=true
 spec:
   entrypoint: main
-  serviceAccountName: argo-init-workflow
+  serviceAccountName: argo-init-workflow-sa
   templates:
     - name: main
       steps:
