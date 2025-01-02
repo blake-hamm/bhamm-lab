@@ -42,7 +42,7 @@ spec:
         args:
           - |
             export GOOGLE_APPLICATION_CREDENTIALS=/secrets/gcp/gcp-sops-sa.json
-            ls -al /workspace/repo
+            ls -al /workspace
             ls -al /secrets/gcp
             sops --decrypt /workspace/secrets.enc.yaml > /workspace/secrets.decrypted.yaml
         env:
