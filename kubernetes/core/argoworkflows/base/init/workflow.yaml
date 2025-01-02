@@ -77,7 +77,7 @@ spec:
           - name: secrets
             path: /workspace/secrets.decrypted.yaml
       container:
-        image: debian:bookworm-20241223-slim
+        image: debian:bookworm-20241223
         command:
           - sh
           - -c
