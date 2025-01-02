@@ -117,7 +117,7 @@ spec:
             done
         env:
           - name: VAULT_ADDR
-            value: "https://vault.default.svc.cluster.local:8200"
+            value: "https://vault.default:8200"
           - name: VAULT_SKIP_VERIFY
             value: "true"
         volumeMounts:
