@@ -22,7 +22,7 @@ spec:
             #     template: replace-core-base
     - name: fetch-sops-file
       container:
-        image: alpine/git:latest
+        image: alpine/git:v2.47.1
         command:
           - sh
           - -c
@@ -35,14 +35,14 @@ spec:
             mountPath: /workspace
     - name: decrypt-sops-file
       container:
-        image: mozilla/sops:latest
+        image: mozilla/sops:v3-alpine
         command:
           - sh
           - -c
         args:
           - |
             export GOOGLE_APPLICATION_CREDENTIALS=/secrets/gcp/gcp-sops-sa.json
-            ls -al /workspace
+            ls -al /workspace/repo
             ls -al /secrets/gcp
             sops --decrypt /workspace/secrets.enc.yaml > /workspace/secrets.decrypted.yaml
         env:
