@@ -37,19 +37,19 @@ spec:
         args:
           - |
             git clone -b feature/k3s https://github.com/blake-hamm/bhamm-lab.git /workspace/repo
-            cp /workspace/repo/secrets.enc.yaml /workspace/secrets.enc.yaml
+            cp /workspace/repo/secrets.enc.json /workspace/secrets.enc.json
         volumeMounts:
           - name: workspace
             mountPath: /workspace
       outputs:
         artifacts:
           - name: secrets
-            path: /workspace/secrets.enc.yaml
+            path: /workspace/secrets.enc.json
     - name: decrypt-sops-file
       inputs:
         artifacts:
           - name: secrets
-            path: /workspace/secrets.enc.yaml
+            path: /workspace/secrets.enc.json
       container:
         image: mozilla/sops:v3-alpine
         command:
@@ -57,7 +57,7 @@ spec:
           - -c
         args:
           - |
-            sops --decrypt /workspace/secrets.enc.yaml > /workspace/secrets.decrypted.yaml
+            sops --decrypt /workspace/secrets.enc.json > /workspace/secrets.decrypted.json
         env:
           - name: GOOGLE_APPLICATION_CREDENTIALS
             value: /secrets/gcp/service-account.json
@@ -70,12 +70,12 @@ spec:
       outputs:
         artifacts:
           - name: secrets
-            path: /workspace/secrets.decrypted.yaml
+            path: /workspace/secrets.decrypted.json
     - name: update-vault
       inputs:
         artifacts:
           - name: secrets
-            path: /workspace/secrets.decrypted.yaml
+            path: /workspace/secrets.decrypted.json
       container:
         image: hashicorp/vault:1.13.3
         command:
@@ -83,18 +83,15 @@ spec:
           - -c
         args:
           - |
-            # Install yq
-            apk update && apk add yq
-            yq --version
-            # Fix the bad yaml
-            yq eval . /workspace/secrets.decrypted.yaml -o=yaml > /workspace/secrets.yaml
+            # Install jq
+            apk update && apk add jq
+            jq --version
             # Loop through each app in the vault_secrets section
-            for app in $(yq e '.vault_secrets | keys | .[]' /workspace/secrets.yaml); do
+            for app in $(jq -r '.vault_secrets | keys[]' /workspace/secrets.decrypted.json); do
               # Loop through each key-value pair for the current app
-              for key in $(yq e ".vault_secrets[$app] | keys | .[]" /workspace/secrets.yaml); do
+              for key in $(jq -r ".vault_secrets[\"$app\"] | keys[]" /workspace/secrets.decrypted.json); do
                 # Extract the value for the current key
-                value=$(yq e ".vault_secrets[$app][$key]" /workspace/secrets.yaml)
-
+                value=$(jq -r ".vault_secrets[\"$app\"][\"$key\"]" /workspace/secrets.decrypted.json)
                 # Set the secret in Vault
                 vault kv put "secret/$app/$key" value=$value
               done
