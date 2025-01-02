@@ -98,7 +98,7 @@ spec:
             done
         env:
           - name: VAULT_ADDR
-            value: "http://vault.default.svc.cluster.local:8200"
+            value: "https://vault.default.svc.cluster.local:8200"
         volumeMounts:
           - name: workspace
             mountPath: /workspace
