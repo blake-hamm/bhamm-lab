@@ -77,7 +77,7 @@ spec:
           - name: secrets
             path: /workspace/secrets.decrypted.json
       container:
-        image: hashicorp/vault:1.13.3
+        image: hashicorp/vault:1.18.1
         command:
           - sh
           - -c

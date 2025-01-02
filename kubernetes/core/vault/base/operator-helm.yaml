@@ -6,14 +6,14 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-850"
 spec:
+  project: default
   destination:
     namespace: default
     server: https://kubernetes.default.svc
-  project: default
   source:
     chart: vault-operator
     repoURL: ghcr.io/bank-vaults/helm-charts
-    targetRevision: 1.21.2
+    targetRevision: 1.22.4
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
