@@ -86,9 +86,6 @@ spec:
             # Install curl and jq
             apk update && apk add curl jq
 
-            # Debug: Print starting environment
-            echo "Initial VAULT_ADDR: $VAULT_ADDR"
-
             # Authenticate with vault
             K8S_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
             echo "Attempting Vault login..."
@@ -97,10 +94,12 @@ spec:
               "$VAULT_ADDR/v1/auth/kubernetes/login")
 
             export VAULT_TOKEN=$(echo $LOGIN_RESPONSE | jq -r '.auth.client_token')
-
-            # Debug: Print token info
-            echo "Checking token info:"
-            vault token lookup || echo "Token lookup failed"
+            if [ -z "$VAULT_TOKEN" ] || [ "$VAULT_TOKEN" = "null" ]; then
+              echo "Failed to get Vault token. Login response:"
+              echo $LOGIN_RESPONSE
+              exit 1
+            fi
+            echo "Successfully obtained Vault token"
 
             # Debug: List existing secrets
             echo "Attempting to list secrets:"
@@ -117,8 +116,12 @@ spec:
               jq 'keys' "$app_secrets"
 
               # Try the write operation with verbose output
-              echo "Attempting to write secrets for $app"
-              VAULT_LOG=debug vault kv put "secret/$app" @"$app_secrets"
+              if ! vault kv put -mount=secret "$app" @"$app_secrets"; then
+                echo "Failed to write secrets for $app"
+                cat "$app_secrets" | jq 'keys'  # Show what keys we tried to write
+                exit 1
+              fi
+              echo "Successfully wrote secrets for $app"
 
               rm -f "$app_secrets"
             done
