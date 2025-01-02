@@ -57,7 +57,8 @@ spec:
           - -c
         args:
           - |
-            sops --decrypt /workspace/secrets.enc.yaml > /workspace/secrets.decrypted.yaml
+            sops --decrypt /workspace/secrets.enc.yaml > /workspace/secrets.bad.yaml
+            yq eval . /workspace/secrets.bad.yaml -o=yaml > /workspace/secrets.decrypted.yaml
         env:
           - name: GOOGLE_APPLICATION_CREDENTIALS
             value: /secrets/gcp/service-account.json
