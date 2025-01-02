@@ -25,6 +25,17 @@ spec:
           workflowDefaults:
             spec:
               serviceAccountName: argo-workflow
+        artifactRepository:
+          s3:
+            endpoint: http://argo-artifacts:9000
+            bucket: argo-artifacts
+            accessKeySecret:
+              name: argo-artifacts
+              key: rootUser
+            secretKeySecret:
+              name: argo-artifacts
+              key: rootPassword
+            insecure: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
