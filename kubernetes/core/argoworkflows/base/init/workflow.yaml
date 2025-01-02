@@ -77,15 +77,14 @@ spec:
           - name: secrets
             path: /workspace/secrets.decrypted.yaml
       container:
-        image: debian:bookworm-20241223
+        image: hashicorp/vault:1.13.3
         command:
           - sh
           - -c
         args:
           - |
-            wget -O - https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
-            apt update && apt install vault
+            apk update && apk add yq
+            yq --version
             # Loop through each app in the vault_secrets section
             for app in $(yq e '.vault_secrets | keys | .[]' /workspace/secrets.decrypted.yaml); do
               # Loop through each key-value pair for the current app
