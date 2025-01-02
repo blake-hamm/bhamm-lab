@@ -20,8 +20,12 @@ spec:
               artifacts:
                 - name: secrets
                   from: "{{steps.fetch-sops-file.outputs.artifacts.secrets}}"
-                  #   - name: update-vault
-                  #     template: update-vault
+        - - name: update-vault
+            template: update-vault
+            arguments:
+              artifacts:
+                - name: secrets
+                  from: "{{steps.decrypt-sops-file.outputs.artifacts.secrets}}"
                   # - - name: replace-core-base
                   #     template: replace-core-base
     - name: fetch-sops-file
@@ -53,8 +57,6 @@ spec:
           - -c
         args:
           - |
-            ls -al /workspace
-            ls -al /secrets/gcp
             sops --decrypt /workspace/secrets.enc.yaml > /workspace/secrets.decrypted.yaml
         env:
           - name: GOOGLE_APPLICATION_CREDENTIALS
@@ -65,38 +67,39 @@ spec:
             readOnly: true
           - name: workspace
             mountPath: /workspace
-  # - name: decrypt-sops-file
-  #   container:
-  #     image: mozilla/sops:latest
-  #     command:
-  #       - sh
-  #       - -c
-  #     args:
-  #       - |
-  #         SOPS_KMS_KEY=/workspace/sops-key.txt sops -d /workspace/sops-file.yaml > /workspace/decrypted-file.yaml
-  #     env:
-  #       - name: SOPS_KMS_KEY
-  #         value: /workspace/sops-key.txt
-  #     volumeMounts:
-  #       - name: workspace
-  #         mountPath: /workspace
+      outputs:
+        artifacts:
+          - name: secrets
+            path: /workspace/secrets.decrypted.yaml
+    - name: update-vault
+      inputs:
+        artifacts:
+          - name: secrets
+            path: /workspace/secrets.decrypted.yaml
+      container:
+        image: hashicorp/vault:1.13.3
+        command:
+          - sh
+          - -c
+        args:
+          - |
+            # Loop through each app in the vault_secrets section
+            for app in $(yq e '.vault_secrets | keys | .[]' /workspace/secrets.decrypted.yaml); do
+              # Loop through each key-value pair for the current app
+              for key in $(yq e ".vault_secrets[$app] | keys | .[]" /workspace/secrets.decrypted.yaml); do
+                # Extract the value for the current key
+                value=$(yq e ".vault_secrets[$app][$key]" /workspace/secrets.decrypted.yaml)
 
-  # - name: update-vault
-  #   container:
-  #     image: hashicorp/vault:latest
-  #     command:
-  #       - sh
-  #       - -c
-  #     args:
-  #       - |
-  #         vault kv put secret/cluster-config @/workspace/decrypted-file.yaml
-  #     env:
-  #       - name: VAULT_ADDR
-  #         value: "http://vault.vault.svc.cluster.local:8200"
-  #     volumeMounts:
-  #       - name: workspace
-  #         mountPath: /workspace
-
+                # Set the secret in Vault
+                vault kv put "secret/$app/$key" value=$value
+              done
+            done
+        env:
+          - name: VAULT_ADDR
+            value: "http://vault.vault.svc.cluster.local:8200"
+        volumeMounts:
+          - name: workspace
+            mountPath: /workspace
   # - name: replace-core-base
   #   container:
   #     image: argoproj/argocd-cli:latest
