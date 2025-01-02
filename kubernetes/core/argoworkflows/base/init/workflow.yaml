@@ -83,6 +83,7 @@ spec:
           - -c
         args:
           - |
+            jq --version
             # Loop through each app in the vault_secrets section
             for app in $(yq e '.vault_secrets | keys | .[]' /workspace/secrets.decrypted.yaml); do
               # Loop through each key-value pair for the current app
