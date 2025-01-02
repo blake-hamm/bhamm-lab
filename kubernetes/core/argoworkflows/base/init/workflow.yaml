@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  name: argo-sops-workflow
+  name: argo-init-workflow
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "0"
