@@ -26,8 +26,8 @@ spec:
               artifacts:
                 - name: secrets
                   from: "{{steps.decrypt-sops-file.outputs.artifacts.secrets}}"
-        - - name: replace-core-base
-            template: replace-core-base
+        - - name: delete-core-base
+            template: delete-core-base
     - name: fetch-sops-file
       container:
         image: alpine/git:v2.47.1
@@ -134,7 +134,7 @@ spec:
         volumeMounts:
           - name: workspace
             mountPath: /workspace
-    - name: replace-core-base
+    - name: delete-core-base
       container:
         image: quay.io/argoproj/argocd:v2.12.9
         command:
@@ -142,9 +142,18 @@ spec:
           - -c
         args:
           - |
-            # argocd app delete core-base  --cascade=false --yes
-            # kubectl apply -f
-            kubectl --version
+            argocd app delete core-base  --cascade=false --yes
+    - name: apply-core-config
+      inputs:
+        artifacts:
+          - name: core-config
+            path: /tmp/manifest.yaml
+      resource:
+        action: apply
+        manifest: |
+          {{- with .Inputs.Artifacts.manifest }}
+          {{ .Data | indent 8 }}
+          {{- end }}
   volumes:
     - name: workspace
       emptyDir: {}
