@@ -117,7 +117,7 @@ spec:
               jq 'keys' "$app_secrets"
 
               # Try the write operation with verbose output
-              if ! vault kv put -mount=secret "$app" @"$app_secrets"; then
+              if ! vault kv put -mount=secret "core/$app" @"$app_secrets"; then
                 echo "Failed to write secrets for $app"
                 cat "$app_secrets" | jq 'keys'  # Show what keys we tried to write
                 exit 1
