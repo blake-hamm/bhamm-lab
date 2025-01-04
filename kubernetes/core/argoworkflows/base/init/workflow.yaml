@@ -143,17 +143,17 @@ spec:
         args:
           - |
             argocd app delete core-base  --cascade=false --yes
-    - name: apply-core-config
-      inputs:
-        artifacts:
-          - name: core-config
-            path: /tmp/manifest.yaml
-      resource:
-        action: apply
-        manifest: |
-          {{- with .Inputs.Artifacts.manifest }}
-          {{ .Data | indent 8 }}
-          {{- end }}
+          # - name: apply-core-config
+          #   inputs:
+          #     artifacts:
+          #       - name: core-config
+          #         path: /tmp/manifest.yaml
+          #   resource:
+          #     action: apply
+          #     manifest: |
+          #       {{- with .Inputs.Artifacts.manifest }}
+          #       {{ .Data | indent 8 }}
+          #       {{- end }}
   volumes:
     - name: workspace
       emptyDir: {}
