@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: core-base
+  name: core-config
   namespace: default
   annotations:
     argocd.argoproj.io/sync-wave: "0"
@@ -10,10 +10,10 @@ spec:
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
     path: kubernetes/core
-    targetRevision: {{ argocd_branch }}
+    targetRevision: feature/k3s
     directory:
       recurse: true
-      include: "*/base/*"
+      include: "*/config/*"
   destination:
     server: "https://kubernetes.default.svc"
     namespace: default

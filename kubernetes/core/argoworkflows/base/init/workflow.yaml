@@ -26,8 +26,8 @@ spec:
               artifacts:
                 - name: secrets
                   from: "{{steps.decrypt-sops-file.outputs.artifacts.secrets}}"
-                  # - - name: replace-core-base
-                  #     template: replace-core-base
+        - - name: replace-core-base
+            template: replace-core-base
     - name: fetch-sops-file
       container:
         image: alpine/git:v2.47.1
@@ -37,14 +37,15 @@ spec:
         args:
           - |
             git clone -b feature/k3s https://github.com/blake-hamm/bhamm-lab.git /workspace/repo
-            cp /workspace/repo/secrets.enc.json /workspace/secrets.enc.json
         volumeMounts:
           - name: workspace
             mountPath: /workspace
       outputs:
         artifacts:
           - name: secrets
-            path: /workspace/secrets.enc.json
+            path: /workspace/repo/secrets.enc.json
+          - name: core-config
+            path: /workspace/repo/kubernetes/core/core-config.yaml
     - name: decrypt-sops-file
       inputs:
         artifacts:
@@ -133,20 +134,17 @@ spec:
         volumeMounts:
           - name: workspace
             mountPath: /workspace
-  # - name: replace-core-base
-  #   container:
-  #     image: argoproj/argocd-cli:latest
-  #     command:
-  #       - sh
-  #       - -c
-  #     args:
-  #       - |
-  #         argocd app delete core-base --yes
-  #         argocd app create core-configured \
-  #           --repo https://your-repo-url.git \
-  #           --path core-configured \
-  #           --dest-namespace default \
-  #           --dest-server https://kubernetes.default.svc
+    - name: replace-core-base
+      container:
+        image: argoproj/argocd-cli:latest
+        command:
+          - sh
+          - -c
+        args:
+          - |
+            # argocd app delete core-base  --cascade=false --yes
+            # kubectl apply -f
+            kubectl --version
   volumes:
     - name: workspace
       emptyDir: {}
