@@ -24,7 +24,7 @@ spec:
           repository: "lldap/lldap"
           tag: "latest"
         persistence:
-          StorageClassName: "csi-rbd-sc"
+          storageClassName: "csi-rbd-sc"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
