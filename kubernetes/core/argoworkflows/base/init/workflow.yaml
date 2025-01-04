@@ -26,8 +26,8 @@ spec:
               artifacts:
                 - name: secrets
                   from: "{{steps.decrypt-sops-file.outputs.artifacts.secrets}}"
-        - - name: delete-core-base
-            template: delete-core-base
+        # - - name: delete-core-base
+        #     template: delete-core-base
         - - name: create-core-config
             template: create-core-config
     - name: fetch-sops-file
