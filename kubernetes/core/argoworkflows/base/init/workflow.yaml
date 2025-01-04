@@ -106,25 +106,33 @@ spec:
             echo "Attempting to list core secrets:"
             vault kv list secret/core/ || echo "List failed"
 
-            # Loop through each app
-            for app in $(jq -r '.vault_secrets | keys[]' /workspace/secrets.decrypted.json); do
-              echo "Processing app: $app"
-              app_secrets="/workspace/${app}_secrets.json"
-              jq -r ".vault_secrets[\"$app\"]" /workspace/secrets.decrypted.json > "$app_secrets"
+            # Loop through each vault path (core, external, etc.)
+            for vault_path in $(jq -r '.vault_secrets | keys[]' /workspace/secrets.decrypted.json); do
+              echo "Processing vault path: $vault_path"
 
-              # Debug: Show what we're trying to write (without sensitive values)
-              echo "Keys being written for $app:"
-              jq 'keys' "$app_secrets"
+              # Loop through each app in the current vault path
+              for app in $(jq -r ".vault_secrets[\"$vault_path\"] | keys[]" /workspace/secrets.decrypted.json); do
+                echo "Processing app: $app in $vault_path"
 
-              # Try the write operation with verbose output
-              if ! vault kv put -mount=secret "core/$app" @"$app_secrets"; then
-                echo "Failed to write secrets for $app"
-                cat "$app_secrets" | jq 'keys'  # Show what keys we tried to write
-                exit 1
-              fi
-              echo "Successfully wrote secrets for $app"
+                # Extract secrets for this app to a temporary file
+                app_secrets="/workspace/${vault_path}_${app}_secrets.json"
+                jq -r ".vault_secrets[\"$vault_path\"][\"$app\"]" /workspace/secrets.decrypted.json > "$app_secrets"
 
-              rm -f "$app_secrets"
+                # Debug: Show what we're trying to write (without sensitive values)
+                echo "Keys being written for $app in $vault_path:"
+                jq 'keys' "$app_secrets"
+
+                # Try the write operation with verbose output
+                if ! vault kv put -mount=secret "$vault_path/$app" @"$app_secrets"; then
+                  echo "Failed to write secrets for $app in $vault_path"
+                  cat "$app_secrets" | jq 'keys'  # Show what keys we tried to write
+                  rm -f "$app_secrets"
+                  exit 1
+                fi
+
+                echo "Successfully wrote secrets for $app in $vault_path"
+                rm -f "$app_secrets"
+              done
             done
         env:
           - name: VAULT_ADDR

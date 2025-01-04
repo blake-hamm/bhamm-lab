@@ -6,6 +6,7 @@ pkgs.mkShell {
     vault
     kubectl
     kubernetes-helm
+    argo
     argocd
     k9s
     colmena
