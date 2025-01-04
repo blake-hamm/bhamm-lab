@@ -135,25 +135,25 @@ spec:
           - name: workspace
             mountPath: /workspace
     - name: delete-core-base
-      container:
-        image: quay.io/argoproj/argocd:v2.12.9
-        command:
-          - sh
-          - -c
-        args:
-          - |
-            argocd app delete core-base  --cascade=false --yes
-          # - name: apply-core-config
-          #   inputs:
-          #     artifacts:
-          #       - name: core-config
-          #         path: /tmp/manifest.yaml
-          #   resource:
-          #     action: apply
-          #     manifest: |
-          #       {{- with .Inputs.Artifacts.manifest }}
-          #       {{ .Data | indent 8 }}
-          #       {{- end }}
+      resource:
+        action: delete
+        manifest: |
+          apiVersion: argoproj.io/v1alpha1
+          kind: Application
+          metadata:
+            name: core-base
+            namespace: default
+        # - name: apply-core-config
+        #   inputs:
+        #     artifacts:
+        #       - name: core-config
+        #         path: /tmp/manifest.yaml
+        #   resource:
+        #     action: apply
+        #     manifest: |
+        #       {{- with .Inputs.Artifacts.manifest }}
+        #       {{ .Data | indent 8 }}
+        #       {{- end }}
   volumes:
     - name: workspace
       emptyDir: {}
