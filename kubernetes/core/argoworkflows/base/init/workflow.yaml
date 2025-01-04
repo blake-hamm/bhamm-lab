@@ -103,8 +103,8 @@ spec:
             echo "Successfully obtained Vault token"
 
             # Debug: List existing secrets
-            echo "Attempting to list secrets:"
-            vault kv list secret/ || echo "List failed"
+            echo "Attempting to list core secrets:"
+            vault kv list secret/core/ || echo "List failed"
 
             # Loop through each app
             for app in $(jq -r '.vault_secrets | keys[]' /workspace/secrets.decrypted.json); do
