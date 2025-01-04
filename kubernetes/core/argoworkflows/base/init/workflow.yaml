@@ -136,7 +136,7 @@ spec:
             mountPath: /workspace
     - name: replace-core-base
       container:
-        image: argoproj/argocd-cli:latest
+        image: quay.io/argoproj/argocd:v2.12.9
         command:
           - sh
           - -c
