@@ -150,7 +150,7 @@ spec:
           apiVersion: argoproj.io/v1alpha1
           kind: Application
           metadata:
-            name: core-base
+            name: core-config
             namespace: default
             annotations:
               argocd.argoproj.io/sync-wave: "0"
@@ -162,7 +162,7 @@ spec:
               targetRevision: feature/k3s
               directory:
                 recurse: true
-                include: "*/base/*"
+                include: "*/config/*"
             destination:
               server: "https://kubernetes.default.svc"
               namespace: default
@@ -170,7 +170,7 @@ spec:
               syncOptions:
                 - ApplyOutOfSyncOnly=true
               automated:
-                prune: false
+                prune: true
                 selfHeal: true
   volumes:
     - name: workspace
