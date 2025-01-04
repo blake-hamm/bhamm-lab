@@ -12,8 +12,11 @@ spec:
   routes:
     - match: Host(`lldap.bhamm-lab.com`)
       kind: Rule
+      middlewares:
+        - name: default-headers
+          # - name: forwardauth-authelia
       services:
         - name: lldap-service
           port: 17170
-  # tls:
-  #   secretName: bhamm-lab-tls
+  tls:
+    secretName: bhamm-lab-tls
