@@ -4,7 +4,7 @@ metadata:
   name: monitor
   namespace: default
   annotations:
-    argocd.argoproj.io/sync-wave: "-600"
+    argocd.argoproj.io/sync-wave: "10"
 spec:
   destination:
     namespace: default

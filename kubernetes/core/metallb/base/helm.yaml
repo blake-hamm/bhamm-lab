@@ -4,7 +4,7 @@ metadata:
   name: metallb
   namespace: default
   annotations:
-    argocd.argoproj.io/sync-wave: "-350"
+    argocd.argoproj.io/sync-wave: "10"
 spec:
   destination:
     namespace: metallb-system

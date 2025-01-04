@@ -5,7 +5,7 @@ metadata:
   namespace: metallb-system
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "-300"
+    argocd.argoproj.io/sync-wave: "15"
 spec:
   addresses:
     - 192.168.69.37-192.168.69.39 # Update in traefik values as well

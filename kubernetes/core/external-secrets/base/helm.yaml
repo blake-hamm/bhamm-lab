@@ -4,7 +4,7 @@ metadata:
   name: external-secrets
   namespace: default
   annotations:
-    argocd.argoproj.io/sync-wave: "-750"
+    argocd.argoproj.io/sync-wave: "20"
 spec:
   destination:
     namespace: default

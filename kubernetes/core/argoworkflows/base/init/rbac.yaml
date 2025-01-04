@@ -4,7 +4,7 @@ metadata:
   name: argo-init-workflow-sa
   namespace: default
   annotations:
-    argocd.argoproj.io/sync-wave: "-802"
+    argocd.argoproj.io/sync-wave: "30"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
