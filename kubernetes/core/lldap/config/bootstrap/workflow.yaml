@@ -15,7 +15,7 @@ spec:
           - /app/bootstrap.sh
         env:
           - name: LLDAP_URL
-            value: "http://lldap:8080"
+            value: "http://lldap-service:17170"
           - name: LLDAP_ADMIN_USERNAME
             valueFrom:
               secretKeyRef:
