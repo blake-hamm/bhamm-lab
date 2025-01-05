@@ -32,6 +32,10 @@ spec:
                           path: lldap_password
                         - key: storage_encryption_key
                           path: storage_encryption_key
+                        - key: oidc_jwks_pem
+                          path: oidc.jwk.RS256.pem
+                        - key: oidc_jwks_crt
+                          path: oidc.jwk.RS256.crt
                   - secret:
                       name: authelia-pg-external-secrets
                       items:
@@ -128,110 +132,118 @@ spec:
                   rules:
                     - policy: 'deny'
                       subject: 'group:services'
-                      # clients:
-                      #   - client_id: 'immich'
-                      #     client_name: 'immich'
-                      #     client_secret: '$pbkdf2-sha512$310000$ePbXTUtLycJCNZKtD6/u1w$tfCj3diKcxbW6NkLAqm5Mkobi32JS0FNUauxj82rulq.6dT/kZ93SKrWHrkX8PmdreHkHkcv1Yfod.ODROpj8w'
-                      #     public: false
-                      #     authorization_policy: 'two_factor'
-                      #     redirect_uris:
-                      #       - 'https://immich.bhamm-lab.com/auth/login'
-                      #       - 'https://immich.bhamm-lab.com/user-settings'
-                      #       - 'app.immich:///oauth-callback'
-                      #     scopes:
-                      #       - 'openid'
-                      #       - 'profile'
-                      #       - 'email'
-                      #     userinfo_signed_response_alg: 'none'
-                      #   - client_id: 'vault'
-                      #     client_name: 'HashiCorp Vault'
-                      #     client_secret: '$pbkdf2-sha512$310000$tl5M93tjJd/ntJcX/VeDWA$E5UM2tStTQcNoA9pPFm6AFmj4xL9sRaOTzRCBvqC/Pao3xz8zyH3sFDLnhkQUEXX7.ubJnveQxYp9732SnCi2Q'
-                      #     public: false
-                      #     authorization_policy: 'two_factor'
-                      #     redirect_uris:
-                      #       - 'https://vault.bhamm-lab.com/oidc/callback'
-                      #       - 'https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback'
-                      #       - 'http://localhost:8250/oidc/callback'
-                      #     scopes:
-                      #       - 'openid'
-                      #       - 'profile'
-                      #       - 'groups'
-                      #       - 'email'
-                      #     userinfo_signed_response_alg: 'none'
-                      #   - client_id: 'argocd'
-                      #     client_name: 'Argo CD'
-                      #     client_secret: '$pbkdf2-sha512$310000$zleQgxPmF81tKn7ZZCpiwA$H1xLnYHqIRewWJjBDJnljs/7Iyw7srK12.TUXDVDbFyyH4yonDOTWAUKQrazNUzm8tIW/0y36UAVe7dKNa/ymA'
-                      #     public: false
-                      #     authorization_policy: 'two_factor'
-                      #     redirect_uris:
-                      #       - 'https://argocd.bhamm-lab.com/auth/callback'
-                      #     scopes:
-                      #       - 'openid'
-                      #       - 'groups'
-                      #       - 'email'
-                      #       - 'profile'
-                      #     userinfo_signed_response_alg: 'none'
-                      #     token_endpoint_auth_method: 'client_secret_post'
-                      #   - client_id: 'argocd-cli'
-                      #     client_name: 'Argo CD (CLI)'
-                      #     public: true
-                      #     authorization_policy: 'two_factor'
-                      #     redirect_uris:
-                      #       - 'http://localhost:8085/auth/callback'
-                      #     scopes:
-                      #       - 'openid'
-                      #       - 'groups'
-                      #       - 'email'
-                      #       - 'profile'
-                      #       - 'offline_access'
-                      #     userinfo_signed_response_alg: 'none'
-                      #   - client_id: 'argoworkflows'
-                      #     client_name: 'Argo Workflows'
-                      #     client_secret: '$pbkdf2-sha512$310000$ggcVQ063OrvfkVBrmJ/jYA$twpvYp/R6R5r8ziSRCTdNpOttQezT1zWxKa4jg7bKoPi.ITTHMf4drmY8J99ud8LlXDTs5VQr8CN/QdU/aBJ0Q'
-                      #     public: false
-                      #     authorization_policy: 'two_factor'
-                      #     redirect_uris:
-                      #       - 'https://argoworkflows.bhamm-lab.com/oauth2/callback'
-                      #     scopes:
-                      #       - 'openid'
-                      #       - 'groups'
-                      #       - 'email'
-                      #       - 'profile'
-                      #     userinfo_signed_response_alg: 'none'
-                      #     token_endpoint_auth_method: 'client_secret_post'
-                      # - client_id: 'grafana'
-                      #   client_name: 'Grafana'
-                      #   client_secret: '$pbkdf2-sha512$310000$fdZqkI2tbkkYGPPxO/6juQ$RzFUajWAlOmj/qAzJOm118Tg/CU2P3FSa46XkLveUFVQgljg163KQChfytVSNC1Rhfe4xDIHdq3V/D00Y4yOoQ'
-                      #   public: false
-                      #   authorization_policy: 'two_factor'
-                      #   require_pkce: true
-                      #   pkce_challenge_method: 'S256'
-                      #   redirect_uris:
-                      #     - 'https://grafana.bhamm-lab.com/login/generic_oauth'
-                      #   scopes:
-                      #     - 'openid'
-                      #     - 'profile'
-                      #     - 'groups'
-                      #     - 'email'
-                      #   userinfo_signed_response_alg: 'none'
-                      #   token_endpoint_auth_method: 'client_secret_basic'
-                      #   claims:
-                      #     email: uid # Map `uid` (or another LDAP attribute) to the `email` claim
-                      #     preferred_username: uid # Ensure the username is set
-                      #     name: displayName # Optionally map `displayName` or another attribute to the name claim
-                      # - client_id: 'gitea'
-                      #   client_name: 'Gitea'
-                      #   client_secret: '$pbkdf2-sha512$310000$OLMZifgp6Mmqs843wKvyJw$IgiDqe/OHN/fvGKtwEcdhOcwz8wkZ4RK8ExHoGwem3RUYAfD9Pp2VwGqno1bRNgjni4EfTUFWuB0bSHOU1Fw8Q'
-                      #   public: false
-                      #   authorization_policy: 'two_factor'
-                      #   redirect_uris:
-                      #     - 'https://git.bhamm-lab.com/user/oauth2/authelia/callback'
-                      #   scopes:
-                      #     - 'openid'
-                      #     - 'email'
-                      #     - 'profile'
-                      #   userinfo_signed_response_alg: 'none'
-                      #   token_endpoint_auth_method: 'client_secret_basic'
+              jwks:
+                - key_id: 'main'
+                  algorithm: 'RS256'
+                  use: 'sig'
+                  key:
+                    path: '/app/external-secrets/oidc.jwk.RS256.pem'
+                  certificate_chain:
+                    path: '/app/external-secrets/oidc.jwk.RS256.crt'
+              clients:
+                - client_id: 'immich'
+                  client_name: 'immich'
+                  client_secret: '$pbkdf2-sha512$310000$ePbXTUtLycJCNZKtD6/u1w$tfCj3diKcxbW6NkLAqm5Mkobi32JS0FNUauxj82rulq.6dT/kZ93SKrWHrkX8PmdreHkHkcv1Yfod.ODROpj8w'
+                  public: false
+                  authorization_policy: 'two_factor'
+                  redirect_uris:
+                    - 'https://immich.bhamm-lab.com/auth/login'
+                    - 'https://immich.bhamm-lab.com/user-settings'
+                    - 'app.immich:///oauth-callback'
+                  scopes:
+                    - 'openid'
+                    - 'profile'
+                    - 'email'
+                  userinfo_signed_response_alg: 'none'
+                  #   - client_id: 'vault'
+                  #     client_name: 'HashiCorp Vault'
+                  #     client_secret: '$pbkdf2-sha512$310000$tl5M93tjJd/ntJcX/VeDWA$E5UM2tStTQcNoA9pPFm6AFmj4xL9sRaOTzRCBvqC/Pao3xz8zyH3sFDLnhkQUEXX7.ubJnveQxYp9732SnCi2Q'
+                  #     public: false
+                  #     authorization_policy: 'two_factor'
+                  #     redirect_uris:
+                  #       - 'https://vault.bhamm-lab.com/oidc/callback'
+                  #       - 'https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback'
+                  #       - 'http://localhost:8250/oidc/callback'
+                  #     scopes:
+                  #       - 'openid'
+                  #       - 'profile'
+                  #       - 'groups'
+                  #       - 'email'
+                  #     userinfo_signed_response_alg: 'none'
+                  #   - client_id: 'argocd'
+                  #     client_name: 'Argo CD'
+                  #     client_secret: '$pbkdf2-sha512$310000$zleQgxPmF81tKn7ZZCpiwA$H1xLnYHqIRewWJjBDJnljs/7Iyw7srK12.TUXDVDbFyyH4yonDOTWAUKQrazNUzm8tIW/0y36UAVe7dKNa/ymA'
+                  #     public: false
+                  #     authorization_policy: 'two_factor'
+                  #     redirect_uris:
+                  #       - 'https://argocd.bhamm-lab.com/auth/callback'
+                  #     scopes:
+                  #       - 'openid'
+                  #       - 'groups'
+                  #       - 'email'
+                  #       - 'profile'
+                  #     userinfo_signed_response_alg: 'none'
+                  #     token_endpoint_auth_method: 'client_secret_post'
+                  #   - client_id: 'argocd-cli'
+                  #     client_name: 'Argo CD (CLI)'
+                  #     public: true
+                  #     authorization_policy: 'two_factor'
+                  #     redirect_uris:
+                  #       - 'http://localhost:8085/auth/callback'
+                  #     scopes:
+                  #       - 'openid'
+                  #       - 'groups'
+                  #       - 'email'
+                  #       - 'profile'
+                  #       - 'offline_access'
+                  #     userinfo_signed_response_alg: 'none'
+                  #   - client_id: 'argoworkflows'
+                  #     client_name: 'Argo Workflows'
+                  #     client_secret: '$pbkdf2-sha512$310000$ggcVQ063OrvfkVBrmJ/jYA$twpvYp/R6R5r8ziSRCTdNpOttQezT1zWxKa4jg7bKoPi.ITTHMf4drmY8J99ud8LlXDTs5VQr8CN/QdU/aBJ0Q'
+                  #     public: false
+                  #     authorization_policy: 'two_factor'
+                  #     redirect_uris:
+                  #       - 'https://argoworkflows.bhamm-lab.com/oauth2/callback'
+                  #     scopes:
+                  #       - 'openid'
+                  #       - 'groups'
+                  #       - 'email'
+                  #       - 'profile'
+                  #     userinfo_signed_response_alg: 'none'
+                  #     token_endpoint_auth_method: 'client_secret_post'
+                  # - client_id: 'grafana'
+                  #   client_name: 'Grafana'
+                  #   client_secret: '$pbkdf2-sha512$310000$fdZqkI2tbkkYGPPxO/6juQ$RzFUajWAlOmj/qAzJOm118Tg/CU2P3FSa46XkLveUFVQgljg163KQChfytVSNC1Rhfe4xDIHdq3V/D00Y4yOoQ'
+                  #   public: false
+                  #   authorization_policy: 'two_factor'
+                  #   require_pkce: true
+                  #   pkce_challenge_method: 'S256'
+                  #   redirect_uris:
+                  #     - 'https://grafana.bhamm-lab.com/login/generic_oauth'
+                  #   scopes:
+                  #     - 'openid'
+                  #     - 'profile'
+                  #     - 'groups'
+                  #     - 'email'
+                  #   userinfo_signed_response_alg: 'none'
+                  #   token_endpoint_auth_method: 'client_secret_basic'
+                  #   claims:
+                  #     email: uid # Map `uid` (or another LDAP attribute) to the `email` claim
+                  #     preferred_username: uid # Ensure the username is set
+                  #     name: displayName # Optionally map `displayName` or another attribute to the name claim
+                  # - client_id: 'gitea'
+                  #   client_name: 'Gitea'
+                  #   client_secret: '$pbkdf2-sha512$310000$OLMZifgp6Mmqs843wKvyJw$IgiDqe/OHN/fvGKtwEcdhOcwz8wkZ4RK8ExHoGwem3RUYAfD9Pp2VwGqno1bRNgjni4EfTUFWuB0bSHOU1Fw8Q'
+                  #   public: false
+                  #   authorization_policy: 'two_factor'
+                  #   redirect_uris:
+                  #     - 'https://git.bhamm-lab.com/user/oauth2/authelia/callback'
+                  #   scopes:
+                  #     - 'openid'
+                  #     - 'email'
+                  #     - 'profile'
+                  #   userinfo_signed_response_alg: 'none'
+                  #   token_endpoint_auth_method: 'client_secret_basic'
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
