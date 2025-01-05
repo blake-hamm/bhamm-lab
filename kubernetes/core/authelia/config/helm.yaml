@@ -157,21 +157,21 @@ spec:
                     - 'profile'
                     - 'email'
                   userinfo_signed_response_alg: 'none'
-                  #   - client_id: 'vault'
-                  #     client_name: 'HashiCorp Vault'
-                  #     client_secret: '$pbkdf2-sha512$310000$tl5M93tjJd/ntJcX/VeDWA$E5UM2tStTQcNoA9pPFm6AFmj4xL9sRaOTzRCBvqC/Pao3xz8zyH3sFDLnhkQUEXX7.ubJnveQxYp9732SnCi2Q'
-                  #     public: false
-                  #     authorization_policy: 'two_factor'
-                  #     redirect_uris:
-                  #       - 'https://vault.bhamm-lab.com/oidc/callback'
-                  #       - 'https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback'
-                  #       - 'http://localhost:8250/oidc/callback'
-                  #     scopes:
-                  #       - 'openid'
-                  #       - 'profile'
-                  #       - 'groups'
-                  #       - 'email'
-                  #     userinfo_signed_response_alg: 'none'
+                - client_id: 'vault'
+                  client_name: 'HashiCorp Vault'
+                  client_secret: '$pbkdf2-sha512$310000$RgShGcxpgOLtKwXIG/4h.g$N/qdg62jY71IwlloAA7B5.Fr4n3LJdg1mQbZ/pVWPoqVg7ntBRzhices5nMG9a5U437ExstmEQZ9LTMFLrEOWg'
+                  public: false
+                  authorization_policy: 'two_factor'
+                  redirect_uris:
+                    - 'https://vault.bhamm-lab.com/oidc/callback'
+                    - 'https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback'
+                    - 'http://localhost:8250/oidc/callback'
+                  scopes:
+                    - 'openid'
+                    - 'profile'
+                    - 'groups'
+                    - 'email'
+                  userinfo_signed_response_alg: 'none'
                   #   - client_id: 'argocd'
                   #     client_name: 'Argo CD'
                   #     client_secret: '$pbkdf2-sha512$310000$zleQgxPmF81tKn7ZZCpiwA$H1xLnYHqIRewWJjBDJnljs/7Iyw7srK12.TUXDVDbFyyH4yonDOTWAUKQrazNUzm8tIW/0y36UAVe7dKNa/ymA'
