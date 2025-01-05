@@ -22,7 +22,7 @@ spec:
           TZ: "MDT"
         image:
           repository: "lldap/lldap"
-          tag: "latest"
+          tag: "v0.6.1"
         persistence:
           storageClassName: "csi-rbd-sc"
   syncPolicy:

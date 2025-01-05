@@ -4,42 +4,51 @@ metadata:
   name: lldap-bootstrap-workflow
   annotations:
     argocd.argoproj.io/sync-wave: "5"
-    argocd.argoproj.io/sync-options: Replace=true
 spec:
-  entrypoint: main
+  entrypoint: lldap-bootstrap-workflow
   serviceAccountName: lldap-bootstrap-workflow-sa
   templates:
-    - name: main
-      steps:
-        - - name: find-pod
-            template: find-pod
-        - - name: run-bootstrap
-            template: run-bootstrap
-            arguments:
-              parameters:
-                - name: pod-name
-                  value: "{{steps.find-pod.outputs.result}}"
-    - name: find-pod
-      script:
-        image: bitnami/kubectl:latest
-        command: [sh]
-        source: |
-          #!/bin/sh
-          # Find a pod with the label app=lldap
-          POD=$(kubectl get pods -l app=lldap -o jsonpath='{.items[0].metadata.name}')
-          if [ -z "$POD" ]; then
-            echo "No pod found with label app=lldap" >&2
-            exit 1
-          fi
-          echo $POD
-    - name: run-bootstrap
-      inputs:
-        parameters:
-          - name: pod-name
-      script:
-        image: bitnami/kubectl:latest
-        command: [sh]
-        source: |
-          #!/bin/sh
-          # Run the bootstrap script on the specified pod
-          kubectl exec {{inputs.parameters.pod-name}} -- bash -c '/app/bootstrap.sh'
+    - name: lldap-bootstrap-workflow
+      container:
+        image: lldap/lldap:v0.6.1
+        command:
+          - /app/bootstrap.sh
+        env:
+          - name: LLDAP_URL
+            value: "http://lldap:8080"
+          - name: LLDAP_ADMIN_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: lldap-credentials
+                key: lldap-ldap-user-name
+          - name: LLDAP_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: lldap-credentials
+                key: lldap-ldap-user-pass
+          - name: DO_CLEANUP
+            value: "true"
+        volumeMounts:
+          - name: user-configs
+            mountPath: /bootstrap/user-configs
+            readOnly: true
+          - name: group-configs
+            mountPath: /bootstrap/group-configs
+            readOnly: true
+  volumes:
+    - name: user-configs
+      projected:
+        sources:
+          - secret:
+              name: lldap-credentials
+              items:
+                - key: user-configs
+                  path: user-configs.json
+    - name: group-configs
+      projected:
+        sources:
+          - secret:
+              name: lldap-credentials
+              items:
+                - key: group-configs
+                  path: group-configs.json
