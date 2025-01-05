@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: lldap-bootstrap-worfklow
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: Replace=true
+spec:
+  entrypoint: main
+  serviceAccountName: lldap-bootstrap-workflow-sa
+  templates:
+    - name: main
+      steps:
+        - - name: find-lldap-pod
+            template: find-lldap-pod
+        - - name: run-lldap-bootstrap
+            template: run-lldap-bootstrap
+            arguments:
+              parameters:
+                - name: pod-name
+                  value: "{{steps.find-pod.outputs.result}}"
+    - name: find-lldap-pod
+      script:
+        image: bitnami/kubectl:latest
+        command: [sh]
+        source: |
+          #!/bin/sh
+          # Find a pod with the label app=lldap
+          POD=$(kubectl get pods -l app=lldap -o jsonpath='{.items[0].metadata.name}')
+          if [ -z "$POD" ]; then
+            echo "No pod found with label app=lldap" >&2
+            exit 1
+          fi
+          echo $POD
+    - name: run-lldap-bootstrap
+      inputs:
+        parameters:
+          - name: pod-name
+      script:
+        image: bitnami/kubectl:latest
+        command: [sh]
+        source: |
+          #!/bin/sh
+          # Run the bootstrap script on the specified pod
+          kubectl exec {{inputs.parameters.pod-name}} -- bash -c '/app/app/bootstrap.sh'
