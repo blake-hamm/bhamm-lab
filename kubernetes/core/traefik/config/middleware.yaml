@@ -47,7 +47,8 @@ metadata:
     argocd.argoproj.io/sync-wave: "5"
 spec:
   forwardAuth:
-    address: 'http://authelia/api/authz/forward-auth'
+    trustForwardHeader: true
+    address: 'http://authelia/api/authz/forward-auth?authelia_url=https%3A%2F%2Fauth.bhamm-lab.com%2F'
     authResponseHeaders:
       - 'Remote-User'
       - 'Remote-Groups'
