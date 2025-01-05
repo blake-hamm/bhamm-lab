@@ -14,7 +14,7 @@ spec:
       kind: Rule
       middlewares:
         - name: default-headers
-          # - name: forwardauth-authelia
+        - name: forwardauth-authelia
       services:
         - name: api@internal
           kind: TraefikService
