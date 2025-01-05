@@ -18,7 +18,7 @@ rules:
     resources: ["secrets"]
     verbs: ["get", "create", "update", "delete"]
   - apiGroups: [""]
-    resources: ["pods", "pods/exec", "pods/portforward"]
+    resources: ["pods", "pods/exec"]
     verbs: ["create", "get", "list", "update", "patch", "delete"]
   - apiGroups: ["argoproj.io"]
     resources: ["applications", "workflowtaskresults"]
