@@ -11,15 +11,15 @@ spec:
   templates:
     - name: main
       steps:
-        - - name: find-lldap-pod
-            template: find-lldap-pod
-        - - name: run-lldap-bootstrap
-            template: run-lldap-bootstrap
+        - - name: find-pod
+            template: find-pod
+        - - name: run-bootstrap
+            template: run-bootstrap
             arguments:
               parameters:
                 - name: pod-name
-                  value: "{{steps.find-lldap-pod.outputs.result}}"
-    - name: find-lldap-pod
+                  value: "{{steps.find-pod.outputs.result}}"
+    - name: find-pod
       script:
         image: bitnami/kubectl:latest
         command: [sh]
@@ -32,7 +32,7 @@ spec:
             exit 1
           fi
           echo $POD
-    - name: run-lldap-bootstrap
+    - name: run-bootstrap
       inputs:
         parameters:
           - name: pod-name
@@ -42,4 +42,4 @@ spec:
         source: |
           #!/bin/sh
           # Run the bootstrap script on the specified pod
-          kubectl exec {{inputs.parameters.pod-name}} -- bash -c '/app/app/bootstrap.sh'
+          kubectl exec {{inputs.parameters.pod-name}} -- bash -c '/app/bootstrap.sh'
