@@ -1,0 +1,240 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: authelia
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: authelia
+    repoURL: https://charts.authelia.com
+    targetRevision: 0.9.14
+    helm:
+      valuesObject:
+        pod:
+          extraVolumeMounts:
+            - mountPath: '/app/external-secrets'
+              name: 'external-secrets'
+              readOnly: true
+          extraVolumes:
+            - name: 'external-secrets'
+              projected:
+                sources:
+                  - secret:
+                      name: authelia-external
+                      items:
+                        - key: lldap_password
+                          path: lldap_password
+                        - key: storage_encryption_key
+                          path: storage_encryption_key
+                  - secret:
+                      name: authelia-pg-external-secrets
+                      items:
+                        - key: password
+                          path: pg_password
+          env:
+            - name: AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD_FILE
+              value: /app/external-secrets/lldap_password
+            - name: AUTHELIA_STORAGE_POSTGRES_PASSWORD_FILE
+              value: /app/external-secrets/pg_password
+            - name: AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE
+              value: /app/external-secrets/storage_encryption_key
+            - name: TZ
+              value: America/Denver
+        configMap:
+          server:
+            timeouts:
+              read: '15 seconds'
+              write: '15 seconds'
+              idle: '30 seconds'
+            buffers:
+              read: 8192
+              write: 8192
+          disabled: false
+          telemetry:
+            metrics:
+              enabled: true
+              serviceMonitor:
+                enabled: true
+                labels:
+                  release: monitor
+          default_2fa_method: totp
+          theme: 'dark'
+          password_reset:
+            disable: true
+          authentication_backend:
+            ldap:
+              enabled: true
+              implementation: 'custom'
+              address: 'ldap://lldap-service:3890'
+              timeout: '15 seconds'
+              base_dn: 'DC=bhamm-lab,DC=com'
+              additional_users_dn: ou=people
+              users_filter: "(&({username_attribute}={input})(objectClass=person))"
+              additional_groups_dn: ou=groups
+              groups_filter: "(member={dn})"
+              attributes:
+                display_name: displayName
+                username: uid
+                group_name: cn
+                mail: mail
+              user: 'uid=authelia,ou=people,DC=bhamm-lab,DC=com'
+              password:
+                disabled: true
+          storage:
+            encryption_key:
+              disabled: true
+            postgres:
+              enabled: true
+              deploy: false
+              address: 'tcp://authelia-pg-cluster-rw:5432'
+              timeout: '15 seconds'
+              database: 'authelia'
+              schema: 'public'
+              username: 'authelia'
+              password:
+                disabled: true
+              tls:
+                skip_verify: true
+          notifier:
+            filesystem:
+              enabled: true
+          access_control:
+            default_policy: deny
+            rules:
+              - domain:
+                  - '*.bhamm-lab.com'
+                  - bhamm-lab.com
+                policy: two_factor
+          session:
+            cookies:
+              - subdomain: 'auth'
+                domain: 'bhamm-lab.com'
+            redis:
+              enabled: true
+              deploy: true
+              host: 'authelia-redis-master'
+          identity_providers:
+            oidc:
+              enabled: true
+              authorization_policies:
+                policy_name:
+                  default_policy: 'two_factor'
+                  rules:
+                    - policy: 'deny'
+                      subject: 'group:services'
+                      # clients:
+                      #   - client_id: 'immich'
+                      #     client_name: 'immich'
+                      #     client_secret: '$pbkdf2-sha512$310000$ePbXTUtLycJCNZKtD6/u1w$tfCj3diKcxbW6NkLAqm5Mkobi32JS0FNUauxj82rulq.6dT/kZ93SKrWHrkX8PmdreHkHkcv1Yfod.ODROpj8w'
+                      #     public: false
+                      #     authorization_policy: 'two_factor'
+                      #     redirect_uris:
+                      #       - 'https://immich.bhamm-lab.com/auth/login'
+                      #       - 'https://immich.bhamm-lab.com/user-settings'
+                      #       - 'app.immich:///oauth-callback'
+                      #     scopes:
+                      #       - 'openid'
+                      #       - 'profile'
+                      #       - 'email'
+                      #     userinfo_signed_response_alg: 'none'
+                      #   - client_id: 'vault'
+                      #     client_name: 'HashiCorp Vault'
+                      #     client_secret: '$pbkdf2-sha512$310000$tl5M93tjJd/ntJcX/VeDWA$E5UM2tStTQcNoA9pPFm6AFmj4xL9sRaOTzRCBvqC/Pao3xz8zyH3sFDLnhkQUEXX7.ubJnveQxYp9732SnCi2Q'
+                      #     public: false
+                      #     authorization_policy: 'two_factor'
+                      #     redirect_uris:
+                      #       - 'https://vault.bhamm-lab.com/oidc/callback'
+                      #       - 'https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback'
+                      #       - 'http://localhost:8250/oidc/callback'
+                      #     scopes:
+                      #       - 'openid'
+                      #       - 'profile'
+                      #       - 'groups'
+                      #       - 'email'
+                      #     userinfo_signed_response_alg: 'none'
+                      #   - client_id: 'argocd'
+                      #     client_name: 'Argo CD'
+                      #     client_secret: '$pbkdf2-sha512$310000$zleQgxPmF81tKn7ZZCpiwA$H1xLnYHqIRewWJjBDJnljs/7Iyw7srK12.TUXDVDbFyyH4yonDOTWAUKQrazNUzm8tIW/0y36UAVe7dKNa/ymA'
+                      #     public: false
+                      #     authorization_policy: 'two_factor'
+                      #     redirect_uris:
+                      #       - 'https://argocd.bhamm-lab.com/auth/callback'
+                      #     scopes:
+                      #       - 'openid'
+                      #       - 'groups'
+                      #       - 'email'
+                      #       - 'profile'
+                      #     userinfo_signed_response_alg: 'none'
+                      #     token_endpoint_auth_method: 'client_secret_post'
+                      #   - client_id: 'argocd-cli'
+                      #     client_name: 'Argo CD (CLI)'
+                      #     public: true
+                      #     authorization_policy: 'two_factor'
+                      #     redirect_uris:
+                      #       - 'http://localhost:8085/auth/callback'
+                      #     scopes:
+                      #       - 'openid'
+                      #       - 'groups'
+                      #       - 'email'
+                      #       - 'profile'
+                      #       - 'offline_access'
+                      #     userinfo_signed_response_alg: 'none'
+                      #   - client_id: 'argoworkflows'
+                      #     client_name: 'Argo Workflows'
+                      #     client_secret: '$pbkdf2-sha512$310000$ggcVQ063OrvfkVBrmJ/jYA$twpvYp/R6R5r8ziSRCTdNpOttQezT1zWxKa4jg7bKoPi.ITTHMf4drmY8J99ud8LlXDTs5VQr8CN/QdU/aBJ0Q'
+                      #     public: false
+                      #     authorization_policy: 'two_factor'
+                      #     redirect_uris:
+                      #       - 'https://argoworkflows.bhamm-lab.com/oauth2/callback'
+                      #     scopes:
+                      #       - 'openid'
+                      #       - 'groups'
+                      #       - 'email'
+                      #       - 'profile'
+                      #     userinfo_signed_response_alg: 'none'
+                      #     token_endpoint_auth_method: 'client_secret_post'
+                      # - client_id: 'grafana'
+                      #   client_name: 'Grafana'
+                      #   client_secret: '$pbkdf2-sha512$310000$fdZqkI2tbkkYGPPxO/6juQ$RzFUajWAlOmj/qAzJOm118Tg/CU2P3FSa46XkLveUFVQgljg163KQChfytVSNC1Rhfe4xDIHdq3V/D00Y4yOoQ'
+                      #   public: false
+                      #   authorization_policy: 'two_factor'
+                      #   require_pkce: true
+                      #   pkce_challenge_method: 'S256'
+                      #   redirect_uris:
+                      #     - 'https://grafana.bhamm-lab.com/login/generic_oauth'
+                      #   scopes:
+                      #     - 'openid'
+                      #     - 'profile'
+                      #     - 'groups'
+                      #     - 'email'
+                      #   userinfo_signed_response_alg: 'none'
+                      #   token_endpoint_auth_method: 'client_secret_basic'
+                      #   claims:
+                      #     email: uid # Map `uid` (or another LDAP attribute) to the `email` claim
+                      #     preferred_username: uid # Ensure the username is set
+                      #     name: displayName # Optionally map `displayName` or another attribute to the name claim
+                      # - client_id: 'gitea'
+                      #   client_name: 'Gitea'
+                      #   client_secret: '$pbkdf2-sha512$310000$OLMZifgp6Mmqs843wKvyJw$IgiDqe/OHN/fvGKtwEcdhOcwz8wkZ4RK8ExHoGwem3RUYAfD9Pp2VwGqno1bRNgjni4EfTUFWuB0bSHOU1Fw8Q'
+                      #   public: false
+                      #   authorization_policy: 'two_factor'
+                      #   redirect_uris:
+                      #     - 'https://git.bhamm-lab.com/user/oauth2/authelia/callback'
+                      #   scopes:
+                      #     - 'openid'
+                      #     - 'email'
+                      #     - 'profile'
+                      #   userinfo_signed_response_alg: 'none'
+                      #   token_endpoint_auth_method: 'client_secret_basic'
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true
