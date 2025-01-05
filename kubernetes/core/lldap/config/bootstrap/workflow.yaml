@@ -18,7 +18,7 @@ spec:
             arguments:
               parameters:
                 - name: pod-name
-                  value: "{{steps.find-pod.outputs.result}}"
+                  value: "{{steps.find-lldap-pod.outputs.result}}"
     - name: find-lldap-pod
       script:
         image: bitnami/kubectl:latest
