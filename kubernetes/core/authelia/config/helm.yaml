@@ -17,6 +17,7 @@ spec:
     helm:
       valuesObject:
         pod:
+          kind: 'StatefulSet'
           extraVolumeMounts:
             - mountPath: '/app/external-secrets'
               name: 'external-secrets'
