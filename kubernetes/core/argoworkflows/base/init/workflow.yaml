@@ -178,7 +178,7 @@ spec:
               syncOptions:
                 - ApplyOutOfSyncOnly=true
               automated:
-                prune: true
+                prune: false
                 selfHeal: true
   volumes:
     - name: workspace
