@@ -14,7 +14,7 @@ spec:
       kind: Rule
       middlewares:
         - name: default-headers
-        - name: forwardauth-authelia
+          # - name: forwardauth-authelia # Required for mobile
       services:
         - name: immich-server
           port: 2283
