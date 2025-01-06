@@ -22,7 +22,7 @@ rules:
     verbs: ["create", "get", "list", "update", "patch", "delete"]
   - apiGroups: ["argoproj.io"]
     resources: ["applications", "workflowtaskresults"]
-    verbs: ["create", "get", "update", "delete"]
+    verbs: ["create", "get", "update", "delete", "patch"]
   - apiGroups: [""]
     resources: ["serviceaccounts"]
     verbs: ["get"]
