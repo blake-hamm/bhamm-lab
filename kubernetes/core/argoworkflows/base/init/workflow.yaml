@@ -170,7 +170,7 @@ spec:
               targetRevision: feature/k3s
               directory:
                 recurse: true
-                include: "*/config/*"
+                include: "{*/config/*,default.yaml,backup.yaml}"
             destination:
               server: "https://kubernetes.default.svc"
               namespace: default
