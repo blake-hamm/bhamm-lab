@@ -7,3 +7,4 @@ metadata:
   labels:
     velero.io/csi-volumesnapshot-class: "true"
 driver: rbd.csi.ceph.com
+deletionPolicy: Delete
