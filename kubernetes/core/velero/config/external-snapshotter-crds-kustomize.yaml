@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: snapshot-controller
+  name: external-snapshotter-crds
   namespace: default
   annotations:
-    argocd.argoproj.io/sync-wave: "12"
+    argocd.argoproj.io/sync-wave: "11"
 spec:
   project: default
   source:
-    path: deploy/kubernetes/snapshot-controller
+    path: client/config/crd
     repoURL: 'https://github.com/kubernetes-csi/external-snapshotter'
     targetRevision: v8.2.0
   destination:
