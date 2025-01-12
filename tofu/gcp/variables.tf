@@ -17,16 +17,10 @@ variable "region" {
   default     = "us-central1"
 }
 
-variable "bucket_name" {
-  description = "The name of the GCS bucket"
+variable "velero_service_account_id" {
+  description = "The ID for the Velero service account"
   type        = string
-  default     = "bhamm-lab-backups"
-}
-
-variable "argo_service_account_id" {
-  description = "The ID for the Argo Workflows service account"
-  type        = string
-  default     = "argo-workflows-backup"
+  default     = "velero-workflows-backup"
 }
 
 variable "vault_service_account_id" {
@@ -46,3 +40,10 @@ variable "sops_key_file_path" {
   type        = string
   default     = "./gcp-sops-sa.json"
 }
+
+variable "velero_key_file_path" {
+  description = "Path to save the generated key file."
+  type        = string
+  default     = "./gcp-velero-sa.json"
+}
+

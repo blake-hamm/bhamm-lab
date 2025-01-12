@@ -4,16 +4,16 @@ resource "google_project_iam_member" "storage_service_account_kms" {
   member  = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
 }
 
-# kms, sa and bucket for backups
-resource "google_kms_key_ring" "backup_key_ring" {
-  name       = "${var.bucket_name}-key-ring"
+# kms, sa and bucket for velero
+resource "google_kms_key_ring" "velero_key_ring" {
+  name       = "velero-key-ring"
   location   = var.region
   depends_on = [google_project_iam_member.storage_service_account_kms]
 }
 
-resource "google_kms_crypto_key" "backup_crypto_key" {
-  name            = "${var.bucket_name}-crypto-key"
-  key_ring        = google_kms_key_ring.backup_key_ring.id
+resource "google_kms_crypto_key" "velero_crypto_key" {
+  name            = "velero-crypto-key"
+  key_ring        = google_kms_key_ring.velero_key_ring.id
   rotation_period = "7776000s" # 90 days
 
   lifecycle {
@@ -21,8 +21,8 @@ resource "google_kms_crypto_key" "backup_crypto_key" {
   }
 }
 
-resource "google_storage_bucket" "backup" {
-  name          = var.bucket_name
+resource "google_storage_bucket" "velero" {
+  name          = "bhamm-lab-velero"
   location      = var.region
   force_destroy = true
 
@@ -33,12 +33,12 @@ resource "google_storage_bucket" "backup" {
   }
 
   encryption {
-    default_kms_key_name = google_kms_crypto_key.backup_crypto_key.id
+    default_kms_key_name = google_kms_crypto_key.velero_crypto_key.id
   }
 
   lifecycle_rule {
     condition {
-      age = 120
+      age = 365
     }
     action {
       type = "Delete"
@@ -46,36 +46,38 @@ resource "google_storage_bucket" "backup" {
   }
 }
 
-resource "google_service_account" "argo_workflows" {
-  account_id   = var.argo_service_account_id
-  display_name = "Argo workflows backup SA"
+resource "google_service_account" "velero" {
+  account_id   = var.velero_service_account_id
+  display_name = "Velero SA"
 }
 
-resource "google_project_iam_member" "argo_workflows_kms" {
+resource "google_project_iam_member" "velero_kms" {
   project = var.project_id
   role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member  = "serviceAccount:${google_service_account.argo_workflows.email}"
+  member  = "serviceAccount:${google_service_account.velero.email}"
 }
 
-# Grant storage object admin permissions to the service account
-resource "google_storage_bucket_iam_member" "argo_workflows_storage_admin" {
-  bucket = google_storage_bucket.backup.name
+resource "google_storage_bucket_iam_member" "velero_storage_admin" {
+  bucket = google_storage_bucket.velero.name
   role   = "roles/storage.objectAdmin"
-  member = "serviceAccount:${google_service_account.argo_workflows.email}"
+  member = "serviceAccount:${google_service_account.velero.email}"
 }
 
-# Create service account key
-resource "google_service_account_key" "argo_workflows_key" {
-  service_account_id = google_service_account.argo_workflows.name
+resource "google_service_account_key" "velero_key" {
+  service_account_id = google_service_account.velero.name
+
+  provisioner "local-exec" {
+    command = "echo '${self.private_key}' | base64 --decode > ${var.velero_key_file_path}"
+  }
 }
 
 
 # Store credentials in Vault
-# resource "vault_generic_secret" "argo_workflows_creds" {
+# resource "vault_generic_secret" "velero_creds" {
 #   path = "secret/core/argo-workflows"
 
 #   data_json = jsonencode({
-#     "gcp_credentials.json" = base64decode(google_service_account_key.argo_workflows_key.private_key),
+#     "gcp_credentials.json" = base64decode(google_service_account_key.velero_key.private_key),
 #     "bucket_name"          = google_storage_bucket.backup.name,
 #     "project_id"           = var.project_id
 #   })
