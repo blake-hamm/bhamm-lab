@@ -36,6 +36,7 @@ spec:
                 key: cloud
               config:
                 region: us-central1
+                kmsKeyName: projects/deep-contact-445917-i9/locations/us-central1/keyRings/velero-key-ring/cryptoKeys/velero-crypto-key
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
