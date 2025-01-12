@@ -1,0 +1,17 @@
+- name: Add Proxmox Backup Server repository
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/pbs.list
+    content: |
+      deb http://download.proxmox.com/debian/pbs bookworm pbs-no-subscription
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Update APT package cache
+- name: Install Proxmox Backup Server
+  ansible.builtin.apt:
+    name: proxmox-backup-server
+    state: present
+- name: Remove the Proxmox Enterprise repository if it exists
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/pbs-enterprise.list
+    state: absent

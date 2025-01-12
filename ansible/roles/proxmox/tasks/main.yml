@@ -6,6 +6,12 @@
     name: lae.proxmox
     apply:
       become: true
+- name: Install pbs
+  ansible.builtin.include_tasks:
+    file: pbs.yml
+    apply:
+      become: true
+  when: proxmox_pbs | default(false)
 - name: Run post tasks
   ansible.builtin.include_tasks:
     file: post.yml
