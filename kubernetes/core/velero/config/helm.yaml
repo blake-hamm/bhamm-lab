@@ -14,8 +14,15 @@ spec:
     chart: velero
     repoURL: https://vmware-tanzu.github.io/helm-charts
     targetRevision: 8.2.0
-    # helm:
-    #   valuesObject:
+    helm:
+      valuesObject:
+        initContainers:
+          - name: velero-plugin-for-gcp
+            image: velero/velero-plugin-for-gcp:v1.11.1
+            imagePullPolicy: IfNotPresent
+            volumeMounts:
+              - mountPath: /target
+                name: plugins
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
