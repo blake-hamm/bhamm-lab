@@ -31,6 +31,8 @@ k3s_server_manifests_urls:
     filename: csi-rbdplugin-provisioner.yaml
   - url: https://raw.githubusercontent.com/ceph/ceph-csi/master/deploy/rbd/kubernetes/csi-rbdplugin.yaml
     filename: csi-rbdplugin.yaml
+  - url: https://raw.githubusercontent.com/ceph/ceph-csi/master/deploy/rbd/kubernetes/csidriver.yaml
+    filename: csidriver.yaml
 k3s_server_manifests_templates:
   - k3s/calico.yaml
   - k3s/kube-vip.yaml

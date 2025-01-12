@@ -16,6 +16,7 @@ spec:
     targetRevision: 8.2.0
     helm:
       valuesObject:
+        snapshotsEnabled: false
         credentials:
           existingSecret: velero-external-secret
         initContainers:
@@ -44,6 +45,7 @@ spec:
                 key: cloud
               config:
                 snapshotLocation: us-central1
+          features: EnableCSI
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

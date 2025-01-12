@@ -24,6 +24,7 @@ pkgs.mkShell {
     restic
     openssl
     google-cloud-sdk
+    velero
   ];
 
   packages = [
