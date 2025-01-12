@@ -36,6 +36,14 @@ spec:
                 key: cloud
               config:
                 kmsKeyName: projects/deep-contact-445917-i9/locations/us-central1/keyRings/velero-key-ring/cryptoKeys/velero-crypto-key
+          volumeSnapshotLocation:
+            - name: "default"
+              provider: "gcp"
+              credential:
+                name: velero-external-secret
+                key: cloud
+              config:
+                snapshotLocation: us-central1
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
