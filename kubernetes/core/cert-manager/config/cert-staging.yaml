@@ -1,0 +1,39 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: bhamm-homelab@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt-staging
+    solvers:
+      - dns01:
+          cloudflare:
+            email: bhamm-homelab@gmail.com
+            apiTokenSecretRef:
+              name: cloudflare
+              key: cloudflare-token
+        selector:
+          dnsZones:
+            - "bhamm-lab.com"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: bhamm-lab-tls-staging
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  secretName: bhamm-lab-tls-staging
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+  commonName: "*.bhamm-lab.com"
+  dnsNames:
+    - "bhamm-lab.com"
+    - "*.bhamm-lab.com"

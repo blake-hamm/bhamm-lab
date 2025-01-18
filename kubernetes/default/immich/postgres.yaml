@@ -1,0 +1,32 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: immich-pg-cluster
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  imageName: ghcr.io/tensorchord/cloudnative-pgvecto.rs:16.5-v0.3.0@sha256:be3f025d79aa1b747817f478e07e71be43236e14d00d8a9eb3914146245035ba
+  instances: 1
+  storage:
+    size: 4Gi
+  monitoring:
+    enablePodMonitor: true
+  postgresql:
+    shared_preload_libraries:
+      - "vectors.so"
+  managed:
+    roles:
+      - name: immich
+        superuser: true
+        login: true
+  bootstrap:
+    initdb:
+      database: immich
+      owner: immich
+      secret:
+        name: immich-pg-external-secrets
+      postInitSQL:
+        - CREATE EXTENSION IF NOT EXISTS "vectors";
+        - CREATE EXTENSION IF NOT EXISTS "cube" CASCADE;
+        - CREATE EXTENSION IF NOT EXISTS "earthdistance" CASCADE;

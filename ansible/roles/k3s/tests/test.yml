@@ -1,0 +1,5 @@
+- name: Test
+  hosts: localhost
+  remote_user: root
+  roles:
+    - k3s

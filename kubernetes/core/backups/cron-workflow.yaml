@@ -1,0 +1,119 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: backup
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "500"
+spec:
+  schedule: "0 * * * *"
+  timezone: "America/Denver"
+  startingDeadlineSeconds: 0
+  concurrencyPolicy: "Replace"
+  successfulJobsHistoryLimit: 4
+  failedJobsHistoryLimit: 4
+  suspend: false
+  workflowSpec:
+    entrypoint: backup-workflow
+    serviceAccountName: argo-backup-workflow
+    templates:
+      - name: backup-workflow
+        dag:
+          tasks:
+            - name: trigger-k8up-pvc-backup
+              template: trigger-k8up-pvc-backup
+            - name: wait-for-k8up-pvc-backup
+              template: wait-for-k8up-pvc-backup
+              dependencies: [trigger-k8up-pvc-backup]
+            - name: prune-k8up-pvc-backup
+              template: prune-k8up-pvc-backup
+              dependencies: [wait-for-k8up-pvc-backup]
+            - name: wait-for-k8up-prune
+              template: wait-for-k8up-prune
+              dependencies: [prune-k8up-pvc-backup]
+      - name: trigger-k8up-pvc-backup
+        resource:
+          action: apply
+          manifest: |
+            apiVersion: k8up.io/v1
+            kind: Backup
+            metadata:
+              name: pvc-backups-{{workflow.creationTimestamp.Y}}-{{workflow.creationTimestamp.m}}-{{workflow.creationTimestamp.d}}-{{workflow.creationTimestamp.H}}-{{workflow.creationTimestamp.M}}-{{workflow.creationTimestamp.S}}
+            spec:
+              failedJobsHistoryLimit: 2
+              successfulJobsHistoryLimit: 2
+              backend:
+                repoPasswordSecretRef:
+                  name: backup-external-secret
+                  key: repo-password
+                s3:
+                  endpoint: https://minio-api.bhamm-lab.com:443
+                  bucket: k8up-pvc-backups
+                  accessKeyIDSecretRef:
+                    name: backup-external-secret
+                    key: user
+                  secretAccessKeySecretRef:
+                    name: backup-external-secret
+                    key: password
+      - name: wait-for-k8up-pvc-backup
+        retryStrategy:
+          limit: 20 # Will try approximately 20 times over 5 minutes
+          retryPolicy: "Always"
+          backoff:
+            duration: "15s" # Check every 15 seconds
+            factor: 1 # Don't increase the duration between retries
+            maxDuration: "15s" # Keep it at 15 seconds
+        resource:
+          action: get
+          successCondition: status.finished == true
+          failureCondition: status.finished == false
+          manifest: |
+            apiVersion: k8up.io/v1
+            kind: Backup
+            metadata:
+              name: pvc-backups-{{workflow.creationTimestamp.Y}}-{{workflow.creationTimestamp.m}}-{{workflow.creationTimestamp.d}}-{{workflow.creationTimestamp.H}}-{{workflow.creationTimestamp.M}}-{{workflow.creationTimestamp.S}}
+      - name: prune-k8up-pvc-backup
+        resource:
+          action: apply
+          manifest: |
+            apiVersion: k8up.io/v1
+            kind: Prune
+            metadata:
+              name: prune-pvc-backups-{{workflow.creationTimestamp.Y}}-{{workflow.creationTimestamp.m}}-{{workflow.creationTimestamp.d}}-{{workflow.creationTimestamp.H}}-{{workflow.creationTimestamp.M}}-{{workflow.creationTimestamp.S}}
+            spec:
+              activeDeadlineSeconds: 600
+              retention:
+                keepLast: 5
+                keepDaily: 3
+                keepWeekly: 1
+                keepMonthly: 1
+              backend:
+                repoPasswordSecretRef:
+                  name: backup-external-secret
+                  key: repo-password
+                s3:
+                  endpoint: https://minio-api.bhamm-lab.com:443
+                  bucket: k8up-pvc-backups
+                  accessKeyIDSecretRef:
+                    name: backup-external-secret
+                    key: user
+                  secretAccessKeySecretRef:
+                    name: backup-external-secret
+                    key: password
+      - name: wait-for-k8up-prune
+        retryStrategy:
+          limit: 20
+          retryPolicy: "Always"
+          backoff:
+            duration: "15s"
+            factor: 1
+            maxDuration: "15s"
+        resource:
+          action: get
+          successCondition: status.finished == true
+          failureCondition: status.finished == false
+          manifest: |
+            apiVersion: k8up.io/v1
+            kind: Prune
+            metadata:
+              name: prune-pvc-backups-{{workflow.creationTimestamp.Y}}-{{workflow.creationTimestamp.m}}-{{workflow.creationTimestamp.d}}-{{workflow.creationTimestamp.H}}-{{workflow.creationTimestamp.M}}-{{workflow.creationTimestamp.S}}

@@ -1,0 +1,28 @@
+# tasks file for k3s
+- name: Run pre tasks
+  ansible.builtin.include_tasks: pre.yml
+- name: Gather ceph data
+  ansible.builtin.include_tasks:
+    file: ceph.yml
+    apply:
+      become: true
+      tags: [ceph]
+      delegate_to: aorus
+- name: Include xanmanning.k3s role
+  ansible.builtin.include_role:
+    name: xanmanning.k3s
+- name: Copy kubeconfig to local
+  ansible.builtin.include_tasks:
+    file: kubeconfig.yml
+    apply:
+      run_once: true
+- name: Patch k3s manifests
+  ansible.builtin.include_tasks:
+    file: patches.yml
+    apply:
+      run_once: true
+- name: Setup argocd
+  ansible.builtin.include_tasks:
+    file: argocd.yml
+    apply:
+      run_once: true

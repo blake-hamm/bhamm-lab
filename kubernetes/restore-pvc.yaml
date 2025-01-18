@@ -1,0 +1,35 @@
+apiVersion: k8up.io/v1
+kind: Restore
+metadata:
+  name: restore
+  namespace: default
+spec:
+  restoreMethod:
+    folder:
+      claimName: redis-data-gitea-redis-cluster-0
+  backend:
+    repoPasswordSecretRef:
+      name: backup-credentials
+      key: repo-pass
+    s3:
+      endpoint: https://minio.default:443
+      bucket: backups
+      accessKeyIDSecretRef:
+        name: backup-credentials
+        key: username
+      secretAccessKeySecretRef:
+        name: backup-credentials
+        key: password
+    tlsOptions:
+      caCert: /mnt/ca/public.crt
+    volumeMounts:
+      - name: ca-tls
+        mountPath: /mnt/ca/
+  podSecurityContext:
+    fsGroup: 1000
+    runAsUser: 1000
+  volumes:
+    - name: ca-tls
+      secret:
+        secretName: minio-tenant-tls
+        defaultMode: 420

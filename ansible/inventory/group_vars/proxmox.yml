@@ -28,6 +28,7 @@ pve_acls:
 pve_roles:
   - name: Tofu
     privileges:
+      - "Datastore.Allocate"
       - "Datastore.AllocateSpace"
       - "Datastore.AllocateTemplate"
       - "Datastore.Audit"
@@ -50,8 +51,7 @@ pve_roles:
       - "VM.Monitor"
       - "VM.PowerMgmt"
       - "SDN.Use"
-pve_ssh_port: "{{ ssh_client_port }}"
-pve_manage_ssh: true
+pve_manage_ssh: false
 pve_storages:
   - name: nfs
     type: nfs
@@ -69,8 +69,18 @@ pve_ceph_pools:
     application: rbd
     autoscale_mode: "on"
     storage: true
+  - name: kubernetes
+    pgs: 64 # adjust later
+    rule: replicated_rule
+    application: rbd
+    autoscale_mode: "on"
+    storage: false
 pve_ceph_fs:
   - name: ceph_fs
     pgs: 64 # adjust later
     rule: replicated_rule
     storage: true
+pve_cluster_ha_groups:
+  - name: main
+    comment: "HA group"
+    nodes: "aorus,antsle"

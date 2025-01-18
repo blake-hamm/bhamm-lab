@@ -1,0 +1,14 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: example-pg-cluster
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "200"
+spec:
+  instances: 1
+  storage:
+    size: 1Gi
+  monitoring:
+    enablePodMonitor: true

@@ -1,0 +1,188 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: argo-init-workflow
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "35"
+    argocd.argoproj.io/sync-options: Replace=true
+spec:
+  entrypoint: main
+  serviceAccountName: argo-init-workflow-sa
+  templates:
+    - name: main
+      steps:
+        - - name: fetch-sops-file
+            template: fetch-sops-file
+        - - name: decrypt-sops-file
+            template: decrypt-sops-file
+            arguments:
+              artifacts:
+                - name: secrets
+                  from: "{{steps.fetch-sops-file.outputs.artifacts.secrets}}"
+        - - name: update-vault
+            template: update-vault
+            arguments:
+              artifacts:
+                - name: secrets
+                  from: "{{steps.decrypt-sops-file.outputs.artifacts.secrets}}"
+        - - name: delete-core-base
+            template: delete-core-base
+        - - name: create-core-config
+            template: create-core-config
+    - name: fetch-sops-file
+      container:
+        image: alpine/git:v2.47.1
+        command:
+          - sh
+          - -c
+        args:
+          - |
+            git clone -b feature/k3s https://github.com/blake-hamm/bhamm-lab.git /workspace/repo
+        volumeMounts:
+          - name: workspace
+            mountPath: /workspace
+      outputs:
+        artifacts:
+          - name: secrets
+            path: /workspace/repo/secrets.enc.json
+    - name: decrypt-sops-file
+      inputs:
+        artifacts:
+          - name: secrets
+            path: /workspace/secrets.enc.json
+      container:
+        image: mozilla/sops:v3-alpine
+        command:
+          - sh
+          - -c
+        args:
+          - |
+            sops --decrypt /workspace/secrets.enc.json > /workspace/secrets.decrypted.json
+        env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /secrets/gcp/service-account.json
+        volumeMounts:
+          - name: gcp-credentials
+            mountPath: /secrets/gcp
+            readOnly: true
+          - name: workspace
+            mountPath: /workspace
+      outputs:
+        artifacts:
+          - name: secrets
+            path: /workspace/secrets.decrypted.json
+    - name: update-vault
+      inputs:
+        artifacts:
+          - name: secrets
+            path: /workspace/secrets.decrypted.json
+      container:
+        image: hashicorp/vault:1.18.1
+        command:
+          - sh
+          - -c
+        args:
+          - |
+            # Install curl and jq
+            apk update && apk add curl jq
+
+            # Authenticate with vault
+            K8S_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+            echo "Attempting Vault login..."
+            LOGIN_RESPONSE=$(curl -k -s --request POST \
+              --data "{\"jwt\": \"$K8S_TOKEN\", \"role\": \"init\"}" \
+              "$VAULT_ADDR/v1/auth/kubernetes/login")
+
+            export VAULT_TOKEN=$(echo $LOGIN_RESPONSE | jq -r '.auth.client_token')
+            if [ -z "$VAULT_TOKEN" ] || [ "$VAULT_TOKEN" = "null" ]; then
+              echo "Failed to get Vault token. Login response:"
+              echo $LOGIN_RESPONSE
+              exit 1
+            fi
+            echo "Successfully obtained Vault token"
+
+            # Debug: List existing secrets
+            echo "Attempting to list core secrets:"
+            vault kv list secret/core/ || echo "List failed"
+
+            # Loop through each vault path (core, external, etc.)
+            for vault_path in $(jq -r '.vault_secrets | keys[]' /workspace/secrets.decrypted.json); do
+              echo "Processing vault path: $vault_path"
+
+              # Loop through each app in the current vault path
+              for app in $(jq -r ".vault_secrets[\"$vault_path\"] | keys[]" /workspace/secrets.decrypted.json); do
+                echo "Processing app: $app in $vault_path"
+
+                # Extract secrets for this app to a temporary file
+                app_secrets="/workspace/${vault_path}_${app}_secrets.json"
+                jq -r ".vault_secrets[\"$vault_path\"][\"$app\"]" /workspace/secrets.decrypted.json > "$app_secrets"
+
+                # Debug: Show what we're trying to write (without sensitive values)
+                echo "Keys being written for $app in $vault_path:"
+                jq 'keys' "$app_secrets"
+
+                # Try the write operation with verbose output
+                if ! vault kv put -mount=secret "$vault_path/$app" @"$app_secrets"; then
+                  echo "Failed to write secrets for $app in $vault_path"
+                  cat "$app_secrets" | jq 'keys'  # Show what keys we tried to write
+                  rm -f "$app_secrets"
+                  exit 1
+                fi
+
+                echo "Successfully wrote secrets for $app in $vault_path"
+                rm -f "$app_secrets"
+              done
+            done
+        env:
+          - name: VAULT_ADDR
+            value: "https://vault.default:8200"
+          - name: VAULT_SKIP_VERIFY
+            value: "true"
+        volumeMounts:
+          - name: workspace
+            mountPath: /workspace
+    - name: delete-core-base
+      resource:
+        action: delete
+        manifest: |
+          apiVersion: argoproj.io/v1alpha1
+          kind: Application
+          metadata:
+            name: core-base
+            namespace: default
+    - name: create-core-config
+      resource:
+        action: apply
+        manifest: |
+          apiVersion: argoproj.io/v1alpha1
+          kind: Application
+          metadata:
+            name: core-config
+            namespace: default
+            annotations:
+              argocd.argoproj.io/sync-wave: "0"
+          spec:
+            project: default
+            source:
+              repoURL: https://github.com/blake-hamm/bhamm-lab.git
+              path: kubernetes/core
+              targetRevision: feature/k3s
+              directory:
+                recurse: true
+                include: "{*/config/*,default.yaml,backup.yaml}"
+            destination:
+              server: "https://kubernetes.default.svc"
+              namespace: default
+            syncPolicy:
+              syncOptions:
+                - ApplyOutOfSyncOnly=true
+              automated:
+                prune: false
+                selfHeal: true
+  volumes:
+    - name: workspace
+      emptyDir: {}
+    - name: gcp-credentials
+      secret:
+        secretName: gcp-sops-sa

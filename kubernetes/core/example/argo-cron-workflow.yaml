@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: hello-world
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "500"
+spec:
+  schedule: "0 11 * * *"
+  timezone: "America/Denver" # Default to local machine timezone
+  startingDeadlineSeconds: 0
+  concurrencyPolicy: "Replace" # Default to "Allow"
+  successfulJobsHistoryLimit: 4 # Default 3
+  failedJobsHistoryLimit: 4 # Default 1
+  suspend: false # Set to "true" to suspend scheduling
+  workflowSpec:
+    # serviceAccountName: argo-workflow
+    entrypoint: hello-world-with-time
+    templates:
+      - name: hello-world-with-time
+        container:
+          image: busybox
+          command: [echo]
+          args: ["🕓 hello world. Scheduled on: {{workflow.scheduledTime}}"]

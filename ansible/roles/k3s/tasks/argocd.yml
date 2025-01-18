@@ -1,0 +1,64 @@
+- name: Add ArgoCD Helm chart repository
+  kubernetes.core.helm_repository:
+    name: argo
+    repo_url: https://argoproj.github.io/argo-helm
+    state: present
+- name: Install ArgoCD with Helm
+  kubernetes.core.helm:
+    release_name: argocd
+    release_namespace: default
+    chart_ref: argo/argo-cd
+    chart_version: 7.7.11
+    update_repo_cache: true
+    create_namespace: true
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    wait: true
+    # values:
+    #   - "{{ argo_cd_values | default([]) }}"
+- name: Wait for ArgoCD server to be ready
+  kubernetes.core.k8s_info:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    kind: Pod
+    namespace: default
+    label_selectors:
+      - app.kubernetes.io/name=argocd-server
+    wait: true
+    wait_sleep: 10
+    wait_timeout: 360
+- name: Wait for ArgoCD repo server to be ready
+  kubernetes.core.k8s_info:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    kind: Pod
+    namespace: default
+    label_selectors:
+      - app.kubernetes.io/name=argocd-repo-server
+    wait: true
+    wait_sleep: 10
+    wait_timeout: 360
+- name: Check for kubernetes secrets
+  kubernetes.core.k8s_info:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    api_version: v1
+    kind: Secret
+    namespace: default
+    wait: true
+    wait_sleep: 10
+    wait_timeout: 360
+  register: secrets_info
+- name: Ensure gcp-unseal-sa and gcp-sops-sa secrets exist
+  ansible.builtin.fail:
+    msg: "Kubernetes secret '{{ item }}' must be manually created."
+  when:
+    - item not in secret_names
+  loop:
+    - gcp-unseal-sa
+    - gcp-sops-sa
+  vars:
+    secret_names: "{{ secrets_info.resources | map(attribute='metadata.name') | list }}"
+- name: Deploy core apps
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    template: core.yaml.j2
+    wait: true

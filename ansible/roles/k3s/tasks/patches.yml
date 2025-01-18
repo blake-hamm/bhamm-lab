@@ -1,0 +1,30 @@
+- name: Patch FelixConfiguration to enable Prometheus metrics
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    definition:
+      apiVersion: crd.projectcalico.org/v1
+      kind: FelixConfiguration
+      metadata:
+        name: default
+      spec:
+        prometheusMetricsEnabled: true
+    merge_type: merge
+    wait: true
+  retries: 3
+  delay: 15
+- name: Patch KubeControllersConfiguration to enable prometheusMetricsPort
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    definition:
+      apiVersion: crd.projectcalico.org/v1
+      kind: KubeControllersConfiguration
+      metadata:
+        name: default
+      spec:
+        prometheusMetricsPort: 9095
+    merge_type: merge
+    wait: true
+  retries: 3
+  delay: 15

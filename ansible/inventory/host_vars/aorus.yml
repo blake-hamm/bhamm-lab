@@ -1,3 +1,7 @@
+ssh_authorized_keys:
+  root: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILU1lLhuPFMaFk3EMZVAJLRNJsUCxE3C3hYmtiArIOG8 root@antsle
+  bhamm: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKsS2H4frdi7AvzkGMPMRaQ+B46Af5oaRFtNJY3uCHt blake.j.hamm@gmail.com
+# Bootstrap
 bootstrap_disk_id: "/dev/disk/by-id/ata-KINGSTON_SA400S37240G_50026B77845B74E3"
 # https://github.com/AerisCloud/ansible-disk
 disk_additional_disks:
@@ -12,7 +16,7 @@ disk_additional_disks:
   - disk: /dev/sdd
     fstype: xfs
     mount_options: defaults,noatime,nodiratime
-    mount: /mnt/partition1
+    mount: /mnt/parity1
 additional_fs_utils:
   - xfsprogs
 # https://github.com/tigattack/ansible-role-mergerfs
@@ -52,9 +56,10 @@ snapraid_scrub_schedule:
 snapraid_scrub_healthcheck_io_uuid: ""
 # https://github.com/geerlingguy/ansible-role-nfs
 nfs_exports:
-  - /mnt/storage/kubernetes *(rw,sync,no_subtree_check,no_root_squash,fsid=0)
-  - /mnt/storage/proxmox *(rw,sync,no_subtree_check,no_root_squash,fsid=1)
-  - /mnt/storage/backups *(rw,sync,no_subtree_check,no_root_squash,fsid=2)
-  - /mnt/storage/shared *(rw,sync,no_subtree_check,no_root_squash,fsid=3)
+  - /mnt/storage/proxmox *(rw,sync,no_subtree_check,no_root_squash,fsid=0)
+  - /mnt/storage/shared *(rw,sync,no_subtree_check,no_root_squash,fsid=1)
+  - /mnt/storage/kubernetes *(rw,sync,no_subtree_check,no_root_squash,fsid=2)
 # Ceph config for proxmox
 ceph_device: /dev/nvme0n1
+# Install pbs
+proxmox_pbs: true

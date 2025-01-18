@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: k8up
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "-100"
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: k8up
+    repoURL: https://k8up-io.github.io/k8up
+    targetRevision: 4.8.1
+    helm:
+      valuesObject:
+        metrics:
+          service:
+            port: 8080
+            type: ClusterIP
+            ipFamilyPolicy: ""
+            ipFamilies: []
+            nodePort: 0
+            annotations: {}
+          serviceMonitor:
+            enabled: false
+            scrapeInterval: 60s
+            namespace: ""
+            additionalLabels: {}
+          prometheusRule:
+            enabled: false
+            namespace: ""
+            additionalLabels: {}
+            createDefaultRules: true
+            jobFailedRulesFor: ["archive", "backup", "check", "prune", "restore"]
+            additionalRules: []
+          grafanaDashboard:
+            enabled: false
+            namespace: ""
+            additionalLabels: {}
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true

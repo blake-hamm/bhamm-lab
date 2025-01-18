@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: minio-argo-artifacts
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: minio
+    repoURL: https://charts.min.io/
+    targetRevision: 5.3.0
+    helm:
+      valuesObject:
+        fullnameOverride: "argo-artifacts"
+        replicas: 2
+        persistence:
+          size: 10Gi
+        resources:
+          requests:
+            memory: 512Mi
+        buckets:
+          - name: argo-artifacts
+            policy: none
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

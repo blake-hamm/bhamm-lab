@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: velero
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: velero
+    repoURL: https://vmware-tanzu.github.io/helm-charts
+    targetRevision: 8.2.0
+    helm:
+      valuesObject:
+        credentials:
+          existingSecret: velero-external-secret
+        initContainers:
+          - name: velero-plugin-for-gcp
+            image: velero/velero-plugin-for-gcp:v1.11.1
+            imagePullPolicy: IfNotPresent
+            volumeMounts:
+              - mountPath: /target
+                name: plugins
+        configuration:
+          backupStorageLocation:
+            - name: "default"
+              provider: "gcp"
+              bucket: "bhamm-lab-velero"
+              default: true
+              credential:
+                name: velero-external-secret
+                key: cloud
+              config:
+                kmsKeyName: projects/deep-contact-445917-i9/locations/us-central1/keyRings/velero-key-ring/cryptoKeys/velero-crypto-key
+          volumeSnapshotLocation:
+            - name: "default"
+              provider: "gcp"
+              credential:
+                name: velero-external-secret
+                key: cloud
+              config:
+                snapshotLocation: us-central1
+          features: EnableCSI
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true

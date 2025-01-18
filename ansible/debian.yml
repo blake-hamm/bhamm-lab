@@ -8,12 +8,12 @@
   roles:
     - security
   tags: [security]
-- name: Configure debian machine network
-  hosts: debian
+- name: Configure debian bare metal machine networks
+  hosts: debian_bare_metal
   roles:
     - network
   tags: [network]
-- name: Configure Storage
+- name: Configure Storage/NFS server 'aorus'
   hosts: aorus
   become: true
   roles:
@@ -21,7 +21,7 @@
     - tigattack.mergerfs
     - ironicbadger.snapraid
     - geerlingguy.nfs
-  tags: [storage]
+  tags: [storage, nfs]
 - name: Install proxmox
   hosts: proxmox
   roles:
