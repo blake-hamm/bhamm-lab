@@ -1,8 +1,7 @@
 # tasks file for opnsense
-- name: Management vlan
-  ansibleguy.opnsense.interface_vlan:
-    description: Management
-    interface: vtnet1
-    vlan: 10
-    priority: 0
-  notify: Reload vlan
+- name: Configure vlans
+  ansible.builtin.include_tasks:
+    file: vlans.yml
+    apply:
+      tags: [vlan]
+      notify: Reload vlan
