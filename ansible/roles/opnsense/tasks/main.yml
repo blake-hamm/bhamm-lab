@@ -1,6 +1,8 @@
 # tasks file for opnsense
-- name: Example
-  ansibleguy.opnsense.alias:
-    name: 'ANSIBLE_TEST1'
-    description: 'just a test'
-    content: ['1.1.1.1']
+- name: Management vlan
+  ansibleguy.opnsense.interface_vlan:
+    description: Management
+    interface: vtnet1
+    vlan: 10
+    priority: 0
+  notify: Reload vlan
