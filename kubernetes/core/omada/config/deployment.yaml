@@ -4,6 +4,8 @@ metadata:
   name: omada
   labels:
     app: omada
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   replicas: 1
   revisionHistoryLimit: 0
