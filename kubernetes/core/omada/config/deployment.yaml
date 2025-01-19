@@ -5,7 +5,7 @@ metadata:
   labels:
     app: omada
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   replicas: 1
   revisionHistoryLimit: 0
@@ -52,13 +52,16 @@ spec:
               name: discovery
               protocol: UDP
             - containerPort: 29811
-              name: discovery-v1
+              name: manager-v1
+              protocol: TCP
+            - containerPort: 29812
+              name: adopt-v1
               protocol: TCP
             - containerPort: 29813
               name: upgrade-v1
               protocol: TCP
             - containerPort: 29814
-              name: manager-v1
+              name: manager-v2
               protocol: TCP
             - containerPort: 29815
               name: transfer-v2

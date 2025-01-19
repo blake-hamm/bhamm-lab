@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: omada-management
+  labels:
+    app: omada
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  type: ClusterIP
+  ports:
+    - name: https
+      port: 443
+      targetPort: 8043
+      protocol: TCP
+  selector:
+    app: omada
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: omada-devices
+  labels:
+    app: omada
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  type: LoadBalancer
+  ports:
+    - name: app-discovery
+      protocol: UDP
+      port: 27001
+      targetPort: 27001
+    - name: discovery
+      protocol: UDP
+      port: 29810
+      targetPort: 29810
+    - name: manager-v1
+      protocol: TCP
+      port: 29811
+      targetPort: 29811
+    - name: adopt-v1
+      protocol: TCP
+      port: 29812
+      targetPort: 29812
+    - name: upgrade-v1
+      protocol: TCP
+      port: 29813
+      targetPort: 29813
+    - name: manager-v2
+      protocol: TCP
+      port: 29814
+      targetPort: 29814
+    - name: transfer-v2
+      protocol: TCP
+      port: 29815
+      targetPort: 29815
+    - name: terminal
+      protocol: TCP
+      port: 29816
+      targetPort: 29816
+  selector:
+    app: omada
