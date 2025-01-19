@@ -1,6 +1,12 @@
+- name: Legacy vlan 1
+  ansibleguy.opnsense.interface_vlan:
+    description: legacy
+    interface: vtnet1
+    vlan: 1
+    priority: 0
 - name: Management vlan 10
   ansibleguy.opnsense.interface_vlan:
-    description: management
+    description: Management
     interface: vtnet1
     vlan: 10
     priority: 0
