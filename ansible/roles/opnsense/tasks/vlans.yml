@@ -1,66 +1,66 @@
 - name: Legacy vlan 1
   ansibleguy.opnsense.interface_vlan:
     description: legacy
-    interface: vtnet1
+    interface: "{{ opnsense_vlan_interface }}"
     vlan: 1
     priority: 0
 - name: Management vlan 10
   ansibleguy.opnsense.interface_vlan:
-    description: Management
-    interface: vtnet1
+    description: management
+    interface: "{{ opnsense_vlan_interface }}"
     vlan: 10
     priority: 0
 - name: Bare metal vlan 20
   ansibleguy.opnsense.interface_vlan:
-    description: Bare metal
-    interface: vtnet1
+    description: metal
+    interface: "{{ opnsense_vlan_interface }}"
     vlan: 20
     priority: 0
 - name: VM vlan 30
   ansibleguy.opnsense.interface_vlan:
     description: vms
-    interface: vtnet1
+    interface: "{{ opnsense_vlan_interface }}"
     vlan: 30
     priority: 0
 - name: Kubernetes vlan 40
   ansibleguy.opnsense.interface_vlan:
     description: k8s
-    interface: vtnet1
+    interface: "{{ opnsense_vlan_interface }}"
     vlan: 40
     priority: 1
 - name: Ceph vlan 50
   ansibleguy.opnsense.interface_vlan:
     description: ceph
-    interface: vtnet1
+    interface: "{{ opnsense_vlan_interface }}"
     vlan: 50
     priority: 2
 - name: Iot vlan 60
   ansibleguy.opnsense.interface_vlan:
     description: iot
-    interface: vtnet1
+    interface: "{{ opnsense_vlan_interface }}"
     vlan: 60
     priority: 0
 - name: Guest vlan 70
   ansibleguy.opnsense.interface_vlan:
     description: guest
-    interface: vtnet1
+    interface: "{{ opnsense_vlan_interface }}"
     vlan: 70
     priority: 0
 - name: Wireguard vlan 80
   ansibleguy.opnsense.interface_vlan:
     description: wireguard
-    interface: vtnet1
+    interface: "{{ opnsense_vlan_interface }}"
     vlan: 80
     priority: 7
 - name: Trusted vlan 90
   ansibleguy.opnsense.interface_vlan:
     description: trusted
-    interface: vtnet1
+    interface: "{{ opnsense_vlan_interface }}"
     vlan: 90
     priority: 7
 - name: Dmz vlan 100
   ansibleguy.opnsense.interface_vlan:
     description: dmz
-    interface: vtnet1
+    interface: "{{ opnsense_vlan_interface }}"
     vlan: 100
     priority: 7
