@@ -17,7 +17,7 @@ spec:
     helm:
       valuesObject:
         credentials:
-          existingSecret: velero-external-secret
+          existingSecret: gcp-velero-sa
         initContainers:
           - name: velero-plugin-for-gcp
             image: velero/velero-plugin-for-gcp:v1.11.1
