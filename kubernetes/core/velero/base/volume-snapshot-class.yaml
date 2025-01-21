@@ -3,6 +3,7 @@ kind: VolumeSnapshotClass
 metadata:
   name: ceph-snapclass
   annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "11"
   labels:
     velero.io/csi-volumesnapshot-class: "true"
