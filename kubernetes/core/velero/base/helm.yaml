@@ -33,7 +33,7 @@ spec:
               default: true
               credential:
                 name: gcp-velero-sa
-                key: credentials.json
+                key: service-account.json
               config:
                 kmsKeyName: projects/deep-contact-445917-i9/locations/us-central1/keyRings/velero-key-ring/cryptoKeys/velero-crypto-key
           volumeSnapshotLocation:
@@ -41,7 +41,7 @@ spec:
               provider: "gcp"
               credential:
                 name: gcp-velero-sa
-                key: credentials.json
+                key: service-account.json
               config:
                 snapshotLocation: us-central1
           features: EnableCSI
