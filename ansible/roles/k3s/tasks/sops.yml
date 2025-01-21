@@ -1,0 +1,31 @@
+- name: Load encrypted secrets
+  community.sops.load_vars:
+    file: "{{ playbook_dir }}/../secrets.enc.json"
+  register: sops_secrets
+  delegate_to: localhost
+  no_log: true
+- name: Extract GCP secrets for bootstrap
+  ansible.builting.set_fact:
+    gcp_secrets:
+      gcp_sops_sa: "{{ sops_secrets.ansible_facts.ansible_secrets.gcp['gcp-sops-sa'] }}"
+      gcp_unseal_sa: "{{ sops_secrets.ansible_facts.ansible_secrets.gcp['gcp-unseal-sa'] }}"
+      gcp_velero_sa: "{{ sops_secrets.ansible_facts.ansible_secrets.gcp['gcp-velero-sa'] }}"
+  no_log: true
+- name: Deploy GCP secrets as Kubernetes secrets
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "{{ item.key | lower | replace('_', '-') }}"
+        namespace: default
+      type: Opaque
+      data:
+        credentials.json: "{{ item.value | to_json | b64encode }}"
+    wait: true
+  retries: 3
+  delay: 15
+  loop: "{{ gcp_secrets | dict2items }}"
+  no_log: true
