@@ -121,7 +121,7 @@ resource "google_kms_crypto_key_iam_member" "vault_sa_kms_access" {
 
 resource "google_kms_key_ring_iam_member" "vault_sa_kms_viewer" {
   key_ring_id = google_kms_key_ring.vault_key_ring.id
-  role        = "roles/cloudkms.viewer"
+  role        = "roles/cloudkms.admin"
   member      = "serviceAccount:${google_service_account.vault_sa.email}"
 }
 
