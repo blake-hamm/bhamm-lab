@@ -152,7 +152,7 @@ resource "google_storage_bucket" "vault" {
 
 resource "google_storage_bucket_iam_member" "vault_storage_admin" {
   bucket = google_storage_bucket.vault.name
-  role   = "roles/storage.objectAdmin"
+  role   = "roles/storage.admin"
   member = "serviceAccount:${google_service_account.vault_sa.email}"
 }
 
