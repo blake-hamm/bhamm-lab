@@ -1,12 +1,21 @@
 # tasks file for opnsense
+- name: Extract interfaces from opnsense_interface_map
+  ansible.builtin.set_fact:
+    all_interfaces: "{{ opnsense_interface_map | map(attribute='interface') | list }}"
+    private_networks: "{{ opnsense_interface_map | map(attribute='interface') | map('regex_replace', '^(.*)$', '__\\1_network') | list }}"
 - name: Configure vlans
   ansible.builtin.include_tasks:
     file: vlans.yml
     apply:
       tags: [vlan]
       notify: Reload vlan
-- name: Configure aliases
+- name: Configure firewall aliases
   ansible.builtin.include_tasks:
     file: aliases.yml
     apply:
       tags: [aliases]
+- name: Configure firewall rules
+  ansible.builtin.include_tasks:
+    file: rules.yml
+    apply:
+      tags: [rules]

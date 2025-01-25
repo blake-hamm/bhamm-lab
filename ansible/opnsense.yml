@@ -11,6 +11,11 @@
       # else you COULD (but SHOULD NOT) use:
       ssl_verify: false
       api_retries: 1
+    ansibleguy.opnsense.rule:
+      match_fields: ['description']
+    ansibleguy.opnsense.rule_multi:
+      match_fields: ['description']
+      key_field: 'description'
   roles:
     - opnsense
   tags: [opnsense]
