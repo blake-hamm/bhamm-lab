@@ -1,9 +1,3 @@
-- name: Legacy vlan 1
-  ansibleguy.opnsense.interface_vlan:
-    description: legacy
-    interface: "{{ opnsense_vlan_interface }}"
-    vlan: 1
-    priority: 0
 - name: Management vlan 10
   ansibleguy.opnsense.interface_vlan:
     description: management
@@ -46,21 +40,15 @@
     interface: "{{ opnsense_vlan_interface }}"
     vlan: 70
     priority: 0
-- name: Wireguard vlan 80
-  ansibleguy.opnsense.interface_vlan:
-    description: wireguard
-    interface: "{{ opnsense_vlan_interface }}"
-    vlan: 80
-    priority: 7
-- name: Trusted vlan 90
+- name: Trusted vlan 80
   ansibleguy.opnsense.interface_vlan:
     description: trusted
     interface: "{{ opnsense_vlan_interface }}"
-    vlan: 90
+    vlan: 80
     priority: 7
-- name: Dmz vlan 100
+- name: Dmz vlan 90
   ansibleguy.opnsense.interface_vlan:
     description: dmz
     interface: "{{ opnsense_vlan_interface }}"
-    vlan: 100
+    vlan: 90
     priority: 7
