@@ -1,0 +1,25 @@
+- name: Setup aliases
+  ansibleguy.opnsense.alias_multi:
+    aliases:
+      PrivateNetworks:
+        type: 'network'
+        description: 'Private ip network ranges'
+        content:
+          - __lan_network
+          - __opt1_network
+          - __opt2_network
+          - __opt3_network
+          - __opt4_network
+          - __opt5_network
+          - __opt6_network
+          - __opt7_network
+          - __opt8_network
+          - __opt9_network
+      Framework:
+        type: 'host'
+        description: 'Framework laptop'
+        content: 10.0.80.2
+      TrustedIOT:
+        type: 'host'
+        description: 'Trusted IOT devices'
+        content: 10.0.60.2-10.0.60.50

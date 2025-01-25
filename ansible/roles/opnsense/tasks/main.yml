@@ -5,3 +5,8 @@
     apply:
       tags: [vlan]
       notify: Reload vlan
+- name: Configure aliases
+  ansible.builtin.include_tasks:
+    file: aliases.yml
+    apply:
+      tags: [aliases]
