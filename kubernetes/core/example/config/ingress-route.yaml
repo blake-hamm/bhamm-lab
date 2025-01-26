@@ -1,0 +1,23 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: test-backup
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+    argocd.argoproj.io/sync-wave: "100"
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`test-backup.bhamm-lab.com`)
+      kind: Rule
+      # middlewares:
+      # - name: default-headers
+      # - name: forwardauth-authelia # Required for mobile
+      services:
+        - name: test-nginx-backup
+          port: 80
+          scheme: http
+  tls:
+    secretName: bhamm-lab-tls

@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-nginx-backup
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-nginx-backup
+  template:
+    metadata:
+      labels:
+        app: test-nginx-backup
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          volumeMounts:
+            - name: test-volume
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: test-volume
+          persistentVolumeClaim:
+            claimName: test-pvc
