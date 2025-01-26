@@ -12,3 +12,4 @@ spec:
   labelSelector:
     matchLabels:
       app: test-nginx
+  snapshotMoveData: true
