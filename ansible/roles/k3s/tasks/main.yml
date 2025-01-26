@@ -37,3 +37,5 @@
     apply:
       run_once: true
       delegate_to: "{{ groups['k3s_master'] | first }}"
+      tags: [argocd]
+  tags: [argocd]
