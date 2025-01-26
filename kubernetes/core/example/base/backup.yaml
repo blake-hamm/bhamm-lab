@@ -1,7 +1,7 @@
 apiVersion: velero.io/v1
 kind: Backup
 metadata:
-  name: test-backup
+  name: test-backup-nginx
   namespace: velero
   annotations:
     argocd.argoproj.io/sync-wave: "100"
