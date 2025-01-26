@@ -5,4 +5,4 @@ metadata:
 spec:
   volumeSnapshotClassName: ceph-snapclass
   source:
-    persistentVolumeClaimName: pvc-d644de90-224d-4f8d-bc84-3d76a43ca9c7
+    persistentVolumeClaimName: test-pvc
