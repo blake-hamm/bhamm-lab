@@ -9,5 +9,3 @@ metadata:
     velero.io/csi-volumesnapshot-class: "true"
 driver: rbd.csi.ceph.com
 deletionPolicy: Delete
-parameters:
-  csi.storage.k8s.io/snapshotter-secret-name: csi-rbd-secret
