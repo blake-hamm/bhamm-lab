@@ -7,7 +7,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "10"
 spec:
   destination:
-    namespace: default
+    namespace: velero
     server: https://kubernetes.default.svc
   project: default
   source:
@@ -17,7 +17,7 @@ spec:
     helm:
       valuesObject:
         credentials:
-          existingSecret: velero-external-secret
+          existingSecret: gcp-velero-sa
         initContainers:
           - name: velero-plugin-for-gcp
             image: velero/velero-plugin-for-gcp:v1.11.1
@@ -32,22 +32,19 @@ spec:
               bucket: "bhamm-lab-velero"
               default: true
               credential:
-                name: velero-external-secret
-                key: cloud
+                name: gcp-velero-sa
+                key: service-account.json
               config:
                 kmsKeyName: projects/deep-contact-445917-i9/locations/us-central1/keyRings/velero-key-ring/cryptoKeys/velero-crypto-key
           volumeSnapshotLocation:
             - name: "default"
-              provider: "gcp"
-              credential:
-                name: velero-external-secret
-                key: cloud
-              config:
-                snapshotLocation: us-central1
+              provider: "csi"
+          defaultVolumeSnapshotLocations: csi:default
           features: EnableCSI
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
     automated:
       prune: true
       selfHeal: true
