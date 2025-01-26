@@ -6,7 +6,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "11"
 spec:
   selector:
-    app: test-nginx-backup
+    app: test-nginx
   ports:
     - protocol: TCP
       port: 80

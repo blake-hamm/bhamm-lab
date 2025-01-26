@@ -1,25 +1,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: test-nginx-backup
-  annotations:
-    argocd.argoproj.io/sync-wave: "10"
+  name: test-nginx
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: test-nginx-backup
+      app: test-nginx
   template:
     metadata:
       labels:
-        app: test-nginx-backup
+        app: test-nginx
     spec:
+      securityContext:
+        fsGroup: 101 # Ensures the nginx user has group access to the mounted files
       containers:
         - name: nginx
           image: nginx:latest
           volumeMounts:
             - name: test-volume
               mountPath: /usr/share/nginx/html
+          ports:
+            - containerPort: 80
       volumes:
         - name: test-volume
           persistentVolumeClaim:
