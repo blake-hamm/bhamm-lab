@@ -2,6 +2,8 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: test-pvc
+  labels:
+    app: test-nginx
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
