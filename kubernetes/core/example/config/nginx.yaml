@@ -25,9 +25,13 @@ spec:
           volumeMounts:
             - name: test-volume
               mountPath: /usr/share/nginx/html
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
           ports:
             - containerPort: 80
       volumes:
         - name: test-volume
           persistentVolumeClaim:
             claimName: test-pvc
+        - name: nginx-config
+          emptyDir: {}
