@@ -4,7 +4,7 @@ metadata:
   name: argo-init-workflow
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "35"
+    argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/sync-options: Replace=true
 spec:
   entrypoint: main
