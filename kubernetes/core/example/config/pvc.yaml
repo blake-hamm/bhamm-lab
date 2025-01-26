@@ -6,6 +6,7 @@ metadata:
     app: test-nginx
   annotations:
     argocd.argoproj.io/sync-wave: "1"
+    csi.storage.k8s.io/pvc/labels: '{"app":"test-nginx"}'
 spec:
   accessModes:
     - ReadWriteOnce
