@@ -34,11 +34,7 @@ spec:
               credential:
                 name: gcp-velero-sa
                 key: service-account.json
-              config:credential:
-                name: gcp-velero-sa
-                key: service-account.json
               config:
-                snapshotLocation: us-central1
                 kmsKeyName: projects/deep-contact-445917-i9/locations/us-central1/keyRings/velero-key-ring/cryptoKeys/velero-crypto-key
           volumeSnapshotLocation:
             - name: "default"
