@@ -8,7 +8,7 @@ spec:
   capacity:
     storage: 1Gi
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   hostPath:
     path: "/opt/kubernetes-storage/nginx"
 ---
@@ -20,7 +20,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
       storage: 1Gi
