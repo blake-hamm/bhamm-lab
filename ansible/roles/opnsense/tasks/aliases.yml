@@ -1,4 +1,24 @@
-- name: Setup aliases
+- name: Build alias definitions
+  ansible.builtin.set_fact:
+    common_aliases: >-
+      {%- set aliases = {} -%} {%- for interface in opnsense_interface_map -%}
+        {%- set _ = aliases.update({
+          interface.name + '_NetworkIP': {
+            'type': 'host',
+            'description': 'IP for ' + interface.name + ' host',
+            'content': interface.address
+          },
+          interface.name + '_Network': {
+            'type': 'network',
+            'description': 'Network range for ' + interface.name,
+            'content': interface.subnet
+          }
+        }) -%}
+      {%- endfor -%} {{ aliases }}
+- name: Common Aliases
+  ansibleguy.opnsense.alias_multi:
+    aliases: "{{ common_aliases }}"
+- name: Specific aliases
   ansibleguy.opnsense.alias_multi:
     aliases:
       PrivateNetworks:

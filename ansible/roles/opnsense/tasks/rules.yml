@@ -2,6 +2,7 @@
   ansible.builtin.set_fact:
     common_firewall_rules: >-
       {{
+
         common_firewall_rules | default({}) | combine({
           "AllowICMPv6": {
             "description": "Allow icmpv6 on all networks",
@@ -14,7 +15,7 @@
             "description": "Only allow IPv4 to internet for " ~ item.name,
             "sequence": 100,
             "ip_protocol": "inet",
-            "source_net": "__" ~ item.interface ~ "_network",
+            "source_net": item.name ~ "_Network",
             "destination_invert": true,
             "destination_net": "PrivateNetworks",
             "interface": item.interface
@@ -23,18 +24,18 @@
             "description": "Only allow IPv6 to internet for " ~ item.name,
             "sequence": 100,
             "ip_protocol": "inet6",
-            "source_net": "__" ~ item.interface ~ "_network",
+            "source_net": item.name ~ "_Network",
             "destination_invert": true,
             "destination_net": "PrivateNetworks",
             "interface": item.interface
           },
-          ("AllowDNS_" ~ item.name | lower): {
+          ("AllowIPv4DNS_" ~ item.name | lower): {
             "description": "Allow access to DNS for " ~ item.name,
             "interface": item.interface,
             "sequence": 2,
             "ip_protocol": "inet",
             "protocol": "UDP",
-            "source_net": "__" ~ item.interface ~ "_network",
+            "source_net": item.name ~ "_Network",
             "destination_net": item.address,
             "destination_port": 53
           }
@@ -46,3 +47,14 @@
 - name: Common firewall rules
   ansibleguy.opnsense.rule_multi:
     rules: "{{ common_firewall_rules }}"
+- name: Specific firewall rules
+  ansibleguy.opnsense.rule_multi:
+    rules:
+      TrustedAccess:
+        description: Allow trusted access to management
+        interface: opt1 # trusted
+        sequence: 3
+        ip_protocol: inet
+        protocol: TCP
+        source_net: trusted_Network
+        destination_net: dmz_Network
