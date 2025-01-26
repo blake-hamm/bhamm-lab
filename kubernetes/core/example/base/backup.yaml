@@ -8,7 +8,7 @@ metadata:
 spec:
   includedResources:
     - persistentvolumes
-    # - persistentvolumeclaims
+    - persistentvolumeclaims
   labelSelector:
     matchLabels:
       app: test-nginx
