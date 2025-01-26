@@ -7,7 +7,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "10"
 spec:
   destination:
-    namespace: default
+    namespace: velero
     server: https://kubernetes.default.svc
   project: default
   source:
@@ -40,20 +40,21 @@ spec:
               credential:
                 name: gcp-velero-sa
                 key: service-account.json
-              config:
-                kmsKeyName: projects/deep-contact-445917-i9/locations/us-central1/keyRings/velero-key-ring/cryptoKeys/velero-crypto-key
-          volumeSnapshotLocation:
-            - name: "default"
-              provider: "gcp"
-              credential:
+              config:credential:
                 name: gcp-velero-sa
                 key: service-account.json
               config:
                 snapshotLocation: us-central1
+                kmsKeyName: projects/deep-contact-445917-i9/locations/us-central1/keyRings/velero-key-ring/cryptoKeys/velero-crypto-key
+          volumeSnapshotLocation:
+            - name: "default"
+              provider: "csi"
+          defaultVolumeSnapshotLocations: csi:default
           features: EnableCSI
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
     automated:
       prune: true
       selfHeal: true
