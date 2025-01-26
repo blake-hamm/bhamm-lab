@@ -1,8 +1,8 @@
 apiVersion: velero.io/v1
 kind: Restore
 metadata:
-  name: test-nginx-restore
+  name: test-restore-1
   namespace: velero
 spec:
-  backupName: test-nginx-backup
+  backupName: test-backup-1
   restorePVs: true
