@@ -9,9 +9,8 @@ spec:
     storage: 1Gi
   accessModes:
     - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: /mnt/test-pv-data
+    path: "/opt/kubernetes-storage/nginx"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

@@ -12,8 +12,6 @@ spec:
       labels:
         app: test-nginx
     spec:
-      securityContext:
-        fsGroup: 101 # Ensures the nginx user has group access to the mounted files
       containers:
         - name: nginx
           image: nginx:latest
