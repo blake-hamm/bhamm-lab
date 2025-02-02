@@ -2,7 +2,6 @@
   ansible.builtin.set_fact:
     common_firewall_rules: >-
       {{
-
         common_firewall_rules | default({}) | combine({
           "AllowICMPv6": {
             "description": "Allow icmpv6 on all networks",
@@ -50,11 +49,35 @@
 - name: Specific firewall rules
   ansibleguy.opnsense.rule_multi:
     rules:
-      TrustedAccess:
+      TrustedLANAccess:
+        description: Allow trusted access to lan
+        interface: opt1 # trusted
+        sequence: 3
+        ip_protocol: inet
+        protocol: any
+        source_net: trusted_Network
+        destination_net: __lan_network
+      TrustedManagementAccess:
         description: Allow trusted access to management
         interface: opt1 # trusted
         sequence: 3
         ip_protocol: inet
-        protocol: TCP
+        protocol: any
+        source_net: trusted_Network
+        destination_net: management_Network
+      TrustedMetalAccess:
+        description: Allow trusted access to metal
+        interface: opt1 # trusted
+        sequence: 3
+        ip_protocol: inet
+        protocol: any
+        source_net: trusted_Network
+        destination_net: metal_Network
+      TrustedDMZAccess:
+        description: Allow trusted access to dmz
+        interface: opt1 # trusted
+        sequence: 3
+        ip_protocol: inet
+        protocol: any
         source_net: trusted_Network
         destination_net: dmz_Network
