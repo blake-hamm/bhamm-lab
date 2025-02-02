@@ -10,7 +10,7 @@
   notify: Restart network
 - name: Setup network interface
   ansible.builtin.template:
-    src: "{{ inventory_hostname }}.j2"
+    src: "network/{{ inventory_hostname }}.j2"
     dest: /etc/network/interfaces
     mode: "644"
   become: true
