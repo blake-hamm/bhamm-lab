@@ -1,24 +1,39 @@
-# localhost network
+# The loopback network interface
 auto lo
 iface lo inet loopback
 
-# 10gb network
+# Management Interface (1Gb) - VLAN 20
+auto eno1
+iface eno1 inet manual
+    mtu 1500
+
+auto eno1.20
+iface eno1.20 inet static
+    address 10.0.20.12/24
+    gateway 10.0.20.1
+    vlan-raw-device eno1
+    mtu 1500
+
+# Proxmox/K3s Bridge (10Gb) - eno3
 auto eno3
 iface eno3 inet manual
-    bond-master bond0
-auto eno4
-iface eno4 inet manual
-    bond-master bond0
-auto bond0
-iface bond0 inet manual
-    bond-slaves eno3 eno4
-    bond-mode 802.3ad
-    bond-miimon 100
-    bond-lacp-rate fast
-    bond-min-links 1
+    mtu 9000
+
 auto vmbr0
-iface vmbr0 inet dhcp
-    bridge-ports bond0
+iface vmbr0 inet manual
+    bridge-ports eno3
     bridge-stp off
     bridge-fd 0
     bridge-maxwait 0
+    mtu 9000
+
+# Ceph Interface (10Gb) - VLAN 50
+auto eno4
+iface eno4 inet manual
+    mtu 9000
+
+auto eno4.50
+iface eno4.50 inet static
+    address 10.0.50.12/24
+    vlan-raw-device eno4
+    mtu 9000
