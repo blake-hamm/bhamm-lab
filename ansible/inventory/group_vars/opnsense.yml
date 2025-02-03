@@ -1,0 +1,42 @@
+opnsense_vlan_interface: lagg1
+opnsense_interface_map:
+  - name: LAN
+    interface: lan
+    address: "192.168.69.1"
+    subnet: "192.168.69.0/24"
+  - name: trusted
+    interface: opt1
+    address: "10.0.80.1"
+    subnet: "10.0.80.0/24"
+  - name: management
+    interface: opt2
+    address: "10.0.10.1"
+    subnet: "10.0.10.0/24"
+  - name: metal
+    interface: opt3
+    address: "10.0.20.1"
+    subnet: "10.0.20.0/24"
+  - name: vms
+    interface: opt4
+    address: "10.0.30.1"
+    subnet: "10.0.30.0/24"
+  - name: k8s
+    interface: opt5
+    address: "10.0.40.1"
+    subnet: "10.0.40.0/24"
+  - name: ceph
+    interface: opt6
+    address: "10.0.50.1"
+    subnet: "10.0.50.0/24"
+  - name: iot
+    interface: opt7
+    address: "10.0.60.1"
+    subnet: "10.0.60.0/24"
+  - name: guest
+    interface: opt8
+    address: "10.0.70.1"
+    subnet: "10.0.70.0/24"
+  - name: dmz
+    interface: opt9
+    address: "10.0.90.1"
+    subnet: "10.0.90.0/24"

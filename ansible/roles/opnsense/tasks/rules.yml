@@ -1,3 +1,4 @@
+# TODO: Put this in group vars
 - name: Set firewall rules for all interfaces
   ansible.builtin.set_fact:
     common_firewall_rules: >-

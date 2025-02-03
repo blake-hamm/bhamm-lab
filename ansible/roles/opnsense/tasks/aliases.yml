@@ -1,3 +1,4 @@
+# TODO: Put this in group vars
 - name: Build alias definitions
   ansible.builtin.set_fact:
     common_aliases: >-

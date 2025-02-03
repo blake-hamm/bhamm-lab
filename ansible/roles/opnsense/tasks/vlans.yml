@@ -1,3 +1,4 @@
+# TODO: Put this in group vars
 - name: Management vlan 10
   ansibleguy.opnsense.interface_vlan:
     description: management
