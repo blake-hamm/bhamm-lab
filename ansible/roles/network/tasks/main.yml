@@ -15,3 +15,18 @@
     mode: "644"
   become: true
   notify: Restart network
+- name: Remove unwanted nameserver line (192.168.69.1)
+  ansible.builtin.lineinfile:
+    path: /etc/resolv.conf
+    regexp: '^nameserver 192.168.69.1$'
+    state: absent
+  become: true
+  notify: Restart network
+- name: Ensure /etc/resolv.conf is updated with the correct nameservers
+  ansible.builtin.lineinfile:
+    path: /etc/resolv.conf
+    line: "nameserver {{ item }}"
+    state: present
+  with_items: "{{ network_nameservers }}"
+  become: true
+  notify: Restart network
