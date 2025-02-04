@@ -17,14 +17,15 @@
 - name: Create user authorized_keys files
   ansible.builtin.copy:
     dest: "/etc/ssh/authorized_keys/{{ item.key }}"
-    content: "{{ item.value }}"
+    content: |
+      {% for key in item.value %}
+      {{ key }}
+      {% endfor %}
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
     mode: '0600'
   loop: "{{ ssh_authorized_keys | dict2items }}"
   become: true
-# - name: Get public hostkey
-# - name: Add all hostkeys to /etc/pve/nodes/<node-name>/ssh_known_hosts w/ alias <node-name>
 - name: Run devsec ssh hardening
   ansible.builtin.include_role:
     name: devsec.hardening.ssh_hardening
