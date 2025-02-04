@@ -10,7 +10,9 @@ iface eno1 inet manual
 auto eno1.20
 iface eno1.20 inet static
     address 10.0.20.13/24
+    netmask 255.255.255.0
     gateway 10.0.20.1
+    dns-nameservers 10.0.20.1 1.1.1.1 1.0.0.1
     vlan-raw-device eno1
     mtu 1500
 
@@ -35,5 +37,6 @@ iface enp1s0f1 inet manual
 auto enp1s0f1.50
 iface enp1s0f1.50 inet static
     address 10.0.50.13/24
+    netmask 255.255.255.0
     vlan-raw-device enp1s0f1
     mtu 9000
