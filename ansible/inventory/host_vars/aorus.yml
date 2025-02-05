@@ -1,3 +1,7 @@
+network_10gb_nics: [enp5s0f0, enp5s0f1]
+# Ceph config for proxmox
+ceph_device: /dev/nvme0n1
+# TODO: Automatically add authorized keys from other metal hosts
 # ssh_authorized_keys:
 #   root: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILU1lLhuPFMaFk3EMZVAJLRNJsUCxE3C3hYmtiArIOG8 root@antsle
 #   bhamm: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKsS2H4frdi7AvzkGMPMRaQ+B46Af5oaRFtNJY3uCHt blake.j.hamm@gmail.com
@@ -59,7 +63,5 @@ nfs_exports:
   - /mnt/storage/proxmox *(rw,sync,no_subtree_check,no_root_squash,fsid=0)
   - /mnt/storage/shared *(rw,sync,no_subtree_check,no_root_squash,fsid=1)
   - /mnt/storage/kubernetes *(rw,sync,no_subtree_check,no_root_squash,fsid=2)
-# Ceph config for proxmox
-ceph_device: /dev/nvme0n1
 # Install pbs
 proxmox_pbs: true

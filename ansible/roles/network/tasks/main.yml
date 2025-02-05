@@ -1,6 +1,9 @@
 # tasks file for network
 - name: Run pre tasks
-  ansible.builtin.include_tasks: pre.yml
+  ansible.builtin.include_tasks:
+    file: pre.yml
+    apply:
+      become: true
 - name: Disable ipv6
   ansible.builtin.copy:
     src: 99-disable-ipv6.conf
@@ -30,3 +33,8 @@
   with_items: "{{ network_nameservers }}"
   become: true
   notify: Restart network
+- name: Optimize 10g nics
+  ansible.builtin.include_tasks:
+    file: nic.yml
+    apply:
+      become: true

@@ -4,20 +4,20 @@
     dest: /etc/network/interfaces.bak
     remote_src: true
     mode: "644"
-  become: true
 - name: Install ifupdown2, bridge-utils and vlan
   ansible.builtin.package:
     name:
       - ifupdown2
       - bridge-utils
       - vlan
+      - iperf3
+      - iputils-tracepath
+      - ethtool
     state: present
-  become: true
 - name: Ensure 8021q kernel module is loaded
   community.general.modprobe:
     name: 8021q
     state: present
-  become: true
 - name: Persist 8021q kernel module across reboots
   ansible.builtin.lineinfile:
     path: /etc/modules
@@ -26,4 +26,3 @@
     mode: "0644"
     owner: root
     group: root
-  become: true
