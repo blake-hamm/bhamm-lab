@@ -1,0 +1,24 @@
+- name: Check if device or partitions are mounted
+  ansible.builtin.shell: |
+    lsblk -no MOUNTPOINT "{{ ceph_device }}"
+  register: lsblk_mount_check
+  changed_when: false
+  args:
+    warn: false
+- name: Fail if device is mounted
+  ansible.builtin.fail:
+    msg: "Device {{ ceph_device }} or its partitions are mounted. Mount points: {{ lsblk_mount_check.stdout_lines | join(', ') }}"
+  when: lsblk_mount_check.stdout != ''
+- name: Remove existing LVM Physical Volume (forcefully)
+  ansible.builtin.command: pvremove -ffy "{{ ceph_device }}"
+  ignore_errors: true
+  # changed_when: false
+- name: Wipe all existing signatures on the device
+  ansible.builtin.command: wipefs --all "{{ ceph_device }}"
+  args:
+    warn: false
+- name: Create new GPT partition table
+  community.general.parted:
+    device: "{{ ceph_device }}"
+    label: gpt
+    state: present

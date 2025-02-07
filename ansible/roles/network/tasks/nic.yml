@@ -20,27 +20,7 @@
   ignore_errors: true
 - name: Extract NIC maximum ring buffer settings
   ansible.builtin.set_fact:
-    nic_buffers: >
-      {{
-        nic_buffers | default([]) +
-        [
-          {
-            'nic_name': item.nic_name,
-            'max_rx': (
-              item.stdout.split('Pre-set maximums:')[1]
-              .split('Current hardware settings:')[0]
-              | regex_search('RX:\\s*(\\d+)', '\\1')
-              | first
-            ),
-            'max_tx': (
-              item.stdout.split('Pre-set maximums:')[1]
-              .split('Current hardware settings:')[0]
-              | regex_search('TX:\\s*(\\d+)', '\\1')
-              | first
-            )
-          }
-        ]
-      }}
+    nic_buffers: "{{ nic_buffers | default([]) + [ { 'nic_name': item.nic_name, 'max_rx': ( (item.stdout.split('Pre-set maximums:')[1] .split('Current hardware settings:')[0] | regex_search('RX:\\s*(\\d+)', '\\1') | first ) ), 'max_tx': ( (item.stdout.split('Pre-set maximums:')[1] .split('Current hardware settings:')[0] | regex_search('TX:\\s*(\\d+)', '\\1') | first ) ) } ] }}"
   loop: "{{ nic_buffers_raw.results }}"
   when: item.rc == 0
 - name: Set NIC ring buffers to maximum supported size

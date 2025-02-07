@@ -2,41 +2,40 @@
 auto lo
 iface lo inet loopback
 
-# Management Interface (1Gb) - VLAN 20
-auto eno1
-iface eno1 inet manual
-    mtu 1500
-
-auto eno1.20
-iface eno1.20 inet static
-    address 10.0.20.13/24
-    netmask 255.255.255.0
-    gateway 10.0.20.1
-    dns-nameservers 10.0.20.1 1.1.1.1 1.0.0.1
-    vlan-raw-device eno1
-    mtu 1500
-
-# Proxmox/K3s Bridge (10Gb) - enp1s0f0
-auto enp1s0f0
-iface enp1s0f0 inet manual
-    mtu 9000
-
-auto vmbr0
-iface vmbr0 inet manual
-    bridge-ports enp1s0f0
-    bridge-stp off
-    bridge-fd 0
-    bridge-maxwait 0
-    mtu 9000
-
-# Ceph Interface (10Gb) - VLAN 50
+# 10Gb NIC (enp1s0f1) on a trunk port: no IP assigned here
 auto enp1s0f1
 iface enp1s0f1 inet manual
     mtu 9000
 
-auto enp1s0f1.50
-iface enp1s0f1.50 inet static
+# VLAN-aware Bridge on enp1s0f1
+# This bridge passes all VLANs and is configured to be aware of VLANs 20 and 51.
+auto vmbr0
+iface vmbr0 inet manual
+    bridge-ports enp1s0f1
+    bridge-stp off
+    bridge-fd 0
+    bridge-vlan-aware yes
+    bridge-vlan-filtering yes
+    bridge-vids 20 51
+    mtu 9000
+
+# Metal interface on VLAN 20 via the bridge
+auto vmbr0.20
+iface vmbr0.20 inet static
+    address 10.0.20.13/24
+    netmask 255.255.255.0
+    gateway 10.0.20.1
+    dns-nameservers 10.0.20.1 1.1.1.1 1.0.0.1
+    mtu 9000
+
+# Ceph Interface (10Gb) - VLAN 50 on enp1s0f0 remains unchanged
+auto enp1s0f0
+iface enp1s0f0 inet manual
+    mtu 9000
+
+auto enp1s0f0.50
+iface enp1s0f0.50 inet static
     address 10.0.50.13/24
     netmask 255.255.255.0
-    vlan-raw-device enp1s0f1
+    vlan-raw-device enp1s0f0
     mtu 9000

@@ -1,4 +1,4 @@
-ssh_permit_root_login: 'prohibit-password'
+ssh_permit_root_login: 'without-password'
 ssh_allow_users: ""
 # vars for ansible/roles/proxmox
 ntp_enabled: true
@@ -59,6 +59,8 @@ pve_storages:
     server: 192.168.69.12
     export: /mnt/storage/proxmox
 pve_ceph_enabled: true
+pve_ceph_network: 10.0.51.0/24
+pve_ceph_cluster_network: 10.0.50.0/24
 pve_ceph_repository_line: "deb http://download.proxmox.com/debian/ceph-squid bookworm no-subscription"
 pve_ceph_osds:
   - device: "{{ ceph_device }}"
@@ -83,4 +85,5 @@ pve_ceph_fs:
 pve_cluster_ha_groups:
   - name: main
     comment: "HA group"
-    nodes: "aorus,antsle"
+    nodes: "aorus,antsle,prodesk"
+proxmox_reset_ceph: true

@@ -1,6 +1,12 @@
 # tasks file for ansible/roles/proxmox
 - name: Run pre tasks
   ansible.builtin.include_tasks: pre.yml
+- name: Prepare for ceph
+  ansible.builtin.include_tasks:
+    file: ceph.yml
+    apply:
+      become: true
+  when: proxmox_reset_ceph | default(false)
 - name: Run lae proxmox ansible role
   ansible.builtin.include_role:
     name: lae.proxmox

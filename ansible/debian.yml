@@ -22,8 +22,8 @@
 #     - ironicbadger.snapraid
 #     - geerlingguy.nfs
 #   tags: [storage, nfs]
-# - name: Install proxmox
-#   hosts: proxmox
-#   roles:
-#     - proxmox
-#   tags: [proxmox]
+- name: Install proxmox
+  hosts: proxmox
+  roles:
+    - proxmox
+  tags: [proxmox]
