@@ -82,3 +82,11 @@
         protocol: any
         source_net: trusted_Network
         destination_net: dmz_Network
+      TrustedGuestAccess:
+        description: Allow trusted access to guest
+        interface: opt1 # trusted
+        sequence: 3
+        ip_protocol: inet
+        protocol: any
+        source_net: trusted_Network
+        destination_net: guest_Network
