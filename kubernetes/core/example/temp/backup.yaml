@@ -1,0 +1,15 @@
+apiVersion: velero.io/v1
+kind: Backup
+metadata:
+  name: test-backup-1
+  namespace: velero
+  annotations:
+    argocd.argoproj.io/sync-wave: "100"
+spec:
+  includedResources:
+    - persistentvolumes
+    - persistentvolumeclaims
+  labelSelector:
+    matchLabels:
+      app: test-nginx
+  snapshotMoveData: false

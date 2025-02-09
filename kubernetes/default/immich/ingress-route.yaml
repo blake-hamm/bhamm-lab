@@ -12,9 +12,9 @@ spec:
   routes:
     - match: Host(`immich.bhamm-lab.com`)
       kind: Rule
-      middlewares:
-        - name: default-headers
-          # - name: forwardauth-authelia # Required for mobile
+      # middlewares:
+      # - name: default-headers
+      # - name: forwardauth-authelia # Required for mobile
       services:
         - name: immich-server
           port: 2283

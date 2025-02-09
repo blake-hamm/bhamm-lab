@@ -1,28 +1,23 @@
-- name: Get opnsense api key/secret from vault
-  hosts: localhost
-  tasks:
-    - name: Authenticate with hashicorp vault
-      community.hashi_vault.vault_read:
-        url: https://vault.bhamm-lab.com
-        auth_method: approle
-        role_id: "{{ lookup('env', 'VAULT_ROLE_ID') }}"
-        secret_id: "{{ lookup('env', 'VAULT_SECRET_ID') }}"
-        path: secret/data/core/opnsense
-      register: vault_opnsense_api
-      retries: 1
 - name: Run opnsense role
   hosts: localhost
   gather_facts: false
+  vars_files:
+    - inventory/group_vars/opnsense.yml
   module_defaults:
     group/ansibleguy.opnsense.all:
       firewall: "{{ hostvars.opnsense.ansible_host }}"
-      api_key: "{{ vault_opnsense_api.data.data.data.key }}"
-      api_secret: "{{ vault_opnsense_api.data.data.data.secret }}"
+      api_key: "{{ lookup('env', 'OPNSENSE_API_KEY') }}"
+      api_secret: "{{ lookup('env', 'OPNSENSE_API_SECRET') }}"
       # if you use an internal certificate:
       #   ssl_ca_file: '/etc/ssl/certs/custom/ca.crt'
       # else you COULD (but SHOULD NOT) use:
       ssl_verify: false
       api_retries: 1
+    ansibleguy.opnsense.rule:
+      match_fields: ['description']
+    ansibleguy.opnsense.rule_multi:
+      match_fields: ['description']
+      key_field: 'description'
   roles:
     - opnsense
   tags: [opnsense]

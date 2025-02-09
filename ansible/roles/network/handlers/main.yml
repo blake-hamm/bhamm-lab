@@ -1,3 +1,8 @@
 # handlers file for network
 - name: Restart network
   ansible.builtin.include_tasks: restart_network.yml
+- name: Restart cpufrequtils
+  ansible.builtin.service:
+    name: cpufrequtils
+    state: restarted
+  become: true

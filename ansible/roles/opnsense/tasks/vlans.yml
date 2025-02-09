@@ -1,0 +1,7 @@
+- name: Configure VLANs dynamically
+  ansibleguy.opnsense.interface_vlan:
+    description: "{{ item.name }}"
+    interface: "{{ opnsense_vlan_interface }}"
+    vlan: "{{ item.vlan }}"
+    priority: "{{ item.priority | default(0) }}"
+  loop: "{{ opnsense_interface_map | selectattr('vlan', 'defined') | list }}"

@@ -4,7 +4,11 @@ metadata:
   name: ceph-snapclass
   annotations:
     argocd.argoproj.io/sync-wave: "11"
+    snapshot.storage.kubernetes.io/is-default-class: "true"
   labels:
     velero.io/csi-volumesnapshot-class: "true"
 driver: rbd.csi.ceph.com
 deletionPolicy: Delete
+parameters:
+  csi.storage.k8s.io/snapshotter-secret-name: csi-rbd-secret
+  csi.storage.k8s.io/snapshotter-secret-namespace: default

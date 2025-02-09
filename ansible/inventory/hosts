@@ -1,16 +1,19 @@
 # bootstrap args: ansible_port=22 ansible_ssh_common_args="-o PasswordAuthentication=yes"
-aorus ansible_host=192.168.69.12
-antsle ansible_host=192.168.69.13
-opnsense ansible_host=192.168.23.1
+aorus ansible_host=10.0.20.11
+antsle ansible_host=10.0.20.12
+prodesk ansible_host=10.0.20.13
+opnsense ansible_host=10.0.9.1
 
 [debian]
 aorus
 antsle
+prodesk
 
 [debian_bare_metal]
 aorus
 antsle
+prodesk
 
-[proxmox]
-aorus
-antsle
+# [proxmox]
+# aorus
+# antsle

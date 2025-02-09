@@ -1,0 +1,42 @@
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# Management Interface (1Gb) - VLAN 20
+auto eno1
+iface eno1 inet manual
+    mtu 1500
+
+auto eno1.20
+iface eno1.20 inet static
+    address 10.0.20.12/24
+    netmask 255.255.255.0
+    gateway 10.0.20.1
+    dns-nameservers 10.0.20.1 1.1.1.1 1.0.0.1
+    vlan-raw-device eno1
+    mtu 1500
+
+# Proxmox/K3s Bridge (10Gb) - eno3
+auto eno3
+iface eno3 inet manual
+    mtu 9000
+
+auto vmbr0
+iface vmbr0 inet manual
+    bridge-ports eno3
+    bridge-stp off
+    bridge-fd 0
+    bridge-maxwait 0
+    mtu 9000
+
+# Ceph Interface (10Gb) - VLAN 50
+auto eno4
+iface eno4 inet manual
+    mtu 9000
+
+auto eno4.50
+iface eno4.50 inet static
+    address 10.0.50.12/24
+    netmask 255.255.255.0
+    vlan-raw-device eno4
+    mtu 9000

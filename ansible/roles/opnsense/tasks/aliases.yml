@@ -1,0 +1,29 @@
+- name: Create aliases dynamically
+  ansible.builtin.set_fact:
+    common_aliases: >-
+      {%- set aliases = {} -%} {%- for interface in opnsense_interface_map -%}
+        {%- set _ = aliases.update({
+          (interface.name ~ "Gateway"): {
+            'type': 'host',
+            'description': 'Gateway IP for ' + interface.name + ' network',
+            'content': interface.address
+          },
+          (interface.name ~ "Network"): {
+            'type': 'network',
+            'description': 'Network range for ' + interface.name,
+            'content': interface.subnet
+          }
+        }) -%}
+      {%- endfor -%} {%- set _ = aliases.update({
+        'PrivateNetworks': {
+          'type': 'network',
+          'description': 'Private IP network ranges',
+          'content': private_networks
+        }
+      }) -%} {{ aliases }}
+- name: Common Aliases
+  ansibleguy.opnsense.alias_multi:
+    aliases: "{{ common_aliases }}"
+- name: Extra aliases
+  ansibleguy.opnsense.alias_multi:
+    aliases: "{{ opnsense_extra_aliases }}"

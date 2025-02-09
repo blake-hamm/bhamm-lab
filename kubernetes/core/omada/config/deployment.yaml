@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: omada
+  labels:
+    app: omada
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: omada
+  template:
+    metadata:
+      labels:
+        app: omada
+    spec:
+      hostNetwork: true
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: "omada-data"
+        - name: logs
+          persistentVolumeClaim:
+            claimName: "omada-logs"
+      containers:
+        - name: omada
+          image: mbentley/omada-controller:5.15.8.2
+          imagePullPolicy: "IfNotPresent"
+          volumeMounts:
+            - mountPath: /opt/tplink/EAPController/data
+              name: data
+            - mountPath: /opt/tplink/EAPController/logs
+              name: logs
+          ports:
+            - containerPort: 8088
+              name: manage-http
+              protocol: TCP
+            - containerPort: 8043
+              name: manage-https
+              protocol: TCP
+            - containerPort: 8843
+              name: porta-https
+              protocol: TCP
+            - containerPort: 27001
+              name: app-discovery
+              protocol: UDP
+            - containerPort: 29810
+              name: discovery
+              protocol: UDP
+            - containerPort: 29811
+              name: manager-v1
+              protocol: TCP
+            - containerPort: 29812
+              name: adopt-v1
+              protocol: TCP
+            - containerPort: 29813
+              name: upgrade-v1
+              protocol: TCP
+            - containerPort: 29814
+              name: manager-v2
+              protocol: TCP
+            - containerPort: 29815
+              name: transfer-v2
+              protocol: TCP
+            - containerPort: 29816
+              name: rtty
+              protocol: TCP
+          env:
+            - name: MANAGE_HTTP_PORT
+              value: "8088"
+            - name: MANAGE_HTTPS_PORT
+              value: "8043"
+            - name: PGID
+              value: "508"
+            - name: PORTAL_HTTP_PORT
+              value: "8088"
+            - name: PORTAL_HTTPS_PORT
+              value: "8843"
+            - name: PORT_ADOPT_V1
+              value: "29812"
+            - name: "PORT_APP_DISCOVERY"
+              value: "27001"
+            - name: PORT_DISCOVERY
+              value: "29810"
+            - name: PORT_MANAGER_V1
+              value: "29811"
+            - name: PORT_MANAGER_V2
+              value: "29814"
+            - name: PORT_TRANSFER_V2
+              value: "29815"
+            - name: PORT_RTTY
+              value: "29816"
+            - name: PORT_UPGRADE_V1
+              value: "29813"
+            - name: SHOW_SERVER_LOGS
+              value: "true"
+            - name: SHOW_MONGODB_LOGS
+              value: "false"
+            - name: TZ
+              value: "America/Denver"

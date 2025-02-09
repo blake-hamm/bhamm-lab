@@ -108,12 +108,21 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
   name      = "k3s-master-${count.index}"
   node_name = var.k3s_nodes[count.index % length(var.k3s_nodes)]
   vm_id     = 110 + count.index
-  tags      = ["debian", "k3s", "k3s-master"]
+  tags      = ["debian", "k3s", "k3s-master", var.k3s_nodes[count.index % length(var.k3s_nodes)]]
 
   started         = true
   stop_on_destroy = true
-  reboot          = true
   migrate         = true
+
+  initialization {
+    datastore_id = "ceph_pool"
+    ip_config {
+      ipv4 {
+        address = "192.168.69.6${count.index}/24"
+        gateway = "192.168.69.1"
+      }
+    }
+  }
 
   agent {
     enabled = true
@@ -167,12 +176,21 @@ resource "proxmox_virtual_environment_vm" "k3s_worker" {
   name      = "k3s-worker-${count.index}"
   node_name = "antsle"
   vm_id     = 120 + count.index
-  tags      = ["debian", "k3s", "k3s-worker"]
+  tags      = ["debian", "k3s", "k3s-worker", "antsle"]
 
   started         = true
   stop_on_destroy = true
-  reboot          = true
   migrate         = true
+
+  initialization {
+    datastore_id = "ceph_pool"
+    ip_config {
+      ipv4 {
+        address = "192.168.69.7${count.index}/24"
+        gateway = "192.168.69.1"
+      }
+    }
+  }
 
   agent {
     enabled = true

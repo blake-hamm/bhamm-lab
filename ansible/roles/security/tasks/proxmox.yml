@@ -1,0 +1,25 @@
+- name: Ensure root user exists
+  ansible.builtin.user:
+    name: root
+    state: present
+    shell: /bin/bash
+- name: Read SSH host key files
+  ansible.builtin.slurp:
+    src: "{{ item }}.pub"
+  loop: "{{ ssh_host_key_files }}"
+  register: key_files_raw
+- name: Create proxmox_host_keys dictionary with list of keys
+  ansible.builtin.set_fact:
+    proxmox_host_keys:
+      root: "{{ key_files_raw.results | map(attribute='content') | map('b64decode') | map('trim') | list }}"
+- name: Aggregate keys from other Proxmox hosts
+  ansible.builtin.set_fact:
+    ssh_authorized_keys: >-
+      {{ ssh_authorized_keys | combine(
+           hostvars[item].proxmox_host_keys | default({}),
+           recursive=true,
+           list_merge='append'
+         )
+       }}
+  loop: "{{ groups['proxmox'] }}"
+  when: inventory_hostname != item

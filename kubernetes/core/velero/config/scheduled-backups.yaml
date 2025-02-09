@@ -2,7 +2,7 @@ apiVersion: velero.io/v1
 kind: Schedule
 metadata:
   name: pv-schedule-backup
-  namespace: default
+  namespace: velero
   annotations:
     argocd.argoproj.io/hook: PostSync
 spec:

@@ -1,0 +1,3 @@
+- name: Reload vlan
+  ansibleguy.opnsense.reload:
+    target: 'interface_vlan'

@@ -1,0 +1,51 @@
+- name: Dynamically set firewall rules for all interfaces
+  ansible.builtin.set_fact:
+    common_firewall_rules: >-
+      {{
+        common_firewall_rules | default({}) | combine({
+          (item.name ~ "AllowIPv4Internet"): {
+            "description": "Only allow IPv4 to internet for " ~ item.name,
+            "sequence": 100,
+            "ip_protocol": "inet",
+            "source_net": item.name ~ "Network",
+            "destination_invert": true,
+            "destination_net": "PrivateNetworks",
+            "interface": item.interface
+          },
+          (item.name ~ "AllowIPv4DNS"): {
+            "description": "Allow access to DNS for " ~ item.name,
+            "interface": item.interface,
+            "sequence": 2,
+            "ip_protocol": "inet",
+            "protocol": "UDP",
+            "source_net": item.name ~ "Network",
+            "destination_net": item.name ~ "Gateway",
+            "destination_port": 53
+          },
+          (item.name ~ "AllowIPv6Internet"): {
+            "description": "Only allow IPv6 to internet for " ~ item.name,
+            "sequence": 100,
+            "ip_protocol": "inet6",
+            "source_net": item.name ~ "Network",
+            "destination_invert": true,
+            "destination_net": "PrivateNetworks",
+            "interface": item.interface
+          },
+          "AllowICMPv6": {
+            "description": "Allow icmpv6 on all networks",
+            "sequence": 1,
+            "ip_protocol": 'inet6',
+            "protocol": 'ICMP',
+            "interface": all_interfaces
+          },
+        })
+      }}
+  loop: "{{ opnsense_interface_map }}"
+  loop_control:
+    index_var: loop_index
+- name: Common firewall rules
+  ansibleguy.opnsense.rule_multi:
+    rules: "{{ common_firewall_rules }}"
+- name: Extra firewall rules
+  ansibleguy.opnsense.rule_multi:
+    rules: "{{ opnsense_extra_rules }}"

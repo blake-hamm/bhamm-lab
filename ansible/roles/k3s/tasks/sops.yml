@@ -1,0 +1,57 @@
+- name: Load encrypted secrets
+  community.sops.load_vars:
+    file: "{{ playbook_dir }}/../secrets.enc.json"
+  register: sops_secrets
+  delegate_to: localhost
+  # no_log: true
+- name: Extract GCP secrets for bootstrap
+  ansible.builtin.set_fact:
+    gcp_sops_sa: "{{ sops_secrets.ansible_facts.ansible_secrets.gcp['gcp-sops-sa'] }}"
+    gcp_velero_sa: "{{ sops_secrets.ansible_facts.ansible_secrets.gcp['gcp-velero-sa'] }}"
+  no_log: true
+- name: Deploy GCP sops secrets as Kubernetes secrets
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "gcp-sops-sa"
+        namespace: default
+      type: Opaque
+      data:
+        service-account.json: "{{ gcp_sops_sa | to_json | b64encode }}"
+    wait: true
+  retries: 3
+  delay: 15
+  no_log: true
+- name: Create Velero namespace
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: velero
+    wait: true
+  retries: 3
+  delay: 15
+- name: Deploy GCP velero secrets as Kubernetes secrets
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "gcp-velero-sa"
+        namespace: velero
+      type: Opaque
+      data:
+        service-account.json: "{{ gcp_velero_sa | to_json | b64encode }}"
+    wait: true
+  retries: 3
+  delay: 15
+  no_log: true

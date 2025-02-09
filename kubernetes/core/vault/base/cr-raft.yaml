@@ -46,16 +46,8 @@ spec:
       storeRootToken: true
       secretShares: 5
       secretThreshold: 3
-    google:
-      kmsKeyRing: "vault"
-      kmsCryptoKey: "vault-unsealer"
-      kmsLocation: "us-central1"
-      kmsProject: "deep-contact-445917-i9"
-      storageBucket: "bhamm-lab-vault"
-  credentialsConfig:
-    env: GOOGLE_APPLICATION_CREDENTIALS
-    path: /etc/gcp/service-account.json
-    secretName: gcp-unseal-sa
+    kubernetes:
+      secretNamespace: default
   config:
     storage:
       raft:
@@ -67,12 +59,6 @@ spec:
         tls_key_file: /vault/tls/server.key
         telemetry:
           unauthenticated_metrics_access: true
-    seal:
-      gcpckms:
-        project: "deep-contact-445917-i9"
-        region: "us-central1"
-        key_ring: "vault"
-        crypto_key: "vault-unsealer"
     telemetry:
       prometheus_retention_time: "24h"
       disable_hostname: true

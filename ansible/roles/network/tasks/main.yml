@@ -1,6 +1,9 @@
 # tasks file for network
 - name: Run pre tasks
-  ansible.builtin.include_tasks: pre.yml
+  ansible.builtin.include_tasks:
+    file: pre.yml
+    apply:
+      become: true
 - name: Disable ipv6
   ansible.builtin.copy:
     src: 99-disable-ipv6.conf
@@ -10,8 +13,28 @@
   notify: Restart network
 - name: Setup network interface
   ansible.builtin.template:
-    src: "{{ inventory_hostname }}.j2"
+    src: "network/{{ inventory_hostname }}.j2"
     dest: /etc/network/interfaces
     mode: "644"
   become: true
   notify: Restart network
+- name: Remove unwanted nameserver line (192.168.69.1)
+  ansible.builtin.lineinfile:
+    path: /etc/resolv.conf
+    regexp: '^nameserver 192.168.69.1$'
+    state: absent
+  become: true
+  notify: Restart network
+- name: Ensure /etc/resolv.conf is updated with the correct nameservers
+  ansible.builtin.lineinfile:
+    path: /etc/resolv.conf
+    line: "nameserver {{ item }}"
+    state: present
+  with_items: "{{ network_nameservers }}"
+  become: true
+  notify: Restart network
+- name: Optimize 10g nics
+  ansible.builtin.include_tasks:
+    file: nic.yml
+    apply:
+      become: true

@@ -4,7 +4,7 @@ metadata:
   name: argo-init-workflow
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "35"
+    argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/sync-options: Replace=true
 spec:
   entrypoint: main
@@ -38,7 +38,7 @@ spec:
           - -c
         args:
           - |
-            git clone -b feature/k3s https://github.com/blake-hamm/bhamm-lab.git /workspace/repo
+            git clone -b feature/opnsense https://github.com/blake-hamm/bhamm-lab.git /workspace/repo
         volumeMounts:
           - name: workspace
             mountPath: /workspace
@@ -167,7 +167,7 @@ spec:
             source:
               repoURL: https://github.com/blake-hamm/bhamm-lab.git
               path: kubernetes/core
-              targetRevision: feature/k3s
+              targetRevision: feature/opnsense
               directory:
                 recurse: true
                 include: "{*/config/*,default.yaml,backup.yaml}"

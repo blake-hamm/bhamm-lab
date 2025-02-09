@@ -27,4 +27,4 @@
     merge_type: merge
     wait: true
   retries: 3
-  delay: 15
+  delay: 30

@@ -7,5 +7,11 @@
     update_cache: true
     cache_valid_time: 86400 # One day
   become: true
+- name: Extra config for proxmox clustering
+  ansible.builtin.include_tasks:
+    file: proxmox.yml
+    apply:
+      become: true
+  when: "'proxmox' in group_names"
 - name: Run ssh tasks
   ansible.builtin.include_tasks: ssh.yml

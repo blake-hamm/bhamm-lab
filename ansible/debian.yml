@@ -13,17 +13,17 @@
   roles:
     - network
   tags: [network]
-- name: Configure Storage/NFS server 'aorus'
-  hosts: aorus
-  become: true
-  roles:
-    - aeriscloud.disk
-    - tigattack.mergerfs
-    - ironicbadger.snapraid
-    - geerlingguy.nfs
-  tags: [storage, nfs]
-- name: Install proxmox
-  hosts: proxmox
-  roles:
-    - proxmox
-  tags: [proxmox]
+# - name: Configure Storage/NFS server 'aorus'
+#   hosts: aorus
+#   become: true
+#   roles:
+#     - aeriscloud.disk
+#     - tigattack.mergerfs
+#     - ironicbadger.snapraid
+#     - geerlingguy.nfs
+#   tags: [storage, nfs]
+# - name: Install proxmox
+#   hosts: proxmox
+#   roles:
+#     - proxmox
+#   tags: [proxmox]
