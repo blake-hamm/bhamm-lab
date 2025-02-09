@@ -1,55 +1,7 @@
-# TODO: Put this in group vars
-- name: Management vlan 10
+- name: Configure VLANs dynamically
   ansibleguy.opnsense.interface_vlan:
-    description: management
+    description: "{{ item.name }}"
     interface: "{{ opnsense_vlan_interface }}"
-    vlan: 10
-    priority: 0
-- name: Bare metal vlan 20
-  ansibleguy.opnsense.interface_vlan:
-    description: metal
-    interface: "{{ opnsense_vlan_interface }}"
-    vlan: 20
-    priority: 0
-- name: VM vlan 30
-  ansibleguy.opnsense.interface_vlan:
-    description: vms
-    interface: "{{ opnsense_vlan_interface }}"
-    vlan: 30
-    priority: 0
-- name: Kubernetes vlan 40
-  ansibleguy.opnsense.interface_vlan:
-    description: k8s
-    interface: "{{ opnsense_vlan_interface }}"
-    vlan: 40
-    priority: 1
-- name: Ceph vlan 50
-  ansibleguy.opnsense.interface_vlan:
-    description: ceph
-    interface: "{{ opnsense_vlan_interface }}"
-    vlan: 50
-    priority: 2
-- name: Iot vlan 60
-  ansibleguy.opnsense.interface_vlan:
-    description: iot
-    interface: "{{ opnsense_vlan_interface }}"
-    vlan: 60
-    priority: 0
-- name: Guest vlan 70
-  ansibleguy.opnsense.interface_vlan:
-    description: guest
-    interface: "{{ opnsense_vlan_interface }}"
-    vlan: 70
-    priority: 0
-- name: Trusted vlan 80
-  ansibleguy.opnsense.interface_vlan:
-    description: trusted
-    interface: "{{ opnsense_vlan_interface }}"
-    vlan: 80
-    priority: 7
-- name: Dmz vlan 90
-  ansibleguy.opnsense.interface_vlan:
-    description: dmz
-    interface: "{{ opnsense_vlan_interface }}"
-    vlan: 90
-    priority: 7
+    vlan: "{{ item.vlan }}"
+    priority: "{{ item.priority | default(0) }}"
+  loop: "{{ opnsense_interface_map | selectattr('vlan', 'defined') | list }}"

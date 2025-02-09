@@ -1,9 +1,36 @@
-# TODO: Put this in group vars
-- name: Set firewall rules for all interfaces
+- name: Dynamically set firewall rules for all interfaces
   ansible.builtin.set_fact:
     common_firewall_rules: >-
       {{
         common_firewall_rules | default({}) | combine({
+          (item.name ~ "AllowIPv4Internet"): {
+            "description": "Only allow IPv4 to internet for " ~ item.name,
+            "sequence": 100,
+            "ip_protocol": "inet",
+            "source_net": item.name ~ "Network",
+            "destination_invert": true,
+            "destination_net": "PrivateNetworks",
+            "interface": item.interface
+          },
+          (item.name ~ "AllowIPv4DNS"): {
+            "description": "Allow access to DNS for " ~ item.name,
+            "interface": item.interface,
+            "sequence": 2,
+            "ip_protocol": "inet",
+            "protocol": "UDP",
+            "source_net": item.name ~ "Network",
+            "destination_net": item.name ~ "Gateway",
+            "destination_port": 53
+          },
+          (item.name ~ "AllowIPv6Internet"): {
+            "description": "Only allow IPv6 to internet for " ~ item.name,
+            "sequence": 100,
+            "ip_protocol": "inet6",
+            "source_net": item.name ~ "Network",
+            "destination_invert": true,
+            "destination_net": "PrivateNetworks",
+            "interface": item.interface
+          },
           "AllowICMPv6": {
             "description": "Allow icmpv6 on all networks",
             "sequence": 1,
@@ -11,34 +38,6 @@
             "protocol": 'ICMP',
             "interface": all_interfaces
           },
-          ("AllowIPv4Internet_" ~ item.name | lower): {
-            "description": "Only allow IPv4 to internet for " ~ item.name,
-            "sequence": 100,
-            "ip_protocol": "inet",
-            "source_net": item.name ~ "_Network",
-            "destination_invert": true,
-            "destination_net": "PrivateNetworks",
-            "interface": item.interface
-          },
-          ("AllowIPv6Internet_" ~ item.name | lower): {
-            "description": "Only allow IPv6 to internet for " ~ item.name,
-            "sequence": 100,
-            "ip_protocol": "inet6",
-            "source_net": item.name ~ "_Network",
-            "destination_invert": true,
-            "destination_net": "PrivateNetworks",
-            "interface": item.interface
-          },
-          ("AllowIPv4DNS_" ~ item.name | lower): {
-            "description": "Allow access to DNS for " ~ item.name,
-            "interface": item.interface,
-            "sequence": 2,
-            "ip_protocol": "inet",
-            "protocol": "UDP",
-            "source_net": item.name ~ "_Network",
-            "destination_net": item.address,
-            "destination_port": 53
-          }
         })
       }}
   loop: "{{ opnsense_interface_map }}"
@@ -47,62 +46,6 @@
 - name: Common firewall rules
   ansibleguy.opnsense.rule_multi:
     rules: "{{ common_firewall_rules }}"
-- name: Specific firewall rules
+- name: Extra firewall rules
   ansibleguy.opnsense.rule_multi:
-    rules:
-      TrustedLANAccess:
-        description: Allow trusted access to lan
-        interface: opt1 # trusted
-        sequence: 3
-        ip_protocol: inet
-        protocol: any
-        source_net: trusted_Network
-        destination_net: __lan_network
-      TrustedManagementAccess:
-        description: Allow trusted access to management
-        interface: opt1 # trusted
-        sequence: 3
-        ip_protocol: inet
-        protocol: any
-        source_net: trusted_Network
-        destination_net: management_Network
-      TrustedMetalAccess:
-        description: Allow trusted access to metal
-        interface: opt1 # trusted
-        sequence: 3
-        ip_protocol: inet
-        protocol: any
-        source_net: trusted_Network
-        destination_net: metal_Network
-      TrustedDMZAccess:
-        description: Allow trusted access to dmz
-        interface: opt1 # trusted
-        sequence: 3
-        ip_protocol: inet
-        protocol: any
-        source_net: trusted_Network
-        destination_net: dmz_Network
-      TrustedGuestAccess:
-        description: Allow trusted access to guest
-        interface: opt1 # trusted
-        sequence: 3
-        ip_protocol: inet
-        protocol: any
-        source_net: trusted_Network
-        destination_net: guest_Network
-      TrustedIOTAccess:
-        description: Allow trusted access to iot
-        interface: opt1 # trusted
-        sequence: 3
-        ip_protocol: inet
-        protocol: any
-        source_net: trusted_Network
-        destination_net: iot_Network
-      GuestIOTAccess:
-        description: Allow guested access to iot
-        interface: opt8 # guest
-        sequence: 3
-        ip_protocol: inet
-        protocol: any
-        source_net: guest_Network
-        destination_net: iot_Network
+    rules: "{{ opnsense_extra_rules }}"

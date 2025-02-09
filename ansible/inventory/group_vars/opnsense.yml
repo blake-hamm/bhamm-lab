@@ -4,39 +4,123 @@ opnsense_interface_map:
     interface: lan
     address: "10.0.9.1"
     subnet: "10.0.9.0/24"
-  - name: trusted
-    interface: opt1
-    address: "10.0.80.1"
-    subnet: "10.0.80.0/24"
   - name: management
     interface: opt2
     address: "10.0.10.1"
     subnet: "10.0.10.0/24"
+    vlan: 10
+    priority: 0
   - name: metal
     interface: opt3
     address: "10.0.20.1"
     subnet: "10.0.20.0/24"
-  - name: vms
-    interface: opt4
-    address: "10.0.30.1"
-    subnet: "10.0.30.0/24"
+    vlan: 20
+    priority: 0
   - name: k8s
     interface: opt5
+    address: "10.0.30.1"
+    subnet: "10.0.30.0/24"
+    vlan: 30
+    priority: 1
+  - name: vms
+    interface: opt4
     address: "10.0.40.1"
     subnet: "10.0.40.0/24"
+    vlan: 40
+    priority: 0
   - name: ceph
     interface: opt6
     address: "10.0.50.1"
     subnet: "10.0.50.0/24"
+    vlan: 50
+    priority: 2
   - name: iot
     interface: opt7
     address: "10.0.60.1"
     subnet: "10.0.60.0/24"
+    vlan: 60
+    priority: 0
   - name: guest
     interface: opt8
     address: "10.0.70.1"
     subnet: "10.0.70.0/24"
+    vlan: 70
+    priority: 6
+  - name: trusted
+    interface: opt1
+    address: "10.0.80.1"
+    subnet: "10.0.80.0/24"
+    vlan: 80
+    priority: 7
   - name: dmz
     interface: opt9
     address: "10.0.90.1"
     subnet: "10.0.90.0/24"
+    vlan: 90
+    priority: 7
+opnsense_extra_aliases:
+  Framework:
+    type: 'host'
+    description: 'Framework laptop'
+    content: 10.0.80.2
+  TrustedIOT:
+    type: 'host'
+    description: 'Trusted IOT devices'
+    content: 10.0.60.2-10.0.60.50
+opnsense_extra_rules:
+  TrustedLANAccess:
+    description: Allow trusted access to lan
+    interface: opt1 # trusted
+    sequence: 3
+    ip_protocol: inet
+    protocol: any
+    source_net: trustedNetwork
+    destination_net: LANNetwork
+  TrustedManagementAccess:
+    description: Allow trusted access to management
+    interface: opt1 # trusted
+    sequence: 3
+    ip_protocol: inet
+    protocol: any
+    source_net: trustedNetwork
+    destination_net: managementNetwork
+  TrustedMetalAccess:
+    description: Allow trusted access to metal
+    interface: opt1 # trusted
+    sequence: 3
+    ip_protocol: inet
+    protocol: any
+    source_net: trustedNetwork
+    destination_net: metalNetwork
+  TrustedDMZAccess:
+    description: Allow trusted access to dmz
+    interface: opt1 # trusted
+    sequence: 3
+    ip_protocol: inet
+    protocol: any
+    source_net: trustedNetwork
+    destination_net: dmzNetwork
+  TrustedGuestAccess:
+    description: Allow trusted access to guest
+    interface: opt1 # trusted
+    sequence: 3
+    ip_protocol: inet
+    protocol: any
+    source_net: trustedNetwork
+    destination_net: guestNetwork
+  TrustedIOTAccess:
+    description: Allow trusted access to iot
+    interface: opt1 # trusted
+    sequence: 3
+    ip_protocol: inet
+    protocol: any
+    source_net: trustedNetwork
+    destination_net: iotNetwork
+  GuestIOTAccess:
+    description: Allow guested access to iot
+    interface: opt8 # guest
+    sequence: 3
+    ip_protocol: inet
+    protocol: any
+    source_net: guestNetwork
+    destination_net: iotNetwork
