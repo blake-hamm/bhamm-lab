@@ -90,3 +90,19 @@
         protocol: any
         source_net: trusted_Network
         destination_net: guest_Network
+      TrustedIOTAccess:
+        description: Allow trusted access to iot
+        interface: opt1 # trusted
+        sequence: 3
+        ip_protocol: inet
+        protocol: any
+        source_net: trusted_Network
+        destination_net: iot_Network
+      GuestIOTAccess:
+        description: Allow guested access to iot
+        interface: opt8 # guest
+        sequence: 3
+        ip_protocol: inet
+        protocol: any
+        source_net: guest_Network
+        destination_net: iot_Network

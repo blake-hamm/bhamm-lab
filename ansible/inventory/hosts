@@ -2,7 +2,7 @@
 aorus ansible_host=10.0.20.11
 antsle ansible_host=10.0.20.12
 prodesk ansible_host=10.0.20.13
-opnsense ansible_host=192.168.69.1
+opnsense ansible_host=10.0.9.1
 
 [debian]
 aorus

@@ -1,6 +1,8 @@
 - name: Run opnsense role
   hosts: localhost
   gather_facts: false
+  vars_files:
+    - inventory/group_vars/opnsense.yml
   module_defaults:
     group/ansibleguy.opnsense.all:
       firewall: "{{ hostvars.opnsense.ansible_host }}"
