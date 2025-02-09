@@ -47,3 +47,4 @@ x Change firewall rules
   - printer
   - smart light switches/plugs
   - eufy
+- Configure dhcp in ansible opnsense
