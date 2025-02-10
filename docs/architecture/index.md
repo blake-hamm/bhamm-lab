@@ -10,9 +10,6 @@ This homelab is a self-hosted and experimental environment designed to support r
 - **Robust Self-Hosting:**
   Create a resilient infrastructure for hosting applications and services in a scalable, self-hosted environment.
 
-- **Automation & Infrastructure as Code:**
-  Leverage CI/CD pipelines and tools like Terraform, Ansible, and Argo CD to automate deployments and streamline operations.
-
 - **Hybrid Cloud Integration:**
   Integrate on-premises infrastructure with cloud resources (e.g., GCP) for backups, failover and AI/ML workloads.
 
@@ -28,7 +25,7 @@ This homelab is a self-hosted and experimental environment designed to support r
   Distributed storage solutions including Ceph, Snapraid/mergerfs and GCP storage ensure 3-2-1 backups with data redundancy and high availability.
 
 - **Networking:**
-  Advanced network designs featuring TP Link Omada equipment, robust VLANs and secure connectivity.
+  Advanced network designs featuring Opnsense firewall, TP Link Omada equipment, robust VLANs and secure connectivity.
 
 - **Automation Tools:**
   A suite of tools such as Terraform, Ansible, and Argo CD automates provisioning, configuration, and deployment processes.
@@ -110,16 +107,17 @@ This homelab is a self-hosted and experimental environment designed to support r
 ## Roadmap
 
 - **Short Term:**
-  - Finalize and document the current lab architecture.
+  - Finalize and publish documentation of the current lab.
   - Implement and test CI/CD pipelines for seamless automation.
   - Establish routine disaster recovery drills and improve backup strategies.
+  - Expose wireguard vpn for offsite access.
 
 - **Mid Term:**
+  - Improve monitoring and alerting capabilities to improve uptime and identify root cause quickly.
+  - Experiment with bare metal GPU clusters and leveraging the nvidia k8s operator.
   - Expand containerized services and enhance Kubernetes cluster resilience.
   - Deepen integration with GCP for hybrid cloud functionalities and AI API access.
-  - Improve monitoring and alerting capabilities to improve uptime and identify root cause quickly.
 
 - **Long Term:**
   - Evolve the lab into a fully modular, scalable environment capable of supporting large-scale AI and ML projects.
-  - Continuously adopt emerging technologies and best practices in DevOps, security, and cloud integration.
-  - Maintain a proactive approach to innovation, ensuring the lab remains a cutting-edge platform for both learning and production.
+  - Evolve the lab into a fully modular, scalable environment capable of supporting large-scale AI and ML projects.
