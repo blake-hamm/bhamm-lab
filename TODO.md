@@ -8,7 +8,12 @@ x Change firewall rules
   x higher priority for guest
 
 # Documentation
-- Organize: Architecture, Deployments, Operations, Security and Compliance, and Disaster Recovery
+- Organize:
+  x Architecture
+  x Deployments
+  x Operations
+  x Security and Compliance
+  x Disaster Recovery
 - Build out docs
 - Deploy to gh pages
 
