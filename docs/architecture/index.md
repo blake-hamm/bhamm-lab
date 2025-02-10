@@ -1,25 +1,22 @@
 # Overview
 
-This lab is a self-hosted, experimental and robust environment designed to support cutting-edge research and professional development in machine learning, DevOps, Kubernetes and security. It serves as both a playground for innovation and a production-grade platform built to ensure high availability, scalability, and resilience. By integrating modern container orchestration, automation, and hybrid cloud capabilities, this lab is engineered to empower AI-powered applications and ML workflows, bolstering my career as an AI/ML Engineer and Consultant.
+This homelab is a self-hosted and experimental environment designed to support research and professional development in machine learning, DevOps, Kubernetes, networking and security. It serves as both a playground for innovation and a production-grade platform built for high availability, scalability, and resilience. By integrating modern container orchestration, automation, and hybrid cloud capabilities, bhamm-lab.com is engineered to support AI-powered applications and ML workflows and grow my skillset as an AI/ML Engineer and Consultant.
 
 ## Key Objectives
 
 - **Learning & Experimentation:**
-  Develop hands-on expertise in AI/ML, DevOps, Kubernetes, network design, and security best practices.
+  Research and demonstrate expertise in AI/ML, DevOps, Kubernetes, network design, and security best practices.
 
 - **Robust Self-Hosting:**
-  Create a resilient, scalable infrastructure for hosting applications and services in a controlled, self-managed environment.
-
-- **Disaster Recovery:**
-  Implement and continuously improve disaster recovery strategies to ensure data integrity and minimal downtime.
+  Create a resilient infrastructure for hosting applications and services in a scalable, self-hosted environment.
 
 - **Automation & Infrastructure as Code:**
   Leverage CI/CD pipelines and tools like Terraform, Ansible, and Argo CD to automate deployments and streamline operations.
 
 - **Hybrid Cloud Integration:**
-  Seamlessly integrate on-premises infrastructure with cloud resources (e.g., GCP) for backups, AI APIs, and compute capabilities.
+  Integrate on-premises infrastructure with cloud resources (e.g., GCP) for backups, failover and AI/ML workloads.
 
-- **Empowering AI & ML Workflows:**
+- **AI/ML Services:**
   Build an environment that supports intensive machine learning processes and AI-powered applications to drive innovation in research and development.
 
 ## Lab at a Glance
@@ -28,19 +25,19 @@ This lab is a self-hosted, experimental and robust environment designed to suppo
   A blend of bare-metal servers, virtualized environments (via Proxmox), and container orchestration (k3s/Kubernetes).
 
 - **Storage & Data Management:**
-  Distributed storage solutions including Ceph, Snapraid/mergerfs and other backup systems ensure data redundancy and high availability.
+  Distributed storage solutions including Ceph, Snapraid/mergerfs and GCP storage ensure 3-2-1 backups with data redundancy and high availability.
 
 - **Networking:**
-  Advanced network designs featuring TP Link Omada equipment, complex VLAN configurations, and secure connectivity.
+  Advanced network designs featuring TP Link Omada equipment, robust VLANs and secure connectivity.
 
 - **Automation Tools:**
   A suite of tools such as Terraform, Ansible, and Argo CD automates provisioning, configuration, and deployment processes.
 
 - **Cloud Integration:**
-  Strategic use of Google Cloud Platform (GCP) for hybrid backup strategies, disaster recovery, and access to AI-driven APIs.
+  Strategic use of Google Cloud Platform (GCP) for hybrid backup strategies, disaster recovery, access to AI-driven APIs and high performance compute.
 
 - **Security Measures:**
-  Implementation of best practices in security, including network segmentation, access controls, and secrets management using SOPS and Vault.
+  Implement best practices in security, including network segmentation, access controls, and secrets management using SOPS and Vault.
 
 ## Design Principles
 

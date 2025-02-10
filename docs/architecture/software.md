@@ -1,20 +1,19 @@
 # Software Architecture
 
 ## Overview
-This document outlines the software components and architecture that form the digital backbone of the lab. It details the operating systems, virtualization platforms, container orchestration, storage solutions, automation tools, and configuration management systems that work in unison to deliver a scalable, robust, and automated environment. This page focuses on the architectural view of software systems, their roles, and their integration.
+
+This document outlines the software components and architecture that form the digital backbone of the lab. It details the operating systems, virtualization platforms, container orchestration, storage solutions, automation tools, and configuration management systems that work in unison to deliver a scalable, robust, and automated environment.
 
 ## Software Inventory
 
 ### Operating Systems & Hypervisors
-- **NixOS:**
-  - **Role:** Primary operating system for bare-metal deployments and base layer for virtualization.
-  - **Usage:** Hosts core services, development environments, and management tools.
 - **Debian:**
-  - **Role:** Primary operating system for bare-metal deployments and base layer for virtualization.
-  - **Usage:** Hosts core services, development environments, and management tools.
+  - **Role:** Primary operating system for bare-metal deployments and virtualization.
+  - **Usage:** Ensure simple, secure and stable OS to customize for various use cases.
 - **Proxmox:**
   - **Role:** Hypervisor platform for managing virtual machines and containers.
-  - **Usage:** Provides virtualization and resource isolation for multiple lab environments.
+  - **Usage:** Provides virtualization and resource isolation for flexible development environments.
+- **NixOS (Decomissioned):** Originally was the preferred Linux OS, but determined to have limited support and ultimately too unstable for my needs.
 
 ### Virtualization & Container Orchestration
 - **Virtual Machines (VMs):**
@@ -26,23 +25,36 @@ This document outlines the software components and architecture that form the di
 ### Storage & Data Management
 - **Ceph:**
   - **Role:** Distributed storage solution.
-  - **Usage:** Provides scalable, redundant storage for VMs, containers, and application data.
-- **Additional Solutions:**
-  - **SnapRAID/MergerFS:** Used for backup, archival storage, and redundancy in non-critical data workflows.
+  - **Usage:** Provides scalable, low latency, redundant storage for VMs, containers, and application data.
+- **Snapraid/mergerfs:**
+  - **Role:** Redundant storage.
+  - **Usage:** Provides secondary file system storage for larger datasets.
+- **GCP Storage:**
+  - **Role:** Offsite storage.
+  - **Usage:** Provide offsite storage to support resiliant backups.
 
 ### Automation and Management Tools
-- **Terraform & Ansible:**
-  - **Role:** Infrastructure as Code (IaC) and configuration management tools.
-  - **Usage:** Automates provisioning, configuration, and management of both hardware and software components.
-- **Nix:**
-  - **Role:** Declarative package management and system configuration tool.
-  - **Usage:** Ensures reproducibility and consistency across environments.
+- **Terraform:**
+  - **Role:** Infrastructure as Code (IaC).
+  - **Usage:** Deploy GCP and proxmox resources.
+- **Ansible:**
+  - **Role:** Configuration management.
+  - **Usage:** Configure and install debian, proxmox and opnsense.
 - **Argo CD:**
   - **Role:** GitOps continuous deployment tool for Kubernetes environments.
   - **Usage:** Manages and synchronizes Kubernetes deployments directly from Git repositories.
+- **Helm:**
+  - **Role:** Ensure consistent kubernetes manifests.
+  - **Usage:** Leverage common configs like Traefik, External Secrets, PVC, Postgresql databases and backups.
+- **Nix:**
+  - **Role:** Declarative package management.
+  - **Usage:** Ensures consistent development environments.
 
 ### Secrets and Configuration Management
-- **SOPS & Vault:**
+- **SOPS:**
+  - **Role:** Tools for secure secrets management and encrypted configuration storage.
+  - **Usage:** Protect sensitive information such as API keys, credentials, and encryption keys, ensuring that configuration data remains secure.
+- **Hashicorp Vault:**
   - **Role:** Tools for secure secrets management and encrypted configuration storage.
   - **Usage:** Protect sensitive information such as API keys, credentials, and encryption keys, ensuring that configuration data remains secure.
 
@@ -58,7 +70,7 @@ This document outlines the software components and architecture that form the di
 ## Integration & Interdependencies
 - **Layered Architecture:**
   The software architecture is designed in layers:
-  - **Base Layer:** Operating systems and hypervisors (Debian, Proxmox) that provide the foundational environment.
+  - **Base Layer:** Network, operating systems and hypervisors (Debian, Proxmox) that provide the foundational environment.
   - **Virtualization/Container Layer:** VMs and Kubernetes (k3s) isolate workloads and enable efficient resource utilization.
   - **Application & Services Layer:** Software applications, storage services, and automation tools that interact through defined APIs and configuration files.
 - **Automation Pipelines:**
