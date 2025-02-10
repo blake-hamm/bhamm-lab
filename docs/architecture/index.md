@@ -120,4 +120,4 @@ This homelab is a self-hosted and experimental environment designed to support r
 
 - **Long Term:**
   - Evolve the lab into a fully modular, scalable environment capable of supporting large-scale AI and ML projects.
-  - Evolve the lab into a fully modular, scalable environment capable of supporting large-scale AI and ML projects.
+  - Collaborate and add more users to build out hackathon-style projects with.
