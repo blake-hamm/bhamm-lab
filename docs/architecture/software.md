@@ -67,28 +67,9 @@ This document outlines the software components and architecture that form the di
     - **Role:** Augments on-premises capabilities by providing additional backup, AI API access, and compute resources.
     - **Usage:** Supports disaster recovery strategies and offloads compute-intensive tasks when needed.
 
-## Integration & Interdependencies
-- **Layered Architecture:**
-  The software architecture is designed in layers:
-  - **Base Layer:** Network, operating systems and hypervisors (Debian, Proxmox) that provide the foundational environment.
-  - **Virtualization/Container Layer:** VMs and Kubernetes (k3s) isolate workloads and enable efficient resource utilization.
-  - **Application & Services Layer:** Software applications, storage services, and automation tools that interact through defined APIs and configuration files.
-- **Automation Pipelines:**
-  CI/CD pipelines tie together the management of infrastructure, application deployment, and configuration updates. This ensures that changes propagate seamlessly from source control to the running environment.
-- **Secure Configuration:**
-  Secrets management tools (SOPS and Vault) integrate with deployment and orchestration processes, ensuring that sensitive information is securely stored and accessed by authorized services only.
-
 ## Diagrams & Visualizations
 - **Architectural Diagrams:**
   - High-level diagrams illustrate the overall software stack, showing how the operating systems, virtualization platforms, and container orchestration interact.
   - Detailed flowcharts map out the integration of automation tools with the infrastructure components.
 - **References:**
   *(Include links or embedded images to your architectural diagrams here.)*
-
-## Future Directions
-- **Scalability Enhancements:**
-  Plans to further decouple services and adopt microservices architectures for improved scalability and fault isolation.
-- **Cloud-Native Integrations:**
-  Increasing reliance on cloud services for backup, disaster recovery, and AI-driven workloads to augment on-premises capabilities.
-- **Enhanced Automation:**
-  Continued expansion of automation capabilities via enhanced CI/CD pipelines and more granular configuration management to further reduce manual intervention.

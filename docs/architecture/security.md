@@ -3,16 +3,6 @@
 ## Overview
 This document outlines the security architecture of the lab environment. It details the measures implemented to secure the network, manage sensitive data, enforce access controls, and securely expose services to external users. The lab’s security framework is built around best practices such as network segmentation with VLANs, robust secrets management with SOPS and Vault, role-based access controls (RBAC), and secure external access via Cloudflare tunnels. These layers of defense work together to protect the integrity, confidentiality, and availability of the lab’s resources.
 
-## Network Security & VLAN Segmentation
-- **VLAN Segmentation:**
-  - The network is segmented into multiple VLANs based on function, tenant, and security level.
-  - Segmentation isolates management, production, and experimental traffic, reducing the risk of lateral movement in the event of a breach.
-- **Firewalls & Intrusion Detection:**
-  - Network perimeter devices enforce strict firewall rules and access control lists (ACLs) to filter inbound and outbound traffic.
-  - Intrusion Detection/Prevention Systems (IDS/IPS) monitor network traffic for suspicious activity.
-- **Secure Routing:**
-  - Routing policies ensure that sensitive traffic is contained within secure segments and that only authorized traffic can cross between VLANs.
-
 ## Secrets Management
 - **SOPS (Secrets OPerationS):**
   - Used for encrypting configuration files and secrets stored in version control.
@@ -54,6 +44,3 @@ This document outlines the security architecture of the lab environment. It deta
   - An incident response plan outlines procedures for containment, eradication, and recovery in the event of a security incident.
 - **Compliance & Auditing:**
   - Regular internal and external audits ensure that security practices meet industry standards and regulatory requirements.
-
-## Summary
-The lab’s security architecture is built on multiple layers of defense, from network segmentation and secrets management to robust access controls and secure service exposure via Cloudflare tunnels. This comprehensive approach minimizes risk, protects sensitive data, and ensures that the environment remains secure and resilient against evolving threats.
