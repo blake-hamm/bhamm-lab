@@ -1,4 +1,5 @@
-# bhamm-lab.com Documentation
+# Overview
+
 These docs provide a comprehensive guide to our lab’s infrastructure, processes, and best practices. The documentation is organized into five main sections:
 
 - **Architecture:**
