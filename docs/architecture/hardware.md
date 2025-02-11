@@ -24,7 +24,7 @@ This page provides an architectural view of the lab’s physical infrastructure.
   - **Features:** 2x10GB NIC, 2x1GB NIC, ipmi
   - **Role:** Proxmox and ceph
 - **Supermicro:**
-  - **Name:** supermicro
+  - **Name:** super
   - **Model:** Supermicro SYS-5019D-FN8TP
   - **CPU:** Intel Xeon processor D-2146NT 8-Core
   - **RAM:** 128 GB ECC
