@@ -1,2 +1,0 @@
-# Nix
-Contains nixos config.

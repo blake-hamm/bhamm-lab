@@ -1,10 +1,18 @@
-# Welcome to my homelab `bhamm-lab.com`
+# Overview
 
-This documentation is for server administrator (me) to organize, understand and reference operations on my homelab.
+These docs provide a comprehensive guide to our lab’s infrastructure, processes, and best practices. The documentation is organized into five main sections:
 
-### Manifesto
- - This homelab prioritizes automation.
- - Infrastructure as code is preferred for configuration and deployment patterns.
- - When IaC is not possible, document deployment patterns that can be automated at a later time.
- - Security is important, but learning new tools and deploying useful apps is more important.
- - Only expose what is absolutely necessary to the public internet.
+- **Architecture:**
+  Detailed documentation of our lab's design and structure—including hardware, network, software, storage, security, and integrations.
+
+- **Deployments:**
+  Procedures for provisioning new resources and deploying changes, using CI/CD, Ansible, Terraform, and Argo CD.
+
+- **Operations:**
+  Day-to-day operational practices, monitoring, and troubleshooting guidelines to maintain optimal performance.
+
+- **Security and Compliance:**
+  Policies, practices, and tools that secure our environment and ensure adherence to industry standards.
+
+- **Disaster Recovery:**
+  Strategies and procedures for rapid recovery and data protection in the event of failures or disasters.

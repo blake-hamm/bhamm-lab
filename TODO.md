@@ -8,9 +8,14 @@ x Change firewall rules
   x higher priority for guest
 
 # Documentation
-- Organize: Architecture, Deployments, Operations, Security and Compliance, and Disaster Recovery
-- Build out docs
-- Deploy to gh pages
+x Organize:
+  x Architecture
+  x Deployments
+  x Operations
+  x Security and Compliance
+  x Disaster Recovery
+x Build out docs
+x Deploy to gh pages
 
 # Proxmox/ceph cluster
 - Setup new debian machine w/ ansible
