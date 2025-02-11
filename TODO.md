@@ -43,6 +43,12 @@ x Deploy to gh pages
 - Dev cluster on PR
 - Test DR with pvc and pg (auto)
 
+# Monitoring
+- Node exporter debian ansible playbook
+- Refine grafana dashboard config
+- Deploy loki
+- Setup alerts for nodes and traefik
+
 # Omada sdn
 - Setup 3 wifi networks
   x Polk_Paradise
