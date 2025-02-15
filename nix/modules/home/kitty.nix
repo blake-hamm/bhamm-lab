@@ -6,7 +6,7 @@
   home-manager.users.${username} = {
     programs.kitty = {
       enable = true;
-      catppuccin.enable = true;
+      # catppuccin.enable = true;
       settings = {
         scrollback_lines = 10000;
         enable_audio_bell = false;
