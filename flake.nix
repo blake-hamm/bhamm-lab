@@ -34,7 +34,6 @@
     # Sops nix
     sops-nix.url = "github:Mic92/sops-nix";
 
-    flake-parts.url = "github:hercules-ci/flake-parts";
   };
 
   outputs = { nixpkgs, self, ... } @ inputs: #inputs.flake-parts.lib.mkFlake { inherit inputs; } {
