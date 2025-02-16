@@ -14,6 +14,7 @@ aorus
 antsle
 super
 
-# [proxmox]
-# aorus
-# antsle
+[proxmox]
+aorus
+antsle
+super
