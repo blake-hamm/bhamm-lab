@@ -22,7 +22,7 @@ x Setup new debian machine w/ ansible
 x Optimize and confirm networking
 x Setup proxmox config w/ proxmox
 x Deploy cluster
-- Update docs
+x Update docs
 
 # k3s cluster
 - Setup helm chart for my apps (external secrets, traefik, pvc, pg)
