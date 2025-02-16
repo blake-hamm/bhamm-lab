@@ -59,7 +59,7 @@ pve_ssh_port: "{{ ansible_port }}"
 #     content: ["images", "iso", "backup", "snippets", "vztmpl"]
 #     server: 192.168.69.12
 #     export: /mnt/storage/proxmox
-pve_ceph_enabled: false # true
+pve_ceph_enabled: true
 pve_ceph_network: 10.0.20.0/24
 pve_ceph_cluster_network: 10.0.50.0/24
 pve_ceph_repository_line: "deb http://download.proxmox.com/debian/ceph-squid bookworm no-subscription"
