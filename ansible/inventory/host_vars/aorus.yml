@@ -1,67 +1,68 @@
 network_10gb_nics: [enp5s0f0, enp5s0f1]
 # Ceph config for proxmox
+proxmox_reset_ceph: true
 ceph_device: /dev/nvme0n1
 # TODO: Automatically add authorized keys from other metal hosts
 # ssh_authorized_keys:
 #   root: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILU1lLhuPFMaFk3EMZVAJLRNJsUCxE3C3hYmtiArIOG8 root@antsle
 #   bhamm: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKsS2H4frdi7AvzkGMPMRaQ+B46Af5oaRFtNJY3uCHt blake.j.hamm@gmail.com
 # Bootstrap
-bootstrap_disk_id: "/dev/disk/by-id/ata-KINGSTON_SA400S37240G_50026B77845B74E3"
-# https://github.com/AerisCloud/ansible-disk
-disk_additional_disks:
-  - disk: /dev/sdc
-    fstype: xfs
-    mount_options: defaults,noatime,nodiratime
-    mount: /mnt/disk1
-  - disk: /dev/sdb
-    fstype: xfs
-    mount_options: defaults,noatime,nodiratime
-    mount: /mnt/disk2
-  - disk: /dev/sdd
-    fstype: xfs
-    mount_options: defaults,noatime,nodiratime
-    mount: /mnt/parity1
-additional_fs_utils:
-  - xfsprogs
-# https://github.com/tigattack/ansible-role-mergerfs
-mergerfs_mounts:
-  - path: /mnt/storage
-    branches:
-      - /mnt/disk*
-    options: allow_other,use_ino
-# https://github.com/ironicbadger/ansible-role-snapraid
-snapraid_install: true
-snapraid_runner: false
-snapraid_data_disks:
-  - path: /mnt/disk1
-    content: true
-  - path: /mnt/disk2
-    content: true
-snapraid_parity_disks:
-  - path: /mnt/parity1
-    content: true
-snapraid_config_excludes:
-  - "*.unrecoverable"
-  - /lost+found/
-  - "*.!sync"
-  - /tmp/
-snapraid_content_files:
-  - /var/snapraid.content
-snapraid_scrub_percent: 22
-snapraid_scrub_age: 8
-snapraid_sync_schedule:
-  minute: 0
-  hour: 0
-snapraid_sync_healthcheck_io_uuid: ""
-snapraid_scrub_schedule:
-  minute: 0
-  hour: 0
-  weekday: 0
-snapraid_scrub_healthcheck_io_uuid: ""
-# https://github.com/geerlingguy/ansible-role-nfs
-nfs_exports:
-  - /mnt/storage/proxmox *(rw,sync,no_subtree_check,no_root_squash,fsid=0)
-  - /mnt/storage/shared *(rw,sync,no_subtree_check,no_root_squash,fsid=1)
-  - /mnt/storage/kubernetes *(rw,sync,no_subtree_check,no_root_squash,fsid=2)
+# bootstrap_disk_id: "/dev/disk/by-id/ata-KINGSTON_SA400S37240G_50026B77845B74E3"
+# # https://github.com/AerisCloud/ansible-disk
+# disk_additional_disks:
+#   - disk: /dev/sdc
+#     fstype: xfs
+#     mount_options: defaults,noatime,nodiratime
+#     mount: /mnt/disk1
+#   - disk: /dev/sdb
+#     fstype: xfs
+#     mount_options: defaults,noatime,nodiratime
+#     mount: /mnt/disk2
+#   - disk: /dev/sdd
+#     fstype: xfs
+#     mount_options: defaults,noatime,nodiratime
+#     mount: /mnt/parity1
+# additional_fs_utils:
+#   - xfsprogs
+# # https://github.com/tigattack/ansible-role-mergerfs
+# mergerfs_mounts:
+#   - path: /mnt/storage
+#     branches:
+#       - /mnt/disk*
+#     options: allow_other,use_ino
+# # https://github.com/ironicbadger/ansible-role-snapraid
+# snapraid_install: true
+# snapraid_runner: false
+# snapraid_data_disks:
+#   - path: /mnt/disk1
+#     content: true
+#   - path: /mnt/disk2
+#     content: true
+# snapraid_parity_disks:
+#   - path: /mnt/parity1
+#     content: true
+# snapraid_config_excludes:
+#   - "*.unrecoverable"
+#   - /lost+found/
+#   - "*.!sync"
+#   - /tmp/
+# snapraid_content_files:
+#   - /var/snapraid.content
+# snapraid_scrub_percent: 22
+# snapraid_scrub_age: 8
+# snapraid_sync_schedule:
+#   minute: 0
+#   hour: 0
+# snapraid_sync_healthcheck_io_uuid: ""
+# snapraid_scrub_schedule:
+#   minute: 0
+#   hour: 0
+#   weekday: 0
+# snapraid_scrub_healthcheck_io_uuid: ""
+# # https://github.com/geerlingguy/ansible-role-nfs
+# nfs_exports:
+#   - /mnt/storage/proxmox *(rw,sync,no_subtree_check,no_root_squash,fsid=0)
+#   - /mnt/storage/shared *(rw,sync,no_subtree_check,no_root_squash,fsid=1)
+#   - /mnt/storage/kubernetes *(rw,sync,no_subtree_check,no_root_squash,fsid=2)
 # Install pbs
-proxmox_pbs: true
+# proxmox_pbs: true

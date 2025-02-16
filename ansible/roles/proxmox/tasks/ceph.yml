@@ -1,0 +1,41 @@
+- name: Check if device or partitions are mounted
+  ansible.builtin.shell: |
+    lsblk -no MOUNTPOINT "{{ ceph_device }}"
+  register: lsblk_mount_check
+  changed_when: false
+- name: Fail if device is mounted
+  ansible.builtin.fail:
+    msg: "Device {{ ceph_device }} or its partitions are mounted. Mount points: {{ lsblk_mount_check.stdout_lines | join(', ') }}"
+  when: lsblk_mount_check.stdout != ''
+- name: Find the volume group on the ceph device
+  ansible.builtin.command: "pvs --noheadings -o vg_name {{ ceph_device }}"
+  register: ceph_vg
+  changed_when: false
+  failed_when: false
+- name: Debug the found volume group
+  ansible.builtin.debug:
+    msg: "Found volume group: {{ ceph_vg.stdout | trim }}"
+  when: ceph_vg.stdout | trim != ""
+- name: Remove the ceph volume group if it exists
+  ansible.builtin.command: "vgremove -f {{ ceph_vg.stdout | trim }}"
+  when: ceph_vg.stdout | trim != ""
+  changed_when: "'not found' not in ceph_vg.stdout"
+- name: Remove existing LVM Physical Volume (forcefully)
+  ansible.builtin.command: pvremove -ffy "{{ ceph_device }}"
+  failed_when: false
+  changed_when: "'No PV found' not in pvremove_result.stderr"
+  register: pvremove_result
+- name: Wipe all existing signatures on the device
+  ansible.builtin.command: wipefs --all "{{ ceph_device }}"
+  changed_when: "'erased' in wipefs_result.stdout"
+  register: wipefs_result
+- name: Install parted package
+  ansible.builtin.package:
+    name: parted
+    state: present
+- name: Create new GPT partition table
+  community.general.parted:
+    device: "{{ ceph_device }}"
+    label: gpt
+    state: present
+    number: 1
