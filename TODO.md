@@ -25,9 +25,11 @@ x Deploy cluster
 x Update docs
 
 # k3s cluster
+- Seperate out terraform code for k3s
+- Use kustomize and base/core and dev/prod manifests
 - Setup helm chart for my apps (external secrets, traefik, pvc, pg)
 - Use namespaces
-- Configure minio
+- Configure minio thoroughly
 - Document disaster recovery (DR)
 - Test DR with pvc and pg (manually)
 - Leverage values file
