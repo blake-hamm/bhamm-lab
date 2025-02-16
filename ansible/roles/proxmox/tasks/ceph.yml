@@ -29,13 +29,3 @@
   ansible.builtin.command: wipefs --all "{{ ceph_device }}"
   changed_when: "'erased' in wipefs_result.stdout"
   register: wipefs_result
-- name: Install parted package
-  ansible.builtin.package:
-    name: parted
-    state: present
-- name: Create new GPT partition table
-  community.general.parted:
-    device: "{{ ceph_device }}"
-    label: gpt
-    state: present
-    number: 1

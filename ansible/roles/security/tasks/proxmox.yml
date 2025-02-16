@@ -3,15 +3,25 @@
     name: root
     state: present
     shell: /bin/bash
-- name: Read SSH host key files
-  ansible.builtin.slurp:
-    src: "{{ item }}.pub"
-  loop: "{{ ssh_host_key_files }}"
-  register: key_files_raw
+- name: Ensure /root/.ssh directory exists
+  ansible.builtin.file:
+    path: /root/.ssh
+    state: directory
+    mode: '0700'
+    owner: root
+    group: root
+- name: Generate SSH key pair for root (if not already present)
+  community.crypto.openssh_keypair:
+    path: /root/.ssh/id_ed25519
+    type: ed25519
+    owner: root
+    group: root
+    mode: '0600'
+  register: root_ssh_keypair
 - name: Create proxmox_host_keys dictionary with list of keys
   ansible.builtin.set_fact:
     proxmox_host_keys:
-      root: "{{ key_files_raw.results | map(attribute='content') | map('b64decode') | map('trim') | list }}"
+      root: ["{{ root_ssh_keypair.public_key }}"]
 - name: Aggregate keys from other Proxmox hosts
   ansible.builtin.set_fact:
     ssh_authorized_keys: >-

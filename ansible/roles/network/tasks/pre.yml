@@ -9,7 +9,6 @@
     name:
       - ifupdown2
       - bridge-utils
-      - vlan
       - iperf3
       - iputils-tracepath
       - ethtool

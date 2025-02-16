@@ -1,8 +1,8 @@
-network_10gb_nics: [eno7, eno8]
+network_10gb_nics: [eno7np2, eno8np3]
 # TODO: Automatically add authorized keys from other metal hosts
 # ssh_authorized_keys:
 #   root: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG8CKk8NMKgAPMjcVUhPvPEmrXu+fQYFJIAMtwnx/yYp root@aorus
 #   bhamm: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKsS2H4frdi7AvzkGMPMRaQ+B46Af5oaRFtNJY3uCHt blake.j.hamm@gmail.com
 # Ceph config for proxmox
-proxmox_reset_ceph: true
+# proxmox_reset_ceph: true
 ceph_device: /dev/nvme0n1

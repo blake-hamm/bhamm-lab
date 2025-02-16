@@ -1,6 +1,6 @@
 network_10gb_nics: [enp5s0f0, enp5s0f1]
 # Ceph config for proxmox
-proxmox_reset_ceph: true
+# proxmox_reset_ceph: true
 ceph_device: /dev/nvme0n1
 # TODO: Automatically add authorized keys from other metal hosts
 # ssh_authorized_keys:

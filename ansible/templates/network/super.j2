@@ -3,20 +3,20 @@ auto lo
 iface lo inet loopback
 
 # SFP+ NIC (10Gb) on trunk port: no IP assigned here
-auto eno7
-iface eno7 inet manual
+auto eno7np2
+iface eno7np2 inet manual
     mtu 9000
 
-# VLAN-aware Bridge on eno7
+# VLAN-aware Bridge on eno7np2
 # The bridge is set to be VLAN aware and recognizes VLANs 20 and 51.
 auto vmbr0
 iface vmbr0 inet manual
-    bridge-ports eno7
+    bridge-ports eno7np2
     bridge-stp off
     bridge-fd 0
     bridge-vlan-aware yes
     bridge-vlan-filtering yes
-    bridge-vids 20 51
+    bridge-vids 20
     mtu 9000
 
 # Metal interface on VLAN 20 via the bridge:
@@ -28,14 +28,14 @@ iface vmbr0.20 inet static
     dns-nameservers 10.0.20.1 1.1.1.1 1.0.0.1
     mtu 9000
 
-# Ceph Interface (10Gb) - VLAN 50 on eno8 remains unchanged:
-auto eno8
-iface eno8 inet manual
+# Ceph Interface (10Gb) - VLAN 50 on eno8np3 remains unchanged:
+auto eno8np3
+iface eno8np3 inet manual
     mtu 9000
 
-auto eno8.50
-iface eno8.50 inet static
+auto eno8np3.50
+iface eno8np3.50 inet static
     address 10.0.50.13/24
     netmask 255.255.255.0
-    vlan-raw-device eno8
+    vlan-raw-device eno8np3
     mtu 9000
