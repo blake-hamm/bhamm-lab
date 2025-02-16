@@ -1,4 +1,4 @@
-ssh_permit_root_login: 'prohibit-password'
+ssh_permit_root_login: 'without-password'
 ssh_allow_users: ""
 # vars for ansible/roles/proxmox
 ntp_enabled: true

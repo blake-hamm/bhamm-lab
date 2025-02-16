@@ -1,4 +1,4 @@
-# bootstrap args: ansible_port=22 ansible_ssh_common_args="-o PasswordAuthentication=yes"
+# debian bootstrap args: ansible_port=22 ansible_ssh_common_args="-o PasswordAuthentication=yes"
 aorus ansible_host=10.0.20.11
 antsle ansible_host=10.0.20.12
 super ansible_host=10.0.20.13
