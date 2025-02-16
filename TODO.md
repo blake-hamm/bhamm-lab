@@ -18,11 +18,16 @@ x Build out docs
 x Deploy to gh pages
 
 # Proxmox/ceph cluster
-- Setup new debian machine w/ ansible
-- Optimize and confirm networking
-- Setup proxmox config w/ proxmox
-- Deploy cluster
+x Setup new debian machine w/ ansible
+x Optimize and confirm networking
+x Setup proxmox config w/ proxmox
+x Deploy cluster
 - Consider refactoring ansible to terraform
+  - ACL's
+  - Users
+  - Groups
+  - HA groups
+  - Storage (pbs,nfs)
 
 # k3s cluster
 - Setup helm chart for my apps (external secrets, traefik, pvc, pg)

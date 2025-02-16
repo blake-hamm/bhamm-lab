@@ -2,12 +2,6 @@ network_10gb_nics: [enp5s0f0, enp5s0f1]
 # Ceph config for proxmox
 # proxmox_reset_ceph: true
 ceph_device: /dev/nvme0n1
-# TODO: Automatically add authorized keys from other metal hosts
-# ssh_authorized_keys:
-#   root: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILU1lLhuPFMaFk3EMZVAJLRNJsUCxE3C3hYmtiArIOG8 root@antsle
-#   bhamm: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKsS2H4frdi7AvzkGMPMRaQ+B46Af5oaRFtNJY3uCHt blake.j.hamm@gmail.com
-# Bootstrap
-# bootstrap_disk_id: "/dev/disk/by-id/ata-KINGSTON_SA400S37240G_50026B77845B74E3"
 # # https://github.com/AerisCloud/ansible-disk
 # disk_additional_disks:
 #   - disk: /dev/sdc
@@ -65,4 +59,4 @@ ceph_device: /dev/nvme0n1
 #   - /mnt/storage/shared *(rw,sync,no_subtree_check,no_root_squash,fsid=1)
 #   - /mnt/storage/kubernetes *(rw,sync,no_subtree_check,no_root_squash,fsid=2)
 # Install pbs
-# proxmox_pbs: true
+proxmox_pbs: true
