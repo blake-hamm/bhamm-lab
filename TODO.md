@@ -22,12 +22,7 @@ x Setup new debian machine w/ ansible
 x Optimize and confirm networking
 x Setup proxmox config w/ proxmox
 x Deploy cluster
-- Consider refactoring ansible to terraform
-  - ACL's
-  - Users
-  - Groups
-  - HA groups
-  - Storage (pbs,nfs)
+- Update docs
 
 # k3s cluster
 - Setup helm chart for my apps (external secrets, traefik, pvc, pg)
@@ -64,3 +59,13 @@ x Deploy cluster
   - smart light switches/plugs
   - eufy
 - Configure dhcp in ansible opnsense
+
+# Finish
+- Install mergerfs/snapraid on aorus node
+- Configure pbs
+- Consider refactoring ansible to terraform
+  - ACL's
+  - Users
+  - Groups
+  - HA groups
+  - Storage (pbs,nfs)
