@@ -11,6 +11,7 @@
   ansible.builtin.apt:
     name: proxmox-backup-server
     state: present
+    update_cache: true
 - name: Remove the Proxmox Enterprise repository if it exists
   ansible.builtin.file:
     path: /etc/apt/sources.list.d/pbs-enterprise.list
