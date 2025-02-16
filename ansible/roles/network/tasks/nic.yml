@@ -2,7 +2,6 @@
   ansible.builtin.apt:
     name: ethtool
     state: present
-    update_cache: true
 - name: Enable NIC offload features
   ansible.builtin.command: |
     ethtool -K {{ nic_name }} tso on gso on gro on lro on tx on rx on
@@ -20,22 +19,21 @@
   ignore_errors: true
 - name: Extract NIC maximum ring buffer settings
   ansible.builtin.set_fact:
-    nic_buffers: >
+    nic_buffers: >-
       {{
-        nic_buffers | default([]) +
-        [
+        nic_buffers | default([]) + [
           {
             'nic_name': item.nic_name,
             'max_rx': (
               item.stdout.split('Pre-set maximums:')[1]
               .split('Current hardware settings:')[0]
-              | regex_search('RX:\\s*(\\d+)', '\\1')
+              | regex_search('RX:\s*(\d+)', '\1')
               | first
             ),
             'max_tx': (
               item.stdout.split('Pre-set maximums:')[1]
               .split('Current hardware settings:')[0]
-              | regex_search('TX:\\s*(\\d+)', '\\1')
+              | regex_search('TX:\s*(\d+)', '\1')
               | first
             )
           }
@@ -73,7 +71,6 @@
   ansible.builtin.apt:
     name: cpufrequtils
     state: present
-    update_cache: true
 - name: Set CPU performance governor
   ansible.builtin.lineinfile:
     path: /etc/default/cpufrequtils
