@@ -8,7 +8,7 @@ iface eno7np2 inet manual
     mtu 9000
 
 # VLAN-aware Bridge on eno7np2
-# The bridge is set to be VLAN aware and recognizes VLANs 20 and 51.
+# This bridge is set to be VLAN aware and recognizes VLANs 20 and 30.
 auto vmbr0
 iface vmbr0 inet manual
     bridge-ports eno7np2
@@ -16,7 +16,7 @@ iface vmbr0 inet manual
     bridge-fd 0
     bridge-vlan-aware yes
     bridge-vlan-filtering yes
-    bridge-vids 20
+    bridge-vids 1 20 30
     mtu 9000
 
 # Metal interface on VLAN 20 via the bridge:
@@ -25,7 +25,15 @@ iface vmbr0.20 inet static
     address 10.0.20.13/24
     netmask 255.255.255.0
     gateway 10.0.20.1
-    dns-nameservers 10.0.20.1 1.1.1.1 1.0.0.1
+    dns-nameservers 1.1.1.1 1.0.0.1
+    mtu 9000
+
+# Kubernetes interface on VLAN 30 via the bridge:
+auto vmbr0.30
+iface vmbr0.30 inet static
+    address 10.0.30.13/24
+    netmask 255.255.255.0
+    dns-nameservers 1.1.1.1 1.0.0.1
     mtu 9000
 
 # Ceph Interface (10Gb) - VLAN 50 on eno8np3 remains unchanged:
