@@ -108,6 +108,14 @@ opnsense_extra_rules:
     protocol: any
     source_net: metalNetwork
     destination_net: k8sNetwork
+  K8sMetalAccess:
+    description: Allow k8s access to metal
+    interface: opt3 # metal
+    sequence: 3
+    ip_protocol: inet
+    protocol: any
+    source_net: k8sNetwork
+    destination_net: metalNetwork
   TrustedDMZAccess:
     description: Allow trusted access to dmz
     interface: opt1 # trusted
