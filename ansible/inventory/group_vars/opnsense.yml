@@ -109,8 +109,8 @@ opnsense_extra_rules:
     source_net: metalNetwork
     destination_net: k8sNetwork
   K8sMetalAccess:
-    description: Allow k8s access to metal
-    interface: opt3 # metal
+    description: Allow k8s access to metal (fork8sNetwork)
+    interface: opt4 # metal
     sequence: 3
     ip_protocol: inet
     protocol: any
