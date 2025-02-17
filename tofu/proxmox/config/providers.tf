@@ -1,10 +1,6 @@
 terraform {
   required_version = ">= 1.7" # For open tofu
   required_providers {
-    vault = {
-      source  = "hashicorp/vault"
-      version = "4.4.0"
-    }
     proxmox = {
       source  = "bpg/proxmox"
       version = "0.66.1"
@@ -12,19 +8,6 @@ terraform {
     local = {
       source  = "hashicorp/local"
       version = "2.5.2"
-    }
-  }
-}
-
-provider "vault" {
-  add_address_to_env = true
-  skip_child_token   = true
-  auth_login {
-    path = "auth/approle/login"
-
-    parameters = {
-      role_id   = var.vault_role_id
-      secret_id = var.vault_secret_id
     }
   }
 }
@@ -37,12 +20,17 @@ provider "proxmox" {
     username = "bhamm"
     node {
       name    = "aorus"
-      address = "192.168.69.12"
+      address = "10.0.20.11"
       port    = "4185"
     }
     node {
       name    = "antsle"
-      address = "192.168.69.13"
+      address = "10.0.20.12"
+      port    = "4185"
+    }
+    node {
+      name    = "super"
+      address = "10.0.20.13"
       port    = "4185"
     }
   }

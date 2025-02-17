@@ -1,18 +1,5 @@
-variable "vault_role_id" {
-  type = string
-}
-
-variable "vault_secret_id" {
-  type = string
-}
-
 variable "proxmox_url" {
-  default = "https://192.168.69.12:8006"
-  type    = string
-}
-
-variable "user" {
-  default = "bhamm"
+  default = "https://10.0.20.11:8006"
   type    = string
 }
 
@@ -25,11 +12,11 @@ variable "count_k3s_master" {
 variable "k3s_nodes" {
   description = "List of Proxmox nodes for k3s deployment"
   type        = list(string)
-  default     = ["antsle", "aorus"]
+  default     = ["antsle", "aorus", "super"]
 }
 
 variable "count_k3s_worker" {
   description = "Number of k3s worker nodes"
   type        = number
-  default     = 1
+  default     = 3
 }
