@@ -14,8 +14,6 @@
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
     wait: true
-    # values:
-    #   - "{{ argo_cd_values | default([]) }}"
 - name: Wait for ArgoCD server to be ready
   kubernetes.core.k8s_info:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
@@ -36,9 +34,9 @@
     wait: true
     wait_sleep: 10
     wait_timeout: 360
-- name: Deploy core apps
-  kubernetes.core.k8s:
-    kubeconfig: /etc/rancher/k3s/k3s.yaml
-    state: present
-    template: core.yaml.j2
-    wait: true
+# - name: Deploy core apps
+#   kubernetes.core.k8s:
+#     kubeconfig: /etc/rancher/k3s/k3s.yaml
+#     state: present
+#     template: core.yaml.j2
+#     wait: true
