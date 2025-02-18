@@ -2,6 +2,7 @@
   ansible.builtin.package:
     name: python3-pip
     state: present
+    update_cache: true
   become: true
 - name: Install python3-hvac
   ansible.builtin.package:
