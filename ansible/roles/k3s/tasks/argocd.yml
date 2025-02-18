@@ -3,10 +3,22 @@
     name: argo
     repo_url: https://argoproj.github.io/argo-helm
     state: present
+- name: Create Argocd namespace
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: argocd
+    wait: true
+  retries: 3
+  delay: 15
 - name: Install ArgoCD with Helm
   kubernetes.core.helm:
     release_name: argocd
-    release_namespace: default
+    release_namespace: argocd
     chart_ref: argo/argo-cd
     chart_version: 7.7.11
     update_repo_cache: true
@@ -14,11 +26,13 @@
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
     wait: true
+  retries: 3
+  delay: 15
 - name: Wait for ArgoCD server to be ready
   kubernetes.core.k8s_info:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     kind: Pod
-    namespace: default
+    namespace: argocd
     label_selectors:
       - app.kubernetes.io/name=argocd-server
     wait: true
@@ -28,7 +42,7 @@
   kubernetes.core.k8s_info:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     kind: Pod
-    namespace: default
+    namespace: argocd
     label_selectors:
       - app.kubernetes.io/name=argocd-repo-server
     wait: true

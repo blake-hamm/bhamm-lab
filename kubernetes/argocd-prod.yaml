@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: all-apps-dev
+  name: apps-prod
   namespace: argocd
 spec:
   project: default
@@ -11,8 +11,7 @@ spec:
     path: kubernetes/manifests/apps
     directory:
       recurse: true
-      include:
-        - '**/*dev.yaml'
+      include: '**/*prod.yaml'
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
