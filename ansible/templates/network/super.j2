@@ -28,14 +28,6 @@ iface vmbr0.20 inet static
     dns-nameservers 1.1.1.1 1.0.0.1
     mtu 9000
 
-# Kubernetes interface on VLAN 30 via the bridge:
-auto vmbr0.30
-iface vmbr0.30 inet static
-    address 10.0.30.13/24
-    netmask 255.255.255.0
-    dns-nameservers 1.1.1.1 1.0.0.1
-    mtu 9000
-
 # Ceph Interface (10Gb) - VLAN 50 on eno8np3 remains unchanged:
 auto eno8np3
 iface eno8np3 inet manual
