@@ -2,7 +2,7 @@ k3s_become: true
 k3s_etcd_datastore: true
 k3s_use_experimental: true
 k3s_server:
-  tls-san: 10.0.20.30
+  tls-san: 10.0.30.30
   cluster-cidr: 10.0.31.0/24
   flannel-backend: none
   disable-network-policy: true

@@ -1,17 +1,26 @@
+- name: Check if client.kubernetes exists
+  ansible.builtin.command: ceph auth get client.kubernetes
+  register: client_auth
+  ignore_errors: true
+  changed_when: false
+- name: Create client.kubernetes if it does not exist
+  ansible.builtin.command: ceph auth get-or-create client.kubernetes mon 'profile rbd' osd 'profile rbd pool=kubernetes' mgr 'profile rbd pool=kubernetes'
+  when: client_auth.rc != 0
+  changed_when: false
 - name: Update kubernetes ceph permisions
-  ansible.builtin.shell: >
+  ansible.builtin.command: >
     ceph auth caps client.kubernetes mon 'profile rbd' osd 'profile rbd pool=kubernetes' mgr 'profile rbd pool=kubernetes'
   register: ceph_update_k8s_client
   failed_when: "'Error' in ceph_update_k8s_client.stderr"
   changed_when: false
 - name: Populate ceph_k8s_key
-  ansible.builtin.shell: >
+  ansible.builtin.command: >
     ceph auth get-key client.kubernetes
   register: ceph_k8s_key
   failed_when: "'Error' in ceph_k8s_key.stderr"
   changed_when: false
 - name: Get ceph config
-  ansible.builtin.shell: >
+  ansible.builtin.command: >
     ceph mon dump
   register: ceph_config
   failed_when: "'Error' in ceph_config.stderr"
