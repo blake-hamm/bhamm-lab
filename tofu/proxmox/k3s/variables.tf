@@ -9,14 +9,21 @@ variable "count_k3s_master" {
   default     = 3
 }
 
-variable "k3s_nodes" {
-  description = "List of Proxmox nodes for k3s deployment"
-  type        = list(string)
-  default     = ["antsle", "aorus", "super"]
-}
-
 variable "count_k3s_worker" {
   description = "Number of k3s worker nodes"
   type        = number
   default     = 3
+}
+
+variable "k3s_nodes" {
+  description = "List of Proxmox nodes with their memory multipliers for k3s deployment"
+  type = list(object({
+    name       = string
+    multiplier = number
+  }))
+  default = [
+    { name = "antsle", multiplier = 1.5 },
+    { name = "aorus", multiplier = 1 },
+    { name = "super", multiplier = 2 },
+  ]
 }
