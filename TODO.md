@@ -25,15 +25,14 @@ x Deploy cluster
 x Update docs
 
 # k3s cluster
-- Use kustomize and base/core and dev/prod manifests
+- Deploy 'prod' cluster
 - Setup helm chart for my apps (external secrets, traefik, pvc, pg)
-- Seperate out terraform code for k3s
+x Seperate out terraform code for k3s
 - Use namespaces
-- Enable k3s vlan and other networking rules
+x Enable k3s vlan and other networking rules
 - Configure minio thoroughly
 - Document disaster recovery (DR)
 - Test DR with pvc and pg (manually)
-- Leverage values file
 - Update docs
 
 # CI/CD
@@ -65,9 +64,10 @@ x Update docs
 - Configure dhcp in ansible opnsense
 
 # Finish
+- Expose docs site and vpn
 - Install mergerfs/snapraid on aorus node
-- Configure pbs
-- Consider refactoring ansible to terraform
+- Integrate proxmox with traefik
+- Consider refactoring proxmox ansible to terraform
   - ACL's
   - Users
   - Groups
