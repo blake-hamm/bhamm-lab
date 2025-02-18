@@ -39,9 +39,9 @@ resource "proxmox_virtual_environment_download_file" "latest_debian_12_bookworm_
   content_type       = "iso"
   datastore_id       = "ceph_fs"
   node_name          = "aorus"
-  url                = "https://cloud.debian.org/images/cloud/bookworm/20250210-2019/debian-12-genericcloud-amd64-20250210-2019.qcow2"
-  file_name          = "debian-12-genericcloud-amd64-20250210-2019.img"
-  checksum           = "a58d86525d75fd8e139a2302531ce5d2ab75ef0273cfe78f9d53aada4b23efd45f8433b4806fa4570cfe981c8fae26f5e5e855cbd66ba2198862f28125fd2d45"
+  url                = "https://cloud.debian.org/images/cloud/bookworm/20250210-2019/debian-12-generic-amd64-20250210-2019.qcow2"
+  file_name          = "debian-12-generic-amd64-20250210-2019.img"
+  checksum           = "56c236142b9e1427862dad62f7dfa727287599d361e7b71c22e3bd1c10e8a9f958fb820576cb5ec239bcb186cc2134b5742120c0b95aeeda68ed867bf206889a"
   checksum_algorithm = "sha512"
   upload_timeout     = 2400
 }
