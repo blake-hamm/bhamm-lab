@@ -26,11 +26,24 @@ x Update docs
 
 # k3s cluster
 - Deploy 'prod' cluster
+- Deploy core
+  - argocd
+  - metallb
+  - calico
+  - minio
+  - argo events
+  - argo workflows
+  - vault
+  - velero
+  - cloudnative pg
+  - traefik
+  - authelia
+  - external secrets
 - Setup helm chart for my apps (external secrets, traefik, pvc, pg)
+  - example nginx with helm
 x Seperate out terraform code for k3s
 - Use namespaces
 x Enable k3s vlan and other networking rules
-- Configure minio thoroughly
 - Document disaster recovery (DR)
 - Test DR with pvc and pg (manually)
 - Update docs
