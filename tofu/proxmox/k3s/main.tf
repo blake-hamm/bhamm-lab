@@ -16,6 +16,12 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
 
   initialization {
     datastore_id = "ceph_pool"
+    dns {
+      servers = [
+        "1.1.1.1",
+        "1.0.0.1"
+      ]
+    }
     ip_config {
       ipv4 {
         address = "10.0.30.6${count.index}/24"
@@ -88,6 +94,12 @@ resource "proxmox_virtual_environment_vm" "k3s_worker" {
 
   initialization {
     datastore_id = "ceph_pool"
+    dns {
+      servers = [
+        "1.1.1.1",
+        "1.0.0.1"
+      ]
+    }
     ip_config {
       ipv4 {
         address = "10.0.30.7${count.index}/24"
