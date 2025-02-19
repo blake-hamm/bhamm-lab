@@ -12,6 +12,11 @@ ansible-playbook ansible/main.yml -l k3s*
 *Note: this uses proxmox dynamic inventory*
 3. Argocd to deploy app of apps and restore services
 ```bash
+# To deploy the prod app
 kubectl apply -f kubernetes/argocd-prod.yaml
+
+# To sync the argocd app (it should autosync, but if impatient)
+kubectl config set-context --current --namespace=argocd
+argocd app sync apps
 ```
 *Note: you may need to adjust the 'targetRevision' in this file*
