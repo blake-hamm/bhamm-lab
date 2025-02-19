@@ -62,6 +62,12 @@ resource "proxmox_virtual_environment_vm" "debian_vm_template" {
 
   initialization {
     datastore_id = "ceph_pool"
+    dns {
+      servers = [
+        "1.1.1.1",
+        "1.0.0.1"
+      ]
+    }
     ip_config {
       ipv4 {
         address = "dhcp"
