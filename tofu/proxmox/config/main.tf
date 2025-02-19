@@ -102,3 +102,15 @@ resource "proxmox_virtual_environment_vm" "debian_vm_template" {
     device = "socket"
   }
 }
+
+resource "proxmox_virtual_environment_hagroup" "main" {
+  group   = "main"
+  comment = "Main HA group."
+
+  # Member nodes, with or without priority.
+  nodes = {
+    antsle = null
+    aorus  = null
+    super  = null
+  }
+}
