@@ -27,9 +27,9 @@ x Update docs
 # k3s cluster
 - Deploy 'prod' cluster
 - Deploy core
-  - argocd
-  - metallb
-  - calico
+  x argocd
+  x metallb
+  x calico
   - minio
   - argo events
   - argo workflows
