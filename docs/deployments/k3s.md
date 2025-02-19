@@ -13,7 +13,7 @@ ansible-playbook ansible/main.yml -l k3s*
 3. Argocd to deploy app of apps and restore services
 ```bash
 # To deploy the prod app
-kubectl apply -f kubernetes/argocd-prod.yaml
+kubectl apply -f kubernetes/prod-apps.yaml
 
 # To sync the argocd app (it should autosync, but if impatient)
 kubectl config set-context --current --namespace=argocd
