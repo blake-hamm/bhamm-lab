@@ -10,6 +10,7 @@ tofu -chdir=tofu/proxmox/k3s apply -parallelism=2 -auto-approve
 ansible-playbook ansible/main.yml -l k3s*
 ```
 *Note: this uses proxmox dynamic inventory*
+
 3. Argocd to deploy app of apps and restore services
 ```bash
 # To deploy the prod app
@@ -20,3 +21,11 @@ kubectl config set-context --current --namespace=argocd
 argocd app sync apps
 ```
 *Note: you may need to adjust the 'targetRevision' in this file*
+
+4. At this point, argocd is successfully synced, but many apps depend on vault secrets (which sync to kubernetes) and will not be healthy. Wait for vault to be healthy and then deploy sops secrets to vault.
+```bash
+# Check if vault is healthy
+
+# Sync sops secrets with vault
+
+```
