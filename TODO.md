@@ -28,13 +28,12 @@ x Update docs
 - Deploy 'prod' cluster
 - Deploy core
   x argocd
-  - argo-events
-  - argo-workflows
+  x argo-events
   x metallb
   x calico
+  - migrate ceph config to argocd (rather than k3s manifests)
   - minio
-  - argo events
-  - argo workflows
+  - argo-workflows
   - vault
   - velero
   - cloudnative pg
