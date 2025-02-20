@@ -1,0 +1,61 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: minio-tenant
+  namespace: default
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: tenant
+    repoURL: https://operator.min.io/
+    targetRevision: v6.0.4
+    helm:
+      valuesObject:
+        tenant:
+          name: minio-tenant
+          configuration:
+            name: minio-external-secret
+          pools:
+            - servers: 2
+              name: argo-workflows-artifacts
+              volumesPerServer: 2
+              size: 20Gi
+              storageAnnotations:
+                k8up.io/backup: "false"
+            # - servers: 2
+            #   name: backup-pool
+            #   volumesPerServer: 2
+            #   size: 100Gi
+            #   storageClassName: nfs-client
+            #   storageAnnotations:
+            #     k8up.io/backup: "false"
+            #   volumeClaimTemplate:
+            #     apiVersion: v1
+            #     kind: PersistentVolumeClaim
+            #     spec:
+            #       accessModes:
+            #         - ReadWriteOnce
+            #       resources:
+            #         requests:
+            #           storage: 10Gi
+            #     status: {}
+          metrics:
+            enabled: true
+            port: 9000
+            protocol: http
+          features:
+            bucketDNS: false
+            domains: {}
+            enableSFTP: false
+          buckets: []
+          users: []
+          prometheusOperator: false
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true

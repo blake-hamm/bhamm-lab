@@ -28,6 +28,8 @@ x Update docs
 - Deploy 'prod' cluster
 - Deploy core
   x argocd
+  - argo-events
+  - argo-workflows
   x metallb
   x calico
   - minio
@@ -41,11 +43,11 @@ x Update docs
   - external secrets
 - Setup helm chart for my apps (external secrets, traefik, pvc, pg)
   - example nginx with helm
+  - Document disaster recovery (DR)
+  - Test DR with pvc and pg (manually)
 x Seperate out terraform code for k3s
 - Use namespaces
 x Enable k3s vlan and other networking rules
-- Document disaster recovery (DR)
-- Test DR with pvc and pg (manually)
 - Update docs
 
 # CI/CD
