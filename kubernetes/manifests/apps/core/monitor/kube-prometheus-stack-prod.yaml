@@ -28,6 +28,8 @@ spec:
                 release: monitor
             storageSpec:
               volumeClaimTemplate:
+                metadata:
+                  name: prometheus
                 spec:
                   accessModes: ["ReadWriteOnce"]
                   resources:
