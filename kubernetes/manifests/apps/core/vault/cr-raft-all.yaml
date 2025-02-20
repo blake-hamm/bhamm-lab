@@ -47,7 +47,7 @@ spec:
       secretShares: 5
       secretThreshold: 3
     kubernetes:
-      secretNamespace: vault
+      secretNamespace: default
   config:
     storage:
       raft:
