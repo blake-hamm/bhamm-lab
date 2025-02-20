@@ -2,7 +2,7 @@ apiVersion: "vault.banzaicloud.com/v1alpha1"
 kind: "Vault"
 metadata:
   name: vault
-  namespace: vault
+  namespace: default
   labels:
     app.kubernetes.io/name: vault
     vault_cr: vault
