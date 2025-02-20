@@ -16,6 +16,9 @@ spec:
     targetRevision: 61.2.0
     helm:
       valuesObject:
+        nameOverride: monitor
+        namespaceOverride: monitor
+        fullnameOverride: monitor
         prometheus:
           prometheusSpec:
             serviceMonitorSelector:
