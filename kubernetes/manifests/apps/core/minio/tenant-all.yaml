@@ -23,8 +23,6 @@ spec:
               name: argo-workflows-artifacts
               volumesPerServer: 2
               size: 20Gi
-              storageAnnotations:
-                k8up.io/backup: "false"
             # - servers: 2
             #   name: backup-pool
             #   volumesPerServer: 2
