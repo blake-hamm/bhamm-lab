@@ -20,9 +20,9 @@ spec:
             name: minio-external-secret
           pools:
             - servers: 2
-              name: argo-workflows-artifacts
+              name: main
               volumesPerServer: 2
-              size: 20Gi
+              size: 50Gi
             # - servers: 2
             #   name: backup-pool
             #   volumesPerServer: 2
