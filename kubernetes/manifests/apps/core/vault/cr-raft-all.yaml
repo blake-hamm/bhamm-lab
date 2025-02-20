@@ -2,7 +2,7 @@ apiVersion: "vault.banzaicloud.com/v1alpha1"
 kind: "Vault"
 metadata:
   name: vault
-  namespace: default
+  namespace: vault
   labels:
     app.kubernetes.io/name: vault
     vault_cr: vault
@@ -47,7 +47,7 @@ spec:
       secretShares: 5
       secretThreshold: 3
     kubernetes:
-      secretNamespace: default
+      secretNamespace: vault
   config:
     storage:
       raft:
