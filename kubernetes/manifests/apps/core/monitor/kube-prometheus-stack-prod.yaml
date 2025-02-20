@@ -19,6 +19,8 @@ spec:
         nameOverride: monitor
         namespaceOverride: monitor
         fullnameOverride: monitor
+        prometheusOperator:
+          fullnameOverride: "prometheus"
         prometheus:
           prometheusSpec:
             serviceMonitorSelector:
