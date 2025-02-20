@@ -14,8 +14,10 @@ spec:
     chart: operator
     repoURL: https://operator.min.io/
     targetRevision: v6.0.4
-    # helm:
-    #   valuesObject:
+    helm:
+      valuesObject:
+        operator:
+          replicaCount: 1
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
