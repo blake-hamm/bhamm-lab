@@ -27,6 +27,8 @@ spec:
         storageClass:
           create: true
           name: csi-rbd-sc
+          annotations:
+            storageclass.kubernetes.io/is-default-class: "true"
           clusterID: "7b02e4a9-b740-4d5a-b519-9585725a55fb"
           pool: kubernetes
           mountOptions:
