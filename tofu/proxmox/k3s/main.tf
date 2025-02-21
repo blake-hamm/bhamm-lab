@@ -46,7 +46,7 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
   }
 
   memory {
-    dedicated = 12288 * var.k3s_nodes[count.index].multiplier
+    dedicated = 16384 * var.k3s_nodes[count.index].multiplier
     floating  = 1
   }
 
@@ -124,7 +124,7 @@ resource "proxmox_virtual_environment_vm" "k3s_worker" {
   }
 
   memory {
-    dedicated = 12288 * var.k3s_nodes[count.index].multiplier
+    dedicated = 16384 * var.k3s_nodes[count.index].multiplier
     floating  = 1
   }
 
