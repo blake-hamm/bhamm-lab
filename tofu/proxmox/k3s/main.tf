@@ -53,6 +53,7 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
   network_device {
     model   = "virtio"
     bridge  = "vmbr0"
+    trunks  = "20;30"
     vlan_id = 30
   }
 
@@ -131,6 +132,7 @@ resource "proxmox_virtual_environment_vm" "k3s_worker" {
   network_device {
     model   = "virtio"
     bridge  = "vmbr0"
+    trunks  = "20;30"
     vlan_id = 30
   }
 
