@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ceph-csi-readiness-check
+  namespace: ceph
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  template:
+    spec:
+      containers:
+        - name: check
+          image: bitnami/kubectl:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              until kubectl get pods -n ceph -l app=ceph-csi-rbd -o jsonpath='{.items[*].status.containerStatuses[0].ready}' | grep "true"; do
+                echo "Waiting for Ceph CSI pods to be ready...";
+                sleep 5;
+              done
+      restartPolicy: Never
+  backoffLimit: 4
