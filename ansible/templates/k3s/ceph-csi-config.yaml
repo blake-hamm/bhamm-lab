@@ -5,3 +5,4 @@ data:
     {{ ceph_csi_config_json | to_nice_json | indent(4) }}
 metadata:
   name: ceph-csi-config
+  namespace: ceph

@@ -23,16 +23,6 @@ k3s_server_manifests_urls:
     filename: tigera-operator.yaml
   - url: https://kube-vip.io/manifests/rbac.yaml
     filename: kube-vip-rbac.yaml
-  - url: https://raw.githubusercontent.com/ceph/ceph-csi/master/deploy/rbd/kubernetes/csi-provisioner-rbac.yaml
-    filename: csi-provisioner-rbac.yaml
-  - url: https://raw.githubusercontent.com/ceph/ceph-csi/master/deploy/rbd/kubernetes/csi-nodeplugin-rbac.yaml
-    filename: csi-nodeplugin-rbac.yaml
-  - url: https://raw.githubusercontent.com/ceph/ceph-csi/master/deploy/rbd/kubernetes/csi-rbdplugin-provisioner.yaml
-    filename: csi-rbdplugin-provisioner.yaml
-  - url: https://raw.githubusercontent.com/ceph/ceph-csi/master/deploy/rbd/kubernetes/csi-rbdplugin.yaml
-    filename: csi-rbdplugin.yaml
-  - url: https://raw.githubusercontent.com/ceph/ceph-csi/master/deploy/rbd/kubernetes/csidriver.yaml
-    filename: csidriver.yaml
 k3s_server_manifests_templates:
   - k3s/calico.yaml
   - k3s/kube-vip.yaml

@@ -1,0 +1,10 @@
+- url: https://raw.githubusercontent.com/ceph/ceph-csi/master/deploy/rbd/kubernetes/csi-provisioner-rbac.yaml
+  filename: csi-provisioner-rbac.yaml
+- url: https://raw.githubusercontent.com/ceph/ceph-csi/master/deploy/rbd/kubernetes/csi-nodeplugin-rbac.yaml
+  filename: csi-nodeplugin-rbac.yaml
+- url: https://raw.githubusercontent.com/ceph/ceph-csi/master/deploy/rbd/kubernetes/csi-rbdplugin-provisioner.yaml
+  filename: csi-rbdplugin-provisioner.yaml
+- url: https://raw.githubusercontent.com/ceph/ceph-csi/master/deploy/rbd/kubernetes/csi-rbdplugin.yaml
+  filename: csi-rbdplugin.yaml
+- url: https://raw.githubusercontent.com/ceph/ceph-csi/master/deploy/rbd/kubernetes/csidriver.yaml
+  filename: csidriver.yaml

@@ -5,3 +5,4 @@ data:
     {}
 metadata:
   name: ceph-csi-encryption-kms-config
+  namespace: ceph
