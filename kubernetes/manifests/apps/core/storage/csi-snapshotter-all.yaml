@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: csi-snapshotter
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+spec:
+  project: default
+  destination:
+    namespace: ceph
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: deploy/kubernetes/csi-snapshotter
+    repoURL: https://github.com/kubernetes-csi/external-snapshotter
+    targetRevision: v8.2.0
+    kustomize:
+      namespace: "ceph"
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
