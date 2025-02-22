@@ -46,7 +46,6 @@ metadata:
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/sync-wave: "5"
 spec:
-  ttlSecondsAfterFinished: 300
   backoffLimit: 2
   template:
     spec:
