@@ -39,6 +39,8 @@ x Update docs
   - cloudnative pg
   - traefik
   - authelia
+  - lldap
+  - cert manager
   x external secrets
 - Setup helm chart for my apps (external secrets, traefik, pvc, pg)
   - example nginx with helm
@@ -74,6 +76,7 @@ x Enable k3s vlan and other networking rules
   x Polk_Paradise
   x lab-trusted
   - lab-iot
+- Deploy omada sdn
 - Connect iot devices
   - printer
   - smart light switches/plugs
@@ -81,9 +84,18 @@ x Enable k3s vlan and other networking rules
 - Configure dhcp in ansible opnsense
 
 # Finish
+- Deploy
+  - docs site
+  - vpn
+  - netbootxyz
+  - immich
+  - servarr
+    - jellyfin
+    - flaresolver
 - Expose docs site and vpn
 - Install mergerfs/snapraid on aorus node
 - Integrate proxmox with traefik
+- More fine grain vault security access
 - Consider refactoring proxmox ansible to terraform
   - ACL's
   - Users
