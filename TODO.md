@@ -89,6 +89,7 @@ x Enable k3s vlan and other networking rules
   - vpn
   - netbootxyz
   - immich
+  - home assistant
   - servarr
     - jellyfin
     - flaresolver
