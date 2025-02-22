@@ -1,0 +1,23 @@
+# External Secrets Configuration
+name: common-app
+
+externalSecrets:
+  enabled: false
+  secrets:
+    - name: example-secret
+      remoteRef:
+        key: secret-key
+        property: secret-value
+
+# Ingress Route Configuration
+ingress:
+  enabled: false
+  entryPoint: web
+  host: example.com
+  tls:
+    enabled: true
+    secretName: example-tls
+
+# Velero Backup Configuration
+velero:
+  enabled: false
