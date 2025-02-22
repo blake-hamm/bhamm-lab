@@ -59,16 +59,27 @@ spec:
             secretName: gcp-sops-sa
       containers:
         - name: main
-          image: alpine:3.18
-          command: ["/bin/sh", "-c"]
+          image: debian:bookworm-slim
+          command: ["/bin/bash", "-c"]
           args:
             - |
-              # Install dependencies
-              apk add --no-cache git curl jq vault kubectl openssh-client
+              # Update and install dependencies
+              apt-get update && apt-get install -y \
+                  git \
+                  curl \
+                  jq \
+                  vault \
+                  ca-certificates \
+                  gnupg \
+                  ssh-client
+
+              # Install sops
+              curl -L -o /usr/local/bin/sops https://github.com/mozilla/sops/releases/download/v3.8.1/sops-v3.8.1.linux.amd64
+              chmod +x /usr/local/bin/sops
 
               # Clone repository
               echo "Cloning repository..."
-              git clone -b feature/opnsense https://github.com/blake-hamm/bhamm-lab.git /workspace/repo
+              git clone https://github.com/blake-hamm/bhamm-lab.git /workspace/repo
 
               # Decrypt secrets
               echo "Decrypting secrets..."
@@ -79,8 +90,8 @@ spec:
               echo "Authenticating with Vault..."
               K8S_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
               LOGIN_RESPONSE=$(curl -k -s --request POST \
-                --data "{\"jwt\": \"$K8S_TOKEN\", \"role\": \"init\"}" \
-                "$VAULT_ADDR/v1/auth/kubernetes/login")
+                  --data "{\"jwt\": \"$K8S_TOKEN\", \"role\": \"init\"}" \
+                  "$VAULT_ADDR/v1/auth/kubernetes/login")
 
               export VAULT_TOKEN=$(echo $LOGIN_RESPONSE | jq -r '.auth.client_token')
               [ -z "$VAULT_TOKEN" ] && { echo "Vault login failed"; exit 1; }
@@ -88,20 +99,19 @@ spec:
               # Update Vault secrets
               echo "Updating Vault..."
               jq -c '.vault_secrets | to_entries[]' /workspace/secrets.decrypted.json | while read -r path_entry; do
-                vault_path=$(echo "$path_entry" | jq -r '.key')
-                echo "$path_entry" | jq -c '.value | to_entries[]' | while read -r app_entry; do
-                  app=$(echo "$app_entry" | jq -r '.key')
-                  echo "$app_entry" | jq -r '.value' > /workspace/tmp.json
+                  vault_path=$(echo "$path_entry" | jq -r '.key')
+                  echo "$path_entry" | jq -c '.value | to_entries[]' | while read -r app_entry; do
+                      app=$(echo "$app_entry" | jq -r '.key')
+                      echo "$app_entry" | jq -r '.value' > /workspace/tmp.json
 
-                  echo "Writing secrets for $vault_path/$app"
-                  vault kv put -mount=secret "$vault_path/$app" @/workspace/tmp.json || exit 1
-                  rm /workspace/tmp.json
-                done
+                      echo "Writing secrets for $vault_path/$app"
+                      vault kv put -mount=secret "$vault_path/$app" @/workspace/tmp.json || exit 1
+                      rm /workspace/tmp.json
+                  done
               done
 
-              # Clean up decrypted file
+              # Clean up
               rm /workspace/secrets.decrypted.json
-
               echo "All operations completed successfully!"
           env:
             - name: VAULT_ADDR
