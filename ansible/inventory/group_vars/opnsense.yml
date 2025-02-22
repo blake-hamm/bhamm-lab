@@ -116,6 +116,7 @@ opnsense_extra_rules:
     protocol: any
     source_net: k8sNetwork
     destination_net: metalNetwork
+    # Manually set state policy to none
   TrustedDMZAccess:
     description: Allow trusted access to dmz
     interface: opt1 # trusted
