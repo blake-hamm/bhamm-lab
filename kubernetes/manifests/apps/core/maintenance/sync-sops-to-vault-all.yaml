@@ -100,7 +100,7 @@ spec:
               echo "Authenticating with Vault..."
               K8S_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
               LOGIN_RESPONSE=$(curl -k -s --request POST \
-                  --data "{\"jwt\": \"$K8S_TOKEN\", \"role\": \"init\"}" \
+                  --data "{\"jwt\": \"$K8S_TOKEN\", \"role\": \"gcp-sops\"}" \
                   "$VAULT_ADDR/v1/auth/kubernetes/login")
 
               export VAULT_TOKEN=$(echo $LOGIN_RESPONSE | jq -r '.auth.client_token')
