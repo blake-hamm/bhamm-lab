@@ -27,33 +27,33 @@ spec:
           workflowDefaults:
             spec:
               serviceAccountName: argo-workflow
-        server:
-          authModes:
-            - sso
-          sso:
-            enabled: true
-            issuer: https://auth.bhamm-lab.com
-            clientId:
-              name: argo-workflows-external-secret
-              key: client-id
-            clientSecret:
-              name: argo-workflows-external-secret
-              key: client-secret
-            redirectUrl: "https://argoworkflows.bhamm-lab.com/oauth2/callback"
-            rbac:
-              enabled: false
-              secretWhitelist: []
-            scopes:
-              - 'openid'
-              - 'groups'
-              - 'email'
-              - 'profile'
-            sessionExpiry: ""
-            issuerAlias: ""
-            customGroupClaimName: ""
-            userInfoPath: ""
-            insecureSkipVerify: false
-            filterGroupsRegex:
+        # server:
+        #   authModes:
+        #     - sso
+        #   sso:
+        #     enabled: true
+        #     issuer: https://auth.bhamm-lab.com
+        #     clientId:
+        #       name: argo-workflows-external-secret
+        #       key: client-id
+        #     clientSecret:
+        #       name: argo-workflows-external-secret
+        #       key: client-secret
+        #     redirectUrl: "https://argoworkflows.bhamm-lab.com/oauth2/callback"
+        #     rbac:
+        #       enabled: false
+        #       secretWhitelist: []
+        #     scopes:
+        #       - 'openid'
+        #       - 'groups'
+        #       - 'email'
+        #       - 'profile'
+        #     sessionExpiry: ""
+        #     issuerAlias: ""
+        #     customGroupClaimName: ""
+        #     userInfoPath: ""
+        #     insecureSkipVerify: false
+        #     filterGroupsRegex:
         artifactRepository:
           s3:
             endpoint: minio.minio:443
