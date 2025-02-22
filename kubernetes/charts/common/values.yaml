@@ -21,3 +21,14 @@ ingress:
 # Velero Backup Configuration
 velero:
   enabled: false
+
+postgresql:
+  enabled: false
+  instances: 1
+  storageSize: 5Gi
+  backups:
+    enabled: false
+    schedule: "0 0 * * *"
+    retention: 30
+    s3Path: "s3://your-bucket/postgres-backups"
+    s3Secret: "minio-creds"

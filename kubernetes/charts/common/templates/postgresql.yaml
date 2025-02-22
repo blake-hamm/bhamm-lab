@@ -1,0 +1,30 @@
+{{- if .Values.postgresql.enabled }}
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ .Values.name }}-postgresql
+  namespace: {{ .Values.name }}
+spec:
+  instances: {{ .Values.postgresql.instances }}
+
+  storage:
+    size: {{ .Values.postgresql.storageSize }}
+
+  bootstrap:
+    initdb:
+      database: {{ .Values.name }}
+      owner: {{ .Values.name }}
+
+  enableSuperuserAccess: false
+
+  {{- if .Values.postgresql.backups.enabled }}
+  backup:
+    barmanObjectStore:
+      destinationPath: {{ .Values.postgresql.backups.s3Path }}
+      s3Credentials:
+        secretName: {{ .Values.postgresql.backups.s3Secret }}
+    retentionPolicy: "{{ .Values.postgresql.backups.retention }}d"
+    schedule:
+      - "{{ .Values.postgresql.backups.schedule }}"
+  {{- end }}
+{{- end }}

@@ -36,7 +36,7 @@ x Update docs
   x argo-workflows
   x vault
   x lldap
-  - cloudnative pg
+  x cloudnative pg
   - authelia
   - traefik
   - cert manager
