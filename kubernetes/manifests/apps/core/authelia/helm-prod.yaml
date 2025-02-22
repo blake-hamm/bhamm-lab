@@ -19,11 +19,11 @@ spec:
         pod:
           kind: 'StatefulSet'
           extraVolumeMounts:
-            - mountPath: '/app/secrets'
-              name: 'secrets'
+            - mountPath: '/app/custom-secrets'
+              name: 'custom-secrets'
               readOnly: true
           extraVolumes:
-            - name: 'secrets'
+            - name: 'custom-secrets'
               projected:
                 sources:
                   - secret:
@@ -44,11 +44,11 @@ spec:
                           path: pg_password
           env:
             - name: AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD_FILE
-              value: /app/secrets/lldap_password
+              value: /app/custom-secrets/lldap_password
             - name: AUTHELIA_STORAGE_POSTGRES_PASSWORD_FILE
-              value: /app/secrets/pg_password
+              value: /app/custom-secrets/pg_password
             - name: AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE
-              value: /app/secrets/storage_encryption_key
+              value: /app/custom-secrets/storage_encryption_key
             - name: TZ
               value: America/Denver
         configMap:
@@ -139,9 +139,9 @@ spec:
                   algorithm: 'RS256'
                   use: 'sig'
                   key:
-                    path: '/app/secrets/oidc.jwk.RS256.pem'
+                    path: '/app/custom-secrets/oidc.jwk.RS256.pem'
                   certificate_chain:
-                    path: '/app/secrets/oidc.jwk.RS256.crt'
+                    path: '/app/custom-secrets/oidc.jwk.RS256.crt'
               clients:
                 - client_id: 'vault'
                   client_name: 'HashiCorp Vault'
