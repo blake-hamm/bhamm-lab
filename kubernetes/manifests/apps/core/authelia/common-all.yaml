@@ -36,7 +36,7 @@ spec:
                 property: oidc_jwks_crt
         postgresql:
           enabled: true
-          storageSize: 1GI
+          storageSize: 1Gi
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
