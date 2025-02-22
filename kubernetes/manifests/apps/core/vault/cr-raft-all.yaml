@@ -102,8 +102,8 @@ spec:
             bound_service_account_namespaces: "*"
             policies: read_secrets
             ttl: 1h
-          - name: gcp-sops
-            bound_service_account_names: "gcp-sops-sa"
+          - name: sops
+            bound_service_account_names: "sync-sops-to-vault-sa"
             bound_service_account_namespaces: "vault"
             policies: allow_secrets
             ttl: 1h
