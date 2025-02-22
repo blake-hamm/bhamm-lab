@@ -31,15 +31,15 @@ x Update docs
   x argo-events
   x metallb
   x calico
-  - migrate ceph config to argocd (rather than k3s manifests)
-  - minio
+  x migrate ceph config to argocd (rather than k3s manifests)
+  x minio
   - argo-workflows
-  - vault
+  x vault
   - velero
   - cloudnative pg
   - traefik
   - authelia
-  - external secrets
+  x external secrets
 - Setup helm chart for my apps (external secrets, traefik, pvc, pg)
   - example nginx with helm
   - Document disaster recovery (DR)
@@ -59,6 +59,9 @@ x Enable k3s vlan and other networking rules
   - Ansible k3s
 - Dev cluster on PR
 - Test DR with pvc and pg (auto)
+- Convert sync sops to vault job as argo workflow
+  - Trigger from argo event when vault is ready
+  - Trigger from gitea on secret changes
 
 # Monitoring
 - Node exporter debian ansible playbook
