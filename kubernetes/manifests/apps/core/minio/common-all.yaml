@@ -12,7 +12,6 @@ spec:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
     targetRevision: feature/k3s-again
     path: kubernetes/charts/common
-    chart: common-app
     helm:
       valuesObject:
         name: minio
