@@ -36,11 +36,11 @@ x Update docs
   x argo-workflows
   x vault
   x lldap
+  - cloudnative pg
   - authelia
   - traefik
   - cert manager
   - velero
-  - cloudnative pg
   x external secrets
 - Setup helm chart for my apps (external secrets, traefik, pvc, pg)
   - example nginx with helm
