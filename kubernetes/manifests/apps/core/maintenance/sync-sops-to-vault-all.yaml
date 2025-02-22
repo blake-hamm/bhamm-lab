@@ -89,7 +89,7 @@ spec:
 
               # Clone repository
               echo "Cloning repository..."
-              git clone https://github.com/blake-hamm/bhamm-lab.git /workspace/repo
+              git clone -b feature/k3s-again https://github.com/blake-hamm/bhamm-lab.git /workspace/repo
 
               # Decrypt secrets
               echo "Decrypting secrets..."
