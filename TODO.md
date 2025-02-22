@@ -35,7 +35,7 @@ x Update docs
   x minio
   x argo-workflows
   x vault
-  - lldap
+  x lldap
   - authelia
   - traefik
   - cert manager
