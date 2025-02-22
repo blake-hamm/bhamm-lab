@@ -34,7 +34,7 @@ spec:
               remoteRef:
                 key: /core/authelia
                 property: oidc_jwks_crt
-        postgres:
+        postgresql:
           enabled: true
           size: 1GI
   syncPolicy:
