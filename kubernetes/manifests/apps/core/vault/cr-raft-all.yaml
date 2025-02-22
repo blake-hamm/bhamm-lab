@@ -102,9 +102,9 @@ spec:
             bound_service_account_namespaces: "*"
             policies: read_secrets
             ttl: 1h
-          - name: init
-            bound_service_account_names: "argo-init-workflow-sa"
-            bound_service_account_namespaces: "default"
+          - name: gcp-sops
+            bound_service_account_names: "gcp-sops-sa"
+            bound_service_account_namespaces: "vault"
             policies: allow_secrets
             ttl: 1h
           - name: prometheus
