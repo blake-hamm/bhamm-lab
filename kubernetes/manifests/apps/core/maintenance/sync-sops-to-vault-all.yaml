@@ -46,7 +46,7 @@ metadata:
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/sync-wave: "5"
 spec:
-  backoffLimit: 2
+  backoffLimit: 1 #2
   template:
     spec:
       serviceAccountName: sync-sops-to-vault-sa
