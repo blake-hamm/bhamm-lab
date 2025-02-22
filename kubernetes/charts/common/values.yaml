@@ -1,6 +1,5 @@
 # External Secrets Configuration
 name: common-app
-
 externalSecrets:
   enabled: false
   secrets:
@@ -8,7 +7,6 @@ externalSecrets:
       remoteRef:
         key: secret-key
         property: secret-value
-
 # Ingress Route Configuration
 ingress:
   enabled: false
@@ -17,14 +15,12 @@ ingress:
   tls:
     enabled: true
     secretName: example-tls
-
 # Velero Backup Configuration
 velero:
   enabled: false
-
 postgresql:
   enabled: false
-  instances: 1
+  instances: 2
   storageSize: 5Gi
   backups:
     enabled: false
