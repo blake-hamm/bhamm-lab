@@ -33,14 +33,14 @@ x Update docs
   x calico
   x migrate ceph config to argocd (rather than k3s manifests)
   x minio
-  - argo-workflows
+  x argo-workflows
   x vault
+  - lldap
+  - authelia
+  - traefik
+  - cert manager
   - velero
   - cloudnative pg
-  - traefik
-  - authelia
-  - lldap
-  - cert manager
   x external secrets
 - Setup helm chart for my apps (external secrets, traefik, pvc, pg)
   - example nginx with helm

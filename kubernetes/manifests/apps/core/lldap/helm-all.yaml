@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: lldap
+  namespace: argocd
+spec:
+  destination:
+    namespace: lldap
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: lldap-chart
+    repoURL: https://github.com/Evantage-WS/lldap-kubernetes.git
+    targetRevision: main
+    helm:
+      valuesObject:
+        secret:
+          create: false
+          name: lldap-external-secret
+        env:
+          TZ: "MST"
+        image:
+          repository: "lldap/lldap"
+          tag: "v0.6.1"
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
