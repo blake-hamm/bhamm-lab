@@ -23,14 +23,14 @@
     apply:
       run_once: true
       delegate_to: "{{ groups['k3s_master'] | first }}"
-# - name: Deploy sops secrets to k3s
-#   ansible.builtin.include_tasks:
-#     file: sops.yml
-#     apply:
-#       run_once: true
-#       delegate_to: "{{ groups['k3s_master'] | first }}"
-#       tags: [sops]
-#   tags: [sops]
+- name: Deploy sops secrets to k3s
+  ansible.builtin.include_tasks:
+    file: sops.yml
+    apply:
+      run_once: true
+      delegate_to: "{{ groups['k3s_master'] | first }}"
+      tags: [sops]
+  tags: [sops]
 - name: Setup argocd
   ansible.builtin.include_tasks:
     file: argocd.yml
