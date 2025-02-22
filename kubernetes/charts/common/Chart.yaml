@@ -1,5 +1,4 @@
 apiVersion: v2
-name: common-app
-description: A application chart with optional features
+name: common
+description: Common application chart
 version: 0.1.0
-appVersion: "1.0.0"
