@@ -2,6 +2,7 @@ apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: letsencrypt-staging
+  namespace: cert-manager
   annotations:
     argocd.argoproj.io/sync-wave: "5"
 spec:
@@ -25,7 +26,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: bhamm-lab-tls-staging
-  namespace: default
+  namespace: cert-manager
   annotations:
     argocd.argoproj.io/sync-wave: "5"
 spec:
