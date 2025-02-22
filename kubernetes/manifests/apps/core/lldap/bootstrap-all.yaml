@@ -59,12 +59,12 @@ spec:
           - name: LLDAP_ADMIN_USERNAME
             valueFrom:
               secretKeyRef:
-                name: lldap-credentials
+                name: lldap-external-secret
                 key: lldap-ldap-user-name
           - name: LLDAP_ADMIN_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: lldap-credentials
+                name: lldap-external-secret
                 key: lldap-ldap-user-pass
           - name: DO_CLEANUP
             value: "true"
@@ -80,7 +80,7 @@ spec:
       projected:
         sources:
           - secret:
-              name: lldap-credentials
+              name: lldap-external-secret
               items:
                 - key: user-configs
                   path: user-configs.json
@@ -88,7 +88,7 @@ spec:
       projected:
         sources:
           - secret:
-              name: lldap-credentials
+              name: lldap-external-secret
               items:
                 - key: group-configs
                   path: group-configs.json
