@@ -38,12 +38,12 @@ x Update docs
   x lldap
   x cloudnative pg
   x authelia
-  - cert manager
+  x cert manager
   - traefik
     - expose argocd
   - velero
   x external secrets
-  - convert jobs to argo workflows (sops and ceph check)
+  x convert jobs to argo workflows (sops and ceph check)
 - Setup helm chart for my apps (external secrets, traefik, pvc, pg)
   - example nginx with helm
   - Document disaster recovery (DR)
