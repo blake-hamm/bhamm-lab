@@ -1,0 +1,117 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sync-sops-to-vault-sa
+  namespace: vault
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: sync-sops-to-vault-role
+  namespace: vault
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["pods", "pods/exec"]
+    verbs: ["create", "get", "list", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: sync-sops-to-vault-binding
+  namespace: vault
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: sync-sops-to-vault-role
+subjects:
+  - kind: ServiceAccount
+    name: sync-sops-to-vault-sa
+    namespace: vault
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sync-sops-to-vault-job
+  namespace: vault
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 2
+  template:
+    spec:
+      serviceAccountName: sync-sops-to-vault-sa
+      volumes:
+        - name: workspace
+          emptyDir: {}
+        - name: gcp-credentials
+          secret:
+            secretName: gcp-sops-sa
+      containers:
+        - name: main
+          image: alpine:3.18
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              # Install dependencies
+              apk add --no-cache git curl jq vault kubectl openssh-client
+
+              # Clone repository
+              echo "Cloning repository..."
+              git clone -b feature/opnsense https://github.com/blake-hamm/bhamm-lab.git /workspace/repo
+
+              # Decrypt secrets
+              echo "Decrypting secrets..."
+              export GOOGLE_APPLICATION_CREDENTIALS=/secrets/gcp/service-account.json
+              sops --decrypt /workspace/repo/secrets.enc.json > /workspace/secrets.decrypted.json
+
+              # Vault authentication
+              echo "Authenticating with Vault..."
+              K8S_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+              LOGIN_RESPONSE=$(curl -k -s --request POST \
+                --data "{\"jwt\": \"$K8S_TOKEN\", \"role\": \"init\"}" \
+                "$VAULT_ADDR/v1/auth/kubernetes/login")
+
+              export VAULT_TOKEN=$(echo $LOGIN_RESPONSE | jq -r '.auth.client_token')
+              [ -z "$VAULT_TOKEN" ] && { echo "Vault login failed"; exit 1; }
+
+              # Update Vault secrets
+              echo "Updating Vault..."
+              jq -c '.vault_secrets | to_entries[]' /workspace/secrets.decrypted.json | while read -r path_entry; do
+                vault_path=$(echo "$path_entry" | jq -r '.key')
+                echo "$path_entry" | jq -c '.value | to_entries[]' | while read -r app_entry; do
+                  app=$(echo "$app_entry" | jq -r '.key')
+                  echo "$app_entry" | jq -r '.value' > /workspace/tmp.json
+
+                  echo "Writing secrets for $vault_path/$app"
+                  vault kv put -mount=secret "$vault_path/$app" @/workspace/tmp.json || exit 1
+                  rm /workspace/tmp.json
+                done
+              done
+
+              # Clean up decrypted file
+              rm /workspace/secrets.decrypted.json
+
+              echo "All operations completed successfully!"
+          env:
+            - name: VAULT_ADDR
+              value: "https://vault.vault:8200"
+            - name: VAULT_SKIP_VERIFY
+              value: "true"
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+            - name: gcp-credentials
+              mountPath: /secrets/gcp
+              readOnly: true
+      restartPolicy: Never
