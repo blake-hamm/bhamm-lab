@@ -17,7 +17,7 @@ spec:
           cloudflare:
             email: bhamm-homelab@gmail.com
             apiTokenSecretRef:
-              name: cloudflare
+              name: cert-manager-external-secret
               key: cloudflare-token
         selector:
           dnsZones:
