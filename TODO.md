@@ -40,6 +40,7 @@ x Update docs
   x authelia
   x cert manager
   - traefik
+    - expose traefik
     - expose argocd
   - velero
   x external secrets
@@ -49,7 +50,7 @@ x Update docs
   - Document disaster recovery (DR)
   - Test DR with pvc and pg (manually)
 x Seperate out terraform code for k3s
-- Use namespaces
+x Use namespaces
 x Enable k3s vlan and other networking rules
 - Update docs
 
@@ -63,7 +64,7 @@ x Enable k3s vlan and other networking rules
   - Ansible k3s
 - Dev cluster on PR
 - Test DR with pvc and pg (auto)
-- Convert sync sops to vault job as argo workflow
+- Convert sync sops to vault job as argo workflow template
   - Trigger from argo event when vault is ready
   - Trigger from gitea on secret changes
 
