@@ -4,6 +4,7 @@ metadata:
   name: letsencrypt-staging
   namespace: cert-manager
   annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "5"
 spec:
   acme:
@@ -28,6 +29,7 @@ metadata:
   name: bhamm-lab-tls-staging
   namespace: cert-manager
   annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "5"
 spec:
   secretName: bhamm-lab-tls-staging
