@@ -17,7 +17,10 @@ spec:
         name: traefik
         ingressRoutes:
           - enabled: true
-            name: traefik
+            name: traefik-dashboard
+            ingressClass: traefik-external
+            websocket: true
+            tlsSecretName: bhamm-lab-tls
             routes:
               - match: Host(`traefik.bhamm-lab.com`)
                 kind: Rule
