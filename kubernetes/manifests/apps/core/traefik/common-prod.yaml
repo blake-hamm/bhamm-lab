@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: traefik-common
-  namespace: traefik
+  namespace: argocd
 spec:
   destination:
     namespace: traefik
