@@ -11,7 +11,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: bin/metallb-operator.yaml
+    path: bin
     repoURL: https://github.com/metallb/metallb-operator.git
     targetRevision: v0.14.2
   syncPolicy:
