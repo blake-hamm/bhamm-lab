@@ -117,6 +117,14 @@ opnsense_extra_rules:
     source_net: k8sNetwork
     destination_net: metalNetwork
     # Manually set state policy to none
+  K8sTrustedAccess:
+    description: Allow k8s access to trusted
+    interface: opt4 # k8s
+    sequence: 3
+    ip_protocol: inet
+    protocol: any
+    source_net: k8sNetwork
+    destination_net: trustedNetwork
   TrustedDMZAccess:
     description: Allow trusted access to dmz
     interface: opt1 # trusted
