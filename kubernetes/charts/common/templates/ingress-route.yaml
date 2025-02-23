@@ -23,6 +23,7 @@ spec:
       middlewares:
         {{- range .middlewares }}
         - name: {{ .name }}
+          namespace: {{ $.namespace | default "traefik" }}
         {{- end }}
       {{- end }}
       services:
