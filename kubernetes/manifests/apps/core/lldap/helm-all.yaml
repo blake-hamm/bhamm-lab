@@ -4,7 +4,7 @@ metadata:
   name: lldap
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/sync-wave: "11"
 spec:
   destination:
     namespace: lldap
