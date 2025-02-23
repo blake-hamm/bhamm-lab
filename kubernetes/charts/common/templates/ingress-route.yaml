@@ -33,8 +33,6 @@ spec:
           scheme: {{ .scheme | default "https" }}
         {{- end }}
   {{- end }}
-  tls:
-    store:
-      name: default
+  tls: {}
 {{- end }}
 {{- end }}
