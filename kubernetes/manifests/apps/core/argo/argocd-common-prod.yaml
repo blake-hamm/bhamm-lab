@@ -17,6 +17,8 @@ spec:
         name: argocd
         externalSecrets:
           enabled: true
+          labels:
+            app.kubernetes.io/part-of: argocd
           secrets:
             - secretKey: oidc_client_secret
               remoteRef:
