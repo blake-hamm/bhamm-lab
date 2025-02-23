@@ -28,6 +28,7 @@ spec:
       services:
         {{- range .services }}
         - name: {{ .name }}
+          namespace: {{ $.Values.name }}
           kind: {{ .kind | default "Service" }}
           port: {{ .port | default 443 }}
           scheme: {{ .scheme | default "https" }}
