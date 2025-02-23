@@ -69,7 +69,7 @@ spec:
     - name: OIDC_VAULT_CLIENT_SECRET
       valueFrom:
         secretKeyRef:
-          name: vault-external-secrets
+          name: vault-external-secret
           key: OIDC_VAULT_CLIENT_SECRET
   statsdDisabled: false
   serviceMonitorEnabled: true
