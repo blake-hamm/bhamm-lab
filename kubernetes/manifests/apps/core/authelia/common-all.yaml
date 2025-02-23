@@ -37,6 +37,21 @@ spec:
         postgresql:
           enabled: true
           storageSize: 1Gi
+        ingressRoutes:
+          - enabled: true
+            name: authelia
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - kind: Rule
+                match: Host(`auth.bhamm-lab.com`)
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: authelia
+                    port: 80
+                    scheme: http
+            tlsSecretName: bhamm-lab-tls
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
