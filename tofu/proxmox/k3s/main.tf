@@ -18,6 +18,7 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
     datastore_id = "ceph_pool"
     dns {
       servers = [
+        "10.0.30.1",
         "1.1.1.1",
         "1.0.0.1"
       ]
@@ -97,6 +98,7 @@ resource "proxmox_virtual_environment_vm" "k3s_worker" {
     datastore_id = "ceph_pool"
     dns {
       servers = [
+        "10.0.30.1",
         "1.1.1.1",
         "1.0.0.1"
       ]
