@@ -5,6 +5,7 @@ To spin up a kubernetes cluster in bhamm-lab, you need to follow these steps:
 tofu -chdir=tofu/proxmox/k3s apply -parallelism=2 -auto-approve
 ```
 *Note: This command will also destroy and replace existing vm's*
+
 2. Ansible to secure debian vm's and deploy k3s
 ```bash
 ansible-playbook ansible/main.yml -l k3s*
