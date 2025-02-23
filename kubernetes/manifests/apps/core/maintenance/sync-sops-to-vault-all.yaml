@@ -45,6 +45,7 @@ metadata:
   annotations:
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   entrypoint: sync-sops-to-vault-workflow
   serviceAccountName: sync-sops-to-vault-sa

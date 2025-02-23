@@ -44,6 +44,7 @@ metadata:
   namespace: lldap
   annotations:
     argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   entrypoint: lldap-bootstrap-workflow
   serviceAccountName: lldap-bootstrap-workflow-sa
