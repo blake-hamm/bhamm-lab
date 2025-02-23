@@ -5,7 +5,7 @@ metadata:
   namespace: cert-manager
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "11"
 spec:
   acme:
     server: https://acme-staging-v02.api.letsencrypt.org/directory
@@ -30,7 +30,7 @@ metadata:
   namespace: traefik
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "11"
 spec:
   secretName: bhamm-lab-tls-staging
   issuerRef:
