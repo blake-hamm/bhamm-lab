@@ -4,9 +4,9 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: {{ .name }}
-  namespace: {{ .Values.name }}
+  namespace: {{ $.Values.name }}  # Use $ to reference parent Values
   annotations:
-    kubernetes.io/ingress.class: {{- .ingressClass }}
+    kubernetes.io/ingress.class: {{ .ingressClass }}  # Fixed hyphen issue
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "1"
     {{- if .websocket }}
@@ -17,9 +17,23 @@ spec:
     - websecure
   routes:
   {{- range .routes }}
+    - match: {{ .match | quote }}
+      kind: {{ .kind }}
+      {{- if .middlewares }}
+      middlewares:
+        {{- range .middlewares }}
+        - name: {{ .name }}
+        {{- end }}
+      {{- end }}
+      services:
+        {{- range .services }}
+        - name: {{ .name }}
+          kind: {{ .kind }}
+        {{- end }}
   {{- end }}
   {{- if .tlsSecretName }}
   tls:
     secretName: {{ .tlsSecretName }}
+  {{- end }}
 {{- end }}
 {{- end }}
