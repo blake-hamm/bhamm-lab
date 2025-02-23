@@ -27,7 +27,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: bhamm-lab-tls
-  namespace: default
+  namespace: traefik
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "5"
@@ -41,11 +41,11 @@ spec:
     - "bhamm-lab.com"
     - "*.bhamm-lab.com"
 ---
-apiVersion: traefik.containo.us/v1alpha1
+apiVersion: traefik.io/v1alpha1
 kind: TLSStore
 metadata:
   name: default
-  namespace: default
+  namespace: traefik
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "6"
