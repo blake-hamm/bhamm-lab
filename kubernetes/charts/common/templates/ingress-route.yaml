@@ -23,13 +23,12 @@ spec:
       middlewares:
         {{- range .middlewares }}
         - name: {{ .name }}
-          namespace: {{ $.namespace | default "traefik" }}
+          namespace: {{ .namespace | default "traefik" }}
         {{- end }}
       {{- end }}
       services:
         {{- range .services }}
         - name: {{ .name }}
-          namespace: {{ $.Values.name }}
           kind: {{ .kind | default "Service" }}
           port: {{ .port | default 443 }}
           scheme: {{ .scheme | default "https" }}
