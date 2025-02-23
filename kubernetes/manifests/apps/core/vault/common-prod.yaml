@@ -22,20 +22,21 @@ spec:
               remoteRef:
                 key: /core/vault
                 property: OIDC_VAULT_CLIENT_SECRET
-                # ingressRoutes:
-                #   - enabled: true
-                #     name: authelia
-                #     ingressClass: traefik-external
-                #     websocket: true
-                #     routes:
-                #       - kind: Rule
-                #         match: Host(`auth.bhamm-lab.com`)
-                #         middlewares:
-                #           - name: default-headers
-                #         services:
-                #           - name: authelia
-                #             port: 80
-                #             scheme: http
+          ingressRoutes:
+            - enabled: true
+              name: vault
+              ingressClass: traefik-external
+              websocket: true
+              routes:
+                - kind: Rule
+                  match: Host(`vault.bhamm-lab.com`)
+                  middlewares:
+                    - name: default-headers
+                    - name: forwardauth-authelia
+                  services:
+                    - name: vault
+                      port: 8200
+                      scheme: https
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
