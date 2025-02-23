@@ -27,6 +27,7 @@ spec:
           - "--log.level=DEBUG"
         deployment:
           enabled: true
+          shareProcessNamespace: true
           replicas: 1
           annotations: {}
           podAnnotations: {}
@@ -46,6 +47,7 @@ spec:
           kubernetesCRD:
             enabled: true
             ingressClass: traefik-external
+            allowCrossNamespace: true
             allowExternalNameServices: true
           kubernetesIngress:
             enabled: false
