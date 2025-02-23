@@ -27,7 +27,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: bhamm-lab-tls
-  namespace: cert-manager
+  namespace: traefik
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "5"
