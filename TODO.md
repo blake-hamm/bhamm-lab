@@ -42,7 +42,7 @@ x Update docs
   - traefik expose
     x traefik
     x authelia
-    - vault
+    x vault
     - argocd
   - velero
   x external secrets
