@@ -8,12 +8,12 @@ externalSecrets:
         key: secret-key
         property: secret-value
 # Ingress Route Configuration
-ingressRoutes:
-  - enabled: false
-    name: default
-    ingressClass: traefik-external
-    routes: []
-    tlsSecretName: bhamm-lab-tls
+ingressRoutes: []
+  # - enabled: false
+  #   name: default
+  #   ingressClass: traefik-external
+  #   routes: []
+  #   tlsSecretName: bhamm-lab-tls
 # Velero Backup Configuration
 velero:
   enabled: false
