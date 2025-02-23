@@ -97,7 +97,7 @@ spec:
             postgres:
               enabled: true
               deploy: false
-              address: 'tcp://authelia-postgresql-rw.authelia:5432'
+              address: 'tcp://authelia-postgresql-rw:5432'
               timeout: '15 seconds'
               database: 'authelia'
               schema: 'public'
