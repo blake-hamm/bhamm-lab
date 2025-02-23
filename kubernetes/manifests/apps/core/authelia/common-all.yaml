@@ -51,7 +51,6 @@ spec:
                   - name: authelia
                     port: 80
                     scheme: http
-            tlsSecretName: bhamm-lab-tls
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

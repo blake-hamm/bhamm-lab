@@ -4,11 +4,11 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: {{ .name }}
-  namespace: traefik
+  namespace: {{ $.Values.name }}
   annotations:
     kubernetes.io/ingress.class: {{ .ingressClass }}
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "10"
     {{- if .websocket }}
     traefik.ingress.kubernetes.io/websocket: "true"
     {{- end }}
@@ -28,15 +28,11 @@ spec:
       services:
         {{- range .services }}
         - name: {{ .name }}
-          namespace: {{ $.Values.name }}
           kind: {{ .kind | default "Service" }}
           port: {{ .port | default 443 }}
           scheme: {{ .scheme | default "https" }}
         {{- end }}
   {{- end }}
-  {{- if .tlsSecretName }}
-  tls:
-    secretName: {{ .tlsSecretName }}
-  {{- end }}
+  tls: {}
 {{- end }}
 {{- end }}
