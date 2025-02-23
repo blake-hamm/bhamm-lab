@@ -98,6 +98,7 @@ x Enable k3s vlan and other networking rules
   - servarr
     - jellyfin
     - flaresolver
+  - Integrate proxmox UI into traefik
 - Expose docs site and vpn
 - Install mergerfs/snapraid on aorus node
 - Integrate proxmox with traefik

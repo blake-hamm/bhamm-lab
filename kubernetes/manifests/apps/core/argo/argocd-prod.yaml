@@ -4,7 +4,7 @@ metadata:
   name: argocd
   namespace: argocd
   annotations:
-    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/sync-wave: "20"
 spec:
   destination:
     namespace: argocd

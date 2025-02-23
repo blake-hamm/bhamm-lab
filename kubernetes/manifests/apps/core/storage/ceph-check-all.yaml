@@ -4,7 +4,7 @@ metadata:
   name: ceph-check-sa
   namespace: ceph
   annotations:
-    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-5"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -12,7 +12,7 @@ metadata:
   name: ceph-check-role
   namespace: ceph
   annotations:
-    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-5"
 rules:
   - apiGroups: [""]
     resources: ["pods", "pods/exec"]
@@ -24,7 +24,7 @@ metadata:
   name: ceph-check-binding
   namespace: ceph
   annotations:
-    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-5"
 roleRef:
   kind: Role
   name: ceph-check-role
@@ -40,8 +40,7 @@ metadata:
   name: ceph-check-workflow
   namespace: ceph
   annotations:
-    argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/sync-wave: 1"
+    argocd.argoproj.io/sync-wave: "-1"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   entrypoint: ceph-check-workflow
