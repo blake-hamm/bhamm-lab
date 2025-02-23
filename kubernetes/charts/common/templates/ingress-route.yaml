@@ -18,6 +18,7 @@ spec:
   {{- range .routes }}
     - match: {{ .match | quote }}
       kind: {{ .kind }}
+      priority: {{ .priority | default 1 }}
       {{- if .middlewares }}
       middlewares:
         {{- range .middlewares }}

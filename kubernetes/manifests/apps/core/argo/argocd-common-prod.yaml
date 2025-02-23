@@ -37,6 +37,7 @@ spec:
                   - name: default-headers
                 services:
                   - name: argocd-server
+                    scheme: http
                     port: 80
               - kind: Rule
                 match: Host(`argocd.bhamm-lab.com`) && Header(`Content-Type`, `application/grpc`)
