@@ -10,6 +10,7 @@ externalSecrets:
 # Ingress Route Configuration
 ingressRoutes:
   - enabled: false
+    name: default
     ingressClass: traefik-external
     routes: []
     tlsSecretName: bhamm-lab-tls
