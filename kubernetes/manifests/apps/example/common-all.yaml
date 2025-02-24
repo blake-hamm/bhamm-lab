@@ -41,7 +41,7 @@ spec:
         velero:
           backup:
             enabled: true
-            schedule: "*/1 * * * *"
+            schedule: "0 * * * *"
             ttl: "5h0m0s"
           restore:
             enabled: false
