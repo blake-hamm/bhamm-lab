@@ -50,9 +50,6 @@ spec:
             enableSFTP: false
           buckets:
             - name: argo-artifacts
-              policy: none
-              purge: false
-              versioning: false
           users: []
           prometheusOperator: false
   syncPolicy:
