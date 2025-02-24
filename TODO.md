@@ -47,11 +47,15 @@ x Deploy core
   x velero
   x external secrets
   x convert jobs to argo workflows (sops and ceph check)
+  - k8up
 x Setup helm chart for my apps (external secrets, traefik, pvc, pg)
   x example nginx with helm
-  - Confirm csi volume snapshot works
-  - Confirm velero backup works w/ no errors
-  - Confirm velero backup restore works w/ no errors
+  - Annotate pvc for k8up
+  - Run k8up backup manually
+  - Change pvc data
+  - Restore pvc with k8up and confirm data restored
+  - Integrate k8up into helm chart (and remove velero)
+  - Remove all velero resources
 x Seperate out terraform code for k3s
 x Use namespaces
 x Enable k3s vlan and other networking rules
@@ -115,3 +119,12 @@ x Update docs
   - Storage (pbs,nfs)
 - Implement devsec.os_hardening
 - Implement debian firewall rules
+- 3-2-1 backups
+  - Configure snapraid/mergerfs
+  - Ensure monitoring
+  - Expose nfs
+  - Create nfs storage class
+  - Setup minio tenant with nfs storage class
+  - Refactor k8up backups to minio
+  - Ensure minio backup bucket syncs to gcp
+  - Ensure on new cluster, minio bucket is restored first, then deploy backup
