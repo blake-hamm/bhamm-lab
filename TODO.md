@@ -25,8 +25,8 @@ x Deploy cluster
 x Update docs
 
 # k3s cluster
-- Deploy 'prod' cluster
-- Deploy core
+x Deploy 'prod' cluster
+x Deploy core
   x argocd
   x argo-events
   x metallb
@@ -44,17 +44,17 @@ x Update docs
     x authelia
     x vault
     x argocd
-  - velero
+  x velero
   x external secrets
   x convert jobs to argo workflows (sops and ceph check)
-- Setup helm chart for my apps (external secrets, traefik, pvc, pg)
+x Setup helm chart for my apps (external secrets, traefik, pvc, pg)
   - example nginx with helm
   - Document disaster recovery (DR)
   - Test DR with pvc and pg (manually)
 x Seperate out terraform code for k3s
 x Use namespaces
 x Enable k3s vlan and other networking rules
-- Update docs
+x Update docs
 
 # CI/CD
 - Deploy forego or gitea

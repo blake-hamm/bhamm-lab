@@ -1,0 +1,17 @@
+{{- if .Values.velero.restore.enabled }}
+apiVersion: velero.io/v1
+kind: Restore
+metadata:
+  name: {{ .Values.name }}-restore
+  namespace: {{ .Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "15"
+spec:
+  backupName: {{ .Values.velero.restore.backupName | quote }}
+  includedNamespaces:
+    - {{ .Values.name | quote }}
+  includedResources:
+    - persistentvolumeclaims
+    - persistentvolumes
+{{- end }}

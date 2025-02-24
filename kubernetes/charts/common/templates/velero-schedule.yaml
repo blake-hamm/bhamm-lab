@@ -1,0 +1,19 @@
+{{- if .Values.velero.backup.enabled }}
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: {{ .Values.name }}-backup-schedule
+  namespace: {{ .Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  schedule: "{{ .Values.velero.schedule | default "0 1 * * *" }}"
+  template:
+    ttl: "{{ .Values.velero.ttl | default "720h0m0s" }}"
+    includedNamespaces:
+      - {{ .Values.name }}
+    includedResources:
+      - persistentvolumeclaims
+      - persistentvolumes
+{{- end }}
