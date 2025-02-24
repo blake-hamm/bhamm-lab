@@ -16,4 +16,5 @@ spec:
     includedResources:
       - persistentvolumeclaims
       - persistentvolumes
+  snapshotMoveData: false
 {{- end }}
