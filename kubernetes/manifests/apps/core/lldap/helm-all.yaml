@@ -24,10 +24,16 @@ spec:
         image:
           repository: "lldap/lldap"
           tag: "v0.6.1"
+  ignoreDifferences:
+    - group: ""
+      kind: PersistentVolumeClaim
+      jsonPointers:
+        - /spec/storageClassName
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true
     automated:
       prune: true
       selfHeal: true
