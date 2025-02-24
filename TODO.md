@@ -55,6 +55,9 @@ x Seperate out terraform code for k3s
 x Use namespaces
 x Enable k3s vlan and other networking rules
 x Update docs
+  - Helm chart
+  - DR w/ pv and pg
+  - Deployment flow
 
 # CI/CD
 - Deploy forego or gitea
