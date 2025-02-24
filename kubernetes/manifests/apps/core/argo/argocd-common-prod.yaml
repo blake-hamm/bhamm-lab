@@ -33,8 +33,6 @@ spec:
               - kind: Rule
                 match: Host(`argocd.bhamm-lab.com`)
                 priority: 10
-                middlewares:
-                  - name: default-headers
                 services:
                   - name: argocd-server
                     scheme: http
@@ -42,8 +40,6 @@ spec:
               - kind: Rule
                 match: Host(`argocd.bhamm-lab.com`) && Header(`Content-Type`, `application/grpc`)
                 priority: 11
-                middlewares:
-                  - name: default-headers
                 services:
                   - name: argocd-server
                     port: 80
