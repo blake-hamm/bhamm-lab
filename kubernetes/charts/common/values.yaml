@@ -15,7 +15,7 @@ ingressRoutes: []
 #   ingressClass: traefik-external
 #   routes: []
 # Velero Backup Configuration
-velero:
+k8up:
   backup:
     enabled: false
     schedule: "0 1 * * *"
