@@ -51,6 +51,11 @@ spec:
                 - 'profile'
                 - 'email'
                 - 'groups'
+              requestedIDTokenClaims:
+                groups:
+                  essential: true
+            server.session.cookie.sameSite: "None"
+            server.session.cookie.secure: "true"
             resource.exclusions: |
               - apiGroups:
                 - velero.io
