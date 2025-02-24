@@ -25,7 +25,7 @@ spec:
           #       key: /core/argocd
           #       property: oidc_client_secret
         ingressRoutes:
-          - enabled: false
+          - enabled: true
             name: example
             ingressClass: traefik-external
             # websocket: true
