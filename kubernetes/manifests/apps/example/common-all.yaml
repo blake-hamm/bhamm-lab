@@ -45,7 +45,7 @@ spec:
             ttl: "5h0m0s"
           restore:
             enabled: true
-            backupName: "example-backup-schedule-20250224040040"
+            backupName: "example-backup-schedule-20250224035340"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
