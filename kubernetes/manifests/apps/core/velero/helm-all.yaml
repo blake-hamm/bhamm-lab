@@ -25,6 +25,7 @@ spec:
             volumeMounts:
               - mountPath: /target
                 name: plugins
+        deployNodeAgent: true
         configuration:
           backupStorageLocation:
             - name: "default"
@@ -41,6 +42,7 @@ spec:
               provider: "csi"
           defaultVolumeSnapshotLocations: csi:default
           features: EnableCSI
+          defaultSnapshotMoveData: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
