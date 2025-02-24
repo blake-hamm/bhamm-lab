@@ -100,11 +100,6 @@ spec:
                   annotations:
                     summary: "Traefik Down"
                     description: "{{ $labels.pod }} on {{ $labels.nodename }} is down"
-  ignoreDifferences:
-    - group: ""
-      kind: Service
-      jsonPointers:
-        - /status
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

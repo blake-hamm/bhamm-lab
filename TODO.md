@@ -48,6 +48,9 @@ x Deploy core
   x external secrets
   x convert jobs to argo workflows (sops and ceph check)
   - k8up
+- Refactor 'backups'
+  - Rename gcp tofu storage/sa to 'backups' (instead of velero)
+  - Update k3s deployment with new secret/naming
 x Setup helm chart for my apps (external secrets, traefik, pvc, pg)
   x example nginx with helm
   - Annotate pvc for k8up
