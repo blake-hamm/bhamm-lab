@@ -48,9 +48,10 @@ x Deploy core
   x external secrets
   x convert jobs to argo workflows (sops and ceph check)
 x Setup helm chart for my apps (external secrets, traefik, pvc, pg)
-  - example nginx with helm
-  - Document disaster recovery (DR)
-  - Test DR with pvc and pg (manually)
+  x example nginx with helm
+  - Confirm csi volume snapshot works
+  - Confirm velero backup works w/ no errors
+  - Confirm velero backup restore works w/ no errors
 x Seperate out terraform code for k3s
 x Use namespaces
 x Enable k3s vlan and other networking rules
