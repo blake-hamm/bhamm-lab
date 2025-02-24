@@ -3,7 +3,7 @@ apiVersion: velero.io/v1
 kind: Schedule
 metadata:
   name: {{ .Values.name }}-backup-schedule
-  namespace: {{ .Values.name }}
+  namespace: velero
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "20"
