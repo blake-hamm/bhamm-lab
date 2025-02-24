@@ -5,6 +5,8 @@ metadata:
   namespace: example
   labels:
     app: example
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   accessModes:
     - ReadWriteOnce
@@ -19,6 +21,8 @@ metadata:
   namespace: example
   labels:
     app: example
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   replicas: 1
   selector:
@@ -47,6 +51,8 @@ kind: Service
 metadata:
   name: example
   namespace: example
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   type: ClusterIP
   ports:
