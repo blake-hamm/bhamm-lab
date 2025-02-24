@@ -17,11 +17,7 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
   initialization {
     datastore_id = "ceph_pool"
     dns {
-      servers = [
-        "10.0.30.1",
-        "1.1.1.1",
-        "1.0.0.1"
-      ]
+      servers = ["10.0.30.1"]
     }
     ip_config {
       ipv4 {
@@ -29,6 +25,7 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
         gateway = "10.0.30.1"
       }
     }
+    user_data_file_id = "ceph_fs:snippets/cloud-config.yaml"
   }
 
   agent {
@@ -97,11 +94,7 @@ resource "proxmox_virtual_environment_vm" "k3s_worker" {
   initialization {
     datastore_id = "ceph_pool"
     dns {
-      servers = [
-        "10.0.30.1",
-        "1.1.1.1",
-        "1.0.0.1"
-      ]
+      servers = ["10.0.30.1"]
     }
     ip_config {
       ipv4 {
@@ -109,6 +102,7 @@ resource "proxmox_virtual_environment_vm" "k3s_worker" {
         gateway = "10.0.30.1"
       }
     }
+    user_data_file_id = "ceph_fs:snippets/cloud-config.yaml"
   }
 
   agent {
