@@ -10,13 +10,19 @@ externalSecrets:
         property: secret-value
 # Ingress Route Configuration
 ingressRoutes: []
-  # - enabled: false
-  #   name: default
-  #   ingressClass: traefik-external
-  #   routes: []
+# - enabled: false
+#   name: default
+#   ingressClass: traefik-external
+#   routes: []
 # Velero Backup Configuration
 velero:
-  enabled: false
+  backup:
+    enabled: false
+    schedule: "0 1 * * *"
+    ttl: "720h0m0s"
+  restore:
+    enabled: false
+    backupName: ""
 postgresql:
   enabled: false
   instances: 2
