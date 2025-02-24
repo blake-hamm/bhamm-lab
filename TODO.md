@@ -39,11 +39,11 @@ x Update docs
   x cloudnative pg
   x authelia
   x cert manager
-  - traefik expose
+  x traefik expose
     x traefik
     x authelia
     x vault
-    - argocd
+    x argocd
   - velero
   x external secrets
   x convert jobs to argo workflows (sops and ceph check)
