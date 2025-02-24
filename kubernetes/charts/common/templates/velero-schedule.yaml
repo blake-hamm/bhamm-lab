@@ -5,9 +5,8 @@ metadata:
   name: {{ .Values.name }}-backup-schedule
   namespace: velero
   annotations:
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,Delete=false,Prune=false
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "20"
-    argocd.argoproj.io/compare-options: IgnoreExtraneous
 spec:
   schedule: "{{ .Values.velero.backup.schedule | default "0 1 * * *" }}"
   template:

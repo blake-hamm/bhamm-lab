@@ -51,6 +51,11 @@ spec:
                 - 'profile'
                 - 'email'
                 - 'groups'
+            resource.exclusions: |
+              - apiGroups:
+                - velero.io
+                kinds:
+                - Backup
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
