@@ -44,8 +44,8 @@ spec:
             schedule: "0 * * * *"
             ttl: "5h0m0s"
           restore:
-            enabled: false
-            backupName: ""
+            enabled: true
+            backupName: "example-backup-schedule-20250224040040"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
