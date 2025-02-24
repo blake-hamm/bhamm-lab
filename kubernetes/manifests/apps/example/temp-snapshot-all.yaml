@@ -3,6 +3,8 @@ kind: VolumeSnapshot
 metadata:
   name: example
   namespace: example
+  annotations:
+    argocd.argoproj.io/sync-wave: "15"
 spec:
   volumeSnapshotClassName: ceph-snapclass
   source:
