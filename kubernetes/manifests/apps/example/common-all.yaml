@@ -16,14 +16,12 @@ spec:
       valuesObject:
         name: example
         externalSecrets:
-          enabled: false
-          # labels:
-          #   app.kubernetes.io/part-of: argocd
-          # secrets:
-          #   - secretKey: oidc_client_secret
-          #     remoteRef:
-          #       key: /core/argocd
-          #       property: oidc_client_secret
+          enabled: true
+          secrets:
+            - secretKey: gcp-k8up-sa
+              remoteRef:
+                key: /external/gcp
+                property: gcp-k8up-sa
         ingressRoutes:
           - enabled: true
             name: example

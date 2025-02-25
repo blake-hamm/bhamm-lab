@@ -53,7 +53,7 @@ x Deploy core
   - Update k3s deployment with new secret/naming
 x Setup helm chart for my apps (external secrets, traefik, pvc, pg)
   x example nginx with helm
-  - Annotate pvc for k8up
+  x Annotate pvc for k8up
   - Run k8up backup manually
   - Change pvc data
   - Restore pvc with k8up and confirm data restored
@@ -128,6 +128,7 @@ x Update docs
   - Expose nfs
   - Create nfs storage class
   - Setup minio tenant with nfs storage class
+  - Refactor k8up to use argo workflows to reduce gcp sa credential surface
   - Refactor k8up backups to minio
   - Ensure minio backup bucket syncs to gcp
   - Ensure on new cluster, minio bucket is restored first, then deploy backup
