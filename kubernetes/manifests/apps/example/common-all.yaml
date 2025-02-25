@@ -36,10 +36,10 @@ spec:
                   - name: example
                     scheme: http
                     port: 80
-        velero:
+        k8up:
           backup:
             enabled: true
-            schedule: "0 * * * *"
+            schedule: "*/5 * * * *"
             ttl: "5h0m0s"
           restore:
             enabled: true
