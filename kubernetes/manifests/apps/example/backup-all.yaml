@@ -81,10 +81,10 @@ spec:
             template: cleanup
     # Step 1: Generate temporary credentials
     - name: generate-secret
-      container:
+      script:
         image: google/cloud-sdk:latest
         command: [bash]
-        args: |
+        source: |
           set -e
 
           # debug
@@ -122,10 +122,10 @@ spec:
             mountPath: /secrets
     # Step 2: Run a one-time backup
     - name: run-backup
-      container:
+      script:
         image: bitnami/kubectl:latest
         command: [bash]
-        args: |
+        source: |
           echo "Triggering a point-in-time backup..."
           BACKUP_NAME="backup-to-gcs-$(date +%s)"
           cat <<EOF | kubectl apply -f -
@@ -156,10 +156,10 @@ spec:
           echo "kubectl get backup $BACKUP_NAME -n example -o wide"
     # Step 3: Clean up the temporary secret after backup is triggered
     - name: cleanup
-      container:
+      script:
         image: bitnami/kubectl:latest
         command: [bash]
-        args: |
+        source: |
           echo "Waiting for backup to complete (this might take some time)..."
           # Add a reasonable timeout based on your backup size
           sleep 60
