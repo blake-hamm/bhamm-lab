@@ -15,11 +15,11 @@ spec:
     entrypoint: main
     templates:
       - name: main
-          steps:
-            - - name: generate-secret
-                templateRef:
-                  name: "generate-secret-{{ .Values.name }}"
-                  template: main
+        steps:
+          - - name: generate-secret
+              templateRef:
+                name: "generate-secret-{{ .Values.name }}"
+                template: main
           - - name: run-backup
               template: run-backup
           - - name: cleanup
