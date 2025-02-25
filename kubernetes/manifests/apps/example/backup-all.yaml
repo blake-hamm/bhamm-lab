@@ -1,39 +1,4 @@
 apiVersion: k8up.io/v1
-kind: PreBackupPod
-metadata:
-  name: get-gcs-token
-  namespace: example
-  annotations:
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "19"
-  preBackup:
-    pod:
-      spec:
-        image: google/cloud-sdk:latest
-        command:
-          - /bin/sh
-          - -c
-          - |
-            # Use the mounted service account JSON to generate a fresh token.
-            export GOOGLE_APPLICATION_CREDENTIALS=/etc/gcp/service-account.json
-            ACCESS_TOKEN=$(gcloud auth application-default print-access-token)
-            echo "New access token: ${ACCESS_TOKEN}"
-            # Patch the token secret in the k8up namespace.
-            kubectl create secret generic gcp-backup-token \
-              --from-literal=accessToken="$ACCESS_TOKEN" \
-              --dry-run=client -o yaml | kubectl apply -f -
-        volumeMounts:
-          - name: gcp-sa
-            mountPath: /etc/gcp
-        volumes:
-          - name: gcp-sa
-            secret:
-              secretName: example-external-secret
-              items:
-                - key: gcp-k8up-sa
-                  path: service-account.json
----
-apiVersion: k8up.io/v1
 kind: Backup
 metadata:
   name: backup-to-gcs
