@@ -93,9 +93,6 @@ spec:
         source: |
           set -e
 
-          # debug
-          ls -la /secrets
-
           echo "Activating service account using the service-account.json..."
           gcloud auth activate-service-account --key-file=/secrets/service-account.json
 
@@ -132,6 +129,8 @@ spec:
         image: bitnami/kubectl:latest
         command: [bash]
         source: |
+          set -e
+
           echo "Triggering a point-in-time backup..."
           BACKUP_NAME="backup-to-gcs-$(date +%s)"
           cat <<EOF | kubectl apply -f -
@@ -148,7 +147,7 @@ spec:
                 name: example-external-secret
                 key: k8up-repo-password
               gcs:
-                bucket: "your-gcs-bucket-name"  # Replace with your target GCS bucket name
+                bucket: bhamm-lab-k8up
                 projectIDSecretRef:
                   name: gcs-backup-temp
                   key: project_id
@@ -159,7 +158,9 @@ spec:
           EOF
 
           echo "Waiting for backup $BACKUP_NAME to start..."
-          kubectl wait --for=condition=Started --timeout=60s backup/$BACKUP_NAME -n example || true
+          kubectl wait --for=jsonpath='{.status.started}'=true \
+            backup/$BACKUP_NAME -n example \
+            --timeout=60s || true
 
           echo "Backup job initiated. You can check the status with:"
           echo "kubectl get backup $BACKUP_NAME -n example -o wide"
@@ -169,6 +170,8 @@ spec:
         image: bitnami/kubectl:latest
         command: [bash]
         source: |
+          set -e
+
           echo "Waiting for backup to complete (this might take some time)..."
           # Add a reasonable timeout based on your backup size
           sleep 60
