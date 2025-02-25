@@ -17,6 +17,9 @@ rules:
   - apiGroups: ["argoproj.io"]
     resources: ["workflows", "workflows/finalizers"]
     verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
 ---
 # Role for permissions in the example namespace
 apiVersion: rbac.authorization.k8s.io/v1
@@ -67,6 +70,9 @@ kind: Workflow
 metadata:
   name: example-backup
   namespace: k8up
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "20"
 spec:
   serviceAccountName: k8up-backup-workflow-sa
   entrypoint: main
