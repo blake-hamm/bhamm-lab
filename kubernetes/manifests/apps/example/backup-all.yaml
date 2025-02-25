@@ -105,7 +105,7 @@ spec:
           echo "Extracting project_id from service-account.json..."
           PROJECT_ID=$(cat /secrets/project_id)
 
-          echo "Creating secret 'gcs-backup-temp' in the 'example' namespace with 2-hour TTL..."
+          echo "Creating secret 'gcs-backup-temp' in the 'example' namespace..."
           cat <<EOF | kubectl apply -f -
           apiVersion: v1
           kind: Secret
@@ -143,6 +143,9 @@ spec:
             labels:
               app: k8up-backup
           spec:
+            repoPasswordSecretRef:
+              name: example-external-secret
+              key: k8up-repo-password
             backend:
               gcs:
                 bucket: "your-gcs-bucket-name"  # Replace with your target GCS bucket name

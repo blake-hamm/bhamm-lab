@@ -18,14 +18,10 @@ spec:
         externalSecrets:
           enabled: true
           secrets:
-            - secretKey: gcp-k8up-sa
+            - secretKey: k8up-repo-password
               remoteRef:
-                key: /external/gcp
-                property: gcp-k8up-sa
-            - secretKey: gcp-project_id
-              remoteRef:
-                key: /external/gcp
-                property: project_id
+                key: /core/k8up
+                property: repo-password
         ingressRoutes:
           - enabled: true
             name: example
