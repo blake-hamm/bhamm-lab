@@ -22,6 +22,10 @@ spec:
               remoteRef:
                 key: /external/gcp
                 property: gcp-k8up-sa
+            - secretKey: gcp-project_id
+              remoteRef:
+                key: /external/gcp
+                property: project_id
         ingressRoutes:
           - enabled: true
             name: example

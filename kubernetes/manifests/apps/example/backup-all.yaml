@@ -28,16 +28,16 @@ spec:
       volumes:
         - name: gcp-sa
           secret:
-            secretName: gcp-k8up-sa
+            secretName: example-external-secret
             items:
-              - key: service-account.json
+              - key: gcp-k8up-sa
                 path: service-account.json
   backend:
     gcs:
       bucket: "bhamm-lab-k8up"
       projectIDSecretRef:
-        name: gcp-k8up-sa
-        key: project_id
+        name: example-external-secret
+        key: gcp-project_id
       accessTokenSecretRef:
         name: gcp-backup-token
         key: accessToken
