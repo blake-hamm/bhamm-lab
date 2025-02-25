@@ -63,6 +63,7 @@
       type: Opaque
       data:
         service-account.json: "{{ gcp_k8up_sa | to_json | b64encode }}"
+        project_id: "{{ gcp_k8up_sa['project_id'] | b64encode }}"
     wait: true
   retries: 3
   delay: 15
