@@ -47,7 +47,7 @@ x Deploy core
   x velero
   x external secrets
   x convert jobs to argo workflows (sops and ceph check)
-  - k8up
+  x k8up
 - Refactor 'backups'
   - Rename gcp tofu storage/sa to 'backups' (instead of velero)
   - Update k3s deployment with new secret/naming

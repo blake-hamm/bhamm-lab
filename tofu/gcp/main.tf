@@ -4,16 +4,16 @@ resource "google_project_iam_member" "storage_service_account_kms" {
   member  = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
 }
 
-# kms, sa and bucket for velero
-resource "google_kms_key_ring" "velero_key_ring" {
-  name       = "velero-key-ring"
+# kms, sa and bucket for k8up
+resource "google_kms_key_ring" "k8up_key_ring" {
+  name       = "k8up-key-ring"
   location   = var.region
   depends_on = [google_project_iam_member.storage_service_account_kms]
 }
 
-resource "google_kms_crypto_key" "velero_crypto_key" {
-  name            = "velero-crypto-key"
-  key_ring        = google_kms_key_ring.velero_key_ring.id
+resource "google_kms_crypto_key" "k8up_crypto_key" {
+  name            = "k8up-crypto-key"
+  key_ring        = google_kms_key_ring.k8up_key_ring.id
   rotation_period = "7776000s" # 90 days
 
   lifecycle {
@@ -21,8 +21,8 @@ resource "google_kms_crypto_key" "velero_crypto_key" {
   }
 }
 
-resource "google_storage_bucket" "velero" {
-  name          = "bhamm-lab-velero"
+resource "google_storage_bucket" "k8up" {
+  name          = "bhamm-lab-k8up"
   location      = var.region
   force_destroy = true
 
@@ -33,7 +33,7 @@ resource "google_storage_bucket" "velero" {
   }
 
   encryption {
-    default_kms_key_name = google_kms_crypto_key.velero_crypto_key.id
+    default_kms_key_name = google_kms_crypto_key.k8up_crypto_key.id
   }
 
   lifecycle_rule {
@@ -46,28 +46,28 @@ resource "google_storage_bucket" "velero" {
   }
 }
 
-resource "google_service_account" "velero" {
-  account_id   = var.velero_service_account_id
-  display_name = "Velero SA"
+resource "google_service_account" "k8up" {
+  account_id   = var.k8up_service_account_id
+  display_name = "k8up SA"
 }
 
-resource "google_project_iam_member" "velero_kms" {
+resource "google_project_iam_member" "k8up_kms" {
   project = var.project_id
   role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member  = "serviceAccount:${google_service_account.velero.email}"
+  member  = "serviceAccount:${google_service_account.k8up.email}"
 }
 
-resource "google_storage_bucket_iam_member" "velero_storage_admin" {
-  bucket = google_storage_bucket.velero.name
+resource "google_storage_bucket_iam_member" "k8up_storage_admin" {
+  bucket = google_storage_bucket.k8up.name
   role   = "roles/storage.objectAdmin"
-  member = "serviceAccount:${google_service_account.velero.email}"
+  member = "serviceAccount:${google_service_account.k8up.email}"
 }
 
-resource "google_service_account_key" "velero_key" {
-  service_account_id = google_service_account.velero.name
+resource "google_service_account_key" "k8up_key" {
+  service_account_id = google_service_account.k8up.name
 
   provisioner "local-exec" {
-    command = "echo '${self.private_key}' | base64 --decode > ${var.velero_key_file_path}"
+    command = "echo '${self.private_key}' | base64 --decode > ${var.k8up_key_file_path}"
   }
 }
 
