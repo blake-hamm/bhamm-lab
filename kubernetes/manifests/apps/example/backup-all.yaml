@@ -86,6 +86,10 @@ spec:
         command: [bash]
         source: |
           set -e
+
+          # debug
+          ls -la /secrets
+
           echo "Activating service account using the service-account.json..."
           gcloud auth activate-service-account --key-file=/secrets/service-account.json
 
