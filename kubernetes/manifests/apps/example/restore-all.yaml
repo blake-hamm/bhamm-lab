@@ -88,7 +88,6 @@ spec:
                 accessTokenSecretRef:
                   name: gcs-backup-temp
                   key: accessToken
-            promURL: "http://prometheus:9090"  # Optional: for metrics
           EOF
 
           # echo "Waiting for backup $BACKUP_NAME to start..."
