@@ -143,10 +143,10 @@ spec:
             labels:
               app: k8up-backup
           spec:
-            repoPasswordSecretRef:
-              name: example-external-secret
-              key: k8up-repo-password
             backend:
+              repoPasswordSecretRef:
+                name: example-external-secret
+                key: k8up-repo-password
               gcs:
                 bucket: "your-gcs-bucket-name"  # Replace with your target GCS bucket name
                 projectIDSecretRef:
