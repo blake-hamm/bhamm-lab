@@ -120,7 +120,6 @@ spec:
       volumeMounts:
         - name: gcp-sa
           mountPath: /secrets
-          readOnly: true
     # Step 2: Run a one-time backup
     - name: run-backup
       script:
@@ -174,4 +173,3 @@ spec:
     - name: gcp-sa
       secret:
         secretName: gcp-k8up-sa
-        defaultMode: 0400
