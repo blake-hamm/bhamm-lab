@@ -1,74 +1,7 @@
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: k8up-backup-workflow-sa
-  namespace: k8up
----
-# Role for permissions in the k8up namespace
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: k8up-backup-workflow-role
-  namespace: k8up
-rules:
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["get", "list"]
-  - apiGroups: ["argoproj.io"]
-    resources: ["workflows", "workflows/finalizers"]
-    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
-  - apiGroups: [""]
-    resources: ["pods"]
-    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
----
-# Role for permissions in the example namespace
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: k8up-backup-workflow-role
-  namespace: example
-rules:
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
-  - apiGroups: ["k8up.io"]
-    resources: ["backups", "backups/status", "backups/finalizers", "restores", "restore/status", "restores/finalizers"]
-    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
----
-# RoleBinding for the k8up namespace
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: k8up-backup-workflow-rolebinding
-  namespace: k8up
-subjects:
-  - kind: ServiceAccount
-    name: k8up-backup-workflow-sa
-    namespace: k8up
-roleRef:
-  kind: Role
-  name: k8up-backup-workflow-role
-  apiGroup: rbac.authorization.k8s.io
----
-# RoleBinding for the example namespace
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: k8up-backup-workflow-rolebinding
-  namespace: example
-subjects:
-  - kind: ServiceAccount
-    name: k8up-backup-workflow-sa
-    namespace: k8up
-roleRef:
-  kind: Role
-  name: k8up-backup-workflow-role
-  apiGroup: rbac.authorization.k8s.io
----
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  name: example-backup
+  name: example-restore
   namespace: k8up
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
@@ -135,11 +68,14 @@ spec:
           BACKUP_NAME="backup-to-gcs-$(date +%s)"
           cat <<EOF | kubectl apply -f -
           apiVersion: k8up.io/v1
-          kind: Backup
+          kind: Restore
           metadata:
-            name: $BACKUP_NAME
+            name: restore-example
             namespace: example
           spec:
+            restoreMethod:
+              folder:
+                claimName: example
             backend:
               repoPasswordSecretRef:
                 name: example-external-secret
@@ -155,13 +91,13 @@ spec:
             promURL: "http://prometheus:9090"  # Optional: for metrics
           EOF
 
-          echo "Waiting for backup $BACKUP_NAME to start..."
-          kubectl wait --for=jsonpath='{.status.started}'=true \
-            backup/$BACKUP_NAME -n example \
-            --timeout=60s || true
+          # echo "Waiting for backup $BACKUP_NAME to start..."
+          # kubectl wait --for=jsonpath='{.status.started}'=true \
+          #   backup/$BACKUP_NAME -n example \
+          #   --timeout=60s || true
 
-          echo "Backup job initiated. You can check the status with:"
-          echo "kubectl get backup $BACKUP_NAME -n example -o wide"
+          # echo "Backup job initiated. You can check the status with:"
+          # echo "kubectl get backup $BACKUP_NAME -n example -o wide"
     # Step 3: Clean up the temporary secret after backup is triggered
     - name: cleanup
       script:
@@ -170,12 +106,12 @@ spec:
         source: |
           set -e
 
-          echo "Waiting for backup to complete (this might take some time)..."
-          kubectl wait --for=jsonpath='{.status.finished}'=true \
-            backup/$BACKUP_NAME -n example || true
+          # echo "Waiting for backup to complete (this might take some time)..."
+          # kubectl wait --for=jsonpath='{.status.finished}'=true \
+          #   re/$BACKUP_NAME -n example || true
 
-          echo "Cleaning up temporary GCP credentials secret..."
-          kubectl delete secret gcs-backup-temp -n example
+          # echo "Cleaning up temporary GCP credentials secret..."
+          # kubectl delete secret gcs-backup-temp -n example
 
           echo "Backup process complete. The backup will continue in the background."
           echo "Check the status with: kubectl get backups -n example"
