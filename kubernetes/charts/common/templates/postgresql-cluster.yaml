@@ -16,16 +16,4 @@ spec:
       database: {{ .Values.name }}
       owner: {{ .Values.name }}
   enableSuperuserAccess: false
-  {{- if .Values.postgresql.backups.enabled }}
-  backup:
-    volumeSnapshot:
-      className: ceph-snapclass
-    barmanObjectStore:
-      destinationPath: "gs:bhamm-lab-k8up/cloudnative-pg/{{ .Values.name }}"
-      googleCredentials:
-        applicationCredentials:
-          name: gcp-pg-auth
-          key: config.json
-    retentionPolicy: "{{ .Values.postgresql.backups.retention }}"
-  {{- end }}
 {{- end }}
