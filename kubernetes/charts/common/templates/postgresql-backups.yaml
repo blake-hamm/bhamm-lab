@@ -7,7 +7,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
-  schedule: {{ .Values.postgresql.backups.schedule }}
+  schedule: "{{ .Values.postgresql.backups.schedule }}"
   cluster:
     name: {{ .Values.name }}-postgresql
 {{- end }}
