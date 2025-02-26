@@ -28,7 +28,7 @@ spec:
           command: [bash]
           source: |
             set -e
-            BACKUP_NAME="{{ .Values.name }}-$(date -u +'%Y-%m-%dT%H.%M.%S')"
+            BACKUP_NAME="{{ .Values.name }}-$(date -u +'%Y-%m-%d-%H-%M-%S')"
 
             echo "Triggering a backup '$BACKUP_NAME'..."
             cat <<EOF | kubectl apply -f -
