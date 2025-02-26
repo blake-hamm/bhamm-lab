@@ -80,7 +80,7 @@ spec:
               namespace: {{ .Values.name }}
             spec:
               retention:
-                keepLast: 5
+                keepLast: 10
                 keepDaily: 5
                 keepWeekly: 1
                 keepMonthly: 1
