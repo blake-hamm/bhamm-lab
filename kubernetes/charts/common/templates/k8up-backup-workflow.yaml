@@ -22,8 +22,8 @@ spec:
                 template: generate-secret
           - - name: backup
               template: backup
-          - - name: prune
-              template: prune
+          - - name: cleanup
+              template: cleanup
       - name: backup
         script:
           image: bitnami/kubectl:latest
