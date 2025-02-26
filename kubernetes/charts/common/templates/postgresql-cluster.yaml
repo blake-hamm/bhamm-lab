@@ -18,6 +18,8 @@ spec:
   enableSuperuserAccess: false
   {{- if .Values.postgresql.backups.enabled }}
   backup:
+    volumeSnapshot:
+      className: ceph-snapclass
     barmanObjectStore:
       destinationPath: "gs:bhamm-lab-k8up/cloudnative-pg/{{ .Values.name }}"
       googleCredentials:
