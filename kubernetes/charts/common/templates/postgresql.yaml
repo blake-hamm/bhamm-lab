@@ -37,7 +37,7 @@ spec:
       database: {{ .Values.name }}
       owner: {{ .Values.name }}
   enableSuperuserAccess: false
-  {{- if .Values.postgresql.backups.enabled }}
+{{- if .Values.postgresql.backups.enabled }}
   backup:
     barmanObjectStore:
       destinationPath: "gs:bhamm-lab-k8up/cloudnative-pg/{{ .Values.name }}"
@@ -52,6 +52,8 @@ kind: ScheduledBackup
 metadata:
   name: {{ .Values.name }}
   namespace: {{ .Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   schedule: {{ .Values.postgresql.backups.schedule }}
   cluster:
