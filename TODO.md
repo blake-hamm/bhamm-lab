@@ -58,10 +58,10 @@ x Setup helm chart for my apps (external secrets, traefik, pvc, pg)
   x Change pvc data
   x Restore pvc with k8up and confirm data restored
   - Integrate k8up into helm chart
-    - argo workflow secret template
-    - argo workflow backup step
+    x argo workflow secret template
+    x argo workflow backup step
+    - argo workflow prune step
     - argo workflow restore step
-    - argo workflow remove secret
 x Seperate out terraform code for k3s
 x Use namespaces
 x Enable k3s vlan and other networking rules
