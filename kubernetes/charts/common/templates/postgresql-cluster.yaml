@@ -16,8 +16,10 @@ spec:
       database: {{ .Values.name }}
       owner: {{ .Values.name }}
   enableSuperuserAccess: false
-  inheritedMetadata:
-    annotations:
-      k8up.io/backupcommand: sh -c 'pg_dump --clean'
-      k8up.io/file-extension: .sql
+  {{- if .Values.postgresql.backups.enabled }}
+  backup:
+    volumeSnapshot:
+      className: ceph-snapclass
+    retentionPolicy: "{{ .Values.postgresql.backups.retention }}"
+  {{- end }}
 {{- end }}
