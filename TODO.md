@@ -60,7 +60,7 @@ x Setup helm chart for my apps (external secrets, traefik, pvc, pg)
   - Integrate k8up into helm chart
     x argo workflow secret template
     x argo workflow backup step
-    - argo workflow prune step
+    x argo workflow prune step
     - argo workflow restore step
 x Seperate out terraform code for k3s
 x Use namespaces
@@ -69,6 +69,7 @@ x Update docs
   - Helm chart
   - DR w/ pv and pg
   - Deployment flow
+- Deploy immich
 
 # CI/CD
 - Deploy forego or gitea
@@ -107,7 +108,6 @@ x Update docs
   - docs site
   - vpn
   - netbootxyz
-  - immich
   - home assistant
   - servarr
     - jellyfin

@@ -18,11 +18,10 @@ ingressRoutes: []
 k8up:
   backup:
     enabled: false
-    schedule: "0 1 * * *"
-    ttl: "720h0m0s"
+    schedule: "0 8 * * *" # 8 am utc/1 am mst
   restore:
     enabled: false
-    backupName: ""
+    snapshot: ""
 postgresql:
   enabled: false
   instances: 2
