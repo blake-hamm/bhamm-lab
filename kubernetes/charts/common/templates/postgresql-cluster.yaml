@@ -12,7 +12,7 @@ spec:
   storage:
     size: {{ .Values.postgresql.storageSize }}
   bootstrap:
-    {{- if .Values.postgresql.backups.recoverySnapshotName }}
+    {{- if .Values.postgresql.recoverySnapshotName }}
     recovery:
       volumeSnapshots:
         storage:
