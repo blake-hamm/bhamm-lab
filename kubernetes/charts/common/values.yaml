@@ -8,7 +8,6 @@ externalSecrets:
       remoteRef:
         key: secret-key
         property: secret-value
-# Ingress Route Configuration
 ingressRoutes: []
 # - enabled: false
 #   name: default
