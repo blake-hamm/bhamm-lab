@@ -18,6 +18,6 @@ spec:
   enableSuperuserAccess: false
   inheritedMetadata:
     annotations:
-      k8up.io/backupcommand: sh -c 'PGDATABASE="$POSTGRES_DB" PGUSER="$POSTGRES_USER" PGPASSWORD="$POSTGRES_PASSWORD" pg_dump --clean'
+      k8up.io/backupcommand: sh -c 'pg_dump --clean'
       k8up.io/file-extension: .sql
 {{- end }}
