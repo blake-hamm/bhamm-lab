@@ -15,27 +15,17 @@ spec:
     helm:
       valuesObject:
         name: immich
-        # externalSecrets:
-        #   enabled: true
-        #   secrets:
-        #     - secretKey: k8up-repo-password
-        #       remoteRef:
-        #         key: /core/k8up
-        #         property: repo-password
-        # ingressRoutes:
-        #   - enabled: true
-        #     name: example
-        #     ingressClass: traefik-external
-        #     # websocket: true
-        #     routes:
-        #       - kind: Rule
-        #         match: Host(`example.bhamm-lab.com`)
-        #         middlewares:
-        #           - name: default-headers
-        #         services:
-        #           - name: example
-        #             scheme: http
-        #             port: 80
+        ingressRoutes:
+          - enabled: true
+            name: immich
+            ingressClass: traefik-external
+            routes:
+              - match: Host(`immich.bhamm-lab.com`)
+                kind: Rule
+                services:
+                  - name: immich-server
+                    port: 2283
+                    scheme: http
         k8up:
           backup:
             enabled: true
