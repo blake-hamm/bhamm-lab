@@ -1,33 +1,60 @@
 {{- if .Values.postgresql.enabled }}
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: gcp-pg-auth
+  namespace: {{ .Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "-2"
+spec:
+  refreshInterval: 30m
+  secretStoreRef:
+    name: vault-backend
+    kind: ClusterSecretStore
+  target:
+    name: gcp-pg-auth
+  data:
+    - secretKey: config.json
+      remoteRef:
+        key: /external/gcp
+        property: gcp-k8up-sa
+---
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: {{ .Values.name }}-postgresql
+  name: {{ .Values.name }}
   namespace: {{ .Values.name }}
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "-1"
 spec:
   instances: {{ .Values.postgresql.instances }}
-
   storage:
     size: {{ .Values.postgresql.storageSize }}
-
   bootstrap:
     initdb:
       database: {{ .Values.name }}
       owner: {{ .Values.name }}
-
   enableSuperuserAccess: false
-
   {{- if .Values.postgresql.backups.enabled }}
   backup:
     barmanObjectStore:
-      destinationPath: {{ .Values.postgresql.backups.s3Path }}
-      s3Credentials:
-        secretName: {{ .Values.postgresql.backups.s3Secret }}
-    retentionPolicy: "{{ .Values.postgresql.backups.retention }}d"
-    schedule:
-      - "{{ .Values.postgresql.backups.schedule }}"
-  {{- end }}
+      destinationPath: "gs:bhamm-lab-k8up/cloudnative-pg/{{ .Values.name }}"
+      googleCredentials:
+        applicationCredentials:
+          name: gcp-pg-auth
+          key: config.json
+    retentionPolicy: "{{ .Values.postgresql.backups.retention }}"
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.name }}
+spec:
+  schedule: {{ .Values.postgresql.backups.schedule }}
+  cluster:
+    name: {{ .Values.name }}
+{{- end }}
 {{- end }}

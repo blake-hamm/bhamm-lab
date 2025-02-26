@@ -27,7 +27,5 @@ postgresql:
   storageSize: 5Gi
   backups:
     enabled: false
-    schedule: "0 0 * * *"
-    retention: 30
-    s3Path: "s3://your-bucket/postgres-backups"
-    s3Secret: "minio-creds"
+    schedule: "0 8 * * *" # 8 am utc/1 am mst
+    retention: "30d"
