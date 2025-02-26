@@ -45,7 +45,7 @@ spec:
           enabled: true
           backups:
             enabled: true
-            schedule: "*/10 * * * *"
+            schedule: "0 */10 * * * *"
             retention: "1d"
   syncPolicy:
     syncOptions:
