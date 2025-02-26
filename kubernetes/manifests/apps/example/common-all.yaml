@@ -46,7 +46,6 @@ spec:
           enabled: true
           backups:
             enabled: true
-            schedule: "0 */5 * * * *" # 8 am utc/1 am mst
             retention: "5d"
   syncPolicy:
     syncOptions:
