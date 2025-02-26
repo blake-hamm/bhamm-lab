@@ -19,7 +19,7 @@ spec:
           - - name: generate-secret
               templateRef:
                 name: "generate-secret-{{ .Values.name }}"
-                template: main
+                template: generate-secret
           - - name: run-backup
               template: run-backup
           - - name: cleanup
@@ -30,13 +30,14 @@ spec:
           command: [bash]
           source: |
             set -e
+            BACKUP_NAME="{{ .Values.name }}-$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 
-            echo "Triggering a backup..."
+            echo "Triggering a backup '$BACKUP_NAME'..."
             cat <<EOF | kubectl apply -f -
             apiVersion: k8up.io/v1
             kind: Backup
             metadata:
-              name: {{ .Values.name }}
+              name: $BACKUP_NAME
               namespace: {{ .Values.name }}
             spec:
               backend:
@@ -54,20 +55,14 @@ spec:
               promURL: "http://prometheus:9090"
             EOF
 
-            echo "Waiting for backup {{ .Values.name }} to start..."
+            echo "Waiting for backup BACKUP_NAME to start..."
             kubectl wait --for=jsonpath='{.status.started}'=true \
-              backup/{{ .Values.name }} -n {{ .Values.name }} \
+              backup/$BACKUP_NAME -n {{ .Values.name }} \
               --timeout=60s || true
-      - name: cleanup
-        script:
-          image: bitnami/kubectl:latest
-          command: [bash]
-          source: |
-            set -e
 
             echo "Waiting for backup to complete (this might take some time)..."
             kubectl wait --for=jsonpath='{.status.finished}'=true \
-              backup/{{ .Values.name }} -n {{ .Values.name }} || true
+              backup/$BACKUP_NAME -n {{ .Values.name }} || true
 
             echo "Cleaning up temporary GCP credentials secret..."
             kubectl delete secret gcp-k8up-temp -n {{ .Values.name }}
