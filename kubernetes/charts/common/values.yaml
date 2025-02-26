@@ -25,6 +25,7 @@ postgresql:
   enabled: false
   instances: 2
   storageSize: 5Gi
+  recoverySnapshotName: ""
   backups:
     enabled: false
     schedule: "0 0 8 * * *" # 8 am utc/1 am mst

@@ -44,6 +44,7 @@ spec:
             enabled: true
         postgresql:
           enabled: true
+          # recoverySnapshotName: "snapcontent-cbe4aa3e-6628-44b9-8e07-3c9a319fe336"
           backups:
             enabled: true
             retention: "5d"

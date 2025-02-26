@@ -12,9 +12,18 @@ spec:
   storage:
     size: {{ .Values.postgresql.storageSize }}
   bootstrap:
+    {{- if .Values.postgresql.backups.recoverySnapshotName }}
+    recovery:
+      volumeSnapshots:
+        storage:
+          name: {{ .Values.postgresql.backups.recoverySnapshotName }}
+          kind: VolumeSnapshot
+          apiGroup: snapshot.storage.k8s.io
+    {{- else }}
     initdb:
       database: {{ .Values.name }}
       owner: {{ .Values.name }}
+    {{- end }}
   enableSuperuserAccess: false
   {{- if .Values.postgresql.backups.enabled }}
   backup:
