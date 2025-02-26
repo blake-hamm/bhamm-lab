@@ -48,6 +48,11 @@ spec:
             - CREATE EXTENSION IF NOT EXISTS "vectors";
             - CREATE EXTENSION IF NOT EXISTS "cube" CASCADE;
             - CREATE EXTENSION IF NOT EXISTS "earthdistance" CASCADE;
+          managed:
+            roles:
+              - name: immich
+                superuser: true
+                login: true
           backups:
             enabled: true
             retention: "30d"

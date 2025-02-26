@@ -28,8 +28,10 @@ postgresql:
   imageName: ""
   sharedPreloadLibraries: ""
   postInitSQL: ""
-  recoverySnapshotName: ""
+  managed:
+    roles: []
   backups:
     enabled: false
     schedule: "0 0 8 * * *" # 8 am utc/1 am mst
     retention: "30d"
+  recoverySnapshotName: ""

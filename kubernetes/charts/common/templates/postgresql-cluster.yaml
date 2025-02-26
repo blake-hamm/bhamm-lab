@@ -18,6 +18,11 @@ spec:
   postgresql:
     shared_preload_libraries: {{ toYaml .Values.postgresql.sharedPreloadLibraries | nindent 4 }}
   {{- end }}
+  {{- if .Values.postgresql.managed.roles }}
+  managed:
+    roles:
+{{ toYaml .Values.postgresql.managed.roles | nindent 6 }}
+  {{- end }}
   bootstrap:
     {{- if .Values.postgresql.recoverySnapshotName }}
     recovery:
