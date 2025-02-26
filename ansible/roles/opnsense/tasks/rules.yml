@@ -22,6 +22,15 @@
             "destination_net": item.name ~ "Gateway",
             "destination_port": 53
           },
+          (item.name ~ "AllowIPv4Ping"): {
+            "description": "Allow access to ICMP for " ~ item.name,
+            "interface": item.interface,
+            "sequence": 2,
+            "ip_protocol": "inet",
+            "protocol": "ICMP",
+            "source_net": item.name ~ "Network",
+            "destination_net": item.name ~ "Gateway",
+          },
           (item.name ~ "AllowIPv6Internet"): {
             "description": "Only allow IPv6 to internet for " ~ item.name,
             "sequence": 100,

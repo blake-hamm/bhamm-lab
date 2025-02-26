@@ -51,7 +51,7 @@ spec:
             - name: cp_namespace
               value: kube-system
             - name: svc_enable
-              value: "true"
+              value: "false"
             - name: svc_leasename
               value: plndr-svcs-lock
             - name: vip_leaderelection
@@ -65,7 +65,7 @@ spec:
             - name: vip_retryperiod
               value: "1"
             - name: address
-              value: 192.168.69.20 # Also configured in group_vars/k3s.yml
+              value: '{{ k3s_server["tls-san"] }}'
             - name: prometheus_server
               value: :2112
           image: ghcr.io/kube-vip/kube-vip:v0.8.0

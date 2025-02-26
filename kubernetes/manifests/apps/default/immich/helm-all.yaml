@@ -1,0 +1,57 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: immich
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+spec:
+  destination:
+    namespace: immich
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: immich
+    repoURL: https://immich-app.github.io/immich-charts
+    targetRevision: 0.9.0
+    helm:
+      valuesObject:
+        image:
+          tag: v1.125.5
+        immich:
+          metrics:
+            enabled: true
+          persistence:
+            library:
+              existingClaim: "immich-library"
+        postgresql:
+          global:
+            postgresql:
+              auth:
+                existingSecret: "immich-postgresql-app"
+        redis:
+          enabled: true
+        env:
+          - name: REDIS_HOSTNAME
+            value: "immich-redis-master"
+          - name: DB_HOSTNAME
+            value: "immich-postgresql-rw"
+          - name: DB_DATABASE_NAME
+            value: "immich"
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: immich-postgresql-app
+                key: username
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: immich-postgresql-app
+                key: password
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

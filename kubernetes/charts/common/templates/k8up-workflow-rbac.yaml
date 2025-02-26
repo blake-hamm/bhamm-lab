@@ -1,0 +1,64 @@
+{{- if .Values.k8up.backup.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: k8up-{{ .Values.name }}
+  namespace: k8up
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: k8up-{{ .Values.name }}
+  namespace: k8up
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list"]
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflows", "workflows/finalizers"]
+    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: k8up-{{ .Values.name }}
+  namespace: {{ .Values.name }}
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+  - apiGroups: ["k8up.io"]
+    resources: ["backups", "backups/status", "backups/finalizers", "restores", "restores/status", "restores/finalizers", "prunes", "prunes/status", "prunes/finalizers"]
+    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: k8up-{{ .Values.name }}
+  namespace: k8up
+subjects:
+  - kind: ServiceAccount
+    name: k8up-{{ .Values.name }}
+    namespace: k8up
+roleRef:
+  kind: Role
+  name: k8up-{{ .Values.name }}
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: k8up-{{ .Values.name }}
+  namespace: {{ .Values.name }}
+subjects:
+  - kind: ServiceAccount
+    name: k8up-{{ .Values.name }}
+    namespace: k8up
+roleRef:
+  kind: Role
+  name: k8up-{{ .Values.name }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

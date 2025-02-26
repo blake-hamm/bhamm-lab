@@ -9,10 +9,10 @@ variable "region" {
   default     = "us-central1"
 }
 
-variable "velero_service_account_id" {
-  description = "The ID for the Velero service account"
+variable "k8up_service_account_id" {
+  description = "The ID for the k8up service account"
   type        = string
-  default     = "velero-workflows-backup"
+  default     = "k8up-backups"
 }
 
 variable "sops_key_file_path" {
@@ -21,9 +21,8 @@ variable "sops_key_file_path" {
   default     = "./gcp-sops-sa.json"
 }
 
-variable "velero_key_file_path" {
+variable "k8up_key_file_path" {
   description = "Path to save the generated key file."
   type        = string
-  default     = "./gcp-velero-sa.json"
+  default     = "./gcp-k8up-sa.json"
 }
-

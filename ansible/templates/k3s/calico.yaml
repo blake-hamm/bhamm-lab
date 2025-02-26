@@ -4,18 +4,15 @@ apiVersion: operator.tigera.io/v1
 kind: Installation
 metadata:
   name: default
-  annotations:
-    argocd.argoproj.io/sync-wave: "-300"
 spec:
   # Configures Calico networking.
   calicoNetwork:
-    mtu: 1450 # TODO: Revisit this with ceph
+    mtu: 9000
     bgp: Disabled
-    # Note: The ipPools section cannot be modified post-install.
     ipPools:
       - name: default-ipv4-ippool
         blockSize: 26
-        cidr: 10.42.0.0/16 # Also configured in group_vars/k3s.yml
+        cidr: '{{ k3s_server["cluster-cidr"] }}'
         encapsulation: VXLAN
         natOutgoing: Enabled
         nodeSelector: all()
@@ -28,6 +25,4 @@ apiVersion: operator.tigera.io/v1
 kind: APIServer
 metadata:
   name: default
-  annotations:
-    argocd.argoproj.io/sync-wave: "-300"
 spec: {}

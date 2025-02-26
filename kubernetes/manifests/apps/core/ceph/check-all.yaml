@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ceph-check-sa
+  namespace: ceph
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ceph-check-role
+  namespace: ceph
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/exec"]
+    verbs: ["get", "list", "patch", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ceph-check-binding
+  namespace: ceph
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+roleRef:
+  kind: Role
+  name: ceph-check-role
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+  - kind: ServiceAccount
+    name: ceph-check-sa
+    namespace: ceph
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: ceph-check-workflow
+  namespace: ceph
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  entrypoint: ceph-check-workflow
+  serviceAccountName: ceph-check-sa
+  templates:
+    - name: ceph-check-workflow
+      container:
+        image: bitnami/kubectl:latest
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            until kubectl get pods -n ceph -l app=ceph-csi-rbd -o jsonpath='{.items[*].status.containerStatuses[0].ready}' | grep "true"; do
+              echo "Waiting for Ceph CSI pods to be ready...";
+              sleep 5;
+            done

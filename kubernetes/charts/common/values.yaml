@@ -1,0 +1,37 @@
+# External Secrets Configuration
+name: common-app
+externalSecrets:
+  enabled: false
+  labels: {}
+  secrets:
+    - name: example-secret
+      remoteRef:
+        key: secret-key
+        property: secret-value
+ingressRoutes: []
+# - enabled: false
+#   name: default
+#   ingressClass: traefik-external
+#   routes: []
+# Velero Backup Configuration
+k8up:
+  backup:
+    enabled: false
+    schedule: "0 8 * * *" # 8 am utc/1 am mst
+  restore:
+    enabled: false
+    snapshot: ""
+postgresql:
+  enabled: false
+  instances: 2
+  storageSize: 5Gi
+  imageName: ""
+  sharedPreloadLibraries: ""
+  postInitSQL: ""
+  managed:
+    roles: []
+  backups:
+    enabled: false
+    schedule: "0 0 8 * * *" # 8 am utc/1 am mst
+    retention: "30d"
+  recoverySnapshotName: ""

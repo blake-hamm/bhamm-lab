@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: minio-common
+  namespace: argocd
+spec:
+  destination:
+    namespace: minio
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    targetRevision: feature/k3s-again
+    path: kubernetes/charts/common
+    helm:
+      valuesObject:
+        name: minio
+        externalSecrets:
+          enabled: true
+          secrets:
+            - secretKey: config.env
+              remoteRef:
+                key: /core/minio
+                property: config.env
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true

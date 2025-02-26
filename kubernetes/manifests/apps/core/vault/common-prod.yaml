@@ -1,0 +1,46 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vault-common
+  namespace: argocd
+spec:
+  destination:
+    namespace: vault
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    targetRevision: feature/k3s-again
+    path: kubernetes/charts/common
+    helm:
+      valuesObject:
+        name: vault
+        externalSecrets:
+          enabled: true
+          secrets:
+            - secretKey: OIDC_VAULT_CLIENT_SECRET
+              remoteRef:
+                key: /core/vault
+                property: OIDC_VAULT_CLIENT_SECRET
+        ingressRoutes:
+          - enabled: true
+            name: vault
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - kind: Rule
+                match: Host(`vault.bhamm-lab.com`)
+                middlewares:
+                  - name: default-headers
+                  - name: forwardauth-authelia
+                services:
+                  - name: vault
+                    port: 8200
+                    scheme: https
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

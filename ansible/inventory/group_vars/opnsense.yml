@@ -9,55 +9,55 @@ opnsense_interface_map:
     address: "10.0.10.1"
     subnet: "10.0.10.0/24"
     vlan: 10
-    priority: 0
+    priority: 6
   - name: metal
     interface: opt3
     address: "10.0.20.1"
     subnet: "10.0.20.0/24"
     vlan: 20
-    priority: 0
+    priority: 3 # critical
   - name: k8s
-    interface: opt5
+    interface: opt4
     address: "10.0.30.1"
     subnet: "10.0.30.0/24"
     vlan: 30
-    priority: 1
+    priority: 3 # critical
   - name: vms
-    interface: opt4
+    interface: opt5
     address: "10.0.40.1"
     subnet: "10.0.40.0/24"
     vlan: 40
-    priority: 0
+    priority: 3 # critical
   - name: ceph
     interface: opt6
     address: "10.0.50.1"
     subnet: "10.0.50.0/24"
     vlan: 50
-    priority: 2
+    priority: 5 # voice
   - name: iot
     interface: opt7
     address: "10.0.60.1"
     subnet: "10.0.60.0/24"
     vlan: 60
-    priority: 0
+    priority: 1 # background
   - name: guest
     interface: opt8
     address: "10.0.70.1"
     subnet: "10.0.70.0/24"
     vlan: 70
-    priority: 6
+    priority: 5 # voice
   - name: trusted
     interface: opt1
     address: "10.0.80.1"
     subnet: "10.0.80.0/24"
     vlan: 80
-    priority: 7
+    priority: 5 # voice
   - name: dmz
     interface: opt9
     address: "10.0.90.1"
     subnet: "10.0.90.0/24"
     vlan: 90
-    priority: 7
+    priority: 2 # excellent
 opnsense_extra_aliases:
   Framework:
     type: 'host'
@@ -92,6 +92,39 @@ opnsense_extra_rules:
     protocol: any
     source_net: trustedNetwork
     destination_net: metalNetwork
+  TrustedK8sAccess:
+    description: Allow trusted access to k8s
+    interface: opt1 # trusted
+    sequence: 3
+    ip_protocol: inet
+    protocol: any
+    source_net: trustedNetwork
+    destination_net: k8sNetwork
+  MetalK8sAccess:
+    description: Allow metal access to k8s
+    interface: opt3 # metal
+    sequence: 3
+    ip_protocol: inet
+    protocol: any
+    source_net: metalNetwork
+    destination_net: k8sNetwork
+  K8sMetalAccess:
+    description: Allow k8s access to metal (fork8sNetwork)
+    interface: opt4 # k8s
+    sequence: 3
+    ip_protocol: inet
+    protocol: any
+    source_net: k8sNetwork
+    destination_net: metalNetwork
+    # Manually set state policy to none
+  K8sTrustedAccess:
+    description: Allow k8s access to trusted
+    interface: opt4 # k8s
+    sequence: 3
+    ip_protocol: inet
+    protocol: any
+    source_net: k8sNetwork
+    destination_net: trustedNetwork
   TrustedDMZAccess:
     description: Allow trusted access to dmz
     interface: opt1 # trusted

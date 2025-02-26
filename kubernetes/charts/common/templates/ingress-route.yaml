@@ -1,0 +1,39 @@
+{{- range .Values.ingressRoutes }}
+{{- if .enabled }}
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.name }}
+  annotations:
+    kubernetes.io/ingress.class: {{ .ingressClass }}
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    {{- if .websocket }}
+    traefik.ingress.kubernetes.io/websocket: "true"
+    {{- end }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  {{- range .routes }}
+    - match: {{ .match | quote }}
+      kind: {{ .kind }}
+      priority: {{ .priority | default 1 }}
+      {{- if .middlewares }}
+      middlewares:
+        {{- range .middlewares }}
+        - name: {{ .name }}
+          namespace: {{ .namespace | default "traefik" }}
+        {{- end }}
+      {{- end }}
+      services:
+        {{- range .services }}
+        - name: {{ .name }}
+          kind: {{ .kind | default "Service" }}
+          port: {{ .port | default 443 }}
+          scheme: {{ .scheme | default "https" }}
+        {{- end }}
+  {{- end }}
+  tls: {}
+{{- end }}
+{{- end }}

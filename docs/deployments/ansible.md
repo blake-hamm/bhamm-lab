@@ -4,10 +4,10 @@
 ansible-playbook ansible/main.yaml
 ```
 
-## Bootstrap
+## Bootstrap new machine
 These steps will bootstrap and configure a new debian host.
 
-1. Install the latest version of debian on the host
+1. Manually install the latest version of debian on the host
   - Skip the root user and create a `bhamm` user
   - Give a relevant hostname and domain of `bhamm-lab.com`
   - Disable a DE and enable ssh and utils

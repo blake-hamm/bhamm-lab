@@ -2,8 +2,8 @@ k3s_become: true
 k3s_etcd_datastore: true
 k3s_use_experimental: true
 k3s_server:
-  tls-san: 192.168.69.20
-  cluster-cidr: 10.42.0.0/16
+  tls-san: 10.0.30.30
+  cluster-cidr: 10.0.31.0/24
   flannel-backend: none
   disable-network-policy: true
   disable:
@@ -23,22 +23,8 @@ k3s_server_manifests_urls:
     filename: tigera-operator.yaml
   - url: https://kube-vip.io/manifests/rbac.yaml
     filename: kube-vip-rbac.yaml
-  - url: https://raw.githubusercontent.com/ceph/ceph-csi/master/deploy/rbd/kubernetes/csi-provisioner-rbac.yaml
-    filename: csi-provisioner-rbac.yaml
-  - url: https://raw.githubusercontent.com/ceph/ceph-csi/master/deploy/rbd/kubernetes/csi-nodeplugin-rbac.yaml
-    filename: csi-nodeplugin-rbac.yaml
-  - url: https://raw.githubusercontent.com/ceph/ceph-csi/master/deploy/rbd/kubernetes/csi-rbdplugin-provisioner.yaml
-    filename: csi-rbdplugin-provisioner.yaml
-  - url: https://raw.githubusercontent.com/ceph/ceph-csi/master/deploy/rbd/kubernetes/csi-rbdplugin.yaml
-    filename: csi-rbdplugin.yaml
-  - url: https://raw.githubusercontent.com/ceph/ceph-csi/master/deploy/rbd/kubernetes/csidriver.yaml
-    filename: csidriver.yaml
 k3s_server_manifests_templates:
   - k3s/calico.yaml
   - k3s/kube-vip.yaml
   - k3s/kube-proxy.yaml
-  - k3s/ceph-csi-config.yaml
-  - k3s/csi-config-map.yaml
-  - k3s/csi-kms-config-map.yaml
   - k3s/csi-rbd-secret.yaml
-  - k3s/ceph-storage-class.yaml

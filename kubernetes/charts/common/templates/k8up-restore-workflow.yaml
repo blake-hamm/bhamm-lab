@@ -1,0 +1,73 @@
+{{- if .Values.k8up.restore.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: k8up-{{ .Values.name }}-restore
+  namespace: k8up
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "19"
+spec:
+  serviceAccountName: "k8up-{{ .Values.name }}"
+  entrypoint: main
+  templates:
+    - name: main
+      steps:
+        - - name: generate-secret
+            templateRef:
+              name: "generate-secret-{{ .Values.name }}"
+              template: generate-secret
+        - - name: restore
+            template: restore
+    - name: restore
+      script:
+        image: bitnami/kubectl:latest
+        command: [bash]
+        source: |
+          set -e
+
+          RESTORE_NAME="{{ .Values.name }}-$(date -u +'%Y-%m-%d-%H-%M-%S')"
+
+          echo "Triggering a restore..."
+          cat <<EOF | kubectl apply -f -
+          apiVersion: k8up.io/v1
+          kind: Restore
+          metadata:
+            name: $RESTORE_NAME
+            namespace: {{ .Values.name }}
+          spec:
+            {{- if .Values.k8up.restore.snapshot }}
+            snapshot: {{ .Values.k8up.restore.snapshot }}
+            {{- end }}
+            restoreMethod:
+              folder:
+                claimName: {{ .Values.name }}
+            backend:
+              repoPasswordSecretRef:
+                name: k8up
+                key: repo-password
+              gcs:
+                bucket: bhamm-lab-k8up
+                projectIDSecretRef:
+                  name: gcp-k8up-temp
+                  key: project_id
+                accessTokenSecretRef:
+                  name: gcp-k8up-temp
+                  key: accessToken
+            podSecurityContext:
+              fsGroup: 0
+              runAsUser: 0
+          EOF
+
+          # echo "Waiting for backup $BACKUP_NAME to start..."
+          # kubectl wait --for=jsonpath='{.status.started}'=true \
+          #   backup/$BACKUP_NAME -n example \
+          #   --timeout=60s || true
+
+          # echo "Backup job initiated. You can check the status with:"
+          # echo "kubectl get backup $BACKUP_NAME -n example -o wide"
+  volumes:
+    - name: gcp-sa
+      secret:
+        secretName: gcp-k8up-sa
+{{- end }}
