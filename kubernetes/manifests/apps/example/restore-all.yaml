@@ -89,8 +89,8 @@ spec:
                   name: gcs-backup-temp
                   key: accessToken
             podSecurityContext:
-              fsGroup: 65532
-              fsGroupChangePolicy: OnRootMismatch
+              fsGroup: 0
+              runAsUser: 0
           EOF
 
           # echo "Waiting for backup $BACKUP_NAME to start..."
