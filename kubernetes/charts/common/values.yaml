@@ -25,6 +25,9 @@ postgresql:
   enabled: false
   instances: 2
   storageSize: 5Gi
+  imageName: ""
+  sharedPreloadLibraries: ""
+  postInitSQL: ""
   recoverySnapshotName: ""
   backups:
     enabled: false

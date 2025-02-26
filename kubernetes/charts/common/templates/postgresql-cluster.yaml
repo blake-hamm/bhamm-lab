@@ -8,9 +8,16 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "-1"
 spec:
+  {{- if .Values.postgresql.imageName }}
+  imageName: {{ .Values.postgresql.imageName | quote }}
+  {{- end }}
   instances: {{ .Values.postgresql.instances }}
   storage:
     size: {{ .Values.postgresql.storageSize }}
+  {{- if .Values.postgresql.sharedPreloadLibraries }}
+  postgresql:
+    shared_preload_libraries: {{ toYaml .Values.postgresql.sharedPreloadLibraries | nindent 4 }}
+  {{- end }}
   bootstrap:
     {{- if .Values.postgresql.recoverySnapshotName }}
     recovery:
@@ -25,6 +32,10 @@ spec:
     initdb:
       database: {{ .Values.name }}
       owner: {{ .Values.name }}
+      {{- if .Values.postgresql.postInitSQL }}
+      postInitSQL:
+{{ toYaml .Values.postgresql.postInitSQL | nindent 8 }}
+      {{- end }}
     {{- end }}
   enableSuperuserAccess: false
   {{- if .Values.postgresql.backups.enabled }}
