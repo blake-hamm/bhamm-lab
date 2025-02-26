@@ -82,6 +82,8 @@ x Update docs
   - Ansible k3s
 - Dev cluster on PR
 - Test DR with pvc and pg (auto)
+  - example pvc should be easy
+  - Need to develop and prove out pg
 - Convert sync sops to vault job as argo workflow template
   - Trigger from argo event when vault is ready
   - Trigger from gitea on secret changes
