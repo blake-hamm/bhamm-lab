@@ -23,7 +23,7 @@ spec:
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: {{ .Values.name }}
+  name: {{ .Values.name }}-postgresql
   namespace: {{ .Values.name }}
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
@@ -55,6 +55,6 @@ metadata:
 spec:
   schedule: {{ .Values.postgresql.backups.schedule }}
   cluster:
-    name: {{ .Values.name }}
+    name: {{ .Values.name }}-postgresql
 {{- end }}
 {{- end }}
