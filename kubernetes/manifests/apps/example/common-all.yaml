@@ -39,7 +39,7 @@ spec:
         k8up:
           backup:
             enabled: true
-            schedule: "*/10 * * * *"
+            # schedule: "*/10 * * * *"
           restore:
             enabled: true
         postgresql:
