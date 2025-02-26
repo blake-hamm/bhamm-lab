@@ -69,8 +69,8 @@ x Update docs
   x Helm chart
   x DR w/ pv and pg
   x Deployment flow
-- Remove unused yaml
-- Deploy immich
+x Remove unused yaml
+x Deploy immich
 
 # CI/CD
 - Deploy forego or gitea
@@ -105,6 +105,9 @@ x Update docs
   - smart light switches/plugs
   - eufy
 - Configure dhcp in ansible opnsense
+- Confirm metal to k8s doesn't leave 10gb switch
+- Ensure *.bhamm-lab.com is accessible from aubs phone/laptops
+- Integrate proxmox with traefik
 
 # Finish
 - Deploy
@@ -118,7 +121,6 @@ x Update docs
   - Integrate proxmox UI into traefik
 - Expose docs site and vpn
 - Install mergerfs/snapraid on aorus node
-- Integrate proxmox with traefik
 - More fine grain vault security access
 - Consider refactoring proxmox ansible to terraform
   - ACL's
@@ -129,6 +131,7 @@ x Update docs
 - Implement devsec.os_hardening
 - Implement debian firewall rules
 - 3-2-1 backups
+  - Setup ceph backups
   - Configure snapraid/mergerfs
   - Ensure monitoring
   - Expose nfs
