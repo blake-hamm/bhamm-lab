@@ -31,7 +31,7 @@ rules:
     resources: ["secrets"]
     verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
   - apiGroups: ["k8up.io"]
-    resources: ["backups", "backups/status", "backups/finalizers", "restores", "restores/status", "restores/finalizers"]
+    resources: ["backups", "backups/status", "backups/finalizers", "restores", "restores/status", "restores/finalizers", "prunes", "prunes/status", "prunes/finalizers"]
     verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
