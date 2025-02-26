@@ -52,7 +52,7 @@ spec:
                   accessTokenSecretRef:
                     name: gcp-k8up-temp
                     key: accessToken
-              promURL: "http://prometheus:9090"
+              # promURL: "http://prometheus:9090"
             EOF
 
             echo "Waiting for backup BACKUP_NAME to start..."
