@@ -18,7 +18,7 @@ spec:
       owner: {{ .Values.name }}
       volumeSnapshots:
         storage:
-          name: {{ .Values.postgresql.backups.recoverySnapshotName }}
+          name: {{ .Values.postgresql.recoverySnapshotName }}
           kind: VolumeSnapshot
           apiGroup: snapshot.storage.k8s.io
     {{- else }}
