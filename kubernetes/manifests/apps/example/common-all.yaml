@@ -39,8 +39,7 @@ spec:
         k8up:
           backup:
             enabled: true
-            schedule: "*/5 * * * *"
-            ttl: "5h0m0s"
+            # schedule: "*/5 * * * *"
           restore:
             enabled: true
             backupName: "example-backup-schedule-20250224035340"
