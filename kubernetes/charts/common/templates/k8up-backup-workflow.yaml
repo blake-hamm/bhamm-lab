@@ -98,14 +98,14 @@ spec:
                     key: accessToken
             EOF
 
-            echo "Waiting for backup PRUNE_NAME to start..."
-            # kubectl wait --for=jsonpath='{.status.started}'=true \
-            #   prune/$PRUNE_NAME -n {{ .Values.name }} \
-            #   --timeout=60s || true
+            echo "Waiting for prune PRUNE_NAME to start..."
+            kubectl wait --for=jsonpath='{.status.started}'=true \
+              prune/$PRUNE_NAME -n {{ .Values.name }} \
+              --timeout=60s || true
 
-            echo "Waiting for backup to complete (this might take some time)..."
-            # kubectl wait --for=jsonpath='{.status.finished}'=true \
-            #   prune/$PRUNE_NAME -n {{ .Values.name }} || true
+            echo "Waiting for prune to complete (this might take some time)..."
+            kubectl wait --for=jsonpath='{.status.finished}'=true \
+              prune/$PRUNE_NAME -n {{ .Values.name }} || true
 
             echo "Cleaning up temporary GCP credentials secret..."
             kubectl delete secret gcp-k8up-temp -n {{ .Values.name }}
