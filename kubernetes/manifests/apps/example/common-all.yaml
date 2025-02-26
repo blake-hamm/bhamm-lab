@@ -41,6 +41,12 @@ spec:
             enabled: true
           restore:
             enabled: true
+        postgresql:
+          enabled: true
+          backups:
+            enabled: true
+            schedule: "*/10 * * * *"
+            retention: "1d"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
