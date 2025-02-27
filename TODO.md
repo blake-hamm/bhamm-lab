@@ -73,17 +73,14 @@ x Remove unused yaml
 x Deploy immich
 
 # CI/CD
-- Deploy forego or gitea
+- Deploy gitea
 - Setup pipelines
-  - Ansible bare metal
-  - Ansible opnsense
-  - Terrafrom gcp
-  - Terraform proxmox
-  - Ansible k3s
+  - Terraform proxmox (branch-based with storage backend - minio)
+  - Ansible k3s (branch-based)
 - Dev cluster on PR
 - Test DR with pvc and pg (auto)
   - example pvc should be easy
-  - Need to develop and prove out pg
+  - Need to develop and prove out pg w/ ceph + volume snapshot
 - Convert sync sops to vault job as argo workflow template
   - Trigger from argo event when vault is ready
   - Trigger from gitea on secret changes
@@ -131,7 +128,7 @@ x Deploy immich
 - Implement devsec.os_hardening
 - Implement debian firewall rules
 - 3-2-1 backups
-  - Setup ceph backups
+  - Setup ceph backups (consider decomissioning k8up)
   - Configure snapraid/mergerfs
   - Ensure monitoring
   - Expose nfs
@@ -141,3 +138,8 @@ x Deploy immich
   - Refactor k8up backups to minio
   - Ensure minio backup bucket syncs to gcp
   - Ensure on new cluster, minio bucket is restored first, then deploy backup
+- Setup CI/CD for other services
+  - Ansible bare metal
+  - Ansible opnsense
+  - Terrafrom gcp
+- Setup service mesh (istio/hashicorp consul)
