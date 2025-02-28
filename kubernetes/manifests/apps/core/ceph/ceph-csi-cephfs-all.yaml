@@ -33,6 +33,8 @@ spec:
           mountOptions:
             - discard
         configMapName: ceph-fs-csi-config
+        cephConfConfigMapName: ceph-fs-config
+        kmsConfigMapName: ceph-fs-csi-encryption-kms-config
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

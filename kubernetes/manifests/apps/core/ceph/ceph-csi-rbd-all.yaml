@@ -34,6 +34,7 @@ spec:
           mountOptions:
             - discard
         configMapName: ceph-rbd-csi-config
+        cephConfConfigMapName: ceph-rbd-config
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
