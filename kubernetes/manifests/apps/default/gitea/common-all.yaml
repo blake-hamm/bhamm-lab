@@ -29,7 +29,7 @@ spec:
             retention: "5d"
         ingressRoutes:
           - enabled: true
-            name: authelia
+            name: gitea
             ingressClass: traefik-external
             websocket: true
             routes:
