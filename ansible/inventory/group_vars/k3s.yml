@@ -28,3 +28,4 @@ k3s_server_manifests_templates:
   - k3s/kube-vip.yaml
   - k3s/kube-proxy.yaml
   - k3s/csi-rbd-secret.yaml
+  - k3s/csi-cephfs-secret.yaml
