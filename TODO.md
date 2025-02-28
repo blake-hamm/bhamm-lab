@@ -151,7 +151,9 @@ x Deploy immich
   - Expose nfs
   - Create nfs storage class
   - Setup minio tenant with nfs storage class
-  - Refactor k8up prune (single backup dag accross cluster? prune on diff schedule?)
+  - Refactor k8up prune
+    - Move generate secret into template with var
+    - Make global prune job that doesn't conflict w/ backup schedule
   - Refactor k8up backups to minio
   - Ensure minio backup bucket syncs to gcp
   - Ensure on new cluster, minio bucket is restored first, then deploy backup

@@ -26,7 +26,7 @@ spec:
   bootstrap:
     {{- if .Values.postgresql.recoverySnapshotName }}
     recovery:
-      database: {{ .Values.name }}
+      database: {{ default .Values.name .Values.postgresql.databaseName }}
       owner: {{ .Values.name }}
       volumeSnapshots:
         storage:

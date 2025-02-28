@@ -28,6 +28,7 @@ postgresql:
   imageName: ""
   sharedPreloadLibraries: ""
   postInitSQL: ""
+  databaseName: ""
   managed:
     roles: []
   backups:
