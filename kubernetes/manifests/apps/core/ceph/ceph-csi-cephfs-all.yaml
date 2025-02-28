@@ -29,7 +29,6 @@ spec:
           name: csi-cephfs-sc
           clusterID: "7b02e4a9-b740-4d5a-b519-9585725a55fb"
           fsName: kubernetes
-          pool: kubernetes
           mountOptions:
             - discard
         configMapName: ceph-fs-csi-config
