@@ -163,3 +163,4 @@ x Deploy immich
   - Ansible opnsense
   - Terrafrom gcp
 - Setup service mesh (istio/hashicorp consul)
+- Create cephfs storage class (for RWM)
