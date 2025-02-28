@@ -124,6 +124,7 @@ x Deploy immich
 - Integrate proxmox with traefik
 
 # Finish
+- Refactor argocd projects into 'core', 'default'
 - Deploy
   - docs site
   - vpn
