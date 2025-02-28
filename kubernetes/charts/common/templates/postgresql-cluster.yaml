@@ -35,7 +35,7 @@ spec:
           apiGroup: snapshot.storage.k8s.io
     {{- else }}
     initdb:
-      database: {{ .Values.name }}
+      database: {{ .Values.postgresql.databaseName | default .Values.name }}
       owner: {{ .Values.name }}
       {{- if .Values.postgresql.postInitSQL }}
       postInitSQL:
