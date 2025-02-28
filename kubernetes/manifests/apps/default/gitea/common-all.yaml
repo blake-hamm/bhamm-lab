@@ -27,6 +27,20 @@ spec:
           backups:
             enabled: true
             retention: "5d"
+        ingressRoutes:
+          - enabled: true
+            name: authelia
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - kind: Rule
+                match: Host(`git.bhamm-lab.com`)
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: gitea-http
+                    port: 3000
+                    scheme: http
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
