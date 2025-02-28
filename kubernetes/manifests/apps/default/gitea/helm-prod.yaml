@@ -16,9 +16,9 @@ spec:
     targetRevision: v10.6.0
     helm:
       valuesObject:
-        persistence:
-          accessModes:
-            - ReadWriteMany
+        # persistence:
+        #   accessModes:
+        #     - ReadWriteMany
         gitea:
           config:
             server:
@@ -55,8 +55,8 @@ spec:
             adminGroup: "lldap_admin"
         actions:
           enabled: true
-          provisioning:
-            enabled: true
+          # provisioning:
+          #   enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
