@@ -32,6 +32,7 @@ spec:
           pool: kubernetes
           mountOptions:
             - discard
+        configMapName: ceph-fs-csi-config
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

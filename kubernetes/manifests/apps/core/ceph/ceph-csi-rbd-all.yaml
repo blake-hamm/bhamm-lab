@@ -33,6 +33,7 @@ spec:
           pool: kubernetes
           mountOptions:
             - discard
+        configMapName: ceph-rbd-csi-config
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
