@@ -1,11 +1,11 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: example-common
+  name: gitea-common
   namespace: argocd
 spec:
   destination:
-    namespace: example
+    namespace: gitea
     server: https://kubernetes.default.svc
   project: default
   source:
@@ -14,7 +14,7 @@ spec:
     path: kubernetes/charts/common
     helm:
       valuesObject:
-        name: example
+        name: gitea
         postgresql:
           enabled: true
           databaseName: "giteadb"
