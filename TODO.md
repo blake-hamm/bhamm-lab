@@ -145,13 +145,13 @@ x Deploy immich
 - Implement devsec.os_hardening
 - Implement debian firewall rules
 - 3-2-1 backups
-  - Setup ceph backups (consider decomissioning k8up)
+  - Setup ceph backups (consider decomissioning k8up if volume snapshots work)
   - Configure snapraid/mergerfs
   - Ensure monitoring
   - Expose nfs
   - Create nfs storage class
   - Setup minio tenant with nfs storage class
-  - Refactor k8up to use argo workflows to reduce gcp sa credential surface
+  - Refactor k8up prune (single backup dag accross cluster? prune on diff schedule?)
   - Refactor k8up backups to minio
   - Ensure minio backup bucket syncs to gcp
   - Ensure on new cluster, minio bucket is restored first, then deploy backup
