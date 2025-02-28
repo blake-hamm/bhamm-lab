@@ -15,6 +15,13 @@ spec:
     helm:
       valuesObject:
         name: gitea
+        externalSecrets:
+          enabled: true
+          secrets:
+            - secretKey: oidc_client_secret
+              remoteRef:
+                key: /default/gitea
+                property: oidc_client_secret
         postgresql:
           enabled: true
           backups:
