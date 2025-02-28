@@ -74,6 +74,8 @@ x Deploy immich
 
 # CI/CD
 - Deploy gitea
+- Create cephfs storage class (for RWM)
+- Deploy gitea act runner
 - Setup pipelines
   - Terraform proxmox (branch-based with storage backend - minio)
   - Ansible k3s (branch-based)
@@ -163,4 +165,3 @@ x Deploy immich
   - Ansible opnsense
   - Terrafrom gcp
 - Setup service mesh (istio/hashicorp consul)
-- Create cephfs storage class (for RWM)

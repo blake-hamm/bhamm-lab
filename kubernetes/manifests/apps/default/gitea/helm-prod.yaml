@@ -54,7 +54,7 @@ spec:
             autoDiscoverUrl: https://auth.bhamm-lab.com/.well-known/openid-configuration
             adminGroup: "lldap_admin"
         actions:
-          enabled: true
+          enabled: false
           provisioning:
             enabled: true
   syncPolicy:
