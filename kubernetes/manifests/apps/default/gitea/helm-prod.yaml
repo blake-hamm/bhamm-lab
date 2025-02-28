@@ -2,18 +2,18 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: gitea
-  namespace: default
+  namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "200"
+    argocd.argoproj.io/sync-wave: "30"
 spec:
   destination:
-    namespace: default
+    namespace: gitea
     server: https://kubernetes.default.svc
   project: default
   source:
     chart: gitea
     repoURL: https://dl.gitea.com/charts/
-    targetRevision: v10.4.0
+    targetRevision: v10.6.0
     helm:
       valuesObject:
         gitea:
