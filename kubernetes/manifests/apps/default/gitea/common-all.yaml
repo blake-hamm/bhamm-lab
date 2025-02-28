@@ -17,7 +17,6 @@ spec:
         name: gitea
         postgresql:
           enabled: true
-          databaseName: "giteadb"
           backups:
             enabled: true
             retention: "5d"
