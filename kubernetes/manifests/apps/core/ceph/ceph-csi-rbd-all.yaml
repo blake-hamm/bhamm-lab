@@ -35,6 +35,7 @@ spec:
             - discard
         configMapName: ceph-rbd-csi-config
         cephConfConfigMapName: ceph-rbd-config
+        kmsConfigMapName: ceph-rbd-csi-encryption-kms-config
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
