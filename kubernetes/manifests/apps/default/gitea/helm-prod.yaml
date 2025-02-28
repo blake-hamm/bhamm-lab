@@ -16,6 +16,9 @@ spec:
     targetRevision: v10.6.0
     helm:
       valuesObject:
+        persistence:
+          accessModes:
+            - ReadWriteMany
         gitea:
           config:
             server:
