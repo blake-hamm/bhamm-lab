@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/k3s-again
+    targetRevision: feature/cicd
     path: kubernetes/manifests/apps
     directory:
       recurse: true
