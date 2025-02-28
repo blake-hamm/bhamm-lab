@@ -83,7 +83,7 @@ pve_ceph_fs:
     pgs: 32 # adjust later
     rule: replicated_rule
     storage: true
-  - name: kubernetes
+  - name: k8s_fs
     pgs: 32 # adjust later
     rule: replicated_rule
     storage: false

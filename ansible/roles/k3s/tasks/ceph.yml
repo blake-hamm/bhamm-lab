@@ -1,42 +1,55 @@
-- name: Check if client.kubernetes exists
-  ansible.builtin.command: ceph auth get client.kubernetes
-  register: client_auth
-  ignore_errors: true
-  changed_when: false
-- name: Create client.kubernetes if it does not exist
-  ansible.builtin.command: ceph auth get-or-create client.kubernetes mon 'profile rbd' osd 'profile rbd pool=kubernetes' mgr 'profile rbd pool=kubernetes'
-  when: client_auth.rc != 0
-  changed_when: false
-- name: Update kubernetes ceph permisions
+- name: Get or create rbd client.kubernetes
   ansible.builtin.command: >
-    ceph auth caps client.kubernetes mon 'profile rbd' osd 'profile rbd pool=kubernetes' mgr 'profile rbd pool=kubernetes'
-  register: ceph_update_k8s_client
-  failed_when: "'Error' in ceph_update_k8s_client.stderr"
+    ceph auth get-or-create client.kubernetes \
+      mon 'profile rbd' \
+      osd 'profile rbd pool=kubernetes' \
+      mgr 'profile rbd pool=kubernetes'
+  register: ceph_k8s_rbd_client
+  failed_when: "'Error' in ceph_k8s_rbd_client.stderr"
   changed_when: false
-- name: Populate ceph_k8s_key
+- name: Populate ceph_k8s_rbd_key
   ansible.builtin.command: >
     ceph auth get-key client.kubernetes
-  register: ceph_k8s_key
-  failed_when: "'Error' in ceph_k8s_key.stderr"
+  register: ceph_k8s_rbd_key
+  failed_when: "'Error' in ceph_k8s_rbd_key.stderr"
   changed_when: false
-- name: Get ceph config
+- name: Create cephfs subvolume
   ansible.builtin.command: >
-    ceph mon dump
-  register: ceph_config
-  failed_when: "'Error' in ceph_config.stderr"
+    ceph fs subvolumegroup create k8s_fs csi
+- name: Get or create client.csi-cephfs
+  ansible.builtin.command: >
+    ceph auth get-or-create client.csi-cephfs \
+      mgr "allow rw" \
+      osd "allow rw tag cephfs metadata=k8s_fs, allow rw tag cephfs data=k8s_fs" \
+      mds "allow r fsname=k8s_fs path=/volumes, allow rws fsname=k8s_fs path=/volumes/csi" \
+      mon "allow r fsname=k8s_fs"
+  register: ceph_k8s_fs_client
+  failed_when: "'Error' in ceph_k8s_fs_client.stderr"
   changed_when: false
-- name: Collect IP addresses of proxmox hosts
-  ansible.builtin.set_fact:
-    monitor_ips: >
-      {{ groups['proxmox'] | map('extract', hostvars, ['ansible_host']) | map('regex_replace', '$', ':6789') | list }}
-- name: Generate Ceph ConfigMap JSON
-  ansible.builtin.set_fact:
-    ceph_csi_config_json: >-
-      {{
-        [
-          {
-            "clusterID": ceph_config.stdout_lines | select('match', 'fsid') | first | regex_replace('fsid ', ''),
-            "monitors": monitor_ips
-          }
-        ]
-      }}
+- name: Populate ceph_k8s_fs_key
+  ansible.builtin.command: >
+    ceph auth get-key client.csi-cephfs
+  register: ceph_k8s_fs_key
+  failed_when: "'Error' in ceph_k8s_fs_key.stderr"
+  changed_when: false
+# - name: Get ceph config
+#   ansible.builtin.command: >
+#     ceph mon dump
+#   register: ceph_config
+#   failed_when: "'Error' in ceph_config.stderr"
+#   changed_when: false
+# - name: Collect IP addresses of proxmox hosts
+#   ansible.builtin.set_fact:
+#     monitor_ips: >
+#       {{ groups['proxmox'] | map('extract', hostvars, ['ansible_host']) | map('regex_replace', '$', ':6789') | list }}
+# - name: Generate Ceph ConfigMap JSON
+#   ansible.builtin.set_fact:
+#     ceph_csi_config_json: >-
+#       {{
+#         [
+#           {
+#             "clusterID": ceph_config.stdout_lines | select('match', 'fsid') | first | regex_replace('fsid ', ''),
+#             "monitors": monitor_ips
+#           }
+#         ]
+#       }}
