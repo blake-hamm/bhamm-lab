@@ -91,6 +91,23 @@ x Deploy immich
 - Deploy loki
 - Setup alerts for nodes and traefik
 
+# Expose bhamm-lab.com
+- Spike cf tunnels
+- Setup Hugo
+- Expose hugo homepage at bhamm-lab.com/
+- Deploy docs at bhamm-lab.com/docs/
+- Deploy lighthearted at bhamm-lab.com/lighthearted/
+- Deploy portfolio links at bhamm-lab.com/portfolio/
+- Deploy portfolio links at bhamm-lab.com/about/
+- Deploy portfolio links at bhamm-lab.com/contact/
+- Opnsense:
+  - port forward traefik prod ip to dmz
+  - geo filter
+  - expose 443 on dmz
+- Traefik
+  - proxy
+  - block *.bhamm-lab.com
+
 # Omada sdn
 - Setup 3 wifi networks
   x Polk_Paradise
