@@ -73,13 +73,21 @@ x Remove unused yaml
 x Deploy immich
 
 # CI/CD
-- Deploy gitea
-- Create cephfs storage class (for RWM)
-- Deploy gitea act runner
-- Setup pipelines
-  - Terraform proxmox (branch-based with storage backend - minio)
-  - Ansible k3s (branch-based)
-- Dev cluster on PR
+x Deploy gitea
+x Create cephfs storage class (for RWM)
+x Deploy gitea act runner
+- Mirror github to gitea as primary
+  - Get token
+  - Set github as upstream
+  - Setup traefik ssh
+- Setup gitea pipeline for k3s
+  - Ensure on open pr - spin up new k3s cluster and deploy
+  - On merge to main - tofu/ansible and argocd sync
+  - Terraform proxmox
+    - Setup minio tofu backend
+    - Convert k3s into module
+    - Leverage module for prod and dev
+  - Ansible k3s
 - Test DR with pvc and pg (auto)
   - example pvc should be easy
   - Need to develop and prove out pg w/ ceph + volume snapshot
@@ -92,6 +100,7 @@ x Deploy immich
 - Refine grafana dashboard config
 - Deploy loki
 - Setup alerts for nodes and traefik
+- Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
 
 # Expose bhamm-lab.com
 - Spike cf tunnels
@@ -108,7 +117,7 @@ x Deploy immich
   - expose 443 on dmz
 - Traefik
   - proxy
-  - block *.bhamm-lab.com
+  - block *.bhamm-lab.com from public
 
 # Omada sdn
 - Setup 3 wifi networks
