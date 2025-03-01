@@ -21,9 +21,9 @@ spec:
         csiConfig:
           - clusterID: "7b02e4a9-b740-4d5a-b519-9585725a55fb"
             monitors:
-              - "10.0.20.11:3300"
-              - "10.0.20.12:3300"
-              - "10.0.20.13:3300"
+              - "10.0.20.11:6803"
+              - "10.0.20.12:6803"
+              - "10.0.20.13:6803"
             cephFS:
               subvolumeGroup: "csi"
         storageClass:
