@@ -100,6 +100,13 @@ opnsense_extra_rules:
     protocol: any
     source_net: trustedNetwork
     destination_net: k8sNetwork
+  LanMetalAccess:
+    description: Allow LAN to access Metal
+    interface: lan
+    sequence: 3
+    ip_protocol: inet
+    protocol: any
+    source_net: metalNetwork
   MetalK8sAccess:
     description: Allow metal access to k8s
     interface: opt3 # metal
@@ -108,6 +115,13 @@ opnsense_extra_rules:
     protocol: any
     source_net: metalNetwork
     destination_net: k8sNetwork
+  LanK8sAccess:
+    description: Allow LAN to access k8s
+    interface: lan
+    sequence: 3
+    ip_protocol: inet
+    protocol: any
+    source_net: k8sNetwork
   K8sMetalAccess:
     description: Allow k8s access to metal (fork8sNetwork)
     interface: opt4 # k8s
