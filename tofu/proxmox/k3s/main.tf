@@ -22,7 +22,7 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
     ip_config {
       ipv4 {
         address = "10.0.30.6${count.index}/24"
-        gateway = "10.0.30.1"
+        gateway = "10.0.30.2"
       }
     }
     user_data_file_id = "ceph_fs:snippets/cloud-config.yaml"
@@ -51,7 +51,7 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
   network_device {
     model   = "virtio"
     bridge  = "vmbr0"
-    trunks  = "20;30"
+    trunks  = "1;20;30"
     vlan_id = 30
   }
 
@@ -99,7 +99,7 @@ resource "proxmox_virtual_environment_vm" "k3s_worker" {
     ip_config {
       ipv4 {
         address = "10.0.30.7${count.index}/24"
-        gateway = "10.0.30.1"
+        gateway = "10.0.30.2"
       }
     }
     user_data_file_id = "ceph_fs:snippets/cloud-config.yaml"
@@ -128,7 +128,7 @@ resource "proxmox_virtual_environment_vm" "k3s_worker" {
   network_device {
     model   = "virtio"
     bridge  = "vmbr0"
-    trunks  = "20;30"
+    trunks  = "1;20;30"
     vlan_id = 30
   }
 
