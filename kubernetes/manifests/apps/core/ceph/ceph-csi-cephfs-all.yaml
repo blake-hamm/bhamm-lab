@@ -16,6 +16,8 @@ spec:
     targetRevision: 3.13.0
     helm:
       valuesObject:
+        nodeplugin:
+          updateStrategy: OnDelete
         provisioner:
           replicaCount: 3
         csiConfig:
@@ -32,8 +34,8 @@ spec:
           clusterID: "7b02e4a9-b740-4d5a-b519-9585725a55fb"
           fsName: k8s_fs
           pool: k8s_fs_data
-          # mountOptions:
-          #   - discard
+          mounter: fuse
+          fuseMountOptions: debug
         configMapName: ceph-fs-csi-config
         cephConfConfigMapName: ceph-fs-config
         kmsConfigMapName: ceph-fs-csi-encryption-kms-config
