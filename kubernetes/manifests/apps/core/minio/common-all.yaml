@@ -15,6 +15,29 @@ spec:
     helm:
       valuesObject:
         name: minio
+        ingressRoutes:
+          - enabled: true
+            name: minio
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - kind: Rule
+                match: Host(`minio.bhamm-lab.com`)
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: minio-tenant-console
+                    port: 9443
+          - enabled: true
+            name: minio-api
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - kind: Rule
+                match: Host(`minio-api.bhamm-lab.com`)
+                services:
+                  - name: minio
+                    port: 443
         externalSecrets:
           enabled: true
           secrets:
