@@ -32,6 +32,7 @@ spec:
           config:
             server:
               ROOT_URL: https://git.bhamm-lab.com/
+              SSH_DOMAIN: bhamm-lab.com
             openid:
               ENABLE_OPENID_SIGNIN: false
               ENABLE_OPENID_SIGNUP: true
