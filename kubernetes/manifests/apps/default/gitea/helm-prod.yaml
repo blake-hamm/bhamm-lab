@@ -20,6 +20,13 @@ spec:
           storageClass: "csi-cephfs-sc"
           accessModes:
             - ReadWriteMany
+        service:
+          ssh:
+            type: LoadBalancer
+            port: 4185
+            annotations:
+              metallb.universe.tf/allow-shared-ip: shared
+              metallb.universe.tf/loadBalancerIPs: 10.0.30.31
         gitea:
           config:
             server:

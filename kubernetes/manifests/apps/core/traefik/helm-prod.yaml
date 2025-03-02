@@ -56,8 +56,9 @@ spec:
         service:
           enabled: true
           type: LoadBalancer
-          # annotations:
-          #   external-dns.alpha.kubernetes.io/hostname: local.bhamm-lab.com
+          annotations:
+            metallb.universe.tf/allow-shared-ip: shared
+            metallb.universe.tf/loadBalancerIPs: 10.0.30.31
           labels: {}
           loadBalancerSourceRanges: []
           externalIPs: []
