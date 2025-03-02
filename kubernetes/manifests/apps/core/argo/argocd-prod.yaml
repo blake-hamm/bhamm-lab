@@ -26,7 +26,7 @@ spec:
         applicationSet:
           replicas: 1
         repoServer:
-          replicas: 1
+          replicas: 2
         configs:
           params:
             server.insecure: true
