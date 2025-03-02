@@ -40,6 +40,9 @@ spec:
               remoteRef:
                 key: /core/minio
                 property: config.env
+        k8up:
+          backup:
+            enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
