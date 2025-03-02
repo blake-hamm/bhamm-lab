@@ -76,9 +76,9 @@ x Deploy immich
 x Deploy gitea
 x Create cephfs storage class (for RWM)
 x Deploy gitea act runner
-- Mirror github to gitea as primary
+x Mirror github to gitea as primary
   x Setup metallb ssh (share lb with traefik)
-  - Set github as upstream
+  x Set github as upstream
 - Setup gitea pipeline for k3s
   - Ensure on open pr - spin up new k3s cluster and deploy
   - On merge to main - tofu/ansible and argocd sync
