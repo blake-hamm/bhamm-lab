@@ -24,7 +24,7 @@ spec:
           ssh:
             type: LoadBalancer
             port: 4185
-            loadBalancerIP: 10.0.30.31
+            # loadBalancerIP: 10.0.30.31
             annotations:
               metallb.universe.tf/allow-shared-ip: shared
               metallb.universe.tf/loadBalancerIPs: 10.0.30.31

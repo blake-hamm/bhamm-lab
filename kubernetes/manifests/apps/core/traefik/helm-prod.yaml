@@ -62,8 +62,8 @@ spec:
           labels: {}
           loadBalancerSourceRanges: []
           externalIPs: []
-          spec:
-            loadBalancerIP: 10.0.30.31
+          # spec:
+          #   loadBalancerIP: 10.0.30.31
         metrics:
           prometheus:
             service:
