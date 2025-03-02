@@ -65,6 +65,8 @@ spec:
             adminGroup: "lldap_admin"
         actions:
           enabled: true
+          existingSecret: ""
+          existingSecretKey: ""
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
