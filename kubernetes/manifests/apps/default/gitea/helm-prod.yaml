@@ -65,8 +65,6 @@ spec:
             adminGroup: "lldap_admin"
         actions:
           enabled: true
-          provisioning:
-            enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

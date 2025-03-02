@@ -50,6 +50,7 @@ spec:
             enableSFTP: false
           buckets:
             - name: argo-artifacts
+            - name: terraform-state
           users: []
           prometheusOperator: false
   syncPolicy:
