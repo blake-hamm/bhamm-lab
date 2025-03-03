@@ -24,6 +24,7 @@
     update_repo_cache: true
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
+    force: true
   failed_when: false
 - name: Wait for ArgoCD server to be ready
   kubernetes.core.k8s_info:

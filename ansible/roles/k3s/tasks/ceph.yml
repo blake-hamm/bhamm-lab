@@ -16,6 +16,9 @@
 - name: Create cephfs subvolume
   ansible.builtin.command: >
     ceph fs subvolumegroup create k8s_fs csi
+  register: ceph_k8s_cephfs_subvolume
+  failed_when: "'Error' in ceph_k8s_cephfs_subvolume.stderr"
+  changed_when: false
 - name: Get or create client.csi-cephfs
   ansible.builtin.command: >
     ceph auth get-or-create client.csi-cephfs \
