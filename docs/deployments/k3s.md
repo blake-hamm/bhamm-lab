@@ -21,6 +21,7 @@ ansible-playbook ansible/main.yml -l dev-k3s* -t debian,k3s -e "env=dev"
 ```bash
 # To deploy the dev
 export KUBE_CONFIG=~/.kube/config-temp
+kubectl apply -f kubernetes/dev.yaml
 kubectl apply -f kubernetes/prod-apps.yaml
 
 # To sync the argocd app (it should autosync, but if impatient)
