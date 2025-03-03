@@ -79,14 +79,16 @@ x Deploy gitea act runner
 x Mirror github to gitea as primary
   x Setup metallb ssh (share lb with traefik)
   x Set github as upstream
+x Switch argocd to gitea repo
 - Setup gitea pipeline for k3s
+  x Terraform proxmox
+    x Setup minio tofu backend
+    x Convert k3s into module
+    x Leverage module for prod and dev
+  x Ansible
+    x Adapt dev
   - Ensure on open pr - spin up new k3s cluster and deploy
   - On merge to main - tofu/ansible and argocd sync
-  - Terraform proxmox
-    - Setup minio tofu backend
-    - Convert k3s into module
-    - Leverage module for prod and dev
-  - Ansible k3s
 - Test DR with pvc and pg (auto)
   - example pvc should be easy
   - Need to develop and prove out pg w/ ceph + volume snapshot
@@ -99,6 +101,7 @@ x Mirror github to gitea as primary
 - Refine grafana dashboard config
 - Deploy loki
 - Setup alerts for nodes and traefik
+- Spike crowdsec
 - Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
 
 # Expose bhamm-lab.com
