@@ -26,5 +26,6 @@ kubectl apply -f kubernetes/dev.yaml
 # To sync the argocd app (it should autosync, but if impatient)
 kubectl config set-context --current --namespace=argocd
 argocd app sync apps
+argocd app get apps --refresh
 ```
 *Note: you may need to adjust the 'targetRevision' in this file*
