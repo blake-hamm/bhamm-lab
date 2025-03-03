@@ -140,6 +140,7 @@ x Switch argocd to gitea repo
 - Integrate proxmox with traefik
 
 # Finish
+- Document secret rotation
 - Refactor argocd projects into 'core', 'default'
 - Deploy
   - docs site
