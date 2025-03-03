@@ -1,0 +1,158 @@
+apiVersion: "vault.banzaicloud.com/v1alpha1"
+kind: "Vault"
+metadata:
+  name: vault
+  namespace: vault
+  labels:
+    app.kubernetes.io/name: vault
+    vault_cr: vault
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  size: 2
+  image: hashicorp/vault:1.18.1
+  annotations:
+    common/annotation: "true"
+  vaultAnnotations:
+    type/instance: "vault"
+  vaultConfigurerAnnotations:
+    type/instance: "vaultconfigurer"
+  vaultLabels:
+    bhamm-lab.com/log-format: "json"
+  vaultConfigurerLabels:
+    bhamm-lab.com/log-format: "string"
+  serviceAccount: vault
+  serviceType: ClusterIP
+  volumeClaimTemplates:
+    - metadata:
+        name: vault-raft
+      spec:
+        # https://kubernetes.io/docs/concepts/storage/persistent-volumes/#class-1
+        # storageClassName: ""
+        accessModes:
+          - ReadWriteOnce
+        volumeMode: Filesystem
+        resources:
+          requests:
+            storage: 1Gi
+  volumeMounts:
+    - name: vault-raft
+      mountPath: /vault/file
+  veleroEnabled: true
+  caNamespaces: ["*"]
+  unsealConfig:
+    options:
+      preFlightChecks: true
+      storeRootToken: true
+      secretShares: 5
+      secretThreshold: 3
+    kubernetes:
+      secretNamespace: vault
+  config:
+    storage:
+      raft:
+        path: "/vault/file"
+    listener:
+      tcp:
+        address: "0.0.0.0:8200"
+        tls_cert_file: /vault/tls/server.crt
+        tls_key_file: /vault/tls/server.key
+        telemetry:
+          unauthenticated_metrics_access: true
+    telemetry:
+      prometheus_retention_time: "24h"
+      disable_hostname: true
+    api_addr: https://vault.vault:8200
+    cluster_addr: "https://${.Env.POD_NAME}:8201"
+    ui: true
+  envsConfig:
+    - name: OIDC_VAULT_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: vault-external-secret
+          key: OIDC_VAULT_CLIENT_SECRET
+  statsdDisabled: false
+  serviceMonitorEnabled: true
+  serviceRegistrationEnabled: true
+  resources:
+    vault:
+      limits:
+        memory: "512Mi"
+        cpu: "200m"
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+  externalConfig:
+    purgeUnmanagedConfig:
+      enabled: true
+      exclude:
+        secrets: true
+    policies:
+      - name: allow_secrets
+        rules: path "secret/*" { capabilities = ["create", "read", "update", "delete", "list"] }
+      - name: read_secrets
+        rules: path "secret/*" { capabilities = ["read", "list"] }
+      - name: admin
+        rules: path "*" { capabilities = ["create", "read", "update", "delete", "list", "sudo"] }
+      - name: prometheus-operator
+        rules: path "sys/metrics" { capabilities = ["list", "read"] }
+      - name: ansible
+        rules: path "secret/data/core/ansible/*" { capabilities = ["create", "read", "update", "delete", "list"] }
+      - name: create_token
+        rules: path "auth/token/create" { capabilities = ["create", "update"] }
+    auth:
+      - type: kubernetes
+        roles:
+          - name: default
+            bound_service_account_names: "*"
+            bound_service_account_namespaces: "*"
+            policies: read_secrets
+            ttl: 1h
+          - name: sops
+            bound_service_account_names: "sync-sops-to-vault-sa"
+            bound_service_account_namespaces: "vault"
+            policies: allow_secrets
+            ttl: 1h
+          - name: prometheus
+            bound_service_account_names: monitor-kube-prometheus-st-prometheus
+            bound_service_account_namespaces: default
+            policies: prometheus-operator
+            ttl: 4h
+      - type: oidc
+        config:
+          oidc_discovery_url: https://auth.dev.bhamm-lab.com
+          oidc_client_id: vault
+          oidc_client_secret: "${env `OIDC_VAULT_CLIENT_SECRET`}"
+          default_role: default
+          allowed_redirect_uris: ["https://vault.dev.bhamm-lab.com/oidc/callback", "https://vault.dev.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback"]
+        roles:
+          - name: default
+            role_type: oidc
+            allowed_redirect_uris: ["https://vault.dev.bhamm-lab.com/oidc/callback", "https://vault.dev.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback", "http://localhost:8250/oidc/callback"]
+            bound_audiences: vault
+            user_claim: sub
+            policies: admin
+            ttl: 1h
+      - type: approle
+        roles:
+          - name: default
+            policies: allow_secrets
+            secret_id_ttl: 1440h
+            secret_id_num_uses: 200
+            token_num_uses: 10
+            token_ttl: 20m
+            token_max_ttl: 30m
+          - name: ansible
+            policies: read_secrets, ansible
+            secret_id_ttl: 1440h
+            secret_id_num_uses: 1000
+            token_num_uses: 0
+            token_ttl: 20m
+            token_max_ttl: 30m
+    secrets:
+      - path: secret
+        type: kv
+        description: General secrets.
+        options:
+          version: 2
