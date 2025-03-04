@@ -21,7 +21,7 @@ spec:
               key: cloudflare-token
         selector:
           dnsZones:
-            - "dev.bhamm-lab.com"
+            - "bhamm-lab.com"
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -38,5 +38,5 @@ spec:
     kind: ClusterIssuer
   commonName: "*.dev.bhamm-lab.com"
   dnsNames:
-    - "dev.bhamm-lab.com"
-    - "*.dev.bhamm-lab.com"
+    - "bhamm-lab.com"
+    - "*.bhamm-lab.com"
