@@ -16,6 +16,7 @@ spec:
     targetRevision: v10.6.0
     helm:
       valuesObject:
+        replicaCount: 2
         persistence:
           storageClass: "csi-cephfs-sc"
           accessModes:
