@@ -36,7 +36,7 @@ spec:
   issuerRef:
     name: letsencrypt-staging
     kind: ClusterIssuer
-  commonName: "*.dev.bhamm-lab.com"
+  commonName: "*.bhamm-lab.com"
   dnsNames:
     - "bhamm-lab.com"
     - "*.bhamm-lab.com"
