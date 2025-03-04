@@ -21,7 +21,7 @@ spec:
               key: cloudflare-token
         selector:
           dnsZones:
-            - "bhamm-lab.com"
+            - "dns.bhamm-lab.com"
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -36,7 +36,7 @@ spec:
   issuerRef:
     name: letsencrypt-staging
     kind: ClusterIssuer
-  commonName: "*.bhamm-lab.com"
+  commonName: "*.dev.bhamm-lab.com"
   dnsNames:
-    - "bhamm-lab.com"
-    - "*.bhamm-lab.com"
+    - "dev.bhamm-lab.com"
+    - "*.dev.bhamm-lab.com"
