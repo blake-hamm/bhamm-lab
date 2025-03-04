@@ -38,5 +38,5 @@ spec:
     kind: ClusterIssuer
   commonName: "*.bhamm-lab.com"
   dnsNames:
-    - ".bhamm-lab.com"
+    - "bhamm-lab.com"
     - "*.bhamm-lab.com"
