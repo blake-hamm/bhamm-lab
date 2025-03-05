@@ -1,0 +1,52 @@
+{{- if or .Values.k8up.backup.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: backup-{{ .Values.name }}
+  namespace: k8up
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "15"
+spec:
+  entrypoint: backup
+  templates:
+    - name: backup
+      script:
+        image: bitnami/kubectl:latest
+        command: [bash]
+        source: |
+          set -e
+          BACKUP_NAME="{{ .Values.name }}-$(date -u +'%Y-%m-%d-%H-%M-%S')"
+
+          echo "Triggering a backup '$BACKUP_NAME'..."
+          cat <<EOF | kubectl apply -f -
+          apiVersion: k8up.io/v1
+          kind: Backup
+          metadata:
+            name: $BACKUP_NAME
+            namespace: {{ .Values.name }}
+          spec:
+            backend:
+              repoPasswordSecretRef:
+                name: k8up
+                key: repo-password
+              gcs:
+                bucket: bhamm-lab-k8up
+                projectIDSecretRef:
+                  name: gcp-k8up-temp
+                  key: project_id
+                accessTokenSecretRef:
+                  name: gcp-k8up-temp
+                  key: accessToken
+            # promURL: "http://prometheus:9090"
+          EOF
+
+          echo "Waiting for backup BACKUP_NAME to start..."
+          kubectl wait --for=jsonpath='{.status.started}'=true \
+            backup/$BACKUP_NAME -n {{ .Values.name }} \
+            --timeout=60s || true
+
+          echo "Waiting for backup to complete (this might take some time)..."
+          kubectl wait --for=jsonpath='{.status.finished}'=true \
+            backup/$BACKUP_NAME -n {{ .Values.name }} || true
+{{- end }}
