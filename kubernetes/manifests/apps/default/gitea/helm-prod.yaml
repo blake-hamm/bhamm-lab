@@ -21,6 +21,8 @@ spec:
           storageClass: "csi-cephfs-sc"
           accessModes:
             - ReadWriteMany
+          annotations:
+            k8up.io/backup: "true"
         service:
           ssh:
             type: LoadBalancer
