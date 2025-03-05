@@ -5,6 +5,7 @@ metadata:
   namespace: immich
   annotations:
     argocd.argoproj.io/sync-wave: "0"
+    k8up.io/backup: "true"
 spec:
   accessModes:
     - ReadWriteOnce
