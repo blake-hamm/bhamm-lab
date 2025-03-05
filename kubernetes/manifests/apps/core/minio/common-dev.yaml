@@ -43,6 +43,8 @@ spec:
         k8up:
           backup:
             enabled: false
+          restore:
+            enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

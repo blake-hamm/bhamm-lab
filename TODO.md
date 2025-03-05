@@ -90,11 +90,19 @@ x Switch argocd to gitea repo
   - Ensure on open pr - spin up new k3s cluster and deploy
   - On merge to main - tofu/ansible and argocd sync
 - Test DR
-  - Deploy manifests
-  - pvc for immich, gitea, minio, example
+  x Deploy manifests
+  - Confirm pvc
+    x example
+    - minio (state bucket and keys)
+    - immich (library)
+    - gitea (shared)
   - Need to develop and prove out pg w/ ceph + volume snapshot
     - common chart deploys volume snapshot directly from ceph
-    - for example, gitea, immich db's
+    - Confirm db
+      - immich (login)
+      - gitea (code)
+      - authelia (2fa)
+      - example (query)
 - Convert sync sops to vault job as argo workflow template
   - Trigger from argo event when vault is ready
   - Trigger from gitea on secret changes
