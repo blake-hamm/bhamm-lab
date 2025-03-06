@@ -24,8 +24,8 @@ spec:
             arguments:
               parameters:
               - name: pvc
-                value: "{{item}}"
-            withParam: "{{steps.get-pvcs.outputs.result}}"
+                value: ".{{item}}"
+            withParam: ".{{steps.get-pvcs.outputs.result}}"
     - name: get-pvcs
       script:
         image: bitnami/kubectl:latest
@@ -56,7 +56,7 @@ spec:
             {{- end }}
             restoreMethod:
               folder:
-                claimName: {{inputs.parameters.pvc}}
+                claimName: .{{inputs.parameters.pvc}}
             backend:
               repoPasswordSecretRef:
                 name: k8up
