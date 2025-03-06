@@ -1,7 +1,7 @@
 apiVersion: snapshot.storage.k8s.io/v1
 kind: VolumeSnapshotContent
 metadata:
-  name: snapcontent-ebf14862-3f52-4ad1-bccf-3d1b63c23121
+  name: example-restore
   annotations:
     snapshot.storage.kubernetes.io/deletion-secret-name: csi-rbd-secret
     snapshot.storage.kubernetes.io/deletion-secret-namespace: ceph
@@ -17,15 +17,13 @@ spec:
   volumeSnapshotRef:
     apiVersion: snapshot.storage.k8s.io/v1
     kind: VolumeSnapshot
-    name: example-20250226174000
+    name: example-restore
     namespace: example
-    resourceVersion: "10621175"
-    uid: ebf14862-3f52-4ad1-bccf-3d1b63c23121
 ---
 apiVersion: snapshot.storage.k8s.io/v1
 kind: VolumeSnapshot
 metadata:
-  name: example-20250226174000
+  name: example-restore
   namespace: example
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
@@ -33,4 +31,4 @@ metadata:
 spec:
   volumeSnapshotClassName: ceph-snapclass
   source:
-    volumeSnapshotContentName: snapcontent-ebf14862-3f52-4ad1-bccf-3d1b63c23121
+    volumeSnapshotContentName: example-restore
