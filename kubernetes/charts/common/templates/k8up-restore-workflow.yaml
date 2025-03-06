@@ -44,7 +44,7 @@ spec:
         source: |
           set -e
 
-          RESTORE_NAME="{{ .Values.name }}-{{inputs.parameters.pvc}}-$(date -u +'%Y-%m-%d-%H-%M-%S')"
+          RESTORE_NAME="{{ .Values.name }}-{{`{{inputs.parameters.pvc}}`}}-$(date -u +'%Y-%m-%d-%H-%M-%S')"
 
           echo "Triggering a restore..."
           cat <<EOF | kubectl apply -f -
