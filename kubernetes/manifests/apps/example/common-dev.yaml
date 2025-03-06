@@ -43,7 +43,7 @@ spec:
             enabled: true
         postgresql:
           enabled: true
-          recoverySnapshotName: "example-20250226174000"
+          recoverySnapshotName: example-restore
           backups:
             enabled: false
   syncPolicy:
