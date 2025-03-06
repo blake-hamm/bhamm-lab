@@ -28,7 +28,7 @@ metadata:
   namespace: {{ .Values.name }}
 rules:
   - apiGroups: [""]
-    resources: ["pvc"]
+    resources: ["persistentvolumeclaims"]
     verbs: ["get", "list"]
   - apiGroups: [""]
     resources: ["secrets"]
