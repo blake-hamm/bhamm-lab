@@ -11,13 +11,13 @@ spec:
   deletionPolicy: Delete
   driver: rbd.csi.ceph.com
   source:
-    volumeHandle: 0001-0024-7b02e4a9-b740-4d5a-b519-9585725a55fb-0000000000000003-e5669fda-92e1-4d33-b8bf-7f58d761ae1b
+    snapshotHandle: 0001-0024-7b02e4a9-b740-4d5a-b519-9585725a55fb-0000000000000003-e5669fda-92e1-4d33-b8bf-7f58d761ae1b
   sourceVolumeMode: Filesystem
   volumeSnapshotClassName: ceph-snapclass
   volumeSnapshotRef:
     apiVersion: snapshot.storage.k8s.io/v1
     kind: VolumeSnapshot
-    name: example-20250306080000
+    name: example-20250226174000
     namespace: example
     resourceVersion: "10621175"
     uid: ebf14862-3f52-4ad1-bccf-3d1b63c23121
