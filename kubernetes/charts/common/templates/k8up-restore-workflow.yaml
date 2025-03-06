@@ -33,7 +33,7 @@ spec:
         source: |
           set -e
 
-          kubectl get pvc -n {{ .Values.name }} -l k8up.io=true
+          kubectl get pvc -n {{ .Values.name }} -o json | jq '[.items[].metadata.name]'
     - name: restore
       inputs:
         parameters:
