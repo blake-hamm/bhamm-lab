@@ -94,6 +94,8 @@ x Switch argocd to gitea repo
   - Confirm pvc
     x example
     - minio (state bucket and keys)
+      - Enhance restore template to loop through pvc with k8up annotation
+      - Based on list of pvc, restore each one and generate 'folder claimName'
     - immich (library)
     - gitea (shared)
   - Need to develop and prove out pg w/ ceph + volume snapshot

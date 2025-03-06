@@ -17,8 +17,23 @@ spec:
             templateRef:
               name: "generate-secret-{{ .Values.name }}"
               template: generate-secret
+        - - name: get-pvcs
+            template: get-pvcs
         - - name: restore
             template: restore
+            arguments:
+              parameters:
+              - name: pvc
+                value: "{{item}}"
+            withParam: "{{steps.get-pvcs.outputs.result}}"
+    - name: get-pvcs
+      script:
+        image: bitnami/kubectl:latest
+        command: [bash]
+        source: |
+          set -e
+
+          kubectl get pvc -n {{ .Values.name }} -l k8up.io=true
     - name: restore
       script:
         image: bitnami/kubectl:latest
@@ -26,7 +41,7 @@ spec:
         source: |
           set -e
 
-          RESTORE_NAME="{{ .Values.name }}-$(date -u +'%Y-%m-%d-%H-%M-%S')"
+          RESTORE_NAME="{{ .Values.name }}-{{inputs.parameters.pvc}}-$(date -u +'%Y-%m-%d-%H-%M-%S')"
 
           echo "Triggering a restore..."
           cat <<EOF | kubectl apply -f -
@@ -41,7 +56,7 @@ spec:
             {{- end }}
             restoreMethod:
               folder:
-                claimName: {{ .Values.name }}
+                claimName: {{inputs.parameters.pvc}}
             backend:
               repoPasswordSecretRef:
                 name: k8up
