@@ -22,14 +22,14 @@ spec:
             websocket: true
             routes:
               - kind: Rule
-                match: Host(`minio.bhamm-lab.com`)
+                match: Host(`minio.dev.bhamm-lab.com`)
                 middlewares:
                   - name: default-headers
                 services:
                   - name: minio-tenant-console
                     port: 9443
               - kind: Rule
-                match: Host(`minio-api.bhamm-lab.com`)
+                match: Host(`minio-api.dev.bhamm-lab.com`)
                 services:
                   - name: minio
                     port: 443
