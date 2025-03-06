@@ -101,10 +101,10 @@ x Switch argocd to gitea repo
   - Need to develop and prove out pg w/ ceph + volume snapshot
     - common chart deploys volume snapshot directly from ceph
     - Confirm db
+      x example (query)
       - immich (login)
       - gitea (code)
       - authelia (2fa)
-      - example (query)
 - Convert sync sops to vault job as argo workflow template
   - Trigger from argo event when vault is ready
   - Trigger from gitea on secret changes
