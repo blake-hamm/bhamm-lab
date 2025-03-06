@@ -28,6 +28,9 @@ metadata:
   namespace: {{ .Values.name }}
 rules:
   - apiGroups: [""]
+    resources: ["pvc"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
     resources: ["secrets"]
     verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
   - apiGroups: ["k8up.io"]
