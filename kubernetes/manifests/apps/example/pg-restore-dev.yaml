@@ -3,6 +3,8 @@ kind: VolumeSnapshotContent
 metadata:
   name: snapcontent-ebf14862-3f52-4ad1-bccf-3d1b63c23121
   annotations:
+    snapshot.storage.kubernetes.io/deletion-secret-name: csi-rbd-secret
+    snapshot.storage.kubernetes.io/deletion-secret-namespace: ceph
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "-3"
 spec:
