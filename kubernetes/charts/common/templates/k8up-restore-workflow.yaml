@@ -35,6 +35,9 @@ spec:
 
           kubectl get pvc -n {{ .Values.name }} -l k8up.io=true
     - name: restore
+      inputs:
+        parameters:
+        - name: pvc
       script:
         image: bitnami/kubectl:latest
         command: [bash]
