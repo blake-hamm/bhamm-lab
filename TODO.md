@@ -93,9 +93,9 @@ x Switch argocd to gitea repo
   x Deploy manifests
   - Confirm pvc
     x example
-    - minio (state bucket and keys)
-      - Enhance restore template to loop through pvc with k8up annotation
-      - Based on list of pvc, restore each one and generate 'folder claimName'
+    - minio (state bucket and keys) - backup from s3 instead
+      x Enhance restore template to loop through pvc with k8up annotation
+      x Based on list of pvc, restore each one and generate 'folder claimName'
     - immich (library)
     - gitea (shared)
   - Need to develop and prove out pg w/ ceph + volume snapshot
@@ -190,3 +190,4 @@ x Switch argocd to gitea repo
   - Ansible opnsense
   - Terrafrom gcp
 - Setup service mesh (istio/hashicorp consul)
+- Consider refactoring minio to primary storage and k8up sync to gcp

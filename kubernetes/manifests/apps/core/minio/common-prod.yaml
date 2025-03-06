@@ -42,7 +42,7 @@ spec:
                 property: config.env
         k8up:
           backup:
-            enabled: true
+            enabled: true # Not working
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
