@@ -32,6 +32,7 @@ spec:
         postgresql:
           enabled: true
           recoverySnapshotName: immich-restore
+          recoverySnapshotHandle: "csi-snap-41809123-732c-4a29-b2fc-ab90635fd74d"
           imageName: "ghcr.io/tensorchord/cloudnative-pgvecto.rs:16.5-v0.3.0@sha256:be3f025d79aa1b747817f478e07e71be43236e14d00d8a9eb3914146245035ba"
           sharedPreloadLibraries:
             - "vectors.so"
