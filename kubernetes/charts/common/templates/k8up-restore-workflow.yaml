@@ -39,7 +39,7 @@ spec:
           - name: claimName
       resource:
         action: create
-        successCondition: status.succeeded > 0
+        successCondition: status.finished > 0
         failureCondition: status.failed > 3
         manifest: |
           apiVersion: k8up.io/v1
