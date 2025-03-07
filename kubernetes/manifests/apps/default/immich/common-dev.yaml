@@ -29,6 +29,8 @@ spec:
         k8up:
           backup:
             enabled: false
+          restore:
+            enabled: true
         postgresql:
           enabled: true
           recoverySnapshotName: immich-restore
