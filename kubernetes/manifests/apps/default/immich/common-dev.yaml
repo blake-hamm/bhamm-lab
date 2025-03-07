@@ -31,6 +31,7 @@ spec:
             enabled: false
           restore:
             enabled: true
+            snapshot: bec74a8f284ee874d95c8c2f037fa3e1b42e18baede9d49e9d43fe795b1729c3
         postgresql:
           enabled: true
           recoverySnapshotName: immich-restore
