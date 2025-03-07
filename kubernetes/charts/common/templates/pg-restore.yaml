@@ -1,0 +1,36 @@
+{{- if and .Values.postgresql.backups.recoverySnapshotName .Values.postgresql.backups.snapshotHandle }}
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotContent
+metadata:
+  name: "{{ .Values.postgresql.backups.recoverySnapshotName }}"
+  annotations:
+    snapshot.storage.kubernetes.io/deletion-secret-name: csi-rbd-secret
+    snapshot.storage.kubernetes.io/deletion-secret-namespace: ceph
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "-3"
+spec:
+  deletionPolicy: Delete
+  driver: rbd.csi.ceph.com
+  source:
+    snapshotHandle: "{{ .Values.postgresql.backups.snapshotHandle }}"
+  sourceVolumeMode: Filesystem
+  volumeSnapshotClassName: ceph-snapclass
+  volumeSnapshotRef:
+    apiVersion: snapshot.storage.k8s.io/v1
+    kind: VolumeSnapshot
+    name: "{{ .Values.postgresql.backups.recoverySnapshotName }}"
+    namespace: example
+---
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+metadata:
+  name: "{{ .Values.postgresql.backups.recoverySnapshotName }}"
+  namespace: "{{ .Values.name }}"
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "-2"
+spec:
+  volumeSnapshotClassName: ceph-snapclass
+  source:
+    volumeSnapshotContentName: "{{ .Values.postgresql.backups.recoverySnapshotName }}"
+{{- end }}

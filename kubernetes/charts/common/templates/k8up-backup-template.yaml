@@ -1,4 +1,4 @@
-{{- if or .Values.k8up.backup.enabled }}
+{{- if .Values.k8up.backup.enabled }}
 apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
