@@ -92,17 +92,19 @@ x Switch argocd to gitea repo
 - Test DR
   x Deploy manifests
   - Confirm pvc
+    - Alter helm chart to require snapshot name and path for recovery
     x example
     - minio (state bucket and keys) - backup from s3 instead
       x Enhance restore template to loop through pvc with k8up annotation
       x Based on list of pvc, restore each one and generate 'folder claimName'
-    - immich (library)
+      - Try again with snapshot name
+    x immich (library)
     - gitea (shared)
   - Need to develop and prove out pg w/ ceph + volume snapshot
     - common chart deploys volume snapshot directly from ceph
     - Confirm db
       x example (query)
-      - immich (login)
+      x immich (login) - TODO: make pvc for config file
       - gitea (code)
       - authelia (2fa)
 - Convert sync sops to vault job as argo workflow template

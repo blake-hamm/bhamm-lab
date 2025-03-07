@@ -18,9 +18,9 @@ k8up:
   backup:
     enabled: false
     schedule: "0 8 * * *" # 8 am utc/1 am mst
-  restore:
-    enabled: false
-    snapshot: ""
+  restores: []
+    # - snapshot: ""
+    #   claimName: ""
 postgresql:
   enabled: false
   instances: 2

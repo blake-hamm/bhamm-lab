@@ -1,4 +1,4 @@
-{{- if .Values.k8up.restore.enabled }}
+{{- if .Values.k8up.restores }}
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
@@ -10,6 +10,10 @@ metadata:
 spec:
   serviceAccountName: "k8up-{{ .Values.name }}"
   entrypoint: main
+  volumes:
+    - name: gcp-sa
+      secret:
+        secretName: gcp-k8up-sa
   templates:
     - name: main
       steps:
@@ -17,49 +21,37 @@ spec:
             templateRef:
               name: "generate-secret-{{ .Values.name }}"
               template: generate-secret
-        - - name: get-pvcs
-            template: get-pvcs
         - - name: restore
             template: restore
             arguments:
               parameters:
-              - name: pvc
-                value: "{{`{{item}}`}}"
-            withParam: "{{`{{steps.get-pvcs.outputs.result}}`}}"
-    - name: get-pvcs
-      script:
-        image: bitnami/kubectl:latest
-        command: [bash]
-        source: |
-          set -e
-
-          kubectl get pvc -n {{ .Values.name }} -o json | jq '[.items[].metadata.name]'
+              - name: snapshot
+                value: "{{`{{item.snapshot}}`}}"
+              - name: claimName
+                value: "{{`{{item.claimName}}`}}"
+            {{- with .Values.k8up.restores }}
+            withItems: {{ . | toJson }}
+            {{- end }}
     - name: restore
       inputs:
         parameters:
-        - name: pvc
-      script:
-        image: bitnami/kubectl:latest
-        command: [bash]
-        source: |
-          set -e
-
-          RESTORE_NAME="{{ .Values.name }}-{{`{{inputs.parameters.pvc}}`}}-$(date -u +'%Y-%m-%d-%H-%M-%S')"
-
-          echo "Triggering a restore..."
-          cat <<EOF | kubectl apply -f -
+          - name: snapshot
+          - name: claimName
+      resource:
+        action: create
+        successCondition: status.succeeded > 0
+        failureCondition: status.failed > 3
+        manifest: |
           apiVersion: k8up.io/v1
           kind: Restore
           metadata:
-            name: $RESTORE_NAME
+            name: {{ .Values.name }}-{{`{{inputs.parameters.claimName}}`}}
             namespace: {{ .Values.name }}
           spec:
-            {{- if .Values.k8up.restore.snapshot }}
-            snapshot: {{ .Values.k8up.restore.snapshot }}
-            {{- end }}
+            snapshot: {{`{{inputs.parameters.snapshot}}`}}
             restoreMethod:
               folder:
-                claimName: {{`{{inputs.parameters.pvc}}`}}
+                claimName: {{`{{inputs.parameters.claimName}}`}}
             backend:
               repoPasswordSecretRef:
                 name: k8up
@@ -75,17 +67,4 @@ spec:
             podSecurityContext:
               fsGroup: 0
               runAsUser: 0
-          EOF
-
-          # echo "Waiting for backup $BACKUP_NAME to start..."
-          # kubectl wait --for=jsonpath='{.status.started}'=true \
-          #   backup/$BACKUP_NAME -n example \
-          #   --timeout=60s || true
-
-          # echo "Backup job initiated. You can check the status with:"
-          # echo "kubectl get backup $BACKUP_NAME -n example -o wide"
-  volumes:
-    - name: gcp-sa
-      secret:
-        secretName: gcp-k8up-sa
 {{- end }}
