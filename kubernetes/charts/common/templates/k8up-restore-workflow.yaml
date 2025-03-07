@@ -39,8 +39,8 @@ spec:
           - name: claimName
       resource:
         action: apply
-        successCondition: status.finished > 0
-        failureCondition: status.failed > 3
+        successCondition: status.finished = true
+        failureCondition: status.failed = true
         manifest: |
           apiVersion: k8up.io/v1
           kind: Restore
