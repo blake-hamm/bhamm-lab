@@ -1,4 +1,4 @@
-{{- if or .Values.k8up.backup.enabled .Values.k8up.restore.enabled }}
+{{- if or .Values.k8up.backup.enabled .Values.k8up.restores }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
