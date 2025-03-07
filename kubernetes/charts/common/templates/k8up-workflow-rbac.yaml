@@ -15,7 +15,7 @@ rules:
     resources: ["secrets"]
     verbs: ["get", "list"]
   - apiGroups: ["argoproj.io"]
-    resources: ["workflows", "workflows/finalizers"]
+    resources: ["workflows", "workflows/finalizers", "workflowtaskresults"]
     verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
   - apiGroups: [""]
     resources: ["pods"]
