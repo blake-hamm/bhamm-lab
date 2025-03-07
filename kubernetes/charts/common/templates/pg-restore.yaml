@@ -1,4 +1,4 @@
-{{- if and .Values.postgresql.backups.recoverySnapshotName .Values.postgresql.backups.snapshotHandle }}
+{{- if and .Values.postgresql.backups.recoverySnapshotName .Values.postgresql.backups.recoverySnapshotHandle }}
 apiVersion: snapshot.storage.k8s.io/v1
 kind: VolumeSnapshotContent
 metadata:
@@ -12,7 +12,7 @@ spec:
   deletionPolicy: Delete
   driver: rbd.csi.ceph.com
   source:
-    snapshotHandle: "{{ .Values.postgresql.backups.snapshotHandle }}"
+    snapshotHandle: "{{ .Values.postgresql.backups.recoverySnapshotHandle }}"
   sourceVolumeMode: Filesystem
   volumeSnapshotClassName: ceph-snapclass
   volumeSnapshotRef:

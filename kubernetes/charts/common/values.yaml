@@ -36,3 +36,4 @@ postgresql:
     schedule: "0 0 8 * * *" # 8 am utc/1 am mst
     retention: "30d"
   recoverySnapshotName: ""
+  recoverySnapshotHandle: ""
