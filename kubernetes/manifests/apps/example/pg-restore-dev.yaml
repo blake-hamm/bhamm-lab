@@ -1,34 +1,34 @@
-apiVersion: snapshot.storage.k8s.io/v1
-kind: VolumeSnapshotContent
-metadata:
-  name: example-restore
-  annotations:
-    snapshot.storage.kubernetes.io/deletion-secret-name: csi-rbd-secret
-    snapshot.storage.kubernetes.io/deletion-secret-namespace: ceph
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "-3"
-spec:
-  deletionPolicy: Delete
-  driver: rbd.csi.ceph.com
-  source:
-    snapshotHandle: 0001-0024-7b02e4a9-b740-4d5a-b519-9585725a55fb-0000000000000003-e88e6649-2f90-4960-a652-aa91c1af2b38
-  sourceVolumeMode: Filesystem
-  volumeSnapshotClassName: ceph-snapclass
-  volumeSnapshotRef:
-    apiVersion: snapshot.storage.k8s.io/v1
-    kind: VolumeSnapshot
-    name: example-restore
-    namespace: example
----
-apiVersion: snapshot.storage.k8s.io/v1
-kind: VolumeSnapshot
-metadata:
-  name: example-restore
-  namespace: example
-  annotations:
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "-2"
-spec:
-  volumeSnapshotClassName: ceph-snapclass
-  source:
-    volumeSnapshotContentName: example-restore
+# apiVersion: snapshot.storage.k8s.io/v1
+# kind: VolumeSnapshotContent
+# metadata:
+#   name: example-restore
+#   annotations:
+#     snapshot.storage.kubernetes.io/deletion-secret-name: csi-rbd-secret
+#     snapshot.storage.kubernetes.io/deletion-secret-namespace: ceph
+#     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+#     argocd.argoproj.io/sync-wave: "-3"
+# spec:
+#   deletionPolicy: Delete
+#   driver: rbd.csi.ceph.com
+#   source:
+#     snapshotHandle: 0001-0024-7b02e4a9-b740-4d5a-b519-9585725a55fb-0000000000000003-e88e6649-2f90-4960-a652-aa91c1af2b38
+#   sourceVolumeMode: Filesystem
+#   volumeSnapshotClassName: ceph-snapclass
+#   volumeSnapshotRef:
+#     apiVersion: snapshot.storage.k8s.io/v1
+#     kind: VolumeSnapshot
+#     name: example-restore
+#     namespace: example
+# ---
+# apiVersion: snapshot.storage.k8s.io/v1
+# kind: VolumeSnapshot
+# metadata:
+#   name: example-restore
+#   namespace: example
+#   annotations:
+#     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+#     argocd.argoproj.io/sync-wave: "-2"
+# spec:
+#   volumeSnapshotClassName: ceph-snapclass
+#   source:
+#     volumeSnapshotContentName: example-restore
