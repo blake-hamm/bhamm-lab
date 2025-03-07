@@ -38,7 +38,7 @@ spec:
           - name: snapshot
           - name: claimName
       resource:
-        action: create
+        action: apply
         successCondition: status.finished > 0
         failureCondition: status.failed > 3
         manifest: |
