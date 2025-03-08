@@ -55,6 +55,8 @@ spec:
         command: ["/bin/bash", "-c"]
         args:
           - |
+            set -e
+            
             # Install pre-reqs
             apt-get update && apt-get install -y \
                 wget \
