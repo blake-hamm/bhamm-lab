@@ -80,6 +80,7 @@ x Mirror github to gitea as primary
   x Setup metallb ssh (share lb with traefik)
   x Set github as upstream
 x Switch argocd to gitea repo
+x Troubleshoot tofu proxmox/k3s when migrating vm (ssh issue) and change ordering of bare metal to (super, aorus, antsle)
 - Setup gitea pipeline for k3s
   x Terraform proxmox
     x Setup minio tofu backend
@@ -91,7 +92,7 @@ x Switch argocd to gitea repo
   - On merge to main
     - tofu/ansible and argocd sync
     - destory dev cluster
-- Test DR
+x Test DR
   x Deploy manifests
   x Confirm pvc
     x Alter helm chart to require snapshot name and path for recovery
@@ -102,18 +103,17 @@ x Switch argocd to gitea repo
       x Try again with snapshot name
     x immich (library)
     x gitea (shared)
-  - Need to develop and prove out pg w/ ceph + volume snapshot
+  x Need to develop and prove out pg w/ ceph + volume snapshot
     x common chart deploys volume snapshot directly from ceph
-    - Confirm db
+    x Confirm db
       x example (query)
       x immich (login) - TODO: make pvc for config file (contains oidc)
       x gitea (code)
-      - authelia (2fa)
+      x authelia (2fa)
 - Convert sync sops to vault job as argo workflow template
   - Trigger from argo event when vault is ready
   - Trigger from gitea on secret changes
 - After merge PR, point prod to 'main' branch in all aspects
-- Troubleshoot tofu proxmox/k3s when migrating vm (ssh issue) and change ordering of bare metal to (super, aorus, antsle)
 
 # Monitoring
 - Node exporter debian ansible playbook
