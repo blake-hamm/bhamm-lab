@@ -56,7 +56,7 @@ spec:
         args:
           - |
             set -e
-            
+
             # Install pre-reqs
             apt-get update && apt-get install -y \
                 wget \
@@ -84,7 +84,7 @@ spec:
 
             # Clone repository
             echo "Cloning repository..."
-            git clone -b feature/cicd https://git.bhamm-lab.com/bhamm/bhamm-lab.git /workspace/repo
+            git clone -b feature/cicd http://gitea.gitea-http:3000/bhamm/bhamm-lab.git /workspace/repo
 
             # Decrypt secrets
             echo "Decrypting secrets..."
