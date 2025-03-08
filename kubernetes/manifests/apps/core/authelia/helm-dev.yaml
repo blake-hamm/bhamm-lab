@@ -18,7 +18,7 @@ spec:
       valuesObject:
         pod:
           kind: 'Deployment'
-          replicas: 2
+          replicas: 1
           extraVolumeMounts:
             - mountPath: '/app/custom-secrets'
               name: 'custom-secrets'
