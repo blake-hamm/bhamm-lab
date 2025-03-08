@@ -157,6 +157,8 @@ x Test DR
 - Integrate proxmox with traefik
 
 # Finish
+- Use gitea container registry
+  - sync sops workflow
 - Document secret rotation
 - Refactor argocd projects into 'core', 'default'
 - Deploy
