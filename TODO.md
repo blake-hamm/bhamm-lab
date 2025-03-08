@@ -91,7 +91,7 @@ x Switch argocd to gitea repo
   - On merge to main - tofu/ansible and argocd sync
 - Test DR
   x Deploy manifests
-  - Confirm pvc
+  x Confirm pvc
     x Alter helm chart to require snapshot name and path for recovery
     x example
     x minio (state bucket and keys) - backup from s3 instead
@@ -99,7 +99,7 @@ x Switch argocd to gitea repo
       x Based on list of pvc, restore each one and generate 'folder claimName'
       x Try again with snapshot name
     x immich (library)
-    - gitea (shared)
+    x gitea (shared)
   - Need to develop and prove out pg w/ ceph + volume snapshot
     - common chart deploys volume snapshot directly from ceph
     - Confirm db

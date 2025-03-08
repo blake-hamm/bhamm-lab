@@ -37,8 +37,6 @@ spec:
         postgresql:
           enabled: true
           storageSize: 1Gi
-          backups:
-            enabled: true
         ingressRoutes:
           - enabled: true
             name: authelia
@@ -46,7 +44,7 @@ spec:
             websocket: true
             routes:
               - kind: Rule
-                match: Host(`auth.bhamm-lab.com`)
+                match: Host(`auth.dev.bhamm-lab.com`)
                 middlewares:
                   - name: default-headers
                 services:
