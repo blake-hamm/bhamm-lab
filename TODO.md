@@ -88,6 +88,7 @@ x Troubleshoot tofu proxmox/k3s when migrating vm (ssh issue) and change orderin
     x Leverage module for prod and dev
   x Ansible
     x Adapt dev
+  - Add gitea action token into vault config
   - Ensure on open pr - spin up new k3s cluster and deploy
   - On merge to main
     - tofu/ansible and argocd sync

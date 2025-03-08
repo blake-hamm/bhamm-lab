@@ -67,8 +67,10 @@ spec:
             adminGroup: "lldap_admin"
         actions:
           enabled: true
-          existingSecret: gitea-actions-token
-          existingSecretKey: token
+          provisioning:
+            enabled: true
+            # existingSecret: gitea-actions-token
+            # existingSecretKey: token
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
