@@ -66,9 +66,7 @@ spec:
             autoDiscoverUrl: https://auth.dev.bhamm-lab.com/.well-known/openid-configuration
             adminGroup: "lldap_admin"
         actions:
-          enabled: true
-          existingSecret: gitea-actions-token
-          existingSecretKey: token
+          enabled: false
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
