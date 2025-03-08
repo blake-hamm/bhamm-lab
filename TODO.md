@@ -105,7 +105,7 @@ x Switch argocd to gitea repo
     - Confirm db
       x example (query)
       x immich (login) - TODO: make pvc for config file (contains oidc)
-      - gitea (code)
+      x gitea (code)
       - authelia (2fa)
 - Convert sync sops to vault job as argo workflow template
   - Trigger from argo event when vault is ready

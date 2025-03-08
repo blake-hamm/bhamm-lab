@@ -25,6 +25,9 @@ spec:
         k8up:
           backup:
             enabled: false
+          restores:
+            - snapshot: "46d2fa2eb299aff6831004056cde6065c7ed47ebcf0e29a042771020eb1a635c"
+              claimName: "gitea-shared-storage"
         postgresql:
           enabled: true
           backups:
