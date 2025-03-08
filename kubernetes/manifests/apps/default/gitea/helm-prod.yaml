@@ -65,10 +65,10 @@ spec:
             existingSecret: 'gitea-external-secret'
             autoDiscoverUrl: https://auth.bhamm-lab.com/.well-known/openid-configuration
             adminGroup: "lldap_admin"
-            # actions:
-            #   enabled: true
-            #   existingSecret: gitea-actions-token
-            #   existingSecretKey: token
+        actions:
+          enabled: true
+          existingSecret: gitea-external-secret
+          existingSecretKey: action-token
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

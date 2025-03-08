@@ -22,10 +22,10 @@ spec:
               remoteRef:
                 key: /default/gitea
                 property: oidc_client_secret
-                # - secretKey: action-token
-                #   remoteRef:
-                #     key: /default/gitea
-                #     property: action-token
+            - secretKey: action-token
+              remoteRef:
+                key: /default/gitea
+                property: action-token
         k8up:
           backup:
             enabled: true
