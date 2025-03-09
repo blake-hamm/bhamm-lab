@@ -69,6 +69,16 @@ spec:
           enabled: true
           existingSecret: gitea-external-secret
           existingSecretKey: action-token
+          statefulset:
+            actRunner:
+              config: |
+                log:
+                  level: debug
+                cache:
+                  enabled: true
+                runner:
+                  labels:
+                    - "ubuntu-latest:docker://node:16-bullseye"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
