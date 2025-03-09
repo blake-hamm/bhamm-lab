@@ -1,0 +1,13 @@
+name: PR Environment Deployment
+on:
+  pull_request:
+    types: [opened]
+jobs:
+  deploy-k3s-dev:
+    name: Deploy k3s Dev Environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
