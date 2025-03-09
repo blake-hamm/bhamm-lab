@@ -43,13 +43,16 @@ metadata:
   name: sync-sops-to-vault-workflow
   namespace: vault
   annotations:
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "0"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   entrypoint: sync-sops-to-vault-workflow
   serviceAccountName: sync-sops-to-vault-sa
   templates:
     - name: sync-sops-to-vault-workflow
+      retryStrategy:
+        limit: "10"
+        retryPolicy: "Always"
       container:
         image: debian:bookworm-slim
         command: ["/bin/bash", "-c"]
