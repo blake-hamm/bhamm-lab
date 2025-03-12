@@ -81,6 +81,10 @@ x Mirror github to gitea as primary
   x Set github as upstream
 x Switch argocd to gitea repo
 x Troubleshoot tofu proxmox/k3s when migrating vm (ssh issue) and change ordering of bare metal to (super, aorus, antsle)
+- Destory legacy 'prod' once new prod is working properly
+- Redploy 'prod' with new setup/cidr
+- Restore with k8up and volume snapshots
+- Setup gitea properly
 - Setup gitea pipeline for k3s
   x Terraform proxmox
     x Setup minio tofu backend
