@@ -49,6 +49,12 @@ spec:
               NAME: gitea
               USER: gitea
               SCHEMA: public
+          oauth:
+            - name: 'authelia'
+              provider: 'openidConnect'
+              existingSecret: 'gitea-external-secret'
+              autoDiscoverUrl: http://authelia.authelia.svc.cluster.local/.well-known/openid-configuration
+              adminGroup: "lldap_admin"
           additionalConfigFromEnvs:
             - name: GITEA__DATABASE__PASSWD
               valueFrom:
@@ -59,12 +65,6 @@ spec:
           enabled: false
         postgresql-ha:
           enabled: false
-        oauth:
-          - name: 'authelia'
-            provider: 'openidConnect'
-            existingSecret: 'gitea-external-secret'
-            autoDiscoverUrl: http://authelia.authelia.svc.cluster.local/.well-known/openid-configuration
-            adminGroup: "lldap_admin"
         actions:
           enabled: true
           existingSecret: gitea-external-secret
