@@ -4,7 +4,7 @@ metadata:
   name: sync-sops-to-vault-sa
   namespace: vault
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-wave: "-2"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -12,7 +12,7 @@ metadata:
   name: sync-sops-to-vault-role
   namespace: vault
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-wave: "-2"
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
@@ -27,7 +27,7 @@ metadata:
   name: sync-sops-to-vault-binding
   namespace: vault
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-wave: "-2"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -43,8 +43,9 @@ metadata:
   name: sync-sops-to-vault-workflow
   namespace: vault
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "-1"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/hook: Sync
 spec:
   entrypoint: sync-sops-to-vault-workflow
   serviceAccountName: sync-sops-to-vault-sa
