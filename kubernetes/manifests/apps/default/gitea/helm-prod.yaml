@@ -66,7 +66,7 @@ spec:
         postgresql-ha:
           enabled: false
         actions:
-          enabled: true
+          enabled: false
           existingSecret: gitea-external-secret
           existingSecretKey: action-token
           statefulset:
