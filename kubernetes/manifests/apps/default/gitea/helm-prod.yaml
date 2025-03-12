@@ -80,6 +80,10 @@ spec:
                 runner:
                   labels:
                     - "ubuntu-latest:docker://node:16-bullseye"
+        redis-cluster:
+          enabled: false
+        redis:
+          enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
