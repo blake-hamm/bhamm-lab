@@ -9,8 +9,8 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    repoURL: https://git.bhamm-lab.com/bhamm/bhamm-lab.git
-    targetRevision: feature/k3s-again
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    targetRevision: feature/cicd
     path: kubernetes/charts/common
     helm:
       valuesObject:
