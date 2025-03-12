@@ -18,7 +18,7 @@ spec:
         externalSecrets:
           enabled: true
           secrets:
-            - secretKey: oidc_client_secret
+            - secretKey: key
               remoteRef:
                 key: /default/gitea
                 property: oidc_client_secret
