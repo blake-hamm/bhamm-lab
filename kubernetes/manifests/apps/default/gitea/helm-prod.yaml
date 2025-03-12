@@ -13,7 +13,7 @@ spec:
   source:
     chart: gitea
     repoURL: https://dl.gitea.com/charts/
-    targetRevision: v10.6.0
+    targetRevision: v11.0.0
     helm:
       valuesObject:
         replicaCount: 1
