@@ -1,7 +1,7 @@
 name: PR Environment Deployment
 on:
   pull_request:
-    types: [opened]
+    types: [opened, synchronize]
 jobs:
   deploy-k3s-dev:
     name: Deploy k3s Dev Environment
