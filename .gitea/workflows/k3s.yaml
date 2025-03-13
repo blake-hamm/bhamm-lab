@@ -9,13 +9,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          repository: bhamm/bhamm-lab
-      - name: Setup OpenTofu
-        uses: opentofu/actions-setup@v1
-        with:
-          tofu_version: 1.7.1
-      - name: Terraform Apply
-        run: |
-          tofu -chdir=tofu/proxmox/k3s workspace select dev
-          tofu -chdir=tofu/proxmox/k3s apply -var-file=dev.tfvars -parallelism=2 -auto-approve
+    # - name: Setup OpenTofu
+    #   uses: opentofu/actions-setup@v1
+    #   with:
+    #     tofu_version: 1.7.1
+    # - name: Terraform Apply
+    #   run: |
+    #     tofu -chdir=tofu/proxmox/k3s workspace select dev
+    #     tofu -chdir=tofu/proxmox/k3s apply -var-file=dev.tfvars -parallelism=2 -auto-approve
