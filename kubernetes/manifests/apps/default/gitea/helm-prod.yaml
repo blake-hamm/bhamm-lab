@@ -81,7 +81,7 @@ spec:
                   enabled: true
                 runner:
                   labels:
-                    - "ubuntu-latest:docker://node:16-bullseye"
+                    - "ubuntu-latest:docker://node:18-bullseye"
         redis-cluster:
           enabled: false
         redis:
