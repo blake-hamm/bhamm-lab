@@ -9,6 +9,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          repository: bhamm/bhamm-lab
       - name: Setup OpenTofu
         uses: opentofu/actions-setup@v1
         with:
