@@ -55,7 +55,7 @@ spec:
               provider: 'openidConnect'
               existingSecret: 'gitea-external-secret'
               autoDiscoverUrl: https://auth.bhamm-lab.com/.well-known/openid-configuration
-              scopes: 'openid email profile'
+              scopes: 'openid email profile groups'
               adminGroup: "admin"
           additionalConfigFromEnvs:
             - name: GITEA__DATABASE__PASSWD
