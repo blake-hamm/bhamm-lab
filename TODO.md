@@ -88,6 +88,7 @@ x Setup gitea properly
 - Setup gitea pipeline for k3s
   x Terraform proxmox
     x Setup minio tofu backend
+    - migrate backend to minio
     x Convert k3s into module
     x Leverage module for prod and dev
   x Ansible
