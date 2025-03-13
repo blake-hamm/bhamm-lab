@@ -84,7 +84,7 @@ x Troubleshoot tofu proxmox/k3s when migrating vm (ssh issue) and change orderin
 x Destory legacy 'prod' once new prod is working properly
 x Redploy 'prod' with new setup/cidr
 x Restore with k8up and volume snapshots
-- Setup gitea properly
+x Setup gitea properly
 - Setup gitea pipeline for k3s
   x Terraform proxmox
     x Setup minio tofu backend
