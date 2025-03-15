@@ -1,4 +1,5 @@
 ansible
+requests
 # hvac
 # httpx
 # jmespath
