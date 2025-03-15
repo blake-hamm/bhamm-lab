@@ -9,6 +9,8 @@ jobs:
     name: Deploy k3s Dev Environment
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
       - name: Deploy Environment
         uses: ./.gitea/actions/reuse-k3s-deploy.yaml
         with:
