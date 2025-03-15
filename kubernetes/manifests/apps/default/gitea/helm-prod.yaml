@@ -84,6 +84,10 @@ spec:
                   mountPath: /var/run/secrets/kubernetes.io/serviceaccount
                   readOnly: true
             actRunner:
+              extraVolumeMounts:
+                - name: kube-sa-token
+                  mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+                  readOnly: true
               config: |
                 container:
                   valid_volumes:
