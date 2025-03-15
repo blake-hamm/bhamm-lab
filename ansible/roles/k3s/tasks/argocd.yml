@@ -78,3 +78,9 @@
         wait: true
         wait_sleep: 10
         wait_timeout: 360
+- name: Deploy apps
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    template: apps.yaml.j2
+    wait: true
