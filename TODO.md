@@ -86,8 +86,8 @@ x Redploy 'prod' with new setup/cidr
 x Restore with k8up and volume snapshots
 x Setup gitea properly
 x Document restore (immich - db/pvc)
-- Restore minio fully
-- Migrate tofu state to minio
+x Restore minio fully
+x Migrate tofu state to minio
 - Setup gitea pipeline for k3s
   x Terraform proxmox
     x Setup minio tofu backend
