@@ -85,6 +85,9 @@ x Destory legacy 'prod' once new prod is working properly
 x Redploy 'prod' with new setup/cidr
 x Restore with k8up and volume snapshots
 x Setup gitea properly
+- Document restore (immich - db/pvc)
+- Restore minio fully
+- Migrate tofu state to minio
 - Setup gitea pipeline for k3s
   x Terraform proxmox
     x Setup minio tofu backend
