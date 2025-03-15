@@ -81,7 +81,7 @@ spec:
                   enabled: true
                 runner:
                   labels:
-                    - "ubuntu-latest:docker://node:18-bullseye"
+                    - "ubuntu-latest:docker://docker.gitea.com/runner-images:ubuntu-latest"
         redis-cluster:
           enabled: false
         redis:
