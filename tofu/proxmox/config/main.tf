@@ -19,6 +19,7 @@ resource "proxmox_virtual_environment_file" "cloud_config" {
         shell: /bin/bash
         ssh_authorized_keys:
           - ${trimspace(data.local_file.ssh_public_key.content)}
+          - ${trimspace(env.GITEA_PUBLIC_KEY)}
         sudo: ALL=(ALL) NOPASSWD:ALL
     runcmd:
         - apt update
