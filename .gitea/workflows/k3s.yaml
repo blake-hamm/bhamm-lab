@@ -25,6 +25,9 @@ jobs:
             secret/data/external/proxmox PROXMOX_TOKEN_SECRET | PROXMOX_TOKEN_SECRET;
             secret/data/default/gitea ssh_private_key | GITEA_PRIVATE_KEY;
             secret/data/external/gcp gcp-k8up-sa | GOOGLE_APPLICATION_CREDENTIALS
+      - name: Write GCP Credentials to File
+        run: |
+          echo "$GOOGLE_APPLICATION_CREDENTIALS" > ${{ runner.temp }}/gcp_credentials.json
       - name: Setup OpenTofu
         uses: opentofu/setup-opentofu@v1
         with:
