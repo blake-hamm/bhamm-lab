@@ -19,7 +19,8 @@ jobs:
           secretId: ${{ secrets.VAULT_SECRET_ID }}
           tlsSkipVerify: true
           secrets: |
-            secret/data/core/gitea KUBECONFIG
+            secret/data/core/minio CONSOLE_ACCESS_KEY | AWS_ACCESS_KEY_ID
+            secret/data/core/minio CONSOLE_SECRET_KEY | AWS_SECRET_ACCESS_KEY
       - name: Setup OpenTofu
         uses: opentofu/setup-opentofu@v1
         with:
