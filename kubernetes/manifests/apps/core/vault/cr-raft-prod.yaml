@@ -97,10 +97,10 @@ spec:
         rules: path "*" { capabilities = ["create", "read", "update", "delete", "list", "sudo"] }
       - name: prometheus-operator
         rules: path "sys/metrics" { capabilities = ["list", "read"] }
-      - name: ansible
-        rules: path "secret/data/core/ansible/*" { capabilities = ["create", "read", "update", "delete", "list"] }
-      - name: create_token
-        rules: path "auth/token/create" { capabilities = ["create", "update"] }
+        # - name: ansible
+        #   rules: path "secret/data/core/ansible/*" { capabilities = ["create", "read", "update", "delete", "list"] }
+        # - name: create_token
+        #   rules: path "auth/token/create" { capabilities = ["create", "update"] }
     auth:
       - type: kubernetes
         roles:
@@ -113,6 +113,11 @@ spec:
             bound_service_account_names: "sync-sops-to-vault-sa"
             bound_service_account_namespaces: "vault"
             policies: allow_secrets
+            ttl: 1h
+          - name: gitea
+            bound_service_account_names: "default"
+            bound_service_account_namespaces: "gitea"
+            policies: read_secrets
             ttl: 1h
           - name: prometheus
             bound_service_account_names: monitor-kube-prometheus-st-prometheus
@@ -128,13 +133,13 @@ spec:
             token_num_uses: 10
             token_ttl: 20m
             token_max_ttl: 30m
-          - name: ansible
-            policies: read_secrets, ansible
-            secret_id_ttl: 1440h
-            secret_id_num_uses: 1000
-            token_num_uses: 0
-            token_ttl: 20m
-            token_max_ttl: 30m
+            # - name: ansible
+            #   policies: read_secrets, ansible
+            #   secret_id_ttl: 1440h
+            #   secret_id_num_uses: 1000
+            #   token_num_uses: 0
+            #   token_ttl: 20m
+            #   token_max_ttl: 30m
             # - type: oidc
             #   config:
             #     oidc_discovery_url: https://auth.bhamm-lab.com
