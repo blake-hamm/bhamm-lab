@@ -73,16 +73,16 @@ spec:
           existingSecret: gitea-external-secret
           existingSecretKey: action-token
           statefulset:
-            # extraVolumes:
-            #   - name: kube-sa-token
-            #     hostPath:
-            #       path: /var/run/secrets/kubernetes.io/serviceaccount
-            #       type: Directory
+            extraVolumes:
+              - name: kube-sa-token
+                hostPath:
+                  path: /var/run/secrets/kubernetes.io/serviceaccount
+                  type: Directory
             actRunner:
-              # extraVolumeMounts:
-              #   - name: kube-sa-token
-              #     mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-              #     readOnly: true
+              extraVolumeMounts:
+                - name: kube-sa-token
+                  mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+                  readOnly: true
               config: |
                 container:
                   valid_volumes:
