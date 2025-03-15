@@ -11,7 +11,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Deploy Environment
-        uses: ./.gitea/actions/reuse-k3s-deploy.yaml
+      - name: Deploy k3s dev Environment
+        uses: ./.gitea/actions/reuse-k3s-deploy
         with:
           environment: dev
+          branch: ${{ github.head_ref || github.ref_name }}

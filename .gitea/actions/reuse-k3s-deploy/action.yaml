@@ -1,9 +1,13 @@
-name: 'Deploy k3s Environment'
-description: 'Deploys k3s environment using OpenTofu and Ansible'
+name: "Reuse k3s Deployment"
+description: "A composite action to deploy a k3s environment."
 inputs:
   env:
     description: 'Environment name (dev/prod)'
     required: true
+  branch:
+    description: "The branch name triggering the deployment"
+    required: true
+    default: "dev"
 runs:
   using: "composite"
   steps:
@@ -51,7 +55,7 @@ runs:
       uses: dawidd6/action-ansible-playbook@v3
       env:
         GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/gcp_credentials.json
-        BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        BRANCH_NAME: ${{ inputs.branch }}
       with:
         playbook: ansible/main.yml
         requirements: ansible/requirements.yml
