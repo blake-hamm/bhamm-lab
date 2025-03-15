@@ -1,12 +1,13 @@
 name: Prod k3s Deployment
 on:
-  pull_request:
-    types:
-      - opened
-      - synchronize
+  push:
+    branches:
+      - main
+      - hotfix/*
+      - feature/cicd
 jobs:
-  deploy-k3s-dev:
-    name: Deploy k3s Dev Environment
+  deploy-k3s-prod:
+    name: Deploy k3s Prod Environment
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -37,8 +38,8 @@ jobs:
       - name: Tofu Apply
         run: |
           tofu -chdir=tofu/proxmox/k3s init
-          tofu -chdir=tofu/proxmox/k3s workspace select -or-create=true dev
-          tofu -chdir=tofu/proxmox/k3s apply -var-file=dev.tfvars -parallelism=2 -auto-approve
+          tofu -chdir=tofu/proxmox/k3s workspace select -or-create=true prod
+          tofu -chdir=tofu/proxmox/k3s apply -var-file=prod.tfvars -parallelism=2 -auto-approve
       - name: Setup python
         uses: actions/setup-python@v5
         with:
@@ -61,6 +62,6 @@ jobs:
           requirements: ansible/requirements.yml
           key: ${{ env.GITEA_PRIVATE_KEY }}
           options: |
-            -l dev-k3s*
+            -l prod-k3s*
             -t debian,k3s
-            -e "env=dev BRANCH_NAME=${{ env.BRANCH_NAME }}"
+            -e "env=prod BRANCH_NAME=${{ env.BRANCH_NAME }}"
