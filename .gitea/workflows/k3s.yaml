@@ -41,10 +41,4 @@ jobs:
         shell: bash
         run: pip install -r requirements.txt
       - name: Run playbook
-        uses: dawidd6/action-ansible-playbook@v3
-        with:
-          playbook: main.yml
-          options: |
-            -l dev-k3s*
-            -t debian,k3s
-            -e "env=dev"
+        run: ansible-playbook ansible/main.yml -l dev-k3s* -t debian,k3s -e "env=dev"
