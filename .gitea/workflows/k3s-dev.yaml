@@ -1,0 +1,15 @@
+name: Dev k3s Environment Deployment
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+jobs:
+  deploy-k3s-dev:
+    name: Deploy k3s Dev Environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Environment
+        uses: ./.gitea/actions/reuse-k3s-deploy.yaml
+        with:
+          environment: dev

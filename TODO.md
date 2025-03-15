@@ -88,16 +88,16 @@ x Setup gitea properly
 x Document restore (immich - db/pvc)
 x Restore minio fully
 x Migrate tofu state to minio
-- Setup gitea pipeline for k3s
+x Setup gitea pipeline for k3s
   x Terraform proxmox
     x Setup minio tofu backend
-    - migrate backend to minio
+    x migrate backend to minio
     x Convert k3s into module
     x Leverage module for prod and dev
   x Ansible
     x Adapt dev
   x Add gitea action token into vault config
-  - Ensure on open pr - spin up new k3s cluster and deploy
+  x Ensure on open pr - spin up new k3s cluster and deploy
   - On merge to main
     - tofu/ansible and argocd sync
     - destory dev cluster
@@ -119,9 +119,6 @@ x Test DR
       x immich (login) - TODO: make pvc for config file (contains oidc)
       x gitea (code)
       x authelia (2fa)
-- Convert sync sops to vault job as argo workflow template
-  - Trigger from argo event when vault is ready
-  - Trigger from gitea on secret changes
 - After merge PR, point prod to 'main' branch in all aspects
 
 # Monitoring
@@ -168,6 +165,9 @@ x Test DR
 - Install awx - https://github.com/ansible-community/awx-operator-helm
 - Use gitea container registry
   - sync sops workflow
+- Convert sync sops to vault job as argo workflow template
+  - Trigger from argo event when vault is ready
+  - Trigger from argo event on secret changes in git
 - Document secret rotation
 - Refactor argocd projects into 'core', 'default'
 - Deploy
