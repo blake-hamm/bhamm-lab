@@ -202,7 +202,7 @@ spec:
                   token_endpoint_auth_method: 'client_secret_basic'
                 - client_id: 'minio'
                   client_name: 'MinIO'
-                  client_secret: '$pbkdf2-sha512$310000$bMk3zrQxvMrpnDb8lafISw$tauR6Q0aaWsR9zrUdIAMrDzjfq1cJi5pSG/XKSNUtACzPp2slmS4tYRLcNho6YGOL1/eViC.tJx5QUCLbC9g0g'
+                  client_secret: '$pbkdf2-sha512$310000$U0PxZ6W3C4G8lPbYu5MEgg$ef2lbfABxs.OXuleAxY.yl0gPYp/9uz0UhB0JXZJT4GYBVx6l5bybIdA0mii7Bbqul9jM7PkDY6SXzthSY2Zew'
                   public: false
                   authorization_policy: 'two_factor'
                   redirect_uris:
