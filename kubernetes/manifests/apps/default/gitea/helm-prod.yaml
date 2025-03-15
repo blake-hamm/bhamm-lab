@@ -78,11 +78,12 @@ spec:
                 hostPath:
                   path: /var/run/secrets/kubernetes.io/serviceaccount
                   type: Directory
-            actRunner:
+            dind:
               extraVolumeMounts:
                 - name: kube-sa-token
                   mountPath: /var/run/secrets/kubernetes.io/serviceaccount
                   readOnly: true
+            actRunner:
               config: |
                 container:
                   valid_volumes:
