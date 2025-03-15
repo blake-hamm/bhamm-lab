@@ -7,7 +7,12 @@ inputs:
   branch:
     description: "The branch name triggering the deployment"
     required: true
-    default: "dev"
+  roleId:
+    description: 'Vault role id'
+    required: true
+  secretId:
+    description: 'Vault secret id'
+    required: true
 runs:
   using: "composite"
   steps:
@@ -17,8 +22,8 @@ runs:
       with:
         url: https://vault.vault:8200
         method: approle
-        roleId: ${{ secrets.VAULT_ROLE_ID }}
-        secretId: ${{ secrets.VAULT_SECRET_ID }}
+        roleId: ${{ inputs.roleId }}
+        secretId: ${{ inputs.secretId }}
         tlsSkipVerify: true
         secrets: |
           secret/data/core/minio CONSOLE_ACCESS_KEY | AWS_ACCESS_KEY_ID;

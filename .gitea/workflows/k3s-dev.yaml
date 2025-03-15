@@ -16,3 +16,5 @@ jobs:
         with:
           environment: dev
           branch: ${{ github.head_ref || github.ref_name }}
+          roleId: ${{ secrets.VAULT_ROLE_ID }}
+          secretId: ${{ secrets.VAULT_SECRET_ID }}
