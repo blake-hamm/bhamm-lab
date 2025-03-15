@@ -15,32 +15,39 @@
     wait: true
   retries: 3
   delay: 15
-- name: Check for existing ArgoCD installation
+- name: Check ArgoCD server pod status
+  kubernetes.core.k8s_info:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    kind: Pod
+    namespace: argocd
+    label_selectors:
+      - app.kubernetes.io/name=argocd-server
+  register: argocd_server_check
+  changed_when: false
+  ignore_errors: true
+- name: Check ArgoCD repo server pod status
+  kubernetes.core.k8s_info:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    kind: Pod
+    namespace: argocd
+    label_selectors:
+      - app.kubernetes.io/name=argocd-repo-server
+  register: argocd_repo_check
+  changed_when: false
+  ignore_errors: true
+- name: Set installation status fact
+  ansible.builtin.set_fact:
+    argocd_needs_install: >
+      {{
+      (argocd_server_check.resources | default([]) | length == 0) or
+      (argocd_repo_check.resources | default([]) | length == 0) or
+      (argocd_server_check.resources | selectattr('status.phase', 'eq', 'Running') | list | length == 0) or
+      (argocd_repo_check.resources | selectattr('status.phase', 'eq', 'Running') | list | length == 0)
+      }}
+- name: Wait for ArgoCD components
+  when: argocd_needs_install
   block:
-    - name: Verify ArgoCD server pod
-      kubernetes.core.k8s_info:
-        kubeconfig: /etc/rancher/k3s/k3s.yaml
-        kind: Pod
-        namespace: argocd
-        label_selectors:
-          - app.kubernetes.io/name=argocd-server
-      register: argocd_check
-      until: argocd_check.resources | selectattr('status.phase', 'eq', 'Running') | list | length > 0
-      retries: 2
-      delay: 5
-    - name: Verify ArgoCD repo server pod
-      kubernetes.core.k8s_info:
-        kubeconfig: /etc/rancher/k3s/k3s.yaml
-        kind: Pod
-        namespace: argocd
-        label_selectors:
-          - app.kubernetes.io/name=argocd-repo-server
-      register: repo_check
-      until: repo_check.resources | selectattr('status.phase', 'eq', 'Running') | list | length > 0
-      retries: 2
-      delay: 5
-  rescue:
-    - name: Install ArgoCD with Helm
+    - name: Install ArgoCD with Helm if needed
       kubernetes.core.helm:
         release_name: argocd
         release_namespace: argocd
@@ -51,7 +58,7 @@
         state: present
         force: true
       failed_when: false
-    - name: Wait for ArgoCD server
+    - name: Wait for server
       kubernetes.core.k8s_info:
         kubeconfig: /etc/rancher/k3s/k3s.yaml
         kind: Pod
@@ -61,7 +68,7 @@
         wait: true
         wait_sleep: 10
         wait_timeout: 360
-    - name: Wait for Repo server
+    - name: Wait for repo server
       kubernetes.core.k8s_info:
         kubeconfig: /etc/rancher/k3s/k3s.yaml
         kind: Pod
