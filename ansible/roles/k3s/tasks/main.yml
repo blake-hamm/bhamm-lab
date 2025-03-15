@@ -2,7 +2,7 @@
 - name: Set target master based on environment
   ansible.builtin.set_fact:
     target_master: "{{ (groups['k3s_master'] | select('match', (env == 'dev') | ternary('^dev-', '^prod-')) | list) | first }}"
-  tags: [argocd]
+  tags: [argocd, kubeconfig]
 - name: Run pre tasks
   ansible.builtin.include_tasks: pre.yml
 - name: Gather ceph data
@@ -37,10 +37,11 @@
       tags: [argocd]
       delegate_to: "{{ target_master }}"
   tags: [argocd]
-
-# - name: Copy kubeconfig to local
-#   ansible.builtin.include_tasks:
-#     file: kubeconfig.yml
-#     apply:
-#       run_once: true
-#       delegate_to: "{{ target_master }}"
+- name: Copy kubeconfig to local
+  ansible.builtin.include_tasks:
+    file: kubeconfig.yml
+    apply:
+      run_once: true
+      tags: [kubeconfig]
+      delegate_to: "{{ target_master }}"
+  tags: [kubeconfig]
