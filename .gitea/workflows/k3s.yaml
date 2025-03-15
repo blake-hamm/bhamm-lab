@@ -32,6 +32,10 @@ jobs:
           tofu -chdir=tofu/proxmox/k3s init
           tofu -chdir=tofu/proxmox/k3s workspace select -or-create=true dev
           tofu -chdir=tofu/proxmox/k3s apply -var-file=dev.tfvars -parallelism=2 -auto-approve
+      - name: "Install Ansible"
+        uses: alex-oleshkevich/setup-ansible@v1.0.1
+        with:
+          version: "9.3.0"
       - name: Run playbook
         uses: dawidd6/action-ansible-playbook@v3
         with:
