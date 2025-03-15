@@ -61,3 +61,4 @@ jobs:
             -l dev-k3s*
             -t debian,k3s
             -e "env=dev"
+            -e "gitea_branch=${{ GITEA_REF_NAME }}"
