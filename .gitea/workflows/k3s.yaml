@@ -13,7 +13,7 @@ jobs:
         uses: opentofu/setup-opentofu@v1
         with:
           tofu_version: 1.7.1
-    # - name: Terraform Apply
-    #   run: |
-    #     tofu -chdir=tofu/proxmox/k3s workspace select dev
-    #     tofu -chdir=tofu/proxmox/k3s apply -var-file=dev.tfvars -parallelism=2 -auto-approve
+      - name: Terraform Apply
+        run: |
+          tofu -chdir=tofu/proxmox/k3s workspace select dev
+          tofu -chdir=tofu/proxmox/k3s apply -var-file=dev.tfvars -parallelism=2 -auto-approve
