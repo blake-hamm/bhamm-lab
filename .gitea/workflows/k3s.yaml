@@ -49,13 +49,11 @@ jobs:
         uses: mdgreenwald/mozilla-sops-action@v1.6.0
         with:
           version: '3.8.1'
-      - run: echo ${{ env.BRANCH_NAME }}
-        env:
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
       - name: Run playbook
         uses: dawidd6/action-ansible-playbook@v3
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/gcp_credentials.json
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         with:
           playbook: ansible/main.yml
           requirements: ansible/requirements.yml
@@ -63,4 +61,4 @@ jobs:
           options: |
             -l dev-k3s*
             -t debian,k3s
-            -e "env=dev GITEA_REF_NAME=${{ env.GITEA_REF_NAME }}"
+            -e "env=dev BRANCH_NAME=${{ env.BRANCH_NAME }}"

@@ -14,7 +14,7 @@ tofu -chdir=tofu/proxmox/k3s destroy -var-file=dev.tfvars -parallelism=2 -auto-a
 
 2. Ansible to secure debian vm's and deploy k3s
 ```bash
-ansible-playbook ansible/main.yml -l dev-k3s* -t debian,k3s -e "env=dev GITEA_REF_NAME=feature/cicd"
+ansible-playbook ansible/main.yml -l dev-k3s* -t debian,k3s -e "env=dev BRANCH_NAME=feature/cicd"
 ```
 *Note: this uses proxmox dynamic inventory*
 
