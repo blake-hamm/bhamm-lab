@@ -165,6 +165,7 @@ x Test DR
 - Integrate proxmox with traefik
 
 # Finish
+- Install awx - https://github.com/ansible-community/awx-operator-helm
 - Use gitea container registry
   - sync sops workflow
 - Document secret rotation
