@@ -41,7 +41,8 @@ spec:
           buckets:
             - name: argo-artifacts
             - name: tofu-state
-          users: []
+          users:
+            - name: minio-external-secret
           env:
             - name: MINIO_IDENTITY_OPENID_CONFIG_URL
               value: "https://auth.bhamm-lab.com/.well-known/openid-configuration"
