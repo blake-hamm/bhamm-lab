@@ -34,9 +34,15 @@ jobs:
         uses: opentofu/setup-opentofu@v1
         with:
           tofu_version: 1.7.1
-      - name: Tofu Apply
+      - name: Tofu Destroy dev and Apply prod
         run: |
           tofu -chdir=tofu/proxmox/k3s init
+
+          # Destroy dev
+          tofu -chdir=tofu/proxmox/k3s workspace select -or-create=true dev
+          tofu -chdir=tofu/proxmox/k3s destroy -var-file=dev.tfvars -parallelism=2 -auto-approve
+
+          # Deploy prod
           tofu -chdir=tofu/proxmox/k3s workspace select -or-create=true prod
           tofu -chdir=tofu/proxmox/k3s apply -var-file=prod.tfvars -parallelism=2 -auto-approve
       - name: Setup python
