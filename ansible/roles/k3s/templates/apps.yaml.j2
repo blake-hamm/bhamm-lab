@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://git.bhamm-lab.com/bhamm/bhamm-lab.git
-    targetRevision: {{ gitea_branch }}
+    targetRevision: {{ GITEA_REF_NAME }}
     path: kubernetes/manifests/apps
     directory:
       recurse: true

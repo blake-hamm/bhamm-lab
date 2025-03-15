@@ -53,8 +53,7 @@ jobs:
         uses: dawidd6/action-ansible-playbook@v3
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/gcp_credentials.json
-          gitea_branch: ${{ GITEA_REF_NAME }}
-          env: dev
+          GITEA_env: dev
         with:
           playbook: ansible/main.yml
           requirements: ansible/requirements.yml
