@@ -32,3 +32,11 @@ jobs:
           tofu -chdir=tofu/proxmox/k3s init
           tofu -chdir=tofu/proxmox/k3s workspace select -or-create=true dev
           tofu -chdir=tofu/proxmox/k3s apply -var-file=dev.tfvars -parallelism=2 -auto-approve
+      - name: Run playbook
+        uses: dawidd6/action-ansible-playbook@v3
+        with:
+          playbook: main.yml
+          options: |
+            -l dev-k3s*
+            -t debian,k3s
+            -e "env=dev"
