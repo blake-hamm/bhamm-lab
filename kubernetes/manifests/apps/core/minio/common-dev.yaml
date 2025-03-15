@@ -40,18 +40,17 @@ spec:
               remoteRef:
                 key: /core/minio
                 property: config.env
+            - secretKey: CONSOLE_ACCESS_KEY
+              remoteRef:
+                key: /core/minio
+                property: CONSOLE_ACCESS_KEY
+            - secretKey: CONSOLE_SECRET_KEY
+              remoteRef:
+                key: /core/minio
+                property: CONSOLE_SECRET_KEY
         k8up:
           backup:
             enabled: false
-          restores:
-            - snapshot: "5c8686a6f91aea6ee4bf4d5d1de64c5b7e3a533e79b8ecb4eda5ce54a2a3a51a"
-              claimName: "data0-minio-tenant-main-0"
-            - snapshot: "df6820236a846cc134cafe6fe4f6206aac4e5a07b2b0bbb536ea1c21699dcca4"
-              claimName: "data0-minio-tenant-main-1"
-            - snapshot: "5e5459646e69528fb5b78db3b7b2cbf4abb1b122ba18430c411cddcdad4e7e27"
-              claimName: "data1-minio-tenant-main-0"
-            - snapshot: "4d293b0299316a56101740208b5ed29a8e90fe19092fd20a2d299e8d667709a6"
-              claimName: "data1-minio-tenant-main-1"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
