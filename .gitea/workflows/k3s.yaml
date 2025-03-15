@@ -20,7 +20,9 @@ jobs:
           tlsSkipVerify: true
           secrets: |
             secret/data/core/minio CONSOLE_ACCESS_KEY | AWS_ACCESS_KEY_ID;
-            secret/data/core/minio CONSOLE_SECRET_KEY | AWS_SECRET_ACCESS_KEY
+            secret/data/core/minio CONSOLE_SECRET_KEY | AWS_SECRET_ACCESS_KEY;
+            secret/data/external/proxmox PROXMOX_VE_API_TOKEN | PROXMOX_VE_API_TOKEN;
+            secret/data/external/proxmox PROXMOX_TOKEN_SECRET | PROXMOX_TOKEN_SECRET
       - name: Setup OpenTofu
         uses: opentofu/setup-opentofu@v1
         with:
