@@ -49,7 +49,9 @@ jobs:
         uses: mdgreenwald/mozilla-sops-action@v1.6.0
         with:
           version: '3.8.1'
-      - run: echo ${{ env.GITHUB_REF_NAME }}
+      - run: echo ${{ env.BRANCH_NAME }}
+        env:
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
       - name: Run playbook
         uses: dawidd6/action-ansible-playbook@v3
         env:
