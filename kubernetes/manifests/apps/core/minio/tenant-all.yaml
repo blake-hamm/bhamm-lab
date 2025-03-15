@@ -44,21 +44,21 @@ spec:
           users: []
           env:
             - name: MINIO_IDENTITY_OPENID_CONFIG_URL
-              value: https://auth.bhamm-lab.com/.well-known/openid-configuration
+              value: "https://auth.bhamm-lab.com/.well-known/openid-configuration"
             - name: MINIO_IDENTITY_OPENID_CLIENT_ID
-              value: minio
+              value: "minio"
             - name: MINIO_IDENTITY_OPENID_CLAIM_NAME
-              value: groups
+              value: "groups"
             - name: MINIO_IDENTITY_OPENID_SCOPES
-              value: openid,profile,email,groups
+              value: "openid,profile,email,groups"
             - name: MINIO_IDENTITY_OPENID_REDIRECT_URI
-              value: https://minio.bhamm-lab.com/oauth_callback
+              value: "https://minio.bhamm-lab.com/oauth_callback"
             - name: MINIO_IDENTITY_OPENID_DISPLAY_NAME
-              value: Authelia
+              value: "Authelia"
             - name: MINIO_IDENTITY_OPENID_CLAIM_USERINFO
-              value: off
+              value: "off"
             - name: MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC
-              value: off
+              value: "off"
           prometheusOperator: false
   syncPolicy:
     syncOptions:
