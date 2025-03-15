@@ -9,6 +9,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      - name: Import Vault secrets
+        id: import-secrets
+        uses: hashicorp/vault-action@v2
+        with:
+          url: https://vault.vault:8200
+          method: kubernetes
+          role: default # in gitea ns
+          tlsSkipVerify: true
+          secrets: |
+            secret/data/core/gitea KUBECONFIG
       - name: Setup OpenTofu
         uses: opentofu/setup-opentofu@v1
         with:
