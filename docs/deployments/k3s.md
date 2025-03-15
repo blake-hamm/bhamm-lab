@@ -3,7 +3,7 @@ To spin up a kubernetes cluster in bhamm-lab, you need to follow these steps:
 1. Terraform to spin up vm's
 ```bash
 tofu -chdir=tofu/proxmox/k3s init
-tofu -chdir=tofu/proxmox/k3s workspace select dev
+tofu -chdir=tofu/proxmox/k3s workspace select -or-create=true dev
 tofu -chdir=tofu/proxmox/k3s plan -var-file=dev.tfvars
 tofu -chdir=tofu/proxmox/k3s apply -var-file=dev.tfvars -parallelism=2 -auto-approve
 
