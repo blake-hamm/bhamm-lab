@@ -51,6 +51,8 @@ jobs:
           version: '3.8.1'
       - name: Run playbook
         uses: dawidd6/action-ansible-playbook@v3
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/gcp_credentials.json
         with:
           playbook: ansible/main.yml
           requirements: ansible/requirements.yml
