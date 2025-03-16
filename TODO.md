@@ -122,6 +122,16 @@ x Test DR
 x After merge PR, point prod to 'main' branch in all aspects
 
 # Monitoring
+- Key monitoring
+  - Bare metal
+  - vm's
+  - k3s
+  - opnsense firewall
+  - traefik/authelia
+  - vault
+  - ceph
+  - calico
+  - omada equipment
 - Node exporter debian ansible playbook
 - Refine grafana dashboard config
 - Deploy loki
@@ -139,7 +149,8 @@ x After merge PR, point prod to 'main' branch in all aspects
 - Deploy portfolio links at bhamm-lab.com/contact/
 
 # Expose bhamm-lab.com
-- Figure out secure way
+- Spike: explore most secure method
+- Setup debian firewall
 - Cloudflare:
   - Use proxy
 - Opnsense:
