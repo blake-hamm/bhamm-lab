@@ -33,22 +33,6 @@ spec:
               enabled: false
         alertmanager:
           enabled: true
-        prometheusOperator:
-          fullnameOverride: "prometheus"
-        prometheus:
-          prometheusSpec:
-            serviceMonitorSelector:
-              matchLabels:
-                release: monitor
-            storageSpec:
-              volumeClaimTemplate:
-                metadata:
-                  name: prometheus
-                spec:
-                  accessModes: ["ReadWriteOnce"]
-                  resources:
-                    requests:
-                      storage: 10Gi
         grafana:
           enabled: true
           # admin:
@@ -137,6 +121,25 @@ spec:
           # calico:
           #   gnetId: 12175
           #   revision: 5
+        nodeExporter:
+          enabled: false
+          forceDeployDashboards: true
+        prometheusOperator:
+          fullnameOverride: "prometheus"
+        prometheus:
+          prometheusSpec:
+            serviceMonitorSelector:
+              matchLabels:
+                release: monitor
+            storageSpec:
+              volumeClaimTemplate:
+                metadata:
+                  name: prometheus
+                spec:
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 10Gi
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

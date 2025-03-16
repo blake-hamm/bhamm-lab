@@ -1,4 +1,11 @@
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: example
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+---
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: example

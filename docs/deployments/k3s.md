@@ -14,19 +14,17 @@ tofu -chdir=tofu/proxmox/k3s destroy -var-file=dev.tfvars -parallelism=2 -auto-a
 
 2. Ansible to secure debian vm's and deploy k3s
 ```bash
+# To deploy k3s dev from the ground up
 ansible-playbook ansible/main.yml -l dev-k3s* -t debian,k3s -e "env=dev BRANCH_NAME=main"
+
+# In case you want to just pull local kube config
+ansible-playbook ansible/main.yml -l dev-k3s* -t kubeconfig -e "env=dev" --skip-tags debian
+
+# In case you need to sync argocd on the cli
+export KUBECONFIG=~/.kube/config-dev
+kubectl config set-context --current --namespace=argocd
+argocd app get apps-dev --refresh
+argocd app sync apps-dev --prune
+argocd app terminate-op apps-dev
 ```
 *Note: this uses proxmox dynamic inventory*
-
-3. Argocd to deploy app of apps and restore services
-```bash
-# To deploy the dev
-export KUBECONFIG=~/.kube/config-dev
-kubectl apply -f kubernetes/dev.yaml
-
-# To sync the argocd app (it should autosync, but if impatient)
-kubectl config set-context --current --namespace=argocd
-argocd app sync apps-dev
-argocd app get apps-dev --refresh
-```
-*Note: you may need to adjust the 'targetRevision' in this file*
