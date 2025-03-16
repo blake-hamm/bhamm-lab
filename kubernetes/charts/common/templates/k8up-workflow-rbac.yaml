@@ -4,12 +4,16 @@ kind: ServiceAccount
 metadata:
   name: k8up-{{ .Values.name }}
   namespace: k8up
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: k8up-{{ .Values.name }}
   namespace: k8up
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
@@ -26,6 +30,8 @@ kind: Role
 metadata:
   name: k8up-{{ .Values.name }}
   namespace: {{ .Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
 rules:
   - apiGroups: [""]
     resources: ["persistentvolumeclaims"]
@@ -42,6 +48,8 @@ kind: RoleBinding
 metadata:
   name: k8up-{{ .Values.name }}
   namespace: k8up
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
 subjects:
   - kind: ServiceAccount
     name: k8up-{{ .Values.name }}
@@ -56,6 +64,8 @@ kind: RoleBinding
 metadata:
   name: k8up-{{ .Values.name }}
   namespace: {{ .Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
 subjects:
   - kind: ServiceAccount
     name: k8up-{{ .Values.name }}
