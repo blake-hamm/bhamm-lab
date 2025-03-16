@@ -123,8 +123,10 @@ x After merge PR, point prod to 'main' branch in all aspects
 
 # Monitoring
 - Key monitoring
-  - Bare metal
-  - vm's
+  - Debian
+    - node exporter
+    - fail2ban exporter
+    - systemd
   - k3s
   - opnsense firewall
   - traefik/authelia
@@ -132,6 +134,7 @@ x After merge PR, point prod to 'main' branch in all aspects
   - ceph
   - calico
   - omada equipment
+  - fail2ban
 - Node exporter debian ansible playbook
 - Refine grafana dashboard config
 - Deploy loki

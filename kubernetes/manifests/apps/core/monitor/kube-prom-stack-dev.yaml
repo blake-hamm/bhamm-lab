@@ -19,6 +19,20 @@ spec:
         nameOverride: monitor
         namespaceOverride: monitor
         fullnameOverride: monitor
+        defaultRules:
+          create: true
+          rules:
+            network: false
+            node: false
+            nodeExporterAlerting: false
+            nodeExporterRecording: false
+            windows: false
+        prometheus-windows-exporter:
+          prometheus:
+            monitor:
+              enabled: false
+        alertmanager:
+          enabled: true
         prometheusOperator:
           fullnameOverride: "prometheus"
         prometheus:
@@ -36,7 +50,13 @@ spec:
                     requests:
                       storage: 10Gi
         grafana:
+          enabled: true
+          # admin:
+          #   existingSecret: kube-prom-external-secret
+          #   userKey: grafana-admin-user
+          #   passwordKey: grafana-admin-password
           # envValueFrom:
+          #   GF_SECURITY_ADMIN_USER
           #   GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
           #     secretKeyRef:
           #       name: monitoring-login
