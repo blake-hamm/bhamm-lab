@@ -72,7 +72,7 @@ resource "proxmox_virtual_environment_haresource" "k3s_master_ha" {
   depends_on  = [proxmox_virtual_environment_vm.k3s_master]
   resource_id = "vm:${proxmox_virtual_environment_vm.k3s_master[count.index].vm_id}"
   state       = "started"
-  group       = "${var.environment}-main"
+  group       = "main"
   comment     = "${var.environment} k3s master HA group."
 }
 

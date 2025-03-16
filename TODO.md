@@ -1,3 +1,119 @@
+# Monitoring
+- Key monitoring
+  - Debian
+    - node exporter
+    - fail2ban exporter
+    - systemd
+  - k3s
+    - api server
+    - resources
+  - opnsense firewall
+  - traefik/authelia
+  - vault
+  - ceph
+  - calico
+  - omada equipment
+  - fail2ban
+- Node exporter debian ansible playbook
+- Refine grafana dashboard config
+- Deploy loki
+- Setup alerts for nodes and traefik
+- Spike crowdsec
+- Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
+
+# Start building hugo website
+- Setup Hugo
+- Expose hugo homepage at bhamm-lab.com/
+- Deploy docs at bhamm-lab.com/docs/
+- Deploy lighthearted at bhamm-lab.com/lighthearted/
+- Deploy portfolio links at bhamm-lab.com/portfolio/
+- Deploy portfolio links at bhamm-lab.com/about/
+- Deploy portfolio links at bhamm-lab.com/contact/
+
+# Expose bhamm-lab.com
+- Spike: explore most secure method
+- Setup debian firewall
+- Cloudflare:
+  - Use proxy
+- Opnsense:
+  - port forward traefik prod ip to dmz
+  - geo filter
+  - only allow cloudflare ip's
+  - expose 443 on dmz
+- Traefik
+  - proxy
+  - block *.bhamm-lab.com from public
+
+# Omada sdn
+- Setup 3 wifi networks
+  x Polk_Paradise
+  x lab-trusted
+  - lab-iot
+- Deploy omada sdn
+- Connect iot devices
+  - printer
+  - smart light switches/plugs
+  - eufy
+- Configure dhcp in ansible opnsense
+- Confirm metal to k8s doesn't leave 10gb switch
+- Ensure *.bhamm-lab.com is accessible from aubs phone/laptops
+- Integrate proxmox with traefik
+
+# Finish
+- Install awx - https://github.com/ansible-community/awx-operator-helm
+- Use gitea container registry
+  - sync sops workflow
+- Convert sync sops to vault job as argo workflow template
+  - Trigger from argo event when vault is ready
+  - Trigger from argo event on secret changes in git
+- Document secret rotation
+- Refactor argocd projects into 'core', 'default'
+- Deploy
+  - docs site
+  - vpn
+  - netbootxyz
+  - home assistant
+  - servarr
+    - jellyfin
+    - flaresolver
+  - Integrate proxmox UI into traefik
+- Expose docs site and vpn
+- Install mergerfs/snapraid on aorus node
+- More fine grain vault security access
+- Consider refactoring proxmox ansible to terraform
+  - ACL's
+  - Users
+  - Groups
+  - HA groups
+  - Storage (pbs,nfs)
+- Implement devsec.os_hardening
+- Implement debian firewall rules
+- 3-2-1 backups
+  - Setup ceph backups (consider decomissioning k8up if volume snapshots work)
+  - Configure snapraid/mergerfs
+  - Ensure monitoring
+  - Expose nfs
+  - Create nfs storage class
+  - Setup minio tenant with nfs storage class
+  - Refactor k8up prune
+    - Move generate secret into template with var
+    - Make global prune job that doesn't conflict w/ backup schedule
+  - Refactor k8up backups to minio
+  - Ensure minio backup bucket syncs to gcp
+  - Ensure on new cluster, minio bucket is restored first, then deploy backup
+- Setup CI/CD for other services
+  - Ansible bare metal
+  - Ansible opnsense
+  - Terrafrom gcp
+- Setup service mesh (istio/hashicorp consul)
+- Consider refactoring minio to primary storage and k8up sync to gcp
+- Audit backups
+  - Use example site for continuous backups/gitops updates with argo workflow/k8up/cloudnativepg
+  - s3 to s3 backups
+  - DR architecture diagram
+
+
+## Previous
 # Secure network
 x Reset AP
 x Change opnsense playbook
@@ -120,111 +236,3 @@ x Test DR
       x gitea (code)
       x authelia (2fa)
 x After merge PR, point prod to 'main' branch in all aspects
-
-# Monitoring
-- Key monitoring
-  - Debian
-    - node exporter
-    - fail2ban exporter
-    - systemd
-  - k3s
-  - opnsense firewall
-  - traefik/authelia
-  - vault
-  - ceph
-  - calico
-  - omada equipment
-  - fail2ban
-- Node exporter debian ansible playbook
-- Refine grafana dashboard config
-- Deploy loki
-- Setup alerts for nodes and traefik
-- Spike crowdsec
-- Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
-
-# Start building hugo website
-- Setup Hugo
-- Expose hugo homepage at bhamm-lab.com/
-- Deploy docs at bhamm-lab.com/docs/
-- Deploy lighthearted at bhamm-lab.com/lighthearted/
-- Deploy portfolio links at bhamm-lab.com/portfolio/
-- Deploy portfolio links at bhamm-lab.com/about/
-- Deploy portfolio links at bhamm-lab.com/contact/
-
-# Expose bhamm-lab.com
-- Spike: explore most secure method
-- Setup debian firewall
-- Cloudflare:
-  - Use proxy
-- Opnsense:
-  - port forward traefik prod ip to dmz
-  - geo filter
-  - only allow cloudflare ip's
-  - expose 443 on dmz
-- Traefik
-  - proxy
-  - block *.bhamm-lab.com from public
-
-# Omada sdn
-- Setup 3 wifi networks
-  x Polk_Paradise
-  x lab-trusted
-  - lab-iot
-- Deploy omada sdn
-- Connect iot devices
-  - printer
-  - smart light switches/plugs
-  - eufy
-- Configure dhcp in ansible opnsense
-- Confirm metal to k8s doesn't leave 10gb switch
-- Ensure *.bhamm-lab.com is accessible from aubs phone/laptops
-- Integrate proxmox with traefik
-
-# Finish
-- Install awx - https://github.com/ansible-community/awx-operator-helm
-- Use gitea container registry
-  - sync sops workflow
-- Convert sync sops to vault job as argo workflow template
-  - Trigger from argo event when vault is ready
-  - Trigger from argo event on secret changes in git
-- Document secret rotation
-- Refactor argocd projects into 'core', 'default'
-- Deploy
-  - docs site
-  - vpn
-  - netbootxyz
-  - home assistant
-  - servarr
-    - jellyfin
-    - flaresolver
-  - Integrate proxmox UI into traefik
-- Expose docs site and vpn
-- Install mergerfs/snapraid on aorus node
-- More fine grain vault security access
-- Consider refactoring proxmox ansible to terraform
-  - ACL's
-  - Users
-  - Groups
-  - HA groups
-  - Storage (pbs,nfs)
-- Implement devsec.os_hardening
-- Implement debian firewall rules
-- 3-2-1 backups
-  - Setup ceph backups (consider decomissioning k8up if volume snapshots work)
-  - Configure snapraid/mergerfs
-  - Ensure monitoring
-  - Expose nfs
-  - Create nfs storage class
-  - Setup minio tenant with nfs storage class
-  - Refactor k8up prune
-    - Move generate secret into template with var
-    - Make global prune job that doesn't conflict w/ backup schedule
-  - Refactor k8up backups to minio
-  - Ensure minio backup bucket syncs to gcp
-  - Ensure on new cluster, minio bucket is restored first, then deploy backup
-- Setup CI/CD for other services
-  - Ansible bare metal
-  - Ansible opnsense
-  - Terrafrom gcp
-- Setup service mesh (istio/hashicorp consul)
-- Consider refactoring minio to primary storage and k8up sync to gcp
