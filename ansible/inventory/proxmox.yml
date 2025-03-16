@@ -14,6 +14,8 @@ groups:
   debian: "'debian' in (proxmox_tags_parsed|list)"
   k3s: "'k3s' in (proxmox_tags_parsed|list)"
   k3s_master: "'k3s-master' in (proxmox_tags_parsed|list)"
+  k3s_dev: "'dev' in (proxmox_tags_parsed|list)"
+  k3s_prod: "'prod' in (proxmox_tags_parsed|list)"
 compose:
   ansible_port: 4185
   ansible_host: proxmox_ipconfig0["ip"].split('/')[0]

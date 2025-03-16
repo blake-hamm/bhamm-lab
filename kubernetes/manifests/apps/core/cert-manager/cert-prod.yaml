@@ -5,7 +5,7 @@ metadata:
   namespace: cert-manager
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "11"
+    argocd.argoproj.io/sync-wave: "12"
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
@@ -30,7 +30,7 @@ metadata:
   namespace: traefik
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "11"
+    argocd.argoproj.io/sync-wave: "12"
 spec:
   secretName: bhamm-lab-tls
   issuerRef:
@@ -48,7 +48,7 @@ metadata:
   namespace: traefik
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "12"
+    argocd.argoproj.io/sync-wave: "13"
 spec:
   defaultCertificate:
     secretName: bhamm-lab-tls

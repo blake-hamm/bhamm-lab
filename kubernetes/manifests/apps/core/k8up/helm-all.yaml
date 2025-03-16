@@ -16,6 +16,8 @@ spec:
     targetRevision: 4.8.1
     helm:
       valuesObject:
+        k8up:
+          skipWithoutAnnotation: true
         metrics:
           service:
             port: 8080

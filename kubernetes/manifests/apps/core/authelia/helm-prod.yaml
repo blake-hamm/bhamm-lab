@@ -186,6 +186,33 @@ spec:
                     - 'profile'
                     - 'offline_access'
                   userinfo_signed_response_alg: 'none'
+                - client_id: 'gitea'
+                  client_name: 'Gitea'
+                  client_secret: '$pbkdf2-sha512$310000$//HDbf48Cu7gi3BJNKrocQ$HnTNOcW6FCgpVtv.fxFsIShby1uHHTYOgQcVDUS5a3eYEfsJT9JdaIUq5.PYRvNS/D29I0WkkEcrZ1omcChDPg'
+                  public: false
+                  authorization_policy: 'two_factor'
+                  redirect_uris:
+                    - 'https://git.bhamm-lab.com/user/oauth2/authelia/callback'
+                  scopes:
+                    - 'openid'
+                    - 'email'
+                    - 'profile'
+                    - 'groups'
+                  userinfo_signed_response_alg: 'none'
+                  token_endpoint_auth_method: 'client_secret_basic'
+                - client_id: 'minio'
+                  client_name: 'MinIO'
+                  client_secret: '$pbkdf2-sha512$310000$U0PxZ6W3C4G8lPbYu5MEgg$ef2lbfABxs.OXuleAxY.yl0gPYp/9uz0UhB0JXZJT4GYBVx6l5bybIdA0mii7Bbqul9jM7PkDY6SXzthSY2Zew'
+                  public: false
+                  authorization_policy: 'two_factor'
+                  redirect_uris:
+                    - 'https://minio.bhamm-lab.com/oauth_callback'
+                  scopes:
+                    - 'openid'
+                    - 'profile'
+                    - 'email'
+                    - 'groups'
+                  userinfo_signed_response_alg: 'none'
                   #   - client_id: 'argoworkflows'
                   #     client_name: 'Argo Workflows'
                   #     client_secret: '$pbkdf2-sha512$310000$ggcVQ063OrvfkVBrmJ/jYA$twpvYp/R6R5r8ziSRCTdNpOttQezT1zWxKa4jg7bKoPi.ITTHMf4drmY8J99ud8LlXDTs5VQr8CN/QdU/aBJ0Q'
@@ -220,19 +247,6 @@ spec:
                   #     email: uid # Map `uid` (or another LDAP attribute) to the `email` claim
                   #     preferred_username: uid # Ensure the username is set
                   #     name: displayName # Optionally map `displayName` or another attribute to the name claim
-                  # - client_id: 'gitea'
-                  #   client_name: 'Gitea'
-                  #   client_secret: '$pbkdf2-sha512$310000$OLMZifgp6Mmqs843wKvyJw$IgiDqe/OHN/fvGKtwEcdhOcwz8wkZ4RK8ExHoGwem3RUYAfD9Pp2VwGqno1bRNgjni4EfTUFWuB0bSHOU1Fw8Q'
-                  #   public: false
-                  #   authorization_policy: 'two_factor'
-                  #   redirect_uris:
-                  #     - 'https://git.bhamm-lab.com/user/oauth2/authelia/callback'
-                  #   scopes:
-                  #     - 'openid'
-                  #     - 'email'
-                  #     - 'profile'
-                  #   userinfo_signed_response_alg: 'none'
-                  #   token_endpoint_auth_method: 'client_secret_basic'
                   # - client_id: 'immich'
                   #   client_name: 'immich'
                   #   client_secret: '$pbkdf2-sha512$310000$crIhYegN8o.n9A5GhzEirA$xXcrxnAM.R6No1LejuKcwcl2Q5LOMabAmBnuIuOsOPrYS3KYzp.FiCxokDFnNLLS4/WiAif3rGz6VklbXCovWw'

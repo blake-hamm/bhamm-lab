@@ -1,0 +1,66 @@
+name: Dev k3s Deployment
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+jobs:
+  deploy-k3s-dev:
+    name: Deploy k3s Dev Environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Import Vault secrets
+        id: import-secrets
+        uses: hashicorp/vault-action@v2
+        with:
+          url: https://vault.vault:8200
+          method: approle
+          roleId: ${{ secrets.VAULT_ROLE_ID }}
+          secretId: ${{ secrets.VAULT_SECRET_ID }}
+          tlsSkipVerify: true
+          secrets: |
+            secret/data/core/minio CONSOLE_ACCESS_KEY | AWS_ACCESS_KEY_ID;
+            secret/data/core/minio CONSOLE_SECRET_KEY | AWS_SECRET_ACCESS_KEY;
+            secret/data/external/proxmox PROXMOX_VE_API_TOKEN | PROXMOX_VE_API_TOKEN;
+            secret/data/external/proxmox PROXMOX_TOKEN_SECRET | PROXMOX_TOKEN_SECRET;
+            secret/data/default/gitea ssh_private_key | GITEA_PRIVATE_KEY;
+            secret/data/external/gcp gcp-k8up-sa | GOOGLE_APPLICATION_CREDENTIALS
+      - name: Write GCP Credentials to File
+        run: |
+          echo "$GOOGLE_APPLICATION_CREDENTIALS" > ${{ runner.temp }}/gcp_credentials.json
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.7.1
+      - name: Tofu Apply
+        run: |
+          tofu -chdir=tofu/proxmox/k3s init
+          tofu -chdir=tofu/proxmox/k3s workspace select -or-create=true dev
+          tofu -chdir=tofu/proxmox/k3s apply -var-file=dev.tfvars -parallelism=2 -auto-approve
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.10'
+          cache: 'pip'
+      - name: Install ansible
+        shell: bash
+        run: pip install -r requirements.txt
+      - name: Install sops
+        uses: mdgreenwald/mozilla-sops-action@v1.6.0
+        with:
+          version: '3.8.1'
+      - name: Run playbook
+        uses: dawidd6/action-ansible-playbook@v3
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/gcp_credentials.json
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        with:
+          playbook: ansible/main.yml
+          requirements: ansible/requirements.yml
+          key: ${{ env.GITEA_PRIVATE_KEY }}
+          options: |
+            -l dev-k3s*
+            -t debian,k3s
+            -e "env=dev BRANCH_NAME=${{ env.BRANCH_NAME }}"

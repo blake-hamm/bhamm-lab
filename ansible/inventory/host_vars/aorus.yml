@@ -1,4 +1,6 @@
 network_10gb_nics: [enp5s0f0, enp5s0f1]
+network_nameservers:
+  - 10.0.20.1
 # Ceph config for proxmox
 # proxmox_reset_ceph: true
 ceph_device: /dev/nvme0n1

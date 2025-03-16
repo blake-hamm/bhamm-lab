@@ -33,3 +33,32 @@
        }}
   loop: "{{ groups['proxmox'] }}"
   when: inventory_hostname != item
+- name: Slurp ed25519 host key from each node
+  ansible.builtin.slurp:
+    src: /etc/ssh/ssh_host_ed25519_key.pub
+  register: slurped_host_key
+- name: Build known_hosts entries for each node
+  ansible.builtin.set_fact:
+    known_hosts_entries: >-
+      {{ known_hosts_entries | default([]) + [
+        {
+          'hostname': hostvars[item].inventory_hostname,
+          'key': hostvars[item].slurped_host_key['content'] | b64decode | trim
+        }
+      ] }}
+  loop: "{{ groups['proxmox'] }}"
+- name: Create file for node's ssh_known_hosts
+  ansible.builtin.file:
+    path: "/etc/pve/nodes/{{ item.hostname }}/ssh_known_hosts"
+    state: touch
+    owner: root
+    group: www-data
+    mode: "0640"
+  loop: "{{ known_hosts_entries }}"
+- name: Add entries to node's known_hosts file
+  ansible.builtin.known_hosts:
+    path: "/etc/pve/nodes/{{ item.hostname }}/ssh_known_hosts"
+    name: "{{ item.hostname }}"
+    key: "{{ item.hostname }} {{ item.key }}"
+    state: present
+  loop: "{{ known_hosts_entries }}"

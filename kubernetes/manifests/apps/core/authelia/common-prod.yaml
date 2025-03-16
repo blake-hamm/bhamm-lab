@@ -10,7 +10,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/k3s-again
+    targetRevision: feature/cicd
     path: kubernetes/charts/common
     helm:
       valuesObject:
@@ -37,6 +37,10 @@ spec:
         postgresql:
           enabled: true
           storageSize: 1Gi
+          recoverySnapshotName: authelia-restore
+          recoverySnapshotHandle: "0001-0024-7b02e4a9-b740-4d5a-b519-9585725a55fb-0000000000000003-2ce8ad7c-5aab-4aaf-8672-5b224ea5d802"
+          backups:
+            enabled: true
         ingressRoutes:
           - enabled: true
             name: authelia

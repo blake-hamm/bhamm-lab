@@ -11,6 +11,7 @@
       drawio
       dbeaver-bin
       virt-manager
+      # steam
       # etcher
       # kubectl
       # kubernetes-helm

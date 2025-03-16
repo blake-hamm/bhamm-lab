@@ -18,9 +18,9 @@ k8up:
   backup:
     enabled: false
     schedule: "0 8 * * *" # 8 am utc/1 am mst
-  restore:
-    enabled: false
-    snapshot: ""
+  restores: []
+    # - snapshot: ""
+    #   claimName: ""
 postgresql:
   enabled: false
   instances: 2
@@ -28,6 +28,7 @@ postgresql:
   imageName: ""
   sharedPreloadLibraries: ""
   postInitSQL: ""
+  databaseName: ""
   managed:
     roles: []
   backups:
@@ -35,3 +36,4 @@ postgresql:
     schedule: "0 0 8 * * *" # 8 am utc/1 am mst
     retention: "30d"
   recoverySnapshotName: ""
+  recoverySnapshotHandle: ""

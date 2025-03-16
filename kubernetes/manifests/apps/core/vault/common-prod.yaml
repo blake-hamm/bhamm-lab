@@ -10,7 +10,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/k3s-again
+    targetRevision: feature/cicd
     path: kubernetes/charts/common
     helm:
       valuesObject:
@@ -32,7 +32,7 @@ spec:
                 match: Host(`vault.bhamm-lab.com`)
                 middlewares:
                   - name: default-headers
-                  - name: forwardauth-authelia
+                    # - name: forwardauth-authelia
                 services:
                   - name: vault
                     port: 8200

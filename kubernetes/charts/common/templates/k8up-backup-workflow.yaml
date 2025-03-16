@@ -1,116 +1,28 @@
 {{- if .Values.k8up.backup.enabled }}
 apiVersion: argoproj.io/v1alpha1
-kind: CronWorkflow
+kind: Workflow
 metadata:
-  name: k8up-{{ .Values.name }}-backups
+  name: k8up-{{ .Values.name }}-backup-latest
   namespace: k8up
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-wave: "19"
 spec:
-  schedule: "{{ .Values.k8up.backup.schedule }}"
-  concurrencyPolicy: "Replace"
-  workflowSpec:
-    serviceAccountName: "k8up-{{ .Values.name }}"
-    entrypoint: main
-    templates:
-      - name: main
-        steps:
-          - - name: generate-secret
-              templateRef:
-                name: "generate-secret-{{ .Values.name }}"
-                template: generate-secret
-          - - name: backup
+  serviceAccountName: "k8up-{{ .Values.name }}"
+  entrypoint: main
+  templates:
+    - name: main
+      steps:
+        - - name: generate-secret
+            templateRef:
+              name: "generate-secret-{{ .Values.name }}"
+              template: generate-secret
+        - - name: backup
+            templateRef:
+              name: "backup-{{ .Values.name }}"
               template: backup
-          - - name: cleanup
-              template: cleanup
-      - name: backup
-        script:
-          image: bitnami/kubectl:latest
-          command: [bash]
-          source: |
-            set -e
-            BACKUP_NAME="{{ .Values.name }}-$(date -u +'%Y-%m-%d-%H-%M-%S')"
-
-            echo "Triggering a backup '$BACKUP_NAME'..."
-            cat <<EOF | kubectl apply -f -
-            apiVersion: k8up.io/v1
-            kind: Backup
-            metadata:
-              name: $BACKUP_NAME
-              namespace: {{ .Values.name }}
-            spec:
-              backend:
-                repoPasswordSecretRef:
-                  name: k8up
-                  key: repo-password
-                gcs:
-                  bucket: bhamm-lab-k8up
-                  projectIDSecretRef:
-                    name: gcp-k8up-temp
-                    key: project_id
-                  accessTokenSecretRef:
-                    name: gcp-k8up-temp
-                    key: accessToken
-              # promURL: "http://prometheus:9090"
-            EOF
-
-            echo "Waiting for backup BACKUP_NAME to start..."
-            kubectl wait --for=jsonpath='{.status.started}'=true \
-              backup/$BACKUP_NAME -n {{ .Values.name }} \
-              --timeout=60s || true
-
-            echo "Waiting for backup to complete (this might take some time)..."
-            kubectl wait --for=jsonpath='{.status.finished}'=true \
-              backup/$BACKUP_NAME -n {{ .Values.name }} || true
-      - name: cleanup
-        script:
-          image: bitnami/kubectl:latest
-          command: [bash]
-          source: |
-            set -e
-            PRUNE_NAME="{{ .Values.name }}-$(date -u +'%Y-%m-%d-%H-%M-%S')"
-
-            echo "Triggering a prune '$PRUNE_NAME'..."
-            cat <<EOF | kubectl apply -f -
-            apiVersion: k8up.io/v1
-            kind: Prune
-            metadata:
-              name: $PRUNE_NAME
-              namespace: {{ .Values.name }}
-            spec:
-              retention:
-                keepLast: 10
-                keepDaily: 5
-                keepWeekly: 1
-                keepMonthly: 1
-              backend:
-                repoPasswordSecretRef:
-                  name: k8up
-                  key: repo-password
-                gcs:
-                  bucket: bhamm-lab-k8up
-                  projectIDSecretRef:
-                    name: gcp-k8up-temp
-                    key: project_id
-                  accessTokenSecretRef:
-                    name: gcp-k8up-temp
-                    key: accessToken
-            EOF
-
-            echo "Waiting for prune PRUNE_NAME to start..."
-            kubectl wait --for=jsonpath='{.status.started}'=true \
-              prune/$PRUNE_NAME -n {{ .Values.name }} \
-              --timeout=60s || true
-
-            echo "Waiting for prune to complete (this might take some time)..."
-            kubectl wait --for=jsonpath='{.status.finished}'=true \
-              prune/$PRUNE_NAME -n {{ .Values.name }} || true
-
-            echo "Cleaning up temporary GCP credentials secret..."
-            kubectl delete secret gcp-k8up-temp -n {{ .Values.name }}
-    volumes:
-      - name: gcp-sa
-        secret:
-          secretName: gcp-k8up-sa
+  volumes:
+    - name: gcp-sa
+      secret:
+        secretName: gcp-k8up-sa
 {{- end }}

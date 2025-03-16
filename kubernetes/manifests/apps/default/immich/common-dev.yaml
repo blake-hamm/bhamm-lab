@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: immich-common
+  namespace: argocd
+spec:
+  destination:
+    namespace: immich
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://git.bhamm-lab.com/bhamm/bhamm-lab.git
+    targetRevision: feature/cicd
+    path: kubernetes/charts/common
+    helm:
+      valuesObject:
+        name: immich
+        ingressRoutes:
+          - enabled: true
+            name: immich
+            ingressClass: traefik-external
+            routes:
+              - match: Host(`immich.dev.bhamm-lab.com`)
+                kind: Rule
+                services:
+                  - name: immich-server
+                    port: 2283
+                    scheme: http
+        k8up:
+          backup:
+            enabled: false
+        postgresql:
+          enabled: true
+          recoverySnapshotName: immich-restore
+          recoverySnapshotHandle: "0001-0024-7b02e4a9-b740-4d5a-b519-9585725a55fb-0000000000000003-41809123-732c-4a29-b2fc-ab90635fd74d"
+          imageName: "ghcr.io/tensorchord/cloudnative-pgvecto.rs:16.5-v0.3.0@sha256:be3f025d79aa1b747817f478e07e71be43236e14d00d8a9eb3914146245035ba"
+          sharedPreloadLibraries:
+            - "vectors.so"
+          postInitSQL:
+            - CREATE EXTENSION IF NOT EXISTS "vectors";
+            - CREATE EXTENSION IF NOT EXISTS "cube" CASCADE;
+            - CREATE EXTENSION IF NOT EXISTS "earthdistance" CASCADE;
+          managed:
+            roles:
+              - name: immich
+                superuser: true
+                login: true
+          backups:
+            enabled: false
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

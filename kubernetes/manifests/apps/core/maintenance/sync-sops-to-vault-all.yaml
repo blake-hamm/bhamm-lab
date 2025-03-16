@@ -4,7 +4,7 @@ metadata:
   name: sync-sops-to-vault-sa
   namespace: vault
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-wave: "-2"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -12,7 +12,7 @@ metadata:
   name: sync-sops-to-vault-role
   namespace: vault
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-wave: "-2"
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
@@ -27,7 +27,7 @@ metadata:
   name: sync-sops-to-vault-binding
   namespace: vault
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-wave: "-2"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -43,18 +43,23 @@ metadata:
   name: sync-sops-to-vault-workflow
   namespace: vault
   annotations:
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "-1"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   entrypoint: sync-sops-to-vault-workflow
   serviceAccountName: sync-sops-to-vault-sa
   templates:
     - name: sync-sops-to-vault-workflow
+      retryStrategy:
+        limit: "10"
+        retryPolicy: "Always"
       container:
         image: debian:bookworm-slim
         command: ["/bin/bash", "-c"]
         args:
           - |
+            set -e
+
             # Install pre-reqs
             apt-get update && apt-get install -y \
                 wget \
@@ -82,7 +87,7 @@ spec:
 
             # Clone repository
             echo "Cloning repository..."
-            git clone -b feature/k3s-again https://github.com/blake-hamm/bhamm-lab.git /workspace/repo
+            git clone -b feature/cicd https://github.com/blake-hamm/bhamm-lab.git /workspace/repo
 
             # Decrypt secrets
             echo "Decrypting secrets..."

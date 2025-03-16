@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: minio-tenant
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   destination:
     namespace: minio
@@ -18,28 +20,16 @@ spec:
           name: minio-tenant
           configuration:
             name: minio-external-secret
+          configSecret:
+            name: minio-external-secret
+            accessKey: ""
+            secretKey: ""
+            existingSecret: true
           pools:
             - servers: 2
               name: main
               volumesPerServer: 2
               size: 50Gi
-              # - servers: 2
-              #   name: backup-pool
-              #   volumesPerServer: 2
-              #   size: 100Gi
-              #   storageClassName: nfs-client
-              #   storageAnnotations:
-              #     k8up.io/backup: "false"
-              #   volumeClaimTemplate:
-              #     apiVersion: v1
-              #     kind: PersistentVolumeClaim
-              #     spec:
-              #       accessModes:
-              #         - ReadWriteOnce
-              #       resources:
-              #         requests:
-              #           storage: 10Gi
-              #     status: {}
           metrics:
             enabled: true
             port: 9000
@@ -50,7 +40,26 @@ spec:
             enableSFTP: false
           buckets:
             - name: argo-artifacts
-          users: []
+            - name: tofu-state
+          users:
+            - name: minio-external-secret
+          env:
+            - name: MINIO_IDENTITY_OPENID_CONFIG_URL
+              value: "https://auth.bhamm-lab.com/.well-known/openid-configuration"
+            - name: MINIO_IDENTITY_OPENID_CLIENT_ID
+              value: "minio"
+            - name: MINIO_IDENTITY_OPENID_CLAIM_NAME
+              value: "groups"
+            - name: MINIO_IDENTITY_OPENID_SCOPES
+              value: "openid,profile,email,groups"
+            - name: MINIO_IDENTITY_OPENID_REDIRECT_URI
+              value: "https://minio.bhamm-lab.com/oauth_callback"
+            - name: MINIO_IDENTITY_OPENID_DISPLAY_NAME
+              value: "Authelia"
+            - name: MINIO_IDENTITY_OPENID_CLAIM_USERINFO
+              value: "off"
+            - name: MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC
+              value: "off"
           prometheusOperator: false
   syncPolicy:
     syncOptions:

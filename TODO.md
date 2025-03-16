@@ -73,26 +73,78 @@ x Remove unused yaml
 x Deploy immich
 
 # CI/CD
-- Deploy forego or gitea
-- Setup pipelines
-  - Ansible bare metal
-  - Ansible opnsense
-  - Terrafrom gcp
-  - Terraform proxmox
-  - Ansible k3s
-- Dev cluster on PR
-- Test DR with pvc and pg (auto)
-  - example pvc should be easy
-  - Need to develop and prove out pg
-- Convert sync sops to vault job as argo workflow template
-  - Trigger from argo event when vault is ready
-  - Trigger from gitea on secret changes
+x Deploy gitea
+x Create cephfs storage class (for RWM)
+x Deploy gitea act runner
+x Mirror github to gitea as primary
+  x Setup metallb ssh (share lb with traefik)
+  x Set github as upstream
+x Switch argocd to gitea repo
+x Troubleshoot tofu proxmox/k3s when migrating vm (ssh issue) and change ordering of bare metal to (super, aorus, antsle)
+x Destory legacy 'prod' once new prod is working properly
+x Redploy 'prod' with new setup/cidr
+x Restore with k8up and volume snapshots
+x Setup gitea properly
+x Document restore (immich - db/pvc)
+x Restore minio fully
+x Migrate tofu state to minio
+x Setup gitea pipeline for k3s
+  x Terraform proxmox
+    x Setup minio tofu backend
+    x migrate backend to minio
+    x Convert k3s into module
+    x Leverage module for prod and dev
+  x Ansible
+    x Adapt dev
+  x Add gitea action token into vault config
+  x Ensure on open pr - spin up new k3s cluster and deploy
+  - On merge to main
+    - tofu/ansible and argocd sync
+    - destory dev cluster
+x Test DR
+  x Deploy manifests
+  x Confirm pvc
+    x Alter helm chart to require snapshot name and path for recovery
+    x example
+    x minio (state bucket and keys) - backup from s3 instead
+      x Enhance restore template to loop through pvc with k8up annotation
+      x Based on list of pvc, restore each one and generate 'folder claimName'
+      x Try again with snapshot name
+    x immich (library)
+    x gitea (shared)
+  x Need to develop and prove out pg w/ ceph + volume snapshot
+    x common chart deploys volume snapshot directly from ceph
+    x Confirm db
+      x example (query)
+      x immich (login) - TODO: make pvc for config file (contains oidc)
+      x gitea (code)
+      x authelia (2fa)
+- After merge PR, point prod to 'main' branch in all aspects
 
 # Monitoring
 - Node exporter debian ansible playbook
 - Refine grafana dashboard config
 - Deploy loki
 - Setup alerts for nodes and traefik
+- Spike crowdsec
+- Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
+
+# Expose bhamm-lab.com
+- Spike cf tunnels
+- Setup Hugo
+- Expose hugo homepage at bhamm-lab.com/
+- Deploy docs at bhamm-lab.com/docs/
+- Deploy lighthearted at bhamm-lab.com/lighthearted/
+- Deploy portfolio links at bhamm-lab.com/portfolio/
+- Deploy portfolio links at bhamm-lab.com/about/
+- Deploy portfolio links at bhamm-lab.com/contact/
+- Opnsense:
+  - port forward traefik prod ip to dmz
+  - geo filter
+  - expose 443 on dmz
+- Traefik
+  - proxy
+  - block *.bhamm-lab.com from public
 
 # Omada sdn
 - Setup 3 wifi networks
@@ -110,6 +162,14 @@ x Deploy immich
 - Integrate proxmox with traefik
 
 # Finish
+- Install awx - https://github.com/ansible-community/awx-operator-helm
+- Use gitea container registry
+  - sync sops workflow
+- Convert sync sops to vault job as argo workflow template
+  - Trigger from argo event when vault is ready
+  - Trigger from argo event on secret changes in git
+- Document secret rotation
+- Refactor argocd projects into 'core', 'default'
 - Deploy
   - docs site
   - vpn
@@ -131,13 +191,21 @@ x Deploy immich
 - Implement devsec.os_hardening
 - Implement debian firewall rules
 - 3-2-1 backups
-  - Setup ceph backups
+  - Setup ceph backups (consider decomissioning k8up if volume snapshots work)
   - Configure snapraid/mergerfs
   - Ensure monitoring
   - Expose nfs
   - Create nfs storage class
   - Setup minio tenant with nfs storage class
-  - Refactor k8up to use argo workflows to reduce gcp sa credential surface
+  - Refactor k8up prune
+    - Move generate secret into template with var
+    - Make global prune job that doesn't conflict w/ backup schedule
   - Refactor k8up backups to minio
   - Ensure minio backup bucket syncs to gcp
   - Ensure on new cluster, minio bucket is restored first, then deploy backup
+- Setup CI/CD for other services
+  - Ansible bare metal
+  - Ansible opnsense
+  - Terrafrom gcp
+- Setup service mesh (istio/hashicorp consul)
+- Consider refactoring minio to primary storage and k8up sync to gcp

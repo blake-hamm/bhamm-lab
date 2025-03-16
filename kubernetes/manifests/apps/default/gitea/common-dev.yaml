@@ -1,0 +1,57 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gitea-common
+  namespace: argocd
+spec:
+  destination:
+    namespace: gitea
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://git.bhamm-lab.com/bhamm/bhamm-lab.git
+    targetRevision: feature/cicd
+    path: kubernetes/charts/common
+    helm:
+      valuesObject:
+        name: gitea
+        externalSecrets:
+          enabled: true
+          secrets:
+            - secretKey: oidc_client_secret
+              remoteRef:
+                key: /default/gitea
+                property: oidc_client_secret
+        k8up:
+          backup:
+            enabled: false
+          restores:
+            - snapshot: "46d2fa2eb299aff6831004056cde6065c7ed47ebcf0e29a042771020eb1a635c"
+              claimName: "gitea-shared-storage"
+        postgresql:
+          enabled: true
+          backups:
+            enabled: false
+          recoverySnapshotName: gitea-restore
+          recoverySnapshotHandle: "0001-0024-7b02e4a9-b740-4d5a-b519-9585725a55fb-0000000000000003-fc3cd0e2-5b09-43bb-b138-38234a8f60b1"
+        ingressRoutes:
+          - enabled: true
+            name: gitea
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - kind: Rule
+                match: Host(`git.dev.bhamm-lab.com`)
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: gitea-http
+                    port: 3000
+                    scheme: http
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

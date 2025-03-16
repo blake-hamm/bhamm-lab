@@ -8,7 +8,7 @@ metadata:
     vault_cr: vault
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-wave: "-5"
 spec:
   size: 2
   image: hashicorp/vault:1.18.1
@@ -97,10 +97,10 @@ spec:
         rules: path "*" { capabilities = ["create", "read", "update", "delete", "list", "sudo"] }
       - name: prometheus-operator
         rules: path "sys/metrics" { capabilities = ["list", "read"] }
-      - name: ansible
-        rules: path "secret/data/core/ansible/*" { capabilities = ["create", "read", "update", "delete", "list"] }
-      - name: create_token
-        rules: path "auth/token/create" { capabilities = ["create", "update"] }
+        # - name: ansible
+        #   rules: path "secret/data/core/ansible/*" { capabilities = ["create", "read", "update", "delete", "list"] }
+        # - name: create_token
+        #   rules: path "auth/token/create" { capabilities = ["create", "update"] }
     auth:
       - type: kubernetes
         roles:
@@ -119,6 +119,15 @@ spec:
             bound_service_account_namespaces: default
             policies: prometheus-operator
             ttl: 4h
+      - type: approle
+        roles:
+          - name: default
+            policies: allow_secrets
+            secret_id_ttl: 1440h
+            secret_id_num_uses: 200
+            token_num_uses: 10
+            token_ttl: 20m
+            token_max_ttl: 30m
       - type: oidc
         config:
           oidc_discovery_url: https://auth.bhamm-lab.com
@@ -134,22 +143,6 @@ spec:
             user_claim: sub
             policies: admin
             ttl: 1h
-      - type: approle
-        roles:
-          - name: default
-            policies: allow_secrets
-            secret_id_ttl: 1440h
-            secret_id_num_uses: 200
-            token_num_uses: 10
-            token_ttl: 20m
-            token_max_ttl: 30m
-          - name: ansible
-            policies: read_secrets, ansible
-            secret_id_ttl: 1440h
-            secret_id_num_uses: 1000
-            token_num_uses: 0
-            token_ttl: 20m
-            token_max_ttl: 30m
     secrets:
       - path: secret
         type: kv

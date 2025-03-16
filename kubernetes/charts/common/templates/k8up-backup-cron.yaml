@@ -1,0 +1,31 @@
+{{- if .Values.k8up.backup.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: k8up-{{ .Values.name }}-backups
+  namespace: k8up
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  schedule: "{{ .Values.k8up.backup.schedule }}"
+  concurrencyPolicy: "Replace"
+  workflowSpec:
+    serviceAccountName: "k8up-{{ .Values.name }}"
+    entrypoint: main
+    templates:
+      - name: main
+        steps:
+          - - name: generate-secret
+              templateRef:
+                name: "generate-secret-{{ .Values.name }}"
+                template: generate-secret
+          - - name: backup
+              templateRef:
+                name: "backup-{{ .Values.name }}"
+                template: backup
+    volumes:
+      - name: gcp-sa
+        secret:
+          secretName: gcp-k8up-sa
+{{- end }}
