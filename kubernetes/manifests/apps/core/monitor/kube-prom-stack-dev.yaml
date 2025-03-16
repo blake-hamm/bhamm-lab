@@ -128,6 +128,17 @@ spec:
           fullnameOverride: "prometheus"
         prometheus:
           prometheusSpec:
+            additionalScrapeConfigs:
+              - job_name: 'debian_nodes'
+                scrape_interval: 30s
+                scrape_timeout: 10s
+                metrics_path: /metrics
+                scheme: http
+                static_configs:
+                  - targets:
+                      - '10.0.20.11:9100' # Aorus
+                      - '10.0.20.12:9100' # Antsle
+                      - '10.0.20.13:9100' # Super
             serviceMonitorSelector:
               matchLabels:
                 release: monitor
