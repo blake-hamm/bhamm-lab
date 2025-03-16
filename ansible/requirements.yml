@@ -11,6 +11,9 @@ collections:
   - name: community.sops
     version: "2.0.1"
     source: https://galaxy.ansible.com
+  - name: prometheus.prometheus
+    version: "0.25.0"
+    source: https://galaxy.ansible.com
 roles:
   - name: geerlingguy.ntp
     version: "2.5.0"
