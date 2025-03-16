@@ -10,7 +10,7 @@ spec:
   project: default
   source:
     repoURL: https://git.bhamm-lab.com/bhamm/bhamm-lab.git
-    targetRevision: feature/cicd
+    targetRevision: main
     path: kubernetes/charts/common
     helm:
       valuesObject:
