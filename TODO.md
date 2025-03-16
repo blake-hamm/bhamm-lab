@@ -98,9 +98,9 @@ x Setup gitea pipeline for k3s
     x Adapt dev
   x Add gitea action token into vault config
   x Ensure on open pr - spin up new k3s cluster and deploy
-  - On merge to main
-    - tofu/ansible and argocd sync
-    - destory dev cluster
+  x On merge to main
+    x tofu/ansible and argocd sync
+    x destory dev cluster
 x Test DR
   x Deploy manifests
   x Confirm pvc
@@ -119,7 +119,7 @@ x Test DR
       x immich (login) - TODO: make pvc for config file (contains oidc)
       x gitea (code)
       x authelia (2fa)
-- After merge PR, point prod to 'main' branch in all aspects
+x After merge PR, point prod to 'main' branch in all aspects
 
 # Monitoring
 - Node exporter debian ansible playbook
@@ -129,8 +129,7 @@ x Test DR
 - Spike crowdsec
 - Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
 
-# Expose bhamm-lab.com
-- Spike cf tunnels
+# Start building hugo website
 - Setup Hugo
 - Expose hugo homepage at bhamm-lab.com/
 - Deploy docs at bhamm-lab.com/docs/
@@ -138,9 +137,15 @@ x Test DR
 - Deploy portfolio links at bhamm-lab.com/portfolio/
 - Deploy portfolio links at bhamm-lab.com/about/
 - Deploy portfolio links at bhamm-lab.com/contact/
+
+# Expose bhamm-lab.com
+- Figure out secure way
+- Cloudflare:
+  - Use proxy
 - Opnsense:
   - port forward traefik prod ip to dmz
   - geo filter
+  - only allow cloudflare ip's
   - expose 443 on dmz
 - Traefik
   - proxy
