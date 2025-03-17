@@ -15,13 +15,21 @@ spec:
     helm:
       valuesObject:
         name: monitor
-        # externalSecrets:
-        #   enabled: true
-        #   secrets:
-        #     - secretKey: k8up-repo-password
-        #       remoteRef:
-        #         key: /core/k8up
-        #         property: repo-password
+        externalSecrets:
+          enabled: true
+          secrets:
+            - secretKey: admin-user
+              remoteRef:
+                key: /core/monitoring
+                property: admin-user
+            - secretKey: admin-password
+              remoteRef:
+                key: /core/monitoring
+                property: admin-password
+            - secretKey: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+              remoteRef:
+                key: /core/monitoring
+                property: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
         ingressRoutes:
           - enabled: true
             name: prometheus
