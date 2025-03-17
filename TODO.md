@@ -1,5 +1,7 @@
 # Monitoring
-- Expose prometheus gui
+x Expose prometheus gui
+- Expose grafana gui
+  - enable oidc
 - Key monitoring
   - Debian
     - node exporter
@@ -57,8 +59,9 @@
   - only allow cloudflare ip's
   - expose 443 on dmz
 - Traefik
-  - proxy
+  - setup new metallb ip for external
   - block *.bhamm-lab.com from public
+  - Setup split dns
 
 # Omada sdn
 - Setup 3 wifi networks
