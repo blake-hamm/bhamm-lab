@@ -20,15 +20,15 @@ spec:
           secrets:
             - secretKey: admin-user
               remoteRef:
-                key: /core/monitoring
+                key: /core/monitor
                 property: admin-user
             - secretKey: admin-password
               remoteRef:
-                key: /core/monitoring
+                key: /core/monitor
                 property: admin-password
             - secretKey: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
               remoteRef:
-                key: /core/monitoring
+                key: /core/monitor
                 property: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
         ingressRoutes:
           - enabled: true
