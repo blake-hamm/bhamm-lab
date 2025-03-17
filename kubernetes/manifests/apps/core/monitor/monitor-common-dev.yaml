@@ -34,7 +34,7 @@ spec:
           - enabled: true
             name: prometheus
             ingressClass: traefik-external
-            # websocket: true
+            websocket: true
             routes:
               - match: Host(`prometheus.dev.bhamm-lab.com`)
                 kind: Rule
@@ -47,7 +47,7 @@ spec:
           - enabled: true
             name: grafana
             ingressClass: traefik-external
-            # websocket: true
+            websocket: true
             routes:
               - match: Host(`grafana.dev.bhamm-lab.com`)
                 kind: Rule
