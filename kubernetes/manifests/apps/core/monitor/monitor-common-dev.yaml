@@ -10,7 +10,7 @@ spec:
   project: default
   source:
     repoURL: https://git.bhamm-lab.com/bhamm/bhamm-lab.git
-    targetRevision: main
+    targetRevision: feature/monitor-revamp
     path: kubernetes/charts/common
     helm:
       valuesObject:
@@ -31,8 +31,7 @@ spec:
                 key: /core/monitor
                 property: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
         ingressRoutes:
-          - enabled: true
-            name: prometheus
+          - name: prometheus
             ingressClass: traefik-external
             websocket: true
             routes:
@@ -44,8 +43,7 @@ spec:
                   - name: monitor-prometheus
                     scheme: http
                     port: 9090
-          - enabled: true
-            name: grafana
+          - name: grafana
             ingressClass: traefik-external
             websocket: true
             routes:
