@@ -33,7 +33,7 @@ spec:
                 middlewares:
                   - name: default-headers
                 services:
-                  - name: monitor-kube-prometheus-st-prometheus
+                  - name: monitor-prometheus
                     scheme: http
                     port: 9090
   syncPolicy:
