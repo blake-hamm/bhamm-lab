@@ -122,14 +122,13 @@ spec:
           #   gnetId: 12175
           #   revision: 5
         nodeExporter:
-          enabled: false
-          forceDeployDashboards: true
+          enabled: true
         prometheusOperator:
           fullnameOverride: "prometheus"
         prometheus:
           prometheusSpec:
             additionalScrapeConfigs:
-              - job_name: 'debian_nodes'
+              - job_name: 'proxmox_nodes'
                 scrape_interval: 30s
                 scrape_timeout: 10s
                 metrics_path: /metrics

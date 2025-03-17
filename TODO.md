@@ -1,18 +1,33 @@
 # Monitoring
+- Expose prometheus gui
 - Key monitoring
   - Debian
     - node exporter
     - fail2ban exporter
     - systemd
+    - Netdata
+    - Wazuh/OSQuery
   - k3s
+    - Remove ansible node exporter
+    - Use k8s-native node exporter
     - api server
     - resources
+    - kube bench - https://github.com/aquasecurity/kube-bench
+    - falco - https://github.com/falcosecurity/falco
+    - cadviser
+    - kube-state
   - opnsense firewall
+    - crowdsec
+    - Zeek
   - traefik/authelia
+    - status codes
+    - response times
+  - blackbox
   - vault
   - ceph
   - calico
   - omada equipment
+    - snmp exporter
   - fail2ban
 - Node exporter debian ansible playbook
 - Refine grafana dashboard config
@@ -31,6 +46,7 @@
 - Deploy portfolio links at bhamm-lab.com/contact/
 
 # Expose bhamm-lab.com
+- Deploy argocd image updateder - https://argocd-image-updater.readthedocs.io/en/stable/
 - Spike: explore most secure method
 - Setup debian firewall
 - Cloudflare:
@@ -111,6 +127,8 @@
   - Use example site for continuous backups/gitops updates with argo workflow/k8up/cloudnativepg
   - s3 to s3 backups
   - DR architecture diagram
+- Consider argocd application sets - https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Use-Cases/
+- Install renovate bot - https://docs.renovatebot.com/modules/platform/gitea/
 
 
 ## Previous
