@@ -1,6 +1,6 @@
 # Monitoring
 x Expose prometheus gui
-- Expose grafana gui
+x Expose grafana gui
   - enable oidc
 - Key monitoring
   - Debian
