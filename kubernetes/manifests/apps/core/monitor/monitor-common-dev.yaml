@@ -28,14 +28,13 @@ spec:
             ingressClass: traefik-external
             # websocket: true
             routes:
-              - kind: Rule
-                match: Host(`prometheus.dev.bhamm-lab.com`)
+              - match: Host(`prometheus.bhamm-lab.com`)
+                kind: Rule
                 middlewares:
                   - name: default-headers
                 services:
-                  - name: prometheus
-                    scheme: https
-                    port: 443
+                  - name: monitor-prometheus
+                    port: 9090
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
