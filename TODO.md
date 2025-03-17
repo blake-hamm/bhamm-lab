@@ -8,8 +8,8 @@
     - Netdata
     - Wazuh/OSQuery
   - k3s
-    - Remove ansible node exporter
-    - Use k8s-native node exporter
+    x Remove ansible node exporter
+    x Use k8s-native node exporter
     - api server
     - resources
     - kube bench - https://github.com/aquasecurity/kube-bench
@@ -129,6 +129,7 @@
   - DR architecture diagram
 - Consider argocd application sets - https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Use-Cases/
 - Install renovate bot - https://docs.renovatebot.com/modules/platform/gitea/
+- Consider using cilium - https://cilium.io/
 
 
 ## Previous

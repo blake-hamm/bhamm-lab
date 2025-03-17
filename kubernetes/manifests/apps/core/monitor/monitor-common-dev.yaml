@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitor-common
+  namespace: argocd
+spec:
+  destination:
+    namespace: monitor
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://git.bhamm-lab.com/bhamm/bhamm-lab.git
+    targetRevision: main
+    path: kubernetes/charts/common
+    helm:
+      valuesObject:
+        name: monitor
+        # externalSecrets:
+        #   enabled: true
+        #   secrets:
+        #     - secretKey: k8up-repo-password
+        #       remoteRef:
+        #         key: /core/k8up
+        #         property: repo-password
+        ingressRoutes:
+          - enabled: true
+            name: prometheus
+            ingressClass: traefik-external
+            # websocket: true
+            routes:
+              - kind: Rule
+                match: Host(`prometheus.dev.bhamm-lab.com`)
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: prometheus
+                    scheme: https
+                    port: 443
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
