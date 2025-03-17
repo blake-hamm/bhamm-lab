@@ -48,7 +48,7 @@ spec:
                 name: Authelia
                 icon: signin
                 client_id: grafana
-                # client_secret: # GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+                client_secret: # GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
                 scopes: openid profile email groups
                 empty_scopes: false
                 auth_url: https://auth.dev.bhamm-lab.com/api/oidc/authorization
