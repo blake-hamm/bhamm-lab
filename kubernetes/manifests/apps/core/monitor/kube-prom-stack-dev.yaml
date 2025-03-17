@@ -19,6 +19,8 @@ spec:
         nameOverride: monitor
         namespaceOverride: monitor
         fullnameOverride: monitor
+        commonLabels:
+          release: monitor
         defaultRules:
           create: true
           rules:
@@ -141,10 +143,8 @@ spec:
                       - '10.0.20.12:9100' # Antsle
                       - '10.0.20.13:9100' # Super
             serviceMonitorSelector:
-              matchExpressions:
-                - key: release
-                  operator: In
-                  values: [monitor, kube-prometheus-stack]
+              matchLabels:
+                release: monitor
             storageSpec:
               volumeClaimTemplate:
                 metadata:
