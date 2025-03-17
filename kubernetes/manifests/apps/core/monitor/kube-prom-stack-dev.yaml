@@ -22,10 +22,6 @@ spec:
         defaultRules:
           create: true
           rules:
-            network: false
-            node: false
-            nodeExporterAlerting: false
-            nodeExporterRecording: false
             windows: false
         prometheus-windows-exporter:
           prometheus:
