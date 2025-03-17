@@ -35,16 +35,15 @@ spec:
           enabled: true
         grafana:
           enabled: true
-          # admin:
-          #   existingSecret: kube-prom-external-secret
-          #   userKey: grafana-admin-user
-          #   passwordKey: grafana-admin-password
-          # envValueFrom:
-          #   GF_SECURITY_ADMIN_USER
-          #   GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
-          #     secretKeyRef:
-          #       name: monitoring-login
-          #       key: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+          admin:
+            existingSecret: monitor-external-secret
+            userKey: admin-user
+            passwordKey: admin-password
+          envValueFrom:
+            GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
+              secretKeyRef:
+                name: monitor-external-secret
+                key: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
           grafana.ini:
             server:
               root_url: https://grafana.dev.bhamm-lab.com
