@@ -13,7 +13,7 @@ spec:
   source:
     chart: kube-prometheus-stack
     repoURL: https://prometheus-community.github.io/helm-charts
-    targetRevision: 61.2.0
+    targetRevision: 70.0.2
     helm:
       valuesObject:
         nameOverride: monitor
@@ -118,9 +118,6 @@ spec:
               node-exporter-full:
                 gnetId: 1860
                 revision: 37
-              opnsense-exporter:
-                gnetId: 21113
-                revision: 1
         nodeExporter:
           enabled: true
           operatingSystems:
