@@ -80,7 +80,7 @@ metadata:
   name: opnsense-exporter
   namespace: monitor
   labels:
-    release: "kube-prom"
+    release: "monitor"
 spec:
   scrapeInterval: 60s
   scrapeTimeout: 3s
