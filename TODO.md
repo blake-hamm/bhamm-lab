@@ -133,7 +133,7 @@ x Expose grafana gui
 - Consider argocd application sets - https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Use-Cases/
 - Install renovate bot - https://docs.renovatebot.com/modules/platform/gitea/
 - Consider using cilium - https://cilium.io/
-
+- audit and rotate secrets
 
 ## Previous
 # Secure network

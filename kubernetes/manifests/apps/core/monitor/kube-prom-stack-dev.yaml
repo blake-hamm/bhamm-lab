@@ -118,6 +118,9 @@ spec:
               node-exporter-full:
                 gnetId: 1860
                 revision: 37
+              opnsense-exporter:
+                gnetId: 21113
+                revision: 1
         nodeExporter:
           enabled: true
           operatingSystems:
