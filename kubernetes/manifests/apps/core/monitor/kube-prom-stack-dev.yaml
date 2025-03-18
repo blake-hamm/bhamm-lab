@@ -132,11 +132,10 @@ spec:
         prometheus:
           prometheusSpec:
             additionalScrapeConfigs:
+              - job_name: opnsense
+                static_configs:
+                  - targets: ['10.0.9.1:9100']
               - job_name: 'proxmox_nodes'
-                scrape_interval: 30s
-                scrape_timeout: 10s
-                metrics_path: /metrics
-                scheme: http
                 static_configs:
                   - targets:
                       - '10.0.20.11:9100' # Aorus
