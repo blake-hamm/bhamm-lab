@@ -4,7 +4,7 @@ x Expose grafana gui
   x enable oidc
 - Key monitoring
   - Debian
-    - node exporter
+    x node exporter
     - fail2ban exporter
     - systemd
     - Netdata
