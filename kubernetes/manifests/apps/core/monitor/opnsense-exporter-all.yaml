@@ -89,4 +89,4 @@ spec:
     - labels:
         job: opnsense-exporter
       targets:
-        - opnsense-exporter.svc:8080
+        - opnsense-exporter:8080
