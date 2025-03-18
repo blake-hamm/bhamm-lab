@@ -1,0 +1,92 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: opnsense-exporter
+  namespace: monitor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: opnsense-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: opnsense-exporter
+    spec:
+      containers:
+        - name: opnsense-exporter
+          image: ghcr.io/athennamind/opnsense-exporter:latest
+          imagePullPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65534
+          ports:
+            - name: metrics-http
+              containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /
+              port: metrics-http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: metrics-http
+          args:
+            - "--log.level=info"
+            - "--log.format=json"
+          env:
+            - name: OPNSENSE_EXPORTER_INSTANCE_LABEL
+              value: "opnsense"
+            - name: OPNSENSE_EXPORTER_OPS_API
+              value: "10.0.9.1"
+            - name: OPNSENSE_EXPORTER_OPS_PROTOCOL
+              value: "http"
+            - name: OPNSENSE_EXPORTER_OPS_INSECURE
+              value: "true"
+            - name: OPNSENSE_EXPORTER_OPS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: monitor-external-secret
+                  key: OPNSENSE_EXPORTER_OPS_API_KEY
+            - name: OPNSENSE_EXPORTER_OPS_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: monitor-external-secret
+                  key: OPNSENSE_EXPORTER_OPS_API_SECRET
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: opnsense-exporter
+  namespace: monitor
+spec:
+  selector:
+    app.kubernetes.io/name: opnsense-exporter
+  type: ClusterIP
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: ScrapeConfig
+metadata:
+  name: opnsense-exporter
+  namespace: monitor
+  labels:
+    release: "kube-prom"
+spec:
+  scrapeInterval: 60s
+  scrapeTimeout: 3s
+  metricsPath: /metrics
+  staticConfigs:
+    - labels:
+        job: opnsense-exporter
+      targets:
+        - opnsense-exporter.svc:8080
