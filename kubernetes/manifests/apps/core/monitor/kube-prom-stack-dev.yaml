@@ -31,6 +31,7 @@ spec:
           enabled: true
         grafana:
           enabled: true
+          defaultDashboardsTimezone: America/Denver
           admin:
             existingSecret: monitor-external-secret
             userKey: admin-user
@@ -71,18 +72,6 @@ spec:
               searchNamespace: ALL
               provider:
                 foldersFromFilesStructure: true
-          dashboardProviders:
-            dashboardproviders.yaml:
-              apiVersion: 1
-              providers:
-                - name: 'extra-dashboards'
-                  orgId: 1
-                  folder: 'Extras'
-                  type: file
-                  disableDeletion: true
-                  editable: true
-                  options:
-                    path: /var/lib/grafana/dashboards/extra-dashboards
           dashboards:
             extra-dashboards:
               k8s-system-api-server:
@@ -118,6 +107,21 @@ spec:
               node-exporter-full:
                 gnetId: 1860
                 revision: 37
+              opnsense-exporter:
+                url: https://raw.githubusercontent.com/AthennaMind/opnsense-exporter/refs/heads/main/deploy/grafana/dashboard-v1.json
+                token: ''
+          dashboardProviders:
+            dashboardproviders.yaml:
+              apiVersion: 1
+              providers:
+                - name: 'extra-dashboards'
+                  orgId: 1
+                  folder: 'Extras'
+                  type: file
+                  disableDeletion: true
+                  editable: true
+                  options:
+                    path: /var/lib/grafana/dashboards/extra-dashboards
         nodeExporter:
           enabled: true
           operatingSystems:
