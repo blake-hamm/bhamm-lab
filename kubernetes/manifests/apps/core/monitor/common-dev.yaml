@@ -30,14 +30,6 @@ spec:
               remoteRef:
                 key: /core/monitor
                 property: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
-            - secretKey: OPNSENSE_EXPORTER_OPS_API_KEY
-              remoteRef:
-                key: /core/monitor
-                property: OPNSENSE_EXPORTER_OPS_API_KEY
-            - secretKey: OPNSENSE_EXPORTER_OPS_API_SECRET
-              remoteRef:
-                key: /core/monitor
-                property: OPNSENSE_EXPORTER_OPS_API_SECRET
         ingressRoutes:
           - name: grafana
             ingressClass: traefik-external

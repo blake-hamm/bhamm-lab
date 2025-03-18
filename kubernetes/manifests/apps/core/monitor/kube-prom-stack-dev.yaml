@@ -107,9 +107,6 @@ spec:
               node-exporter-full:
                 gnetId: 1860
                 revision: 37
-              opnsense-exporter:
-                url: https://raw.githubusercontent.com/blake-hamm/opnsense-exporter/refs/heads/main/deploy/grafana/dashboard-v1.json
-                token: ''
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
