@@ -17,7 +17,8 @@ x Expose grafana gui
     x cadviser
     x kube-state
     x calico
-    - metallb
+    x metallb
+    x authelia
     - vault
     - kube bench - https://github.com/aquasecurity/kube-bench
     - falco - https://github.com/falcosecurity/falco

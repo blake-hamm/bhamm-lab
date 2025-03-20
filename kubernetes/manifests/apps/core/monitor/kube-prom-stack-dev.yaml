@@ -105,6 +105,7 @@ spec:
               metallb:
                 gnetId: 20162
                 revision: 5
+                datasource: Prometheus
               calico:
                 gnetId: 12175
                 revision: 5
