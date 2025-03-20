@@ -104,6 +104,7 @@ spec:
               calico:
                 gnetId: 12175
                 revision: 5
+                datasource: Prometheus
               node-exporter-full:
                 gnetId: 1860
                 revision: 37
