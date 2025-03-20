@@ -95,6 +95,7 @@ spec:
               authelia:
                 url: https://raw.githubusercontent.com/authelia/authelia/refs/heads/master/examples/grafana-dashboards/simple.json
                 token: ''
+                datasource: Prometheus
               ceph-cluster:
                 gnetId: 2842
                 revision: 17
