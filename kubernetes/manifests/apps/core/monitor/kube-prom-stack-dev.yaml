@@ -92,6 +92,9 @@ spec:
               k8s-views-pods:
                 url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-pods.json
                 token: ''
+              authelia:
+                url: https://raw.githubusercontent.com/authelia/authelia/refs/heads/master/examples/grafana-dashboards/simple.json
+                token: ''
               ceph-cluster:
                 gnetId: 2842
                 revision: 17

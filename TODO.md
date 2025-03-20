@@ -5,11 +5,10 @@ x Expose grafana gui
 - Key monitoring
   - Bare metal
     x node exporter
-    - fail2ban exporter
     - Netdata
     - Wazuh
     - crowdsec - https://doc.crowdsec.net/
-    - zenarmor
+    - fail2ban exporter
   - k3s
     x Remove ansible node exporter
     x Use k8s-native node exporter
@@ -17,31 +16,27 @@ x Expose grafana gui
     x resources
     x cadviser
     x kube-state
-    - calico
+    x calico
+    - metallb
     - vault
     - kube bench - https://github.com/aquasecurity/kube-bench
     - falco - https://github.com/falcosecurity/falco
   - opnsense firewall
     x netflow analyzer
-    x zenarmor
     - crowdsec
     - Zeek
     - ClamAV
     - Suricata
-  - traefik/authelia
-    - status codes
-    - response times
-  - blackbox
+  x traefik/authelia
+    x status codes
+    x response times
   - ceph
-  - omada equipment
-    - snmp exporter
 x Node exporter debian ansible playbook
-- Refine grafana dashboard config
 - Deploy loki
 - Setup alerts for nodes and traefik
-- Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
 
 # Start building hugo website
+- Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
 - Setup Hugo
 - Expose hugo homepage at bhamm-lab.com/
 - Deploy docs at bhamm-lab.com/docs/
@@ -142,6 +137,9 @@ x Node exporter debian ansible playbook
   - https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-deploy-eck.html
   - replace zenarmor db in opnsense
 - lynis audit - https://cisofy.com/lynis/#how-it-works
+- blackbox exporter - https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus-blackbox-exporter/values.yaml
+  - omada equipment
+    - snmp exporter
 
 ## Previous
 # Secure network
