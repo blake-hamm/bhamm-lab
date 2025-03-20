@@ -3,39 +3,42 @@ x Expose prometheus gui
 x Expose grafana gui
   x enable oidc
 - Key monitoring
-  - Debian
+  - Bare metal
     x node exporter
     - fail2ban exporter
-    - systemd
     - Netdata
-    - Wazuh/OSQuery
+    - Wazuh
+    - crowdsec - https://doc.crowdsec.net/
+    - zenarmor
   - k3s
     x Remove ansible node exporter
     x Use k8s-native node exporter
-    - api server
-    - resources
+    x api server
+    x resources
+    x cadviser
+    x kube-state
+    - calico
+    - vault
     - kube bench - https://github.com/aquasecurity/kube-bench
     - falco - https://github.com/falcosecurity/falco
-    - cadviser
-    - kube-state
   - opnsense firewall
+    x netflow analyzer
+    x zenarmor
     - crowdsec
     - Zeek
+    - ClamAV
+    - Suricata
   - traefik/authelia
     - status codes
     - response times
   - blackbox
-  - vault
   - ceph
-  - calico
   - omada equipment
     - snmp exporter
-  - fail2ban
-- Node exporter debian ansible playbook
+x Node exporter debian ansible playbook
 - Refine grafana dashboard config
 - Deploy loki
 - Setup alerts for nodes and traefik
-- Spike crowdsec
 - Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
 
 # Start building hugo website
@@ -134,6 +137,11 @@ x Expose grafana gui
 - Install renovate bot - https://docs.renovatebot.com/modules/platform/gitea/
 - Consider using cilium - https://cilium.io/
 - audit and rotate secrets
+- Automated opnsense backups - https://www.zenarmor.com/docs/network-security-tutorials/opnsense-security-and-hardening-best-practice-guide#regularly-backup-and-protect-backup-files
+- Deploy elasticsearch operator
+  - https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-deploy-eck.html
+  - replace zenarmor db in opnsense
+- lynis audit - https://cisofy.com/lynis/#how-it-works
 
 ## Previous
 # Secure network
