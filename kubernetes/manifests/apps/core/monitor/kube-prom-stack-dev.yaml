@@ -103,8 +103,8 @@ spec:
                 gnetId: 17347
                 revision: 9
               metallb:
-                gnetId: 20162
-                revision: 5
+                url: https://raw.githubusercontent.com/M0NsTeRRR/grafana-dashboards/refs/heads/main/dashboards/metallb.json
+                token: ''
                 datasource: Prometheus
               calico:
                 gnetId: 12175
