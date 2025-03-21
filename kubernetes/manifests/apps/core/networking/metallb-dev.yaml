@@ -17,6 +17,7 @@ spec:
     helm:
       valuesObject:
         prometheus:
+          rbacPrometheus: false
           serviceMonitor:
             enabled: true
             speaker:
