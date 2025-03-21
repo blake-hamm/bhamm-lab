@@ -11,6 +11,7 @@
       drawio
       dbeaver-bin
       virt-manager
+      # signal-desktop
       # gnome-network-displays
       # steam
       # etcher

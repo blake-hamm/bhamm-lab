@@ -18,7 +18,7 @@ x Expose grafana gui
     x kube-state
     x calico
     x authelia
-    - metallb (need to fork dashboard json and adjust data source)
+    x metallb (need to fork dashboard json and adjust data source)
     - kube scheduler
     - kube etcd
     - kube controller
