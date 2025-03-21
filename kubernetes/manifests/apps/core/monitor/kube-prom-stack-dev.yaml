@@ -105,7 +105,6 @@ spec:
               metallb:
                 url: https://raw.githubusercontent.com/blake-hamm/grafana-dashboards/refs/heads/main/dashboards/metallb.json
                 token: ''
-                datasource: Prometheus
               calico:
                 gnetId: 12175
                 revision: 5
