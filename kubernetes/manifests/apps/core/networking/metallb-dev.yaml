@@ -17,6 +17,9 @@ spec:
     helm:
       valuesObject:
         prometheus:
+          rbacPrometheus: true
+          serviceAccount: "prometheus"
+          namespace: "monitor"
           serviceMonitor:
             enabled: true
             speaker:
