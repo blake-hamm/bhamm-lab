@@ -17,9 +17,15 @@ x Expose grafana gui
     x cadviser
     x kube-state
     x calico
-    x metallb
     x authelia
+    - metallb (need to fork dashboard json and adjust data source)
+    - kube scheduler
+    - kube etcd
+    - kube controller
+    - kube proxy
     - vault
+    - cert manager
+    - k8up - https://grafana.com/grafana/dashboards/20166-k8up/
     - kube bench - https://github.com/aquasecurity/kube-bench
     - falco - https://github.com/falcosecurity/falco
   - opnsense firewall

@@ -11,6 +11,7 @@
       drawio
       dbeaver-bin
       virt-manager
+      # gnome-network-displays
       # steam
       # etcher
       # kubectl
