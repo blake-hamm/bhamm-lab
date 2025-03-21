@@ -58,3 +58,101 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "5"
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: speaker-monitor
+  namespace: metallb-system
+  labels:
+    component: speaker
+    release: monitor
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  endpoints:
+    - port: metricshttps
+      interval: 30s
+      honorLabels: true
+      bearerTokenFile: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+      scheme: "https"
+      tlsConfig:
+        insecureSkipVerify: true
+  jobLabel: "component"
+  namespaceSelector:
+    matchNames:
+      - metallb-system
+  selector:
+    matchLabels:
+      name: speaker-monitor-service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    prometheus.io/scrape: "true"
+    argocd.argoproj.io/sync-wave: "5"
+  labels:
+    name: speaker-monitor-service
+  name: speaker-monitor-service
+  namespace: metallb-system
+spec:
+  selector:
+    component: speaker
+  clusterIP: None
+  ports:
+    - name: metricshttps
+      port: 9120
+      targetPort: 9120
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: controller-monitor
+  namespace: metallb-system
+  labels:
+    component: controller
+    release: monitor
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  endpoints:
+    - port: metricshttps
+      interval: 30s
+      honorLabels: true
+      bearerTokenFile: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+      scheme: "https"
+      tlsConfig:
+        insecureSkipVerify: true
+  jobLabel: "component"
+  namespaceSelector:
+    matchNames:
+      - metallb-system
+  selector:
+    matchLabels:
+      name: controller-monitor-service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    prometheus.io/scrape: "true"
+    argocd.argoproj.io/sync-wave: "5"
+  labels:
+    name: controller-monitor-service
+  name: controller-monitor-service
+  namespace: metallb-system
+spec:
+  selector:
+    component: controller
+  clusterIP: None
+  ports:
+    - name: metricshttps
+      port: 9120
+      targetPort: 9120
+  sessionAffinity: None
+  type: ClusterIP
