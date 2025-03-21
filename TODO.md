@@ -19,10 +19,6 @@ x Expose grafana gui
     x calico
     x authelia
     x metallb (need to fork dashboard json and adjust data source)
-    - kube scheduler
-    - kube etcd
-    - kube controller
-    - kube proxy
     - vault
     - cert manager
     - k8up - https://grafana.com/grafana/dashboards/20166-k8up/
@@ -147,6 +143,13 @@ x Node exporter debian ansible playbook
 - blackbox exporter - https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus-blackbox-exporter/values.yaml
   - omada equipment
     - snmp exporter
+- Migrate from k3s to something more robust
+  - Confirm monitoring for
+    - kube scheduler
+    - kube etcd
+    - kube controller
+    - kube proxy
+  - Or this - https://fabianlee.org/2022/07/02/prometheus-installing-kube-prometheus-stack-on-k3s-cluster/
 
 ## Previous
 # Secure network
