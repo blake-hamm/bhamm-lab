@@ -19,7 +19,7 @@ x Expose grafana gui
     x calico
     x authelia
     x metallb (need to fork dashboard json and adjust data source)
-    - vault
+    x vault
     - cert manager
     - k8up - https://grafana.com/grafana/dashboards/20166-k8up/
     - kube bench - https://github.com/aquasecurity/kube-bench
