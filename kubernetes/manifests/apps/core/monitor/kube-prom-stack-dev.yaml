@@ -112,6 +112,10 @@ spec:
               node-exporter-full:
                 gnetId: 1860
                 revision: 37
+              vault:
+                gnetId: 12904
+                revision: 2
+                datasource: Prometheus
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
