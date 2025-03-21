@@ -116,6 +116,10 @@ spec:
                 gnetId: 12904
                 revision: 2
                 datasource: Prometheus
+              cert-manager:
+                gnetId: 20842
+                revision: 3
+                datasource: Prometheus
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
