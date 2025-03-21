@@ -45,7 +45,7 @@ metadata:
   namespace: metallb-system
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "3"
 spec:
   addresses:
     - 10.0.30.131-10.0.30.139 # Update in traefik values as well
@@ -57,7 +57,7 @@ metadata:
   namespace: metallb-system
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "3"
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -92,7 +92,7 @@ kind: Service
 metadata:
   annotations:
     prometheus.io/scrape: "true"
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "4"
   labels:
     name: speaker-monitor-service
   name: speaker-monitor-service
@@ -141,7 +141,7 @@ kind: Service
 metadata:
   annotations:
     prometheus.io/scrape: "true"
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "4"
   labels:
     name: controller-monitor-service
   name: controller-monitor-service
