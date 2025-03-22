@@ -41,6 +41,8 @@ spec:
               secretKeyRef:
                 name: monitor-external-secret
                 key: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+          plugins:
+            - grafana-lokiexplore-app
           grafana.ini:
             server:
               root_url: https://grafana.dev.bhamm-lab.com
