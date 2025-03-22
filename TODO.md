@@ -2,7 +2,7 @@
 x Expose prometheus gui
 x Expose grafana gui
   x enable oidc
-- Key monitoring
+x Key monitoring
   x Bare metal
     x node exporter
   x k3s
@@ -22,10 +22,11 @@ x Expose grafana gui
   x traefik/authelia
     x status codes
     x response times
-  - ceph
+  x ceph
 x Node exporter debian ansible playbook
 - Deploy loki
-- Setup alerts for nodes and traefik
+  - Leverage minio storage
+  - oath2 (or traefik)
 
 # Start building hugo website
 - Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
@@ -38,6 +39,7 @@ x Node exporter debian ansible playbook
 - Deploy portfolio links at bhamm-lab.com/contact/
 
 # Expose bhamm-lab.com
+- Setup alerts for nodes and traefik
 - Example Cloud-Native Security Stack:
     Falco: Runtime security for Kubernetes.
     CrowdSec: Block malicious IPs (SSH, web attacks).

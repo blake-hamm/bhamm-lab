@@ -1,0 +1,104 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: loki-distributed
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  destination:
+    namespace: monitor
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: loki-distributed
+    repoURL: https://prometheus-community.github.io/helm-charts
+    targetRevision: 0.80.2
+    helm:
+      valuesObject:
+        loki:
+          storage_config:
+            aws:
+              # s3: http<s>://<username>:<secret>@<fqdn>:<port>
+              bucketnames: loki-data
+              region: us-east-1
+              endpoint: minio.minio:443
+              access_key_id: "${MINIO_ACCESS_KEY_ID}"
+              secret_access_key: "${MINIO_SECRET_ACCESS_KEY}"
+              s3forcepathstyle: true
+            tsdb_shipper:
+              active_index_directory: /loki/index
+              cache_location: /loki/index_cache
+              cache_ttl: 24h
+          schema_config:
+            configs:
+              - from: 2020-07-01
+                store: tsdb
+                object_store: s3
+                schema: v13
+                index:
+                  prefix: index_
+                  period: 24h
+          ingester:
+            extraArgs:
+              - '-config.expand-env=true'
+            extraEnvFrom:
+              - name: MINIO_ACCESS_KEY_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: monitor-external-secret
+                    key: MINIO_ACCESS_KEY_ID
+              - name: MINIO_SECRET_ACCESS_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: monitor-external-secret
+                    key: MINIO_SECRET_ACCESS_KEY
+          distributor:
+            extraArgs:
+              - '-config.expand-env=true'
+            extraEnvFrom:
+              - name: MINIO_ACCESS_KEY_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: monitor-external-secret
+                    key: MINIO_ACCESS_KEY_ID
+              - name: MINIO_SECRET_ACCESS_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: monitor-external-secret
+                    key: MINIO_SECRET_ACCESS_KEY
+          querier:
+            extraArgs:
+              - '-config.expand-env=true'
+            extraEnvFrom:
+              - name: MINIO_ACCESS_KEY_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: monitor-external-secret
+                    key: MINIO_ACCESS_KEY_ID
+              - name: MINIO_SECRET_ACCESS_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: monitor-external-secret
+                    key: MINIO_SECRET_ACCESS_KEY
+          compactor:
+            extraArgs:
+              - '-config.expand-env=true'
+            extraEnvFrom:
+              - name: MINIO_ACCESS_KEY_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: monitor-external-secret
+                    key: MINIO_ACCESS_KEY_ID
+              - name: MINIO_SECRET_ACCESS_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: monitor-external-secret
+                    key: MINIO_SECRET_ACCESS_KEY
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
