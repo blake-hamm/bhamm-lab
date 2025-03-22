@@ -155,6 +155,12 @@ spec:
                       - '10.0.20.11:9100' # Aorus
                       - '10.0.20.12:9100' # Antsle
                       - '10.0.20.13:9100' # Super
+              - job_name: 'ceph'
+                static_configs:
+                  - targets:
+                      - '10.0.20.11:9283' # Aorus
+                      - '10.0.20.12:9283' # Antsle
+                      - '10.0.20.13:9283' # Super
             scrapeConfigSelector:
               matchExpressions:
                 - key: release
