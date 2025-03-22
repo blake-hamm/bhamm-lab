@@ -120,6 +120,10 @@ spec:
                 gnetId: 20842
                 revision: 3
                 datasource: Prometheus
+              ceph:
+                gnetId: 2842
+                revision: 18
+                datasource: Prometheus
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
