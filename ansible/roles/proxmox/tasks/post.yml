@@ -44,3 +44,6 @@
     name: docker
     enabled: true
     state: started
+- name: Enable prometheus on ceph
+  ansible.builtin.command: ceph mgr module enable prometheus
+  changed_when: false

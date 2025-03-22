@@ -3,13 +3,9 @@ x Expose prometheus gui
 x Expose grafana gui
   x enable oidc
 - Key monitoring
-  - Bare metal
+  x Bare metal
     x node exporter
-    - Netdata
-    - Wazuh
-    - crowdsec - https://doc.crowdsec.net/
-    - fail2ban exporter
-  - k3s
+  x k3s
     x Remove ansible node exporter
     x Use k8s-native node exporter
     x api server
@@ -20,16 +16,9 @@ x Expose grafana gui
     x authelia
     x metallb (need to fork dashboard json and adjust data source)
     x vault
-    - cert manager
-    - k8up - https://grafana.com/grafana/dashboards/20166-k8up/
-    - kube bench - https://github.com/aquasecurity/kube-bench
-    - falco - https://github.com/falcosecurity/falco
-  - opnsense firewall
+    x cert manager
+  x opnsense firewall
     x netflow analyzer
-    - crowdsec
-    - Zeek
-    - ClamAV
-    - Suricata
   x traefik/authelia
     x status codes
     x response times
@@ -49,6 +38,17 @@ x Node exporter debian ansible playbook
 - Deploy portfolio links at bhamm-lab.com/contact/
 
 # Expose bhamm-lab.com
+- Example Cloud-Native Security Stack:
+    Falco: Runtime security for Kubernetes.
+    CrowdSec: Block malicious IPs (SSH, web attacks).
+    Suricata: Network-layer IDS.
+    Trivy: Vulnerability scanning.
+    Osquery: Host-level compliance checks.
+- falco https://github.com/falcosecurity/charts/tree/master/charts
+- crowdsec server
+  - integrate with agents
+  - integrate with traefik
+- clamAV
 - Deploy argocd image updateder - https://argocd-image-updater.readthedocs.io/en/stable/
 - Spike: explore most secure method
 - Setup debian firewall
@@ -63,6 +63,7 @@ x Node exporter debian ansible playbook
   - setup new metallb ip for external
   - block *.bhamm-lab.com from public
   - Setup split dns
+- Consider Zeek
 
 # Omada sdn
 - Setup 3 wifi networks
@@ -150,6 +151,9 @@ x Node exporter debian ansible playbook
     - kube controller
     - kube proxy
   - Or this - https://fabianlee.org/2022/07/02/prometheus-installing-kube-prometheus-stack-on-k3s-cluster/
+- traefik waf https://plugins.traefik.io/plugins/628c9eadffc0cd18356a9799/modsecurity-plugin
+- k8up - https://grafana.com/grafana/dashboards/20166-k8up/ (stretch)
+- kube bench - https://github.com/aquasecurity/kube-bench
 
 ## Previous
 # Secure network
