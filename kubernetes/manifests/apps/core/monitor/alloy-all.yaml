@@ -22,7 +22,7 @@ spec:
             content: |
               loki.write "loki" {
                 endpoint {
-                  url = "http://loki-distributed-gateway.monitor:3100/loki/api/v1/push"
+                  url = "http://loki-distributed-distributor:3100/loki/api/v1/push"
                 }
               }
 

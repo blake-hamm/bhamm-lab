@@ -124,10 +124,6 @@ spec:
                 gnetId: 2842
                 revision: 18
                 datasource: Prometheus
-              loki:
-                gnetId: 12611
-                revision: 2
-                datasource: Prometheus
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
@@ -140,6 +136,11 @@ spec:
                   editable: true
                   options:
                     path: /var/lib/grafana/dashboards/extra-dashboards
+          additionalDataSources:
+            - name: Loki
+              type: loki
+              url: http://loki-distributed-gateway
+              access: proxy
         nodeExporter:
           enabled: true
           operatingSystems:
