@@ -13,7 +13,7 @@ spec:
   source:
     chart: loki-distributed
     repoURL: https://prometheus-community.github.io/helm-charts
-    targetRevision: v0.80.2
+    targetRevision: 0.80.1
     helm:
       valuesObject:
         loki:
@@ -68,20 +68,6 @@ spec:
                     name: monitor-external-secret
                     key: MINIO_SECRET_ACCESS_KEY
           querier:
-            extraArgs:
-              - '-config.expand-env=true'
-            extraEnvFrom:
-              - name: MINIO_ACCESS_KEY_ID
-                valueFrom:
-                  secretKeyRef:
-                    name: monitor-external-secret
-                    key: MINIO_ACCESS_KEY_ID
-              - name: MINIO_SECRET_ACCESS_KEY
-                valueFrom:
-                  secretKeyRef:
-                    name: monitor-external-secret
-                    key: MINIO_SECRET_ACCESS_KEY
-          compactor:
             extraArgs:
               - '-config.expand-env=true'
             extraEnvFrom:
