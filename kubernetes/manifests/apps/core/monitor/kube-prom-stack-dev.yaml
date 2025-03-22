@@ -124,6 +124,10 @@ spec:
                 gnetId: 2842
                 revision: 18
                 datasource: Prometheus
+              loki:
+                gnetId: 14055
+                revision: 5
+                datasource: Prometheus
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
