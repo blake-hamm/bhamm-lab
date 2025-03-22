@@ -41,6 +41,7 @@ spec:
           buckets:
             - name: argo-artifacts
             - name: tofu-state
+            - name: loki-data
           users:
             - name: minio-external-secret
           env:

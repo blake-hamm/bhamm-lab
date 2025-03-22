@@ -30,6 +30,14 @@ spec:
               remoteRef:
                 key: /core/monitor
                 property: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+            - secretKey: MINIO_ACCESS_KEY_ID
+              remoteRef:
+                key: /core/minio
+                property: MINIO_ACCESS_KEY_ID
+            - secretKey: MINIO_SECRET_ACCESS_KEY
+              remoteRef:
+                key: /core/minio
+                property: MINIO_SECRET_ACCESS_KEY
         ingressRoutes:
           - name: grafana
             ingressClass: traefik-external
