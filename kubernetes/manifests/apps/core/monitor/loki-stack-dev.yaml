@@ -39,6 +39,10 @@ spec:
                 index:
                   prefix: index_
                   period: 24h
+        serviceMonitor:
+          enabled: true
+          labels:
+            release: monitor
         ingester:
           extraArgs:
             - '-config.expand-env=true'
