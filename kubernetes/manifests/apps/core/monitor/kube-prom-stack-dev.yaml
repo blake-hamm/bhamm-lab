@@ -13,19 +13,173 @@ spec:
   source:
     chart: kube-prometheus-stack
     repoURL: https://prometheus-community.github.io/helm-charts
-    targetRevision: 61.2.0
+    targetRevision: 70.0.2
     helm:
       valuesObject:
         nameOverride: monitor
         namespaceOverride: monitor
         fullnameOverride: monitor
+        defaultRules:
+          create: true
+          rules:
+            windows: false
+        prometheus-windows-exporter:
+          prometheus:
+            monitor:
+              enabled: false
+        alertmanager:
+          enabled: true
+        grafana:
+          enabled: true
+          defaultDashboardsTimezone: America/Denver
+          admin:
+            existingSecret: monitor-external-secret
+            userKey: admin-user
+            passwordKey: admin-password
+          envValueFrom:
+            GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
+              secretKeyRef:
+                name: monitor-external-secret
+                key: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+          grafana.ini:
+            server:
+              root_url: https://grafana.dev.bhamm-lab.com
+            auth.generic_oauth:
+              enabled: true
+              name: Authelia
+              icon: signin
+              client_id: grafana
+              scopes: openid profile email groups
+              empty_scopes: false
+              auth_url: https://auth.dev.bhamm-lab.com/api/oidc/authorization
+              token_url: https://auth.dev.bhamm-lab.com/api/oidc/token
+              api_url: https://auth.dev.bhamm-lab.com/api/oidc/userinfo
+              login_attribute_path: preferred_username
+              groups_attribute_path: groups
+              name_attribute_path: name
+              use_pkce: true
+              role_attribute_path: contains(groups, 'lldap_admin') && 'GrafanaAdmin' || contains(groups, 'admin') && 'Admin' || contains(groups, 'editor') && 'Editor' || 'Viewer'
+              email_attribute_name: preferred_username
+              allow_sign_up: true
+              allow_assign_grafana_admin: true
+          sidecar:
+            dashboards:
+              enabled: true
+              defaultFolderName: "General"
+              label: grafana_dashboard
+              labelValue: "1"
+              folderAnnotation: grafana_folder
+              searchNamespace: ALL
+              provider:
+                foldersFromFilesStructure: true
+          dashboards:
+            extra-dashboards:
+              k8s-system-api-server:
+                url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-api-server.json
+                token: ''
+              k8s-system-coredns:
+                url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-coredns.json
+                token: ''
+              k8s-views-global:
+                url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-global.json
+                token: ''
+              k8s-views-namespaces:
+                url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-namespaces.json
+                token: ''
+              k8s-views-nodes:
+                url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-nodes.json
+                token: ''
+              k8s-views-pods:
+                url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-pods.json
+                token: ''
+              authelia:
+                url: https://raw.githubusercontent.com/authelia/authelia/refs/heads/master/examples/grafana-dashboards/simple.json
+                token: ''
+                datasource: Prometheus
+              ceph-cluster:
+                gnetId: 2842
+                revision: 17
+              traefik:
+                gnetId: 17347
+                revision: 9
+              metallb:
+                url: https://raw.githubusercontent.com/blake-hamm/grafana-dashboards/refs/heads/main/dashboards/metallb.json
+                token: ''
+              calico:
+                gnetId: 12175
+                revision: 5
+                datasource: Prometheus
+              node-exporter-full:
+                gnetId: 1860
+                revision: 37
+              vault:
+                gnetId: 12904
+                revision: 2
+                datasource: Prometheus
+              cert-manager:
+                gnetId: 20842
+                revision: 3
+                datasource: Prometheus
+              ceph:
+                gnetId: 2842
+                revision: 18
+                datasource: Prometheus
+          dashboardProviders:
+            dashboardproviders.yaml:
+              apiVersion: 1
+              providers:
+                - name: 'extra-dashboards'
+                  orgId: 1
+                  folder: 'Extras'
+                  type: file
+                  disableDeletion: true
+                  editable: true
+                  options:
+                    path: /var/lib/grafana/dashboards/extra-dashboards
+          additionalDataSources:
+            - name: Loki
+              type: loki
+              url: http://loki-distributed-gateway
+              access: proxy
+        nodeExporter:
+          enabled: true
+          operatingSystems:
+            linux:
+              enabled: true
+            aix:
+              enabled: false
+            darwin:
+              enabled: false
         prometheusOperator:
           fullnameOverride: "prometheus"
         prometheus:
           prometheusSpec:
+            additionalScrapeConfigs:
+              - job_name: opnsense
+                static_configs:
+                  - targets: ['10.0.9.1:9100']
+              - job_name: 'proxmox_nodes'
+                static_configs:
+                  - targets:
+                      - '10.0.20.11:9100' # Aorus
+                      - '10.0.20.12:9100' # Antsle
+                      - '10.0.20.13:9100' # Super
+              - job_name: 'ceph'
+                static_configs:
+                  - targets:
+                      - '10.0.20.11:9283' # Aorus
+                      - '10.0.20.12:9283' # Antsle
+                      - '10.0.20.13:9283' # Super
+            scrapeConfigSelector:
+              matchExpressions:
+                - key: release
+                  operator: In
+                  values: [monitor, kube-prometheus-stack]
             serviceMonitorSelector:
-              matchLabels:
-                release: monitor
+              matchExpressions:
+                - key: release
+                  operator: In
+                  values: [monitor, kube-prometheus-stack]
             storageSpec:
               volumeClaimTemplate:
                 metadata:
@@ -35,88 +189,6 @@ spec:
                   resources:
                     requests:
                       storage: 10Gi
-        grafana:
-          # envValueFrom:
-          #   GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
-          #     secretKeyRef:
-          #       name: monitoring-login
-          #       key: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
-          grafana.ini:
-            server:
-              root_url: https://grafana.dev.bhamm-lab.com
-              # auth.generic_oauth:
-              #   enabled: true
-              #   name: Authelia
-              #   icon: signin
-              #   client_id: grafana
-              #   # client_secret: # GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
-              #   scopes: openid profile email groups
-              #   empty_scopes: false
-              #   auth_url: https://auth.dev.bhamm-lab.com/api/oidc/authorization
-              #   token_url: https://auth.dev.bhamm-lab.com/api/oidc/token
-              #   api_url: https://auth.dev.bhamm-lab.com/api/oidc/userinfo
-              #   login_attribute_path: preferred_username
-              #   groups_attribute_path: groups
-              #   name_attribute_path: name
-              #   use_pkce: true
-              #   role_attribute_path: contains(groups, 'lldap_admin') && 'GrafanaAdmin' || contains(groups, 'admin') && 'Admin' || contains(groups, 'editor') && 'Editor' || 'Viewer'
-              #   email_attribute_name: preferred_username
-              #   allow_sign_up: true
-              #   allow_assign_grafana_admin: true
-          # sidecar:
-          #   dashboards:
-          #     enabled: true
-          #     defaultFolderName: "General"
-          #     label: grafana_dashboard
-          #     labelValue: "1"
-          #     folderAnnotation: grafana_folder
-          #     searchNamespace: ALL
-          #     provider:
-          #       foldersFromFilesStructure: true
-          # dashboardProviders:
-          #   dashboardproviders.yaml:
-          #     apiVersion: 1
-          #     providers:
-          #       - name: 'extra-dashboards'
-          #         orgId: 1
-          #         folder: 'Extras'
-          #         type: file
-          #         disableDeletion: true
-          #         editable: true
-          #         options:
-          #           path: /var/lib/grafana/dashboards/extra-dashboards
-          # dashboards:
-          #   extra-dashboards:
-          #     k8s-system-api-server:
-          #       url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-api-server.json
-          #       token: ''
-          #     k8s-system-coredns:
-          #       url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-coredns.json
-          #       token: ''
-          #     k8s-views-global:
-          #       url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-global.json
-          #       token: ''
-          #     k8s-views-namespaces:
-          #       url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-namespaces.json
-          #       token: ''
-          #     k8s-views-nodes:
-          #       url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-nodes.json
-          #       token: ''
-          #     k8s-views-pods:
-          #       url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-pods.json
-          #       token: ''
-          #     ceph-cluster:
-          #       gnetId: 2842
-          #       revision: 17
-          #     traefik:
-          #       gnetId: 17347
-          #       revision: 9
-          #     metallb:
-          #       gnetId: 20162
-          #       revision: 5
-          # calico:
-          #   gnetId: 12175
-          #   revision: 5
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

@@ -45,7 +45,7 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
   }
 
   memory {
-    dedicated = var.memory_dedicated_base * var.k3s_nodes[count.index].multiplier
+    dedicated = floor(var.memory_dedicated_base * var.k3s_nodes[count.index].multiplier)
     floating  = 1
   }
 
@@ -72,7 +72,7 @@ resource "proxmox_virtual_environment_haresource" "k3s_master_ha" {
   depends_on  = [proxmox_virtual_environment_vm.k3s_master]
   resource_id = "vm:${proxmox_virtual_environment_vm.k3s_master[count.index].vm_id}"
   state       = "started"
-  group       = "${var.environment}-main"
+  group       = "main"
   comment     = "${var.environment} k3s master HA group."
 }
 
@@ -123,7 +123,7 @@ resource "proxmox_virtual_environment_vm" "k3s_worker" {
   }
 
   memory {
-    dedicated = var.memory_dedicated_base * var.k3s_nodes[count.index].multiplier
+    dedicated = floor(var.memory_dedicated_base * var.k3s_nodes[count.index].multiplier)
     floating  = 1
   }
 

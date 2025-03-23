@@ -80,6 +80,7 @@ spec:
                 cache:
                   enabled: true
                 runner:
+                  capacity: 3
                   labels:
                     - "ubuntu-latest:docker://docker.gitea.com/runner-images:ubuntu-latest"
         redis-cluster:

@@ -1,5 +1,5 @@
 {{- range .Values.ingressRoutes }}
-{{- if .enabled }}
+---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
@@ -35,5 +35,4 @@ spec:
         {{- end }}
   {{- end }}
   tls: {}
-{{- end }}
 {{- end }}

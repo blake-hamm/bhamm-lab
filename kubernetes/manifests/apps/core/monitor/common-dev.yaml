@@ -1,0 +1,72 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitor-common
+  namespace: argocd
+spec:
+  destination:
+    namespace: monitor
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://git.bhamm-lab.com/bhamm/bhamm-lab.git
+    targetRevision: feature/monitor-revamp
+    path: kubernetes/charts/common
+    helm:
+      valuesObject:
+        name: monitor
+        externalSecrets:
+          enabled: true
+          secrets:
+            - secretKey: admin-user
+              remoteRef:
+                key: /core/monitor
+                property: admin-user
+            - secretKey: admin-password
+              remoteRef:
+                key: /core/monitor
+                property: admin-password
+            - secretKey: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+              remoteRef:
+                key: /core/monitor
+                property: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+            - secretKey: MINIO_ACCESS_KEY_ID
+              remoteRef:
+                key: /core/minio
+                property: CONSOLE_ACCESS_KEY
+            - secretKey: MINIO_SECRET_ACCESS_KEY
+              remoteRef:
+                key: /core/minio
+                property: CONSOLE_SECRET_KEY
+        ingressRoutes:
+          - name: grafana
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - match: Host(`grafana.dev.bhamm-lab.com`)
+                kind: Rule
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: kube-prometheus-stack-grafana
+                    scheme: http
+                    port: 80
+          - name: prometheus
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - match: Host(`prometheus.dev.bhamm-lab.com`)
+                kind: Rule
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: monitor-prometheus
+                    scheme: http
+                    port: 9090
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

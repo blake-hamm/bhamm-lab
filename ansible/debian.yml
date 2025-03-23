@@ -8,7 +8,7 @@
   roles:
     - security
   tags: [security]
-- name: Configure debian bare metal machine networks
+- name: Configure debian bare metal machines
   hosts: debian_bare_metal
   roles:
     - network
@@ -26,4 +26,5 @@
   hosts: proxmox
   roles:
     - proxmox
+    - prometheus.prometheus.node_exporter
   tags: [proxmox]

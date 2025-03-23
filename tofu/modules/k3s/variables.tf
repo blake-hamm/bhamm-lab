@@ -25,8 +25,8 @@ variable "k3s_nodes" {
     multiplier = number
   }))
   default = [
-    { name = "super", multiplier = 1.75 },
-    { name = "aorus", multiplier = 1.5 },
+    { name = "super", multiplier = 1.6 },
+    { name = "aorus", multiplier = 1.4 },
     { name = "antsle", multiplier = 1 },
   ]
 }

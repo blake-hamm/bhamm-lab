@@ -1,3 +1,178 @@
+# Monitoring
+x Expose prometheus gui
+x Expose grafana gui
+  x enable oidc
+x Key monitoring
+  x Bare metal
+    x node exporter
+  x k3s
+    x Remove ansible node exporter
+    x Use k8s-native node exporter
+    x api server
+    x resources
+    x cadviser
+    x kube-state
+    x calico
+    x authelia
+    x metallb (need to fork dashboard json and adjust data source)
+    x vault
+    x cert manager
+  x opnsense firewall
+    x netflow analyzer
+  x traefik/authelia
+    x status codes
+    x response times
+  x ceph
+x Node exporter debian ansible playbook
+x Deploy loki
+  x Leverage minio storage
+  x Deploy alloy
+- Finalize Prod
+  - Merge pr
+  - Make release/* branch
+    - Update prod stuff
+      - oidc grafana
+      - traefik prometheus/grafana/alertmanager
+      - kube-prom-stack
+      - loki
+      - alloy
+      - metallb metrics
+      - vault smon
+    - Update gitea action
+    - Update sops sync branch
+  - Collect debian logs (journald) to loki w/ ansible
+  - Update prod kubernetes config
+
+# Start building hugo website
+- Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
+- Setup Hugo
+- Expose hugo homepage at bhamm-lab.com/
+- Deploy docs at bhamm-lab.com/docs/
+- Deploy lighthearted at bhamm-lab.com/lighthearted/
+- Deploy portfolio links at bhamm-lab.com/portfolio/
+- Deploy portfolio links at bhamm-lab.com/about/
+- Deploy portfolio links at bhamm-lab.com/contact/
+
+# Expose bhamm-lab.com
+- Setup alerts for nodes and traefik
+- Example Cloud-Native Security Stack:
+    Falco: Runtime security for Kubernetes.
+    CrowdSec: Block malicious IPs (SSH, web attacks).
+    Suricata: Network-layer IDS.
+    Trivy: Vulnerability scanning.
+    Osquery: Host-level compliance checks.
+- falco https://github.com/falcosecurity/charts/tree/master/charts
+- crowdsec server
+  - integrate with agents
+  - integrate with traefik
+- clamAV
+- Deploy argocd image updateder - https://argocd-image-updater.readthedocs.io/en/stable/
+- Spike: explore most secure method
+- Setup debian firewall
+- Cloudflare:
+  - Use proxy
+- Opnsense:
+  - port forward traefik prod ip to dmz
+  - geo filter
+  - only allow cloudflare ip's
+  - expose 443 on dmz
+- Traefik
+  - setup new metallb ip for external
+  - block *.bhamm-lab.com from public
+  - Setup split dns
+- Consider Zeek
+
+# Omada sdn
+- Setup 3 wifi networks
+  x Polk_Paradise
+  x lab-trusted
+  - lab-iot
+- Deploy omada sdn
+- Connect iot devices
+  - printer
+  - smart light switches/plugs
+  - eufy
+- Configure dhcp in ansible opnsense
+- Confirm metal to k8s doesn't leave 10gb switch
+- Ensure *.bhamm-lab.com is accessible from aubs phone/laptops
+- Integrate proxmox with traefik
+
+# Finish
+- Install awx - https://github.com/ansible-community/awx-operator-helm
+- Use gitea container registry
+  - sync sops workflow
+- Convert sync sops to vault job as argo workflow template
+  - Trigger from argo event when vault is ready
+  - Trigger from argo event on secret changes in git
+- Document secret rotation
+- Refactor argocd projects into 'core', 'default'
+- Deploy
+  - docs site
+  - vpn
+  - netbootxyz
+  - home assistant
+  - servarr
+    - jellyfin
+    - flaresolver
+  - Integrate proxmox UI into traefik
+- Expose docs site and vpn
+- Install mergerfs/snapraid on aorus node
+- More fine grain vault security access
+- Consider refactoring proxmox ansible to terraform
+  - ACL's
+  - Users
+  - Groups
+  - HA groups
+  - Storage (pbs,nfs)
+- Implement devsec.os_hardening
+- Implement debian firewall rules
+- 3-2-1 backups
+  - Setup ceph backups (consider decomissioning k8up if volume snapshots work)
+  - Configure snapraid/mergerfs
+  - Ensure monitoring
+  - Expose nfs
+  - Create nfs storage class
+  - Setup minio tenant with nfs storage class
+  - Refactor k8up prune
+    - Move generate secret into template with var
+    - Make global prune job that doesn't conflict w/ backup schedule
+  - Refactor k8up backups to minio
+  - Ensure minio backup bucket syncs to gcp
+  - Ensure on new cluster, minio bucket is restored first, then deploy backup
+- Setup CI/CD for other services
+  - Ansible bare metal
+  - Ansible opnsense
+  - Terrafrom gcp
+- Setup service mesh (istio/hashicorp consul)
+- Consider refactoring minio to primary storage and k8up sync to gcp
+- Audit backups
+  - Use example site for continuous backups/gitops updates with argo workflow/k8up/cloudnativepg
+  - s3 to s3 backups
+  - DR architecture diagram
+- Consider argocd application sets - https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Use-Cases/
+- Install renovate bot - https://docs.renovatebot.com/modules/platform/gitea/
+- Consider using cilium - https://cilium.io/
+- audit and rotate secrets
+- Automated opnsense backups - https://www.zenarmor.com/docs/network-security-tutorials/opnsense-security-and-hardening-best-practice-guide#regularly-backup-and-protect-backup-files
+- Deploy elasticsearch operator
+  - https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-deploy-eck.html
+  - replace zenarmor db in opnsense
+- lynis audit - https://cisofy.com/lynis/#how-it-works
+- blackbox exporter - https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus-blackbox-exporter/values.yaml
+  - omada equipment
+    - snmp exporter
+- Migrate from k3s to something more robust
+  - Confirm monitoring for
+    - kube scheduler
+    - kube etcd
+    - kube controller
+    - kube proxy
+  - Or this - https://fabianlee.org/2022/07/02/prometheus-installing-kube-prometheus-stack-on-k3s-cluster/
+- traefik waf https://plugins.traefik.io/plugins/628c9eadffc0cd18356a9799/modsecurity-plugin
+- k8up - https://grafana.com/grafana/dashboards/20166-k8up/ (stretch)
+- kube bench - https://github.com/aquasecurity/kube-bench
+
+## Previous
 # Secure network
 x Reset AP
 x Change opnsense playbook
@@ -98,9 +273,9 @@ x Setup gitea pipeline for k3s
     x Adapt dev
   x Add gitea action token into vault config
   x Ensure on open pr - spin up new k3s cluster and deploy
-  - On merge to main
-    - tofu/ansible and argocd sync
-    - destory dev cluster
+  x On merge to main
+    x tofu/ansible and argocd sync
+    x destory dev cluster
 x Test DR
   x Deploy manifests
   x Confirm pvc
@@ -119,93 +294,4 @@ x Test DR
       x immich (login) - TODO: make pvc for config file (contains oidc)
       x gitea (code)
       x authelia (2fa)
-- After merge PR, point prod to 'main' branch in all aspects
-
-# Monitoring
-- Node exporter debian ansible playbook
-- Refine grafana dashboard config
-- Deploy loki
-- Setup alerts for nodes and traefik
-- Spike crowdsec
-- Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
-
-# Expose bhamm-lab.com
-- Spike cf tunnels
-- Setup Hugo
-- Expose hugo homepage at bhamm-lab.com/
-- Deploy docs at bhamm-lab.com/docs/
-- Deploy lighthearted at bhamm-lab.com/lighthearted/
-- Deploy portfolio links at bhamm-lab.com/portfolio/
-- Deploy portfolio links at bhamm-lab.com/about/
-- Deploy portfolio links at bhamm-lab.com/contact/
-- Opnsense:
-  - port forward traefik prod ip to dmz
-  - geo filter
-  - expose 443 on dmz
-- Traefik
-  - proxy
-  - block *.bhamm-lab.com from public
-
-# Omada sdn
-- Setup 3 wifi networks
-  x Polk_Paradise
-  x lab-trusted
-  - lab-iot
-- Deploy omada sdn
-- Connect iot devices
-  - printer
-  - smart light switches/plugs
-  - eufy
-- Configure dhcp in ansible opnsense
-- Confirm metal to k8s doesn't leave 10gb switch
-- Ensure *.bhamm-lab.com is accessible from aubs phone/laptops
-- Integrate proxmox with traefik
-
-# Finish
-- Install awx - https://github.com/ansible-community/awx-operator-helm
-- Use gitea container registry
-  - sync sops workflow
-- Convert sync sops to vault job as argo workflow template
-  - Trigger from argo event when vault is ready
-  - Trigger from argo event on secret changes in git
-- Document secret rotation
-- Refactor argocd projects into 'core', 'default'
-- Deploy
-  - docs site
-  - vpn
-  - netbootxyz
-  - home assistant
-  - servarr
-    - jellyfin
-    - flaresolver
-  - Integrate proxmox UI into traefik
-- Expose docs site and vpn
-- Install mergerfs/snapraid on aorus node
-- More fine grain vault security access
-- Consider refactoring proxmox ansible to terraform
-  - ACL's
-  - Users
-  - Groups
-  - HA groups
-  - Storage (pbs,nfs)
-- Implement devsec.os_hardening
-- Implement debian firewall rules
-- 3-2-1 backups
-  - Setup ceph backups (consider decomissioning k8up if volume snapshots work)
-  - Configure snapraid/mergerfs
-  - Ensure monitoring
-  - Expose nfs
-  - Create nfs storage class
-  - Setup minio tenant with nfs storage class
-  - Refactor k8up prune
-    - Move generate secret into template with var
-    - Make global prune job that doesn't conflict w/ backup schedule
-  - Refactor k8up backups to minio
-  - Ensure minio backup bucket syncs to gcp
-  - Ensure on new cluster, minio bucket is restored first, then deploy backup
-- Setup CI/CD for other services
-  - Ansible bare metal
-  - Ansible opnsense
-  - Terrafrom gcp
-- Setup service mesh (istio/hashicorp consul)
-- Consider refactoring minio to primary storage and k8up sync to gcp
+x After merge PR, point prod to 'main' branch in all aspects
