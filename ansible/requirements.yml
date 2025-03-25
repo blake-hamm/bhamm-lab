@@ -14,6 +14,9 @@ collections:
   - name: prometheus.prometheus
     version: "0.25.0"
     source: https://galaxy.ansible.com
+  - name: grafana.grafana
+    version: "5.7.0"
+    source: https://galaxy.ansible.com
 roles:
   - name: geerlingguy.ntp
     version: "2.5.0"
@@ -29,5 +32,5 @@ roles:
   - name: geerlingguy.nfs
     version: "2.1.0"
   - name: xanmanning.k3s
-    src: https://github.com/PyratLabs/ansible-role-k3s.git
-    version: v3.4.4
+    src: https://github.com/blake-hamm/ansible-role-k3s.git
+    version: "main"

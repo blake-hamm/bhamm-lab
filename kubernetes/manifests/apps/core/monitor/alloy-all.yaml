@@ -26,30 +26,6 @@ spec:
                 }
               }
 
-              // local.file_match discovers files on the local filesystem using glob patterns and the doublestar library. It returns an array of file paths.
-              local.file_match "node_logs" {
-                path_targets = [{
-                  __path__  = "/var/log/*.log",
-                  job       = "node/logs",
-                  node_name = sys.env("HOSTNAME"),
-                }]
-              }
-
-              // loki.source.file reads log entries from files and forwards them to other loki.* components.
-              // You can specify multiple loki.source.file components by giving them different labels.
-              loki.source.file "node_logs" {
-                targets    = local.file_match.node_logs.targets
-                forward_to = [loki.write.loki.receiver]
-              }
-
-              loki.source.journal "journal" {
-                labels = {
-                  job       = "node/journal",
-                  node_name = sys.env("HOSTNAME"),
-                }
-                forward_to = [loki.write.loki.receiver]
-              }
-
               // discovery.kubernetes allows you to find scrape targets from Kubernetes resources.
               // It watches cluster state and ensures targets are continually synced with what is currently running in your cluster.
               discovery.kubernetes "pod" {

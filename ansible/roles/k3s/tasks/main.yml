@@ -2,9 +2,33 @@
 - name: Set target master based on environment
   ansible.builtin.set_fact:
     target_master: "{{ (groups['k3s_master'] | select('match', (env == 'dev') | ternary('^dev-', '^prod-')) | list) | first }}"
-  tags: [argocd, kubeconfig]
+  tags: [always]
+- name: Check k3s cluster status
+  kubernetes.core.k8s_info:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    kind: Node
+    api: v1
+  register: k3s_node_info
+  delegate_to: "{{ target_master }}"
+  ignore_errors: true
+  changed_when: false
+  run_once: true
+  tags: [always]
+- name: Extract inventory node names
+  ansible.builtin.set_fact:
+    inventory_nodes: |
+      {{ groups['k3s'] | select('match', (env == 'dev') | ternary('^dev-', '^prod-')) | map('extract', hostvars, 'inventory_hostname') | list }}
+  run_once: true
+  when: k3s_node_info is not failed
+  tags: [always]
+- name: Verify inventory matches cluster nodes
+  ansible.builtin.set_fact:
+    nodes_match: "{{ k3s_node_info.resources | map(attribute='metadata.name') | sort == inventory_nodes | sort }}"
+  when: k3s_node_info is not failed
+  tags: [always]
 - name: Run pre tasks
   ansible.builtin.include_tasks: pre.yml
+  when: k3s_node_info is failed or not nodes_match or k3s_force_deploy
 - name: Gather ceph data
   ansible.builtin.include_tasks:
     file: ceph.yml
@@ -12,15 +36,18 @@
       become: true
       tags: [ceph]
       delegate_to: aorus
+  when: k3s_node_info is failed or not nodes_match or k3s_force_deploy
 - name: Include xanmanning.k3s role
   ansible.builtin.include_role:
     name: xanmanning.k3s
+  when: k3s_node_info is failed or not nodes_match or k3s_force_deploy
 - name: Patch k3s manifests
   ansible.builtin.include_tasks:
     file: patches.yml
     apply:
       run_once: true
       delegate_to: "{{ target_master }}"
+  when: k3s_node_info is failed or not nodes_match or k3s_force_deploy
 - name: Deploy sops secrets to k3s
   ansible.builtin.include_tasks:
     file: sops.yml
@@ -28,6 +55,7 @@
       run_once: true
       tags: [sops]
       delegate_to: "{{ target_master }}"
+  when: k3s_node_info is failed or not nodes_match or k3s_force_deploy
   tags: [sops]
 - name: Setup argocd
   ansible.builtin.include_tasks:
@@ -44,4 +72,5 @@
       run_once: true
       tags: [kubeconfig]
       delegate_to: "{{ target_master }}"
+  when: k3s_node_info is failed or not nodes_match or k3s_force_deploy
   tags: [kubeconfig]

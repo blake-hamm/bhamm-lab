@@ -30,7 +30,7 @@ metadata:
   labels:
     app: example
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "9"
 spec:
   replicas: 1
   selector:
@@ -71,7 +71,7 @@ metadata:
   name: example
   namespace: example
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "10"
 spec:
   type: ClusterIP
   ports:

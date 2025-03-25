@@ -27,23 +27,26 @@ x Node exporter debian ansible playbook
 x Deploy loki
   x Leverage minio storage
   x Deploy alloy
-- Finalize Prod
-  - Merge pr
-  - Make release/* branch
-    - Update prod stuff
-      - oidc grafana
-      - traefik prometheus/grafana/alertmanager
-      - kube-prom-stack
-      - loki
-      - alloy
-      - metallb metrics
-      - vault smon
-    - Update gitea action
-    - Update sops sync branch
-  - Collect debian logs (journald) to loki w/ ansible
-  - Update prod kubernetes config
+x Finalize Prod
+  x Merge pr
+  x Make release/* branch
+    x Fix authelia db (restore from newer snapshot)
+    x Fix gitea (unknown)
+    x Leverage github as source of truth
+    x Somehow skip k3s role in ansible if it's already running and there is no 'force' flag
+    X Update prod stuff
+      x oidc grafana
+      x traefik prometheus/grafana/alertmanager
+      x kube-prom-stack
+      x loki
+      x alloy
+      x metallb metrics
+      X vault smon
+    x Update gitea action
+    x Update sops sync branch
+  x Collect debian logs (journald) to loki w/ ansible
 
-# Start building hugo website
+# Start building website
 - Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
 - Setup Hugo
 - Expose hugo homepage at bhamm-lab.com/

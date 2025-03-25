@@ -4,6 +4,7 @@ on:
     branches:
       - main
       - hotfix/*
+      - release/*
 jobs:
   deploy-k3s-prod:
     name: Deploy k3s Prod Environment

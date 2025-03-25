@@ -18,7 +18,7 @@ tofu -chdir=tofu/proxmox/k3s destroy -var-file=dev.tfvars -parallelism=2 -auto-a
 ansible-playbook ansible/main.yml -l dev-k3s* -t debian,k3s -e "env=dev BRANCH_NAME=main"
 
 # In case you want to just pull local kube config
-ansible-playbook ansible/main.yml -l dev-k3s* -t kubeconfig -e "env=dev" --skip-tags debian
+ansible-playbook ansible/main.yml -l dev-k3s* -t kubeconfig -e "env=dev k3s_force_deploy=true" --skip-tags debian
 
 # In case you need to sync argocd on the cli
 export KUBECONFIG=~/.kube/config-dev

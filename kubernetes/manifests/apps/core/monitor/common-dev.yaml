@@ -9,7 +9,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    repoURL: https://git.bhamm-lab.com/bhamm/bhamm-lab.git
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
     targetRevision: feature/monitor-revamp
     path: kubernetes/charts/common
     helm:

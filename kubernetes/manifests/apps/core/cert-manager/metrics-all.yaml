@@ -4,6 +4,7 @@ metadata:
   name: cert-manager-controller
   namespace: cert-manager
   annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "10"
   labels:
     release: monitor
@@ -23,6 +24,7 @@ metadata:
   name: cert-manager-cainjector
   namespace: cert-manager
   annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "10"
   labels:
     release: monitor
@@ -42,6 +44,7 @@ metadata:
   name: cert-manager-webhook
   namespace: cert-manager
   annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "10"
   labels:
     release: monitor

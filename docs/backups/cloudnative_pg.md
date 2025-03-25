@@ -3,7 +3,7 @@ For postgres, backups are orchestrated with the cloudnative pg operator. This ca
 1. Get snapshothandle name from volumesnapshot
 ```bash
 kubectl get volumesnapshotcontent
-kubectl get volumesnapshotcontent <name> # status.snapshotHandle
+kubectl describe volumesnapshotcontent <name> # status.snapshotHandle
 # Will be something like:
 # 0001-0024-7b02e4a9-b740-4d5a-b519-9585725a55fb-0000000000000003-41809123-732c-4a29-b2fc-ab90635fd74d
 # Need to remember last uuid: 41809123-732c-4a29-b2fc-ab90635fd74d

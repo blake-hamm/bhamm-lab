@@ -27,3 +27,15 @@
     cmd: helm version
   register: helm_version
   changed_when: false
+- name: Set fs.inotify.max_user_instances to 1280
+  ansible.posix.sysctl:
+    name: fs.inotify.max_user_instances
+    value: 1280
+    state: present
+    reload: true
+- name: Set fs.inotify.max_user_watches to 655360
+  ansible.posix.sysctl:
+    name: fs.inotify.max_user_watches
+    value: 655360
+    state: present
+    reload: true

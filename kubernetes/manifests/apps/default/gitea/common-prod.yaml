@@ -38,6 +38,8 @@ spec:
           backups:
             enabled: true
             retention: "5d"
+          recoverySnapshotName: gitea-restore
+          recoverySnapshotHandle: "0001-0024-7b02e4a9-b740-4d5a-b519-9585725a55fb-0000000000000003-6f1f1688-465e-4e23-b839-c313c6391b4b"
         ingressRoutes:
           - enabled: true
             name: gitea

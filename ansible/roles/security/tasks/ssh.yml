@@ -7,13 +7,11 @@
     validate: visudo -cf %s
     mode: "0440"
   loop: "{{ ssh_authorized_keys | dict2items }}"
-  become: true
 - name: Create /etc/ssh/authorized_keys directory
   ansible.builtin.file:
     path: /etc/ssh/authorized_keys
     state: directory
     mode: '0755'
-  become: true
 - name: Create user authorized_keys files
   ansible.builtin.copy:
     dest: "/etc/ssh/authorized_keys/{{ item.key }}"
@@ -25,7 +23,6 @@
     group: "{{ item.key }}"
     mode: '0600'
   loop: "{{ ssh_authorized_keys | dict2items }}"
-  become: true
 - name: Run devsec ssh hardening
   ansible.builtin.include_role:
     name: devsec.hardening.ssh_hardening

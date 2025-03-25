@@ -7,7 +7,9 @@
   hosts: debian
   roles:
     - security
+    - grafana.grafana.alloy
   tags: [security]
+  become: true
 - name: Configure debian bare metal machines
   hosts: debian_bare_metal
   roles:
