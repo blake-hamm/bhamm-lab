@@ -62,3 +62,5 @@ ceph_device: /dev/nvme0n1
 #   - /mnt/storage/kubernetes *(rw,sync,no_subtree_check,no_root_squash,fsid=2)
 # Install pbs
 proxmox_pbs: true
+proxmox_gpu: true
+proxmox_gpu_ids: "1002:744c,1002:ab30"

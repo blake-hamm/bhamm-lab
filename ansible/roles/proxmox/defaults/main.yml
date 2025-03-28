@@ -1,2 +1,5 @@
 proxmox_pbs: false
 proxmox_reset_ceph: false
+proxmox_gpu: false
+proxmox_gpu_ids: ""
+proxmox_vfio_modules: [vfio, vfio_iommu_type1, vfio_pci, vfio_virqfd]
