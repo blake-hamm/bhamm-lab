@@ -1,10 +1,10 @@
 - name: Ensure iommu=pt is added to GRUB_CMDLINE_LINUX_DEFAULT
   ansible.builtin.replace:
     path: /etc/default/grub
-    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT="quiet"$'
-    replace: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet iommu=pt"'
+    regexp: '^(GRUB_CMDLINE_LINUX_DEFAULT\s*=\s*").*(")$'
+    replace: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet iommu=pt pcie_acs_override=downstream,multifunction"'
     backup: true
-  notify: Udate grub
+  notify: Update grub
 - name: Ensure VFIO kernel modules are loaded at boot
   ansible.builtin.lineinfile:
     path: /etc/modules

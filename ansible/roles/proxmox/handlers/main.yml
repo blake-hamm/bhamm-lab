@@ -3,10 +3,10 @@
     update_cache: true
 - name: Update grub
   ansible.builtin.command: update-grub
-  chaned_when: false
+  changed_when: false
 - name: Update initramfs
   ansible.builtin.command: update-initramfs -u -k all
-  chaned_when: false
+  changed_when: false
 - name: Reboot system
   ansible.builtin.reboot:
     msg: "System reboot triggered by Ansible"
