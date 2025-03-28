@@ -46,6 +46,16 @@ x Finalize Prod
     x Update sops sync branch
   x Collect debian logs (journald) to loki w/ ansible
 
+# Install gpu
+x Physical install on aorus (replace previous one and remove nic)
+  x Adjust nic config
+- Setup pcie passthrough
+- Setup debian gpu machine for k3s tofu module
+- Integrate with k3s
+  - add amd gpu operator
+  - Leverage in deployment
+  - try immich - https://immich.app/docs/features/ml-hardware-acceleration/
+
 # Start building website
 - Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
 - Setup Hugo
