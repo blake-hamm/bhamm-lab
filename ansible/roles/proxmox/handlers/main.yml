@@ -1,13 +1,4 @@
 - name: Update APT package cache
   ansible.builtin.apt:
     update_cache: true
-- name: Update grub
-  ansible.builtin.command: update-grub
-  changed_when: false
-- name: Update initramfs
-  ansible.builtin.command: update-initramfs -u -k all
-  changed_when: false
-- name: Reboot system
-  ansible.builtin.reboot:
-    msg: "System reboot triggered by Ansible"
-    reboot_timeout: 600
+  become: true
