@@ -1,7 +1,7 @@
 resource "proxmox_virtual_environment_vm" "k3s_master" {
   count     = var.count_k3s_master
   name      = "${var.environment}-k3s-master-${count.index}"
-  node_name = var.k3s_nodes[count.index].name
+  node_name = var.k3s_master_nodes[count.index].name
   vm_id     = var.master_vm_id_start + count.index
   tags = [
     "debian",
@@ -9,7 +9,7 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
     "k3s-master",
     "tofu",
     var.environment,
-    var.k3s_nodes[count.index].name,
+    var.k3s_master_nodes[count.index].name,
   ]
 
   started         = true
@@ -48,7 +48,7 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
   machine = "q35"
 
   memory {
-    dedicated = floor(var.memory_dedicated_base * var.k3s_nodes[count.index].multiplier)
+    dedicated = floor(var.memory_dedicated_base * var.k3s_master_nodes[count.index].multiplier)
     floating  = 1
   }
 
@@ -83,7 +83,7 @@ resource "proxmox_virtual_environment_vm" "k3s_worker" {
   count      = var.count_k3s_worker
   depends_on = [proxmox_virtual_environment_vm.k3s_master]
   name       = "${var.environment}-k3s-worker-${count.index}"
-  node_name  = var.k3s_nodes[count.index].name
+  node_name  = var.k3s_worker_nodes[count.index].name
   vm_id      = var.worker_vm_id_start + count.index
   tags = [
     "debian",
@@ -91,7 +91,7 @@ resource "proxmox_virtual_environment_vm" "k3s_worker" {
     "k3s-worker",
     "tofu",
     var.environment,
-    var.k3s_nodes[count.index].name
+    var.k3s_worker_nodes[count.index].name
   ]
 
   started         = true
@@ -130,7 +130,7 @@ resource "proxmox_virtual_environment_vm" "k3s_worker" {
   machine = "q35"
 
   memory {
-    dedicated = floor(var.memory_dedicated_base * var.k3s_nodes[count.index].multiplier)
+    dedicated = floor(var.memory_dedicated_base * var.k3s_worker_nodes[count.index].multiplier)
     floating  = 1
   }
 

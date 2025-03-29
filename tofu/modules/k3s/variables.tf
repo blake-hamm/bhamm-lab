@@ -18,7 +18,7 @@ variable "count_k3s_worker" {
   type        = number
 }
 
-variable "k3s_nodes" {
+variable "k3s_master_nodes" {
   description = "List of Proxmox nodes and their memory multipliers"
   type = list(object({
     name       = string
@@ -27,6 +27,18 @@ variable "k3s_nodes" {
   default = [
     { name = "super", multiplier = 1.6 },
     { name = "aorus", multiplier = 1.4 },
+    { name = "antsle", multiplier = 1 },
+  ]
+}
+
+variable "k3s_worker_nodes" {
+  description = "List of Proxmox nodes and their memory multipliers"
+  type = list(object({
+    name       = string
+    multiplier = number
+  }))
+  default = [
+    { name = "super", multiplier = 1.6 },
     { name = "antsle", multiplier = 1 },
   ]
 }
