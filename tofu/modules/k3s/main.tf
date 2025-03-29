@@ -7,6 +7,7 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
     "debian",
     "k3s",
     "k3s-master",
+    "tofu",
     var.environment,
     var.k3s_nodes[count.index].name,
   ]
@@ -79,14 +80,16 @@ resource "proxmox_virtual_environment_haresource" "k3s_master_ha" {
 }
 
 resource "proxmox_virtual_environment_vm" "k3s_worker" {
-  count     = var.count_k3s_worker
-  name      = "${var.environment}-k3s-worker-${count.index}"
-  node_name = var.k3s_nodes[count.index].name
-  vm_id     = var.worker_vm_id_start + count.index
+  count      = var.count_k3s_worker
+  depends_on = [proxmox_virtual_environment_vm.k3s_master]
+  name       = "${var.environment}-k3s-worker-${count.index}"
+  node_name  = var.k3s_nodes[count.index].name
+  vm_id      = var.worker_vm_id_start + count.index
   tags = [
     "debian",
     "k3s",
     "k3s-worker",
+    "tofu",
     var.environment,
     var.k3s_nodes[count.index].name
   ]

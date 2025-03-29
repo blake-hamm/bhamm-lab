@@ -5,10 +5,10 @@ To spin up a kubernetes cluster in bhamm-lab, you need to follow these steps:
 tofu -chdir=tofu/proxmox/k3s init
 tofu -chdir=tofu/proxmox/k3s workspace select -or-create=true dev
 tofu -chdir=tofu/proxmox/k3s plan -var-file=dev.tfvars
-tofu -chdir=tofu/proxmox/k3s apply -var-file=dev.tfvars -parallelism=2 -auto-approve
+tofu -chdir=tofu/proxmox/k3s apply -var-file=dev.tfvars -parallelism=1 -auto-approve
 
 # To destroy
-tofu -chdir=tofu/proxmox/k3s destroy -var-file=dev.tfvars -parallelism=2 -auto-approve
+tofu -chdir=tofu/proxmox/k3s destroy -var-file=dev.tfvars -auto-approve
 ```
 *Note: This command will also destroy and replace existing vm's*
 

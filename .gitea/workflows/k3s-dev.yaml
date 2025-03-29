@@ -38,7 +38,7 @@ jobs:
         run: |
           tofu -chdir=tofu/proxmox/k3s init
           tofu -chdir=tofu/proxmox/k3s workspace select -or-create=true dev
-          tofu -chdir=tofu/proxmox/k3s apply -var-file=dev.tfvars -parallelism=2 -auto-approve
+          tofu -chdir=tofu/proxmox/k3s apply -var-file=dev.tfvars -parallelism=1 -auto-approve
       - name: Setup python
         uses: actions/setup-python@v5
         with:
