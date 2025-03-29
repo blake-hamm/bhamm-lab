@@ -17,7 +17,7 @@ provider "proxmox" {
   insecure = true
   ssh {
     agent    = true
-    username = "bhamm"
+    username = "root"
     node {
       name    = "aorus"
       address = "10.0.20.11"

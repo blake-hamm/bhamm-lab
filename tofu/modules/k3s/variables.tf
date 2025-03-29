@@ -43,6 +43,48 @@ variable "k3s_worker_nodes" {
   ]
 }
 
+variable "enable_gpu_worker" {
+  type        = bool
+  default     = false
+  description = "Controls whether to create the GPU worker VM"
+}
+
+variable "k3s_gpu_worker_node" {
+  description = "Proxmox node for gpu workers"
+  type        = string
+  default     = "aorus"
+}
+
+variable "k3s_gpu_worker_id" {
+  description = "Id for gpu worker (used for vm id and ip address)"
+  type        = number
+  default     = 5
+}
+
+variable "gpu_cpu_cores" {
+  description = "CPU cores for gpu worker"
+  type        = number
+  default     = 4
+}
+
+variable "k3s_gpu_memory" {
+  description = "Memory for gpu worker in MB"
+  type        = number
+  default     = 24576 # 24 by default
+}
+
+variable "k3s_host_gpu_name" {
+  description = "Proxmox host gpu name"
+  type        = string
+  default     = "hostpci0"
+}
+
+variable "k3s_host_gpu_id" {
+  description = "Proxmox host gpu id"
+  type        = string
+  default     = "0000:09:00.0"
+}
+
 variable "master_vm_id_start" {
   description = "Starting VM ID for master nodes"
   type        = number

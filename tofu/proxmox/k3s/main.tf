@@ -12,4 +12,5 @@ module "k3s_cluster" {
   cpu_cores_master      = var.cpu_cores_master
   cpu_cores_worker      = var.cpu_cores_worker
   memory_dedicated_base = var.memory_dedicated_base
+  enable_gpu_worker     = var.enable_gpu_worker
 }
