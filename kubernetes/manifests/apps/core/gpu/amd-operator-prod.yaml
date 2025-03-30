@@ -19,7 +19,7 @@ spec:
         node-feature-discovery:
           enabled: false
         kmm:
-          enabled: false
+          enabled: true
           controller:
             manager:
               image:
@@ -61,44 +61,51 @@ spec:
     enableNodeLabeller: true
   metricsExporter:
     enable: true
+    rbacConfig:
+      enable: false
+      disableHttps: true
   testRunner:
     enable: true
   selector:
     gpu: "true"
 ---
-apiVersion: monitoring.coreos.com/v1
-kind: PodMonitor
+apiVersion: v1
+kind: Service
 metadata:
-  name: gpu-node-exporter-monitor
+  name: gpu-operator-metrics-exporter-custom
   namespace: gpu
+  labels:
+    app.kubernetes.io/name: metrics-exporter-custom
+    daemonset-name: gpu-operator
   annotations:
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/sync-wave: "9"
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: metrics-exporter
+    daemonset-name: gpu-operator
+  ports:
+    - name: metrics
+      port: 5000
+      targetPort: 5000
+      protocol: TCP
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: gpu-operator-metrics-exporter-monitor-custom
+  namespace: gpu
   labels:
     release: monitor
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: metrics-exporter
+      app.kubernetes.io/name: metrics-exporter-custom
       daemonset-name: gpu-operator
-  podMetricsEndpoints:
-    - port: "5000"
+  endpoints:
+    - port: metrics
       path: /metrics
----
-apiVersion: v1
-kind: Pod
-metadata:
-  name: pytorch-gpu-pod
-  namespace: gpu
-  labels:
-    purpose: demo-pytorch-amdgpu
-spec:
-  containers:
-    - name: pytorch-gpu-container
-      image: rocm/pytorch:latest
-      workingDir: /root
-      command: ["/bin/bash", "-c", "--"]
-      args: ["rocm-smi > /tmp/rocm-smi-output; git clone https://github.com/ROCm/pytorch-micro-benchmarking.git; cd pytorch-micro-benchmarking;  python micro_benchmarking_pytorch.py --network resnet50 --compile > /tmp/benchmark-output; sleep infinity & wait"]
-      resources:
-        limits:
-          amd.com/gpu: 1
+      interval: 15s

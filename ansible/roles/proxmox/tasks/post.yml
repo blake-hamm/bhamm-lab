@@ -51,9 +51,8 @@
   ansible.builtin.lineinfile:
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*'
-    line: 'GRUB_CMDLINE_LINUX="amd_iommu=on{{ " " + grub_extra_args if grub_extra_args is defined else "" }}"'
+    line: 'GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX amd_iommu=on"'
     backrefs: true
   when: inventory_hostname == "aorus"
   notify:
     - Update grub
-    - Reboot host

@@ -1,15 +1,3 @@
-# Install gpu
-x Physical install on aorus (replace previous one and remove nic)
-  x Adjust nic config
-x Setup pcie passthrough
-x Setup debian gpu machine for k3s tofu module
-x Integrate with k3s
-  x add amd gpu operator
-  x Leverage in deployment
-- Confirm in prod
-  - Add monitoring
-  - Test pytorch container
-
 # Setup container registry
 - SPIKE: find container registry
 - Deploy
@@ -150,6 +138,18 @@ x Integrate with k3s
 - kube bench - https://github.com/aquasecurity/kube-bench
 
 ## Previous
+# Install gpu
+x Physical install on aorus (replace previous one and remove nic)
+  x Adjust nic config
+x Setup pcie passthrough
+x Setup debian gpu machine for k3s tofu module
+x Integrate with k3s
+  x add amd gpu operator
+  x Leverage in deployment
+x Confirm in prod
+  x Add monitoring
+  - Test pytorch container (too large - need to test in different way)
+
 # Monitoring
 x Expose prometheus gui
 x Expose grafana gui

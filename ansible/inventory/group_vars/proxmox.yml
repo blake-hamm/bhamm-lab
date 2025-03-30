@@ -14,7 +14,8 @@ ntp_servers:
   - time.nist.gov
   - us.pool.ntp.org
 ntp_timezone: America/Denver
-pve_check_for_kernel_update: true
+pve_check_for_kernel_update: false
+pve_default_kernel_version: 1.0.1
 pve_reboot_on_kernel_update: true
 pve_cluster_enabled: true
 pve_group: proxmox

@@ -24,7 +24,8 @@ jobs:
           secrets: |
             secret/data/core/minio CONSOLE_ACCESS_KEY | AWS_ACCESS_KEY_ID;
             secret/data/core/minio CONSOLE_SECRET_KEY | AWS_SECRET_ACCESS_KEY;
-            secret/data/external/proxmox PROXMOX_VE_API_TOKEN | PROXMOX_VE_API_TOKEN;
+            secret/data/external/proxmox PROXMOX_VE_USERNAME | PROXMOX_VE_USERNAME;
+            secret/data/external/proxmox PROXMOX_VE_PASSWORD | PROXMOX_VE_PASSWORD;
             secret/data/external/proxmox PROXMOX_TOKEN_SECRET | PROXMOX_TOKEN_SECRET;
             secret/data/default/gitea ssh_private_key | GITEA_PRIVATE_KEY;
             secret/data/external/gcp gcp-k8up-sa | GOOGLE_APPLICATION_CREDENTIALS

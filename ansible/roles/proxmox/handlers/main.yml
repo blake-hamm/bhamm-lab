@@ -6,8 +6,3 @@
   ansible.builtin.command: update-grub
   become: true
   changed_when: false
-- name: Reboot host
-  ansible.builtin.reboot:
-    msg: "Rebooting to activate AMD IOMMU"
-    reboot_timeout: 600
-  become: true
