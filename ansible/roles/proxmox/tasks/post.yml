@@ -47,3 +47,13 @@
 - name: Enable prometheus on ceph
   ansible.builtin.command: ceph mgr module enable prometheus
   changed_when: false
+- name: Ensure AMD IOMMU is enabled in GRUB for aorus
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX=.*'
+    line: 'GRUB_CMDLINE_LINUX="amd_iommu=on{{ " " + grub_extra_args if grub_extra_args is defined else "" }}"'
+    backrefs: true
+  when: inventory_hostname == "aorus"
+  notify:
+    - Update grub
+    - Reboot host

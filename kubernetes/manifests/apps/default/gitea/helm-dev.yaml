@@ -67,6 +67,10 @@ spec:
             adminGroup: "lldap_admin"
         actions:
           enabled: false
+        redis-cluster:
+          enabled: false
+        redis:
+          enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

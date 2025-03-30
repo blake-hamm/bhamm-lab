@@ -82,6 +82,8 @@ resource "proxmox_virtual_environment_vm" "debian_vm_template" {
     type  = "host"
   }
 
+  machine = "q35"
+
   memory {
     dedicated = 6144
     floating  = 1

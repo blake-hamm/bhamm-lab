@@ -18,7 +18,7 @@ variable "count_k3s_worker" {
   type        = number
 }
 
-variable "k3s_nodes" {
+variable "k3s_master_nodes" {
   description = "List of Proxmox nodes and their memory multipliers"
   type = list(object({
     name       = string
@@ -29,6 +29,60 @@ variable "k3s_nodes" {
     { name = "aorus", multiplier = 1.4 },
     { name = "antsle", multiplier = 1 },
   ]
+}
+
+variable "k3s_worker_nodes" {
+  description = "List of Proxmox nodes and their memory multipliers"
+  type = list(object({
+    name       = string
+    multiplier = number
+  }))
+  default = [
+    { name = "super", multiplier = 1.6 },
+    { name = "antsle", multiplier = 1 },
+  ]
+}
+
+variable "enable_gpu_worker" {
+  type        = bool
+  default     = false
+  description = "Controls whether to create the GPU worker VM"
+}
+
+variable "k3s_gpu_worker_node" {
+  description = "Proxmox node for gpu workers"
+  type        = string
+  default     = "aorus"
+}
+
+variable "k3s_gpu_worker_id" {
+  description = "Id for gpu worker (used for vm id and ip address)"
+  type        = number
+  default     = 5
+}
+
+variable "gpu_cpu_cores" {
+  description = "CPU cores for gpu worker"
+  type        = number
+  default     = 6
+}
+
+variable "k3s_gpu_memory" {
+  description = "Memory for gpu worker in MB"
+  type        = number
+  default     = 30720 # 30 by default
+}
+
+variable "k3s_host_gpu_id" {
+  description = "Proxmox host gpu id"
+  type        = string
+  default     = "0000:09:00.0"
+}
+
+variable "k3s_host_gpu_audio_id" {
+  description = "Proxmox host gpu audio id"
+  type        = string
+  default     = "0000:09:00.1"
 }
 
 variable "master_vm_id_start" {

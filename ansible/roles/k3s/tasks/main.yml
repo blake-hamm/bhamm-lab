@@ -1,4 +1,11 @@
 # tasks file for k3s
+- name: Configure amd gpu
+  ansible.builtin.include_tasks:
+    file: gpu.yml
+    apply:
+      tags: [gpu]
+  tags: [gpu]
+  when: "'gpu' in group_names"
 - name: Set target master based on environment
   ansible.builtin.set_fact:
     target_master: "{{ (groups['k3s_master'] | select('match', (env == 'dev') | ternary('^dev-', '^prod-')) | list) | first }}"

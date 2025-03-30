@@ -182,6 +182,11 @@ spec:
                 - key: release
                   operator: In
                   values: [monitor, kube-prometheus-stack]
+            podMonitorSelector:
+              matchExpressions:
+                - key: release
+                  operator: In
+                  values: [monitor, kube-prometheus-stack]
             storageSpec:
               volumeClaimTemplate:
                 metadata:

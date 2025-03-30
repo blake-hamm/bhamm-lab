@@ -1,0 +1,25 @@
+- name: Update package cache
+  ansible.builtin.apt:
+    update_cache: true
+- name: Check if package is already installed
+  ansible.builtin.command: "dpkg -l amdgpu-install"
+  register: amdgpu_pkg_check
+  failed_when: false
+  changed_when: false
+- name: Download AMDGPU installer package
+  ansible.builtin.get_url:
+    url: "https://repo.radeon.com/amdgpu-install/6.3.3/ubuntu/jammy/amdgpu-install_6.3.60303-1_all.deb"
+    dest: "/tmp/amdgpu-install.deb"
+    mode: '0644'
+  when: "'6.3.60303-1' not in amdgpu_pkg_check.stdout"
+- name: Install AMDGPU package
+  ansible.builtin.apt:
+    deb: "/tmp/amdgpu-install.deb"
+  when: "'6.3.60303-1' not in amdgpu_pkg_check.stdout"
+- name: Update package cache again
+  ansible.builtin.apt:
+    update_cache: true
+  when: "'6.3.60303-1' not in amdgpu_pkg_check.stdout"
+- name: Install rocm
+  ansible.builtin.command: "amdgpu-install -y --usecase=rocm"
+  changed_when: false

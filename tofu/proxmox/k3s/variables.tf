@@ -47,3 +47,8 @@ variable "memory_dedicated_base" {
   type    = number
   default = 16384
 }
+
+variable "enable_gpu_worker" {
+  type        = bool
+  description = "Controls whether to create the GPU worker VM"
+}

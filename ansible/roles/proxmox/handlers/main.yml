@@ -1,3 +1,13 @@
 - name: Update APT package cache
   ansible.builtin.apt:
     update_cache: true
+  become: true
+- name: Update grub
+  ansible.builtin.command: update-grub
+  become: true
+  changed_when: false
+- name: Reboot host
+  ansible.builtin.reboot:
+    msg: "Rebooting to activate AMD IOMMU"
+    reboot_timeout: 600
+  become: true

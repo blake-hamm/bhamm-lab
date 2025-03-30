@@ -1,0 +1,102 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: amd-operator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-9"
+spec:
+  destination:
+    namespace: gpu
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/spjmurray/gpu-operator.git
+    targetRevision: hooks_be_gone
+    path: helm-charts-k8s
+    helm:
+      valuesObject:
+        node-feature-discovery:
+          enabled: false
+        kmm:
+          enabled: false
+          controller:
+            manager:
+              image:
+                repository: docker.io/rocm/kernel-module-management-operator
+                tag: v1.2.0
+          webhookServer:
+            webhookServer:
+              image:
+                repository: docker.io/rocm/kernel-module-management-webhook-server
+                tag: v1.2.0
+        installdefaultNFDRule: false
+        controllerManager:
+          manager:
+            image:
+              repository: docker.io/rocm/gpu-operator
+              tag: v1.2.0
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: amd.com/v1alpha1
+kind: DeviceConfig
+metadata:
+  name: gpu-operator
+  namespace: gpu
+spec:
+  driver:
+    enable: false
+    blacklist: true
+  devicePlugin:
+    devicePluginImage: rocm/k8s-device-plugin:latest
+    nodeLabellerImage: rocm/k8s-device-plugin:labeller-latest
+    enableNodeLabeller: true
+  metricsExporter:
+    enable: true
+  testRunner:
+    enable: true
+  selector:
+    gpu: "true"
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: gpu-node-exporter-monitor
+  namespace: gpu
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "10"
+  labels:
+    release: monitor
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: metrics-exporter
+      daemonset-name: gpu-operator
+  podMetricsEndpoints:
+    - port: "5000"
+      path: /metrics
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pytorch-gpu-pod
+  namespace: gpu
+  labels:
+    purpose: demo-pytorch-amdgpu
+spec:
+  containers:
+    - name: pytorch-gpu-container
+      image: rocm/pytorch:latest
+      workingDir: /root
+      command: ["/bin/bash", "-c", "--"]
+      args: ["rocm-smi > /tmp/rocm-smi-output; git clone https://github.com/ROCm/pytorch-micro-benchmarking.git; cd pytorch-micro-benchmarking;  python micro_benchmarking_pytorch.py --network resnet50 --compile > /tmp/benchmark-output; sleep infinity & wait"]
+      resources:
+        limits:
+          amd.com/gpu: 1

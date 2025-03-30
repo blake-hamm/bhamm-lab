@@ -1,50 +1,14 @@
-# Monitoring
-x Expose prometheus gui
-x Expose grafana gui
-  x enable oidc
-x Key monitoring
-  x Bare metal
-    x node exporter
-  x k3s
-    x Remove ansible node exporter
-    x Use k8s-native node exporter
-    x api server
-    x resources
-    x cadviser
-    x kube-state
-    x calico
-    x authelia
-    x metallb (need to fork dashboard json and adjust data source)
-    x vault
-    x cert manager
-  x opnsense firewall
-    x netflow analyzer
-  x traefik/authelia
-    x status codes
-    x response times
-  x ceph
-x Node exporter debian ansible playbook
-x Deploy loki
-  x Leverage minio storage
-  x Deploy alloy
-x Finalize Prod
-  x Merge pr
-  x Make release/* branch
-    x Fix authelia db (restore from newer snapshot)
-    x Fix gitea (unknown)
-    x Leverage github as source of truth
-    x Somehow skip k3s role in ansible if it's already running and there is no 'force' flag
-    X Update prod stuff
-      x oidc grafana
-      x traefik prometheus/grafana/alertmanager
-      x kube-prom-stack
-      x loki
-      x alloy
-      x metallb metrics
-      X vault smon
-    x Update gitea action
-    x Update sops sync branch
-  x Collect debian logs (journald) to loki w/ ansible
+# Install gpu
+x Physical install on aorus (replace previous one and remove nic)
+  x Adjust nic config
+x Setup pcie passthrough
+x Setup debian gpu machine for k3s tofu module
+x Integrate with k3s
+  x add amd gpu operator
+  x Leverage in deployment
+- Confirm in prod
+  - Add monitoring
+  - Test pytorch container
 
 # Start building website
 - Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
@@ -101,6 +65,9 @@ x Finalize Prod
 - Integrate proxmox with traefik
 
 # Finish
+- Transtion amd operator to use custom docker image - https://instinct.docs.amd.com/projects/gpu-operator/en/latest/drivers/precompiled-driver.html
+- cloudnative pg monitoring
+- Further restrict proxmox users (ansible, tofu remove)
 - Install awx - https://github.com/ansible-community/awx-operator-helm
 - Use gitea container registry
   - sync sops workflow
@@ -176,6 +143,54 @@ x Finalize Prod
 - kube bench - https://github.com/aquasecurity/kube-bench
 
 ## Previous
+# Monitoring
+x Expose prometheus gui
+x Expose grafana gui
+  x enable oidc
+x Key monitoring
+  x Bare metal
+    x node exporter
+  x k3s
+    x Remove ansible node exporter
+    x Use k8s-native node exporter
+    x api server
+    x resources
+    x cadviser
+    x kube-state
+    x calico
+    x authelia
+    x metallb (need to fork dashboard json and adjust data source)
+    x vault
+    x cert manager
+  x opnsense firewall
+    x netflow analyzer
+  x traefik/authelia
+    x status codes
+    x response times
+  x ceph
+x Node exporter debian ansible playbook
+x Deploy loki
+  x Leverage minio storage
+  x Deploy alloy
+x Finalize Prod
+  x Merge pr
+  x Make release/* branch
+    x Fix authelia db (restore from newer snapshot)
+    x Fix gitea (unknown)
+    x Leverage github as source of truth
+    x Somehow skip k3s role in ansible if it's already running and there is no 'force' flag
+    X Update prod stuff
+      x oidc grafana
+      x traefik prometheus/grafana/alertmanager
+      x kube-prom-stack
+      x loki
+      x alloy
+      x metallb metrics
+      X vault smon
+    x Update gitea action
+    x Update sops sync branch
+  x Collect debian logs (journald) to loki w/ ansible
+
 # Secure network
 x Reset AP
 x Change opnsense playbook
