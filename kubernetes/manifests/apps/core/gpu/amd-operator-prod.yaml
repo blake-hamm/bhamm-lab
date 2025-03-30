@@ -49,6 +49,8 @@ kind: DeviceConfig
 metadata:
   name: gpu-operator
   namespace: gpu
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   driver:
     enable: false

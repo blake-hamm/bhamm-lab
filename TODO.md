@@ -10,8 +10,15 @@ x Integrate with k3s
   - Add monitoring
   - Test pytorch container
 
-# Start building website
+# Setup container registry
+- SPIKE: find container registry
+- Deploy
+- Test with 'example docker'
+
+# First yt video prep
 - Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
+
+# Start building website
 - Setup Hugo
 - Expose hugo homepage at bhamm-lab.com/
 - Deploy docs at bhamm-lab.com/docs/
