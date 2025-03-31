@@ -1,13 +1,17 @@
+# First yt video prep
+x Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
+  x Deployment
+  x Configmap
+  x svc
+  x Ingressroute
+
 # Setup container registry
 - SPIKE: find container registry
 - Deploy
 - Test with 'example docker'
 
-# First yt video prep
-- Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
-
 # Start building website
-- Setup Hugo
+- Setup Hugo - https://github.com/adityatelange/hugo-PaperMod
 - Expose hugo homepage at bhamm-lab.com/
 - Deploy docs at bhamm-lab.com/docs/
 - Deploy lighthearted at bhamm-lab.com/lighthearted/
