@@ -195,7 +195,7 @@ spec:
                     requests:
                       storage: 10Gi
             retention: 5d
-            retentionSize: "10Gi"
+            retentionSize: "10GiB"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
