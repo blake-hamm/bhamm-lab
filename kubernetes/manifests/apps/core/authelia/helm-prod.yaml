@@ -229,6 +229,23 @@ spec:
                     - 'email'
                   userinfo_signed_response_alg: 'none'
                   token_endpoint_auth_method: 'client_secret_basic'
+                - client_id: 'harbor'
+                  client_name: 'Harbor'
+                  client_secret: '$pbkdf2-sha512$310000$GpH5jKZfiYXmgjMLe1gNnQ$tBffSkveAxfbPSdDq9SIssItEXKj5WDvgBFCuyLfXPCTtMtRhwIfTPPGDjBP48px0ZEpkJG4DdACWOMXhU3GHQ'
+                  public: false
+                  authorization_policy: 'two_factor'
+                  redirect_uris:
+                    - 'https://harbor.bhamm-lab.com/c/oidc/callback'
+                  grant_types:
+                    - 'refresh_token'
+                    - 'authorization_code'
+                  scopes:
+                    - 'openid'
+                    - 'profile'
+                    - 'groups'
+                    - 'email'
+                    - 'offline_access'
+                  userinfo_signed_response_alg: 'none'
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

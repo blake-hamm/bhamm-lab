@@ -33,6 +33,30 @@ data:
       iconSize: small
 
     sections:
+    - name: Network
+      icon: fas fa-network-wired
+      items:
+      - title: Opnsense
+        description: Visit opnsense firewall
+        icon: hl-opnsense
+        url: https://10.0.9.1/
+        statusCheckAllowInsecure: true
+      - title: Main Switch
+        description: Visit 2.5gb poe main tp link switch
+        icon: hl-tp-link
+        url: https://10.0.10.11/
+        statusCheck: false
+      - title: Server Switch
+        description: Visit 10gb server tp link switch
+        icon: hl-tp-link
+        url: https://10.0.10.12/
+        statusCheckAllowInsecure: true
+      - title: Traefik
+        description: Visit traefik dashboard
+        icon: hl-traefik-proxy
+        url: https://traefik.bhamm-lab.com/
+        statusCheckAcceptCodes: '401'
+
     - name: Servers
       icon: fas fa-server
       items:
@@ -67,32 +91,16 @@ data:
         url: https://10.0.10.23/
         statusCheck: false
 
-    - name: Network
-      icon: fas fa-network-wired
+    - name: Apps
+      icon: fas fa-shapes
       items:
-      - title: Opnsense
-        description: Visit opnsense firewall
-        icon: hl-opnsense
-        url: https://10.0.9.1/
-        statusCheckAllowInsecure: true
-      - title: Main Switch
-        description: Visit 2.5gb poe main tp link switch
-        icon: hl-tp-link
-        url: https://10.0.10.11/
-        statusCheckAllowInsecure: true
-      - title: Server Switch
-        description: Visit 10gb server tp link switch
-        icon: hl-tp-link
-        url: https://10.0.10.12/
-        statusCheckAllowInsecure: true
-      - title: Traefik
-        description: Visit traefik dashboard
-        icon: hl-traefik-proxy
-        url: https://traefik.bhamm-lab.com/
-        statusCheckAcceptCodes: '401'
+      - title: Immich
+        description: Visit immich
+        icon: hl-immich
+        url: https://immich.bhamm-lab.com/
 
     - name: Monitoring
-      icon: fas fa-magnifying-glass-chart
+      icon: mdi-finance
       items:
       - title: Grafana
         description: Visit grafana
@@ -124,15 +132,20 @@ data:
         description: Visit vault
         icon: hl-vault-light
         url: https://vault.bhamm-lab.com/
+      - title: Harbor
+        description: Visit harbor
+        icon: hl-harbor
+        url: https://harbor.bhamm-lab.com/
+
+    - name: Storage
+      icon: mdi-database
+      items:
       - title: Minio
         description: Visit minio
         icon: hl-minio-light
         url: https://minio.bhamm-lab.com/
-
-    - name: Apps
-      icon: fas fa-shapes
-      items:
-      - title: Immich
-        description: Visit immich
-        icon: hl-immich
-        url: https://immich.bhamm-lab.com/
+      - title: Ceph Dashboard
+        description: Visit Ceph grafana dashboard
+        icon: hl-ceph
+        url: https://grafana.bhamm-lab.com/goto/AFqtW3TNg?orgId=1
+        statusCheck: false

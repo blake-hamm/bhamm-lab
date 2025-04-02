@@ -1,14 +1,25 @@
-# First yt video prep
-x Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
-  x Deployment
-  x Configmap
-  x svc
-  x Ingressroute
-
 # Setup container registry
-- SPIKE: find container registry
-- Deploy
+x SPIKE: find container registry - use gitea
 - Test with 'example docker'
+  x Test manually with local docker commands and pat (push changes) - in gitea
+  x Deploy harbor (better features including mirroring)
+    x Setup database and secrets in common chart
+    x Deploy helm chart w/ external db and minio creds
+    x Configure oidc
+    x Configure ingress
+  x Confirm bash script with harbor
+  x Switch to 'release/*' branch (dev has no gitea action runner)
+  x Update sops secret with harbor robot credentials
+
+# Create argo sops workflow
+- Create argo event for changes in ./docker directory
+- Argo workflow to build, tag, sign and push image to harbor (for example)
+- Refactor to be more dynamic based on dockerfiles changed
+- Sops workflow docker image
+- Argo event when changes to sops file
+- Argo workflow to deploy changes
+- Argo event/workflow for terraform/ansible
+- Send back to gitea somehow?
 
 # Start building website
 - Setup Hugo - https://github.com/adityatelange/hugo-PaperMod
@@ -63,7 +74,13 @@ x Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
 - Ensure *.bhamm-lab.com is accessible from aubs phone/laptops
 - Integrate proxmox with traefik
 
+# AI
+- Deploy openwebui - https://github.com/open-webui/helm-charts/tree/main/charts/open-webui (with ollama)
+
 # Finish
+- Expose argo workflows and add to dashy w/ oidc
+- Make ha with 3 replicas for all services
+- Switch to harbor
 - Transtion amd operator to use custom docker image - https://instinct.docs.amd.com/projects/gpu-operator/en/latest/drivers/precompiled-driver.html
 - cloudnative pg monitoring
 - Further restrict proxmox users (ansible, tofu remove)
@@ -120,6 +137,8 @@ x Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
   - DR architecture diagram
 - Consider argocd application sets - https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Use-Cases/
 - Install renovate bot - https://docs.renovatebot.com/modules/platform/gitea/
+  - Setup repo mirroring with public images
+  - Setup argo workflow to handle this
 - Consider using cilium - https://cilium.io/
 - audit and rotate secrets
 - Automated opnsense backups - https://www.zenarmor.com/docs/network-security-tutorials/opnsense-security-and-hardening-best-practice-guide#regularly-backup-and-protect-backup-files
@@ -142,6 +161,13 @@ x Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
 - kube bench - https://github.com/aquasecurity/kube-bench
 
 ## Previous
+# First yt video prep
+x Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
+  x Deployment
+  x Configmap
+  x svc
+  x Ingressroute
+
 # Install gpu
 x Physical install on aorus (replace previous one and remove nic)
   x Adjust nic config
