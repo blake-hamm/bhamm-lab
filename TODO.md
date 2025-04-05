@@ -1,7 +1,8 @@
 # Fix issues
-- Adjust vm sizing in dev (3 master, 3 workers, less ram/more cpu)
-- Temp skip argocd deployment
+x Adjust vm sizing in dev (3 master, 3 workers, less ram/more cpu)
+- Ensure jumbo mtu of 9000 where possible
 - Switch to cilium
+- Temp skip argocd deployment
 - Deploy dev cluster w/ cilium (before argocd dp)
 - Add taints for gpu/master nodes
 - Ensure HA with node affinity towards vm hosts (aorus, antsle, super)

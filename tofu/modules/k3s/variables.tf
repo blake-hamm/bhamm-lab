@@ -136,6 +136,12 @@ variable "network_trunks" {
   default     = "1;20;30"
 }
 
+variable "network_mtu" {
+  description = "mtu of network"
+  type        = number
+  default     = 9000
+}
+
 variable "clone_datastore_id" {
   description = "Datastore ID for cloning"
   type        = string

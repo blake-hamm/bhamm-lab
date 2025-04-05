@@ -57,6 +57,7 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
     bridge  = var.network_bridge
     trunks  = var.network_trunks
     vlan_id = var.vlan_id
+    mtu     = var.network_mtu
   }
 
   serial_device {
@@ -139,6 +140,7 @@ resource "proxmox_virtual_environment_vm" "k3s_worker" {
     bridge  = var.network_bridge
     trunks  = var.network_trunks
     vlan_id = var.vlan_id
+    mtu     = var.network_mtu
   }
 
   serial_device {
@@ -213,6 +215,7 @@ resource "proxmox_virtual_environment_vm" "k3s_gpu_worker" {
     bridge  = var.network_bridge
     trunks  = var.network_trunks
     vlan_id = var.vlan_id
+    mtu     = var.network_mtu
   }
 
   serial_device {
