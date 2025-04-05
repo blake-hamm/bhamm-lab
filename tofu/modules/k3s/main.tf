@@ -48,7 +48,7 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
   machine = "q35"
 
   memory {
-    dedicated = floor(var.memory_dedicated_base * var.k3s_master_nodes[count.index].multiplier)
+    dedicated = floor(var.memory_base_master * var.k3s_master_nodes[count.index].multiplier)
     floating  = 1
   }
 
@@ -130,7 +130,7 @@ resource "proxmox_virtual_environment_vm" "k3s_worker" {
   machine = "q35"
 
   memory {
-    dedicated = floor(var.memory_dedicated_base * var.k3s_worker_nodes[count.index].multiplier)
+    dedicated = floor(var.memory_base_worker * var.k3s_worker_nodes[count.index].multiplier)
     floating  = 1
   }
 

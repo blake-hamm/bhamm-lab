@@ -1,8 +1,8 @@
 # Fix issues
-- Disable swap on proxmox host and vm's
+- Adjust vm sizing in dev (3 master, 3 workers, less ram/more cpu)
+- Temp skip argocd deployment
 - Switch to cilium
 - Deploy dev cluster w/ cilium (before argocd dp)
-- Adjust vm sizing in dev (3 master, 3 workers, less ram/more cpu)
 - Add taints for gpu/master nodes
 - Ensure HA with node affinity towards vm hosts (aorus, antsle, super)
 - Leverage redis operator

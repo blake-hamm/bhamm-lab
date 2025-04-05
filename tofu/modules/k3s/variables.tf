@@ -39,6 +39,7 @@ variable "k3s_worker_nodes" {
   }))
   default = [
     { name = "super", multiplier = 1.6 },
+    { name = "aorus", multiplier = 1.4 },
     { name = "antsle", multiplier = 1 },
   ]
 }
@@ -181,8 +182,13 @@ variable "cpu_cores_worker" {
   type        = number
 }
 
-variable "memory_dedicated_base" {
-  description = "Base memory allocation in MB"
+variable "memory_base_master" {
+  description = "Base memory allocation in MB for master nodes"
+  type        = number
+}
+
+variable "memory_base_worker" {
+  description = "Base memory allocation in MB for worker nodes"
   type        = number
 }
 

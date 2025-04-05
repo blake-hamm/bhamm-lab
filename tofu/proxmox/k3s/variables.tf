@@ -35,15 +35,20 @@ variable "worker_ip_format" {
 
 variable "cpu_cores_master" {
   type    = number
-  default = 3
+  default = 2
 }
 
 variable "cpu_cores_worker" {
   type    = number
-  default = 2
+  default = 4
 }
 
-variable "memory_dedicated_base" {
+variable "memory_base_master" {
+  type    = number
+  default = 8192
+}
+
+variable "memory_base_worker" {
   type    = number
   default = 16384
 }
