@@ -17,3 +17,6 @@ k3s_server:
     - node-monitor-grace-period=20s
   kubelet-arg:
     - node-status-update-frequency=5s
+  node-taint:
+    - node-role.kubernetes.io/master=:NoSchedule
+    - node-role.kubernetes.io/control-plane=:NoSchedule

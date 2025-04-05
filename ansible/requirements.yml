@@ -34,3 +34,6 @@ roles:
   - name: xanmanning.k3s
     src: https://github.com/blake-hamm/ansible-role-k3s.git
     version: "main"
+  - src: https://github.com/githubixx/ansible-role-cilium-cli.git
+    name: githubixx.cilium_cli
+    version: "2.8.2+0.16.23"

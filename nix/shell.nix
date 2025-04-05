@@ -25,6 +25,7 @@ pkgs.mkShell {
     openssl
     google-cloud-sdk
     velero
+    cilium-cli
   ];
 
   packages = [

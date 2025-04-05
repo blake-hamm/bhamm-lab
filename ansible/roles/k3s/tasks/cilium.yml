@@ -1,0 +1,24 @@
+- name: Downloading cilium CLI archive
+  ansible.builtin.get_url:
+    url: "{{ k3s_cilium_cli_url }}"
+    dest: "/tmp/{{ k3s_cilium_cli_archive }}"
+    checksum: "sha256:{{ k3s_cilium_cli_url }}.sha256sum"
+    mode: "0600"
+- name: Unarchive cilium CLI
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ k3s_cilium_cli_archive }}"
+    dest: "/tmp"
+    remote_src: true
+- name: Copy cilium cli binary to destination directory
+  ansible.builtin.copy:
+    src: "/tmp/cilium"
+    dest: "/usr/local/bin/cilium"
+    mode: "0755"
+    owner: "root"
+    group: "root"
+    remote_src: true
+- name: Install cilium cni
+  ansible.builtin.command: cilium install --version 1.17.2 --set=ipam.operator.clusterPoolIPv4PodCIDRList="{{ k3s_server["cluster-cidr"] }}"
+  environment:
+    KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
+  changed_when: false
