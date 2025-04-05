@@ -11,7 +11,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "-5"
 spec:
   size: 2
-  image: hashicorp/vault:1.18.1
+  image: hashicorp/vault:1.19.1
   annotations:
     common/annotation: "true"
   vaultAnnotations:
@@ -110,7 +110,7 @@ spec:
             policies: read_secrets
             ttl: 1h
           - name: sops
-            bound_service_account_names: "sync-sops-to-vault-sa"
+            bound_service_account_names: "sops-vault-sync-sa"
             bound_service_account_namespaces: "vault"
             policies: allow_secrets
             ttl: 1h

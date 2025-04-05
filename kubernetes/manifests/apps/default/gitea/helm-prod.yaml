@@ -17,6 +17,10 @@ spec:
     helm:
       valuesObject:
         replicaCount: 3
+        deployment:
+          terminationGracePeriodSeconds: 15
+        strategy:
+          type: "Recreate"
         persistence:
           storageClass: "csi-cephfs-sc"
           accessModes:
@@ -50,6 +54,9 @@ spec:
               NAME: gitea
               USER: gitea
               SCHEMA: public
+            webhook:
+              ALLOWED_HOST_LIST: gitea-eventsource-svc.argo-events.svc.cluster.local
+              SKIP_TLS_VERIFY: true
           oauth:
             - name: 'authelia'
               provider: 'openidConnect'

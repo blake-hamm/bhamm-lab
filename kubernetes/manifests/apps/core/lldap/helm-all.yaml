@@ -24,6 +24,8 @@ spec:
         image:
           repository: "lldap/lldap"
           tag: "v0.6.1"
+        hpa:
+          enabled: false
   ignoreDifferences:
     - group: ""
       kind: PersistentVolumeClaim

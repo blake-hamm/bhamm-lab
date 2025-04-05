@@ -1,27 +1,20 @@
-# Setup container registry
-x SPIKE: find container registry - use gitea
-- Test with 'example docker'
-  x Test manually with local docker commands and pat (push changes) - in gitea
-  x Deploy harbor (better features including mirroring)
-    x Setup database and secrets in common chart
-    x Deploy helm chart w/ external db and minio creds
-    x Configure oidc
-    x Configure ingress
-  x Confirm bash script with harbor
-  x Switch to 'release/*' branch (dev has no gitea action runner)
-  x Update sops secret with harbor robot credentials
+# Fix issues
+- Disable swap on proxmox host and vm's
+- Switch to cilium
+- Deploy dev cluster w/ cilium (before argocd dp)
+- Adjust vm sizing in dev (3 master, 3 workers, less ram/more cpu)
+- Add taints for gpu/master nodes
+- Ensure HA with node affinity towards vm hosts (aorus, antsle, super)
+- Leverage redis operator
 
-# Create argo sops workflow
-- Create argo event for changes in ./docker directory
-- Argo workflow to build, tag, sign and push image to harbor (for example)
-- Refactor to be more dynamic based on dockerfiles changed
-- Sops workflow docker image
-- Argo event when changes to sops file
-- Argo workflow to deploy changes
-- Argo event/workflow for terraform/ansible
-- Send back to gitea somehow?
+# Prep for exposure
+- Traefik
+  - setup new metallb ip for external
+  - block *.bhamm-lab.com from public
+  - Setup split dns (wildcard internal, www. external)
 
 # Start building website
+- Update dashy links for grafana
 - Setup Hugo - https://github.com/adityatelange/hugo-PaperMod
 - Expose hugo homepage at bhamm-lab.com/
 - Deploy docs at bhamm-lab.com/docs/
@@ -53,11 +46,12 @@ x SPIKE: find container registry - use gitea
   - geo filter
   - only allow cloudflare ip's
   - expose 443 on dmz
-- Traefik
-  - setup new metallb ip for external
-  - block *.bhamm-lab.com from public
-  - Setup split dns
 - Consider Zeek
+
+# Refactor internal coms
+- Change harbor s3 integration to use internal minio svc instead of traefik ingress
+- Try argocd w/ gitea internal svc
+- Change frequency of dashy pings
 
 # Omada sdn
 - Setup 3 wifi networks
@@ -75,13 +69,15 @@ x SPIKE: find container registry - use gitea
 - Integrate proxmox with traefik
 
 # AI
+- Transtion amd operator to use custom docker image - https://instinct.docs.amd.com/projects/gpu-operator/en/latest/drivers/precompiled-driver.html
+- Create node taint to deny scheduling to gpu vm
 - Deploy openwebui - https://github.com/open-webui/helm-charts/tree/main/charts/open-webui (with ollama)
 
 # Finish
-- Expose argo workflows and add to dashy w/ oidc
+- Argo event/workflow for terraform/ansible and decom gitea actions
+- Fix TZ on all services
 - Make ha with 3 replicas for all services
-- Switch to harbor
-- Transtion amd operator to use custom docker image - https://instinct.docs.amd.com/projects/gpu-operator/en/latest/drivers/precompiled-driver.html
+- Switch to cilium
 - cloudnative pg monitoring
 - Further restrict proxmox users (ansible, tofu remove)
 - Install awx - https://github.com/ansible-community/awx-operator-helm
@@ -161,6 +157,32 @@ x SPIKE: find container registry - use gitea
 - kube bench - https://github.com/aquasecurity/kube-bench
 
 ## Previous
+# Create argo sops workflow
+x Create argo event source for gitea webhook
+x Test gitea argo event source
+x Expose argo workflows and add to dashy w/ oidc
+x Create argo sensor filtering changes in ./docker directory to trigger workflow
+x Argo workflow to build, tag, sign and push image to harbor (for example)
+x Refactor to be more dynamic based on dockerfiles changed
+x Add gitea status ping for commit
+x Sops workflow docker image
+x Argo event when changes to sops file
+x Argo workflow to deploy changes
+x Send back to gitea somehow?
+
+# Setup container registry
+x SPIKE: find container registry - use gitea
+x Test with 'example docker'
+  x Test manually with local docker commands and pat (push changes) - in gitea
+  x Deploy harbor (better features including mirroring)
+    x Setup database and secrets in common chart
+    x Deploy helm chart w/ external db and minio creds
+    x Configure oidc
+    x Configure ingress
+  x Confirm bash script with harbor
+  x Switch to 'release/*' branch (dev has no gitea action runner)
+  x Update sops secret with harbor robot credentials
+
 # First yt video prep
 x Deploy dashy https://github.com/lissy93/dashy?tab=readme-ov-file
   x Deployment

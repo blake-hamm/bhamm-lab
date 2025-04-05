@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: gitea-status
+  namespace: argo-events
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  serviceAccountName: default
+  entrypoint: gitea-status
+  templates:
+    - name: gitea-status
+      inputs:
+        parameters:
+          - name: git-sha
+          - name: state
+          - name: repo-owner
+            value: bhamm
+          - name: repo-name
+            value: bhamm-lab
+          - name: gitea-host
+            value: https://git.bhamm-lab.com
+          - name: context
+            value: "Argo Workflow"
+          - name: argo-server-base-url
+            value: https://argoworkflows.bhamm-lab.com
+      container:
+        image: curlimages/curl:latest
+        env:
+          - name: GITEA_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: argo-events-external-secret
+                key: gitea-token
+        command: [sh, -c]
+        args:
+          - |
+            curl -X POST \
+              -H "Authorization: token $GITEA_TOKEN" \
+              -H "Content-Type: application/json" \
+              "{{inputs.parameters.gitea-host}}/api/v1/repos/{{inputs.parameters.repo-owner}}/{{inputs.parameters.repo-name}}/statuses/{{inputs.parameters.git-sha}}" \
+              -d "{
+                \"context\": \"{{inputs.parameters.context}}\",
+                \"description\": \"Workflow {{workflow.name}}\",
+                \"state\": \"{{inputs.parameters.state}}\",
+                \"target_url\": \"{{inputs.parameters.argo-server-base-url}}/workflows/{{workflow.namespace}}/{{workflow.name}}\"
+              }"

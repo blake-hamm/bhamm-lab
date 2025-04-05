@@ -246,6 +246,20 @@ spec:
                     - 'email'
                     - 'offline_access'
                   userinfo_signed_response_alg: 'none'
+                - client_id: 'argoworkflows'
+                  client_name: 'Argo Workflows'
+                  client_secret: '$pbkdf2-sha512$310000$MxhhAocEQWNmHNKyLIE7Sg$CCf6xcnDFpaBVskhImasp51322SthPsytptHpuXA/oUae7xpsXj7xUwU8A85qi7H7TR7SdmmVBquK9V5YXWXqg'
+                  public: false
+                  authorization_policy: 'two_factor'
+                  redirect_uris:
+                    - 'https://argoworkflows.bhamm-lab.com/oauth2/callback'
+                  scopes:
+                    - 'openid'
+                    - 'groups'
+                    - 'email'
+                    - 'profile'
+                  userinfo_signed_response_alg: 'none'
+                  token_endpoint_auth_method: 'client_secret_post'
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

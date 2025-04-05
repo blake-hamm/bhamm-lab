@@ -18,14 +18,26 @@ spec:
         externalSecrets:
           enabled: true
           secrets:
-            - secretKey: minio-user
+            - secretKey: client-id
               remoteRef:
-                key: /core/minio
-                property: root-user
-            - secretKey: minio-password
+                key: /core/argo-workflows
+                property: oidc_client_id
+            - secretKey: client-secret
               remoteRef:
-                key: /core/minio
-                property: root-password
+                key: /core/argo-workflows
+                property: oidc_client_secret
+        ingressRoutes:
+          - enabled: true
+            name: argo-workflows
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - kind: Rule
+                match: Host(`argoworkflows.bhamm-lab.com`)
+                services:
+                  - name: argo-workflows-server
+                    scheme: http
+                    port: 2746
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

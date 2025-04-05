@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: clone-repo
+  namespace: argo-events
+spec:
+  entrypoint: clone-repo
+  templates:
+    - name: clone-repo
+      inputs:
+        parameters:
+          - name: url
+            value: https://git.bhamm-lab.com/bhamm/bhamm-lab.git
+          - name: branch
+            value: main
+      outputs:
+        artifacts:
+          - name: repo
+            path: /workspace
+            archive:
+              none: {}
+      script:
+        image: alpine/git:latest
+        command: [sh]
+        source: |
+          #!/bin/sh
+          echo "Cloning {{inputs.parameters.url}}#{{inputs.parameters.branch}}"
+          SHORT_BRANCH=$(echo "{{inputs.parameters.branch}}" | sed 's|refs/heads/||')
+          git clone --depth 1 --branch "$SHORT_BRANCH" "{{inputs.parameters.url}}" /workspace

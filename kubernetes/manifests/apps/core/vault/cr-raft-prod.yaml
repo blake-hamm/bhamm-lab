@@ -10,8 +10,8 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "-5"
 spec:
-  size: 2
-  image: hashicorp/vault:1.18.1
+  size: 3
+  image: hashicorp/vault:1.19.1
   annotations:
     common/annotation: "true"
   vaultAnnotations:
@@ -39,7 +39,6 @@ spec:
   volumeMounts:
     - name: vault-raft
       mountPath: /vault/file
-  veleroEnabled: true
   caNamespaces: ["*"]
   unsealConfig:
     options:
@@ -72,7 +71,6 @@ spec:
         secretKeyRef:
           name: vault-external-secret
           key: OIDC_VAULT_CLIENT_SECRET
-  statsdDisabled: false
   serviceMonitorEnabled: true
   serviceRegistrationEnabled: true
   resources:
@@ -97,10 +95,6 @@ spec:
         rules: path "*" { capabilities = ["create", "read", "update", "delete", "list", "sudo"] }
       - name: prometheus-operator
         rules: path "sys/metrics" { capabilities = ["list", "read"] }
-        # - name: ansible
-        #   rules: path "secret/data/core/ansible/*" { capabilities = ["create", "read", "update", "delete", "list"] }
-        # - name: create_token
-        #   rules: path "auth/token/create" { capabilities = ["create", "update"] }
     auth:
       - type: kubernetes
         roles:
@@ -110,8 +104,8 @@ spec:
             policies: read_secrets
             ttl: 1h
           - name: sops
-            bound_service_account_names: "sync-sops-to-vault-sa"
-            bound_service_account_namespaces: "vault"
+            bound_service_account_names: "sops-vault-sync-sa"
+            bound_service_account_namespaces: "argo-events"
             policies: allow_secrets
             ttl: 1h
           - name: prometheus

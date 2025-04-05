@@ -62,10 +62,10 @@ spec:
             bucket: argo-artifacts
             accessKeySecret:
               name: argo-workflows-external-secret
-              key: minio-user
+              key: accessKeySecret
             secretKeySecret:
               name: argo-workflows-external-secret
-              key: minio-password
+              key: secretKeySecret
             insecure: true
   syncPolicy:
     syncOptions:

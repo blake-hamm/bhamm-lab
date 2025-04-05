@@ -1,0 +1,232 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: gitea-docker-changes
+  namespace: argo-events
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  dependencies:
+    - name: gitea-push-event
+      eventSourceName: gitea
+      eventName: push
+      filters:
+        script: |-
+          -- Check all commits for docker/ path changes
+          for _, commit in ipairs(event.body.commits) do
+              -- Check added files
+              for _, path in ipairs(commit.added) do
+                  if string.sub(path, 1, 7) == "docker/" then
+                      return true
+                  end
+              end
+
+              -- Check modified files
+              for _, path in ipairs(commit.modified) do
+                  if string.sub(path, 1, 7) == "docker/" then
+                      return true
+                  end
+              end
+
+              -- Check removed files
+              for _, path in ipairs(commit.removed) do
+                  if string.sub(path, 1, 7) == "docker/" then
+                      return true
+                  end
+              end
+          end
+          return false
+  triggers:
+    - template:
+        name: docker-change-trigger
+        argoWorkflow:
+          operation: submit
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: gitea-docker-changes-
+              spec:
+                serviceAccountName: default
+                entrypoint: main
+                onExit: exit-handler
+                arguments:
+                  parameters:
+                    - name: commits
+                    - name: repoUrl
+                    - name: branch
+                    - name: git-sha
+                templates:
+                  - name: main
+                    inputs:
+                      parameters:
+                        - name: commits
+                        - name: repoUrl
+                        - name: branch
+                        - name: git-sha
+                    dag:
+                      tasks:
+                        - name: gitea-status
+                          templateRef:
+                            name: gitea-status
+                            template: gitea-status
+                          arguments:
+                            parameters:
+                              - name: git-sha
+                                value: "{{inputs.parameters.git-sha}}"
+                              - name: state
+                                value: "pending"
+                        - name: extract-dockerfiles
+                          template: extract-dockerfiles
+                          arguments:
+                            parameters:
+                              - name: commits
+                                value: "{{inputs.parameters.commits}}"
+                        - name: clone-repo
+                          templateRef:
+                            name: clone-repo
+                            template: clone-repo
+                          arguments:
+                            parameters:
+                              - name: url
+                                value: "{{inputs.parameters.repoUrl}}"
+                              - name: branch
+                                value: "{{inputs.parameters.branch}}"
+                        - name: prepare-config
+                          template: prepare-docker-config
+                        - name: build-and-push
+                          template: build-and-push-kaniko
+                          depends: "extract-dockerfiles && clone-repo && prepare-config"
+                          arguments:
+                            parameters:
+                              - name: dockerfile
+                                value: "{{item}}"
+                            artifacts:
+                              - name: repository
+                                from: "{{tasks.clone-repo.outputs.artifacts.repo}}"
+                              - name: docker-config
+                                from: "{{tasks.prepare-config.outputs.artifacts.docker-creds}}"
+                          withParam: "{{tasks.extract-dockerfiles.outputs.result}}"
+                  - name: extract-dockerfiles
+                    inputs:
+                      parameters:
+                        - name: commits
+                      artifacts:
+                        - name: input-json
+                          path: /tmp/input.json
+                          raw:
+                            data: "{{inputs.parameters.commits}}"
+                    script:
+                      image: python:alpine
+                      command: [python]
+                      source: |
+                        import json
+                        import os
+
+                        with open('/tmp/input.json', 'r') as f:
+                            commits = json.load(f)
+
+                        docker_files = []
+                        for commit in commits:
+                            for path in commit.get('added', []) + commit.get('modified', []):
+                                if path.startswith('docker/') and path.endswith('Dockerfile'):
+                                    docker_files.append(path)
+
+                        print(json.dumps(docker_files))
+                  - name: prepare-docker-config
+                    outputs:
+                      artifacts:
+                        - name: docker-creds
+                          path: /kaniko/.docker
+                          archive:
+                            none: {}
+                    script:
+                      image: alpine:latest
+                      command: [sh]
+                      env:
+                        - name: REGISTRY
+                          value: "harbor.bhamm-lab.com"
+                        - name: ROBOT_USERNAME
+                          valueFrom:
+                            secretKeyRef:
+                              name: argo-events-external-secret
+                              key: robot-username
+                        - name: ROBOT_TOKEN
+                          valueFrom:
+                            secretKeyRef:
+                              name: argo-events-external-secret
+                              key: robot-token
+                      source: |
+                        #!/bin/sh
+                        mkdir -p /kaniko/.docker
+                        echo '{
+                          "auths": {
+                            "'"${REGISTRY}"'": {
+                              "auth": "'"$(echo -n "${ROBOT_USERNAME}:${ROBOT_TOKEN}" | base64)"'"
+                            }
+                          }
+                        }' > /kaniko/.docker/config.json
+                  - name: build-and-push-kaniko
+                    inputs:
+                      parameters:
+                        - name: dockerfile
+                      artifacts:
+                        - name: repository
+                          path: /workspace
+                        - name: docker-config
+                          path: /kaniko/.docker
+                    container:
+                      image: gcr.io/kaniko-project/executor:debug
+                      command: ["/busybox/sh", "-c"]
+                      args:
+                        - |
+                          # Show debug info
+                          echo "Workspace contents:"
+                          ls -laR /workspace
+
+                          # Build using parameter from stdout
+                          full_path="/workspace/{{inputs.parameters.dockerfile}}"
+                          context_dir=$(dirname "$full_path")
+                          image_name=$(basename "$context_dir")
+
+                          /kaniko/executor \
+                            --context "dir://$context_dir" \
+                            --dockerfile "$full_path" \
+                            --destination "harbor.bhamm-lab.com/library/$image_name:latest" \
+                            --skip-tls-verify \
+                            --verbosity=debug
+                  - name: exit-handler
+                    steps:
+                      - - name: final-status
+                          templateRef:
+                            name: gitea-status
+                            template: gitea-status
+                          arguments:
+                            parameters:
+                              - name: git-sha
+                                value: "{{workflow.parameters.git-sha}}"
+                              - name: state
+                                value: "{{=workflow.status == 'Succeeded' ? 'success' : 'failure'}}"
+          parameters:
+            - src:
+                dependencyName: gitea-push-event
+                dataKey: body.commits
+              dest: spec.arguments.parameters.0.value
+              transformation:
+                template: "{{ .Input | toJson }}"
+            - src:
+                dependencyName: gitea-push-event
+                dataKey: body.repository.clone_url
+              dest: spec.arguments.parameters.1.value
+            - src:
+                dependencyName: gitea-push-event
+                dataKey: body.ref
+                transformation:
+                  template: '{{ .Input | replace "refs/heads/" "" }}'
+              dest: spec.arguments.parameters.2.value
+            - src:
+                dependencyName: gitea-push-event
+                dataKey: body.head_commit.id
+              dest: spec.arguments.parameters.3.value

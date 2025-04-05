@@ -1,18 +1,18 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: sync-sops-to-vault-sa
-  namespace: vault
+  name: sops-vault-sync-sa
+  namespace: argo-events
   annotations:
-    argocd.argoproj.io/sync-wave: "-2"
+    argocd.argoproj.io/sync-wave: "-3"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: sync-sops-to-vault-role
-  namespace: vault
+  name: sops-vault-sync-role
+  namespace: argo-events
   annotations:
-    argocd.argoproj.io/sync-wave: "-2"
+    argocd.argoproj.io/sync-wave: "-3"
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
@@ -24,75 +24,50 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: sync-sops-to-vault-binding
-  namespace: vault
+  name: sops-vault-sync-binding
+  namespace: argo-events
   annotations:
     argocd.argoproj.io/sync-wave: "-2"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: sync-sops-to-vault-role
+  name: sops-vault-sync-role
 subjects:
   - kind: ServiceAccount
-    name: sync-sops-to-vault-sa
-    namespace: vault
+    name: sops-vault-sync-sa
+    namespace: argo-events
 ---
 apiVersion: argoproj.io/v1alpha1
-kind: Workflow
+kind: WorkflowTemplate
 metadata:
-  name: sync-sops-to-vault-workflow
-  namespace: vault
+  name: sops-vault-sync
+  namespace: argo-events
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
-  entrypoint: sync-sops-to-vault-workflow
-  serviceAccountName: sync-sops-to-vault-sa
+  entrypoint: sops-vault-sync
+  serviceAccountName: sops-vault-sync-sa
   templates:
-    - name: sync-sops-to-vault-workflow
+    - name: sops-vault-sync
       retryStrategy:
-        limit: "10"
+        limit: "3"
         retryPolicy: "Always"
+      inputs:
+        artifacts:
+          - name: repository
+            path: /workspace
       container:
-        image: debian:bookworm-slim
+        image: harbor.bhamm-lab.com/library/sops-vault-sync:latest
         command: ["/bin/bash", "-c"]
         args:
           - |
             set -e
 
-            # Install pre-reqs
-            apt-get update && apt-get install -y \
-                wget \
-                gpg \
-                lsb-release
-
-            # Get vault keys
-            wget -O - https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
-
-            # Update and install dependencies
-            apt-get update && apt-get install -y \
-                git \
-                curl \
-                jq \
-                vault \
-                ca-certificates \
-                gnupg \
-                ssh-client
-
-            # Install sops
-            curl -LO https://github.com/getsops/sops/releases/download/v3.9.4/sops-v3.9.4.linux.amd64
-            mv sops-v3.9.4.linux.amd64 /usr/local/bin/sops
-            chmod +x /usr/local/bin/sops
-
-            # Clone repository
-            echo "Cloning repository..."
-            git clone -b release/container-registry https://github.com/blake-hamm/bhamm-lab.git /workspace/repo
-
             # Decrypt secrets
             echo "Decrypting secrets..."
             export GOOGLE_APPLICATION_CREDENTIALS=/secrets/gcp/service-account.json
-            sops --decrypt /workspace/repo/secrets.enc.json > /workspace/secrets.decrypted.json
+            sops --decrypt /workspace/secrets.enc.json > /workspace/secrets.decrypted.json
 
             # Vault authentication
             echo "Authenticating with Vault..."

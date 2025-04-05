@@ -9,7 +9,7 @@
     gcp_sops_sa: "{{ sops_secrets.ansible_facts.ansible_secrets.gcp['gcp-sops-sa'] }}"
     gcp_k8up_sa: "{{ sops_secrets.ansible_facts.ansible_secrets.gcp['gcp-k8up-sa'] }}"
   no_log: true
-- name: Create Vault namespace
+- name: Create Argo Events namespace
   kubernetes.core.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
@@ -17,7 +17,7 @@
       apiVersion: v1
       kind: Namespace
       metadata:
-        name: vault
+        name: argo-events
     wait: true
   retries: 3
   delay: 15
@@ -30,7 +30,7 @@
       kind: Secret
       metadata:
         name: "gcp-sops-sa"
-        namespace: vault
+        namespace: argo-events
       type: Opaque
       data:
         service-account.json: "{{ gcp_sops_sa | to_json | b64encode }}"
