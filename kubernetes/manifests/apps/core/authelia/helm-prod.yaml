@@ -4,7 +4,7 @@ metadata:
   name: authelia
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "15"
+    argocd.argoproj.io/sync-wave: "4"
 spec:
   destination:
     namespace: authelia
@@ -18,7 +18,7 @@ spec:
       valuesObject:
         pod:
           kind: 'Deployment'
-          replicas: 2
+          replicas: 3
           extraVolumeMounts:
             - mountPath: '/app/custom-secrets'
               name: 'custom-secrets'

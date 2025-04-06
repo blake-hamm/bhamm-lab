@@ -4,7 +4,7 @@ metadata:
   name: sops-vault-sync-sa
   namespace: argo-events
   annotations:
-    argocd.argoproj.io/sync-wave: "-3"
+    argocd.argoproj.io/sync-wave: "-4"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -12,7 +12,7 @@ metadata:
   name: sops-vault-sync-role
   namespace: argo-events
   annotations:
-    argocd.argoproj.io/sync-wave: "-3"
+    argocd.argoproj.io/sync-wave: "-4"
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
@@ -27,7 +27,7 @@ metadata:
   name: sops-vault-sync-binding
   namespace: argo-events
   annotations:
-    argocd.argoproj.io/sync-wave: "-2"
+    argocd.argoproj.io/sync-wave: "-3"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -43,7 +43,7 @@ metadata:
   name: sops-vault-sync
   namespace: argo-events
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-wave: "-2"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   entrypoint: sops-vault-sync
@@ -114,3 +114,7 @@ spec:
               items:
                 - key: service-account.json
                   path: service-account.json
+
+# Sync sops workflow
+---
+

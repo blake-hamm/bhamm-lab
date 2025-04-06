@@ -4,7 +4,7 @@ metadata:
   name: lldap-bootstrap-workflow-sa
   namespace: lldap
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "1"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -12,7 +12,7 @@ metadata:
   name: lldap-bootstrap-workflow-role
   namespace: lldap
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "1"
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
@@ -27,7 +27,7 @@ metadata:
   name: lldap-bootstrap-workflow-binding
   namespace: lldap
   annotations:
-    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-wave: "2"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -43,7 +43,7 @@ metadata:
   name: lldap-bootstrap-workflow
   namespace: lldap
   annotations:
-    argocd.argoproj.io/sync-wave: "12"
+    argocd.argoproj.io/sync-wave: "3"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   entrypoint: lldap-bootstrap-workflow
