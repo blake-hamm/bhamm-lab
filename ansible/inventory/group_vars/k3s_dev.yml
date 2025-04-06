@@ -15,6 +15,8 @@ k3s_server:
   kube-controller-manager-arg:
     - node-monitor-period=20s
     - node-monitor-grace-period=20s
+    - enable-dynamic-provisioning=true
+    - attach-detach-reconcile-sync-period=10s
   kubelet-arg:
     - node-status-update-frequency=5s
   node-taint:

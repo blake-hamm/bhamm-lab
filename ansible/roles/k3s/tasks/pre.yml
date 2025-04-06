@@ -39,3 +39,8 @@
     value: 655360
     state: present
     reload: true
+- name: Run Jeff Geerling ntp role
+  ansible.builtin.include_role:
+    name: geerlingguy.ntp
+    apply:
+      become: true
