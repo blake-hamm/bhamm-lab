@@ -18,6 +18,7 @@ spec:
       valuesObject:
         provisioner:
           replicaCount: 3
+          enableHostNetwork: true
         csiConfig:
           - clusterID: "7b02e4a9-b740-4d5a-b519-9585725a55fb"
             monitors:
@@ -33,6 +34,7 @@ spec:
           pool: kubernetes
           mountOptions:
             - discard
+          tryOtherMounters: true
         configMapName: ceph-rbd-csi-config
         cephConfConfigMapName: ceph-rbd-config
         kmsConfigMapName: ceph-rbd-csi-encryption-kms-config
