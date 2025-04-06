@@ -17,8 +17,18 @@
     owner: "root"
     group: "root"
     remote_src: true
-- name: Install cilium cni
-  ansible.builtin.command: cilium install --version 1.17.2 --set=ipam.operator.clusterPoolIPv4PodCIDRList="{{ k3s_server["cluster-cidr"] }}"
+- name: Check if Cilium is already installed and healthy
+  ansible.builtin.command:
+    cmd: cilium status --wait --wait-duration 45s
   environment:
     KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
+  register: cilium_status_check
+  ignore_errors: true
+  changed_when: false
+- name: Install Cilium CNI (only if not healthy)
+  ansible.builtin.command:
+    cmd: cilium install --version {{ k3s_cilium_version }} --set=ipam.operator.clusterPoolIPv4PodCIDRList="{{ k3s_server['cluster-cidr'] }}"
+  environment:
+    KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
+  when: cilium_status_check is failed
   changed_when: false

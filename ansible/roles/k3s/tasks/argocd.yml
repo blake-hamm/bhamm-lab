@@ -38,12 +38,10 @@
 - name: Set installation status fact
   ansible.builtin.set_fact:
     argocd_needs_install: >
-      {{
-      (argocd_server_check.resources | default([]) | length == 0) or
-      (argocd_repo_check.resources | default([]) | length == 0) or
-      (argocd_server_check.resources | selectattr('status.phase', 'eq', 'Running') | list | length == 0) or
-      (argocd_repo_check.resources | selectattr('status.phase', 'eq', 'Running') | list | length == 0)
-      }}
+      {{ (argocd_server_check.resources | default([]) | length == 0)
+        or (argocd_repo_check.resources | default([]) | length == 0)
+        or (argocd_server_check.resources | selectattr('status.phase', 'eq', 'Running') | list | length == 0)
+        or (argocd_repo_check.resources | selectattr('status.phase', 'eq', 'Running') | list | length == 0) }}
 - name: Wait for ArgoCD components
   when: argocd_needs_install
   block:
@@ -57,7 +55,8 @@
         kubeconfig: /etc/rancher/k3s/k3s.yaml
         state: present
         force: true
-      failed_when: false
+      retries: 3
+      delay: 30
     - name: Wait for server
       kubernetes.core.k8s_info:
         kubeconfig: /etc/rancher/k3s/k3s.yaml
@@ -78,9 +77,10 @@
         wait: true
         wait_sleep: 10
         wait_timeout: 360
-- name: Deploy apps
-  kubernetes.core.k8s:
-    kubeconfig: /etc/rancher/k3s/k3s.yaml
-    state: present
-    template: apps.yaml.j2
-    wait: true
+
+# - name: Deploy apps
+#   kubernetes.core.k8s:
+#     kubeconfig: /etc/rancher/k3s/k3s.yaml
+#     state: present
+#     template: apps.yaml.j2
+#     wait: true

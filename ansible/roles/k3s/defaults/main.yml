@@ -4,3 +4,4 @@ k3s_cilium_cli_os: "linux"
 k3s_cilium_cli_arch: "amd64"
 k3s_cilium_cli_archive: "cilium-{{ k3s_cilium_cli_os }}-{{ k3s_cilium_cli_arch }}.tar.gz"
 k3s_cilium_cli_url: "https://github.com/cilium/cilium-cli/releases/download/{{ k3s_cilium_cli_version }}/{{ k3s_cilium_cli_archive }}"
+k3s_cilium_version: 1.17.2

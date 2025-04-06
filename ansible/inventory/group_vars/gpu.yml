@@ -2,4 +2,4 @@ k3s_agent:
   node-label:
     - "gpu=true"
   node-taint:
-    - node-role.kubernetes.io/gpu=:NoSchedule
+    - node-role.kubernetes.io/gpu:NoSchedule
