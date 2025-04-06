@@ -23,7 +23,7 @@ spec:
               effect: NoSchedule
         provisioner:
           replicaCount: 3
-          enableHostNetwork: true
+          enableHostNetwork: false
           tolerations:
             - key: node-role.kubernetes.io/control-plane
               operator: Exists
