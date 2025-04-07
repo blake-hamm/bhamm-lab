@@ -34,14 +34,6 @@ spec:
               - "10.0.20.11:3300"
               - "10.0.20.12:3300"
               - "10.0.20.13:3300"
-        cephconf: |
-          # minimal ceph.conf for 7b02e4a9-b740-4d5a-b519-9585725a55fb
-          [global]
-            fsid = 7b02e4a9-b740-4d5a-b519-9585725a55fb
-            mon_host = [v2:10.0.20.12:3300/0,v1:10.0.20.12:6789/0] [v2:10.0.20.11:3300/0,v1:10.0.20.11:6789/0] [v2:10.0.20.13:3300/0,v1:10.0.20.13:6789/0]
-            auth_cluster_required = cephx
-            auth_service_required = cephx
-            auth_client_required = cephx
         storageClass:
           create: true
           name: csi-rbd-sc
