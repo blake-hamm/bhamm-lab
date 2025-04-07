@@ -16,18 +16,9 @@ spec:
     targetRevision: 3.13.1
     helm:
       valuesObject:
-        nodeplugin:
-          tolerations:
-            - key: node-role.kubernetes.io/control-plane
-              operator: Exists
-              effect: NoSchedule
         provisioner:
           replicaCount: 3
           enableHostNetwork: false
-          tolerations:
-            - key: node-role.kubernetes.io/control-plane
-              operator: Exists
-              effect: NoSchedule
         csiConfig:
           - clusterID: "7b02e4a9-b740-4d5a-b519-9585725a55fb"
             monitors:
