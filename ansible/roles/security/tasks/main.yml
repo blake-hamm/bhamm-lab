@@ -3,6 +3,7 @@
   ansible.builtin.include_tasks: pre.yml
 - name: Update and upgrade packages
   ansible.builtin.package:
+    allow_downgrade: true
     upgrade: true
     update_cache: true
     cache_valid_time: 86400 # One day
