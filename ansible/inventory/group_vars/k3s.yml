@@ -2,17 +2,14 @@ k3s_become: true
 k3s_etcd_datastore: true
 k3s_use_experimental: true
 k3s_server_manifests_urls:
-  # - url: https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/tigera-operator.yaml
-  #   filename: tigera-operator.yaml
   - url: https://kube-vip.io/manifests/rbac.yaml
     filename: kube-vip-rbac.yaml
+  # - url: https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/tigera-operator.yaml
+  #   filename: tigera-operator.yaml
+  # - url: https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.0/experimental-install.yaml
+    # filename: experimental-install.yaml
 k3s_server_manifests_templates:
   # - k3s/calico.yaml
   - k3s/kube-vip.yaml
   - k3s/csi-rbd-secret.yaml
   - k3s/csi-cephfs-secret.yaml
-ntp_enabled: true
-ntp_manage_config: true
-ntp_servers:
-  - time.nist.gov
-  - us.pool.ntp.org

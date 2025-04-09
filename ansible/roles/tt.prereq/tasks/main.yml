@@ -1,0 +1,69 @@
+---
+- name: Set same timezone on every Server
+  community.general.timezone:
+    name: "{{ system_timezone }}"
+  when: (system_timezone is defined) and (system_timezone != "Your/Timezone")
+
+- name: Set SELinux to disabled state
+  ansible.posix.selinux:
+    state: disabled
+  when: ansible_os_family == "RedHat"
+
+- name: Enable IPv4 forwarding
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: "1"
+    state: present
+    reload: true
+  tags: sysctl
+
+- name: Enable IPv6 forwarding
+  ansible.posix.sysctl:
+    name: net.ipv6.conf.all.forwarding
+    value: "1"
+    state: present
+    reload: true
+  tags: sysctl
+
+- name: Enable IPv6 router advertisements
+  ansible.posix.sysctl:
+    name: net.ipv6.conf.all.accept_ra
+    value: "2"
+    state: present
+    reload: true
+  tags: sysctl
+
+- name: Add br_netfilter to /etc/modules-load.d/
+  ansible.builtin.copy:
+    content: br_netfilter
+    dest: /etc/modules-load.d/br_netfilter.conf
+    mode: u=rw,g=,o=
+  when: ansible_os_family == "RedHat"
+
+- name: Load br_netfilter
+  community.general.modprobe:
+    name: br_netfilter
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Set bridge-nf-call-iptables (just to be sure)
+  ansible.posix.sysctl:
+    name: "{{ item }}"
+    value: "1"
+    state: present
+    reload: true
+  when: ansible_os_family == "RedHat"
+  loop:
+    - net.bridge.bridge-nf-call-iptables
+    - net.bridge.bridge-nf-call-ip6tables
+  tags: sysctl
+
+- name: Add /usr/local/bin to sudo secure_path
+  ansible.builtin.lineinfile:
+    line: Defaults    secure_path = {{ secure_path[ansible_os_family] }}
+    regexp: Defaults(\s)*secure_path(\s)*=
+    state: present
+    insertafter: EOF
+    path: /etc/sudoers
+    validate: visudo -cf %s
+  when: ansible_os_family in [ "RedHat", "Suse" ]

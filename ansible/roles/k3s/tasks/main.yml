@@ -44,20 +44,41 @@
       tags: [ceph]
       delegate_to: aorus
   when: k3s_node_info is failed or not nodes_match or k3s_force_deploy
-- name: Include xanmanning.k3s role
-  ansible.builtin.include_role:
-    name: xanmanning.k3s
+- name: Run Techno Tim's Ansible roles
+  block:
+    - name: Reset
+      ansible.builtin.include_role:
+        name: tt.reset
+      when: k3s_reset
+    - name: Install prereqs
+      ansible.builtin.include_role:
+        name: tt.prereq
+    - name: Download k3s binary
+      ansible.builtin.include_role:
+        name: tt.download
+    - name: Bootstrap k3s servers
+      ansible.builtin.include_role:
+        name: tt.k3s_server
+      when: "'k3s_master' in group_names"
+    - name: Start k3s agents
+      ansible.builtin.include_role:
+        name: tt.k3s_agent
+      when: "'k3s_master' not in group_names"
+    - name: Post k3s actions (cilium setup)
+      ansible.builtin.include_role:
+        name: tt.k3s_server_post
+  become: true
   when: k3s_node_info is failed or not nodes_match or k3s_force_deploy
-- name: Install cilium
-  ansible.builtin.include_tasks:
-    file: cilium.yml
-    apply:
-      run_once: true
-      delegate_to: "{{ target_master }}"
-      tags: [cilium]
-      become: true
-  when: k3s_node_info is failed or not nodes_match or k3s_force_deploy
-  tags: [cilium]
+# - name: Install cilium
+#   ansible.builtin.include_tasks:
+#     file: cilium.yml
+#     apply:
+#       run_once: true
+#       delegate_to: "{{ target_master }}"
+#       tags: [cilium]
+#       become: true
+#   when: k3s_node_info is failed or not nodes_match or k3s_force_deploy
+#   tags: [cilium]
 - name: Deploy sops secrets to k3s
   ansible.builtin.include_tasks:
     file: sops.yml

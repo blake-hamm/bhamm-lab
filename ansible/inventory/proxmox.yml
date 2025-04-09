@@ -14,9 +14,13 @@ groups:
   debian: "'debian' in (proxmox_tags_parsed|list)"
   k3s: "'k3s' in (proxmox_tags_parsed|list)"
   k3s_master: "'k3s-master' in (proxmox_tags_parsed|list)"
+  master: "'k3s-master' in (proxmox_tags_parsed|list)"
+  node: "'k3s-master' not in (proxmox_tags_parsed|list)"
   k3s_dev: "'dev' in (proxmox_tags_parsed|list)"
   k3s_prod: "'prod' in (proxmox_tags_parsed|list)"
   gpu: "'gpu' in (proxmox_tags_parsed|list)"
 compose:
   ansible_port: 4185
   ansible_host: proxmox_ipconfig0["ip"].split('/')[0]
+  ansible_hostname: proxmox_name
+  k3s_node_ip: proxmox_ipconfig0["ip"].split('/')[0]

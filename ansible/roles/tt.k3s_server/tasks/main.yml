@@ -1,0 +1,177 @@
+---
+- name: Stop k3s-init
+  ansible.builtin.systemd:
+    name: k3s-init
+    state: stopped
+  failed_when: false
+
+# k3s-init won't work if the port is already in use
+- name: Stop k3s
+  ansible.builtin.systemd:
+    name: k3s
+    state: stopped
+  failed_when: false
+
+- name: Clean previous runs of k3s-init # noqa command-instead-of-module
+  # The systemd module does not support "reset-failed", so we need to resort to command.
+  ansible.builtin.command: systemctl reset-failed k3s-init
+  failed_when: false
+  changed_when: false
+
+- name: Deploy K3s http_proxy conf
+  ansible.builtin.include_tasks: http_proxy.yml
+  when: proxy_env is defined
+
+- name: Deploy vip manifest
+  ansible.builtin.include_tasks: vip.yml
+- name: Deploy metallb manifest
+  ansible.builtin.include_tasks: metallb.yml
+  tags: metallb
+  when: kube_vip_lb_ip_range is not defined and (not cilium_bgp or cilium_iface is not defined)
+
+- name: Deploy kube-vip manifest
+  ansible.builtin.include_tasks: kube-vip.yml
+  tags: kubevip
+  when: kube_vip_lb_ip_range is defined
+
+- name: Init cluster inside the transient k3s-init service
+  ansible.builtin.command:
+    cmd: systemd-run -p RestartSec=2 -p Restart=on-failure --unit=k3s-init k3s server {{ server_init_args }}
+    creates: "{{ systemd_dir }}/k3s-init.service"
+
+- name: Verification
+  when: false
+  block:
+    - name: Verify that all nodes actually joined (check k3s-init.service if this fails)
+      ansible.builtin.command:
+        cmd: "{{ k3s_kubectl_binary | default('k3s kubectl') }} get nodes -l 'node-role.kubernetes.io/master=true' -o=jsonpath='{.items[*].metadata.name}'" # yamllint disable-line rule:line-length
+      register: nodes
+      until: nodes.rc == 0 and (nodes.stdout.split() | length) == (groups[group_name_master | default('master')] | length) # yamllint disable-line rule:line-length
+      retries: "{{ retry_count | default(20) }}"
+      delay: 30
+      changed_when: false
+  always:
+    - debug:
+        msg: "{{ nodes.stdout }}"
+    - debug:
+        msg: "{{ nodes.stdout.split() }}"
+    - name: Save logs of k3s-init.service
+      ansible.builtin.include_tasks: fetch_k3s_init_logs.yml
+      when: log_destination
+      vars:
+        log_destination: >-
+          {{ lookup('ansible.builtin.env', 'ANSIBLE_K3S_LOG_DIR', default=False) }}
+- name: Kill the temporary service used for initialization
+  ansible.builtin.systemd:
+    name: k3s-init
+    state: stopped
+  failed_when: false
+
+- name: Copy K3s service file
+  register: k3s_service
+  ansible.builtin.template:
+    src: k3s.service.j2
+    dest: "{{ systemd_dir }}/k3s.service"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable and check K3s service
+  ansible.builtin.systemd:
+    name: k3s
+    daemon_reload: true
+    state: restarted
+    enabled: true
+
+- name: Wait for node-token
+  ansible.builtin.wait_for:
+    path: /var/lib/rancher/k3s/server/node-token
+
+- name: Register node-token file access mode
+  ansible.builtin.stat:
+    path: /var/lib/rancher/k3s/server
+  register: p
+
+- name: Change file access node-token
+  ansible.builtin.file:
+    path: /var/lib/rancher/k3s/server
+    mode: g+rx,o+rx
+
+- name: Read node-token from master
+  ansible.builtin.slurp:
+    src: /var/lib/rancher/k3s/server/node-token
+  register: node_token
+
+- name: Store Master node-token
+  ansible.builtin.set_fact:
+    token: "{{ node_token.content | b64decode | regex_replace('\n', '') }}"
+
+- name: Restore node-token file access
+  ansible.builtin.file:
+    path: /var/lib/rancher/k3s/server
+    mode: "{{ p.stat.mode }}"
+
+- name: Create directory .kube
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.kube"
+    state: directory
+    owner: "{{ ansible_user_id }}"
+    mode: u=rwx,g=rx,o=
+
+- name: Copy config file to user home directory
+  ansible.builtin.copy:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: "{{ ansible_user_dir }}/.kube/config"
+    remote_src: true
+    owner: "{{ ansible_user_id }}"
+    mode: u=rw,g=,o=
+
+- name: Configure kubectl cluster to {{ endpoint_url }}
+  ansible.builtin.command: >-
+    {{ k3s_kubectl_binary | default('k3s kubectl') }} config set-cluster default
+      --server={{ endpoint_url }}
+      --kubeconfig {{ ansible_user_dir }}/.kube/config
+  changed_when: true
+  vars:
+    endpoint_url: >-
+      https://{{ apiserver_endpoint | ansible.utils.ipwrap }}:6443
+# Deactivated linter rules:
+#   - jinja[invalid]: As of version 6.6.0, ansible-lint complains that the input to ipwrap
+#                     would be undefined. This will not be the case during playbook execution.
+# noqa jinja[invalid]
+
+- name: Create kubectl symlink
+  ansible.builtin.file:
+    src: /usr/local/bin/k3s
+    dest: /usr/local/bin/kubectl
+    state: link
+  when: k3s_create_kubectl_symlink | default(true) | bool
+
+- name: Create crictl symlink
+  ansible.builtin.file:
+    src: /usr/local/bin/k3s
+    dest: /usr/local/bin/crictl
+    state: link
+  when: k3s_create_crictl_symlink | default(true) | bool
+
+- name: Get contents of manifests folder
+  ansible.builtin.find:
+    paths: /var/lib/rancher/k3s/server/manifests
+    file_type: file
+  register: k3s_server_manifests
+
+- name: Get sub dirs of manifests folder
+  ansible.builtin.find:
+    paths: /var/lib/rancher/k3s/server/manifests
+    file_type: directory
+  register: k3s_server_manifests_directories
+
+- name: Remove manifests and folders that are only needed for bootstrapping cluster so k3s doesn't auto apply on start
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items:
+    - "{{ k3s_server_manifests.files }}"
+    - "{{ k3s_server_manifests_directories.files }}"
+  loop_control:
+    label: "{{ item.path }}"

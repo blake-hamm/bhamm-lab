@@ -1,0 +1,135 @@
+---
+argument_specs:
+  main:
+    short_description: Setup k3s servers
+    options:
+      apiserver_endpoint:
+        description: Virtual ip-address configured on each master
+        required: true
+
+      cilium_bgp:
+        description:
+          - Enable cilium BGP control plane for LB services and pod cidrs.
+          - Disables the use of MetalLB.
+        type: bool
+        default: ~
+
+      cilium_iface:
+        description: The network interface used for when Cilium is enabled
+        default: ~
+
+      extra_server_args:
+        description: Extra arguments for server nodes
+        default: ""
+
+      group_name_master:
+        description: Name of the master group
+        default: master
+
+      k3s_create_kubectl_symlink:
+        description: Create the kubectl -> k3s symlink
+        default: false
+        type: bool
+
+      k3s_create_crictl_symlink:
+        description: Create the crictl -> k3s symlink
+        default: false
+        type: bool
+
+      kube_vip_arp:
+        description: Enables kube-vip ARP broadcasts
+        default: true
+        type: bool
+
+      kube_vip_bgp:
+        description: Enables kube-vip BGP peering
+        default: false
+        type: bool
+
+      kube_vip_bgp_routerid:
+        description: Defines the router ID for the kube-vip BGP server
+        default: "127.0.0.1"
+
+      kube_vip_bgp_as:
+        description: Defines the AS for the kube-vip BGP server
+        default: "64513"
+
+      kube_vip_bgp_peeraddress:
+        description: Defines the address for the kube-vip BGP peer
+        default: "192.168.30.1"
+
+      kube_vip_bgp_peeras:
+        description: Defines the AS for the kube-vip BGP peer
+        default: "64512"
+
+      kube_vip_bgp_peers:
+        description: List of BGP peer ASN & address pairs
+        default: []
+
+      kube_vip_bgp_peers_groups:
+        description: Inventory group in which to search for additional kube_vip_bgp_peers parameters to merge.
+        default: ['k3s_master']
+
+      kube_vip_iface:
+        description:
+          - Explicitly define an interface that ALL control nodes
+          - should use to propagate the VIP, define it here.
+          - Otherwise, kube-vip will determine the right interface
+          - automatically at runtime.
+        default: ~
+
+      kube_vip_tag_version:
+        description: Image tag for kube-vip
+        default: v0.7.2
+
+      kube_vip_cloud_provider_tag_version:
+        description: Tag for kube-vip-cloud-provider manifest when enabled
+        default: main
+
+      kube_vip_lb_ip_range:
+        description: IP range for kube-vip load balancer
+        default: ~
+
+      metal_lb_controller_tag_version:
+        description: Image tag for MetalLB
+        default: v0.14.3
+
+      metal_lb_speaker_tag_version:
+        description: Image tag for MetalLB
+        default: v0.14.3
+
+      metal_lb_type:
+        choices:
+          - frr
+          - native
+        default: native
+        description: Use FRR mode or native. Valid values are `frr` and `native`
+
+      proxy_env:
+        type: dict
+        description:
+          - Internet proxy configurations.
+          - See https://docs.k3s.io/advanced#configuring-an-http-proxy for details
+        default: ~
+        options:
+          HTTP_PROXY:
+            description: HTTP internet proxy
+            required: true
+          HTTPS_PROXY:
+            description: HTTPS internet proxy
+            required: true
+          NO_PROXY:
+            description: Addresses that will not use the proxies
+            required: true
+
+      retry_count:
+        description: Amount of retries when verifying that nodes joined
+        type: int
+        default: 20
+
+      server_init_args:
+        description: Arguments for server nodes
+
+      systemd_dir:
+        description: Path to systemd services
+        default: /etc/systemd/system

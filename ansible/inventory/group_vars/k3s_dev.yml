@@ -1,10 +1,13 @@
 k3s_server:
+  listen-port: 6443
   tls-san: 10.0.30.130
   cluster-cidr: 10.131.0.0/16
   service-cidr: 10.132.0.0/16
   cluster-dns: 10.132.0.10
   flannel-backend: none
   disable-network-policy: true
+  disable-kube-proxy: true
+  disable-cloud-controller: true
   disable:
     - traefik
     - local-storage
@@ -21,3 +24,48 @@ k3s_server:
     - node-status-update-frequency=5s
   node-taint:
     - node-role.kubernetes.io/control-plane:NoSchedule
+
+####
+# techno time vars
+k3s_reset: true
+k3s_version: v1.30.2+k3s2
+system_timezone: America/Denver
+cilium_iface: eth0
+cilium_bgp: false
+cilium_mode: native
+cilium_tag: v1.16.0
+cilium_hubble: true
+cluster_cidr: 10.130.0.0/16
+kube_vip_arp: true
+apiserver_endpoint: 10.0.30.130
+k3s_token: some-SUPER-DEDEUPER-secret-password
+k3s_master_taint: true
+extra_args: >-
+  --node-ip={{ k3s_node_ip }}
+extra_server_args: >-
+  {{ extra_args }}
+  --cluster-cidr={{ cluster_cidr }}
+  --tls-san {{ apiserver_endpoint }}
+  --node-taint node-role.kubernetes.io/control-plane=true:NoSchedule
+  --flannel-backend=none
+  --disable-network-policy
+  --disable-kube-proxy
+  --disable-cloud-controller
+  --disable servicelb
+  --disable traefik
+  --disable local-storage
+  --kube-apiserver-arg default-not-ready-toleration-seconds=30
+  --kube-apiserver-arg default-unreachable-toleration-seconds=30
+  --kube-controller-manager-arg node-monitor-period=20s
+  --kube-controller-manager-arg node-monitor-grace-period=20s
+  --kube-controller-manager-arg enable-dynamic-provisioning=true
+  --kube-controller-manager-arg attach-detach-reconcile-sync-period=10s
+  --kubelet-arg node-status-update-frequency=10s
+extra_agent_args: >-
+  {{ extra_args }}
+kube_vip_tag_version: v0.8.2
+metal_lb_type: native
+metal_lb_mode: layer2
+metal_lb_speaker_tag_version: v0.14.8
+metal_lb_controller_tag_version: v0.14.8
+metal_lb_ip_range: 10.0.30.131-10.0.30.139
