@@ -34,7 +34,7 @@ spec:
           pool: kubernetes
           mountOptions:
             - discard
-          mounter: krbd
+          mounter: rbd-nbd
         configMapName: ceph-rbd-csi-config
         cephConfConfigMapName: ceph-rbd-config
         kmsConfigMapName: ceph-rbd-csi-encryption-kms-config
