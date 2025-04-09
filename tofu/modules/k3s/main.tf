@@ -67,7 +67,7 @@ resource "proxmox_virtual_environment_vm" "k3s_master" {
   disk {
     datastore_id = var.vm_disk_datastore_id
     interface    = "scsi0"
-    size         = var.disk_size
+    size         = var.disk_size_master
   }
 }
 
@@ -150,7 +150,7 @@ resource "proxmox_virtual_environment_vm" "k3s_worker" {
   disk {
     datastore_id = var.vm_disk_datastore_id
     interface    = "scsi0"
-    size         = var.disk_size
+    size         = var.disk_size_worker
   }
 }
 
@@ -225,7 +225,7 @@ resource "proxmox_virtual_environment_vm" "k3s_gpu_worker" {
   disk {
     datastore_id = var.vm_disk_datastore_id
     interface    = "scsi0"
-    size         = 150 # Requires more space
+    size         = var.disk_size_gpu
   }
 
   hostpci {

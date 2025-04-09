@@ -198,8 +198,20 @@ variable "memory_base_worker" {
   type        = number
 }
 
-variable "disk_size" {
+variable "disk_size_master" {
   description = "Disk size in GB"
   type        = number
-  default     = 50
+  default     = 75
+}
+
+variable "disk_size_worker" {
+  description = "Disk size in GB"
+  type        = number
+  default     = 100
+}
+
+variable "disk_size_gpu" {
+  description = "Disk size in GB"
+  type        = number
+  default     = 150
 }
