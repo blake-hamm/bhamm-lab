@@ -1,5 +1,6 @@
 k3s_server:
   tls-san: 10.0.30.130
+  listen-port: 6443
   cluster-cidr: 10.131.0.0/16
   service-cidr: 10.132.0.0/16
   cluster-dns: 10.132.0.10
@@ -20,4 +21,4 @@ k3s_server:
   kubelet-arg:
     - node-status-update-frequency=5s
   node-taint:
-    - node-role.kubernetes.io/control-plane:NoSchedule
+    - node-role.kubernetes.io/control-plane=true:NoSchedule
