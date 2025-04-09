@@ -18,7 +18,7 @@ spec:
       valuesObject:
         provisioner:
           replicaCount: 3
-          enableHostNetwork: false
+          enableHostNetwork: false # Try changing
         csiConfig:
           - clusterID: "7b02e4a9-b740-4d5a-b519-9585725a55fb"
             monitors:
@@ -35,6 +35,7 @@ spec:
           mountOptions:
             - discard
           tryOtherMounters: true
+          mounter: kernel
         configMapName: ceph-rbd-csi-config
         cephConfConfigMapName: ceph-rbd-config
         kmsConfigMapName: ceph-rbd-csi-encryption-kms-config
