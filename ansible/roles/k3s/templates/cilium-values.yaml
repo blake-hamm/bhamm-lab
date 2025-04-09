@@ -1,0 +1,34 @@
+k8sServiceHost: '{{ k3s_server["tls-san"] }}'
+k8sServicePort: '{{ k3s_server["listen-port"] }}'
+kubeProxyReplacement: true
+ipam:
+  operator:
+    clusterPoolIPv4PodCIDRList: '{{ k3s_server["cluster-cidr"] }}'
+# l2announcements:
+#   enabled: true
+# externalIPs:
+#   enabled: true
+k8sClientRateLimit:
+  qps: 50
+  burst: 200
+operator:
+  replicas: 1
+  rollOutPods: true
+  rollOutCiliumPods: true
+# gatewayAPI:
+#   enabled: true
+# envoy:
+#   enabled: true
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+  ui:
+    enabled: true
+prometheus:
+  enabled: true
+# securityContext:
+#   capabilities:
+#     keepCapNetBindService: true
+debug:
+  enabled: true

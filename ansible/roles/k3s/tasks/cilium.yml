@@ -25,9 +25,16 @@
   register: cilium_status_check
   ignore_errors: true
   changed_when: false
+- name: Template cilium-values.yaml
+  ansible.builtin.template:
+    src: cilium-values.yaml
+    dest: /tmp/cilium-values.yaml
+    mode: '0600'
+  when: cilium_status_check is failed
+  register: templated_values
 - name: Install Cilium CNI (only if not healthy)
   ansible.builtin.command:
-    cmd: cilium install --version {{ k3s_cilium_version }} --set=ipam.operator.clusterPoolIPv4PodCIDRList="{{ k3s_server['cluster-cidr'] }}"
+    cmd: cilium install --values /tmp/cilium-values.yaml
   environment:
     KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
   when: cilium_status_check is failed
