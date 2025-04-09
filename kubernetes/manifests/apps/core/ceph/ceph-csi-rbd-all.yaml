@@ -18,7 +18,7 @@ spec:
       valuesObject:
         provisioner:
           replicaCount: 3
-          enableHostNetwork: false # Try changing
+          enableHostNetwork: true
         csiConfig:
           - clusterID: "7b02e4a9-b740-4d5a-b519-9585725a55fb"
             monitors:
