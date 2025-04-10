@@ -31,3 +31,5 @@ provider "helm" {
 provider "kubernetes" {
   config_path = "${path.module}/result/kube-config.yaml"
 }
+
+provider "sops" {}

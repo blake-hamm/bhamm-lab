@@ -1,6 +1,6 @@
 resource "helm_release" "argocd" {
   depends_on = [
-    local_file.kube_config
+    kubernetes_secret.this
   ]
   name             = "argocd"
   repository       = "https://argoproj.github.io/argo-helm"
@@ -16,6 +16,8 @@ resource "helm_release" "argocd" {
 }
 
 resource "kubernetes_manifest" "core" {
+  depends_on = [helm_release.argocd]
+
   manifest = {
     apiVersion = "argoproj.io/v1alpha1"
     kind       = "Application"
@@ -47,6 +49,4 @@ resource "kubernetes_manifest" "core" {
       }
     }
   }
-
-  depends_on = [helm_release.argocd]
 }

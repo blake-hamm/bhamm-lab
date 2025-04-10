@@ -21,5 +21,9 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "2.36.0"
     }
+    sops = {
+      source  = "carlpett/sops"
+      version = "1.2.0"
+    }
   }
 }
