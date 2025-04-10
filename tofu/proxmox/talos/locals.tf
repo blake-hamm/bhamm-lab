@@ -11,6 +11,10 @@ locals {
       ip           = format(var.master_ip_format, idx)
       machine_type = "controlplane"
       host_node    = var.proxmox_nodes[idx].name
+      vm_id        = var.master_vm_id_start + idx
+      cpu          = var.cpu_cores_master
+      disk_size    = var.disk_size_master
+      memory       = floor(var.memory_base_master * var.proxmox_nodes[idx].multiplier)
     }
   ]
 
@@ -20,6 +24,10 @@ locals {
       ip           = format(var.worker_ip_format, idx)
       machine_type = "worker"
       host_node    = var.proxmox_nodes[idx].name
+      vm_id        = var.worker_vm_id_start + idx
+      cpu          = var.cpu_cores_worker
+      disk_size    = var.disk_size_worker
+      memory       = floor(var.memory_base_worker * var.proxmox_nodes[idx].multiplier)
     }
   ]
 

@@ -104,6 +104,12 @@ variable "network_trunks" {
   default     = "1;20;30"
 }
 
+variable "mtu" {
+  description = "MTU of network"
+  type        = number
+  default     = 9000
+}
+
 variable "vm_datastore_id" {
   description = "Datastore ID for vm's in Proxmox"
   type        = string
@@ -131,7 +137,7 @@ variable "cpu_cores_master" {
 variable "cpu_cores_worker" {
   description = "Number of CPU cores for worker nodes"
   type        = number
-  default     = 2
+  default     = 4
 }
 
 variable "memory_base_master" {
