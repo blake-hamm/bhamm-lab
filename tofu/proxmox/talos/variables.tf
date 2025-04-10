@@ -175,3 +175,8 @@ variable "extra_manifests" {
   type        = list(string)
   default     = []
 }
+
+variable "branch_name" {
+  description = "Gitops branch to deploy"
+  type        = string
+}

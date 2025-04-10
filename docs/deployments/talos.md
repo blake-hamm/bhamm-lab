@@ -12,7 +12,7 @@ To deploy talos run these commands:
 tofu -chdir=tofu/proxmox/talos init
 tofu -chdir=tofu/proxmox/talos workspace select -or-create=true dev
 tofu -chdir=tofu/proxmox/talos plan -var-file=dev.tfvars
-tofu -chdir=tofu/proxmox/talos apply -var-file=dev.tfvars -parallelism=1 -auto-approve
+tofu -chdir=tofu/proxmox/talos apply -var-file=dev.tfvars -auto-approve -var='branch_name=feature/talos'
 
 # To destroy
 tofu -chdir=tofu/proxmox/talos destroy -var-file=dev.tfvars -auto-approve
