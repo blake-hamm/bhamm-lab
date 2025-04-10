@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ceph-csi-rbd
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+spec:
+  destination:
+    namespace: ceph
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: ceph-csi-rbd
+    repoURL: https://ceph.github.io/csi-charts
+    targetRevision: 3.13.0
+    helm:
+      valuesObject:
+        provisioner:
+          replicaCount: 3
+        csiConfig:
+          - clusterID: "7b02e4a9-b740-4d5a-b519-9585725a55fb"
+            monitors:
+              - "10.0.20.11:3300"
+              - "10.0.20.12:3300"
+              - "10.0.20.13:3300"
+        storageClass:
+          create: true
+          name: csi-rbd-sc
+          annotations:
+            storageclass.kubernetes.io/is-default-class: "true"
+          clusterID: "7b02e4a9-b740-4d5a-b519-9585725a55fb"
+          pool: kubernetes
+          mountOptions:
+            - discard
+          provisionerSecret: csi-rbd-secret
+          controllerExpandSecret: csi-rbd-secret
+          nodeStageSecret: csi-rbd-secret
+        configMapName: ceph-rbd-csi-config
+        cephConfConfigMapName: ceph-rbd-config
+        kmsConfigMapName: ceph-rbd-csi-encryption-kms-config
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
