@@ -1,6 +1,4 @@
 kubeProxyReplacement: true
-# Talos specific
-# https://www.talos.dev/latest/kubernetes-guides/configuration/kubeprism/
 k8sServiceHost: localhost
 k8sServicePort: 7445
 securityContext:
@@ -11,6 +9,26 @@ cgroup:
   autoMount:
     enabled: false
   hostRoot: /sys/fs/cgroup
-# https://docs.cilium.io/en/stable/network/concepts/ipam/
 ipam:
   mode: kubernetes
+envoy:
+  enabled: true
+  securityContext:
+    capabilities:
+      keepCapNetBindService: true
+      envoy: [NET_ADMIN, PERFMON, BPF]
+k8sClientRateLimit:
+  qps: 20
+  burst: 100
+l2announcements:
+  enabled: true
+externalIPs:
+  enabled: true
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+    rollOutPods: true
+  ui:
+    enabled: true
+    rollOutPods: true
