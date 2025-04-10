@@ -8,13 +8,14 @@
   roles:
     - security
     - grafana.grafana.alloy
+    - network
   tags: [security]
   become: true
-- name: Configure debian bare metal machines
-  hosts: debian_bare_metal
-  roles:
-    - network
-  tags: [network]
+# - name: Configure debian bare metal machines
+# hosts: debian_bare_metal
+# roles:
+# - network
+# tags: [network]
 # - name: Configure Storage/NFS server 'aorus'
 #   hosts: aorus
 #   become: true

@@ -4,6 +4,7 @@
     dest: /etc/network/interfaces.bak
     remote_src: true
     mode: "644"
+  when: "'debian_bare_metal' in group_names"
 - name: Install ifupdown2, bridge-utils and vlan
   ansible.builtin.package:
     name:
@@ -12,6 +13,7 @@
       - iperf3
       - iputils-tracepath
       - ethtool
+      - netcat-openbsd
     state: present
 - name: Ensure 8021q kernel module is loaded
   community.general.modprobe:

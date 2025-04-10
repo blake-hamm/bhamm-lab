@@ -11,6 +11,7 @@
     mode: "644"
   become: true
   notify: Restart network
+  when: "'debian_bare_metal' in group_names"
 - name: Setup network interface
   ansible.builtin.template:
     src: "network/{{ inventory_hostname }}.j2"
@@ -18,6 +19,7 @@
     mode: "644"
   become: true
   notify: Restart network
+  when: "'debian_bare_metal' in group_names"
 - name: Remove unwanted nameserver line (192.168.69.1)
   ansible.builtin.lineinfile:
     path: /etc/resolv.conf
@@ -25,6 +27,7 @@
     state: absent
   become: true
   notify: Restart network
+  when: "'debian_bare_metal' in group_names"
 - name: Ensure /etc/resolv.conf is updated with the correct nameservers
   ansible.builtin.lineinfile:
     path: /etc/resolv.conf
@@ -33,8 +36,10 @@
   with_items: "{{ network_nameservers }}"
   become: true
   notify: Restart network
+  when: "'debian_bare_metal' in group_names"
 - name: Optimize 10g nics
   ansible.builtin.include_tasks:
     file: nic.yml
     apply:
       become: true
+  when: "'debian_bare_metal' in group_names"
