@@ -57,7 +57,6 @@
         force: true
       retries: 3
       delay: 30
-      failed_when: false
     - name: Wait for server
       kubernetes.core.k8s_info:
         kubeconfig: /etc/rancher/k3s/k3s.yaml
