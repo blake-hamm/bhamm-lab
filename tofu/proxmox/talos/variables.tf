@@ -164,8 +164,17 @@ variable "disk_size_worker" {
   default     = 100
 }
 
-variable "cluster_endpoint" {
+variable "vip" {
   description = "VIP endpoint for cluster"
   type        = string
-  default     = "https://10.0.30.130:6443"
+  default     = "10.0.30.130"
+}
+
+variable "extra_manifests" {
+  description = "Extra kubernetes manifests to deploy."
+  type        = list(string)
+  default = [
+    "https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.1/standard-install.yaml",
+    "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.2.1/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml"
+  ]
 }

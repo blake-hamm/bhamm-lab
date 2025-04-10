@@ -2,7 +2,6 @@ locals {
   # Gather metadata to download talos image
   schematic    = file("${path.module}/config/schematic.yaml")
   schematic_id = jsondecode(data.http.schematic_id.response_body)["id"]
-  image_id     = "${local.schematic_id}_${var.talos_version}"
 
   # Talos vm config
   master_nodes = [
@@ -15,6 +14,7 @@ locals {
       cpu          = var.cpu_cores_master
       disk_size    = var.disk_size_master
       memory       = floor(var.memory_base_master * var.proxmox_nodes[idx].multiplier)
+      vip          = var.vip
     }
   ]
 
@@ -28,6 +28,7 @@ locals {
       cpu          = var.cpu_cores_worker
       disk_size    = var.disk_size_worker
       memory       = floor(var.memory_base_worker * var.proxmox_nodes[idx].multiplier)
+      vip          = null
     }
   ]
 
@@ -35,6 +36,8 @@ locals {
     for node in concat(local.master_nodes, local.worker_nodes) :
     node.hostname => node
   }
+
+  cluster_endpoint = [for node in local.master_nodes : node.ip][0]
 
   # Cilium config files
   cilium_values  = file("${path.module}/config/cilium-values.yaml")
