@@ -173,8 +173,5 @@ variable "vip" {
 variable "extra_manifests" {
   description = "Extra kubernetes manifests to deploy."
   type        = list(string)
-  default = [
-    "https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.1/standard-install.yaml",
-    "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.2.1/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml"
-  ]
+  default     = []
 }
