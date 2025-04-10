@@ -1,9 +1,16 @@
 k8sServiceHost: '{{ k3s_server["tls-san"] }}'
 k8sServicePort: '{{ k3s_server["listen-port"] }}'
 kubeProxyReplacement: true
+mtu: 9000
 ipam:
+  mode: cluster-pool
   operator:
-    clusterPoolIPv4PodCIDRList: '{{ k3s_server["cluster-cidr"] }}'
+    clusterPoolIPv4PodCIDRList:
+      - '{{ k3s_server["cluster-cidr"] }}'
+      - '{{ k3s_server["service-cidr"] }}'
+bpf:
+  vlanBypass: [1, 20, 30]
+routingMode: tunnel
 # l2announcements:
 #   enabled: true
 # externalIPs:
@@ -17,8 +24,8 @@ operator:
   rollOutCiliumPods: true
 # gatewayAPI:
 #   enabled: true
-# envoy:
-#   enabled: true
+envoy:
+  enabled: true
 hubble:
   enabled: true
   relay:
@@ -31,4 +38,4 @@ prometheus:
 #   capabilities:
 #     keepCapNetBindService: true
 debug:
-  enabled: true
+  enabled: false
