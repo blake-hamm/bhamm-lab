@@ -157,3 +157,9 @@ variable "disk_size_worker" {
   type        = number
   default     = 100
 }
+
+variable "cluster_endpoint" {
+  description = "VIP endpoint for cluster"
+  type        = string
+  default     = "https://10.0.30.130:6443"
+}
