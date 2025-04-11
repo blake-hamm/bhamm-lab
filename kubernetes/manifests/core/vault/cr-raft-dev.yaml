@@ -39,7 +39,7 @@ spec:
   volumeMounts:
     - name: vault-raft
       mountPath: /vault/file
-  veleroEnabled: true
+  veleroEnabled: false
   caNamespaces: ["*"]
   unsealConfig:
     options:
