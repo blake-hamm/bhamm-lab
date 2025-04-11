@@ -17,3 +17,9 @@ tofu -chdir=tofu/proxmox/talos apply -var-file=dev.tfvars -auto-approve -var='br
 # To destroy
 tofu -chdir=tofu/proxmox/talos destroy -var-file=dev.tfvars -auto-approve
 ```
+
+```bash
+export KUBECONFIG=./tofu/proxmox/talos/result/kube-config.yaml
+kubectl config set-context --current --namespace=argocd
+argocd app get apps-dev --refresh
+```
