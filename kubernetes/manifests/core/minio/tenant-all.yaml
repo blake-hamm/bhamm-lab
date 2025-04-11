@@ -29,7 +29,7 @@ spec:
             - servers: 2
               name: main
               volumesPerServer: 2
-              size: 50Gi
+              size: 20Gi
           metrics:
             enabled: true
             port: 9000
