@@ -120,7 +120,7 @@ spec:
             ttl: 1h
           - name: sops
             bound_service_account_names: "sops-vault-sync-sa"
-            bound_service_account_namespaces: "vault"
+            bound_service_account_namespaces: "argo-events"
             policies: allow_secrets
             ttl: 1h
           - name: prometheus
