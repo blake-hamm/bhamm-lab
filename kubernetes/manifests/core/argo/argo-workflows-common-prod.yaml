@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argo-workflows-common
+  namespace: argocd
+spec:
+  destination:
+    namespace: argo-workflows
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    targetRevision: main
+    path: kubernetes/charts/common
+    helm:
+      valuesObject:
+        name: argo-workflows
+        externalSecrets:
+          enabled: true
+          secrets:
+            - secretKey: client-id
+              remoteRef:
+                key: /core/argo-workflows
+                property: oidc_client_id
+            - secretKey: client-secret
+              remoteRef:
+                key: /core/argo-workflows
+                property: oidc_client_secret
+        ingressRoutes:
+          - enabled: true
+            name: argo-workflows
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - kind: Rule
+                match: Host(`argoworkflows.bhamm-lab.com`)
+                services:
+                  - name: argo-workflows-server
+                    scheme: http
+                    port: 2746
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

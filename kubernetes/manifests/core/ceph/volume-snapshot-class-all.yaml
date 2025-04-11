@@ -1,0 +1,17 @@
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotClass
+metadata:
+  name: ceph-snapclass
+  namespace: ceph
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    snapshot.storage.kubernetes.io/is-default-class: "true"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    velero.io/csi-volumesnapshot-class: "true"
+driver: rbd.csi.ceph.com
+deletionPolicy: Delete
+parameters:
+  clusterID: 7b02e4a9-b740-4d5a-b519-9585725a55fb
+  csi.storage.k8s.io/snapshotter-secret-name: csi-rbd-secret
+  csi.storage.k8s.io/snapshotter-secret-namespace: ceph

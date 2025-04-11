@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: lldap-common
+  namespace: argocd
+spec:
+  destination:
+    namespace: lldap
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    targetRevision: main
+    path: kubernetes/charts/common
+    helm:
+      valuesObject:
+        name: lldap
+        externalSecrets:
+          enabled: true
+          secrets:
+            - secretKey: lldap-ldap-user-name
+              remoteRef:
+                key: /core/lldap
+                property: lldap-ldap-user-name
+            - secretKey: lldap-ldap-user-pass
+              remoteRef:
+                key: /core/lldap
+                property: lldap-ldap-user-pass
+            - secretKey: lldap-jwt-secret
+              remoteRef:
+                key: /core/lldap
+                property: lldap-jwt-secret
+            - secretKey: base-dn
+              remoteRef:
+                key: /core/lldap
+                property: base-dn
+            - secretKey: group-configs
+              remoteRef:
+                key: /core/lldap
+                property: group-configs
+            - secretKey: user-configs
+              remoteRef:
+                key: /core/lldap
+                property: user-configs
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

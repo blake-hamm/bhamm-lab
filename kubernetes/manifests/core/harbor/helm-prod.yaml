@@ -1,0 +1,102 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: harbor
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+spec:
+  destination:
+    namespace: harbor
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: harbor
+    repoURL: https://helm.goharbor.io
+    targetRevision: v1.16.2
+    helm:
+      valuesObject:
+        expose:
+          type: clusterIP
+          tls:
+            enabled: false
+          clusterIP:
+            name: harbor
+        externalURL: https://harbor.bhamm-lab.com
+        persistence:
+          enabled: true
+          imageChartStorage:
+            disableredirect: true
+            type: s3
+            s3:
+              existingSecret: "harbor-external-secret"
+              region: us-east-1
+              bucket: harbor-data
+              regionendpoint: https://minio-api.bhamm-lab.com
+              #encrypt: false
+              #keyid: mykeyid
+              #secure: true
+              #skipverify: false
+              #v4auth: true
+              #chunksize: "5242880"
+              #rootdirectory: /s3/object/name/prefix
+              #storageclass: STANDARD
+              #multipartcopychunksize: "33554432"
+              #multipartcopymaxconcurrency: 100
+              #multipartcopythresholdsize: "33554432"
+        existingSecretAdminPassword: "harbor-external-secret"
+        existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
+        ipFamily:
+          ipv6:
+            enabled: false
+        enableMigrateHelmHook: false
+        metrics:
+          enabled: false
+          serviceMonitor:
+            enabled: false
+            additionalLabels: {}
+        cache:
+          enabled: true
+          expireHours: 24
+        trivy:
+          enabled: true
+          # gitHubToken the GitHub access token to download Trivy DB
+          #
+          # Trivy DB contains vulnerability information from NVD, Red Hat, and many other upstream vulnerability databases.
+          # It is downloaded by Trivy from the GitHub release page https://github.com/aquasecurity/trivy-db/releases and cached
+          # in the local file system (`/home/scanner/.cache/trivy/db/trivy.db`). In addition, the database contains the update
+          # timestamp so Trivy can detect whether it should download a newer version from the Internet or use the cached one.
+          # Currently, the database is updated every 12 hours and published as a new release to GitHub.
+          #
+          # Anonymous downloads from GitHub are subject to the limit of 60 requests per hour. Normally such rate limit is enough
+          # for production operations. If, for any reason, it's not enough, you could increase the rate limit to 5000
+          # requests per hour by specifying the GitHub access token. For more details on GitHub rate limiting please consult
+          # https://developer.github.com/v3/#rate-limiting
+          #
+          # You can create a GitHub token by following the instructions in
+          # https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line
+          gitHubToken: ""
+          # skipUpdate the flag to disable Trivy DB downloads from GitHub
+          #
+          # You might want to set the value of this flag to `true` in test or CI/CD environments to avoid GitHub rate limiting issues.
+          # If the value is set to `true` you have to manually download the `trivy.db` file and mount it in the
+          # `/home/scanner/.cache/trivy/db/trivy.db` path.
+          skipUpdate: false
+        database:
+          type: external
+          external:
+            host: "harbor-postgresql-rw"
+            port: "5432"
+            username: "harbor"
+            coreDatabase: "harbor"
+            existingSecret: "harbor-postgresql-app"
+            sslmode: "disable"
+        redis:
+          type: internal
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

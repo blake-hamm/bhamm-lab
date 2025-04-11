@@ -1,0 +1,76 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argo-workflows
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+spec:
+  destination:
+    namespace: argo-workflows
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: argo-workflows
+    repoURL: https://argoproj.github.io/argo-helm
+    targetRevision: 0.42.5
+    helm:
+      valuesObject:
+        workflow:
+          serviceAccount:
+            create: true
+        controller:
+          metricsConfig:
+            enabled: false
+          telemetryConfig:
+            enabled: false
+          logging:
+            level: info
+          workflowDefaults:
+            spec:
+              serviceAccountName: argo-workflow
+        # server:
+        #   authModes:
+        #     - sso
+        #   sso:
+        #     enabled: true
+        #     issuer: https://auth.bhamm-lab.com
+        #     clientId:
+        #       name: argo-workflows-external-secret
+        #       key: client-id
+        #     clientSecret:
+        #       name: argo-workflows-external-secret
+        #       key: client-secret
+        #     redirectUrl: "https://argoworkflows.bhamm-lab.com/oauth2/callback"
+        #     rbac:
+        #       enabled: false
+        #       secretWhitelist: []
+        #     scopes:
+        #       - 'openid'
+        #       - 'groups'
+        #       - 'email'
+        #       - 'profile'
+        #     sessionExpiry: ""
+        #     issuerAlias: ""
+        #     customGroupClaimName: ""
+        #     userInfoPath: ""
+        #     insecureSkipVerify: false
+        #     filterGroupsRegex:
+        artifactRepository:
+          s3:
+            endpoint: minio.minio:443
+            bucket: argo-artifacts
+            accessKeySecret:
+              name: argo-workflows-external-secret
+              key: accessKeySecret
+            secretKeySecret:
+              name: argo-workflows-external-secret
+              key: secretKeySecret
+            insecure: true
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
