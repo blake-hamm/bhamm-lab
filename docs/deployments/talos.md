@@ -9,10 +9,18 @@ When deploying talos, we leverage open tofu which orchestates the following step
 
 To deploy talos run these commands:
 ```bash
+# First deploy vm's and bootstrap the cluster
 tofu -chdir=tofu/proxmox/talos init
 tofu -chdir=tofu/proxmox/talos workspace select -or-create=true dev
 tofu -chdir=tofu/proxmox/talos plan -var-file=dev.tfvars
-tofu -chdir=tofu/proxmox/talos apply -var-file=dev.tfvars -auto-approve -var='branch_name=feature/talos'
+tofu -chdir=tofu/proxmox/talos apply -var-file=dev.tfvars -auto-approve
+
+# Then deploy the minimum required for kubernetes
+export KUBE_CONFIG_PATH=../../tofu/proxmox/talos/result/kube-config.yaml
+tofu -chdir=tofu/kubernetes init
+tofu -chdir=tofu/kubernetes workspace select -or-create=true dev
+tofu -chdir=tofu/kubernetes plan -var 'environment=dev' -var 'branch_name=feature/talos'
+tofu -chdir=tofu/kubernetes apply -var 'environment=dev' -var 'branch_name=feature/talos' -auto-approve
 
 # To destroy
 tofu -chdir=tofu/proxmox/talos destroy -var-file=dev.tfvars -auto-approve

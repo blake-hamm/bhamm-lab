@@ -1,13 +1,9 @@
 
 data "sops_file" "this" {
-  source_file = "../../../secrets.enc.json"
+  source_file = "../../secrets.enc.json"
 }
 
 locals {
-  depends_on = [
-    local_file.kube_config,
-    data.sops_file.this
-  ]
   secret_structure = jsondecode(nonsensitive(data.sops_file.this.raw)).init
   namespaces       = keys(local.secret_structure) # Extract namespace names
   secrets_map = merge([
