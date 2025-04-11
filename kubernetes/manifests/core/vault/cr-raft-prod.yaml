@@ -110,7 +110,7 @@ spec:
             ttl: 1h
           - name: prometheus
             bound_service_account_names: monitor-kube-prometheus-st-prometheus
-            bound_service_account_namespaces: default
+            bound_service_account_namespaces: monitor
             policies: prometheus-operator
             ttl: 4h
       - type: approle
