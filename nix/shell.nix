@@ -28,6 +28,7 @@ pkgs.mkShell {
     cilium-cli
     hubble
     talosctl
+    uv
   ];
 
   packages = [
