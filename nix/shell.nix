@@ -1,5 +1,4 @@
 { pkgs }:
-
 pkgs.mkShell {
   buildInputs = with pkgs; [
     pre-commit
@@ -29,6 +28,7 @@ pkgs.mkShell {
     hubble
     talosctl
     uv
+    ceph-client
   ];
 
   packages = [
