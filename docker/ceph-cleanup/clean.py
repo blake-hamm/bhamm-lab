@@ -234,6 +234,14 @@ def main():
     k8s_volumes = get_k8s_volumes()
     k8s_snapshots = get_k8s_snapshots()
 
+    # Protect current snapshots
+    for snap_id in k8s_snapshots:
+      results = run_ceph_command(
+        ["snap", "protect", f"{CEPH_POOL}/{snap_id}@{snap_id}"],
+        json_output=False,
+        rbd=True
+      )
+
     # Get all Ceph images
     ceph_images = get_ceph_images()
 
