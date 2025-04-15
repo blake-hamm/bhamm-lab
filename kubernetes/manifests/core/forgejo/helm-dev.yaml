@@ -11,8 +11,8 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    chart: forgejo-helm/forgejo
-    repoURL: oci://code.forgejo.org
+    chart: forgejo
+    repoURL: code.forgejo.org/forgejo-helm/forgejo/
     targetRevision: 11.0.5
     helm:
       valuesObject:
