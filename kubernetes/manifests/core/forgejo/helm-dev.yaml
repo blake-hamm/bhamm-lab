@@ -35,7 +35,7 @@ spec:
           oauth:
             - name: 'authelia'
               provider: 'openidConnect'
-              existingSecret: 'gitea-external-secret'
+              existingSecret: 'git-external-secret'
               autoDiscoverUrl: https://auth.dev.bhamm-lab.com/.well-known/openid-configuration
               adminGroup: "lldap_admin"
           config:
