@@ -14,7 +14,9 @@
   hosts: debian_bare_metal
   roles:
     - network
-  tags: [network]
+    - mrlesmithjr.zfs
+  become: true
+  tags: [network, storage]
 # - name: Configure Storage/NFS server 'aorus'
 #   hosts: aorus
 #   become: true

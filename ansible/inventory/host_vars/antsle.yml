@@ -2,5 +2,17 @@ network_10gb_nics: [eno3, eno4]
 network_nameservers:
   - 10.0.20.1
 # Ceph config for proxmox
-# proxmox_reset_ceph: true
 ceph_device: /dev/nvme0n1
+# zfs config
+zfs_create_pools: true
+zfs_pools:
+  - name: main
+    action: create
+    options:
+      ashift: 12
+    compression: lz4
+    devices:
+      - ata-Samsung_SSD_870_EVO_1TB_S75BNL0Y201842M
+      - ata-Samsung_SSD_870_EVO_1TB_S75BNL0Y201871R
+    type: mirror
+    state: present

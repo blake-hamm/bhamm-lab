@@ -14,7 +14,7 @@ ntp_servers:
   - time.nist.gov
   - us.pool.ntp.org
 ntp_timezone: America/Denver
-pve_check_for_kernel_update: false
+pve_check_for_kernel_update: true
 pve_remove_old_kernels: false
 pve_default_kernel_version: 1.0.1
 pve_reboot_on_kernel_update: true
@@ -62,7 +62,12 @@ pve_roles:
       - "SDN.Use"
 pve_manage_ssh: false
 pve_ssh_port: "{{ ansible_port }}"
-# pve_storages:
+pve_zfs_enabled: true
+pve_storages: []
+#   - name: vms
+#     type: zfs # Need to enable this somehow
+#     content: [ "images" ]
+#     pool: main
 #   - name: nfs
 #     type: nfs
 #     content: ["images", "iso", "backup", "snippets", "vztmpl"]

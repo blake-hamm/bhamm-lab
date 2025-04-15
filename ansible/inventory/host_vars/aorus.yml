@@ -75,3 +75,16 @@ pve_vfio_blacklist_drivers:
   - name: "snd_hda_intel"
 pve_pcie_ignore_msrs: false
 pve_pcie_report_msrs: true
+# zfs config
+zfs_create_pools: true
+zfs_pools:
+  - name: main
+    action: create
+    options:
+      ashift: 12
+    compression: lz4
+    devices:
+      - ata-Samsung_SSD_870_EVO_1TB_S75BNL0Y201685W
+      - ata-Samsung_SSD_870_EVO_1TB_S75BNL0Y201833B
+    type: mirror
+    state: present
