@@ -13,6 +13,7 @@ spec:
   ignoreDifferences:
     - group: "cilium.io"
       kind: "CiliumIdentity"
+      namespace: ""
   source:
     chart: tenant
     repoURL: https://operator.min.io/
