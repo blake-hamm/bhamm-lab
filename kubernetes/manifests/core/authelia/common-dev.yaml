@@ -37,8 +37,8 @@ spec:
         postgresql:
           enabled: true
           storageSize: 1Gi
-          recoverySnapshotName: authelia-restore
-          recoverySnapshotHandle: "0001-0024-7b02e4a9-b740-4d5a-b519-9585725a55fb-0000000000000003-574716d7-122b-499e-8499-eff573448fb3"
+          # recoverySnapshotName: authelia-restore
+          # recoverySnapshotHandle: "0001-0024-7b02e4a9-b740-4d5a-b519-9585725a55fb-0000000000000003-574716d7-122b-499e-8499-eff573448fb3"
         ingressRoutes:
           - enabled: true
             name: authelia
