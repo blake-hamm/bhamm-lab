@@ -4,8 +4,7 @@
 - Deploy dev cluster w/ cilium (before argocd dp)
 - Adjust vm sizing in dev (3 master, 3 workers, less ram/more cpu)
 - Add taints for gpu/master nodes
-- Ensure HA with node affinity towards vm hosts (aorus, antsle, super)
-- Leverage redis operator
+- Switch to talos
 
 # Prep for exposure
 - Traefik
@@ -74,6 +73,9 @@
 - Deploy openwebui - https://github.com/open-webui/helm-charts/tree/main/charts/open-webui (with ollama)
 
 # Finish
+- Ensure HA with node affinity towards vm hosts (aorus, antsle, super)
+- Leverage redis operator
+- Install proxmox cloud controller
 - Argo event/workflow for terraform/ansible and decom gitea actions
 - Fix TZ on all services
 - Make ha with 3 replicas for all services
