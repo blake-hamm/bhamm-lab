@@ -43,11 +43,12 @@ spec:
             - name: tofu-state
             - name: loki-data
             - name: harbor-data
+            - name: k8up-backups
           users:
             - name: minio-external-secret
           env:
             - name: MINIO_IDENTITY_OPENID_CONFIG_URL
-              value: "https://auth.bhamm-lab.com/.well-known/openid-configuration"
+              value: "https://auth.dev.bhamm-lab.com/.well-known/openid-configuration"
             - name: MINIO_IDENTITY_OPENID_CLIENT_ID
               value: "minio"
             - name: MINIO_IDENTITY_OPENID_CLAIM_NAME
@@ -55,7 +56,7 @@ spec:
             - name: MINIO_IDENTITY_OPENID_SCOPES
               value: "openid,profile,email,groups"
             - name: MINIO_IDENTITY_OPENID_REDIRECT_URI
-              value: "https://minio.bhamm-lab.com/oauth_callback"
+              value: "https://minio.dev.bhamm-lab.com/oauth_callback"
             - name: MINIO_IDENTITY_OPENID_DISPLAY_NAME
               value: "Authelia"
             - name: MINIO_IDENTITY_OPENID_CLAIM_USERINFO
