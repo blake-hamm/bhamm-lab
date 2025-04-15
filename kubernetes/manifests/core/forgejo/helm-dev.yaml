@@ -53,8 +53,8 @@ spec:
             database:
               DB_TYPE: postgres
               HOST: git-postgresql-rw
-              NAME: gitea
-              USER: gitea
+              NAME: git
+              USER: git
               SCHEMA: public
           additionalConfigFromEnvs:
             - name: GITEA__DATABASE__PASSWD
