@@ -8,7 +8,6 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   schedule: "{{ .Values.postgresql.backups.schedule }}"
-  method: volumeSnapshot
   cluster:
     name: {{ .Values.name }}-postgresql
 {{- end }}
