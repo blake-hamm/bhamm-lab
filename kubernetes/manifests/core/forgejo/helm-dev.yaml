@@ -32,12 +32,12 @@ spec:
           annotations:
             k8up.io/backup: "true"
         gitea:
-          oauth:
-            - name: 'authelia'
-              provider: 'openidConnect'
-              existingSecret: 'git-external-secret'
-              autoDiscoverUrl: https://auth.dev.bhamm-lab.com/.well-known/openid-configuration
-              adminGroup: "lldap_admin"
+          # oauth:
+          #   - name: 'authelia'
+          #     provider: 'openidConnect'
+          #     existingSecret: 'git-external-secret'
+          #     autoDiscoverUrl: https://auth.dev.bhamm-lab.com/.well-known/openid-configuration
+          #     adminGroup: "lldap_admin"
           config:
             server:
               ROOT_URL: https://git.dev.bhamm-lab.com/
