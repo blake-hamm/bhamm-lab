@@ -73,6 +73,7 @@
 - Deploy openwebui - https://github.com/open-webui/helm-charts/tree/main/charts/open-webui (with ollama)
 
 # Finish
+- Setup cilium monitoring
 - Ensure HA with node affinity towards vm hosts (aorus, antsle, super)
 - Leverage redis operator
 - Install proxmox cloud controller
