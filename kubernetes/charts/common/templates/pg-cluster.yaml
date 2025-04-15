@@ -45,12 +45,12 @@ spec:
   enableSuperuserAccess: false
   {{- if .Values.postgresql.backups.enabled }}
   backup:
-    volumeSnapshot:
-      className: ceph-snapclass
+    # volumeSnapshot:
+    #   className: ceph-snapclass
     retentionPolicy: "{{ .Values.postgresql.backups.retention }}"
     barmanObjectStore:
       destinationPath: "s3://pg-backups/{{ .Values.name }}"
-      endpointURL: http://minio-api.bhamm-lab.com
+      endpointURL: https://minio-api.bhamm-lab.com
       s3Credentials:
         accessKeyId:
           name: pg-minio
