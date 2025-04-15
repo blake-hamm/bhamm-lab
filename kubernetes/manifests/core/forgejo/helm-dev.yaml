@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     chart: forgejo
-    repoURL: oci://code.forgejo.org/forgejo-helm/
+    repoURL: oci://code.forgejo.org/forgejo-helm/forgejo
     targetRevision: v11.0.5
     helm:
       valuesObject:
