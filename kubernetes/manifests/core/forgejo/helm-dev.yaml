@@ -13,6 +13,7 @@ spec:
   source:
     repoURL: https://code.forgejo.org/forgejo-helm/forgejo-helm.git
     targetRevision: v11.0.5
+    path: .
     helm:
       valuesObject:
         replicaCount: 1
