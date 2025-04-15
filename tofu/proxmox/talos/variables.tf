@@ -113,7 +113,7 @@ variable "mtu" {
 variable "vm_datastore_id" {
   description = "Datastore ID for vm's in Proxmox"
   type        = string
-  default     = "ceph_pool"
+  default     = "vms"
 }
 
 variable "file_datastore_id" {
