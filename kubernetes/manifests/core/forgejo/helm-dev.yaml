@@ -13,7 +13,7 @@ spec:
   source:
     chart: forgejo
     repoURL: oci://code.forgejo.org/forgejo-helm/forgejo
-    targetRevision: v11.0.5
+    targetRevision: 11.0.5
     helm:
       valuesObject:
         replicaCount: 1
