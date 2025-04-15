@@ -12,8 +12,8 @@ spec:
   project: default
   source:
     chart: forgejo
-    repoURL: oci://code.forgejo.org/forgejo-helm/forgejo
-    targetRevision: v11.0.5
+    repoURL: oci://code.forgejo.org/forgejo-helm/forgejo/
+    targetRevision: 11.0.5
     helm:
       valuesObject:
         replicaCount: 1
