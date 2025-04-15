@@ -43,6 +43,7 @@ spec:
             - name: tofu-state
             - name: loki-data
             - name: harbor-data
+            - name: pg-backups
           users:
             - name: minio-external-secret
           env:

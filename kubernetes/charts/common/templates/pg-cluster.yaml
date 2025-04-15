@@ -48,5 +48,15 @@ spec:
     volumeSnapshot:
       className: ceph-snapclass
     retentionPolicy: "{{ .Values.postgresql.backups.retention }}"
+    barmanObjectStore:
+      destinationPath: "s3://pg-backups/{{ .Values.name }}"
+      endpointURL: http://minio-api.bhamm-lab.com
+      s3Credentials:
+        accessKeyId:
+          name: pg-minio
+          key: CONSOLE_ACCESS_KEY
+        secretAccessKey:
+          name: pg-minio
+          key: CONSOLE_SECRET_KEY
   {{- end }}
 {{- end }}
