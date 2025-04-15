@@ -52,7 +52,7 @@ spec:
               SHOW_REGISTRATION_BUTTON: false
             database:
               DB_TYPE: postgres
-              HOST: gitea-postgresql-rw
+              HOST: git-postgresql-rw
               NAME: gitea
               USER: gitea
               SCHEMA: public
@@ -60,7 +60,7 @@ spec:
             - name: GITEA__DATABASE__PASSWD
               valueFrom:
                 secretKeyRef:
-                  name: gitea-postgresql-app
+                  name: git-postgresql-app
                   key: password
         postgresql:
           enabled: false
