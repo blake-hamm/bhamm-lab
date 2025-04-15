@@ -48,7 +48,7 @@ spec:
           # recoverySnapshotHandle: "0001-0024-7b02e4a9-b740-4d5a-b519-9585725a55fb-0000000000000003-e88e6649-2f90-4960-a652-aa91c1af2b38"
           backups:
             enabled: true
-            schedule: "*/5 * * * *"
+            schedule: "* */5 * * * *"
             retention: "3d"
   syncPolicy:
     syncOptions:
