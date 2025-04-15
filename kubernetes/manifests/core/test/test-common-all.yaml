@@ -1,0 +1,59 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: test-common
+  namespace: argocd
+spec:
+  destination:
+    namespace: example
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    targetRevision: feature/talos
+    path: kubernetes/charts/common
+    helm:
+      valuesObject:
+        name: example
+        externalSecrets:
+          enabled: true
+          secrets:
+            - secretKey: k8up-repo-password
+              remoteRef:
+                key: /core/k8up
+                property: repo-password
+        ingressRoutes:
+          - enabled: true
+            name: example
+            ingressClass: traefik-external
+            # websocket: true
+            routes:
+              - kind: Rule
+                match: Host(`test.dev.bhamm-lab.com`)
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: example
+                    scheme: http
+                    port: 80
+        k8up:
+          backup:
+            enabled: false
+            # restores:
+            #   - snapshot: "d6762d359bd86e8e3e22154748dc686b49cffec78b477628c1c133c0630310a5"
+            #     claimName: "example"
+        postgresql:
+          enabled: true
+          # recoverySnapshotName: example-restore
+          # recoverySnapshotHandle: "0001-0024-7b02e4a9-b740-4d5a-b519-9585725a55fb-0000000000000003-e88e6649-2f90-4960-a652-aa91c1af2b38"
+          backups:
+            enabled: true
+            schedule: "*/5 * * * *"
+            retention: "3d"
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
