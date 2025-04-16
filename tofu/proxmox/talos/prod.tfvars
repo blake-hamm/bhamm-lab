@@ -1,0 +1,9 @@
+environment        = "prod"
+count_master       = 3
+count_worker       = 3
+master_vm_id_start = 310
+worker_vm_id_start = 320
+master_ip_format   = "10.0.30.18%d"
+worker_ip_format   = "10.0.30.19%d"
+vip                = "10.0.30.40"
+# enable_gpu_worker  = false

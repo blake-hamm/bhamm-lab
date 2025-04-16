@@ -167,7 +167,6 @@ variable "disk_size_worker" {
 variable "vip" {
   description = "VIP endpoint for cluster"
   type        = string
-  default     = "10.0.30.130"
 }
 
 variable "extra_manifests" {
