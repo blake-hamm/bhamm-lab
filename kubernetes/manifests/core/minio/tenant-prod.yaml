@@ -26,9 +26,9 @@ spec:
             secretKey: ""
             existingSecret: true
           pools:
-            - servers: 3
+            - servers: 1
               name: main
-              volumesPerServer: 2
+              volumesPerServer: 1
               size: 30Gi
               affinity:
                 podAntiAffinity:

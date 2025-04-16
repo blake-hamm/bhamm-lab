@@ -26,10 +26,10 @@ spec:
             secretKey: ""
             existingSecret: true
           pools:
-            - servers: 2
+            - servers: 1
               name: main
-              volumesPerServer: 2
-              size: 20Gi
+              volumesPerServer: 1
+              size: 10Gi
           metrics:
             enabled: true
             port: 9000
