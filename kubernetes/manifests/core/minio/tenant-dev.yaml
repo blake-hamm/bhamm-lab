@@ -18,6 +18,8 @@ spec:
       valuesObject:
         tenant:
           name: minio-tenant
+          configuration:
+            name: minio-external-secret
           configSecret:
             name: minio-external-secret
             accessKey: ""
