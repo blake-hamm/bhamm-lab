@@ -13,7 +13,7 @@ spec:
   source:
     chart: cloudnative-pg
     repoURL: https://cloudnative-pg.github.io/charts
-    targetRevision: v0.22.1
+    targetRevision: v0.23.2
     helm:
       valuesObject:
         monitoring:
