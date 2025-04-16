@@ -45,8 +45,6 @@ spec:
   enableSuperuserAccess: false
   {{- if .Values.postgresql.backups.enabled }}
   backup:
-    # volumeSnapshot:
-    #   className: ceph-snapclass
     retentionPolicy: "{{ .Values.postgresql.backups.retention }}"
     barmanObjectStore:
       destinationPath: "s3://pg-backups/"
@@ -58,5 +56,24 @@ spec:
         secretAccessKey:
           name: pg-minio
           key: CONSOLE_SECRET_KEY
+  {{- end }}
+  {{- if .Values.postgresql.restore.enabled }}
+  bootstrap:
+    recovery:
+      source: clusterBackup
+  externalClusters:
+    - name: clusterBackup
+      barmanObjectStore:
+        destinationPath: "s3://pg-backups/"
+        endpointURL: https://minio-api.bhamm-lab.com
+        s3Credentials:
+          accessKeyId:
+            name: pg-minio
+            key: CONSOLE_ACCESS_KEY
+          secretAccessKey:
+            name: pg-minio
+            key: CONSOLE_SECRET_KEY
+        wal:
+          maxParallel: 8
   {{- end }}
 {{- end }}
