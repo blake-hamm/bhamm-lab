@@ -28,7 +28,7 @@ spec:
           pools:
             - servers: 3
               name: main
-              volumesPerServer: 1
+              volumesPerServer: 2
               size: 30Gi
               affinity:
                 podAntiAffinity:
