@@ -1,19 +1,24 @@
 # Fix issues
-- Disable swap on proxmox host and vm's
-- Switch to cilium
-- Deploy dev cluster w/ cilium (before argocd dp)
-- Adjust vm sizing in dev (3 master, 3 workers, less ram/more cpu)
-- Add taints for gpu/master nodes
-- Switch to talos
+x Switch to cilium
+x Deploy dev cluster w/ cilium (before argocd dp)
+x Adjust vm sizing in dev (3 master, 3 workers, less ram/more cpu)
+x Add taints for gpu/master nodes
+x Switch to talos
+- Confirm prod on talos is g2g
+- Remove prod k3s
+- Confirm cnpg backups to minio w/ test
+- Cleanup repo + merge pr
+  - media
+  - cicd
+- Update dashy links
 
 # Prep for exposure
 - Traefik
-  - setup new metallb ip for external
+  - setup new metallb ip for dmz
   - block *.bhamm-lab.com from public
-  - Setup split dns (wildcard internal, www. external)
+  - Setup split dns (wildcard internal, www. dmz)
 
 # Start building website
-- Update dashy links for grafana
 - Setup Hugo - https://github.com/adityatelange/hugo-PaperMod
 - Expose hugo homepage at bhamm-lab.com/
 - Deploy docs at bhamm-lab.com/docs/
