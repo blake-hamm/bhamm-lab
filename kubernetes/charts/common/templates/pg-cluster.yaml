@@ -50,7 +50,7 @@ spec:
     retentionPolicy: "{{ .Values.postgresql.backups.retention }}"
     barmanObjectStore:
       destinationPath: "s3://pg-backups/"
-      endpointURL: https://minio-api.bhamm-lab.com
+      endpointURL: https://minio-api.dev.bhamm-lab.com
       s3Credentials:
         accessKeyId:
           name: pg-minio
