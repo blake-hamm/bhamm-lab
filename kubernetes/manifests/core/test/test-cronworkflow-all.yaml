@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: maintain-timestamps
+  namespace: test
+spec:
+  schedule: "*/1 * * * *"
+  concurrencyPolicy: Forbid
+  workflowSpec:
+    entrypoint: main
+    templates:
+      - name: main
+        steps:
+          - - name: update-db
+              template: update-database
+      - name: update-database
+        script:
+          image: postgres:alpine
+          env:
+            - name: PGHOST
+              valueFrom: {secretKeyRef: {name: test-postgresql-app, key: host}}
+            - name: PGPORT
+              valueFrom: {secretKeyRef: {name: test-postgresql-app, key: port}}
+            - name: PGDATABASE
+              valueFrom: {secretKeyRef: {name: test-postgresql-app, key: dbname}}
+            - name: PGUSER
+              valueFrom: {secretKeyRef: {name: test-postgresql-app, key: user}}
+            - name: PGPASSWORD
+              valueFrom: {secretKeyRef: {name: test-postgresql-app, key: password}}
+          command: [sh, -c]
+          source: |-
+            psql -X -v ON_ERROR_STOP=1 <<'EOSQL'
+            BEGIN;
+
+            -- Create table if not exists
+            CREATE TABLE IF NOT EXISTS timestamps (
+              id SERIAL PRIMARY KEY,
+              created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+
+            -- Insert new timestamp
+            INSERT INTO timestamps DEFAULT VALUES;
+
+            -- Delete oldest record if count > 10
+            WITH oldest AS (
+              SELECT id FROM timestamps
+              ORDER BY created_at ASC
+              LIMIT 1
+              FOR UPDATE SKIP LOCKED
+            )
+            DELETE FROM timestamps
+            WHERE id IN (SELECT id FROM oldest)
+            AND (SELECT COUNT(*) FROM timestamps) > 10;
+
+            COMMIT;
+            EOSQL

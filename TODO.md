@@ -5,8 +5,8 @@ x Adjust vm sizing in dev (3 master, 3 workers, less ram/more cpu)
 x Add taints for gpu/master nodes
 x Switch to talos
 - Confirm prod on talos is g2g
+  - Confirm test cnpg minio backup w/ workflow
 - Remove prod k3s
-- Confirm cnpg backups to minio w/ test
 - Cleanup repo + merge pr
   - media
   - cicd
