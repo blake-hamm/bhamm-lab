@@ -28,7 +28,7 @@ spec:
         deployment:
           enabled: true
           shareProcessNamespace: true
-          replicas: 2
+          replicas: 1
           annotations: {}
           podAnnotations: {}
           additionalContainers: []
@@ -63,8 +63,6 @@ spec:
           labels: {}
           loadBalancerSourceRanges: []
           externalIPs: []
-          # spec:
-          #   loadBalancerIP: 10.0.30.31
         metrics:
           prometheus:
             service:
