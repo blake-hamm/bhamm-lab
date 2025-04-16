@@ -28,7 +28,7 @@ spec:
         deployment:
           enabled: true
           shareProcessNamespace: true
-          replicas: 2
+          replicas: 3
           annotations: {}
           podAnnotations: {}
           additionalContainers: []
@@ -57,13 +57,12 @@ spec:
           enabled: true
           type: LoadBalancer
           annotations:
-            metallb.universe.tf/allow-shared-ip: shared
-            metallb.universe.tf/loadBalancerIPs: 10.0.30.31
+            lbipam.cilium.io/ips: 10.0.30.141
+            lbipam.cilium.io/sharing-key: shared
+            lbipam.cilium.io/sharing-cross-namespace: "*"
           labels: {}
           loadBalancerSourceRanges: []
           externalIPs: []
-          # spec:
-          #   loadBalancerIP: 10.0.30.31
         metrics:
           prometheus:
             service:
