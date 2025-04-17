@@ -19,11 +19,11 @@ k8up:
     enabled: false
     schedule: "0 8 * * *" # 8 am utc/1 am mst
   restores: []
-    # - snapshot: ""
-    #   claimName: ""
+  # - snapshot: ""
+  #   claimName: ""
 postgresql:
   enabled: false
-  instances: 2
+  instances: 3
   storageSize: 5Gi
   imageName: ""
   sharedPreloadLibraries: ""
