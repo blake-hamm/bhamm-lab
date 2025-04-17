@@ -23,6 +23,9 @@ spec:
     roles:
 {{ toYaml .Values.postgresql.managed.roles | nindent 6 }}
   {{- end }}
+  env:
+  - name: TZ
+    value: {{ .Values.postgresql.timezone }}
   bootstrap:
     {{- if .Values.postgresql.recoverySnapshotName }}
     recovery:

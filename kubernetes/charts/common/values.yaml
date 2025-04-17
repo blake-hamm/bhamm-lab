@@ -29,6 +29,7 @@ postgresql:
   sharedPreloadLibraries: ""
   postInitSQL: ""
   databaseName: ""
+  timezone: "America/Denver"
   managed:
     roles: []
   backups:
