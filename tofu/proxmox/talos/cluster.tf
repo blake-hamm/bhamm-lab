@@ -94,8 +94,7 @@ resource "talos_cluster_kubeconfig" "this" {
     talos_machine_bootstrap.this,
     data.talos_cluster_health.this
   ]
-  node                 = [for node in local.master_nodes : node.ip][0]
-  endpoint             = local.cluster_endpoint
+  node                 = var.vip
   client_configuration = talos_machine_secrets.this.client_configuration
   timeouts = {
     read = "1m"
