@@ -50,7 +50,7 @@ spec:
       destinationPath: "s3://pg-backups/"
       endpointURL: https://minio-api.bhamm-lab.com
       {{- if .Values.postgresql.restore.enabled }}
-      serverName: recoveredCluster
+      serverName: "{{ .Values.name }}-postgresql-latest"
       {{- end }}
       s3Credentials:
         accessKeyId:
