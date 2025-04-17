@@ -6,7 +6,7 @@ x Add taints for gpu/master nodes
 x Switch to talos
 - Confirm prod on talos is g2g
   x Confirm test cnpg minio backup w/ workflow
-  - Setup vault oidc
+  x Setup vault oidc
 - Remove prod k3s
 - Migrate tofu state files to prod minio
 - Cleanup repo + merge pr
@@ -80,11 +80,13 @@ x Switch to talos
 - Integrate proxmox with traefik
 
 # AI
+- Setup with talos - https://github.com/siderolabs/talos/discussions/10286
 - Transtion amd operator to use custom docker image - https://instinct.docs.amd.com/projects/gpu-operator/en/latest/drivers/precompiled-driver.html
 - Create node taint to deny scheduling to gpu vm
 - Deploy openwebui - https://github.com/open-webui/helm-charts/tree/main/charts/open-webui (with ollama)
 
 # Finish
+- Setup kubernetes metrics in talos
 - Setup cilium monitoring
 - Ensure HA with node affinity towards vm hosts (aorus, antsle, super)
 - Leverage redis operator
