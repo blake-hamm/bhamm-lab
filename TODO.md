@@ -11,20 +11,20 @@ x Remove prod k3s
 x Migrate tofu state files to prod minio
 x Manage local kubeconfig file automagically
 x Fully replace example with test
-- Update dashy links
-  - Remove old grafana dashboards
+x Update dashy links
+  x Remove old grafana dashboards
 - Cleanup repo + merge pr
   x media
   x cicd
 - After merge
-  - Adjust harbor db restore/backup
-  - Adjust forgejo git user and db restore/backup
+  - Adjust harbor altogether and db restore/backup
+  - Adjust forgejo git user, repo and db restore/backup
   - Adjust authelia db restore/backup
   - Adjust immich altogether and db restore/backups
 
 # Prep for exposure
 - Traefik
-  - setup new metallb ip for dmz
+  - setup new ip for dmz
   - block *.bhamm-lab.com from public
   - Setup split dns (wildcard internal, www. dmz)
 
