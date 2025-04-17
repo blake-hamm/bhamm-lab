@@ -49,6 +49,9 @@ spec:
     barmanObjectStore:
       destinationPath: "s3://pg-backups/"
       endpointURL: https://minio-api.bhamm-lab.com
+      {{- if .Values.postgresql.restore.enabled }}
+      serverName: recoveredCluster
+      {{- end }}
       s3Credentials:
         accessKeyId:
           name: pg-minio
