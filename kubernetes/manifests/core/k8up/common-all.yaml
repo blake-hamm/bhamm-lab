@@ -22,6 +22,10 @@ spec:
               remoteRef:
                 key: /external/gcp
                 property: gcp-k8up-sa
+            - secretKey: project_id
+              remoteRef:
+                key: /external/gcp
+                property: project_id
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
