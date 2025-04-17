@@ -27,5 +27,5 @@ spec:
     volumes:
       - name: gcp-sa
         secret:
-          secretName: gcp-k8up-sa
+          secretName: k8up-external-secret
 {{- end }}

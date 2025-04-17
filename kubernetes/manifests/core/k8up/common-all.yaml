@@ -18,7 +18,7 @@ spec:
         externalSecrets:
           enabled: true
           secrets:
-            - secretKey: gcp-k8up-sa
+            - secretKey: service-account.json
               remoteRef:
                 key: /external/gcp
                 property: gcp-k8up-sa
