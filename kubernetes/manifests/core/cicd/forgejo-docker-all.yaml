@@ -1,15 +1,15 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: gitea-docker-changes
+  name: forgejo-docker-changes
   namespace: argo-events
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "3"
 spec:
   dependencies:
-    - name: gitea-push-event
-      eventSourceName: gitea
+    - name: forgejo-push-event
+      eventSourceName: forgejo
       eventName: push
       filters:
         script: |-
@@ -47,7 +47,7 @@ spec:
               apiVersion: argoproj.io/v1alpha1
               kind: Workflow
               metadata:
-                generateName: gitea-docker-changes-
+                generateName: forgejo-docker-changes-
               spec:
                 serviceAccountName: default
                 entrypoint: main
@@ -68,10 +68,10 @@ spec:
                         - name: git-sha
                     dag:
                       tasks:
-                        - name: gitea-status
+                        - name: forgejo-status
                           templateRef:
-                            name: gitea-status
-                            template: gitea-status
+                            name: forgejo-status
+                            template: forgejo-status
                           arguments:
                             parameters:
                               - name: git-sha
@@ -201,8 +201,8 @@ spec:
                     steps:
                       - - name: final-status
                           templateRef:
-                            name: gitea-status
-                            template: gitea-status
+                            name: forgejo-status
+                            template: forgejo-status
                           arguments:
                             parameters:
                               - name: git-sha
@@ -211,22 +211,22 @@ spec:
                                 value: "{{=workflow.status == 'Succeeded' ? 'success' : 'failure'}}"
           parameters:
             - src:
-                dependencyName: gitea-push-event
+                dependencyName: forgejo-push-event
                 dataKey: body.commits
               dest: spec.arguments.parameters.0.value
               transformation:
                 template: "{{ .Input | toJson }}"
             - src:
-                dependencyName: gitea-push-event
+                dependencyName: forgejo-push-event
                 dataKey: body.repository.clone_url
               dest: spec.arguments.parameters.1.value
             - src:
-                dependencyName: gitea-push-event
+                dependencyName: forgejo-push-event
                 dataKey: body.ref
                 transformation:
                   template: '{{ .Input | replace "refs/heads/" "" }}'
               dest: spec.arguments.parameters.2.value
             - src:
-                dependencyName: gitea-push-event
+                dependencyName: forgejo-push-event
                 dataKey: body.head_commit.id
               dest: spec.arguments.parameters.3.value

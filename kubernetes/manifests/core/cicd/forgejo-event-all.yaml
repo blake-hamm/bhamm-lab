@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: gitea
+  name: forgejo
   namespace: argo-events
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
