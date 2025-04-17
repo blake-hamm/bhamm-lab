@@ -38,5 +38,3 @@ postgresql:
     retention: "30d"
   restore:
     enabled: false
-  recoverySnapshotName: ""
-  recoverySnapshotHandle: ""

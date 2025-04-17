@@ -27,15 +27,11 @@ spec:
   - name: TZ
     value: {{ .Values.postgresql.timezone }}
   bootstrap:
-    {{- if .Values.postgresql.recoverySnapshotName }}
+    {{- if .Values.postgresql.restore.enabled }}
     recovery:
+      source: clusterBackup
       database: {{ .Values.postgresql.databaseName | default .Values.name }}
       owner: {{ .Values.name }}
-      volumeSnapshots:
-        storage:
-          name: {{ .Values.postgresql.recoverySnapshotName }}
-          kind: VolumeSnapshot
-          apiGroup: snapshot.storage.k8s.io
     {{- else }}
     initdb:
       database: {{ .Values.postgresql.databaseName | default .Values.name }}
@@ -64,11 +60,6 @@ spec:
           key: CONSOLE_SECRET_KEY
   {{- end }}
   {{- if .Values.postgresql.restore.enabled }}
-  bootstrap:
-    recovery:
-      source: clusterBackup
-      database: {{ .Values.postgresql.databaseName | default .Values.name }}
-      owner: {{ .Values.name }}
   externalClusters:
     - name: clusterBackup
       barmanObjectStore:
