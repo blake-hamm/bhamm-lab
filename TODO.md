@@ -10,10 +10,13 @@ x Confirm prod on talos is g2g
 x Remove prod k3s
 - Migrate tofu state files to prod minio
 - Manage local kubeconfig file automagically
+- Fully replace example with test
+- Update prod ip address
+- Update dashy links
+  - Remove old grafana dashboards
 - Cleanup repo + merge pr
   - media
   - cicd
-- Update dashy links
 - After merge
   - Adjust harbor db restore/backup
   - Adjust forgejo git user and db restore/backup
@@ -50,7 +53,7 @@ x Remove prod k3s
 - clamAV
 - Deploy argocd image updateder - https://argocd-image-updater.readthedocs.io/en/stable/
 - Spike: explore most secure method
-- Setup debian firewall
+- Setup talos dmz block except ip
 - Cloudflare:
   - Use proxy
 - Opnsense:

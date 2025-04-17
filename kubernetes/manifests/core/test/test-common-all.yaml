@@ -46,7 +46,6 @@ spec:
           enabled: true
           backups:
             enabled: true
-            schedule: "0 0 */1 * * *"
             retention: "3d"
           restore:
             enabled: true
