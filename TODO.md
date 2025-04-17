@@ -5,12 +5,19 @@ x Adjust vm sizing in dev (3 master, 3 workers, less ram/more cpu)
 x Add taints for gpu/master nodes
 x Switch to talos
 - Confirm prod on talos is g2g
-  - Confirm test cnpg minio backup w/ workflow
+  x Confirm test cnpg minio backup w/ workflow
+  - Setup vault oidc
 - Remove prod k3s
+- Migrate tofu state files to prod minio
 - Cleanup repo + merge pr
   - media
   - cicd
 - Update dashy links
+- After merge
+  - Adjust harbor db restore/backup
+  - Adjust forgejo git user and db restore/backup
+  - Adjust authelia db restore/backup
+  - Adjust immich altogether and db restore/backups
 
 # Prep for exposure
 - Traefik
