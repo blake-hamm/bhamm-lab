@@ -18,7 +18,7 @@ x Update dashy links
   x cicd
 - After merge
   - Adjust harbor altogether and db restore/backup
-  - Adjust forgejo git user, repo and db restore/backup
+  - Adjust forgejo git user, repo, webhook and db restore/backup
   - Adjust authelia db restore/backup
   - Adjust immich altogether and db restore/backups
 
