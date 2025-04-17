@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: k8up-common
+  namespace: argocd
+spec:
+  destination:
+    namespace: k8up
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    targetRevision: main
+    path: kubernetes/charts/common
+    helm:
+      valuesObject:
+        name: k8up
+        externalSecrets:
+          enabled: true
+          secrets:
+            - secretKey: gcp-k8up-sa
+              remoteRef:
+                key: /external/gcp
+                property: gcp-k8up-sa
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
