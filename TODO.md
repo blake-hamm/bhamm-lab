@@ -15,7 +15,7 @@ x Fully replace example with test
   - Remove old grafana dashboards
 - Cleanup repo + merge pr
   - media
-  - cicd
+  x cicd
 - After merge
   - Adjust harbor db restore/backup
   - Adjust forgejo git user and db restore/backup
