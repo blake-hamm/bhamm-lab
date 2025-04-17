@@ -14,7 +14,7 @@ x Fully replace example with test
 - Update dashy links
   - Remove old grafana dashboards
 - Cleanup repo + merge pr
-  - media
+  x media
   x cicd
 - After merge
   - Adjust harbor db restore/backup
