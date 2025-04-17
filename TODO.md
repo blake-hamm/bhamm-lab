@@ -9,7 +9,7 @@ x Confirm prod on talos is g2g
   x Setup vault oidc
 x Remove prod k3s
 x Migrate tofu state files to prod minio
-- Manage local kubeconfig file automagically
+x Manage local kubeconfig file automagically
 - Fully replace example with test
 - Update prod ip address
 - Update dashy links
