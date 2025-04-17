@@ -64,10 +64,12 @@ spec:
   bootstrap:
     recovery:
       source: clusterBackup
+      database: {{ .Values.postgresql.databaseName | default .Values.name }}
+      owner: {{ .Values.name }}
   externalClusters:
     - name: clusterBackup
       barmanObjectStore:
-        destinationPath: "s3://pg-backups/{{ .Values.name }}-postgresql"
+        destinationPath: "s3://pg-backups/"
         endpointURL: https://minio-api.bhamm-lab.com
         s3Credentials:
           accessKeyId:
