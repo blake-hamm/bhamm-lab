@@ -4,7 +4,7 @@ x Deploy dev cluster w/ cilium (before argocd dp)
 x Adjust vm sizing in dev (3 master, 3 workers, less ram/more cpu)
 x Add taints for gpu/master nodes
 x Switch to talos
-- Confirm prod on talos is g2g
+x Confirm prod on talos is g2g
   x Confirm test cnpg minio backup w/ workflow
   x Setup vault oidc
 - Remove prod k3s
@@ -86,6 +86,7 @@ x Switch to talos
 - Deploy openwebui - https://github.com/open-webui/helm-charts/tree/main/charts/open-webui (with ollama)
 
 # Finish
+- Expose hubble and/or setup cilium prom/grafana metrics
 - Setup kubernetes metrics in talos
 - Setup cilium monitoring
 - Ensure HA with node affinity towards vm hosts (aorus, antsle, super)
