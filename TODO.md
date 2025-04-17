@@ -9,6 +9,7 @@ x Confirm prod on talos is g2g
   x Setup vault oidc
 - Remove prod k3s
 - Migrate tofu state files to prod minio
+- Manage local kubeconfig file automagically
 - Cleanup repo + merge pr
   - media
   - cicd
