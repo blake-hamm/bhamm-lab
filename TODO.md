@@ -7,7 +7,7 @@ x Switch to talos
 x Confirm prod on talos is g2g
   x Confirm test cnpg minio backup w/ workflow
   x Setup vault oidc
-- Remove prod k3s
+x Remove prod k3s
 - Migrate tofu state files to prod minio
 - Manage local kubeconfig file automagically
 - Cleanup repo + merge pr
