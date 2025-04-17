@@ -93,6 +93,8 @@ spec:
             sslmode: "disable"
         redis:
           type: internal
+        updateStrategy:
+          type: Recreate
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
