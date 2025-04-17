@@ -69,7 +69,7 @@ spec:
   externalClusters:
     - name: clusterBackup
       barmanObjectStore:
-        destinationPath: "s3://pg-backups/"
+        destinationPath: "s3://pg-backups/{{ .Values.name }}-postgresql"
         endpointURL: https://minio-api.bhamm-lab.com
         s3Credentials:
           accessKeyId:
