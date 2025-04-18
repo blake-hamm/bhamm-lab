@@ -174,9 +174,14 @@ def check_and_cleanup_snapshots(image: str, k8s_snapshots: Set[str]):
             logger.info(f"Found orphaned snapshot: {image}@{snap_name}")
 
             if not DRY_RUN:
+                # Unprotect snapshot if protected
+                if 'snap' in image:
+                  snap_cmd = ["snap", "unprotect", f"{CEPH_POOL}/{image}@{snap_name}"]
+                  run_ceph_command(snap_cmd, json_output=False, rbd=True)
+
                 # Remove the snapshot
                 snap_cmd = ["snap", "rm", f"{CEPH_POOL}/{image}@{snap_name}"]
-                if run_ceph_command(snap_cmd, json_output=False) is not None:
+                if run_ceph_command(snap_cmd, json_output=False, rbd=True) is not None:
                     logger.info(f"Removed orphaned snapshot: {image}@{snap_name}")
                 else:
                     logger.error(f"Failed to remove snapshot: {image}@{snap_name}")

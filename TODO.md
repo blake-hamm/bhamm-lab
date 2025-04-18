@@ -13,17 +13,26 @@ x Manage local kubeconfig file automagically
 x Fully replace example with test
 x Update dashy links
   x Remove old grafana dashboards
-- Cleanup repo + merge pr
+x Cleanup repo + merge pr
   x media
   x cicd
-- After merge
-  - Adjust harbor altogether and db restore/backup
-  - Adjust forgejo git user, repo, webhook and db restore/backup
-  - Adjust authelia db restore/backup
-  - Adjust immich altogether and db restore/backups
-  - Adjust test common branch
+x After merge
+  x Adjust harbor altogether and db restore/backup
+    x Setup oidc and disable other logins
+    x Setup docker proxy
+    x Setup robot creds
+    x Ensure example docker image working
+  x Adjust forgejo git user, repo, webhook and db restore/backup
+    x Adjust oidc/disable admin
+    x Setup repo mirror
+    x Add ssh key
+    x Setup webhook
+  x Adjust authelia db restore/backup
+  x Adjust immich altogether and db restore/backups
+  x Adjust test common branch
 
 # Prep for exposure
+- Refactor gitea actions as argo workflows
 - Traefik
   - setup new ip for dmz
   - block *.bhamm-lab.com from public

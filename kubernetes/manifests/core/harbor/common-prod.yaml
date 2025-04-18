@@ -17,8 +17,6 @@ spec:
         name: harbor
         postgresql:
           enabled: true
-          recoverySnapshotName: harbor-restore
-          recoverySnapshotHandle: '0001-0024-7b02e4a9-b740-4d5a-b519-9585725a55fb-0000000000000003-51154dfc-9873-4c22-9370-528e1ca9ad8f'
           backups:
             enabled: true
         externalSecrets:

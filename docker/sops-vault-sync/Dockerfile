@@ -1,4 +1,4 @@
-FROM harbor.bhamm-lab.com/dockerhub_proxy/debian:bookworm-slim
+FROM harbor.bhamm-lab.com/dockerhub/debian:bookworm-slim
 
 # Install base dependencies
 RUN apt-get update && \

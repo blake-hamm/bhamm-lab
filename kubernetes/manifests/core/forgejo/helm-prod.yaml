@@ -16,7 +16,7 @@ spec:
     path: .
     helm:
       valuesObject:
-        replicaCount: 3
+        replicaCount: 1
         service:
           ssh:
             type: LoadBalancer
@@ -37,7 +37,9 @@ spec:
               provider: 'openidConnect'
               existingSecret: 'git-external-secret'
               autoDiscoverUrl: https://auth.bhamm-lab.com/.well-known/openid-configuration
-              adminGroup: "lldap_admin"
+              scopes: 'openid email profile groups'
+              groupClaimName: 'groups'
+              adminGroup: "admin"
           config:
             server:
               ROOT_URL: https://git.bhamm-lab.com/
@@ -56,6 +58,9 @@ spec:
               NAME: git
               USER: git
               SCHEMA: public
+            webhook:
+              ALLOWED_HOST_LIST: forgejo-eventsource-svc.argo-events.svc.cluster.local
+              SKIP_TLS_VERIFY: true
           additionalConfigFromEnvs:
             - name: GITEA__DATABASE__PASSWD
               valueFrom:

@@ -1,3 +1,3 @@
-FROM harbor.bhamm-lab.com/dockerhub_proxy/nginx:stable-alpine
+FROM harbor.bhamm-lab.com/dockerhub/nginx:stable-alpine
 
 COPY default.conf /etc/nginx/conf.d/default.conf

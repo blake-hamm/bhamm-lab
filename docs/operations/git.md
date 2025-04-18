@@ -1,4 +1,4 @@
-# Gitea
+# Git
 Some useful troubleshooting tips for gitea
 
 ```bash

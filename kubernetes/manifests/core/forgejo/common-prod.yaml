@@ -32,7 +32,7 @@ spec:
         postgresql:
           enabled: true
           backups:
-            enabled: false
+            enabled: true
         ingressRoutes:
           - enabled: true
             name: forgejo
