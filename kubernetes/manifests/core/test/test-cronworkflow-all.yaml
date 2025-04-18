@@ -1,0 +1,104 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: maintain-timestamps
+  namespace: test
+spec:
+  schedule: "0 */6 * * *"
+  concurrencyPolicy: Forbid
+  workflowSpec:
+    entrypoint: main
+    serviceAccountName: argo-cron-sa
+    templates:
+      - name: main
+        steps:
+          - - name: update-db
+              template: update-database
+      - name: update-database
+        script:
+          image: postgres:alpine
+          env:
+            - name: PGHOST
+              valueFrom: {secretKeyRef: {name: test-postgresql-app, key: host}}
+            - name: PGPORT
+              valueFrom: {secretKeyRef: {name: test-postgresql-app, key: port}}
+            - name: PGDATABASE
+              valueFrom: {secretKeyRef: {name: test-postgresql-app, key: dbname}}
+            - name: PGUSER
+              valueFrom: {secretKeyRef: {name: test-postgresql-app, key: user}}
+            - name: PGPASSWORD
+              valueFrom: {secretKeyRef: {name: test-postgresql-app, key: password}}
+          command: [sh, -c]
+          source: |-
+            psql -X -v ON_ERROR_STOP=1 <<'EOSQL'
+            BEGIN;
+
+            -- Create table if not exists
+            CREATE TABLE IF NOT EXISTS timestamps (
+              id SERIAL PRIMARY KEY,
+              created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+
+            -- Insert new timestamp
+            INSERT INTO timestamps DEFAULT VALUES;
+
+            -- Delete oldest record if count > 10
+            WITH oldest AS (
+              SELECT id FROM timestamps
+              ORDER BY created_at ASC
+              LIMIT 1
+              FOR UPDATE SKIP LOCKED
+            )
+            DELETE FROM timestamps
+            WHERE id IN (SELECT id FROM oldest)
+            AND (SELECT COUNT(*) FROM timestamps) > 10;
+
+            COMMIT;
+            EOSQL
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argo-cron-sa
+  namespace: test
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: argo-cron-role
+  namespace: test
+rules:
+  # Your existing rule
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflowtaskresults"]
+    verbs: ["create", "patch"]
+  # Additional required permissions for Argo Workflows
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflows", "cronworkflows"]
+    verbs: ["create", "get", "list", "update", "patch", "delete", "watch"]
+  # Pod permissions for workflow execution
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["create", "get", "list", "watch", "update", "patch", "delete"]
+  # Event permissions for status reporting
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+  # Optional: If using Kubernetes secrets or configmaps
+  - apiGroups: [""]
+    resources: ["secrets", "configmaps"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argo-cron-role-binding
+  namespace: test
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: argo-cron-role
+subjects:
+  - kind: ServiceAccount
+    name: argo-cron-sa
+    namespace: test

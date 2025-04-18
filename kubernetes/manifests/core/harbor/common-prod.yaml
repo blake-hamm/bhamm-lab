@@ -1,0 +1,58 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: harbor-common
+  namespace: argocd
+spec:
+  destination:
+    namespace: harbor
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    targetRevision: main
+    path: kubernetes/charts/common
+    helm:
+      valuesObject:
+        name: harbor
+        postgresql:
+          enabled: true
+          recoverySnapshotName: harbor-restore
+          recoverySnapshotHandle: '0001-0024-7b02e4a9-b740-4d5a-b519-9585725a55fb-0000000000000003-51154dfc-9873-4c22-9370-528e1ca9ad8f'
+          backups:
+            enabled: true
+        externalSecrets:
+          enabled: true
+          secrets:
+            - secretKey: REGISTRY_STORAGE_S3_ACCESSKEY
+              remoteRef:
+                key: /core/minio
+                property: CONSOLE_ACCESS_KEY
+            - secretKey: REGISTRY_STORAGE_S3_SECRETKEY
+              remoteRef:
+                key: /core/minio
+                property: CONSOLE_SECRET_KEY
+            - secretKey: HARBOR_ADMIN_PASSWORD
+              remoteRef:
+                key: /core/harbor
+                property: HARBOR_ADMIN_PASSWORD
+        ingressRoutes:
+          - name: harbor
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - match: Host(`harbor.bhamm-lab.com`)
+                kind: Rule
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: harbor
+                    scheme: http
+                    port: 80
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

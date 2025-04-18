@@ -1,0 +1,9 @@
+environment        = "dev"
+count_master       = 3
+count_worker       = 3
+master_vm_id_start = 210
+worker_vm_id_start = 220
+master_ip_format   = "10.0.30.16%d"
+worker_ip_format   = "10.0.30.17%d"
+vip                = "10.0.30.130"
+# enable_gpu_worker  = false

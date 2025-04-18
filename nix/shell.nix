@@ -1,5 +1,4 @@
 { pkgs }:
-
 pkgs.mkShell {
   buildInputs = with pkgs; [
     pre-commit
@@ -25,6 +24,11 @@ pkgs.mkShell {
     openssl
     google-cloud-sdk
     velero
+    cilium-cli
+    hubble
+    talosctl
+    uv
+    ceph-client
   ];
 
   packages = [

@@ -1,20 +1,35 @@
 # Fix issues
-- Disable swap on proxmox host and vm's
-- Switch to cilium
-- Deploy dev cluster w/ cilium (before argocd dp)
-- Adjust vm sizing in dev (3 master, 3 workers, less ram/more cpu)
-- Add taints for gpu/master nodes
-- Ensure HA with node affinity towards vm hosts (aorus, antsle, super)
-- Leverage redis operator
+x Switch to cilium
+x Deploy dev cluster w/ cilium (before argocd dp)
+x Adjust vm sizing in dev (3 master, 3 workers, less ram/more cpu)
+x Add taints for gpu/master nodes
+x Switch to talos
+x Confirm prod on talos is g2g
+  x Confirm test cnpg minio backup w/ workflow
+  x Setup vault oidc
+x Remove prod k3s
+x Migrate tofu state files to prod minio
+x Manage local kubeconfig file automagically
+x Fully replace example with test
+x Update dashy links
+  x Remove old grafana dashboards
+- Cleanup repo + merge pr
+  x media
+  x cicd
+- After merge
+  - Adjust harbor altogether and db restore/backup
+  - Adjust forgejo git user, repo, webhook and db restore/backup
+  - Adjust authelia db restore/backup
+  - Adjust immich altogether and db restore/backups
+  - Adjust test common branch
 
 # Prep for exposure
 - Traefik
-  - setup new metallb ip for external
+  - setup new ip for dmz
   - block *.bhamm-lab.com from public
-  - Setup split dns (wildcard internal, www. external)
+  - Setup split dns (wildcard internal, www. dmz)
 
 # Start building website
-- Update dashy links for grafana
 - Setup Hugo - https://github.com/adityatelange/hugo-PaperMod
 - Expose hugo homepage at bhamm-lab.com/
 - Deploy docs at bhamm-lab.com/docs/
@@ -38,7 +53,7 @@
 - clamAV
 - Deploy argocd image updateder - https://argocd-image-updater.readthedocs.io/en/stable/
 - Spike: explore most secure method
-- Setup debian firewall
+- Setup talos dmz block except ip
 - Cloudflare:
   - Use proxy
 - Opnsense:
@@ -69,11 +84,18 @@
 - Integrate proxmox with traefik
 
 # AI
+- Setup with talos - https://github.com/siderolabs/talos/discussions/10286
 - Transtion amd operator to use custom docker image - https://instinct.docs.amd.com/projects/gpu-operator/en/latest/drivers/precompiled-driver.html
 - Create node taint to deny scheduling to gpu vm
 - Deploy openwebui - https://github.com/open-webui/helm-charts/tree/main/charts/open-webui (with ollama)
 
 # Finish
+- Expose hubble and/or setup cilium prom/grafana metrics
+- Setup kubernetes metrics in talos
+- Setup cilium monitoring
+- Ensure HA with node affinity towards vm hosts (aorus, antsle, super)
+- Leverage redis operator
+- Install proxmox cloud controller
 - Argo event/workflow for terraform/ansible and decom gitea actions
 - Fix TZ on all services
 - Make ha with 3 replicas for all services

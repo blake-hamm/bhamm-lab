@@ -1,4 +1,20 @@
 # Cloudnative pg
+## WAL archive to minio
+I have refactore cnpg backups so that I don't need to deal with volume snapshots when backing up/restoring. Instead, backups are now orchestrated using minio and the WAL archiving pattern.
+
+There are some manual steps involved with restoring backups:
+- Ensure data is available in minio tenant under s3://pg-backups/<namespace>-postgresql
+- Ensure no data or directory is empty at s3://pg-backups/<namespace>-postgresql-latest (this is the new target backup directory)
+
+Then, all you need to do in the values is enable:
+```yaml
+postgresql:
+  restore:
+    enabled: true
+```
+Everything else will be automagically handled!
+
+## Depreciated:
 For postgres, backups are orchestrated with the cloudnative pg operator. This can be configured with the common helm chart. One thing to note: *these backups require a volumesnapshot.* I still need to ensure a 'new' cluster is able to restore a cloudnative pg. Theoritically, these are the steps:
 1. Get snapshothandle name from volumesnapshot
 ```bash

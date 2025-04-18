@@ -34,3 +34,6 @@ roles:
   - name: xanmanning.k3s
     src: https://github.com/blake-hamm/ansible-role-k3s.git
     version: "main"
+  - name: mrlesmithjr.zfs
+    src: https://github.com/blake-hamm/ansible-zfs.git
+    version: "master"

@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test
+  namespace: test
+  labels:
+    app: test
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    k8up.io/backup: "true"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test
+  namespace: test
+  labels:
+    app: test
+  annotations:
+    argocd.argoproj.io/sync-wave: "14"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      initContainers:
+        - name: config-init
+          image: busybox
+          command: ['sh', '-c', 'echo "server { listen 80; root /usr/share/nginx/html; autoindex on; }" > /etc/nginx/conf.d/default.conf']
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
+      containers:
+        - name: nginx
+          image: nginx:stable-alpine
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: html
+              mountPath: /usr/share/nginx/html
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
+      volumes:
+        - name: html
+          persistentVolumeClaim:
+            claimName: test
+        - name: nginx-config
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test
+  namespace: test
+  annotations:
+    argocd.argoproj.io/sync-wave: "15"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: test
