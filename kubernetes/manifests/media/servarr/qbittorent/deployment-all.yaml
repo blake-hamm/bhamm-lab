@@ -58,9 +58,9 @@ spec:
               mountPath: /downloads
           env:
             - name: PUID
-              value: 1000
+              value: "1000"
             - name: PGID
-              value: 1000
+              value: "1000"
             - name: TZ
               value: "America/Denver"
             - name: WEBUI_PORT
