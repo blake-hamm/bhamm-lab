@@ -1,35 +1,14 @@
-# Fix issues
-x Switch to cilium
-x Deploy dev cluster w/ cilium (before argocd dp)
-x Adjust vm sizing in dev (3 master, 3 workers, less ram/more cpu)
-x Add taints for gpu/master nodes
-x Switch to talos
-x Confirm prod on talos is g2g
-  x Confirm test cnpg minio backup w/ workflow
-  x Setup vault oidc
-x Remove prod k3s
-x Migrate tofu state files to prod minio
-x Manage local kubeconfig file automagically
-x Fully replace example with test
-x Update dashy links
-  x Remove old grafana dashboards
-x Cleanup repo + merge pr
-  x media
-  x cicd
-x After merge
-  x Adjust harbor altogether and db restore/backup
-    x Setup oidc and disable other logins
-    x Setup docker proxy
-    x Setup robot creds
-    x Ensure example docker image working
-  x Adjust forgejo git user, repo, webhook and db restore/backup
-    x Adjust oidc/disable admin
-    x Setup repo mirror
-    x Add ssh key
-    x Setup webhook
-  x Adjust authelia db restore/backup
-  x Adjust immich altogether and db restore/backups
-  x Adjust test common branch
+# Servarr stack
+x Review hacks/default.bak
+- Setup nfs on aorus
+- Deploy nfs storage class
+- Add vpn credentials for gluten
+- Deploy
+  - Jellyfin
+  - Unpackarr w/ grafana
+  - Prowlarr
+  - Sonarr
+  - qbittorent
 
 # Prep for exposure
 - Refactor gitea actions as argo workflows
@@ -99,6 +78,7 @@ x After merge
 - Deploy openwebui - https://github.com/open-webui/helm-charts/tree/main/charts/open-webui (with ollama)
 
 # Finish
+- Make forgejo ha - https://code.forgejo.org/forgejo-helm/forgejo-helm/src/branch/main/docs/ha-setup.md
 - Expose hubble and/or setup cilium prom/grafana metrics
 - Setup kubernetes metrics in talos
 - Setup cilium monitoring
@@ -188,6 +168,39 @@ x After merge
 - kube bench - https://github.com/aquasecurity/kube-bench
 
 ## Previous
+# Fix issues
+x Switch to cilium
+x Deploy dev cluster w/ cilium (before argocd dp)
+x Adjust vm sizing in dev (3 master, 3 workers, less ram/more cpu)
+x Add taints for gpu/master nodes
+x Switch to talos
+x Confirm prod on talos is g2g
+  x Confirm test cnpg minio backup w/ workflow
+  x Setup vault oidc
+x Remove prod k3s
+x Migrate tofu state files to prod minio
+x Manage local kubeconfig file automagically
+x Fully replace example with test
+x Update dashy links
+  x Remove old grafana dashboards
+x Cleanup repo + merge pr
+  x media
+  x cicd
+x After merge
+  x Adjust harbor altogether and db restore/backup
+    x Setup oidc and disable other logins
+    x Setup docker proxy
+    x Setup robot creds
+    x Ensure example docker image working
+  x Adjust forgejo git user, repo, webhook and db restore/backup
+    x Adjust oidc/disable admin
+    x Setup repo mirror
+    x Add ssh key
+    x Setup webhook
+  x Adjust authelia db restore/backup
+  x Adjust immich altogether and db restore/backups
+  x Adjust test common branch
+
 # Create argo sops workflow
 x Create argo event source for gitea webhook
 x Test gitea argo event source
