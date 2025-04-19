@@ -9,5 +9,6 @@ spec:
   selector:
     app: qbittorrent
   ports:
-    - targetPort: 8080
+    - name: webui
+      targetPort: 8080
       port: 8080

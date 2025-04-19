@@ -44,7 +44,7 @@ spec:
                 services:
                   - name: qbittorrent
                     scheme: http
-                    port: 8080
+                    port: webui
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
