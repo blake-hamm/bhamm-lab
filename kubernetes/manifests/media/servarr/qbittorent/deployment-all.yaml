@@ -67,7 +67,7 @@ spec:
             - name: QBITTORRENT_INTERFACE
               value: "tun0"
         - name: port-sync
-          image: ghcr.io/bjw-s/gluetun-qb-port-sync
+          image: ghcr.io/bjw-s-labs/gluetun-qb-port-sync:latest
           env:
             - name: GLUETUN_CONTROL_SERVER_HOST
               value: "localhost"
