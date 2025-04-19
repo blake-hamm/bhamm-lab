@@ -67,15 +67,25 @@ spec:
             - name: QBITTORRENT_INTERFACE
               value: "tun0"
         - name: port-sync
-          image: ghcr.io/t-anc/gsp-qbittorent-gluetun-sync-port-mod:main
+          image: ghcr.io/bjw-s/gluetun-qb-port-sync
           env:
-            - name: GSP_GTN_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: servarr-external-secret
-                  key: GSP_GTN_API_KEY
-            - name: GSP_QBITTORRENT_PORT
-              value: "53764"
+            - name: GLUETUN_CONTROL_SERVER_HOST
+              value: "localhost"
+            - name: GLUETUN_CONTROL_SERVER_PORT
+              value: "8000"
+            - name: QBITTORRENT_HOST
+              value: "localhost"
+            - name: QBITTORRENT_WEBUI_PORT
+              value: "8080"
+            - name: CRON_ENABLED
+              value: "true"
+            - name: CRON_SCHEDULE
+              value: "*/5 * * * *"
+            - name: LOG_TIMESTAMP
+              value: "false"
+          volumeMounts:
+            - name: port-forward-config
+              mountPath: /config
       volumes:
         - name: gluetun-config
           persistentVolumeClaim:
@@ -86,3 +96,5 @@ spec:
         - name: downloads
           persistentVolumeClaim:
             claimName: downloads
+        - name: port-forward-config
+          emptyDir: {}
