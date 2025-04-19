@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: gluetun
-          image: ghcr.io/qdm12/gluetun:latest
+          image: ghcr.io/qdm12/gluetun:v3.39.0
           env:
             - name: VPN_SERVICE_PROVIDER
               value: protonvpn
@@ -27,6 +27,8 @@ spec:
               value: wireguard
             - name: VPN_PORT_FORWARDING
               value: "on"
+            - name: VPN_PORT_FORWARDING_PROVIDER
+              value: protonvpn
             - name: QBT_WEBUI_ENABLED
               value: "true"
             - name: SERVER_COUNTRIES

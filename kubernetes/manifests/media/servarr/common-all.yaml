@@ -33,7 +33,7 @@ spec:
             enabled: true
         ingressRoutes:
           - enabled: true
-            name: servarr
+            name: qbittorrent
             ingressClass: traefik-external
             # websocket: true
             routes:
