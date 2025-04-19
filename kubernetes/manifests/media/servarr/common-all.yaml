@@ -20,7 +20,7 @@ spec:
         externalSecrets:
           enabled: true
           secrets:
-            - secretKey: proton-wireguard-private-key
+            - secretKey: WIREGUARD_PRIVATE_KEY
               remoteRef:
                 key: /default/servarr
                 property: proton-wireguard-private-key
