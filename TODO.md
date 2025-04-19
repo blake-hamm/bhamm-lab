@@ -14,6 +14,7 @@ x Deploy nfs storage class
 - Adjust forgejo storage to minio
 - Backup to minio on nfs
 - Rename talos vm zfs data
+- Use minio for immich
 
 # Prep for exposure
 - Refactor gitea actions as argo workflows
