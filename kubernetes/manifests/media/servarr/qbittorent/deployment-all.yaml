@@ -64,8 +64,8 @@ spec:
               value: "America/Denver"
             - name: WEBUI_PORT
               value: "8080"
-            - name: QBITTORRENT_INTERFACE
-              value: "tun0"
+            - name: QBITTORRENT__PORT
+              value: "8080"
         - name: port-sync
           image: ghcr.io/bjw-s-labs/gluetun-qb-port-sync:latest
           env:
