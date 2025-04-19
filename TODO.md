@@ -1,7 +1,7 @@
 # Servarr stack
 x Review hacks/default.bak
-- Setup nfs on aorus
-- Deploy nfs storage class
+x Setup nfs on aorus
+x Deploy nfs storage class
 - Add vpn credentials for gluten
 - Deploy
   - Jellyfin
@@ -9,6 +9,11 @@ x Review hacks/default.bak
   - Prowlarr
   - Sonarr
   - qbittorent
+
+# Refactor backups/storage
+- Adjust forgejo storage to minio
+- Backup to minio on nfs
+- Rename talos vm zfs data
 
 # Prep for exposure
 - Refactor gitea actions as argo workflows
