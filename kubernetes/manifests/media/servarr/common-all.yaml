@@ -20,10 +20,10 @@ spec:
         externalSecrets:
           enabled: true
           secrets:
-            - secretKey: proton-secret
+            - secretKey: proton-wireguard-private-key
               remoteRef:
                 key: /default/servarr
-                property: proton-secret
+                property: proton-wireguard-private-key
         k8up:
           backup:
             enabled: true
