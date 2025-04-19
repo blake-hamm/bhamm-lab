@@ -31,20 +31,20 @@ spec:
         k8up:
           backup:
             enabled: true
-            # ingressRoutes:
-            #   - enabled: true
-            #     name: test
-            #     ingressClass: traefik-external
-            #     # websocket: true
-            #     routes:
-            #       - kind: Rule
-            #         match: Host(`test.bhamm-lab.com`)
-            #         middlewares:
-            #           - name: default-headers
-            #         services:
-            #           - name: test
-            #             scheme: http
-            #             port: 80
+        ingressRoutes:
+          - enabled: true
+            name: servarr
+            ingressClass: traefik-external
+            # websocket: true
+            routes:
+              - kind: Rule
+                match: Host(`qb.bhamm-lab.com`)
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: qbtorrent
+                    scheme: http
+                    port: 8080
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
