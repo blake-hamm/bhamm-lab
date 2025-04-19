@@ -42,7 +42,7 @@ spec:
                 middlewares:
                   - name: default-headers
                 services:
-                  - name: qbtorrent
+                  - name: qbittorrent
                     scheme: http
                     port: 8080
   syncPolicy:
