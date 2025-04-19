@@ -35,7 +35,6 @@ spec:
               value: "America/Denver"
             - name: FIREWALL_OUTBOUND_SUBNETS
               value: 10.96.0.0/12,10.244.0.0/16,10.42.0.0/16 # Allow access to k8s subnets
-          envFrom:
             - name: WIREGUARD_PRIVATE_KEY
               valueFrom:
                 secretKeyRef:
