@@ -78,6 +78,7 @@ x Review hacks/default.bak
 - Deploy openwebui - https://github.com/open-webui/helm-charts/tree/main/charts/open-webui (with ollama)
 
 # Finish
+- Switch vm zfs name (and confirm prod backups)
 - Make forgejo ha - https://code.forgejo.org/forgejo-helm/forgejo-helm/src/branch/main/docs/ha-setup.md
 - Expose hubble and/or setup cilium prom/grafana metrics
 - Setup kubernetes metrics in talos
