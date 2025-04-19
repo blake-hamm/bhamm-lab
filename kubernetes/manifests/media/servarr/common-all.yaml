@@ -23,7 +23,11 @@ spec:
             - secretKey: WIREGUARD_PRIVATE_KEY
               remoteRef:
                 key: /default/servarr
-                property: proton-wireguard-private-key
+                property: WIREGUARD_PRIVATE_KEY
+            - secretKey: GSP_GTN_API_KEY
+              remoteRef:
+                key: /default/servarr
+                property: GSP_GTN_API_KEY
         k8up:
           backup:
             enabled: true
