@@ -45,6 +45,19 @@ spec:
                   - name: qbittorrent
                     scheme: http
                     port: webui
+          - enabled: true
+            name: prowlarr
+            ingressClass: traefik-external
+            # websocket: true
+            routes:
+              - kind: Rule
+                match: Host(`prowlarr.bhamm-lab.com`)
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: prowlarr
+                    scheme: http
+                    port: ui
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
