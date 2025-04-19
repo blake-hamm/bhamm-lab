@@ -2,7 +2,7 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: qbittorrent
-  namespace: default
+  namespace: servarr
   labels:
     app: qbittorrent
   annotations:
