@@ -2,11 +2,11 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: sonarr
-  namespace: default
+  namespace: servarr
   labels:
     app: sonarr
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "12"
 spec:
   replicas: 1
   selector:
@@ -23,11 +23,19 @@ spec:
           ports:
             - containerPort: 8989
           volumeMounts:
-            - name: sonarr-config-volume
+            - name: sonarr-config
               mountPath: /config
-            - name: qbittorrent-downloads-volume
+            - name: downloads
               mountPath: /downloads
+            - name: media
+              mountPath: /media
           env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "America/Denver"
             - name: SONARR__APP__INSTANCENAME
               value: sonarr
             - name: SONARR__APP__THEME
@@ -41,9 +49,12 @@ spec:
             - name: SONARR__LOG__LEVEL
               value: info
       volumes:
-        - name: sonarr-config-volume
+        - name: sonarr-config
           persistentVolumeClaim:
             claimName: sonarr-config
-        - name: qbittorrent-downloads-volume
+        - name: downloads
           persistentVolumeClaim:
-            claimName: qbittorrent-downloads-pvc
+            claimName: downloads
+        - name: media
+          persistentVolumeClaim:
+            claimName: media

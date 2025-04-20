@@ -2,11 +2,11 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: radarr
-  namespace: default
+  namespace: servarr
   labels:
     app: radarr
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "12"
 spec:
   replicas: 1
   selector:
@@ -23,9 +23,19 @@ spec:
           ports:
             - containerPort: 7878
           volumeMounts:
-            - name: radarr-config-volume
+            - name: radarr-config
               mountPath: /config
+            - name: downloads
+              mountPath: /downloads
+            - name: media
+              mountPath: /media
           env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "America/Denver"
             - name: RADARR__APP__INSTANCENAME
               value: radarr
             - name: RADARR__APP__THEME
@@ -39,6 +49,12 @@ spec:
             - name: RADARR__LOG__LEVEL
               value: info
       volumes:
-        - name: radarr-config-volume
+        - name: radarr-config
           persistentVolumeClaim:
             claimName: radarr-config
+        - name: downloads
+          persistentVolumeClaim:
+            claimName: downloads
+        - name: media
+          persistentVolumeClaim:
+            claimName: media

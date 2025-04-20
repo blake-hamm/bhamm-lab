@@ -108,6 +108,26 @@ data:
         description: Visit immich
         icon: hl-immich
         url: https://immich.bhamm-lab.com/
+      - title: Jellyfin
+        description: Visit jellyfin
+        icon: hl-jellyfin
+        url: https://jellyfin.bhamm-lab.com/
+      - title: Sonarr
+        description: Visit sonarr
+        icon: hl-sonarr
+        url: https://sonarr.bhamm-lab.com/
+      - title: Radarr
+        description: Visit radarr
+        icon: hl-radarr
+        url: https://radarr.bhamm-lab.com/
+      - title: Prowlarr
+        description: Visit prowlarr
+        icon: hl-prowlarr
+        url: https://prowlarr.bhamm-lab.com/
+      - title: Qbittorrent
+        description: Visit qbittorrent
+        icon: hl-qbittorrent
+        url: https://qb.bhamm-lab.com/
 
     - name: Monitoring
       icon: mdi-finance

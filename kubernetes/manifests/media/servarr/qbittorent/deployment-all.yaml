@@ -2,11 +2,11 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: qbittorrent
-  namespace: default
+  namespace: servarr
   labels:
     app: qbittorrent
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "12"
 spec:
   replicas: 1
   selector:
@@ -18,45 +18,58 @@ spec:
         app: qbittorrent
     spec:
       containers:
-        - name: qbittorrent
-          image: lscr.io/linuxserver/qbittorrent:latest
-          volumeMounts:
-            - name: qbittorrent-config-volume
-              mountPath: /config
-            - name: qbittorrent-downloads-volume
-              mountPath: /downloads
-          env:
-            - name: QBITTORRENT__PORT
-              value: "8080"
         - name: gluetun
-          image: qmcgaw/gluetun:latest
+          image: ghcr.io/qdm12/gluetun:v3.39.0
           env:
             - name: VPN_SERVICE_PROVIDER
-              value: custom
+              value: protonvpn
             - name: VPN_TYPE
               value: wireguard
-            - name: VPN_INTERFACE
-              value: wg0
-            - name: VPN_ENDPOINT_PORT
-              value: "51820"
             - name: VPN_PORT_FORWARDING
               value: "on"
             - name: VPN_PORT_FORWARDING_PROVIDER
               value: protonvpn
+            - name: QBT_WEBUI_ENABLED
+              value: "true"
+            - name: SERVER_COUNTRIES
+              value: "United States"
+            - name: TZ
+              value: "America/Denver"
             - name: FIREWALL_INPUT_PORTS
               value: "8080"
             - name: FIREWALL_OUTBOUND_SUBNETS
               value: 10.96.0.0/12,10.244.0.0/16,10.42.0.0/16 # Allow access to k8s subnets
-          envFrom:
-            - secretRef:
-                name: qbittorrent-secret
+            - name: WIREGUARD_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: servarr-external-secret
+                  key: WIREGUARD_PRIVATE_KEY
           securityContext:
             capabilities:
               add:
                 - NET_ADMIN
             allowPrivilegeEscalation: false
-        - name: port-forward
-          image: ghcr.io/bjw-s/gluetun-qb-port-sync
+          volumeMounts:
+            - name: gluetun-config
+              mountPath: /gluetun
+        - name: qbittorrent
+          image: lscr.io/linuxserver/qbittorrent:latest
+          volumeMounts:
+            - name: qbittorrent-config
+              mountPath: /config
+            - name: downloads
+              mountPath: /downloads
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "America/Denver"
+            - name: WEBUI_PORT
+              value: "8080"
+        - name: port-sync
+          image: ghcr.io/bjw-s-labs/gluetun-qb-port-sync:latest
           env:
             - name: GLUETUN_CONTROL_SERVER_HOST
               value: "localhost"
@@ -76,11 +89,14 @@ spec:
             - name: port-forward-config
               mountPath: /config
       volumes:
-        - name: qbittorrent-config-volume
+        - name: gluetun-config
+          persistentVolumeClaim:
+            claimName: gluetun-config
+        - name: qbittorrent-config
           persistentVolumeClaim:
             claimName: qbittorrent-config
-        - name: qbittorrent-downloads-volume
+        - name: downloads
           persistentVolumeClaim:
-            claimName: qbittorrent-downloads-pvc
+            claimName: downloads
         - name: port-forward-config
           emptyDir: {}

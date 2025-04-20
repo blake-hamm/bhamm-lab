@@ -2,12 +2,12 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: nfs
-  namespace: default
+  namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "-200"
+    argocd.argoproj.io/sync-wave: "-10"
 spec:
   destination:
-    namespace: default
+    namespace: nfs
     server: https://kubernetes.default.svc
   project: default
   source:
@@ -17,13 +17,15 @@ spec:
     helm:
       valuesObject:
         storageClass:
+          create: true
           defaultClass: false
         nfs:
-          server: 192.168.69.12
+          server: 10.0.20.11
           path: /mnt/storage/kubernetes
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
     automated:
       prune: true
       selfHeal: true

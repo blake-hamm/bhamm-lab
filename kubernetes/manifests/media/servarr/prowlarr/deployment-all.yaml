@@ -2,11 +2,11 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: prowlarr
-  namespace: default
+  namespace: servarr
   labels:
     app: prowlarr
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "12"
 spec:
   replicas: 1
   selector:
@@ -23,9 +23,15 @@ spec:
           ports:
             - containerPort: 9696
           volumeMounts:
-            - name: prowlarr-config-volume
+            - name: prowlarr-config
               mountPath: /config
           env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "America/Denver"
             - name: PROWLARR__APP__INSTANCENAME
               value: Prowlarr
             - name: PROWLARR__APP__THEME
@@ -39,6 +45,6 @@ spec:
             - name: PROWLARR__LOG__LEVEL
               value: info
       volumes:
-        - name: prowlarr-config-volume
+        - name: prowlarr-config
           persistentVolumeClaim:
             claimName: prowlarr-config

@@ -2,11 +2,11 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: flaresolverr
-  namespace: default
+  namespace: servarr
   labels:
     app: flaresolverr
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "12"
 spec:
   replicas: 1
   selector:

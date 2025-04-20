@@ -80,18 +80,12 @@ pve_ceph_repository_line: "deb http://download.proxmox.com/debian/ceph-squid boo
 pve_ceph_osds:
   - device: "{{ ceph_device }}"
 pve_ceph_pools:
-  - name: ceph_pool
-    pgs: 32 # adjust later
-    rule: replicated_rule
-    application: rbd
-    autoscale_mode: "warn"
-    storage: true
   - name: kubernetes
     pgs: 32 # adjust later
     rule: replicated_rule
     application: rbd
     autoscale_mode: "warn"
-    storage: false
+    storage: true
 pve_ceph_fs:
   - name: ceph_fs
     pgs: 32 # adjust later
