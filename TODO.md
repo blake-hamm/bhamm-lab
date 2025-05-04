@@ -1,28 +1,10 @@
-# Refactor backups/storage
-x Add pvc dashy link
-x Deploy second minio tenant w/ nfs storage
-x Backup to minio on nfs
-x Test backup/restore
-x Adjust forgejo storage to minio (retain pvc)
-x Use nfs for immich
-x Setup nfs minio backup to gcp
-x Test dev environment and restore backups
-x Update backup docs
-x Rename talos vm zfs data
-x Update ip addresses for prod
-x Remove minio legacy
-x Config harbor
-x Add forgejo webhook
-x Config servarr
-  x radarr
-  x sonarr
-  x flaresolverr
-  x prowlarr
-  x qbittorrent
-x Update secrets for servarr stack and connect
-x Ensure qbittorrent functions correctly
-x Add minio grafana
-x Update dashy links for minio
+# Deploy docs site
+- Create ci/cd with argo workflows to deploy when docs change
+  - Build docker image
+  - Deploy docker image
+- Create some architecture diagrams
+- Update docs flow and make less AI slop
+- Automated changelog
 
 # Prep for exposure
 - Refactor gitea actions as argo workflows
@@ -189,6 +171,32 @@ x Update dashy links for minio
 - kube bench - https://github.com/aquasecurity/kube-bench
 
 ## Previous
+# Refactor backups/storage
+x Add pvc dashy link
+x Deploy second minio tenant w/ nfs storage
+x Backup to minio on nfs
+x Test backup/restore
+x Adjust forgejo storage to minio (retain pvc)
+x Use nfs for immich
+x Setup nfs minio backup to gcp
+x Test dev environment and restore backups
+x Update backup docs
+x Rename talos vm zfs data
+x Update ip addresses for prod
+x Remove minio legacy
+x Config harbor
+x Add forgejo webhook
+x Config servarr
+  x radarr
+  x sonarr
+  x flaresolverr
+  x prowlarr
+  x qbittorrent
+x Update secrets for servarr stack and connect
+x Ensure qbittorrent functions correctly
+x Add minio grafana
+x Update dashy links for minio
+
 # Servarr stack
 x Review hacks/default.bak
 x Setup nfs on aorus
