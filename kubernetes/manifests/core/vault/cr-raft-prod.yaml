@@ -11,7 +11,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "-5"
 spec:
   size: 3
-  image: hashicorp/vault:1.19.1
+  image: hashicorp/vault:1.19.3
   annotations:
     common/annotation: "true"
   vaultAnnotations:

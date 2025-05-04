@@ -26,6 +26,14 @@ spec:
               remoteRef:
                 key: /default/gitea
                 property: oidc_client_secret
+            - secretKey: MINIO_ACCESS_KEY_ID
+              remoteRef:
+                key: /core/minio
+                property: CONSOLE_ACCESS_KEY
+            - secretKey: MINIO_SECRET_ACCESS_KEY
+              remoteRef:
+                key: /core/minio
+                property: CONSOLE_SECRET_KEY
         k8up:
           backup:
             enabled: false

@@ -1,6 +1,7 @@
 variable "project_id" {
   description = "The ID of the GCP project"
   type        = string
+  default     = "deep-contact-445917-i9"
 }
 
 variable "region" {
@@ -18,11 +19,16 @@ variable "k8up_service_account_id" {
 variable "sops_key_file_path" {
   description = "Path to save the generated key file."
   type        = string
-  default     = "./gcp-sops-sa.json"
+  default     = "./result/gcp-sops-sa.json"
 }
 
 variable "k8up_key_file_path" {
   description = "Path to save the generated key file."
   type        = string
-  default     = "./gcp-k8up-sa.json"
+  default     = "./result/gcp-k8up-sa.json"
+}
+variable "k8up_hmac_credentials_path" {
+  description = "Path to save the generated key file."
+  type        = string
+  default     = "./result/gcp-k8up-hmac.json"
 }

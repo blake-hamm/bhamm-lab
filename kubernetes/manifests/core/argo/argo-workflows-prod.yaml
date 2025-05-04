@@ -58,7 +58,7 @@ spec:
             filterGroupsRegex:
         artifactRepository:
           s3:
-            endpoint: minio-api.bhamm-lab.com
+            endpoint: minio-ceph-api.bhamm-lab.com
             bucket: argo-artifacts
             accessKeySecret:
               name: argo-events-external-secret

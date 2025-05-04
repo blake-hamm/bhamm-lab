@@ -16,7 +16,8 @@ tofu -chdir=tofu/proxmox/talos plan -var-file=dev.tfvars
 tofu -chdir=tofu/proxmox/talos apply -var-file=dev.tfvars -auto-approve
 
 # Then deploy the minimum required for kubernetes
-export KUBE_CONFIG_PATH=../../tofu/proxmox/talos/result/kube-config.yaml
+export KUBECONFIG=../../tofu/proxmox/talos/result/kube-config-dev.yaml
+export KUBE_CONFIG_PATH=../../tofu/proxmox/talos/result/kube-config-dev.yaml
 tofu -chdir=tofu/kubernetes init
 tofu -chdir=tofu/kubernetes workspace select -or-create=true dev
 tofu -chdir=tofu/kubernetes plan -var 'environment=dev' -var 'branch_name=feature/talos'
@@ -27,7 +28,7 @@ tofu -chdir=tofu/proxmox/talos destroy -var-file=dev.tfvars -auto-approve
 ```
 
 ```bash
-export KUBECONFIG=./tofu/proxmox/talos/result/kube-config.yaml
+export KUBECONFIG=./tofu/proxmox/talos/result/kube-config-dev.yaml
 kubectl config set-context --current --namespace=argocd
 argocd app get apps-dev --refresh
 ```

@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: minio-tenant
+  name: minio-ceph-tenant
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "0"
 spec:
   destination:
-    namespace: minio
+    namespace: ceph
     server: https://kubernetes.default.svc
   project: default
   source:
@@ -17,11 +17,11 @@ spec:
     helm:
       valuesObject:
         tenant:
-          name: minio-tenant
+          name: minio-ceph
           configuration:
-            name: minio-external-secret
+            name: ceph-external-secret
           configSecret:
-            name: minio-external-secret
+            name: ceph-external-secret
             accessKey: ""
             secretKey: ""
             existingSecret: true
@@ -29,7 +29,8 @@ spec:
             - servers: 1
               name: main
               volumesPerServer: 1
-              size: 10Gi
+              size: 30Gi
+              storageClassName: csi-rbd-sc
           metrics:
             enabled: true
             port: 9000
@@ -43,21 +44,20 @@ spec:
             - name: tofu-state
             - name: loki-data
             - name: harbor-data
-            - name: k8up-backups
-            - name: pg-backups
+            - name: forgejo
           users:
-            - name: minio-external-secret
+            - name: ceph-external-secret
           env:
             - name: MINIO_IDENTITY_OPENID_CONFIG_URL
-              value: "https://auth.dev.bhamm-lab.com/.well-known/openid-configuration"
+              value: "https://auth.bhamm-lab.com/.well-known/openid-configuration"
             - name: MINIO_IDENTITY_OPENID_CLIENT_ID
-              value: "minio"
+              value: "minio-ceph"
             - name: MINIO_IDENTITY_OPENID_CLAIM_NAME
               value: "groups"
             - name: MINIO_IDENTITY_OPENID_SCOPES
               value: "openid,profile,email,groups"
             - name: MINIO_IDENTITY_OPENID_REDIRECT_URI
-              value: "https://minio.dev.bhamm-lab.com/oauth_callback"
+              value: "https://minio-ceph.bhamm-lab.com/oauth_callback"
             - name: MINIO_IDENTITY_OPENID_DISPLAY_NAME
               value: "Authelia"
             - name: MINIO_IDENTITY_OPENID_CLAIM_USERINFO

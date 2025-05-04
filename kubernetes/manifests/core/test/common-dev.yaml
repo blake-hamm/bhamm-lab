@@ -10,7 +10,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: main
+    targetRevision: feature/backups
     path: kubernetes/charts/common
     helm:
       valuesObject:
@@ -29,7 +29,7 @@ spec:
             # websocket: true
             routes:
               - kind: Rule
-                match: Host(`test.bhamm-lab.com`)
+                match: Host(`test.dev.bhamm-lab.com`)
                 middlewares:
                   - name: default-headers
                 services:
@@ -38,14 +38,15 @@ spec:
                     port: 80
         k8up:
           backup:
-            enabled: true
-            # restores:
-            #   - snapshot: "d6762d359bd86e8e3e22154748dc686b49cffec78b477628c1c133c0630310a5"
-            #     claimName: "test"
+            enabled: false
+            schedule: "0 */3 * * *"
+          restores:
+            - snapshot: "latest"
+              claimName: "test"
         postgresql:
           enabled: true
           backups:
-            enabled: true
+            enabled: false
             retention: "3d"
           restore:
             enabled: true

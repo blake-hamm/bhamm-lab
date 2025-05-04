@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket = "tofu-state"
-    key    = "kubernetes/terraform.state"
+    key    = "gcp/terraform.state"
     endpoints = {
       s3 = "https://minio-ceph-api.bhamm-lab.com"
     }

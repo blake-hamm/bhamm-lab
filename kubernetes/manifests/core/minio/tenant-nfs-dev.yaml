@@ -1,0 +1,72 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: minio-nfs-tenant
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  destination:
+    namespace: nfs
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: tenant
+    repoURL: https://operator.min.io/
+    targetRevision: v6.0.4
+    helm:
+      valuesObject:
+        tenant:
+          name: minio-nfs
+          configuration:
+            name: nfs-external-secret
+          configSecret:
+            name: nfs-external-secret
+            accessKey: ""
+            secretKey: ""
+            existingSecret: true
+          pools:
+            - servers: 1
+              name: main
+              volumesPerServer: 1
+              size: 30Gi
+              storageClassName: nfs-client
+              storageAnnotations:
+                k8up.io/backup: "true"
+          metrics:
+            enabled: true
+            port: 9000
+            protocol: http
+          features:
+            bucketDNS: false
+            domains: {}
+            enableSFTP: false
+          buckets:
+            - name: k8up-backups
+            - name: pg-backups
+          users:
+            - name: nfs-external-secret
+          # env:
+          #   - name: MINIO_IDENTITY_OPENID_CONFIG_URL
+          #     value: "https://auth.bhamm-lab.com/.well-known/openid-configuration"
+          #   - name: MINIO_IDENTITY_OPENID_CLIENT_ID
+          #     value: "minio-nfs"
+          #   - name: MINIO_IDENTITY_OPENID_CLAIM_NAME
+          #     value: "groups"
+          #   - name: MINIO_IDENTITY_OPENID_SCOPES
+          #     value: "openid,profile,email,groups"
+          #   - name: MINIO_IDENTITY_OPENID_REDIRECT_URI
+          #     value: "https://minio-nfs.bhamm-lab.com/oauth_callback"
+          #   - name: MINIO_IDENTITY_OPENID_DISPLAY_NAME
+          #     value: "Authelia"
+          #   - name: MINIO_IDENTITY_OPENID_CLAIM_USERINFO
+          #     value: "off"
+          #   - name: MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC
+          #     value: "off"
+          prometheusOperator: false
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true

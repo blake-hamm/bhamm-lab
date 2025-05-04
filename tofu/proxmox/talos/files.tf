@@ -13,5 +13,5 @@ resource "proxmox_virtual_environment_download_file" "this" {
   overwrite               = false
 
   url       = "${var.talos_factory_url}/image/${local.schematic_id}/${var.talos_version}/${var.talos_platform}-${var.talos_arch}.raw.gz"
-  file_name = "talos-${local.schematic_id}-${var.talos_version}-${var.talos_platform}-${var.talos_arch}.img"
+  file_name = "${var.environment}-talos-${local.schematic_id}-${var.talos_version}-${var.talos_platform}-${var.talos_arch}.img"
 }

@@ -13,7 +13,7 @@ metadata:
   labels:
     app: test
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "-2"
     k8up.io/backup: "true"
 spec:
   accessModes:

@@ -11,7 +11,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "-5"
 spec:
   size: 2
-  image: hashicorp/vault:1.19.1
+  image: hashicorp/vault:1.19.3
   annotations:
     common/annotation: "true"
   vaultAnnotations:
@@ -75,14 +75,6 @@ spec:
   statsdDisabled: false
   serviceMonitorEnabled: true
   serviceRegistrationEnabled: true
-  resources:
-    vault:
-      limits:
-        memory: "512Mi"
-        cpu: "200m"
-      requests:
-        memory: "256Mi"
-        cpu: "100m"
   externalConfig:
     purgeUnmanagedConfig:
       enabled: true

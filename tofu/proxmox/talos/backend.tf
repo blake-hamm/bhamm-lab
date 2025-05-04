@@ -3,7 +3,7 @@ terraform {
     bucket = "tofu-state"
     key    = "talos/terraform.state"
     endpoints = {
-      s3 = "https://minio-api.bhamm-lab.com"
+      s3 = "https://minio-ceph-api.bhamm-lab.com"
     }
     region                      = "main"
     skip_requesting_account_id  = true

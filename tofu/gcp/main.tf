@@ -71,6 +71,25 @@ resource "google_service_account_key" "k8up_key" {
   }
 }
 
+resource "google_storage_hmac_key" "k8up_hmac" {
+  service_account_email = google_service_account.k8up.email
+
+  # Optional: Force key rotation by tainting/recreating the resource
+  lifecycle {
+    ignore_changes = [service_account_email] # Keep this unless you want to rotate
+  }
+
+
+  # Save credentials to a local JSON file for sops
+  provisioner "local-exec" {
+    command = <<-EOT
+      echo '{
+        "access_id": "${self.access_id}",
+        "secret": "${self.secret}"
+      }' > ${var.k8up_hmac_credentials_path}
+    EOT
+  }
+}
 
 # Store credentials in Vault
 # resource "vault_generic_secret" "velero_creds" {

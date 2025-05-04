@@ -17,6 +17,7 @@ spec:
     helm:
       valuesObject:
         k8up:
+          timezone: "America/Denver"
           skipWithoutAnnotation: true
         metrics:
           service:

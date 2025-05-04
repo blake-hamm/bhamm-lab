@@ -101,7 +101,7 @@ spec:
               aws:
                 bucketnames: loki-data
                 region: us-east-1
-                endpoint: https://minio.minio:443
+                endpoint: https://minio.ceph:443
                 access_key_id: "${MINIO_ACCESS_KEY_ID}"
                 secret_access_key: "${MINIO_SECRET_ACCESS_KEY}"
                 s3forcepathstyle: true

@@ -1,9 +1,12 @@
 # Kubernetes backups
 
 ## k8up
-k8up backups are used for pvc and tested with the 'example' application. They require pvc to be labeled with `k8up.io/backup: "true"` and guarantee that data can be backed up on a schedule and restored. This can be configured in the 'common' helm chart and more details can be found in the deployments/helm section of these docs.
+k8up backups are used for pvc and tested with the 'test' application. They require pvc to be labeled with `k8up.io/backup: "true"` and guarantee that data can be backed up on a schedule and restored. This can be configured in the 'common' helm chart and more details can be found in the deployments/helm section of these docs.
 
-## Minio
+To backup the latest image, you can deploy with `latest` as the snapshot name to restore. Alternatively, you can look in the `snapshots` k8up crd to pick a specific image.
+
+## Minio (Decomissioned)
+*Determined that this minio backups are functioning correctly.*
 I have discovered that backing up and restoring the pvc of minio will not suffice.. I need to re-visit this, but ultimately, I plan to backup minio with k8up as a s3 to s3 backup. This will restore all data in minio (while not necessarily restoring the minio config). In the future, I need to better understand how to backup the config (like authelia settings). For now, in a DR, I will need to take some manual steps to recover minio fully.
 
 ## Velero (Decomissioned)

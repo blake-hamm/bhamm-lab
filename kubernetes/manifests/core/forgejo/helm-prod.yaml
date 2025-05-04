@@ -26,6 +26,7 @@ spec:
               lbipam.cilium.io/sharing-key: shared
               lbipam.cilium.io/sharing-cross-namespace: "*"
         persistence:
+          enabled: true
           storageClass: "csi-cephfs-sc"
           accessModes:
             - ReadWriteMany
@@ -61,12 +62,28 @@ spec:
             webhook:
               ALLOWED_HOST_LIST: forgejo-eventsource-svc.argo-events.svc.cluster.local
               SKIP_TLS_VERIFY: true
+            storage:
+              STORAGE_TYPE: minio
+              MINIO_USE_SSL: true
+              MINIO_ENDPOINT: minio-ceph-api.bhamm-lab.com
+              MINIO_BUCKET: forgejo
+              MINIO_LOCATION: main
           additionalConfigFromEnvs:
             - name: GITEA__DATABASE__PASSWD
               valueFrom:
                 secretKeyRef:
                   name: git-postgresql-app
                   key: password
+            - name: GITEA__STORAGE__MINIO_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: git-external-secret
+                  key: MINIO_ACCESS_KEY_ID
+            - name: GITEA__STORAGE__MINIO_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: git-external-secret
+                  key: MINIO_SECRET_ACCESS_KEY
         postgresql:
           enabled: false
         postgresql-ha:

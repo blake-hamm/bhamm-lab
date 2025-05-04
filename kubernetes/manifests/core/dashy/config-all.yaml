@@ -232,3 +232,8 @@ data:
         icon: hl-ceph
         url: https://grafana.bhamm-lab.com/d/tbO9LAiZK/ceph-cluster?var-interval=$__auto&orgId=1&from=now-6h&to=now&timezone=browser&var-DS_PROMETHEUS=prometheus&refresh=1m
         statusCheck: false
+      - title: PVC
+        description: View pvc grafana dashboard
+        icon: https://raw.githubusercontent.com/kubernetes/community/b51e2a3bce5d115b138df9d49c1ba8017cffdd45/icons/svg/resources/labeled/pvc.svg
+        url: https://grafana.bhamm-lab.com/d/919b92a8e8041bd567af9edab12c840c/kubernetes-persistent-volumes?orgId=1&from=now-24h&to=now&timezone=America%2FDenver&var-datasource=default&var-cluster=&var-namespace=authelia&var-volume=authelia-postgresql-1&refresh=10s
+        statusCheck: false

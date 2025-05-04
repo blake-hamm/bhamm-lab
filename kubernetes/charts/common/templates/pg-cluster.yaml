@@ -47,7 +47,7 @@ spec:
     retentionPolicy: "{{ .Values.postgresql.backups.retention }}"
     barmanObjectStore:
       destinationPath: "s3://pg-backups/"
-      endpointURL: https://minio-api.bhamm-lab.com
+      endpointURL: https://minio-nfs-api.bhamm-lab.com
       {{- if .Values.postgresql.restore.enabled }}
       serverName: "{{ .Values.name }}-postgresql-latest"
       {{- end }}
@@ -65,7 +65,7 @@ spec:
       barmanObjectStore:
         destinationPath: "s3://pg-backups/"
         serverName: "{{ .Values.name }}-postgresql"
-        endpointURL: https://minio-api.bhamm-lab.com
+        endpointURL: https://minio-nfs-api.bhamm-lab.com
         s3Credentials:
           accessKeyId:
             name: pg-minio

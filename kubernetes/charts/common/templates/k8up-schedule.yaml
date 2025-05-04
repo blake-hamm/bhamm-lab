@@ -1,0 +1,42 @@
+{{- if .Values.k8up.backup.enabled }}
+apiVersion: k8up.io/v1
+kind: Schedule
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  backend:
+    repoPasswordSecretRef:
+      name: k8up
+      key: repo-password
+    s3:
+      endpoint: https://minio-nfs-api.bhamm-lab.com
+      bucket: k8up-backups
+      accessKeyIDSecretRef:
+        name: k8up
+        key: accessKeyID
+      secretAccessKeySecretRef:
+        name: k8up
+        key: secretAccessKeySecret
+  backup:
+    schedule: "{{ .Values.k8up.backup.schedule }}"
+    failedJobsHistoryLimit: 2
+    successfulJobsHistoryLimit: 2
+    # optional
+    #promURL: https://prometheus-io-instance:8443
+  check:
+    schedule: '0 1 * * 1'
+    # optional
+    #promURL: https://prometheus-io-instance:8443
+  prune:
+    schedule: '0 1 * * 0'
+    retention:
+      keepLast: 5
+      keepDaily: 2
+      keepWeekly: 1
+      keepMonthly: 1
+      keepYearly: 1
+{{- end }}

@@ -1,23 +1,19 @@
-# Servarr stack
-x Review hacks/default.bak
-x Setup nfs on aorus
-x Deploy nfs storage class
-x Add vpn credentials for gluten
-x Deploy
-  x Jellyfin
-  x Unpackarr
-  x Prowlarr
-  x Sonarr
-  x qbittorent
-  x radarr
-- Add dashy links (and pvc grafana under storage)
-
 # Refactor backups/storage
-- Adjust forgejo storage to minio
-- Backup to minio on nfs
+x Add pvc dashy link
+x Deploy second minio tenant w/ nfs storage
+x Backup to minio on nfs
+x Test backup/restore
+x Adjust forgejo storage to minio (retain pvc)
+x Use nfs for immich
+x Setup nfs minio backup to gcp
+x Test dev environment and restore backups
+x Update backup docs
+- Setup zfs exporter and grafana - https://github.com/aroberts/ansible-role-zfs_exporter
+- Setup snapraid/mergerfs grafana - https://github.com/ljmerza/snapraid-collector
 - Rename talos vm zfs data
-- Use minio for immich
-- Setup zfs exporter
+- Update ip addresses for prod
+- Remove minio legacy
+- Add forgejo webhook
 
 # Prep for exposure
 - Refactor gitea actions as argo workflows
@@ -178,6 +174,20 @@ x Deploy
 - kube bench - https://github.com/aquasecurity/kube-bench
 
 ## Previous
+# Servarr stack
+x Review hacks/default.bak
+x Setup nfs on aorus
+x Deploy nfs storage class
+x Add vpn credentials for gluten
+x Deploy
+  x Jellyfin
+  x Unpackarr
+  x Prowlarr
+  x Sonarr
+  x qbittorent
+  x radarr
+x Add dashy links
+
 # Fix issues
 x Switch to cilium
 x Deploy dev cluster w/ cilium (before argocd dp)

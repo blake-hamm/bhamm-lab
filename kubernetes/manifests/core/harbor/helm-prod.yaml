@@ -32,7 +32,7 @@ spec:
               existingSecret: "harbor-external-secret"
               region: us-east-1
               bucket: harbor-data
-              regionendpoint: https://minio-api.bhamm-lab.com
+              regionendpoint: https://minio-ceph-api.bhamm-lab.com
               #encrypt: false
               #keyid: mykeyid
               #secure: true

@@ -13,9 +13,10 @@ resource "helm_release" "argocd" {
       domain = var.environment == "prod" ? "argocd.bhamm-lab.com" : "argocd.dev.bhamm-lab.com"
     })
   ]
+  wait = true
 }
 
-resource "kubectl_manifest" "test" {
+resource "kubectl_manifest" "argo_apps" {
   depends_on = [helm_release.argocd]
   yaml_body  = <<YAML
 apiVersion: argoproj.io/v1alpha1
