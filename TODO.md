@@ -8,12 +8,21 @@ x Use nfs for immich
 x Setup nfs minio backup to gcp
 x Test dev environment and restore backups
 x Update backup docs
-- Setup zfs exporter and grafana - https://github.com/aroberts/ansible-role-zfs_exporter
-- Setup snapraid/mergerfs grafana - https://github.com/ljmerza/snapraid-collector
-- Rename talos vm zfs data
-- Update ip addresses for prod
-- Remove minio legacy
-- Add forgejo webhook
+x Rename talos vm zfs data
+x Update ip addresses for prod
+x Remove minio legacy
+x Config harbor
+x Add forgejo webhook
+x Config servarr
+  x radarr
+  x sonarr
+  x flaresolverr
+  x prowlarr
+  x qbittorrent
+x Update secrets for servarr stack and connect
+x Ensure qbittorrent functions correctly
+x Add minio grafana
+x Update dashy links for minio
 
 # Prep for exposure
 - Refactor gitea actions as argo workflows
@@ -55,6 +64,12 @@ x Update backup docs
   - only allow cloudflare ip's
   - expose 443 on dmz
 - Consider Zeek
+
+# Backup/storage observability
+- Create k8up backup dashboard w/ alerts
+- Add dashy links for zfs exporter and snapraid/mergerfs grafana
+- Setup zfs exporter and grafana - https://github.com/aroberts/ansible-role-zfs_exporter
+- Setup snapraid/mergerfs grafana - https://github.com/ljmerza/snapraid-collector
 
 # Refactor internal coms
 - Change harbor s3 integration to use internal minio svc instead of traefik ingress

@@ -46,7 +46,7 @@ spec:
             # websocket: true
             routes:
               - kind: Rule
-                match: Host(`qb.bhamm-lab.com`)
+                match: Host(`qbittorrent.bhamm-lab.com`)
                 middlewares:
                   - name: default-headers
                 services:

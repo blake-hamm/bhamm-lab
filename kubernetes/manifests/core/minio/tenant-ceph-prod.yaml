@@ -64,6 +64,8 @@ spec:
               value: "off"
             - name: MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC
               value: "off"
+            - name: MINIO_PROMETHEUS_AUTH_TYPE
+              value: "public"
           prometheusOperator: false
   syncPolicy:
     syncOptions:

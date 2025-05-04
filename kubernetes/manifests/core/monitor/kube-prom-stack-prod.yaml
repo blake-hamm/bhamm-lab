@@ -100,13 +100,6 @@ spec:
               traefik:
                 gnetId: 17347
                 revision: 9
-              metallb:
-                url: https://raw.githubusercontent.com/blake-hamm/grafana-dashboards/refs/heads/main/dashboards/metallb.json
-                token: ''
-              calico:
-                gnetId: 12175
-                revision: 5
-                datasource: Prometheus
               node-exporter-full:
                 gnetId: 1860
                 revision: 37
@@ -131,6 +124,12 @@ spec:
                 token: ''
               amd-gpu:
                 url: https://raw.githubusercontent.com/blake-hamm/gpu-operator/refs/heads/feature/grafana-update/grafana/dashboard_gpu.json
+                token: ''
+              minio-cluster:
+                url: https://raw.githubusercontent.com/blake-hamm/minio/refs/heads/master/docs/metrics/prometheus/grafana/minio-dashboard.json
+                token: ''
+              minio-bucket:
+                url: https://raw.githubusercontent.com/blake-hamm/minio/refs/heads/master/docs/metrics/prometheus/grafana/bucket/minio-bucket.json
                 token: ''
           dashboardProviders:
             dashboardproviders.yaml:
@@ -178,21 +177,34 @@ spec:
                       - '10.0.20.11:9283' # Aorus
                       - '10.0.20.12:9283' # Antsle
                       - '10.0.20.13:9283' # Super
-            scrapeConfigSelector:
-              matchExpressions:
-                - key: release
-                  operator: In
-                  values: [monitor, kube-prometheus-stack]
-            serviceMonitorSelector:
-              matchExpressions:
-                - key: release
-                  operator: In
-                  values: [monitor, kube-prometheus-stack]
-            podMonitorSelector:
-              matchExpressions:
-                - key: release
-                  operator: In
-                  values: [monitor, kube-prometheus-stack]
+              - job_name: minio-job
+                metrics_path: /minio/v2/metrics/cluster
+                scheme: https
+                tls_config:
+                  insecure_skip_verify: true
+                static_configs:
+                  - targets: ['minio-ceph-hl.ceph:9000', 'minio-nfs-hl.nfs:9000']
+              - job_name: minio-job-node
+                metrics_path: /minio/v2/metrics/node
+                scheme: https
+                tls_config:
+                  insecure_skip_verify: true
+                static_configs:
+                  - targets: ['minio-ceph-hl.ceph:9000', 'minio-nfs-hl.nfs:9000']
+              - job_name: minio-job-bucket
+                metrics_path: /minio/v2/metrics/bucket
+                scheme: https
+                tls_config:
+                  insecure_skip_verify: true
+                static_configs:
+                  - targets: ['minio-ceph-hl.ceph:9000', 'minio-nfs-hl.nfs:9000']
+              - job_name: minio-job-resource
+                metrics_path: /minio/v2/metrics/resource
+                scheme: https
+                tls_config:
+                  insecure_skip_verify: true
+                static_configs:
+                  - targets: ['minio-ceph-hl.ceph:9000', 'minio-nfs-hl.nfs:9000']
             storageSpec:
               volumeClaimTemplate:
                 metadata:

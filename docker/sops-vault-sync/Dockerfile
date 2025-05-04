@@ -1,3 +1,4 @@
+# Sops sync (used in forgejo webhook - ci)
 FROM harbor.bhamm-lab.com/dockerhub/debian:bookworm-slim
 
 # Install base dependencies

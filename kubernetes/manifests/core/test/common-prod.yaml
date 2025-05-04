@@ -47,8 +47,8 @@ spec:
           backups:
             enabled: true
             retention: "3d"
-          restore:
-            enabled: true
+            # restore:
+            #   enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

@@ -127,7 +127,7 @@ data:
       - title: Qbittorrent
         description: Visit qbittorrent
         icon: hl-qbittorrent
-        url: https://qb.bhamm-lab.com/
+        url: https://qbittorrent.bhamm-lab.com/
 
     - name: Monitoring
       icon: mdi-finance
@@ -223,10 +223,24 @@ data:
     - name: Storage
       icon: mdi-database
       items:
-      - title: Minio
-        description: Visit minio
+      - title: Minio Ceph
+        description: Visit minio ceph
         icon: hl-minio-light
-        url: https://minio.bhamm-lab.com/
+        url: https://minio-ceph.bhamm-lab.com/
+      - title: Minio NFS
+        description: Visit minio nfs
+        icon: hl-minio-light
+        url: https://minio-nfs.bhamm-lab.com/
+      - title: Minio
+        description: Minio grafana dashboard
+        icon: hl-grafana
+        url: https://grafana.bhamm-lab.com/d/TgmJnqnnk/minio-dashboard?orgId=1&from=now-6h&to=now&timezone=browser&var-scrape_jobs=$__all
+        statusCheck: false
+      - title: Minio Bucket
+        description: Minio bucket grafana dashboard
+        icon: hl-grafana
+        url: https://grafana.bhamm-lab.com/d/TgmJnqnnk2/minio-bucket-dashboard?orgId=1&from=now-6h&to=now&timezone=America%2FDenver&var-scrape_jobs=minio-job-bucket
+        statusCheck: false
       - title: Ceph
         description: Visit Ceph grafana dashboard
         icon: hl-ceph

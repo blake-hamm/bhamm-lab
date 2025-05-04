@@ -17,5 +17,5 @@ metadata:
   name: external
 spec:
   blocks:
-    - start: "10.0.30.141"
-      stop: "10.0.30.149"
+    - start: "10.0.30.31"
+      stop: "10.0.30.39"
