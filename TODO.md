@@ -58,6 +58,26 @@
 - Try argocd w/ gitea internal svc
 - Change frequency of dashy pings
 
+# Troubleshot
+```bash
+From root@aorus.bhamm-lab.com Sun May 04 00:00:04 2025
+Envelope-to: root@aorus.bhamm-lab.com
+Delivery-date: Sun, 04 May 2025 00:00:04 -0600
+From: root@aorus.bhamm-lab.com (Cron Daemon)
+To: root@aorus.bhamm-lab.com
+Subject: Cron <root@aorus> snapraid scrub --plan 22 --older-than 8
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+X-Cron-Env: <SHELL=/bin/sh>
+X-Cron-Env: <HOME=/root>
+X-Cron-Env: <PATH=/usr/bin:/bin>
+X-Cron-Env: <LOGNAME=root>
+Date: Sun, 04 May 2025 00:00:01 -0600
+
+/bin/sh: 1: snapraid: not found
+```
+
 # Omada sdn
 - Setup 3 wifi networks
   x Polk_Paradise
