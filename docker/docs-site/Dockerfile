@@ -15,14 +15,17 @@ COPY nginx.conf /etc/nginx/nginx.conf
 RUN rm -rf /etc/nginx/conf.d/*
 COPY default.conf /etc/nginx/conf.d/default.conf
 
-# 3) Fix permissions on both config files and the site
+# 3) Copy the MkDocs-built site into the Nginx html directory
+COPY --from=builder /docs/site /usr/share/nginx/html
+
+# 4) Fix permissions on all configs and site files
 RUN \
   chown root:nginx /etc/nginx/nginx.conf && \
   chmod 644       /etc/nginx/nginx.conf && \
   chown root:nginx /etc/nginx/conf.d/default.conf && \
   chmod 644       /etc/nginx/conf.d/default.conf && \
   chown -R nginx:nginx /usr/share/nginx/html && \
-  chmod -R 755   /usr/share/nginx/html
+  chmod -R 755       /usr/share/nginx/html
 
 USER nginx
 EXPOSE 8080
