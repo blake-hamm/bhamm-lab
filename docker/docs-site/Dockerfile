@@ -1,4 +1,4 @@
-FROM python:3.11-slim AS builder
+FROM python:3.10-slim AS builder
 
 WORKDIR /app
 
@@ -42,9 +42,9 @@ RUN addgroup -S nginx-group && \
     chmod 755 /etc/nginx/conf.d
 
 # Create necessary directories with proper permissions
-RUN mkdir -p /tmp/nginx/client-body && \
+RUN mkdir -p /tmp/nginx/client-body /tmp/nginx/proxy /tmp/nginx/fastcgi /tmp/nginx/uwsgi /tmp/nginx/scgi && \
     chown -R nginx-user:nginx-group /tmp/nginx && \
-    chmod 755 /tmp/nginx /tmp/nginx/client-body
+    chmod 755 /tmp/nginx /tmp/nginx/client-body /tmp/nginx/proxy /tmp/nginx/fastcgi /tmp/nginx/uwsgi /tmp/nginx/scgi
 
 # Switch to non-root user
 USER nginx-user
