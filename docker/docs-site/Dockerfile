@@ -1,12 +1,29 @@
-FROM harbor.bhamm-lab.com/dockerhub/python:3.12-alpine
+# Stage 1: Build MkDocs site with plugins
+FROM python:3.11-alpine as builder
 
-
-COPY . .
-
+WORKDIR /docs
 RUN pip install --no-cache-dir mkdocs mkdocs-material
 
-RUN mkdocs build
+COPY . .
+RUN mkdocs build --strict --clean
 
-EXPOSE 8000
+# Stage 2: Serve with Nginx (with security hardening)
+FROM nginx:1.25-alpine
 
-CMD ["mkdocs", "serve", "--dev-addr", "0.0.0.0:8000"]
+# Remove default nginx configs
+RUN rm -rf /etc/nginx/conf.d/*
+
+# Custom Nginx config (optimized for static sites)
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy built docs from builder
+COPY --from=builder /docs/site /usr/share/nginx/html
+
+# Security: Run as non-root user
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chmod -R 755 /usr/share/nginx/html
+
+USER nginx
+
+EXPOSE 8080
+CMD ["nginx", "-g", "daemon off;"]
