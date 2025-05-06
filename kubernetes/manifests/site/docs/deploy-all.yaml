@@ -92,7 +92,7 @@ apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
   name: strip-docs-prefix
-  namespace: docs
+  namespace: traefik
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "1"
