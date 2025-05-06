@@ -57,10 +57,14 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 3
           volumeMounts:
-            - name: nginx-cache
+            - name: cache
               mountPath: /var/cache/nginx
+            - name: run
+              mountPath: /var/run
       volumes:
-        - name: nginx-cache
+        - name: cache
+          emptyDir: {}
+        - name: run
           emptyDir: {}
       securityContext:
         runAsNonRoot: true
