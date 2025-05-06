@@ -26,8 +26,8 @@ spec:
                   - name: default-headers
                 services:
                   - name: docs-site
-                    scheme: https
-                    port: 80
+                    scheme: http
+                    port: http
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

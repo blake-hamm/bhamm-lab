@@ -81,8 +81,9 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 80
-      targetPort: 8000
+      targetPort: 8080
   selector:
     app: docs-site
