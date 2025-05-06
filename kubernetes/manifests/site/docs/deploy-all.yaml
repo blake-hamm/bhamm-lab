@@ -38,10 +38,19 @@ spec:
               cpu: "100m"
           securityContext:
             allowPrivilegeEscalation: false
+            runAsUser: 101
+            runAsGroup: 101
             readOnlyRootFilesystem: true
             capabilities:
               drop:
                 - ALL
+          resources:
+            limits:
+              cpu: "0.5"
+              memory: "512Mi"
+            requests:
+              cpu: "0.2"
+              memory: "256Mi"
           livenessProbe:
             httpGet:
               path: /
@@ -68,8 +77,8 @@ spec:
           emptyDir: {}
       securityContext:
         runAsNonRoot: true
-        runAsUser: 101
-        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
 ---
 apiVersion: v1
 kind: Service
