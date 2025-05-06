@@ -22,8 +22,8 @@ RUN mkdocs build
 FROM nginx:1.28-alpine
 
 # Copy custom nginx configuration first
-COPY nginx/nginx.conf /etc/nginx/nginx.conf
-COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY default.conf /etc/nginx/conf.d/default.conf
 
 # Copy built files from builder stage
 COPY --from=builder /app/site /usr/share/nginx/html
