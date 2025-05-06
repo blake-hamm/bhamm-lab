@@ -25,42 +25,41 @@ spec:
         app: docs-site
     spec:
       containers:
-        - name: docs-site
+        - name: docs-server
           image: harbor.bhamm-lab.com/library/docs-site:latest
           ports:
-            - containerPort: 8000
-          env:
-            - name: PYTHONUNBUFFERED
-              value: "1"
+            - containerPort: 8080
           resources:
             requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
               memory: "128Mi"
               cpu: "100m"
-            limits:
-              memory: "256Mi"
-              cpu: "200m"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           livenessProbe:
             httpGet:
               path: /
-              port: 8000
+              port: 8080
             initialDelaySeconds: 10
             periodSeconds: 15
+            timeoutSeconds: 3
           readinessProbe:
             httpGet:
               path: /
-              port: 8000
+              port: 8080
             initialDelaySeconds: 5
             periodSeconds: 10
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 1000
-            readOnlyRootFilesystem: true
-          volumeMounts:
-            - name: tmp-dir
-              mountPath: /tmp
-      volumes:
-        - name: tmp-dir
-          emptyDir: {}
+            timeoutSeconds: 3
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        fsGroup: 101
 ---
 apiVersion: v1
 kind: Service
