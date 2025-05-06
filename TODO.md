@@ -1,11 +1,9 @@
 # Deploy docs site
-- Create ci/cd with argo workflows to deploy when docs change
-  - Decouple docker steps from forgejo-docker-all.yaml into templates
-  - Create new forgejo-docs-all.yaml event file to build docker image
-  - Deploy docker image with argocd
-- Create some architecture diagrams
+x Create ci/cd with argo workflows to deploy when docs change
 - Update docs flow and make less AI slop
+- Create some architecture diagrams
 - Automated changelog
+- Add docs link to dashy
 
 # Start building website
 - Setup Hugo - https://github.com/adityatelange/hugo-PaperMod
