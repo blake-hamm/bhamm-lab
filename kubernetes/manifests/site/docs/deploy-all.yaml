@@ -70,7 +70,6 @@ spec:
         runAsNonRoot: true
         runAsUser: 101
         fsGroup: 101
-        readOnlyRootFilesystem: true
 ---
 apiVersion: v1
 kind: Service
