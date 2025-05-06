@@ -8,7 +8,7 @@ COPY . .
 RUN mkdocs build --strict --clean
 
 # Stage 2: Serve with Nginx (with security hardening)
-FROM nginx:1.25-alpine
+FROM nginx:1.28-alpine
 
 # Remove default configs and copy ours
 RUN rm -rf /etc/nginx/conf.d/*
