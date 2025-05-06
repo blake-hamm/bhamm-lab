@@ -132,6 +132,7 @@ spec:
                         for commit in commits:
                             for path in commit.get('added', []) + commit.get('modified', []):
                                 parts = path.split('/')
+                                print(parts)
                                 if len(parts) >= 2 and parts[0] == 'dockerfile':
                                     dir_name = parts[1]
                                     dockerfile_path = os.path.join('dockerfile', dir_name, 'Dockerfile')
