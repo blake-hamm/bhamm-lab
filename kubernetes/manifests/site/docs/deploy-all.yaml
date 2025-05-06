@@ -51,10 +51,6 @@ spec:
               port: 8000
             initialDelaySeconds: 5
             periodSeconds: 10
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 1000
-            readOnlyRootFilesystem: true
           volumeMounts:
             - name: tmp-dir
               mountPath: /tmp
