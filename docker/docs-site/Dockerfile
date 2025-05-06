@@ -10,13 +10,15 @@ RUN mkdocs build --strict --clean
 # Stage 2: Serve with Nginx (with security hardening)
 FROM nginx:1.25-alpine
 
-# Remove default nginx configs
+# Remove default configs and copy ours
 RUN rm -rf /etc/nginx/conf.d/*
-
-# Custom Nginx config (optimized for static sites)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy built docs from builder
+# Make sure nginx user can read it
+RUN chown root:nginx /etc/nginx/conf.d/default.conf \
+    && chmod 644 /etc/nginx/conf.d/default.conf
+
+# Copy static site (from your builder stage)
 COPY --from=builder /docs/site /usr/share/nginx/html
 
 # Security: Run as non-root user
