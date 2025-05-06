@@ -1,4 +1,5 @@
-site_name: My Docs
+site_name: bhamm-lab.com Docs
+site_url: https://bhamm-lab.com/docs/
 theme:
   name: material
   features:
