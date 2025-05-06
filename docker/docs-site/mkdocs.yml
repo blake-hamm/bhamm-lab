@@ -1,6 +1,5 @@
 site_name: bhamm-lab docs
-site_url: https://bhamm-lab.com/docs
-use_directory_urls: false
+use_directory_urls: true
 theme:
   name: material
   features:
