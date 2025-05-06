@@ -21,28 +21,30 @@ RUN mkdocs build
 # Use nginx to serve static files
 FROM nginx:1.28-alpine
 
-# Security hardening
-RUN apk add --no-cache shadow && \
-    groupadd -r nginx-group && \
-    useradd -r -g nginx-group -s /sbin/nologin -c "Nginx user" nginx-user && \
-    touch /var/run/nginx.pid && \
-    chown -R nginx-user:nginx-group /var/cache/nginx /var/run/nginx.pid
-
-# Copy custom nginx configuration
-COPY default.conf /etc/nginx/conf.d/default.conf
+# Copy custom nginx configuration first
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 
 # Copy built files from builder stage
 COPY --from=builder /app/site /usr/share/nginx/html
 
-# Remove default nginx config and use custom one
+# Remove default nginx config
 RUN rm -f /etc/nginx/conf.d/default.conf.default
 
-# Security headers and configuration
-COPY nginx.conf /etc/nginx/nginx.conf
+# Security hardening and set proper ownership
+RUN addgroup -S nginx-group && \
+    adduser -S -G nginx-group -s /sbin/nologin -H nginx-user && \
+    mkdir -p /var/cache/nginx /var/run && \
+    touch /var/run/nginx.pid && \
+    chown -R nginx-user:nginx-group /var/cache/nginx /var/run/nginx.pid /usr/share/nginx/html /etc/nginx/conf.d /etc/nginx/nginx.conf && \
+    chmod -R 755 /usr/share/nginx/html && \
+    chmod -R 644 /etc/nginx/conf.d/* /etc/nginx/nginx.conf && \
+    chmod 755 /etc/nginx/conf.d
 
-# Set proper ownership
-RUN chown -R nginx-user:nginx-group /usr/share/nginx/html && \
-    chmod -R 755 /usr/share/nginx/html
+# Create necessary directories with proper permissions
+RUN mkdir -p /tmp/nginx/client-body && \
+    chown -R nginx-user:nginx-group /tmp/nginx && \
+    chmod 755 /tmp/nginx /tmp/nginx/client-body
 
 # Switch to non-root user
 USER nginx-user
