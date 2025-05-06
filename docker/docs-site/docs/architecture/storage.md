@@ -1,4 +1,4 @@
-# Storage Architecture
+# Storage
 
 ## Overview
 This document details the storage architecture employed in the lab. It covers the two primary storage solutions in use—Ceph and MergerFS combined with SnapRAID—as well as a retrospective look at ZFS, which was previously evaluated but ultimately found less suitable for a heterogeneous hardware environment. Additionally, the document outlines the use of Google Cloud Platform (GCP) storage for offsite backups to ensure data resilience and disaster recovery.

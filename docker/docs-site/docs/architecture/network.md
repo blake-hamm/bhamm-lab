@@ -1,4 +1,4 @@
-# Network Architecture
+# Network
 
 ## Overview
 This document outlines the network architecture of the lab, detailing both the physical and logical components that ensure robust, secure, and scalable connectivity. It covers the topology, key network devices, VLAN segmentation, IP addressing, cabling infrastructure, and security policies.

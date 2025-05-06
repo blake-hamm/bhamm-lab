@@ -1,4 +1,4 @@
-# Hardware Infrastructure
+# Hardware
 
 ## Overview
 This page provides an architectural view of the lab’s physical infrastructure. It covers the hardware inventory, physical organization, connectivity, and future expansion plans.

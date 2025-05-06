@@ -1,17 +1,11 @@
 # Deploy docs site
 - Create ci/cd with argo workflows to deploy when docs change
-  - Build docker image
-  - Deploy docker image
+  - Decouple docker steps from forgejo-docker-all.yaml into templates
+  - Create new forgejo-docs-all.yaml event file to build docker image
+  - Deploy docker image with argocd
 - Create some architecture diagrams
 - Update docs flow and make less AI slop
 - Automated changelog
-
-# Prep for exposure
-- Refactor gitea actions as argo workflows
-- Traefik
-  - setup new ip for dmz
-  - block *.bhamm-lab.com from public
-  - Setup split dns (wildcard internal, www. dmz)
 
 # Start building website
 - Setup Hugo - https://github.com/adityatelange/hugo-PaperMod
@@ -21,6 +15,14 @@
 - Deploy portfolio links at bhamm-lab.com/portfolio/
 - Deploy portfolio links at bhamm-lab.com/about/
 - Deploy portfolio links at bhamm-lab.com/contact/
+- Deploy blogs at bhamm-lab.com/blogs/
+
+# Prep for exposure
+- Refactor gitea actions as argo workflows
+- Traefik
+  - setup new ip for dmz
+  - block *.bhamm-lab.com from public
+  - Setup split dns (wildcard internal, www. dmz)
 
 # Expose bhamm-lab.com
 - Setup alerts for nodes and traefik

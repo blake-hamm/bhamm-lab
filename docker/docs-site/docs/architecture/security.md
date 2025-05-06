@@ -1,4 +1,4 @@
-# Security Architecture
+# Security
 
 ## Overview
 This document outlines the security architecture of the lab environment. It details the measures implemented to secure the network, manage sensitive data, enforce access controls, and securely expose services to external users. The lab’s security framework is built around best practices such as network segmentation with VLANs, robust secrets management with SOPS and Vault, role-based access controls (RBAC), and secure external access via Cloudflare tunnels. These layers of defense work together to protect the integrity, confidentiality, and availability of the lab’s resources.
