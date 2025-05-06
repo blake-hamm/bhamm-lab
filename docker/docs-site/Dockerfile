@@ -1,32 +1,53 @@
-# Stage 1: Build MkDocs site with plugins
-FROM python:3.11-alpine AS builder
-WORKDIR /docs
-RUN pip install --no-cache-dir mkdocs mkdocs-material
-COPY . .
-RUN mkdocs build --strict --clean
+FROM python:3.11-slim AS builder
 
-# Stage 2: Serve with Nginx (with security hardening)
+WORKDIR /app
+
+# Install required dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy mkdocs files
+COPY . .
+
+# Build static site
+RUN mkdocs build
+
+# Use nginx to serve static files
 FROM nginx:1.28-alpine
 
-# 1) Replace the main nginx.conf so we can pull in mime.types globally
-COPY nginx.conf /etc/nginx/nginx.conf
+# Security hardening
+RUN apk add --no-cache shadow && \
+    groupadd -r nginx-group && \
+    useradd -r -g nginx-group -s /sbin/nologin -c "Nginx user" nginx-user && \
+    touch /var/run/nginx.pid && \
+    chown -R nginx-user:nginx-group /var/cache/nginx /var/run/nginx.pid
 
-# 2) Remove default vhosts, then add ours
-RUN rm -rf /etc/nginx/conf.d/*
+# Copy custom nginx configuration
 COPY default.conf /etc/nginx/conf.d/default.conf
 
-# 3) Copy the MkDocs-built site into the Nginx html directory
-COPY --from=builder /docs/site /usr/share/nginx/html
+# Copy built files from builder stage
+COPY --from=builder /app/site /usr/share/nginx/html
 
-# 4) Fix permissions on all configs and site files
-RUN \
-  chown root:nginx /etc/nginx/nginx.conf && \
-  chmod 644       /etc/nginx/nginx.conf && \
-  chown root:nginx /etc/nginx/conf.d/default.conf && \
-  chmod 644       /etc/nginx/conf.d/default.conf && \
-  chown -R nginx:nginx /usr/share/nginx/html && \
-  chmod -R 755       /usr/share/nginx/html
+# Remove default nginx config and use custom one
+RUN rm -f /etc/nginx/conf.d/default.conf.default
 
-USER nginx
+# Security headers and configuration
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Set proper ownership
+RUN chown -R nginx-user:nginx-group /usr/share/nginx/html && \
+    chmod -R 755 /usr/share/nginx/html
+
+# Switch to non-root user
+USER nginx-user
+
 EXPOSE 8080
+
+# Use non-privileged port
 CMD ["nginx", "-g", "daemon off;"]
