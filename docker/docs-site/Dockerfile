@@ -1,4 +1,4 @@
-FROM harbor.bhamm-lab.com/dockerhub/python:3.11-alpine
+FROM harbor.bhamm-lab.com/dockerhub/python:3.12-alpine
 
 COPY . .
 
