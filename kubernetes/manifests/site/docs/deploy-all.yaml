@@ -56,10 +56,17 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 3
+          volumeMounts:
+            - name: nginx-cache
+              mountPath: /var/cache/nginx
+      volumes:
+        - name: nginx-cache
+          emptyDir: {}
       securityContext:
         runAsNonRoot: true
         runAsUser: 101
         fsGroup: 101
+        readOnlyRootFilesystem: true
 ---
 apiVersion: v1
 kind: Service
