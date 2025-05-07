@@ -4,6 +4,9 @@ x Create ci/cd with argo workflows to deploy when docs change
 - Create some architecture diagrams
 - Automated changelog
 - Add docs link to dashy
+- ADHOC: Fix backups
+  - Add prunes/checks to local backup schedule
+  - Compression?
 
 # Start building website
 - Setup Hugo - https://github.com/adityatelange/hugo-PaperMod

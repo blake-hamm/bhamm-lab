@@ -19,6 +19,9 @@ spec:
         k8up:
           timezone: "America/Denver"
           skipWithoutAnnotation: true
+          envVars:
+            - name: BACKUP_COMMAND_RESTIC
+              value: "/usr/local/bin/k8up,restic,--compression,max"
         metrics:
           service:
             port: 8080
