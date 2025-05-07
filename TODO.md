@@ -8,6 +8,7 @@ x Create ci/cd with argo workflows to deploy when docs change
   - Add prunes/checks to local backup schedule
   - Compression?
   - Add k8up prometheus/grafana
+  - Check loki logs
 
 # Start building website
 - Setup Hugo - https://github.com/adityatelange/hugo-PaperMod
