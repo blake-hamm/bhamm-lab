@@ -39,6 +39,9 @@ spec:
         k8up:
           backup:
             enabled: true
+            schedule: "*/30 * * * *"
+            checkSchedule: "*/50 * * * *"
+            pruneSchedule: "*/45 * * * *"
           restores:
             - snapshot: "latest"
               claimName: "test"
