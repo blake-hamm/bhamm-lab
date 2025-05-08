@@ -6,9 +6,9 @@ x Create ci/cd with argo workflows to deploy when docs change
 - Add docs link to dashy
 - ADHOC: Fix backups
   - Add prunes/checks to local backup schedule
-  - Compression?
+  x Compression w/ restic (need to test)
   - Add k8up prometheus/grafana
-  - Check loki logs
+  - Check loki logs (ex: k8up, minio)
 
 # Start building website
 - Setup Hugo - https://github.com/adityatelange/hugo-PaperMod

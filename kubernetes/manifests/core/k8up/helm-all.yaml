@@ -20,8 +20,8 @@ spec:
           timezone: "America/Denver"
           skipWithoutAnnotation: true
           envVars:
-            - name: BACKUP_COMMAND_RESTIC
-              value: "/usr/local/bin/k8up,restic,--compression,max"
+            - name: RESTIC_COMPRESSION
+              value: max
         metrics:
           service:
             port: 8080
