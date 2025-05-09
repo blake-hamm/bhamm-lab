@@ -31,10 +31,11 @@ spec:
             nodePort: 0
             annotations: {}
           serviceMonitor:
-            enabled: false
+            enabled: true
             scrapeInterval: 60s
             namespace: ""
-            additionalLabels: {}
+            additionalLabels:
+              release: monitor
           prometheusRule:
             enabled: false
             namespace: ""

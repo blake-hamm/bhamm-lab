@@ -5,7 +5,7 @@ x Create ci/cd with argo workflows to deploy when docs change
 - Automated changelog
 - Add docs link to dashy
 - ADHOC: Fix backups
-  - Add prunes/checks to local backup schedule
+  x Add prunes/checks to local backup schedule
   x Compression w/ restic (need to test)
   - Add k8up prometheus/grafana
   - Check loki logs (ex: k8up, minio)

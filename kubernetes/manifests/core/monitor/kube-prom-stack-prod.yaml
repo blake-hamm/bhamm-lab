@@ -131,6 +131,10 @@ spec:
               minio-bucket:
                 url: https://raw.githubusercontent.com/blake-hamm/minio/refs/heads/master/docs/metrics/prometheus/grafana/bucket/minio-bucket.json
                 token: ''
+              k8up:
+                gnetId: 20166
+                revision: 4
+                datasource: Prometheus
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
