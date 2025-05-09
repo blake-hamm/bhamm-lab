@@ -132,9 +132,8 @@ spec:
                 url: https://raw.githubusercontent.com/blake-hamm/minio/refs/heads/master/docs/metrics/prometheus/grafana/bucket/minio-bucket.json
                 token: ''
               k8up:
-                gnetId: 20166
-                revision: 4
-                datasource: Prometheus
+                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/feature/docs/kubernetes/manifests/core/monitor/dashboards/k8up.json
+                token: ''
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
