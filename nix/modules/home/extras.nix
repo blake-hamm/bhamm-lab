@@ -11,6 +11,7 @@
       drawio
       dbeaver-bin
       virt-manager
+      obs-studio
       # signal-desktop
       # gnome-network-displays
       # steam
