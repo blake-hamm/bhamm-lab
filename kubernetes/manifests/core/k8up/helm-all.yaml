@@ -19,6 +19,9 @@ spec:
         k8up:
           timezone: "America/Denver"
           skipWithoutAnnotation: true
+          envVars:
+            - name: RESTIC_COMPRESSION
+              value: max
         metrics:
           service:
             port: 8080
@@ -28,10 +31,11 @@ spec:
             nodePort: 0
             annotations: {}
           serviceMonitor:
-            enabled: false
+            enabled: true
             scrapeInterval: 60s
             namespace: ""
-            additionalLabels: {}
+            additionalLabels:
+              release: monitor
           prometheusRule:
             enabled: false
             namespace: ""

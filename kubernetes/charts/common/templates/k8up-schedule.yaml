@@ -28,11 +28,11 @@ spec:
     # optional
     #promURL: https://prometheus-io-instance:8443
   check:
-    schedule: '0 1 * * 1'
+    schedule: "{{ .Values.k8up.backup.checkSchedule }}"
     # optional
     #promURL: https://prometheus-io-instance:8443
   prune:
-    schedule: '0 1 * * 0'
+    schedule: "{{ .Values.k8up.backup.pruneSchedule }}"
     retention:
       keepLast: 5
       keepDaily: 2

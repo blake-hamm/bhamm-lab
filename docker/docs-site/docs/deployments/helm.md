@@ -68,6 +68,3 @@ Set up K8up for backups (and optional restores):
         enabled: false          # Enable restores if needed
         snapshot: ""
 ```
-
-## Troubleshooting
-

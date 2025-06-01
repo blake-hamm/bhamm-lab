@@ -19,9 +19,17 @@ spec:
         storageClass:
           create: true
           defaultClass: false
+          annotations:
+            k8up.io/backup: "true"
         nfs:
           server: 10.0.20.11
           path: /mnt/storage/kubernetes
+          mountOptions:
+            - hard
+            - timeo=600
+            - retrans=2
+            - nfsvers=4.2
+            - noatime
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

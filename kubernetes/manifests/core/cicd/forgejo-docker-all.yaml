@@ -131,8 +131,12 @@ spec:
                         docker_files = []
                         for commit in commits:
                             for path in commit.get('added', []) + commit.get('modified', []):
-                                if path.startswith('docker/') and path.endswith('Dockerfile'):
-                                    docker_files.append(path)
+                                parts = path.split('/')
+                                if len(parts) >= 2 and parts[0] == 'docker':
+                                    dir_name = parts[1]
+                                    dockerfile_path = os.path.join('docker', dir_name, 'Dockerfile')
+                                    if dockerfile_path not in docker_files:
+                                        docker_files.append(dockerfile_path)
 
                         print(json.dumps(docker_files))
                   - name: prepare-docker-config

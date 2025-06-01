@@ -131,6 +131,12 @@ spec:
               minio-bucket:
                 url: https://raw.githubusercontent.com/blake-hamm/minio/refs/heads/master/docs/metrics/prometheus/grafana/bucket/minio-bucket.json
                 token: ''
+              k8up:
+                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/feature/docs/kubernetes/manifests/core/monitor/dashboards/k8up.json
+                token: ''
+              nfs:
+                url: https://raw.githubusercontent.com/blake-hamm/nfs-grafana/refs/heads/master/prometheus/nfs-full.json
+                token: ''
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
@@ -205,6 +211,21 @@ spec:
                   insecure_skip_verify: true
                 static_configs:
                   - targets: ['minio-ceph-hl.ceph:9000', 'minio-nfs-hl.nfs:9000']
+            scrapeConfigSelector:
+              matchExpressions:
+                - key: release
+                  operator: In
+                  values: [monitor, kube-prometheus-stack]
+            serviceMonitorSelector:
+              matchExpressions:
+                - key: release
+                  operator: In
+                  values: [monitor, kube-prometheus-stack]
+            podMonitorSelector:
+              matchExpressions:
+                - key: release
+                  operator: In
+                  values: [monitor, kube-prometheus-stack]
             storageSpec:
               volumeClaimTemplate:
                 metadata:

@@ -26,6 +26,18 @@ spec:
               remoteRef:
                 key: /external/gcp
                 property: project_id
+            - secretKey: repo-password
+              remoteRef:
+                key: /core/k8up
+                property: repo-password
+            - secretKey: accessKeyID
+              remoteRef:
+                key: /core/minio
+                property: CONSOLE_ACCESS_KEY
+            - secretKey: secretAccessKeySecret
+              remoteRef:
+                key: /core/minio
+                property: CONSOLE_SECRET_KEY
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

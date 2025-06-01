@@ -110,13 +110,13 @@ metadata:
   namespace: servarr
   annotations:
     argocd.argoproj.io/sync-wave: "11"
-    k8up.io/backup: "true"
+    k8up.io/backup: "false"
 spec:
   accessModes:
     - ReadWriteMany
   resources:
     requests:
-      storage: 200Gi
+      storage: 2Ti
   storageClassName: nfs-client
 ---
 apiVersion: v1
@@ -126,11 +126,11 @@ metadata:
   namespace: servarr
   annotations:
     argocd.argoproj.io/sync-wave: "11"
-    k8up.io/backup: "true"
+    k8up.io/backup: "false"
 spec:
   accessModes:
     - ReadWriteMany
   resources:
     requests:
-      storage: 500Gi
+      storage: 2Ti
   storageClassName: nfs-client

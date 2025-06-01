@@ -17,7 +17,9 @@ ingressRoutes: []
 k8up:
   backup:
     enabled: false
-    schedule: "0 8 * * *" # 8 am utc/1 am mst
+    schedule: "0 1 * * *"
+    checkSchedule: "0 3 * * *"
+    pruneSchedule: "0 4 * * *"
   restores: []
   # - snapshot: ""
   #   claimName: ""

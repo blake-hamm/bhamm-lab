@@ -1,35 +1,23 @@
-# Refactor backups/storage
-x Add pvc dashy link
-x Deploy second minio tenant w/ nfs storage
-x Backup to minio on nfs
-x Test backup/restore
-x Adjust forgejo storage to minio (retain pvc)
-x Use nfs for immich
-x Setup nfs minio backup to gcp
-x Test dev environment and restore backups
+# Deploy docs site
+x Create ci/cd with argo workflows to deploy when docs change
+- Update docs flow and make less AI slop
+  - Add photo of rack
+x Create architecture diagram
+x Update software architecture
 x Update backup docs
-x Rename talos vm zfs data
-x Update ip addresses for prod
-x Remove minio legacy
-x Config harbor
-x Add forgejo webhook
-x Config servarr
-  x radarr
-  x sonarr
-  x flaresolverr
-  x prowlarr
-  x qbittorrent
-x Update secrets for servarr stack and connect
-x Ensure qbittorrent functions correctly
-x Add minio grafana
-x Update dashy links for minio
-
-# Prep for exposure
-- Refactor gitea actions as argo workflows
-- Traefik
-  - setup new ip for dmz
-  - block *.bhamm-lab.com from public
-  - Setup split dns (wildcard internal, www. dmz)
+x Update deployment docs
+x Update operations docs
+x Update security docs
+x Add AI docs
+x Add docs link to dashy
+x ADHOC: Fix backups
+  x Add prunes/checks to local backup schedule
+  x Compression w/ restic (need to test)
+  x Add k8up prometheus/grafana
+  x Check loki logs (ex: k8up, minio)
+  x Delete servarr download/media backups from k8up
+  x Delete pvc on nfs not in cluster
+  x Balance mergerfs
 
 # Start building website
 - Setup Hugo - https://github.com/adityatelange/hugo-PaperMod
@@ -39,6 +27,16 @@ x Update dashy links for minio
 - Deploy portfolio links at bhamm-lab.com/portfolio/
 - Deploy portfolio links at bhamm-lab.com/about/
 - Deploy portfolio links at bhamm-lab.com/contact/
+- Deploy blogs at bhamm-lab.com/blogs/
+
+# Prep for exposure
+- Add kubernetes metrics
+- Switch from dev/prod to blue/green
+- Refactor gitea actions as argo workflows
+- Traefik
+  - setup new ip for dmz
+  - block *.bhamm-lab.com from public
+  - Setup split dns (wildcard internal, www. dmz)
 
 # Expose bhamm-lab.com
 - Setup alerts for nodes and traefik
@@ -76,6 +74,26 @@ x Update dashy links for minio
 - Try argocd w/ gitea internal svc
 - Change frequency of dashy pings
 
+# Troubleshot
+```bash
+From root@aorus.bhamm-lab.com Sun May 04 00:00:04 2025
+Envelope-to: root@aorus.bhamm-lab.com
+Delivery-date: Sun, 04 May 2025 00:00:04 -0600
+From: root@aorus.bhamm-lab.com (Cron Daemon)
+To: root@aorus.bhamm-lab.com
+Subject: Cron <root@aorus> snapraid scrub --plan 22 --older-than 8
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+X-Cron-Env: <SHELL=/bin/sh>
+X-Cron-Env: <HOME=/root>
+X-Cron-Env: <PATH=/usr/bin:/bin>
+X-Cron-Env: <LOGNAME=root>
+Date: Sun, 04 May 2025 00:00:01 -0600
+
+/bin/sh: 1: snapraid: not found
+```
+
 # Omada sdn
 - Setup 3 wifi networks
   x Polk_Paradise
@@ -92,12 +110,14 @@ x Update dashy links for minio
 - Integrate proxmox with traefik
 
 # AI
+- Switch to garage https://garagehq.deuxfleurs.fr/documentation/cookbook/kubernetes/
 - Setup with talos - https://github.com/siderolabs/talos/discussions/10286
 - Transtion amd operator to use custom docker image - https://instinct.docs.amd.com/projects/gpu-operator/en/latest/drivers/precompiled-driver.html
 - Create node taint to deny scheduling to gpu vm
 - Deploy openwebui - https://github.com/open-webui/helm-charts/tree/main/charts/open-webui (with ollama)
 
 # Finish
+- Switch to nfs csi driver - https://github.com/kubernetes-csi/csi-driver-nfs
 - Switch vm zfs name (and confirm prod backups)
 - Make forgejo ha - https://code.forgejo.org/forgejo-helm/forgejo-helm/src/branch/main/docs/ha-setup.md
 - Expose hubble and/or setup cilium prom/grafana metrics
@@ -189,6 +209,32 @@ x Update dashy links for minio
 - kube bench - https://github.com/aquasecurity/kube-bench
 
 ## Previous
+# Refactor backups/storage
+x Add pvc dashy link
+x Deploy second minio tenant w/ nfs storage
+x Backup to minio on nfs
+x Test backup/restore
+x Adjust forgejo storage to minio (retain pvc)
+x Use nfs for immich
+x Setup nfs minio backup to gcp
+x Test dev environment and restore backups
+x Update backup docs
+x Rename talos vm zfs data
+x Update ip addresses for prod
+x Remove minio legacy
+x Config harbor
+x Add forgejo webhook
+x Config servarr
+  x radarr
+  x sonarr
+  x flaresolverr
+  x prowlarr
+  x qbittorrent
+x Update secrets for servarr stack and connect
+x Ensure qbittorrent functions correctly
+x Add minio grafana
+x Update dashy links for minio
+
 # Servarr stack
 x Review hacks/default.bak
 x Setup nfs on aorus

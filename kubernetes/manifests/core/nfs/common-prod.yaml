@@ -62,7 +62,7 @@ spec:
                 property: AWS_SECRET_ACCESS_KEY
         k8up:
           backup:
-            enabled: true
+            enabled: false
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

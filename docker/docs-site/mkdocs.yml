@@ -1,4 +1,6 @@
-site_name: My Docs
+site_name: bhamm-lab docs
+site_url: https://bhamm-lab.com/docs
+use_directory_urls: true
 theme:
   name: material
   features:
@@ -21,3 +23,6 @@ theme:
         name: Switch to light mode
 plugins:
   - search
+  - mermaid2
+markdown_extensions:
+  - mdx_truly_sane_lists

@@ -16,7 +16,7 @@
     - network
     - mrlesmithjr.zfs
   become: true
-  tags: [network, storage]
+  tags: [network, zfs]
 - name: Configure Storage/NFS server 'aorus'
   hosts: aorus
   become: true
