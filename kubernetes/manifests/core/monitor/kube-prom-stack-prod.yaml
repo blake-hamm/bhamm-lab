@@ -132,7 +132,7 @@ spec:
                 url: https://raw.githubusercontent.com/blake-hamm/minio/refs/heads/master/docs/metrics/prometheus/grafana/bucket/minio-bucket.json
                 token: ''
               k8up:
-                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/feature/docs/kubernetes/manifests/core/monitor/dashboards/k8up.json
+                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/main/kubernetes/manifests/core/monitor/dashboards/k8up.json
                 token: ''
               nfs:
                 url: https://raw.githubusercontent.com/blake-hamm/nfs-grafana/refs/heads/master/prometheus/nfs-full.json
