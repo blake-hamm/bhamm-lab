@@ -13,7 +13,7 @@ spec:
   source:
     chart: metrics-server
     repoURL: https://charts.bitnami.com/bitnami
-    targetRevision: 7.4.7
+    targetRevision: 6.2.12
     helm:
       valuesObject:
         networkPolicy:
