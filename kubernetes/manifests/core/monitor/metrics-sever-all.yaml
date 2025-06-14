@@ -21,7 +21,7 @@ spec:
         apiService:
           create: true
         extraArgs:
-          - --kubelet-insecure-tls=true
+          - --kubelet-insecure-tls
           - --kubelet-preferred-address-types=InternalIP
   syncPolicy:
     syncOptions:
