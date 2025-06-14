@@ -18,6 +18,8 @@ spec:
       valuesObject:
         networkPolicy:
           enabled: false
+        apiService:
+          create: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
