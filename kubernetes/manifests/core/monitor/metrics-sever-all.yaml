@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     chart: metrics-server
-    repoURL: oci://registry-1.docker.io/bitnamicharts/metrics-server
+    repoURL: https://charts.bitnami.com/bitnami
     targetRevision: 7.4.7
     helm:
       valuesObject:
