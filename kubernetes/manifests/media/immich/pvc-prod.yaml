@@ -4,7 +4,7 @@ metadata:
   name: immich-library
   namespace: immich
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "1"
     k8up.io/backup: "true"
 spec:
   accessModes:
