@@ -51,7 +51,7 @@
   ansible.builtin.lineinfile:
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=.*'
-    line: 'GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX amd_iommu=on"'
+    line: 'GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX amd_iommu=on pcie_acs_override=id:8086:56a6,id:8086:4f92"'
     backrefs: true
   when: inventory_hostname == "aorus"
   notify:
