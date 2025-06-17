@@ -1,4 +1,4 @@
-environment        = "prod"
+environment        = "green"
 count_master       = 3
 count_worker       = 3
 master_vm_id_start = 110
