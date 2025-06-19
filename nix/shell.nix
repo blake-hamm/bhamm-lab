@@ -29,6 +29,7 @@ pkgs.mkShell {
     talosctl
     uv
     ceph-client
+    minio-client
   ];
 
   packages = [
