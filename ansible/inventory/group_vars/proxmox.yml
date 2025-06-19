@@ -95,6 +95,8 @@ pve_ceph_fs:
     pgs: 32 # adjust later
     rule: replicated_rule
     storage: false
+pve_ceph_rgw_enabled: true
+pve_ceph_rgw_dns: "s3-ceph.bhamm-lab.com"
 # pve_cluster_ha_groups:
 #   - name: main
 #     comment: "HA group"

@@ -22,7 +22,7 @@ roles:
     version: "2.5.0"
   - src: https://github.com/blake-hamm/ansible-role-proxmox.git
     name: lae.proxmox
-    version: "feature/support-amd-passthrough"
+    version: "feature/ceph-rgw"
   - name: aeriscloud.disk
     version: "v2.6.4"
   - name: tigattack.mergerfs
