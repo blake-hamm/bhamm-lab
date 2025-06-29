@@ -3,7 +3,8 @@ kind: Namespace
 metadata:
   name: ceph
   annotations:
-    argocd.argoproj.io/sync-wave: "-6"
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "0"
   labels:
     pod-security.kubernetes.io/enforce: privileged
 ---
@@ -13,7 +14,8 @@ metadata:
   name: ceph-csi-rbd
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "-5"
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   destination:
     namespace: ceph

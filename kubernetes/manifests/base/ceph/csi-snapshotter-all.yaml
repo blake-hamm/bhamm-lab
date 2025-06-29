@@ -1,17 +1,18 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: snapshot-controller
+  name: csi-snapshotter
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "-5"
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   project: default
   destination:
     namespace: ceph
     server: 'https://kubernetes.default.svc'
   source:
-    path: deploy/kubernetes/snapshot-controller
+    path: deploy/kubernetes/csi-snapshotter
     repoURL: https://github.com/kubernetes-csi/external-snapshotter
     targetRevision: v8.2.0
     kustomize:

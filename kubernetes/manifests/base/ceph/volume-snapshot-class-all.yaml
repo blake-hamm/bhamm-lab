@@ -4,9 +4,10 @@ metadata:
   name: ceph-snapclass
   namespace: ceph
   annotations:
+    argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/sync-wave: "1"
-    snapshot.storage.kubernetes.io/is-default-class: "true"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    snapshot.storage.kubernetes.io/is-default-class: "true"
   labels:
     velero.io/csi-volumesnapshot-class: "true"
 driver: rbd.csi.ceph.com
