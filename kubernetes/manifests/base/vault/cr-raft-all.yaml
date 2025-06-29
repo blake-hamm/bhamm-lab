@@ -8,7 +8,8 @@ metadata:
     vault_cr: vault
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "-5"
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   size: 3
   image: hashicorp/vault:1.19.3
@@ -65,12 +66,12 @@ spec:
     api_addr: https://vault.vault:8200
     cluster_addr: "https://${.Env.POD_NAME}:8201"
     ui: true
-  envsConfig:
-    - name: OIDC_VAULT_CLIENT_SECRET
-      valueFrom:
-        secretKeyRef:
-          name: vault-external-secret
-          key: OIDC_VAULT_CLIENT_SECRET
+  # envsConfig:
+  #   - name: OIDC_VAULT_CLIENT_SECRET
+  #     valueFrom:
+  #       secretKeyRef:
+  #         name: vault-external-secret
+  #         key: OIDC_VAULT_CLIENT_SECRET
   statsdDisabled: false
   serviceMonitorEnabled: true
   serviceRegistrationEnabled: true
@@ -115,21 +116,21 @@ spec:
             token_num_uses: 10
             token_ttl: 20m
             token_max_ttl: 30m
-      - type: oidc
-        config:
-          oidc_discovery_url: https://auth.bhamm-lab.com
-          oidc_client_id: vault
-          oidc_client_secret: "${env `OIDC_VAULT_CLIENT_SECRET`}"
-          default_role: default
-          allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback"]
-        roles:
-          - name: default
-            role_type: oidc
-            allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback", "http://localhost:8250/oidc/callback"]
-            bound_audiences: vault
-            user_claim: sub
-            policies: admin
-            ttl: 1h
+            # - type: oidc
+            #   config:
+            #     oidc_discovery_url: https://auth.bhamm-lab.com
+            #     oidc_client_id: vault
+            #     oidc_client_secret: "${env `OIDC_VAULT_CLIENT_SECRET`}"
+            #     default_role: default
+            #     allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback"]
+            #   roles:
+            #     - name: default
+            #       role_type: oidc
+            #       allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback", "http://localhost:8250/oidc/callback"]
+            #       bound_audiences: vault
+            #       user_claim: sub
+            #       policies: admin
+            #       ttl: 1h
     secrets:
       - path: secret
         type: kv
@@ -146,4 +147,5 @@ metadata:
     release: monitor
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "2"

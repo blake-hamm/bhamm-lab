@@ -4,7 +4,8 @@ metadata:
   name: vault-operator
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "-6"
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   destination:
     namespace: vault
