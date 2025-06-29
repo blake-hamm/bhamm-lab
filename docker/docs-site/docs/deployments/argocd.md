@@ -21,6 +21,7 @@
 *At this point all my storage classes, secretes and garage should be functioning. Also, I should have a valid cert for my cloudflare website. I should also be able to deploy common helm charts w/ external secrets, k8up pvc restores and cnpg postgres databases restores.*
 
 ## Sync (core)
+-wave -1 Sync common helm apps
 -wave 0 Authelia db restore from garage (internal)
 -wave 0 Argo Workflows/Events
 -wave 0 Harbor
