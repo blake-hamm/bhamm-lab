@@ -4,6 +4,7 @@ metadata:
   name: k8up
   namespace: argocd
   annotations:
+    argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/sync-wave: "1"
 spec:
   destination:
