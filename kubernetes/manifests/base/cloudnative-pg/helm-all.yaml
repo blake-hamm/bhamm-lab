@@ -4,7 +4,8 @@ metadata:
   name: cloudnative-pg
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "-5"
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   destination:
     namespace: cnpg-system
