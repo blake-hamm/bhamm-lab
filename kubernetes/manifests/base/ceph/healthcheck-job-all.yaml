@@ -40,30 +40,39 @@ subjects:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: ceph-check-job
+  name: ceph-healthcheck
   namespace: ceph
   annotations:
     argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/sync-wave: "1"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
-  backoffLimit: 1
+  backoffLimit: 2
   activeDeadlineSeconds: 600
   template:
     spec:
       serviceAccountName: ceph-check-sa
+      restartPolicy: Never
       containers:
-        - name: ceph-check
+        - name: ceph-healthcheck
           image: bitnami/kubectl:latest
           command:
             - /bin/sh
             - -c
           args:
             - |
+              max_attempts=12
+              attempt=1
               until kubectl get pods -n ceph -l app=ceph-csi-rbd \
-                  -o jsonpath='{.items[*].status.containerStatuses[0].ready}' \
-                  | grep "true"; do
-                echo "Waiting for Ceph CSI pods to be ready...";
-                sleep 5;
+                     -o jsonpath='{.items[*].status.containerStatuses[0].ready}' \
+                   | grep -q "true"; do
+                if [ "$attempt" -ge "$max_attempts" ]; then
+                  echo "❌ Ceph CSI pods never became ready after $attempt attempts."
+                  exit 1
+                fi
+                echo "Attempt $attempt/$max_attempts: waiting for Ceph CSI pods to be ready…"
+                sleep $(( attempt * 5 ))
+                attempt=$(( attempt + 1 ))
               done
-      restartPolicy: Never
+              echo "✅ Ceph CSI pods are ready."
+              exit 0
