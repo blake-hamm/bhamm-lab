@@ -6,7 +6,8 @@ metadata:
   namespace: {{ $.Values.name }}
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-wave: 1
+    argocd.argoproj.io/hook: Sync
 spec:
   {{- if ne $restore.snapshot "latest" }}  # <-- Add this conditional
   snapshot: {{ $restore.snapshot }}
