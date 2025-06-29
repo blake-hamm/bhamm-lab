@@ -4,11 +4,12 @@
 -wave -1 ArgoCD
 -wave 0 Ceph (csi)
 -wave 0 NFS (csi)
--wave 0 Operators
+-wave 0 Operators/crds
   - k8up
   - CloudnativePG
   - Cert manager
   - Kubernetes metrics
+-wave 1 k8up helm
 -wave 1 Checkpoint job for storage health
 -wave 2 Monitor
 -wave 2 Vault
@@ -18,6 +19,7 @@
 -wave 6 garage (k8up restore from gcp)
 -wave 7 Checkpoint job for garage health
 -wave 8 Cert manager external dns challenge
+-wave 9 Test helm
 *At this point all my storage classes, secretes and garage should be functioning. Also, I should have a valid cert for my cloudflare website. I should also be able to deploy common helm charts w/ external secrets, k8up pvc restores and cnpg postgres databases restores.*
 
 ## Sync (core)

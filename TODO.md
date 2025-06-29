@@ -8,6 +8,7 @@ x Setup ceph rgw
   - Adjust sync waves and add phases (hooks)
   - Switch to nfs csi
   - Ensure resource request/limits set (LimitRange manifest in common helm)
+  - Add namespace feature (privileged) to common helm
   - Replace minio with garage for nfs s3 storage
 - Deploy entire cluster and manually configure
 - Run backups
