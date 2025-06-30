@@ -4,7 +4,6 @@ metadata:
   name: vault-healthcheck-sa
   namespace: vault
   annotations:
-    argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/sync-wave: "2"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -13,7 +12,6 @@ metadata:
   name: vault-healthcheck-role
   namespace: vault
   annotations:
-    argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/sync-wave: "2"
 rules:
   - apiGroups: [""]
@@ -29,7 +27,6 @@ metadata:
   name: vault-healthcheck-rolebinding
   namespace: vault
   annotations:
-    argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/sync-wave: "2"
 subjects:
   - kind: ServiceAccount
@@ -46,7 +43,6 @@ metadata:
   name: vault-healthcheck
   namespace: vault
   annotations:
-    argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/sync-wave: "3"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:

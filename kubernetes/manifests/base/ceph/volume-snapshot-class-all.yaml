@@ -4,7 +4,6 @@ metadata:
   name: ceph-snapclass
   namespace: ceph
   annotations:
-    argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/sync-wave: "1"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     snapshot.storage.kubernetes.io/is-default-class: "true"

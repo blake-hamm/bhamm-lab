@@ -4,7 +4,6 @@ metadata:
   name: k8up-crds
   namespace: argocd
   annotations:
-    argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/sync-wave: "0"
 spec:
   project: default
