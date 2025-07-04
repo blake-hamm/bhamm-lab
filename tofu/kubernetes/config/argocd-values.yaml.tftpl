@@ -11,3 +11,37 @@ repoServer:
 configs:
   params:
     server.insecure: true
+  rbac:
+    policy.default: 'role:admin'
+    policy.csv: |
+      p, role:admin, applications, *, */*, allow
+      p, role:admin, clusters, get, *, allow
+      p, role:admin, repositories, *, *, allow
+      p, role:admin, logs, get, *, allow
+      p, role:admin, exec, create, */*, allow
+      g, oidc:lldap_admin, role:admin
+  cm:
+    resource.exclusions: |
+      - apiGroups:
+        - velero.io
+        kinds:
+        - Backup
+      - apiGroups:
+        - "cilium.io"
+        kinds:
+        - "CiliumIdentity"
+        clusters:
+        - "*"
+    resource.customizations.health.argoproj.io_Application: |
+      hs = {}
+      hs.status = "Progressing"
+      hs.message = ""
+      if obj.status ~= nil then
+        if obj.status.health ~= nil then
+          hs.status = obj.status.health.status
+          if obj.status.health.message ~= nil then
+            hs.message = obj.status.health.message
+          end
+        end
+      end
+      return hs
