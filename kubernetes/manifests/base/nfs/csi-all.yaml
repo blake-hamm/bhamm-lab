@@ -20,20 +20,6 @@ spec:
           tolerations: {}
         node:
           tolerations: {}
-        externalSnapshotter:
-          enabled: true
-          name: snapshot-controller
-          priorityClassName: system-cluster-critical
-          controller:
-            replicas: 1
-          resources:
-            limits:
-              memory: 300Mi
-            requests:
-              cpu: 10m
-              memory: 20Mi
-          customResourceDefinitions:
-            enabled: false
         storageClass:
           create: false
   syncPolicy:
