@@ -18,6 +18,8 @@ spec:
       valuesObject:
         serviceMonitor:
           enabled: true
+        webhook:
+          enabled: false
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
