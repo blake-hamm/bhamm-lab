@@ -16,6 +16,12 @@ spec:
     path: script/helm/garage
     helm:
       valuesObject:
+        environment:
+          - name: GARAGE_ADMIN_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: garage-external-secret
+                key: GARAGE_ADMIN_TOKEN
         persistence:
           enabled: true
           meta:
