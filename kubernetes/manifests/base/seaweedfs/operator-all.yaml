@@ -11,9 +11,9 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    chart: seaweedfs-operator
-    repoURL: https://seaweedfs.github.io/seaweedfs-operator/helm
+    repoURL: https://github.com/seaweedfs/seaweedfs-operator.git
     targetRevision: 1.0.2
+    path: deploy/helm
     helm:
       valuesObject:
         serviceMonitor:
