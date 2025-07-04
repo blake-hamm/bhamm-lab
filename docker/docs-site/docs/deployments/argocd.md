@@ -1,20 +1,22 @@
 # ArgoCD
 
-## PreSync (base)
+## Base app
 -wave -1 ArgoCD
 -wave 0 Ceph (csi)
 -wave 0 NFS (csi)
 -wave 0 Operators/crds
   - k8up
-  - CloudnativePG
   - Cert manager
   - Kubernetes metrics
+  - Vault
 -wave 1 k8up helm
 -wave 1 Checkpoint job for storage health
 -wave 2 Monitor
 -wave 2 Vault
+-wave 2 CloudnativePG
 -wave 3 Checkpoint job for vault health
--wave 4 External Secrets
+-wave 3 External Secrets
+-wave 4 Vault secret store
 -wave 5 Checkpoint job for secrets store health
 -wave 6 garage (k8up restore from gcp)
 -wave 7 Checkpoint job for garage health
