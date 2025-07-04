@@ -18,6 +18,8 @@ spec:
       valuesObject:
         controller:
           tolerations: {}
+        node:
+          tolerations: {}
         storageClass:
           create: false
   syncPolicy:
