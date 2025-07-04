@@ -22,6 +22,10 @@ spec:
           tolerations: {}
         storageClass:
           create: true
+          name: nfs-csi
+          annotations:
+            storageclass.kubernetes.io/is-default-class: "false"
+            k8up.io/backup: "true"
           parameters:
             server: 10.0.20.11
             share: /mnt/storage/kubernetes
