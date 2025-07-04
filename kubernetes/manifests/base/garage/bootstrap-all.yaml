@@ -61,14 +61,23 @@ spec:
                 path: rpc-secret
       containers:
         - name: bootstrap
-          image: bitnami/kubectl:latest
+          image: alpine:3.17
           command: ["/bin/sh", "-eux", "-c"]
           args:
             - |
-              # 1) install Garage CLI
+              # 1) install prerequisites
+              apk add --no-cache curl jq ca-certificates
+
+              # 2) download kubectl
+              K8S_VER=$(curl -Ls https://dl.k8s.io/release/stable.txt)
+              curl -Lo /usr/local/bin/kubectl \
+                https://dl.k8s.io/release/${K8S_VER}/bin/linux/amd64/kubectl
+              chmod +x /usr/local/bin/kubectl
+
+              # 3) download Garage CLI
               curl -Lo /usr/local/bin/garage \
-                https://github.com/deuxfleurs/garage/releases/latest/download/garage-linux-amd64 \
-              && chmod +x /usr/local/bin/garage
+                https://github.com/deuxfleurs/garage/releases/latest/download/garage-linux-amd64
+              chmod +x /usr/local/bin/garage
 
               # 2) generate new S3 credentials via Garage admin token
               creds=$(garage \
