@@ -1,0 +1,24 @@
+apiVersion: seaweed.seaweedfs.com/v1
+kind: Seaweed
+metadata:
+  name: main
+  namespace: seaweedfs
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  image: chrislusf/seaweedfs:1.0.2
+  volumeServerDiskCount: 1
+  hostSuffix: seaweed.bhamm-lab.com
+  master:
+    replicas: 1
+  volume:
+    replicas: 1
+    requests:
+      storage: 20Gi
+    storageClassName: nfs-csi
+  filer:
+    replicas: 1
+    config: |
+      [leveldb2]
+      enabled = true
+      dir = "/data/filerldb2"
