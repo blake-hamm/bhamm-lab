@@ -62,7 +62,7 @@ spec:
       containers:
         - name: bootstrap
           image: bitnami/kubectl:latest
-          command: ["/bin/sh", "-eux"]
+          command: ["/bin/sh", "-eux", "-c"]
           args:
             - |
               # 1) install Garage CLI
@@ -72,7 +72,7 @@ spec:
 
               # 2) generate new S3 credentials via Garage admin token
               creds=$(garage \
-                       --rpc-host GARAGE_ENDPOINT \
+                       --rpc-host "$GARAGE_ENDPOINT" \
                        --rpc-secret-file /etc/garage/rpc/rpc-secret \
                        --admin-token-file /etc/garage/admin/admin-token \
                        key create admin)
