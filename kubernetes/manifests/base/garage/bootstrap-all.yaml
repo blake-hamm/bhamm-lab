@@ -73,8 +73,8 @@ spec:
               # 2) generate new S3 credentials via Garage admin token
               creds=$(garage \
                        --rpc-host GARAGE_ENDPOINT \
-                       --rpc-secret-file /etc/garage/rpc-secret \
-                       --admin-token-file /etc/garage/admin-token \
+                       --rpc-secret-file /etc/garage/rpc/rpc-secret \
+                       --admin-token-file /etc/garage/admin/admin-token \
                        key create admin)
               echo "$creds"
 
@@ -89,10 +89,10 @@ spec:
               | kubectl apply -f -
           volumeMounts:
             - name: admin-token
-              mountPath: /etc/garage
+              mountPath: /etc/garage/admin
               readOnly: true
             - name: rpc-secret
-              mountPath: /etc/garage
+              mountPath: /etc/garage/rpc
               readOnly: true
           env:
             - name: GARAGE_ENDPOINT
