@@ -16,6 +16,8 @@ spec:
     path: charts/v4.9.0/csi-driver-nfs
     helm:
       valuesObject:
+        controller:
+          tolerations: {}
         storageClass:
           create: false
   syncPolicy:
