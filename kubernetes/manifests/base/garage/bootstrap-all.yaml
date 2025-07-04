@@ -58,23 +58,18 @@ spec:
           command: ["/bin/sh", "-eux", "-c"]
           args:
             - |
-              # install jq for JSON parsing
-              apt-get update && apt-get install -y jq
+              # 1) Create admin user
+              kubectl exec -n garage garage-0 -- \
+                ./garage key create admin
 
-              # 1) exec into garage-0 and generate a new S3 keypair
-              CREDS_JSON=$(
-                kubectl exec -n garage garage-0 -- \
-                  ./garage key create admin --format json
-              )
+              # # 2) extract keyId & secretKey
+              # ACCESS_KEY=$(echo "$CREDS_JSON" | jq -r .keyId)
+              # SECRET_KEY=$(echo "$CREDS_JSON" | jq -r .secretKey)
 
-              # 2) extract keyId & secretKey
-              ACCESS_KEY=$(echo "$CREDS_JSON" | jq -r .keyId)
-              SECRET_KEY=$(echo "$CREDS_JSON" | jq -r .secretKey)
-
-              # 3) create/update the k8s Secret
-              kubectl create secret generic garage-s3-creds \
-                -n garage \
-                --from-literal=accessKey="$ACCESS_KEY" \
-                --from-literal=secretKey="$SECRET_KEY" \
-                --dry-run=client -o yaml \
-              | kubectl apply -f -
+              # # 3) create/update the k8s Secret
+              # kubectl create secret generic garage-s3-creds \
+              #   -n garage \
+              #   --from-literal=accessKey="$ACCESS_KEY" \
+              #   --from-literal=secretKey="$SECRET_KEY" \
+              #   --dry-run=client -o yaml \
+              # | kubectl apply -f -
