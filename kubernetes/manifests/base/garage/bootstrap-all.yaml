@@ -76,7 +76,7 @@ spec:
 
               # 3) download Garage CLI
               curl -Lo /usr/local/bin/garage \
-                https://github.com/deuxfleurs/garage/releases/latest/download/garage-linux-amd64
+                https://garagehq.deuxfleurs.fr/_releases/v1.2.0/aarch64-unknown-linux-musl/garage
               chmod +x /usr/local/bin/garage
 
               # 2) generate new S3 credentials via Garage admin token
