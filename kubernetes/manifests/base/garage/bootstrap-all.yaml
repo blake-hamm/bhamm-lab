@@ -1,0 +1,100 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: garage-bootstrap
+  namespace: garage
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: garage-bootstrap-role
+  namespace: garage
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: garage-bootstrap-binding
+  namespace: garage
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: garage-bootstrap-role
+subjects:
+  - kind: ServiceAccount
+    name: garage-bootstrap
+    namespace: garage
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: garage-bootstrap-create-cred
+  namespace: garage
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      serviceAccountName: garage-bootstrap
+      volumes:
+        - name: admin-token
+          secret:
+            secretName: garage-external-secret
+            items:
+              - key: GARAGE_ADMIN_TOKEN
+                path: admin-token
+        - name: rpc-secret
+          secret:
+            secretName: garage-rpc-secret
+            items:
+              - key: rpcSecret
+                path: rpc-secret
+      containers:
+        - name: bootstrap
+          image: bitnami/kubectl:latest
+          command: ["/bin/sh", "-eux"]
+          args:
+            - |
+              # 1) install Garage CLI
+              curl -Lo /usr/local/bin/garage \
+                https://github.com/deuxfleurs/garage/releases/latest/download/garage-linux-amd64 \
+              && chmod +x /usr/local/bin/garage
+
+              # 2) generate new S3 credentials via Garage admin token
+              creds=$(garage \
+                       --rpc-host GARAGE_ENDPOINT \
+                       --rpc-secret-file /etc/garage/rpc-secret \
+                       --admin-token-file /etc/garage/admin-token \
+                       key create admin)
+              echo "$creds"
+
+              accessKey=$(echo "$creds" | jq -r '.accessKey')
+              secretKey=$(echo "$creds" | jq -r '.secretKey')
+
+              # 3) write to k8s Secret (will create or update)
+              kubectl create secret generic garage-s3-creds \
+                --from-literal=accessKey="$accessKey" \
+                --from-literal=secretKey="$secretKey" \
+                -n garage --dry-run=client -o yaml \
+              | kubectl apply -f -
+          volumeMounts:
+            - name: admin-token
+              mountPath: /etc/garage
+              readOnly: true
+            - name: rpc-secret
+              mountPath: /etc/garage
+              readOnly: true
+          env:
+            - name: GARAGE_ENDPOINT
+              value: "http://garage.garage.svc.cluster.local:3900"
+      restartPolicy: OnFailure
