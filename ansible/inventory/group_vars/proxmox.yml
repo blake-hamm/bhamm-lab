@@ -97,6 +97,7 @@ pve_ceph_fs:
     storage: false
 pve_ceph_rgw_enabled: true
 pve_ceph_rgw_dns: "s3-ceph.bhamm-lab.com"
+pve_ceph_rgw_admin: true
 # pve_cluster_ha_groups:
 #   - name: main
 #     comment: "HA group"
