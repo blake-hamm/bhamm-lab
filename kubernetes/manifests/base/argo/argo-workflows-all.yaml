@@ -4,10 +4,10 @@ metadata:
   name: argo-workflows
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "-5"
+    argocd.argoproj.io/sync-wave: "6"
 spec:
   destination:
-    namespace: argo-workflows
+    namespace: argo
     server: https://kubernetes.default.svc
   project: default
   source:
@@ -26,9 +26,9 @@ spec:
             enabled: false
           logging:
             level: info
-          workflowDefaults:
-            spec:
-              serviceAccountName: argo-workflow
+            # workflowDefaults:
+            #   spec:
+            #     serviceAccountName: argo-workflow
         server:
           authModes:
             - sso
@@ -36,10 +36,10 @@ spec:
             enabled: true
             issuer: https://auth.bhamm-lab.com
             clientId:
-              name: argo-workflows-external-secret
+              name: argo-external-secrets
               key: client-id
             clientSecret:
-              name: argo-workflows-external-secret
+              name: argo-external-secrets
               key: client-secret
             redirectUrl: "https://argoworkflows.bhamm-lab.com/oauth2/callback"
             rbac:
@@ -58,14 +58,14 @@ spec:
             filterGroupsRegex:
         artifactRepository:
           s3:
-            endpoint: minio-ceph-api.bhamm-lab.com
+            endpoint: "http://rgw.ceph.svc.cluster.local:7480"
             bucket: argo-artifacts
             accessKeySecret:
-              name: argo-events-external-secret
-              key: accessKeySecret
+              name: argo-external-secret
+              key: access_key
             secretKeySecret:
-              name: argo-events-external-secret
-              key: secretKeySecret
+              name: argo-external-secret
+              key: secret_key
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
