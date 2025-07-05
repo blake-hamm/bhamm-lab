@@ -31,8 +31,10 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
+              set -euxo pipefail
+
               # Add debug output
-              echo "Testing curl connection to endpoint: $ENDPOINT_URL"
+              echo "Testing HTTP connection to endpoint: $ENDPOINT_URL"
               if ! curl -s -I -m 5 "$ENDPOINT_URL" >/dev/null; then
                 echo "ERROR: Cannot connect to S3 service"
                 exit 1
@@ -41,6 +43,7 @@ spec:
               # Verify credentials and endpoint
               echo "Testing aws connection to endpoint: $ENDPOINT_URL"
               aws configure list
+              aws --endpoint-url "$ENDPOINT_URL" --debug s3api list-buckets || true
 
               # Create bucket
               BUCKET_NAME="test-bucket-$(date +%s)"
