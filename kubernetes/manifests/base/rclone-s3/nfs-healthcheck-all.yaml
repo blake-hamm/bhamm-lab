@@ -34,10 +34,8 @@ spec:
                 exit 1
               fi
 
-              # Generate unique bucket name
-              BUCKET_NAME="test-bucket-$(date +%s)"
-
               # Test bucket operations
+              BUCKET_NAME="test-bucket-$(date +%s)"
               echo "Creating bucket: $BUCKET_NAME"
               aws --endpoint-url $ENDPOINT_URL s3 mb s3://$BUCKET_NAME
 
