@@ -5,7 +5,7 @@ metadata:
   namespace: nfs
   annotations:
     argocd.argoproj.io/sync-wave: "5"
-    argocd.argoproj.io/sync-options: Replace=true
+    argocd.argoproj.io/hook: Sync
 spec:
   template:
     spec:
