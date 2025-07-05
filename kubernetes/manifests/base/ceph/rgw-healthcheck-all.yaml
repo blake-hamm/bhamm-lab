@@ -32,39 +32,41 @@ spec:
           args:
             - |
               # Add debug output
-              echo "Testing connection to endpoint: $ENDPOINT_URL"
+              echo "Testing curl connection to endpoint: $ENDPOINT_URL"
               if ! curl -s -I -m 5 "$ENDPOINT_URL" >/dev/null; then
                 echo "ERROR: Cannot connect to S3 service"
                 exit 1
               fi
 
-              # Generate unique bucket name
-              BUCKET_NAME="test-bucket-$(date +%s)"
-
               # Verify credentials and endpoint
-              echo "Testing connection to endpoint: $ENDPOINT_URL"
+              echo "Testing aws connection to endpoint: $ENDPOINT_URL"
               aws configure list
 
               # Create bucket
-              echo "Creating bucket: $BUCKET_NAME"
-              aws --endpoint-url $ENDPOINT_URL s3 mb s3://$BUCKET_NAME
+              BUCKET_NAME="test-bucket-$(date +%s)"
+              echo "Creating bucket: $BUCKET_NAME"echo "Creating bucket"
+              aws --endpoint-url $ENDPOINT_URL s3api create-bucket \
+                --bucket $BUCKET_NAME \
 
-              # Upload test file
-              echo "Creating test file"
-              echo "Ceph RGW S3 API Test - Success!" > testfile.txt
               echo "Uploading test file"
-              aws --endpoint-url $ENDPOINT_URL s3 cp testfile.txt s3://$BUCKET_NAME/testfile.txt
+              echo "S3 API test successful" > testfile.txt
+              aws --endpoint-url $ENDPOINT_URL s3api put-object \
+                --bucket $BUCKET_NAME \
+                --key testfile.txt \
+                --body testfile.txt
 
-              # List objects to verify
-              echo "Listing bucket contents:"
-              aws --endpoint-url $ENDPOINT_URL s3 ls s3://$BUCKET_NAME
+              echo "Listing objects"
+              aws --endpoint-url $ENDPOINT_URL s3api list-objects \
+                --bucket $BUCKET_NAME
 
-              # Download and verify content
               echo "Downloading test file"
-              aws --endpoint-url $ENDPOINT_URL s3 cp s3://$BUCKET_NAME/testfile.txt downloaded.txt
+              aws --endpoint-url $ENDPOINT_URL s3api get-object \
+                --bucket $BUCKET_NAME \
+                --key testfile.txt \
+                downloaded.txt
 
-              echo "Verifying content:"
-              if grep -q "Ceph RGW S3 API Test - Success!" downloaded.txt; then
+              echo "Verifying content"
+              if diff testfile.txt downloaded.txt; then
                 echo "Content verification successful!"
               else
                 echo "Content verification failed!"
@@ -73,10 +75,13 @@ spec:
 
               # Clean up
               echo "Deleting test object"
-              aws --endpoint-url $ENDPOINT_URL s3 rm s3://$BUCKET_NAME/testfile.txt
+              aws --endpoint-url $ENDPOINT_URL s3api delete-object \
+                --bucket $BUCKET_NAME \
+                --key testfile.txt
 
               echo "Deleting test bucket"
-              aws --endpoint-url $ENDPOINT_URL s3 rb s3://$BUCKET_NAME
+              aws --endpoint-url $ENDPOINT_URL s3api delete-bucket \
+                --bucket $BUCKET_NAME
 
               echo "S3 API test completed successfully"
       restartPolicy: Never
