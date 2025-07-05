@@ -44,7 +44,7 @@ spec:
 
               # Create bucket
               BUCKET_NAME="test-bucket-$(date +%s)"
-              echo "Creating bucket: $BUCKET_NAME"echo "Creating bucket"
+              echo "Creating bucket: $BUCKET_NAME"
               aws --endpoint-url $ENDPOINT_URL s3api create-bucket \
                 --bucket $BUCKET_NAME \
 
