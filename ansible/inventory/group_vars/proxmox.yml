@@ -96,7 +96,7 @@ pve_ceph_fs:
     rule: replicated_rule
     storage: false
 pve_ceph_rgw_enabled: true
-pve_ceph_rgw_dns: "s3-ceph.bhamm-lab.com"
+pve_ceph_rgw_dns: "rgw.ceph.svc.cluster.local"
 pve_ceph_rgw_admin: true
 # pve_cluster_ha_groups:
 #   - name: main

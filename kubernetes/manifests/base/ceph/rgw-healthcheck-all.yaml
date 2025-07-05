@@ -48,34 +48,27 @@ spec:
               # Test bucket operations
               BUCKET_NAME="test-bucket-$(date +%s)"
               echo "Creating bucket: $BUCKET_NAME"
-              aws --endpoint-url "$ENDPOINT_URL" s3api create-bucket \
-                --bucket "$BUCKET_NAME"
+              aws --endpoint-url $ENDPOINT_URL s3 mb s3://$BUCKET_NAME
 
               echo "Uploading test file"
               echo "S3 API test successful" > testfile.txt
-              aws --endpoint-url "$ENDPOINT_URL" s3api put-object \
-                --bucket "$BUCKET_NAME" \
-                --key testfile.txt \
-                --body testfile.txt
+              aws --endpoint-url $ENDPOINT_URL s3 cp testfile.txt s3://$BUCKET_NAME/testfile.txt
 
               echo "Downloading test file"
-              aws --endpoint-url "$ENDPOINT_URL" s3api get-object \
-                --bucket "$BUCKET_NAME" \
-                --key testfile.txt \
-                downloaded.txt
+              aws --endpoint-url $ENDPOINT_URL s3 cp s3://$BUCKET_NAME/testfile.txt downloaded.txt
 
               echo "Verifying content"
-              diff testfile.txt downloaded.txt
+              if diff testfile.txt downloaded.txt; then
+                echo "Content verification successful!"
+              else
+                echo "Content verification failed!"
+                exit 1
+              fi
 
-              echo "Deleting test object"
-              aws --endpoint-url "$ENDPOINT_URL" s3api delete-object \
-                --bucket "$BUCKET_NAME" \
-                --key testfile.txt
-
-              echo "Deleting test bucket"
-              aws --endpoint-url "$ENDPOINT_URL" s3api delete-bucket \
-                --bucket "$BUCKET_NAME"
-
+              # Clean up
+              echo "Deleting test objects"
+              aws --endpoint-url $ENDPOINT_URL s3 rm s3://$BUCKET_NAME/testfile.txt
+              aws --endpoint-url $ENDPOINT_URL s3 rb s3://$BUCKET_NAME
               echo "S3 API test completed successfully"
       restartPolicy: Never
   backoffLimit: 1
