@@ -23,10 +23,20 @@ spec:
                   name: rclone-auth
                   key: AWS_SECRET_ACCESS_KEY
             - name: ENDPOINT_URL
-              value: "http://nfs.rclone-s3-nfs:8080"
+              value: "http://rclone-s3-nfs.nfs.svc.cluster.local:8080"
           command: ["/bin/sh", "-c"]
           args:
             - |
+              # Add debug output
+              echo "Testing connection to: $ENDPOINT_URL"
+              echo "Using access key: $AWS_ACCESS_KEY_ID"
+
+              # Add connection test before bucket operations
+              if ! nc -z -w 5 rclone-s3-nfs.nfs.svc.cluster.local 8080; then
+                echo "ERROR: Cannot connect to S3 service"
+                exit 1
+              fi
+
               # Generate unique bucket name
               BUCKET_NAME="test-bucket-$(date +%s)"
 
