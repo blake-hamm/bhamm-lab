@@ -24,6 +24,12 @@ spec:
                   key: AWS_SECRET_ACCESS_KEY
             - name: ENDPOINT_URL
               value: "http://rclone-s3-nfs.nfs.svc.cluster.local:8080"
+            - name: AWS_DEFAULT_REGION
+              value: us-east-1
+            - name: AWS_S3_FORCE_PATH_STYLE
+              value: "true"
+            - name: AWS_EC2_METADATA_DISABLED
+              value: "true"
           command: ["/bin/sh", "-c"]
           args:
             - |
