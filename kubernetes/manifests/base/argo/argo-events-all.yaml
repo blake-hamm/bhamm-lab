@@ -2,12 +2,12 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: argo-events
-  namespace: argo
+  namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "3"
 spec:
   destination:
-    namespace: argo-events
+    namespace: argo
     server: https://kubernetes.default.svc
   project: default
   source:
