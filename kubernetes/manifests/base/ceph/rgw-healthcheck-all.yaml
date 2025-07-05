@@ -3,6 +3,9 @@ kind: Job
 metadata:
   name: ceph-rgw-s3-healthcheck
   namespace: ceph
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-options: Replace=true
 spec:
   template:
     spec:
