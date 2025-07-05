@@ -28,11 +28,8 @@ spec:
           args:
             - |
               # Add debug output
-              echo "Testing connection to: $ENDPOINT_URL"
-              echo "Using access key: $AWS_ACCESS_KEY_ID"
-
-              # Add connection test before bucket operations
-              if ! nc -z -w 5 rclone-s3-nfs.nfs.svc.cluster.local 8080; then
+              echo "Testing connection to endpoint: $ENDPOINT_URL"
+              if ! curl -s -I -m 5 "$ENDPOINT_URL" >/dev/null; then
                 echo "ERROR: Cannot connect to S3 service"
                 exit 1
               fi
