@@ -43,7 +43,7 @@ spec:
               # Verify credentials and endpoint
               echo "Testing aws connection to endpoint: $ENDPOINT_URL"
               aws configure list
-              aws --endpoint-url "$ENDPOINT_URL" --debug s3api list-buckets || true
+              aws --endpoint-url "$ENDPOINT_URL" s3api list-buckets
 
               # Test bucket operations
               BUCKET_NAME="test-bucket-$(date +%s)"
