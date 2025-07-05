@@ -1,0 +1,77 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ceph-rgw-s3-healthcheck
+  namespace: ceph
+spec:
+  template:
+    spec:
+      containers:
+        - name: s3-test
+          image: amazon/aws-cli:latest
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-rgw-user
+                  key: access_key
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-rgw-user
+                  key: secret_key
+            - name: ENDPOINT_URL
+              value: "http://rgw.ceph.svc.cluster.local:7480"
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              # Add debug output
+              echo "Testing connection to endpoint: $ENDPOINT_URL"
+              if ! curl -s -I -m 5 "$ENDPOINT_URL" >/dev/null; then
+                echo "ERROR: Cannot connect to S3 service"
+                exit 1
+              fi
+
+              # Generate unique bucket name
+              BUCKET_NAME="test-bucket-$(date +%s)"
+
+              # Verify credentials and endpoint
+              echo "Testing connection to endpoint: $ENDPOINT_URL"
+              aws configure list
+
+              # Create bucket
+              echo "Creating bucket: $BUCKET_NAME"
+              aws --endpoint-url $ENDPOINT_URL s3 mb s3://$BUCKET_NAME
+
+              # Upload test file
+              echo "Creating test file"
+              echo "Ceph RGW S3 API Test - Success!" > testfile.txt
+              echo "Uploading test file"
+              aws --endpoint-url $ENDPOINT_URL s3 cp testfile.txt s3://$BUCKET_NAME/testfile.txt
+
+              # List objects to verify
+              echo "Listing bucket contents:"
+              aws --endpoint-url $ENDPOINT_URL s3 ls s3://$BUCKET_NAME
+
+              # Download and verify content
+              echo "Downloading test file"
+              aws --endpoint-url $ENDPOINT_URL s3 cp s3://$BUCKET_NAME/testfile.txt downloaded.txt
+
+              echo "Verifying content:"
+              if grep -q "Ceph RGW S3 API Test - Success!" downloaded.txt; then
+                echo "Content verification successful!"
+              else
+                echo "Content verification failed!"
+                exit 1
+              fi
+
+              # Clean up
+              echo "Deleting test object"
+              aws --endpoint-url $ENDPOINT_URL s3 rm s3://$BUCKET_NAME/testfile.txt
+
+              echo "Deleting test bucket"
+              aws --endpoint-url $ENDPOINT_URL s3 rb s3://$BUCKET_NAME
+
+              echo "S3 API test completed successfully"
+      restartPolicy: Never
+  backoffLimit: 1
