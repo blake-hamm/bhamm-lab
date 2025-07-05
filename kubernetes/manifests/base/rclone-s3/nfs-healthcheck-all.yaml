@@ -1,0 +1,58 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rclone-s3-nfs-healthcheck
+  namespace: nfs
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  template:
+    spec:
+      containers:
+        - name: s3-test
+          image: amazon/aws-cli:latest
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: rclone-auth
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rclone-auth
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: ENDPOINT_URL
+              value: "http://nfs.rclone-s3-nfs:8080"
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              # Generate unique bucket name
+              BUCKET_NAME="test-bucket-$(date +%s)"
+
+              # Test bucket operations
+              echo "Creating bucket: $BUCKET_NAME"
+              aws --endpoint-url $ENDPOINT_URL s3 mb s3://$BUCKET_NAME
+
+              echo "Uploading test file"
+              echo "S3 API test successful" > testfile.txt
+              aws --endpoint-url $ENDPOINT_URL s3 cp testfile.txt s3://$BUCKET_NAME/testfile.txt
+
+              echo "Downloading test file"
+              aws --endpoint-url $ENDPOINT_URL s3 cp s3://$BUCKET_NAME/testfile.txt downloaded.txt
+
+              echo "Verifying content"
+              if diff testfile.txt downloaded.txt; then
+                echo "Content verification successful!"
+              else
+                echo "Content verification failed!"
+                exit 1
+              fi
+
+              # Clean up
+              echo "Deleting test objects"
+              aws --endpoint-url $ENDPOINT_URL s3 rm s3://$BUCKET_NAME/testfile.txt
+              aws --endpoint-url $ENDPOINT_URL s3 rb s3://$BUCKET_NAME
+              echo "S3 API test completed successfully"
+      restartPolicy: Never
+  backoffLimit: 1
