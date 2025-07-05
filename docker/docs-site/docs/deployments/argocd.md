@@ -11,18 +11,24 @@
   - Vault
 -wave 1 k8up helm
 -wave 1 Checkpoint job for storage health
+-wave 1 Ceph rgw endpoints
 -wave 2 Monitor
 -wave 2 Vault
 -wave 2 CloudnativePG
+-wave 2 rclone s3 pvc
+-wave 2 Ceph rgw service
 -wave 3 Checkpoint job for vault health
 -wave 3 External Secrets
+-wave 3 rclone s3 dp
+-wave 4 rclone s3 svc
 -wave 4 Vault secret store
+-wave 4 Checkpoint job for ceph rgw s3 health
+-wave 5 Checkpoint job for rclone s3 health
 -wave 5 Checkpoint job for secrets store health
--wave 6 garage (k8up restore from gcp)
--wave 7 Checkpoint job for garage health
+# TODO (after backup/restore): -wave 6 k8up rclone s3 sync/restore from gcp
 -wave 8 Cert manager external dns challenge
 -wave 9 Test helm
-*At this point all my storage classes, secretes and garage should be functioning. Also, I should have a valid cert for my cloudflare website. I should also be able to deploy common helm charts w/ external secrets, k8up pvc restores and cnpg postgres databases restores.*
+*At this point all my storage classes, secretes and s3 (ceph rgw and rclone w/ nfs pvc) should be functioning. Also, I should have a valid cert for my cloudflare website. I should also be able to deploy common helm charts w/ external secrets, k8up pvc restores and cnpg postgres databases restores.*
 
 ## Sync (core)
 -wave -1 Sync common helm apps
