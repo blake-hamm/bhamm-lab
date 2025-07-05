@@ -36,10 +36,10 @@ spec:
             enabled: true
             issuer: https://auth.bhamm-lab.com
             clientId:
-              name: argo-external-secrets
+              name: argo-external-secret
               key: client-id
             clientSecret:
-              name: argo-external-secrets
+              name: argo-external-secret
               key: client-secret
             redirectUrl: "https://argoworkflows.bhamm-lab.com/oauth2/callback"
             rbac:
