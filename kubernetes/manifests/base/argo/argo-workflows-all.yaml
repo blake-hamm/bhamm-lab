@@ -24,9 +24,7 @@ spec:
             spec:
               serviceAccountName: argo-workflow
           workflowNamespaces:
-            - default
-            - ceph
-            - nfs
+            - "*"
           metricsConfig:
             enabled: false
           telemetryConfig:
