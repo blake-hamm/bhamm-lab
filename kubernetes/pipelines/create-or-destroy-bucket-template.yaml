@@ -18,7 +18,7 @@ spec:
         value: "rclone-auth"
       - name: aws-access-key-id-key
         value: "AWS_ACCESS_KEY_ID"
-      - name: aws-secret-access-key-key
+      - name: aws-secret-access-key
         value: "AWS_SECRET_ACCESS_KEY"
   templates:
     - name: bucket-management
@@ -38,8 +38,8 @@ spec:
                   value: "{{workflow.parameters.aws-auth-secret}}"
                 - name: aws-access-key-id-key
                   value: "{{workflow.parameters.aws-access-key-id-key}}"
-                - name: aws-secret-access-key-key
-                  value: "{{workflow.parameters.aws-secret-access-key-key}}"
+                - name: aws-secret-access-key
+                  value: "{{workflow.parameters.aws-secret-access-key}}"
         - - name: create-bucket
             template: create-bucket
             arguments:
@@ -54,8 +54,8 @@ spec:
                   value: "{{workflow.parameters.aws-auth-secret}}"
                 - name: aws-access-key-id-key
                   value: "{{workflow.parameters.aws-access-key-id-key}}"
-                - name: aws-secret-access-key-key
-                  value: "{{workflow.parameters.aws-secret-access-key-key}}"
+                - name: aws-secret-access-key
+                  value: "{{workflow.parameters.aws-secret-access-key}}"
     - name: destroy-bucket
       inputs:
         parameters:
@@ -64,7 +64,7 @@ spec:
           - name: aws-region
           - name: aws-auth-secret
           - name: aws-access-key-id-key
-          - name: aws-secret-access-key-key
+          - name: aws-secret-access-key
       container:
         image: amazon/aws-cli:latest
         env:
@@ -77,7 +77,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: "{{inputs.parameters.aws-auth-secret}}"
-                key: "{{inputs.parameters.aws-secret-access-key-key}}"
+                key: "{{inputs.parameters.aws-secret-access-key}}"
           - name: AWS_DEFAULT_REGION
             value: "{{inputs.parameters.aws-region}}"
           - name: ENDPOINT_URL
@@ -95,7 +95,7 @@ spec:
           - name: aws-region
           - name: aws-auth-secret
           - name: aws-access-key-id-key
-          - name: aws-secret-access-key-key
+          - name: aws-secret-access-key
       container:
         image: amazon/aws-cli:latest
         env:
@@ -108,7 +108,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: "{{inputs.parameters.aws-auth-secret}}"
-                key: "{{inputs.parameters.aws-secret-access-key-key}}"
+                key: "{{inputs.parameters.aws-secret-access-key}}"
           - name: AWS_DEFAULT_REGION
             value: "{{inputs.parameters.aws-region}}"
           - name: ENDPOINT_URL
