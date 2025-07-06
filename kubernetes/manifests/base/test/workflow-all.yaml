@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: test-s3-bucket
+  namespace: ceph
+spec:
+  workflowTemplateRef:
+    name: s3-bucket-management
+  arguments:
+    parameters:
+      - name: bucket-name
+        value: "test"
+      - name: endpoint-url
+        value: "https://ceph-rgw.mycluster.local"
+      - name: aws-region
+        value: "us-west-2"
+      - name: destroy-and-create
+        value: "true"
+      - name: aws-auth-secret
+        value: "ceph-rgw-user"
+      - name: aws-access-key-id
+        value: "access_key"
+      - name: aws-secret-access-key
+        value: "secret_key"
