@@ -27,7 +27,7 @@ spec:
     - name: bucket-management
       steps:
         - - name: optionally-destroy
-            when: "{{workflow.parameters.destroy-and-create}} == 'true'"
+            when: "{{workflow.parameters.destroy-and-create}}"
             template: destroy-bucket
             arguments:
               parameters:
