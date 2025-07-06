@@ -20,18 +20,30 @@
 -wave 3 Checkpoint job for vault health
 -wave 3 External Secrets
 -wave 3 rclone s3 dp
+-wave 3 argo events
 -wave 4 rclone s3 svc
 -wave 4 Vault secret store
 -wave 4 Checkpoint job for ceph rgw s3 health
+-wave 4 argo eventbus
 -wave 5 Checkpoint job for rclone s3 health
--wave 5 Checkpoint job for secrets store health
-# TODO (after backup/restore): -wave 6 k8up rclone s3 sync/restore from gcp
--wave 8 Cert manager external dns challenge
--wave 9 Test helm
-*At this point all my storage classes, secretes and s3 (ceph rgw and rclone w/ nfs pvc) should be functioning. Also, I should have a valid cert for my cloudflare website. I should also be able to deploy common helm charts w/ external secrets, k8up pvc restores and cnpg postgres databases restores.*
+-wave 6 deploy argo workflows with ceph rgw s3
+-wave 7 Vault secret sync argo workflow
+-wave 7 Pipelines app
+-wave 8 argo workflow - rclone s3 create buckets (k8up/cnpg)
+-wave 8 argo workflow - ceph rgw s3 create buckets (blue/green) [destroy cnpg objects]
+# TODO (after backup/restore): -wave 9 k8up rclone s3 sync/restore from gcp
+-wave 9 Test ns
+-wave 10 Test cnpg
+-wave 10 Test pvc
+-wave 11 Test dp
+-wave 11 Test common (k8up/cnpg backups)
+-wave 12 Test CronWorkflow (timestamp on index.html in pvc)
+-wave 12 Test svc
+*At this point all my storage classes, secretes and s3 (ceph rgw and rclone w/ nfs pvc) should be functioning. I should also be able to deploy common helm charts w/ external secrets, k8up pvc restores and cnpg postgres databases restores.*
 
 ## Sync (core)
 -wave -1 Sync common helm apps
+-wave 0 Cert manager external dns challenge
 -wave 0 Authelia db restore from garage (internal)
 -wave 0 Argo Workflows/Events
 -wave 0 Harbor
