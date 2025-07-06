@@ -63,7 +63,7 @@ spec:
       - name: bucket-configurations
         value: |-
           [
-            {"bucketName": "test1", "destroyAndCreate": true},
-            {"bucketName": "test2", "destroyAndCreate": false},
-            {"bucketName": "test3", "destroyAndCreate": true}
+            {"bucketName": "test1", "destroyAndCreate": "true"},
+            {"bucketName": "test2", "destroyAndCreate": "false"},
+            {"bucketName": "test3", "destroyAndCreate": "true"}
           ]
