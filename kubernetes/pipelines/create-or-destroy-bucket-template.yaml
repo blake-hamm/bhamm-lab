@@ -6,59 +6,51 @@ metadata:
     argocd.argoproj.io/sync-wave: "7"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
-  entrypoint: bucket-management
-  arguments:
-    parameters:
-      - name: bucket-name
-        value: "test-bucket-{{workflow.creationTimestamp}}"
-      - name: endpoint-url
-        value: "http://rclone-s3-nfs.nfs.svc.cluster.local:8080"
-      - name: aws-region
-        value: "us-east-1"
-      - name: destroy-and-create
-        value: "false"
-      - name: aws-auth-secret
-        value: "rclone-auth"
-      - name: aws-access-key-id
-        value: "AWS_ACCESS_KEY_ID"
-      - name: aws-secret-access-key
-        value: "AWS_SECRET_ACCESS_KEY"
   templates:
     - name: bucket-management
+      inputs:
+        parameters:
+          - name: bucket-name
+          - name: endpoint-url
+          - name: aws-region
+          - name: destroy-and-create
+          - name: aws-auth-secret
+          - name: aws-access-key-id
+          - name: aws-secret-access-key
       steps:
         - - name: optionally-destroy
-            when: "{{workflow.parameters.destroy-and-create}}"
+            when: "{{inputs.parameters.destroy-and-create}} == 'true'"
             template: destroy-bucket
             arguments:
               parameters:
                 - name: bucket-name
-                  value: "{{workflow.parameters.bucket-name}}"
+                  value: "{{inputs.parameters.bucket-name}}"
                 - name: endpoint-url
-                  value: "{{workflow.parameters.endpoint-url}}"
+                  value: "{{inputs.parameters.endpoint-url}}"
                 - name: aws-region
-                  value: "{{workflow.parameters.aws-region}}"
+                  value: "{{inputs.parameters.aws-region}}"
                 - name: aws-auth-secret
-                  value: "{{workflow.parameters.aws-auth-secret}}"
+                  value: "{{inputs.parameters.aws-auth-secret}}"
                 - name: aws-access-key-id
-                  value: "{{workflow.parameters.aws-access-key-id}}"
+                  value: "{{inputs.parameters.aws-access-key-id}}"
                 - name: aws-secret-access-key
-                  value: "{{workflow.parameters.aws-secret-access-key}}"
+                  value: "{{inputs.parameters.aws-secret-access-key}}"
         - - name: create-bucket
             template: create-bucket
             arguments:
               parameters:
                 - name: bucket-name
-                  value: "{{workflow.parameters.bucket-name}}"
+                  value: "{{inputs.parameters.bucket-name}}"
                 - name: endpoint-url
-                  value: "{{workflow.parameters.endpoint-url}}"
+                  value: "{{inputs.parameters.endpoint-url}}"
                 - name: aws-region
-                  value: "{{workflow.parameters.aws-region}}"
+                  value: "{{inputs.parameters.aws-region}}"
                 - name: aws-auth-secret
-                  value: "{{workflow.parameters.aws-auth-secret}}"
+                  value: "{{inputs.parameters.aws-auth-secret}}"
                 - name: aws-access-key-id
-                  value: "{{workflow.parameters.aws-access-key-id}}"
+                  value: "{{inputs.parameters.aws-access-key-id}}"
                 - name: aws-secret-access-key
-                  value: "{{workflow.parameters.aws-secret-access-key}}"
+                  value: "{{inputs.parameters.aws-secret-access-key}}"
     - name: destroy-bucket
       inputs:
         parameters:
