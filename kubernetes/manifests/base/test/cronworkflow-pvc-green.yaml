@@ -57,15 +57,14 @@ spec:
                     --field-selector=status.phase=Running \
                     -o jsonpath='{.items[0].metadata.name}')
 
-              # pull out up to 9 existing timestamps, strip <li>…</li>, drop blanks
-              old_ts=$(kubectl exec -n test "$pod" -- \
-                grep -oP '(?<=<li>).*?(?=</li>)' \
-                /usr/share/nginx/html/index.html \
-                || true \
+              # extract up to 9 old timestamps via sed, drop blanks
+              old_ts=$(kubectl exec -n test "$pod" -- sh -c "
+                sed -n 's:.*<li>\\(.*\\)</li>:\\1:p' /usr/share/nginx/html/index.html \
+                || true" \
                 | grep -v '^$' \
                 | head -n9)
 
-              # generate full HTML and write it back
+              # build & write new HTML
               kubectl exec -i -n test "$pod" -- tee /usr/share/nginx/html/index.html >/dev/null <<EOF
               <html>
               <head><title>Last Update Timestamps</title></head>
