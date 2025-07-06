@@ -12,9 +12,9 @@ spec:
       - name: bucket-name
         value: "test"
       - name: endpoint-url
-        value: "https://ceph-rgw.mycluster.local"
+        value: "http://rgw.ceph.svc.cluster.local:7480"
       - name: aws-region
-        value: "us-west-2"
+        value: "us-east-1"
       - name: destroy-and-create
         value: "true"
       - name: aws-auth-secret
