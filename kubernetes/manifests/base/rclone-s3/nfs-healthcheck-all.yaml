@@ -23,6 +23,8 @@ spec:
                 secretKeyRef:
                   name: rclone-auth
                   key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_DEFAULT_REGION
+              value: us-east-1
             - name: ENDPOINT_URL
               value: "http://rclone-s3-nfs.nfs.svc.cluster.local:8080"
           command: ["/bin/sh", "-c"]

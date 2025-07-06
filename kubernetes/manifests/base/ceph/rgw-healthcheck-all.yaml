@@ -25,6 +25,8 @@ spec:
                   key: secret_key
             - name: ENDPOINT_URL
               value: "http://rgw.ceph.svc.cluster.local:7480"
+            - name: AWS_DEFAULT_REGION
+              value: us-east-1
           command: ["/bin/sh", "-c"]
           args:
             - |
