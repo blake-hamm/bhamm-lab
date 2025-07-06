@@ -1,5 +1,5 @@
 apiVersion: argoproj.io/v1alpha1
-kind: Workflow #CronWorkflow
+kind: CronWorkflow
 metadata:
   name: test-timestamp-updater
   namespace: test
