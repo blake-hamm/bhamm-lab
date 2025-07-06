@@ -1,5 +1,5 @@
 apiVersion: argoproj.io/v1alpha1
-kind: WorkflowTemplate
+kind: ClusterWorkflowTemplate
 metadata:
   name: s3-bucket-management
   namespace: argo
