@@ -31,6 +31,7 @@
 -wave 7 Pipelines app
 -wave 8 argo workflow - rclone s3 create buckets (k8up/cnpg)
 -wave 8 argo workflow - ceph rgw s3 create buckets (blue/green) [destroy cnpg objects]
+-wave 8 nfs common (secrets for k8up restore/backup)
 # TODO (after backup/restore): -wave 9 k8up rclone s3 sync/restore from gcp
 -wave 9 Test ns
 -wave 10 Test cnpg
@@ -39,10 +40,14 @@
 -wave 12 Test CronWorkflow (timestamp on index.html in pvc)
 -wave 12 Test svc
 -wave 13 Test common (k8up/cnpg backups)
+-wave 14 nfs backups
 *At this point all my storage classes, secretes and s3 (ceph rgw and rclone w/ nfs pvc) should be functioning. I should also be able to deploy common helm charts w/ external secrets, k8up pvc restores and cnpg postgres databases restores.*
 
 ## Sync (core)
 -wave -1 Sync common helm apps
+  -wave 14 external-secrets
+  -wave 15 k8up backups
+  -wave 16 ingress
 -wave 0 Cert manager external dns challenge
 -wave 0 Authelia db restore from garage (internal)
 -wave 0 Argo Workflows/Events

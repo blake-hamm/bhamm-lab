@@ -1,11 +1,11 @@
 apiVersion: k8up.io/v1
 kind: Schedule
 metadata:
-  name: minio
+  name: rclone-s3-offsite
   namespace: nfs
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-wave: "14"
 spec:
   backend:
     repoPasswordSecretRef:
