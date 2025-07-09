@@ -40,7 +40,7 @@
 -wave 12 Test CronWorkflow (timestamp on index.html in pvc)
 -wave 12 Test svc
 -wave 13 Test common (k8up/cnpg backups)
--wave 14 nfs backups
+-wave 14 rclone s3 nfs offsite gcs backups
 *At this point all my storage classes, secretes and s3 (ceph rgw and rclone w/ nfs pvc) should be functioning. I should also be able to deploy common helm charts w/ external secrets, k8up pvc restores and cnpg postgres databases restores.*
 
 ## Sync (core)
