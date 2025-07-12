@@ -25,7 +25,6 @@ spec:
         - "--min-chunk-size=5MB"
         - "--max-archive-size=1GB"
         - "--max-bandwidth=100MB"
-        - "--aws-region=us-east-1"
         - "-vv"
     wal:
       archiveAdditionalCommandArgs:
