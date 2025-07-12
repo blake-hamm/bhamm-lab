@@ -5,12 +5,17 @@ metadata:
   namespace: ceph
   annotations:
     argocd.argoproj.io/sync-wave: "3"
-    cilium.io/loadbalancer-timeout: "3600s"
-    cilium.io/loadbalancer-connect-timeout: "300s"
-    cilium.io/loadbalancer-keepalive: "300s"
+    cilium.io/loadbalancer-timeout: "0"
+    cilium.io/loadbalancer-connect-timeout: "0"
+    cilium.io/loadbalancer-keepalive: "7200s"
+    cilium.io/lb-l7: "http"
+    cilium.io/lb-l7-protocol: "http2"
+    cilium.io/loadbalancer-buffer-size: "65536"
+    cilium.io/loadbalancer-buffer-max-size: "16777216"
 spec:
   type: ClusterIP
   ports:
     - name: http
       port: 7480
       targetPort: 7480
+      appProtocol: h2c
