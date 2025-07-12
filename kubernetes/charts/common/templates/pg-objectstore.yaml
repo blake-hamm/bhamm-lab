@@ -22,9 +22,6 @@ spec:
     data:
       additionalCommandArgs:
         - "--read-timeout=600"
-        - "--write-timeout=600"
-        - "--retry-times=10"
-        - "--retry-delay=10"
         - "--min-chunk-size=5MB"
         - "--max-archive-size=1GB"
         - "-v"
