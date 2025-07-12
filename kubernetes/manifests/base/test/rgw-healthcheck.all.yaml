@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: ceph-rgw-s3-healthcheck
-  namespace: ceph
+  namespace: test
   annotations:
     argocd.argoproj.io/sync-wave: "4"
     argocd.argoproj.io/hook: Sync
@@ -17,12 +17,12 @@ spec:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: ceph-rgw-user
+                  name: cnpg-s3-backup-creds
                   key: access_key
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: ceph-rgw-user
+                  name: cnpg-s3-backup-creds
                   key: secret_key
             - name: ENDPOINT_URL
               value: "http://rgw.ceph.svc.cluster.local:7480"
