@@ -10,7 +10,7 @@ metadata:
 spec:
   configuration:
     destinationPath: "s3://cnpg-backups/"
-    endpointURL: http://rgw.ceph.svc.cluster.local:7480
+    endpointURL: http://rclone-s3-nfs.nfs.svc.cluster.local:8080
     s3Credentials:
       accessKeyId:
         name: cnpg-s3-backup-creds
@@ -19,15 +19,4 @@ spec:
         name: cnpg-s3-backup-creds
         key: secret_key
     retentionPolicy: "{{ .Values.postgresql.backups.retention }}"
-    data:
-      additionalCommandArgs:
-        - "--read-timeout=600"
-        - "--min-chunk-size=5MB"
-        - "--max-archive-size=1GB"
-        - "--max-bandwidth=100MB"
-        - "-vv"
-    wal:
-      archiveAdditionalCommandArgs:
-        - "--read-timeout=300"
-        - "-vv"
 {{- end }}
