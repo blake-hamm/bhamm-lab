@@ -15,8 +15,7 @@ spec:
     targetRevision: v0.5.0
     directory:
       recurse: false
-      include:
-        - "manifest.yaml"
+      include: "manifest.yaml"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
