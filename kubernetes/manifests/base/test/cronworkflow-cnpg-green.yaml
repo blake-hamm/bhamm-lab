@@ -1,10 +1,11 @@
 apiVersion: argoproj.io/v1alpha1
 kind: CronWorkflow
 metadata:
-  name: maintain-timestamps
+  name: test-timestamp-updater-cnpg
   namespace: test
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "18"
 spec:
   schedule: "0 */6 * * *"
   concurrencyPolicy: Forbid
@@ -57,50 +58,3 @@ spec:
 
             COMMIT;
             EOSQL
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: argo-cron-sa
-  namespace: test
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: argo-cron-role
-  namespace: test
-rules:
-  # Your existing rule
-  - apiGroups: ["argoproj.io"]
-    resources: ["workflowtaskresults"]
-    verbs: ["create", "patch"]
-  # Additional required permissions for Argo Workflows
-  - apiGroups: ["argoproj.io"]
-    resources: ["workflows", "cronworkflows"]
-    verbs: ["create", "get", "list", "update", "patch", "delete", "watch"]
-  # Pod permissions for workflow execution
-  - apiGroups: [""]
-    resources: ["pods", "pods/log"]
-    verbs: ["create", "get", "list", "watch", "update", "patch", "delete"]
-  # Event permissions for status reporting
-  - apiGroups: [""]
-    resources: ["events"]
-    verbs: ["create", "patch"]
-  # Optional: If using Kubernetes secrets or configmaps
-  - apiGroups: [""]
-    resources: ["secrets", "configmaps"]
-    verbs: ["get", "list", "watch"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: argo-cron-role-binding
-  namespace: test
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: argo-cron-role
-subjects:
-  - kind: ServiceAccount
-    name: argo-cron-sa
-    namespace: test

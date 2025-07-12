@@ -33,7 +33,7 @@ subjects:
 apiVersion: argoproj.io/v1alpha1
 kind: CronWorkflow
 metadata:
-  name: test-timestamp-updater
+  name: test-timestamp-updater-pvc
   namespace: test
   annotations:
     argocd.argoproj.io/sync-wave: "12"
