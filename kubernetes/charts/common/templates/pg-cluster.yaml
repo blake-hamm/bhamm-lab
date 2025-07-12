@@ -47,7 +47,7 @@ spec:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
       parameters:
-        barmanObjectName: {{ .Values.name}}-cnpg-ceph
+        barmanObjectName: {{ .Values.name}}-cnpg-s3
   {{- end }}
   {{- if .Values.postgresql.restore.enabled }}
   externalClusters:
