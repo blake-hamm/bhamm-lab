@@ -28,6 +28,5 @@ spec:
     wal:
       additionalCommandArgs:
         - "--read-timeout=300"
-        - "--write-timeout=300"
-        - "--retry-times=5"
+        - "-v"
 {{- end }}
