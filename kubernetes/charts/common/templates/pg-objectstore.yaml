@@ -30,6 +30,5 @@ spec:
     wal:
       archiveAdditionalCommandArgs:
         - "--read-timeout=300"
-        - "--aws-region=us-east-1"
         - "-v"
 {{- end }}
