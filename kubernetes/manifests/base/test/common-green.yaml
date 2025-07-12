@@ -42,11 +42,11 @@ spec:
             # restores:
             #   - snapshot: "latest"
             #     claimName: "test"
-        postgresql:
-          enabled: true
-          backups:
-            enabled: true
-            retention: "3d"
+            # postgresql:
+            #   enabled: true
+            #   backups:
+            #     enabled: true
+            #     retention: "3d"
             # restore:
             #   enabled: true
   syncPolicy:
