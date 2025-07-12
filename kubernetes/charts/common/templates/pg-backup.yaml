@@ -14,4 +14,5 @@ spec:
   method: plugin
   pluginConfiguration:
     name: barman-cloud.cloudnative-pg.io
+  immediate: true
 {{- end }}
