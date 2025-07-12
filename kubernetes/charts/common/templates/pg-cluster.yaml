@@ -6,7 +6,7 @@ metadata:
   namespace: {{ .Values.name }}
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "15"
+    argocd.argoproj.io/sync-wave: "16"
 spec:
   {{- if .Values.postgresql.imageName }}
   imageName: {{ .Values.postgresql.imageName | quote }}
@@ -42,22 +42,12 @@ spec:
       {{- end }}
     {{- end }}
   enableSuperuserAccess: false
-  {{- if .Values.postgresql.backups.enabled }}
-  backup:
-    retentionPolicy: "{{ .Values.postgresql.backups.retention }}"
-    barmanObjectStore:
-      destinationPath: "s3://cnpg-backups/"
-      endpointURL: http://rgw.ceph.svc.cluster.local:7480
-      {{- if .Values.postgresql.restore.enabled }}
-      serverName: "{{ .Values.name }}-postgresql-latest"
-      {{- end }}
-      s3Credentials:
-        accessKeyId:
-          name: cnpg-s3-backup-creds
-          key: access_key
-        secretAccessKey:
-          name: cnpg-s3-backup-creds
-          key: secret_key
+  {{- if or .Values.postgresql.backups.enabled .Values.postgresql.restore.enabled }}
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: {{ .Values.name}}-cnpg-ceph
   {{- end }}
   {{- if .Values.postgresql.restore.enabled }}
   externalClusters:

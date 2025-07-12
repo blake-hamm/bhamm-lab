@@ -6,9 +6,12 @@ metadata:
   namespace: {{ .Values.name }}
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "16"
+    argocd.argoproj.io/sync-wave: "17"
 spec:
   schedule: "{{ .Values.postgresql.backups.schedule }}"
   cluster:
     name: {{ .Values.name }}-postgresql
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io
 {{- end }}
