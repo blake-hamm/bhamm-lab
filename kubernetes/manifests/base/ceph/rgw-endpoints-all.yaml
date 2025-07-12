@@ -9,8 +9,8 @@ metadata:
 subsets:
   - addresses:
       - ip: 10.0.20.11
-      - ip: 10.0.20.12
-      - ip: 10.0.20.13
+        # - ip: 10.0.20.12
+        # - ip: 10.0.20.13
     ports:
       - name: http
         port: 7480

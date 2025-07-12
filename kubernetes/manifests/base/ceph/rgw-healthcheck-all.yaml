@@ -28,8 +28,6 @@ spec:
               value: "http://rgw.ceph.svc.cluster.local:7480"
             - name: AWS_DEFAULT_REGION
               value: us-east-1
-            - name: AWS_S3_MAX_CONCURRENT_REQUESTS
-              value: "1"
           command: ["/bin/sh", "-c"]
           args:
             - |
