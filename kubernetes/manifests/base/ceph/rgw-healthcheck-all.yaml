@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: ceph-rgw-s3-healthcheck
-  namespace: ceph
+  namespace: test
   annotations:
     argocd.argoproj.io/sync-wave: "4"
     argocd.argoproj.io/hook: Sync
