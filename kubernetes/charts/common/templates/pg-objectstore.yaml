@@ -27,7 +27,7 @@ spec:
         - "--max-bandwidth=100MB"
         - "-v"
     wal:
-      additionalCommandArgs:
+      archiveAdditionalCommandArgs:
         - "--read-timeout=300"
         - "-v"
 {{- end }}
