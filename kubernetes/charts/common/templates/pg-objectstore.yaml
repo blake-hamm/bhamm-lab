@@ -19,4 +19,18 @@ spec:
         name: cnpg-s3-backup-creds
         key: secret_key
     retentionPolicy: "{{ .Values.postgresql.backups.retention }}"
+    data:
+      additionalCommandArgs:
+        - "--read-timeout=600"
+        - "--write-timeout=600"
+        - "--retry-times=10"
+        - "--retry-delay=10"
+        - "--min-chunk-size=5MB"
+        - "--max-archive-size=1GB"
+        - "-v"
+    wal:
+      additionalCommandArgs:
+        - "--read-timeout=300"
+        - "--write-timeout=300"
+        - "--retry-times=5"
 {{- end }}
