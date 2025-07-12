@@ -70,7 +70,8 @@ spec:
               aws --endpoint-url $ENDPOINT_URL \
                   s3 cp 50mb.file s3://$BUCKET_NAME/test-multipart.file \
                   --expected-size $((50*1024*1024)) \
-                  --metadata md5=$(md5sum 50mb.file | awk '{print $1}')
+                  --metadata md5=$(md5sum 50mb.file | awk '{print $1}') \
+                  --debug
 
               # Clean up
               echo "Deleting test objects"
