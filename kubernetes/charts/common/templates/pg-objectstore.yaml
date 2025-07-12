@@ -9,7 +9,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "15"
 spec:
   configuration:
-    destinationPath: "s3://cnpg-backups/{{ .Values.name }}"
+    destinationPath: "s3://cnpg-backups/"
     endpointURL: http://rgw.ceph.svc.cluster.local:7480
     s3Credentials:
       accessKeyId:
