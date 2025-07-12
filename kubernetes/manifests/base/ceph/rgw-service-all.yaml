@@ -5,6 +5,9 @@ metadata:
   namespace: ceph
   annotations:
     argocd.argoproj.io/sync-wave: "3"
+    cilium.io/loadbalancer-timeout: "3600s"
+    cilium.io/loadbalancer-connect-timeout: "300s"
+    cilium.io/loadbalancer-keepalive: "300s"
 spec:
   type: ClusterIP
   ports:
