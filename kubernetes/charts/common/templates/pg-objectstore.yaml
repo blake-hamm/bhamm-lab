@@ -26,9 +26,9 @@ spec:
         - "--max-archive-size=1GB"
         - "--max-bandwidth=100MB"
         - "--aws-region=us-east-1"
-        - "-v"
+        - "-vv"
     wal:
       archiveAdditionalCommandArgs:
         - "--read-timeout=300"
-        - "-v"
+        - "-vv"
 {{- end }}
