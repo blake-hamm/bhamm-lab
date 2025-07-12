@@ -24,7 +24,7 @@ spec:
         - "--read-timeout=600"
         - "--min-chunk-size=5MB"
         - "--max-archive-size=1GB"
-        - "--max-bandwidth=10MB"
+        - "--max-bandwidth=50MB"
         - "-v"
     wal:
       additionalCommandArgs:
