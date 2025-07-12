@@ -16,6 +16,8 @@ spec:
     directory:
       recurse: false
       include: "manifest.yaml"
+    kustomize:
+      namespace: "cnpg-system"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
