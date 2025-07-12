@@ -28,6 +28,8 @@ spec:
               value: "http://rgw.ceph.svc.cluster.local:7480"
             - name: AWS_DEFAULT_REGION
               value: us-east-1
+            - name: AWS_S3_MAX_CONCURRENT_REQUESTS
+              value: "1"
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -68,8 +70,7 @@ spec:
               echo "Testing multipart uploads"
               dd if=/dev/zero of=50mb.file bs=1M count=50
               aws --endpoint-url $ENDPOINT_URL \
-                  s3 --max_concurrent-requests 1 \
-                  cp 50mb.file s3://$BUCKET_NAME/test-multipart.file \
+                  s3 cp 50mb.file s3://$BUCKET_NAME/test-multipart.file \
                   --expected-size $((50*1024*1024)) \
                   --metadata md5=$(md5sum 50mb.file | awk '{print $1}')
 
