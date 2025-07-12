@@ -1,0 +1,18 @@
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: rgw
+  namespace: ceph
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  labels:
+    kubernetes.io/service-name: rgw
+addressType: IPv4
+ports:
+  - name: http
+    port: 7480
+    protocol: TCP
+endpoints:
+  - addresses: ["10.0.20.11"]
+  - addresses: ["10.0.20.12"]
+  - addresses: ["10.0.20.13"]

@@ -11,4 +11,3 @@ spec:
     - name: http
       port: 7480
       targetPort: 7480
-      protocol: TCP
