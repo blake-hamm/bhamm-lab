@@ -68,5 +68,5 @@ spec:
             {"bucketName": "harbor-data", "destroyAndCreate": "false"},
             {"bucketName": "forgejo", "destroyAndCreate": "false"},
             {"bucketName": "tofu-state", "destroyAndCreate": "false"},
-            {"bucketName": "cnpg-backups", "destroyAndCreate": "true"}
+            {"bucketName": "cnpg-backups", "destroyAndCreate": "false"}
           ]
