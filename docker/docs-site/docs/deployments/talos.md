@@ -11,9 +11,9 @@ To deploy talos run these commands:
 ```bash
 # First deploy vm's and bootstrap the cluster
 tofu -chdir=tofu/proxmox/talos init
-tofu -chdir=tofu/proxmox/talos workspace select -or-create=true dev
-tofu -chdir=tofu/proxmox/talos plan -var-file=dev.tfvars
-tofu -chdir=tofu/proxmox/talos apply -var-file=dev.tfvars -auto-approve
+tofu -chdir=tofu/proxmox/talos workspace select -or-create=true green
+tofu -chdir=tofu/proxmox/talos plan -var-file=green.tfvars
+tofu -chdir=tofu/proxmox/talos apply -var-file=green.tfvars -auto-approve
 
 # Then deploy the minimum required for kubernetes
 export KUBECONFIG=../../tofu/proxmox/talos/result/kube-config-green.yaml

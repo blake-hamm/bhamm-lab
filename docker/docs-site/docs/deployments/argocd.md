@@ -48,7 +48,8 @@
 -wave -1 Sync common helm apps
   -wave 14 external-secrets
   -wave 16 cnpg cluster
-  -wave 15 k8up backups
+  -wave 15 k8up restore
+  -wave 16 k8up backup/schedule
   -wave 16 ingress
 -wave 0 Cert manager external dns challenge
 -wave 0 Authelia db restore from garage (internal)
