@@ -42,36 +42,31 @@
 -wave 13 Test common (k8up/cnpg backups)
 -wave 14 rclone s3 nfs offsite gcs backups
 -wave 18 Test CronWorkflow (timestamp on cnpg)
+-wave 19 Cert manager external dns challenge and metrics
 *At this point all my storage classes, secretes and s3 (ceph rgw and rclone w/ nfs pvc) should be functioning. I should also be able to deploy common helm charts w/ external secrets, k8up pvc restores and cnpg postgres databases restores.*
 
 ## Sync (core)
--wave -1 Sync common helm apps
+-wave -20 Sync common helm apps
   -wave 14 external-secrets
   -wave 16 cnpg cluster
   -wave 15 k8up restore
   -wave 16 k8up backup/schedule
   -wave 16 ingress
--wave 0 Cert manager external dns challenge
--wave 0 Authelia db restore from garage (internal)
--wave 0 Argo Workflows/Events
--wave 0 Harbor
--wave 0 Common: external secrets
--wave 1 Checkpoint job for authelia db health
--wave 1 Common: cnpg cluster restores
--wave 1 Common: k8up pvc restores
--wave 2 Authelia
--wave 2 lldap
--wave 2 Traefik
--wave 2 Forgejo
--wave 3 Checkpoint health job for:
+-wave 20 Authelia db restore (common)
+-wave 20 Harbor
+-wave 20 Common: external secrets
+-wave 21 Authelia
+-wave 21 lldap
+-wave 21 Traefik
+-wave 21 Forgejo
+-wave 22 Checkpoint health job for:
   - authelia
   - traefik
   - lldap
   - Argo workflows/events
   - Harbor
   - Forgejo
--wave 4 Dashy deployment
--wave 4 Test app deployment
+-wave 23 Dashy deployment
 *At this point all my core k8s utilities should be run and confirmed with the test app. Everything should be accessible with my traefik lb ip. Data should be restored from k8up backups which are in the minio. I should also be able to deploy common helm charts w/ ingress (authelia/traefik) and k8up pvc backups/schedules.*
 
 ## PostSync (apps)
