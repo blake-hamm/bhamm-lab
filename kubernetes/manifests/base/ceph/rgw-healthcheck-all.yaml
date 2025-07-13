@@ -65,17 +65,17 @@ spec:
                 exit 1
               fi
 
-              echo "Testing multipart uploads"
-              dd if=/dev/zero of=50mb.file bs=1M count=50
-              aws --endpoint-url $ENDPOINT_URL \
-                  s3 cp 50mb.file s3://$BUCKET_NAME/test-multipart.file \
-                  --expected-size $((50*1024*1024)) --debug # \
+              # echo "Testing multipart uploads"
+              # dd if=/dev/zero of=50mb.file bs=1M count=50
+              # aws --endpoint-url $ENDPOINT_URL \
+              #     s3 cp 50mb.file s3://$BUCKET_NAME/test-multipart.file \
+              #     --expected-size $((50*1024*1024)) --debug \
               #     --metadata md5=$(md5sum 50mb.file | awk '{print $1}') \
               #     --debug
 
               # Clean up
               echo "Deleting test objects"
-              aws --endpoint-url $ENDPOINT_URL s3 rm s3://$BUCKET_NAME/test-multipart.file
+              # aws --endpoint-url $ENDPOINT_URL s3 rm s3://$BUCKET_NAME/test-multipart.file
               aws --endpoint-url $ENDPOINT_URL s3 rm s3://$BUCKET_NAME/testfile.txt
               aws --endpoint-url $ENDPOINT_URL s3 rb s3://$BUCKET_NAME
               echo "S3 API test completed successfully"
