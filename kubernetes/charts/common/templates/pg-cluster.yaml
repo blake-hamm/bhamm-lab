@@ -42,7 +42,7 @@ spec:
       {{- end }}
     {{- end }}
   enableSuperuserAccess: false
-  {{- if or .Values.postgresql.backups.enabled .Values.postgresql.restore.enabled }}
+  {{- if .Values.postgresql.backups.enabled }}
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
