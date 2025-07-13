@@ -1,18 +1,23 @@
 # Refactor cluster
-x Setup ceph rgw
+x Setup ceph rgw (replace with rclone s3 server)
 - Setup green deployment
-  - Talos deployment
-  - Sync all ns and 'external-secrets' in terraform w/ sops
+  x Talos deployment
+  x Sync all ns and 'external-secrets' in terraform w/ sops
 - Config argocd
-  - ArgoCD app health - https://argo-cd.readthedocs.io/en/stable/operator-manual/health/#argocd-app
-  - Adjust sync waves and add phases (hooks)
-  - Switch to nfs csi
+  x ArgoCD app health - https://argo-cd.readthedocs.io/en/stable/operator-manual/health/#argocd-app
+  x Adjust sync waves and add phases (hooks)
+  x Switch to nfs csi
   - Ensure resource request/limits set (LimitRange manifest in common helm)
   - Add namespace feature (privileged) to common helm
-  - Replace minio with garage for nfs s3 storage
-- Deploy entire cluster and manually configure
+  - Replace minio with rclone s3
 - Run backups
 - Setup blue deployment (should restore cleanly w/out intervention)
+
+
+- Deploy entire cluster and manually configure
+- Build 'kill switch' workflow
+  - Remove ns/pvc
+  - Remove argocd apps
 
 ```
 This is complete when:

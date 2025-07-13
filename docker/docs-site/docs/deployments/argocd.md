@@ -46,6 +46,7 @@
 ## Sync (core)
 -wave -1 Sync common helm apps
   -wave 14 external-secrets
+  -wave 16 cnpg cluster
   -wave 15 k8up backups
   -wave 16 ingress
 -wave 0 Cert manager external dns challenge
