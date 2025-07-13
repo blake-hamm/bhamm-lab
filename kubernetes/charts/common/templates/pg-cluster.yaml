@@ -52,18 +52,10 @@ spec:
   {{- if .Values.postgresql.restore.enabled }}
   externalClusters:
     - name: clusterBackup
-      barmanObjectStore:
-        destinationPath: "s3://cnpg-backups/"
-        serverName: "{{ .Values.name }}-postgresql"
-        endpointURL: http://rgw.ceph.svc.cluster.local:7480
-        s3Credentials:
-          accessKeyId:
-            name: cnpg-s3-backup-creds
-            key: access_key
-          secretAccessKey:
-            name: cnpg-s3-backup-creds
-            key: secret_key
-        wal:
-          maxParallel: 8
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        parameters:
+          barmanObjectName: "{{ .Values.name }}-cnpg-s3"
+          serverName: "{{ .Values.name }}-postgresql"
   {{- end }}
 {{- end }}
