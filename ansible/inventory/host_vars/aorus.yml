@@ -75,10 +75,14 @@ pve_pcie_ovmf_enabled: false
 pve_pci_device_ids:
   - id: "1002:744c"
   - id: "1002:ab30"
+  - id: "8086:56a6"
+  - id: "8086:4f92"
 pve_vfio_blacklist_drivers:
   - name: "radeon"
   - name: "amdgpu"
   - name: "snd_hda_intel"
+  - name: "i915"
+  - name: "xe"
 pve_pcie_ignore_msrs: false
 pve_pcie_report_msrs: true
 # zfs config

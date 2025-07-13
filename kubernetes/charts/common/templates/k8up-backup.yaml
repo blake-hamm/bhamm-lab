@@ -6,8 +6,7 @@ metadata:
   namespace: {{ .Values.name }}
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: 0
-    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/sync-wave: "16"
 spec:
   failedJobsHistoryLimit: 2
   successfulJobsHistoryLimit: 2
@@ -16,7 +15,7 @@ spec:
       name: k8up
       key: repo-password
     s3:
-      endpoint: https://minio-nfs-api.bhamm-lab.com
+      endpoint: http://rclone-s3-nfs.nfs.svc.cluster.local:8080
       bucket: k8up-backups
       accessKeyIDSecretRef:
         name: k8up

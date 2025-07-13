@@ -1,0 +1,73 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: rclone-s3-buckets
+  namespace: nfs
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  entrypoint: process-buckets
+  parallelism: 3
+  templates:
+    - name: process-buckets
+      steps:
+        - - name: process-bucket
+            template: s3-bucket-management-wrapper
+            arguments:
+              parameters:
+                - name: bucket-name
+                  value: "{{item.bucketName}}"
+                - name: destroy-and-create
+                  value: "{{item.destroyAndCreate}}"
+            withParam: "{{workflow.parameters.bucket-configurations}}"
+    - name: s3-bucket-management-wrapper
+      inputs:
+        parameters:
+          - name: bucket-name
+          - name: destroy-and-create
+      steps:
+        - - name: bucket-management
+            templateRef:
+              name: s3-bucket-management
+              template: bucket-management
+              clusterScope: true
+            arguments:
+              parameters:
+                - name: bucket-name
+                  value: "{{inputs.parameters.bucket-name}}"
+                - name: destroy-and-create
+                  value: "{{inputs.parameters.destroy-and-create}}"
+                - name: endpoint-url
+                  value: "{{workflow.parameters.endpoint-url}}"
+                - name: aws-region
+                  value: "{{workflow.parameters.aws-region}}"
+                - name: aws-auth-secret
+                  value: "{{workflow.parameters.aws-auth-secret}}"
+                - name: aws-access-key-id
+                  value: "{{workflow.parameters.aws-access-key-id}}"
+                - name: aws-secret-access-key
+                  value: "{{workflow.parameters.aws-secret-access-key}}"
+  arguments:
+    parameters:
+      - name: endpoint-url
+        value: "http://rclone-s3-nfs.nfs.svc.cluster.local:8080"
+      - name: aws-region
+        value: "us-east-1"
+      - name: aws-auth-secret
+        value: "rclone-auth"
+      - name: aws-access-key-id
+        value: "AWS_ACCESS_KEY_ID"
+      - name: aws-secret-access-key
+        value: "AWS_SECRET_ACCESS_KEY"
+      - name: bucket-configurations
+        value: |-
+          [
+            {"bucketName": "loki-data", "destroyAndCreate": "false"},
+            {"bucketName": "argo-artifact", "destroyAndCreate": "false"},
+            {"bucketName": "harbor-data", "destroyAndCreate": "false"},
+            {"bucketName": "forgejo", "destroyAndCreate": "false"},
+            {"bucketName": "tofu-state", "destroyAndCreate": "false"},
+            {"bucketName": "cnpg-backups", "destroyAndCreate": "false"},
+            {"bucketName": "k8up-backups", "destroyAndCreate": "false"}
+          ]

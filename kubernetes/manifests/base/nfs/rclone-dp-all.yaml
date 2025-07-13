@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rclone-s3-nfs-server
+  namespace: nfs
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rclone-s3-nfs-server
+  template:
+    metadata:
+      labels:
+        app: rclone-s3-nfs-server
+    spec:
+      containers:
+        - name: rclone
+          image: rclone/rclone:latest
+          env:
+            - name: RCLONE_AUTH_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rclone-auth
+                  key: RCLONE_AUTH_KEY
+          args:
+            - serve
+            - s3
+            - --addr=:8080
+            - /data
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: rclone-s3-nfs-data

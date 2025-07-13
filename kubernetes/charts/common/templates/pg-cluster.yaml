@@ -6,8 +6,7 @@ metadata:
   namespace: {{ .Values.name }}
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: 1
-    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "16"
 spec:
   {{- if .Values.postgresql.imageName }}
   imageName: {{ .Values.postgresql.imageName | quote }}
@@ -44,37 +43,19 @@ spec:
     {{- end }}
   enableSuperuserAccess: false
   {{- if .Values.postgresql.backups.enabled }}
-  backup:
-    retentionPolicy: "{{ .Values.postgresql.backups.retention }}"
-    barmanObjectStore:
-      destinationPath: "s3://pg-backups/"
-      endpointURL: https://minio-nfs-api.bhamm-lab.com
-      {{- if .Values.postgresql.restore.enabled }}
-      serverName: "{{ .Values.name }}-postgresql-latest"
-      {{- end }}
-      s3Credentials:
-        accessKeyId:
-          name: pg-minio
-          key: CONSOLE_ACCESS_KEY
-        secretAccessKey:
-          name: pg-minio
-          key: CONSOLE_SECRET_KEY
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: {{ .Values.name}}-cnpg-s3
   {{- end }}
   {{- if .Values.postgresql.restore.enabled }}
   externalClusters:
     - name: clusterBackup
-      barmanObjectStore:
-        destinationPath: "s3://pg-backups/"
-        serverName: "{{ .Values.name }}-postgresql"
-        endpointURL: https://minio-nfs-api.bhamm-lab.com
-        s3Credentials:
-          accessKeyId:
-            name: pg-minio
-            key: CONSOLE_ACCESS_KEY
-          secretAccessKey:
-            name: pg-minio
-            key: CONSOLE_SECRET_KEY
-        wal:
-          maxParallel: 8
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        parameters:
+          barmanObjectName: "{{ .Values.name }}-cnpg-s3"
+          serverName: "{{ .Values.name }}-postgresql"
   {{- end }}
 {{- end }}

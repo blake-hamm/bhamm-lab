@@ -1,0 +1,17 @@
+# endpoints.yaml
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: rgw
+  namespace: ceph
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+subsets:
+  - addresses:
+      - ip: 10.0.20.11
+        # - ip: 10.0.20.12
+        # - ip: 10.0.20.13
+    ports:
+      - name: http
+        port: 7480
+        protocol: TCP

@@ -1,0 +1,247 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  destination:
+    namespace: monitor
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: kube-prometheus-stack
+    repoURL: https://prometheus-community.github.io/helm-charts
+    targetRevision: 70.0.2
+    helm:
+      valuesObject:
+        nameOverride: monitor
+        namespaceOverride: monitor
+        fullnameOverride: monitor
+        defaultRules:
+          create: true
+          rules:
+            windows: false
+        prometheus-windows-exporter:
+          prometheus:
+            monitor:
+              enabled: false
+        alertmanager:
+          enabled: true
+        grafana:
+          enabled: true
+          defaultDashboardsTimezone: America/Denver
+          envValueFrom:
+            GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
+              secretKeyRef:
+                name: monitor-external-secret
+                key: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+          grafana.ini:
+            server:
+              root_url: https://grafana.bhamm-lab.com
+            auth.basic:
+              enabled: false
+            auth.generic_oauth:
+              enabled: true
+              name: Authelia
+              icon: signin
+              client_id: grafana
+              scopes: openid profile email groups
+              empty_scopes: false
+              auth_url: https://auth.bhamm-lab.com/api/oidc/authorization
+              token_url: https://auth.bhamm-lab.com/api/oidc/token
+              api_url: https://auth.bhamm-lab.com/api/oidc/userinfo
+              login_attribute_path: preferred_username
+              groups_attribute_path: groups
+              name_attribute_path: name
+              use_pkce: true
+              role_attribute_path: contains(groups[*], 'admin') && 'GrafanaAdmin' || 'Viewer'
+              allow_sign_up: true
+              allow_assign_grafana_admin: true
+              auto_login: true
+          sidecar:
+            dashboards:
+              enabled: true
+              defaultFolderName: "General"
+              label: grafana_dashboard
+              labelValue: "1"
+              folderAnnotation: grafana_folder
+              searchNamespace: ALL
+              provider:
+                foldersFromFilesStructure: true
+          dashboards:
+            extra-dashboards:
+              k8s-system-api-server:
+                url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-api-server.json
+                token: ''
+              k8s-system-coredns:
+                url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-system-coredns.json
+                token: ''
+              k8s-views-global:
+                url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-global.json
+                token: ''
+              k8s-views-namespaces:
+                url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-namespaces.json
+                token: ''
+              k8s-views-nodes:
+                url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-nodes.json
+                token: ''
+              k8s-views-pods:
+                url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-pods.json
+                token: ''
+              authelia:
+                url: https://raw.githubusercontent.com/authelia/authelia/refs/heads/master/examples/grafana-dashboards/simple.json
+                token: ''
+                datasource: Prometheus
+              ceph-cluster:
+                gnetId: 2842
+                revision: 17
+              traefik:
+                gnetId: 17347
+                revision: 9
+              node-exporter-full:
+                gnetId: 1860
+                revision: 37
+              vault:
+                gnetId: 12904
+                revision: 2
+                datasource: Prometheus
+              cert-manager:
+                gnetId: 20842
+                revision: 3
+                datasource: Prometheus
+              ceph:
+                gnetId: 2842
+                revision: 18
+                datasource: Prometheus
+              bsd:
+                gnetId: 4260
+                revision: 12
+                datasource: Prometheus
+              amd-overview:
+                url: https://raw.githubusercontent.com/blake-hamm/gpu-operator/refs/heads/feature/grafana-update/grafana/dashboard_overview.json
+                token: ''
+              amd-gpu:
+                url: https://raw.githubusercontent.com/blake-hamm/gpu-operator/refs/heads/feature/grafana-update/grafana/dashboard_gpu.json
+                token: ''
+              minio-cluster:
+                url: https://raw.githubusercontent.com/blake-hamm/minio/refs/heads/master/docs/metrics/prometheus/grafana/minio-dashboard.json
+                token: ''
+              minio-bucket:
+                url: https://raw.githubusercontent.com/blake-hamm/minio/refs/heads/master/docs/metrics/prometheus/grafana/bucket/minio-bucket.json
+                token: ''
+              k8up:
+                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/main/kubernetes/manifests/core/monitor/dashboards/k8up.json
+                token: ''
+              nfs:
+                url: https://raw.githubusercontent.com/blake-hamm/nfs-grafana/refs/heads/master/prometheus/nfs-full.json
+                token: ''
+          dashboardProviders:
+            dashboardproviders.yaml:
+              apiVersion: 1
+              providers:
+                - name: 'extra-dashboards'
+                  orgId: 1
+                  folder: 'Extras'
+                  type: file
+                  disableDeletion: true
+                  editable: true
+                  options:
+                    path: /var/lib/grafana/dashboards/extra-dashboards
+          additionalDataSources:
+            - name: Loki
+              type: loki
+              url: http://loki-distributed-gateway
+              access: proxy
+        nodeExporter:
+          enabled: true
+          operatingSystems:
+            linux:
+              enabled: true
+            aix:
+              enabled: false
+            darwin:
+              enabled: false
+        prometheusOperator:
+          fullnameOverride: "prometheus"
+        prometheus:
+          prometheusSpec:
+            additionalScrapeConfigs:
+              - job_name: opnsense
+                static_configs:
+                  - targets: ['10.0.9.1:9100']
+              - job_name: 'proxmox_nodes'
+                static_configs:
+                  - targets:
+                      - '10.0.20.11:9100' # Aorus
+                      - '10.0.20.12:9100' # Antsle
+                      - '10.0.20.13:9100' # Super
+              - job_name: 'ceph'
+                static_configs:
+                  - targets:
+                      - '10.0.20.11:9283' # Aorus
+                      - '10.0.20.12:9283' # Antsle
+                      - '10.0.20.13:9283' # Super
+              - job_name: minio-job
+                metrics_path: /minio/v2/metrics/cluster
+                scheme: https
+                tls_config:
+                  insecure_skip_verify: true
+                static_configs:
+                  - targets: ['minio-ceph-hl.ceph:9000', 'minio-nfs-hl.nfs:9000']
+              - job_name: minio-job-node
+                metrics_path: /minio/v2/metrics/node
+                scheme: https
+                tls_config:
+                  insecure_skip_verify: true
+                static_configs:
+                  - targets: ['minio-ceph-hl.ceph:9000', 'minio-nfs-hl.nfs:9000']
+              - job_name: minio-job-bucket
+                metrics_path: /minio/v2/metrics/bucket
+                scheme: https
+                tls_config:
+                  insecure_skip_verify: true
+                static_configs:
+                  - targets: ['minio-ceph-hl.ceph:9000', 'minio-nfs-hl.nfs:9000']
+              - job_name: minio-job-resource
+                metrics_path: /minio/v2/metrics/resource
+                scheme: https
+                tls_config:
+                  insecure_skip_verify: true
+                static_configs:
+                  - targets: ['minio-ceph-hl.ceph:9000', 'minio-nfs-hl.nfs:9000']
+            scrapeConfigSelector:
+              matchExpressions:
+                - key: release
+                  operator: In
+                  values: [monitor, kube-prometheus-stack]
+            serviceMonitorSelector:
+              matchExpressions:
+                - key: release
+                  operator: In
+                  values: [monitor, kube-prometheus-stack]
+            podMonitorSelector:
+              matchExpressions:
+                - key: release
+                  operator: In
+                  values: [monitor, kube-prometheus-stack]
+            storageSpec:
+              volumeClaimTemplate:
+                metadata:
+                  name: prometheus
+                spec:
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 10Gi
+            retention: 5d
+            retentionSize: "10GiB"
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - ServerSideApply=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

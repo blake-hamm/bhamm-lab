@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nfs-csi
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  destination:
+    namespace: nfs
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/kubernetes-csi/csi-driver-nfs.git
+    targetRevision: v4.9.0
+    path: charts/v4.9.0/csi-driver-nfs
+    helm:
+      valuesObject:
+        controller:
+          tolerations: {}
+        node:
+          tolerations: {}
+        storageClass:
+          create: true
+          name: nfs-csi
+          annotations:
+            storageclass.kubernetes.io/is-default-class: "false"
+            k8up.io/backup: "true"
+          parameters:
+            server: 10.0.20.11
+            share: /mnt/storage/kubernetes
+            subDir: green
+          mountOptions:
+            - hard
+            - timeo=600
+            - retrans=2
+            - nfsvers=4.2
+            - noatime
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

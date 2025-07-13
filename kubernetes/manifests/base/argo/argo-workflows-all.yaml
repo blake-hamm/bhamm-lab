@@ -1,0 +1,84 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argo-workflows
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
+spec:
+  destination:
+    namespace: argo
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: argo-workflows
+    repoURL: https://argoproj.github.io/argo-helm
+    targetRevision: 0.42.5
+    helm:
+      valuesObject:
+        workflow:
+          serviceAccount:
+            create: true
+        controller:
+          workflowDefaults:
+            spec:
+              serviceAccountName: argo-workflow
+          workflowNamespaces:
+            - default
+            - ceph
+            - nfs
+            - test
+          metricsConfig:
+            enabled: false
+          telemetryConfig:
+            enabled: false
+          logging:
+            level: info
+            # workflowDefaults:
+            #   spec:
+            #     serviceAccountName: argo-workflow
+            # TODO: Below requires authelia accessible (should work with blue/green)
+            # server:
+            #   authModes:
+            #     - sso
+            #   sso:
+            #     enabled: true
+            #     issuer: https://auth.bhamm-lab.com
+            #     clientId:
+            #       name: argo-external-secret
+            #       key: client-id
+            #     clientSecret:
+            #       name: argo-external-secret
+            #       key: client-secret
+            #     redirectUrl: "https://argoworkflows.bhamm-lab.com/oauth2/callback"
+            #     rbac:
+            #       enabled: false
+            #       secretWhitelist: []
+            #     scopes:
+            #       - 'openid'
+            #       - 'groups'
+            #       - 'email'
+            #       - 'profile'
+            #     sessionExpiry: ""
+            #     issuerAlias: ""
+            #     customGroupClaimName: ""
+            #     userInfoPath: ""
+            #     insecureSkipVerify: false
+            #     filterGroupsRegex:
+        artifactRepository:
+          s3:
+            endpoint: "http://rgw.ceph.svc.cluster.local:7480"
+            bucket: argo-artifacts
+            accessKeySecret:
+              name: argo-external-secret
+              key: access_key
+            secretKeySecret:
+              name: argo-external-secret
+              key: secret_key
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

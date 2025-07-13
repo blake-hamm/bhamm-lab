@@ -1,0 +1,22 @@
+{{- if or .Values.postgresql.backups.enabled .Values.postgresql.restore.enabled }}
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: {{ .Values.name }}-cnpg-s3
+  namespace: {{ .Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "15"
+spec:
+  configuration:
+    destinationPath: "s3://cnpg-backups/"
+    endpointURL: http://rclone-s3-nfs.nfs.svc.cluster.local:8080
+    s3Credentials:
+      accessKeyId:
+        name: cnpg-s3-backup-creds
+        key: access_key
+      secretAccessKey:
+        name: cnpg-s3-backup-creds
+        key: secret_key
+    retentionPolicy: "{{ .Values.postgresql.backups.retention }}"
+{{- end }}

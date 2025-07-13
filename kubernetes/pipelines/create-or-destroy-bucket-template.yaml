@@ -1,0 +1,115 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterWorkflowTemplate
+metadata:
+  name: s3-bucket-management
+  annotations:
+    argocd.argoproj.io/sync-wave: "7"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  templates:
+    - name: bucket-management
+      inputs:
+        parameters:
+          - name: bucket-name
+          - name: endpoint-url
+          - name: aws-region
+          - name: destroy-and-create
+          - name: aws-auth-secret
+          - name: aws-access-key-id
+          - name: aws-secret-access-key
+      steps:
+        - - name: optionally-destroy
+            when: "{{inputs.parameters.destroy-and-create}}"
+            template: destroy-bucket
+            arguments:
+              parameters:
+                - name: bucket-name
+                  value: "{{inputs.parameters.bucket-name}}"
+                - name: endpoint-url
+                  value: "{{inputs.parameters.endpoint-url}}"
+                - name: aws-region
+                  value: "{{inputs.parameters.aws-region}}"
+                - name: aws-auth-secret
+                  value: "{{inputs.parameters.aws-auth-secret}}"
+                - name: aws-access-key-id
+                  value: "{{inputs.parameters.aws-access-key-id}}"
+                - name: aws-secret-access-key
+                  value: "{{inputs.parameters.aws-secret-access-key}}"
+        - - name: create-bucket
+            template: create-bucket
+            arguments:
+              parameters:
+                - name: bucket-name
+                  value: "{{inputs.parameters.bucket-name}}"
+                - name: endpoint-url
+                  value: "{{inputs.parameters.endpoint-url}}"
+                - name: aws-region
+                  value: "{{inputs.parameters.aws-region}}"
+                - name: aws-auth-secret
+                  value: "{{inputs.parameters.aws-auth-secret}}"
+                - name: aws-access-key-id
+                  value: "{{inputs.parameters.aws-access-key-id}}"
+                - name: aws-secret-access-key
+                  value: "{{inputs.parameters.aws-secret-access-key}}"
+    - name: destroy-bucket
+      inputs:
+        parameters:
+          - name: bucket-name
+          - name: endpoint-url
+          - name: aws-region
+          - name: aws-auth-secret
+          - name: aws-access-key-id
+          - name: aws-secret-access-key
+      container:
+        image: amazon/aws-cli:latest
+        env:
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: "{{inputs.parameters.aws-auth-secret}}"
+                key: "{{inputs.parameters.aws-access-key-id}}"
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: "{{inputs.parameters.aws-auth-secret}}"
+                key: "{{inputs.parameters.aws-secret-access-key}}"
+          - name: AWS_DEFAULT_REGION
+            value: "{{inputs.parameters.aws-region}}"
+          - name: ENDPOINT_URL
+            value: "{{inputs.parameters.endpoint-url}}"
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Attempting to remove bucket: $ENDPOINT_URL/{{inputs.parameters.bucket-name}}"
+            aws --endpoint-url $ENDPOINT_URL s3 rb s3://{{inputs.parameters.bucket-name}} --force || echo "Bucket did not exist or was already empty"
+    - name: create-bucket
+      inputs:
+        parameters:
+          - name: bucket-name
+          - name: endpoint-url
+          - name: aws-region
+          - name: aws-auth-secret
+          - name: aws-access-key-id
+          - name: aws-secret-access-key
+      container:
+        image: amazon/aws-cli:latest
+        env:
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: "{{inputs.parameters.aws-auth-secret}}"
+                key: "{{inputs.parameters.aws-access-key-id}}"
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: "{{inputs.parameters.aws-auth-secret}}"
+                key: "{{inputs.parameters.aws-secret-access-key}}"
+          - name: AWS_DEFAULT_REGION
+            value: "{{inputs.parameters.aws-region}}"
+          - name: ENDPOINT_URL
+            value: "{{inputs.parameters.endpoint-url}}"
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Creating bucket: {{inputs.parameters.bucket-name}} at $ENDPOINT_URL"
+            aws --endpoint-url $ENDPOINT_URL s3 mb s3://{{inputs.parameters.bucket-name}}

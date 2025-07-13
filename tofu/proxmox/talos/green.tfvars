@@ -1,0 +1,9 @@
+environment        = "green"
+count_master       = 3
+count_worker       = 3
+master_vm_id_start = 110
+worker_vm_id_start = 120
+master_ip_format   = "10.0.30.6%d"
+worker_ip_format   = "10.0.30.7%d"
+vip                = "10.0.30.30"
+# enable_gpu_worker  = false

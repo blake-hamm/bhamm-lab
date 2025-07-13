@@ -1,0 +1,81 @@
+# grants list/get on pods, and exec into them
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: argo-pod-access
+  namespace: test
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create", "get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bind-argo-pod-access
+  namespace: test
+  annotations:
+    argocd.argoproj.io/sync-wave: "11"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: argo-pod-access
+subjects:
+  - kind: ServiceAccount
+    name: argo-workflow
+    namespace: test
+---
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: test-timestamp-updater-pvc
+  namespace: test
+  annotations:
+    argocd.argoproj.io/sync-wave: "12"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  schedule: "0 */6 * * *"
+  concurrencyPolicy: Replace
+  workflowSpec:
+    entrypoint: update-timestamp
+    templates:
+      - name: update-timestamp
+        container:
+          image: bitnami/kubectl:latest
+          command: [bash, -c]
+          args:
+            - |
+              set -euo pipefail
+
+              # find the running nginx pod
+              pod=$(kubectl get pods -n test -l app=test \
+                    --field-selector=status.phase=Running \
+                    -o jsonpath='{.items[0].metadata.name}')
+
+              # extract up to 9 old timestamps via sed, drop blanks
+              old_ts=$(kubectl exec -n test "$pod" -- sh -c "
+                sed -n 's:.*<li>\\(.*\\)</li>:\\1:p' /usr/share/nginx/html/index.html \
+                || true" \
+                | grep -v '^$' \
+                | head -n9)
+
+              # build & write new HTML
+              kubectl exec -i -n test "$pod" -- tee /usr/share/nginx/html/index.html >/dev/null <<EOF
+              <html>
+              <head><title>Last Update Timestamps</title></head>
+              <body>
+                <h1>Last 10 Update Timestamps (UTC):</h1>
+                <ul>
+                  <li>$(date -u +'%Y-%m-%d %T UTC')</li>
+              $(echo "$old_ts" | awk 'NF{printf "                <li>%s</li>\n", $0}')
+                </ul>
+              </body>
+              </html>
+              EOF
+
+              echo "index.html updated on $(date -u +'%Y-%m-%d %T UTC')"

@@ -22,14 +22,14 @@ resource "kubectl_manifest" "argo_apps" {
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: apps-${var.environment}
+  name: ${var.environment}-base
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
     targetRevision: ${var.branch_name}
-    path: kubernetes/manifests
+    path: kubernetes/manifests/base
     directory:
       recurse: true
       include: "{**all.yaml,**${var.environment}.yaml}"
@@ -42,6 +42,12 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    retry:
+      limit: 10
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 20m
 
 YAML
 }

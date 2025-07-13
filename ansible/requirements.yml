@@ -20,9 +20,9 @@ collections:
 roles:
   - name: geerlingguy.ntp
     version: "2.5.0"
-  - src: https://github.com/lae/ansible-role-proxmox.git
+  - src: https://github.com/blake-hamm/ansible-role-proxmox.git
     name: lae.proxmox
-    version: "v1.9.1"
+    version: "feature/ceph-rgw"
   - name: aeriscloud.disk
     version: "v2.6.4"
   - name: tigattack.mergerfs

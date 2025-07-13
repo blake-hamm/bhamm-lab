@@ -17,8 +17,7 @@ spec:
     helm:
       valuesObject:
         pod:
-          kind: 'Deployment'
-          replicas: 2
+          kind: 'DaemonSet'
           extraVolumeMounts:
             - mountPath: '/app/custom-secrets'
               name: 'custom-secrets'

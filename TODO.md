@@ -1,3 +1,44 @@
+# Refactor cluster
+x Setup ceph rgw (replace with rclone s3 server)
+- Setup green deployment
+  x Talos deployment
+  x Sync all ns and 'external-secrets' in terraform w/ sops
+- Config argocd
+  x ArgoCD app health - https://argo-cd.readthedocs.io/en/stable/operator-manual/health/#argocd-app
+  x Adjust sync waves and add phases (hooks)
+  x Switch to nfs csi
+  - Ensure resource request/limits set (LimitRange manifest in common helm)
+  - Add namespace feature (privileged) to common helm
+  - Replace minio with rclone s3
+- Run backups
+- Setup blue deployment (should restore cleanly w/out intervention)
+
+
+- Deploy entire cluster and manually configure
+- Build 'kill switch' workflow
+  - Remove ns/pvc
+  - Remove argocd apps
+
+```
+This is complete when:
+
+    Adjust talos vm schematic, removing ucode
+    Setup pcie passthrough with new intel work talos vm node
+    Ensure talos vm has required software - https://github.com/siderolabs/extensions/pkgs/container/i915
+    Ensure taint on intel worker node and scheduling is disabled
+    Install NFD - https://nfd.sigs.k8s.io/deployment/helm
+    Install Intel GPU device plugin
+        https://intel.github.io/intel-device-plugins-for-kubernetes/cmd/gpu_plugin/README.html
+        https://github.com/intel/helm-charts/tree/main/charts/device-plugin-operator
+        https://github.com/intel/intel-device-plugins-for-kubernetes/blob/main/deployments/operator/samples/deviceplugin_v1_gpudeviceplugin.yaml
+    Ensure gpu metrics flowing and grafana dashboard enabled
+        https://intel.github.io/intel-device-plugins-for-kubernetes/cmd/gpu_plugin/monitoring.html#monitoring-gpus
+        https://github.com/intel/xpumanager/tree/master/deployment/kubernetes/monitoring
+    Adjust immich/jellyfin/servarr deployment to bypass vm taints and schedule to node
+    Adjust immich config to leverage gpu
+    Adjust jellyfin config to leverage gpu
+```
+
 # Deploy docs site
 x Create ci/cd with argo workflows to deploy when docs change
 - Update docs flow and make less AI slop

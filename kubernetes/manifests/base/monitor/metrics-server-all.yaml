@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: metrics-server
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  destination:
+    namespace: monitor
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: metrics-server
+    repoURL: https://charts.bitnami.com/bitnami
+    targetRevision: 6.2.12
+    helm:
+      valuesObject:
+        networkPolicy:
+          enabled: false
+        apiService:
+          create: true
+        extraArgs:
+          - --kubelet-insecure-tls
+          - --kubelet-preferred-address-types=InternalIP
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ceph-check-sa
+  namespace: ceph
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ceph-check-role
+  namespace: ceph
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/exec"]
+    verbs: ["get", "list", "patch", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ceph-check-binding
+  namespace: ceph
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+roleRef:
+  kind: Role
+  name: ceph-check-role
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+  - kind: ServiceAccount
+    name: ceph-check-sa
+    namespace: ceph
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ceph-healthcheck
+  namespace: ceph
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 600
+  template:
+    spec:
+      serviceAccountName: ceph-check-sa
+      restartPolicy: Never
+      containers:
+        - name: ceph-healthcheck
+          image: bitnami/kubectl:latest
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - |
+              max_attempts=12
+              attempt=1
+              until kubectl get pods -n ceph -l app=ceph-csi-rbd \
+                     -o jsonpath='{.items[*].status.containerStatuses[0].ready}' \
+                   | grep -q "true"; do
+                if [ "$attempt" -ge "$max_attempts" ]; then
+                  echo "❌ Ceph CSI pods never became ready after $attempt attempts."
+                  exit 1
+                fi
+                echo "Attempt $attempt/$max_attempts: waiting for Ceph CSI pods to be ready…"
+                sleep $(( attempt * 5 ))
+                attempt=$(( attempt + 1 ))
+              done
+              echo "✅ Ceph CSI pods are ready."
+              exit 0

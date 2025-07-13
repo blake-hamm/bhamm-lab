@@ -50,7 +50,7 @@
 - name: Create file for node's ssh_known_hosts
   ansible.builtin.file:
     path: "/etc/pve/nodes/{{ item.hostname }}/ssh_known_hosts"
-    state: touch
+    state: file
     owner: root
     group: www-data
     mode: "0640"

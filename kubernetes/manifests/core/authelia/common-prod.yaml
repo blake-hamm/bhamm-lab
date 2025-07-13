@@ -38,6 +38,8 @@ spec:
           enabled: true
           backups:
             enabled: true
+          restore:
+            enabled: true
         ingressRoutes:
           - enabled: true
             name: authelia
