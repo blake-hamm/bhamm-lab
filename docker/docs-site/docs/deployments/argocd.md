@@ -32,7 +32,7 @@
 -wave 8 argo workflow - rclone s3 create buckets (k8up/cnpg)
 -wave 8 argo workflow - ceph rgw s3 create buckets (blue/green) [destroy cnpg objects]
 -wave 8 nfs common (secrets for k8up restore/backup)
-# TODO (after backup/restore): -wave 9 k8up rclone s3 sync/restore from gcp
+-wave 9 nfs k8up rclone s3 sync/restore from gcp
 -wave 9 Test ns
 -wave 10 Test cnpg
 -wave 10 Test pvc
@@ -41,6 +41,7 @@
 -wave 12 Test svc
 -wave 13 Test common (k8up/cnpg backups)
 -wave 14 rclone s3 nfs offsite gcs backups
+-wave 18 Test CronWorkflow (timestamp on cnpg)
 *At this point all my storage classes, secretes and s3 (ceph rgw and rclone w/ nfs pvc) should be functioning. I should also be able to deploy common helm charts w/ external secrets, k8up pvc restores and cnpg postgres databases restores.*
 
 ## Sync (core)
