@@ -45,18 +45,21 @@ spec:
       secretAccessKeySecretRef:
         name: nfs-external-secret
         key: AWS_SECRET_ACCESS_KEY
+  failedJobsHistoryLimit: 4
+  successfulJobsHistoryLimit: 4
   backup:
-    schedule: "0 2 * * *" #"0 0 1,15 * *" # First of each month
-    failedJobsHistoryLimit: 2
-    successfulJobsHistoryLimit: 2
+    schedule: "0 3 * * *" #"0 0 1,15 * *" # First of each month
+    activeDeadlineSeconds: 45
     # optional
     #promURL: https://prometheus-io-instance:8443
   check:
     schedule: "0 4 * * *" #'0 0 2,16 * *' # Second of each month
+    activeDeadlineSeconds: 15
     # optional
     #promURL: https://prometheus-io-instance:8443
   prune:
     schedule: "0 5 * * *" #'0 0 2,16 * *' # Second of each month
+    activeDeadlineSeconds: 15
     retention:
       keepLast: 2
       keepMonthly: 1

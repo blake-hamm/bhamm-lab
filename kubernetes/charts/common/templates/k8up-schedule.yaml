@@ -21,18 +21,21 @@ spec:
       secretAccessKeySecretRef:
         name: k8up
         key: secretAccessKeySecret
+  failedJobsHistoryLimit: 4
+  successfulJobsHistoryLimit: 4
   backup:
     schedule: "{{ .Values.k8up.backup.schedule }}"
-    failedJobsHistoryLimit: 2
-    successfulJobsHistoryLimit: 2
+    activeDeadlineSeconds: 45
     # optional
     #promURL: https://prometheus-io-instance:8443
   check:
     schedule: "{{ .Values.k8up.backup.checkSchedule }}"
+    activeDeadlineSeconds: 15
     # optional
     #promURL: https://prometheus-io-instance:8443
   prune:
     schedule: "{{ .Values.k8up.backup.pruneSchedule }}"
+    activeDeadlineSeconds: 15
     retention:
       keepLast: 5
       keepDaily: 2
