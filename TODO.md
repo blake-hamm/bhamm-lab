@@ -9,12 +9,17 @@ x Setup ceph rgw (replace with rclone s3 server)
   x Switch to nfs csi
   - Ensure resource request/limits set (LimitRange manifest in common helm)
   - Add namespace feature (privileged) to common helm
-  - Replace minio with rclone s3
-- Run backups
-- Setup blue deployment (should restore cleanly w/out intervention)
+x Run backups
+x Setup blue deployment (should restore cleanly w/out intervention)
 
-
-- Deploy entire cluster and manually configure
+- Ensure green points to main
+- Finalize storage
+  - Ensure talos has storage accessible
+  - Setup local path provisioner with kustomize
+  - Have cnpg use local path
+  - Deploy seaweedfs (using local path)
+  - Remove ceph rgw completely
+- Deploy core and manually configure
 - Build 'kill switch' workflow
   - Remove ns/pvc
   - Remove argocd apps
