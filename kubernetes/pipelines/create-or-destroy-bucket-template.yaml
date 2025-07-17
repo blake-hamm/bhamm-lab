@@ -111,5 +111,11 @@ spec:
         command: ["/bin/sh", "-c"]
         args:
           - |
-            echo "Creating bucket: {{inputs.parameters.bucket-name}} at $ENDPOINT_URL"
-            aws --endpoint-url $ENDPOINT_URL s3 mb s3://{{inputs.parameters.bucket-name}}
+            echo "Checking if bucket {{inputs.parameters.bucket-name}} already exists"
+            # Use head-bucket to check existence
+            if aws --endpoint-url $ENDPOINT_URL s3api head-bucket --bucket "{{inputs.parameters.bucket-name}}" >/dev/null 2>&1; then
+              echo "Bucket already exists. Skipping creation."
+            else
+              echo "Creating new bucket: {{inputs.parameters.bucket-name}} at $ENDPOINT_URL"
+              aws --endpoint-url $ENDPOINT_URL s3 mb s3://{{inputs.parameters.bucket-name}}
+            fi
