@@ -1,4 +1,5 @@
 network_nameservers:
+  - 9.9.9.9
   - 1.1.1.1
   - 1.0.0.1
 network_10gb_nics: []
