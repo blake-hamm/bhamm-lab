@@ -1,7 +1,7 @@
 variable "talos_version" {
   description = "Talos version to use"
   type        = string
-  default     = "v1.10.4"
+  default     = "v1.10.5"
 }
 
 variable "talos_factory_url" {
@@ -155,13 +155,19 @@ variable "memory_base_worker" {
 variable "disk_size_master" {
   description = "Disk size in GB"
   type        = number
-  default     = 75
+  default     = 40
 }
 
 variable "disk_size_worker" {
   description = "Disk size in GB"
   type        = number
-  default     = 100
+  default     = 60
+}
+
+variable "disk_size_worker_user" {
+  description = "Disk size in GB"
+  type        = number
+  default     = 40
 }
 
 variable "vip" {

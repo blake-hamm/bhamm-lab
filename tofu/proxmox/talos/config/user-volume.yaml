@@ -3,6 +3,6 @@ kind: UserVolumeConfig
 name: local-path-provisioner
 provisioning:
   diskSelector:
-    match: "system_disk"
-  minSize: 20GB
-  maxSize: 50GB
+    match: "!system_disk"
+  minSize: 20GiB
+  maxSize: 40GiB

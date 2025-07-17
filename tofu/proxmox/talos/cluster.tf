@@ -39,27 +39,22 @@ data "talos_machine_configuration" "this" {
   talos_version    = var.talos_version
   machine_type     = each.value.machine_type
   machine_secrets  = talos_machine_secrets.this.machine_secrets
-  config_patches = concat(
-    [
-      templatefile("${path.module}/config/common.yaml.tftpl", {
-        node_name    = each.value.host_node
-        cluster_name = var.environment
-        hostname     = each.key
-        ip           = each.value.ip
-        gateway      = var.network_gateway
-        vip          = each.value.vip
-      })
-    ],
-    each.value.machine_type == "controlplane" ? [
-      templatefile("${path.module}/config/master.yaml.tftpl", {
-        extra_manifests  = jsonencode(var.extra_manifests)
-        inline_manifests = jsonencode(terraform_data.cilium_bootstrap_inline_manifests.output)
-      })
-    ] : [],
-    each.value.machine_type != "controlplane" ? [
-      file("${path.module}/config/user-volume.yaml")
-    ] : []
-  )
+  config_patches = [
+    templatefile("${path.module}/config/common.yaml.tftpl", {
+      node_name    = each.value.host_node
+      cluster_name = var.environment
+      hostname     = each.key
+      ip           = each.value.ip
+      gateway      = var.network_gateway
+      vip          = each.value.vip
+    }), each.value.machine_type == "controlplane" ?
+    templatefile("${path.module}/config/master.yaml.tftpl", {
+      # kubelet = var.cluster.kubelet
+      extra_manifests = jsonencode(var.extra_manifests)
+      # api_server = var.cluster.api_server
+      inline_manifests = jsonencode(terraform_data.cilium_bootstrap_inline_manifests.output)
+    }) : file("${path.module}/config/user-volume.yaml")
+  ]
 }
 
 resource "talos_machine_configuration_apply" "this" {
