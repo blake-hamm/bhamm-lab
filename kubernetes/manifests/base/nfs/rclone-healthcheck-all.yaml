@@ -51,7 +51,9 @@ spec:
               aws --endpoint-url $ENDPOINT_URL s3 cp s3://$BUCKET_NAME/testfile.txt downloaded.txt
 
               echo "Verifying content"
-              if diff testfile.txt downloaded.txt; then
+              orig_md5=$(md5sum testfile.txt | awk '{print $1}')
+              down_md5=$(md5sum downloaded.txt | awk '{print $1}')
+              if [ "$orig_md5" = "$down_md5" ]; then
                 echo "Content verification successful!"
               else
                 echo "Content verification failed!"
