@@ -25,17 +25,17 @@ spec:
   successfulJobsHistoryLimit: 4
   backup:
     schedule: "{{ .Values.k8up.backup.schedule }}"
-    activeDeadlineSeconds: 45
+    activeDeadlineSeconds: 2700
     # optional
     #promURL: https://prometheus-io-instance:8443
   check:
     schedule: "{{ .Values.k8up.backup.checkSchedule }}"
-    activeDeadlineSeconds: 15
+    activeDeadlineSeconds: 900
     # optional
     #promURL: https://prometheus-io-instance:8443
   prune:
     schedule: "{{ .Values.k8up.backup.pruneSchedule }}"
-    activeDeadlineSeconds: 15
+    activeDeadlineSeconds: 900
     retention:
       keepLast: 5
       keepDaily: 2
