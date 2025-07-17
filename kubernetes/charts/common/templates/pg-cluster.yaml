@@ -13,6 +13,7 @@ spec:
   {{- end }}
   instances: {{ .Values.postgresql.instances }}
   storage:
+    storageClass: local-path
     size: {{ .Values.postgresql.storageSize }}
   {{- if .Values.postgresql.sharedPreloadLibraries }}
   postgresql:
