@@ -53,7 +53,10 @@ spec:
               annotations:
                 "k8up.io/backup": "true"
               maxVolumes: 0
-          idx: {}
+          idx:
+            type: "persistentVolumeClaim"
+            size: "20Gi"
+            storageClass: "csi-rbd-sc"
           logs:
             type: "emptyDir"
           livenessProbe:
