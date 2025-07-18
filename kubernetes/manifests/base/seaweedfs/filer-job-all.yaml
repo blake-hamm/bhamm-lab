@@ -25,7 +25,7 @@ spec:
 
               # Apply configuration
               weed shell -filer=seaweedfs-filer:8888 -master=seaweedfs-master:9333 <<EOF
-              fs.configure -locationPrefix=/buckets/fast -disk=fast -apply
+              #DEFAULT: fs.configure -locationPrefix=/buckets/fast -disk=fast -apply
               fs.configure -locationPrefix=/buckets/slow -disk=slow -apply
               exit
               EOF
