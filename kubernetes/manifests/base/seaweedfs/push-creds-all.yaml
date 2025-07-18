@@ -2,7 +2,7 @@ apiVersion: external-secrets.io/v1alpha1
 kind: PushSecret
 metadata:
   name: seaweedfs-s3-creds
-  namespace: seawedfs
+  namespace: seaweedfs
   annotations:
     argocd.argoproj.io/sync-wave: "5"
 spec:
