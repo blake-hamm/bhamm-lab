@@ -9,8 +9,8 @@ metadata:
     argocd.argoproj.io/sync-wave: "15"
 spec:
   configuration:
-    destinationPath: "s3://cnpg-backups/"
-    endpointURL: http://rclone-s3-nfs.nfs.svc.cluster.local:8080
+    destinationPath: "s3://fast_cnpg_backups/"
+    endpointURL: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
     s3Credentials:
       accessKeyId:
         name: cnpg-s3-backup-creds
