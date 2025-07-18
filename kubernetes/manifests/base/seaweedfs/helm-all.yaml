@@ -34,22 +34,6 @@ spec:
             periodSeconds: 15
           logs:
             type: "emptyDir"
-          config: |-
-            [master.maintenance]
-            scripts = """
-              lock
-              fs.configure -locationPrefix=/buckets/slow -disk=hdd -apply
-              fs.configure -locationPrefix=/buckets/fast -disk=ssd -apply
-              ec.encode -fullPercent=95 -quietFor=1h
-              ec.rebuild -force
-              ec.balance -force
-              volume.deleteEmpty -quietFor=24h -force
-              volume.balance -force
-              volume.fix.replication -force
-              s3.clean.uploads -timeAgo=24h
-              unlock
-            """
-            sleep_minutes = 15
         volume:
           enabled: true
           index: leveldb
