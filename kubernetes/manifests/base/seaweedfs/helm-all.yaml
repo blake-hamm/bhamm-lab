@@ -42,14 +42,14 @@ spec:
           dataDirs:
             - name: slow
               type: "persistentVolumeClaim"
-              size: "100Gi"
+              size: "200Gi"
               storageClass: "nfs-csi"
               annotations:
                 "k8up.io/backup": "true"
               maxVolumes: 0
             - name: fast
               type: "persistentVolumeClaim"
-              size: "100Gi"
+              size: "200Gi"
               storageClass: "csi-rbd-sc"
               annotations:
                 "k8up.io/backup": "true"
@@ -60,7 +60,7 @@ spec:
                fs.configure -locationPrefix=/buckets/fast -disk=fast -apply
                fs.configure -locationPrefix=/buckets/slow -disk=slow -apply
              """
-             sleep_minutes = 60
+             sleep_minutes = 15
           logs:
             type: "emptyDir"
           livenessProbe:
