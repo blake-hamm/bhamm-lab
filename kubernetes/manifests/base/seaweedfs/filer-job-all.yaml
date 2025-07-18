@@ -13,7 +13,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: configure
-          image: chrislusf/seaweedfs:latest # Match your SeaweedFS version
+          image: chrislusf/seaweedfs:latest
           command: ["sh", "-c"]
           args:
             - |
