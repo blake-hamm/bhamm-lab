@@ -9,7 +9,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "15"
 spec:
   configuration:
-    destinationPath: "s3://fast_cnpg_backups/"
+    destinationPath: "s3://fast-cnpg-backups/"
     endpointURL: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
     s3Credentials:
       accessKeyId:
