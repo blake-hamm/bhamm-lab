@@ -42,14 +42,14 @@ spec:
           dataDirs:
             - name: slow
               type: "persistentVolumeClaim"
-              size: "200Gi"
+              size: "100Gi"
               storageClass: "nfs-csi"
               annotations:
                 "k8up.io/backup": "true"
               maxVolumes: 0
             - name: fast
               type: "persistentVolumeClaim"
-              size: "200Gi"
+              size: "100Gi"
               storageClass: "csi-rbd-sc"
               annotations:
                 "k8up.io/backup": "true"
