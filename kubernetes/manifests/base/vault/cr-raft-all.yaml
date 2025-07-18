@@ -96,9 +96,9 @@ spec:
             bound_service_account_namespaces: "*"
             policies: read_secrets
             ttl: 1h
-          - name: vault
+          - name: pushsecret
             bound_service_account_names: "default"
-            bound_service_account_namespaces: "vault"
+            bound_service_account_namespaces: "seaweedfs"
             policies: allow_secrets
             ttl: 1h
           - name: sops
