@@ -21,6 +21,7 @@ spec:
             enabled: true
         master:
           enabled: true
+          volumeSizeLimitMB: 10000
           data:
             type: "persistentVolumeClaim"
             size: "10Gi"
@@ -41,22 +42,25 @@ spec:
           dataDirs:
             - name: slow
               type: "persistentVolumeClaim"
-              size: "50Gi"
+              size: "100Gi"
               storageClass: "nfs-csi"
               annotations:
                 "k8up.io/backup": "true"
               maxVolumes: 0
             - name: fast
               type: "persistentVolumeClaim"
-              size: "50Gi"
+              size: "100Gi"
               storageClass: "csi-rbd-sc"
               annotations:
                 "k8up.io/backup": "true"
               maxVolumes: 0
-          idx:
-            type: "persistentVolumeClaim"
-            size: "20Gi"
-            storageClass: "csi-rbd-sc"
+          config: |-
+            [master.maintenance]
+             scripts = """
+               fs.configure -locationPrefix=/buckets/fast -disk=fast -apply
+               fs.configure -locationPrefix=/buckets/slow -disk=slow -apply
+             """
+             sleep_minutes = 60
           logs:
             type: "emptyDir"
           livenessProbe:
