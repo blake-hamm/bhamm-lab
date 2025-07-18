@@ -37,7 +37,7 @@ spec:
           enabled: true
           index: leveldb
           readMode: proxy
-          extraArgs: ["-disk", "slow,fast"]
+          extraArgs: ["-disk", "slow,fast,default"]
           dataDirs:
             - name: slow
               type: "persistentVolumeClaim"
@@ -49,6 +49,13 @@ spec:
             - name: fast
               type: "persistentVolumeClaim"
               size: "50Gi"
+              storageClass: "csi-rbd-sc"
+              annotations:
+                "k8up.io/backup": "true"
+              maxVolumes: 0
+            - name: default
+              type: "persistentVolumeClaim"
+              size: "10Gi"
               storageClass: "csi-rbd-sc"
               annotations:
                 "k8up.io/backup": "true"
