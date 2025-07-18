@@ -39,7 +39,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "12"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
-  schedule: "0 */6 * * *"
+  schedule: "*/5 * * * *" #"0 */6 * * *"
   concurrencyPolicy: Replace
   workflowSpec:
     entrypoint: update-timestamp
