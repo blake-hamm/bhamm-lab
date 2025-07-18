@@ -11,11 +11,11 @@ data:
       "locations": [
         {
           "locationPrefix": "/buckets/fast_",
-          "disk": "fast"
+          "diskType": "fast"
         },
         {
           "locationPrefix": "/buckets/slow_",
-          "disk": "slow"
+          "diskType": "slow"
         }
       ]
     }
