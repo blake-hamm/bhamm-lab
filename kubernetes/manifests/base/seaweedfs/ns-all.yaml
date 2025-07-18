@@ -4,5 +4,5 @@ metadata:
   name: seaweedfs
   annotations:
     argocd.argoproj.io/sync-wave: "0"
-  labels:
-    pod-security.kubernetes.io/enforce: privileged
+    # labels:
+    #   pod-security.kubernetes.io/enforce: privileged

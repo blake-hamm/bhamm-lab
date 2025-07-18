@@ -31,6 +31,8 @@ spec:
             periodSeconds: 15
           readinessProbe:
             periodSeconds: 15
+          logs:
+            type: "emptyDir"
         volume:
           enabled: true
           index: leveldb
@@ -44,6 +46,8 @@ spec:
                 "k8up.io/backup": "true"
               maxVolumes: 0
           idx: {}
+          logs:
+            type: "emptyDir"
           livenessProbe:
             periodSeconds: 15
           readinessProbe:
@@ -60,6 +64,8 @@ spec:
             storageClass: "csi-rbd-sc"
             annotations:
               "k8up.io/backup": "true"
+          logs:
+            type: "emptyDir"
           s3:
             enabled: true
             enableAuth: true
