@@ -1,4 +1,3 @@
-# grants list/get on pods, and exec into them
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -39,7 +38,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "12"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
-  schedule: "*/5 * * * *" #"0 */6 * * *"
+  schedule: "*/5 * * * *"
   concurrencyPolicy: Replace
   workflowSpec:
     entrypoint: update-timestamp
@@ -65,17 +64,22 @@ spec:
               fi
               echo "Found pod: $pod"
 
-              # extract up to 9 old timestamps via sed, drop blanks
-              echo "Extracting old timestamps from pod $pod"
-              old_ts=$(kubectl exec -n test "$pod" -- sh -c "
-                sed -n 's:.*<li>\\(.*\\)</li>:\\1:p' /usr/share/nginx/html/index.html \
-                || true" \
-                | grep -v '^$' \
-                | head -n9)
-              if [ -z "$old_ts" ]; then
-                echo "WARNING: No old timestamps found in index.html"
+              # check if index.html exists, then extract up to 9 old timestamps
+              echo "Checking if /usr/share/nginx/html/index.html exists in pod $pod"
+              if kubectl exec -n test "$pod" -- sh -c "test -f /usr/share/nginx/html/index.html"; then
+                echo "index.html exists, extracting old timestamps"
+                old_ts=$(kubectl exec -n test "$pod" -- sh -c \
+                  "sed -n 's:.*<li>\\(.*\\)</li>:\\1:p' /usr/share/nginx/html/index.html" \
+                  | grep -v '^$' \
+                  | head -n9)
+                if [ -z "$old_ts" ]; then
+                  echo "WARNING: No valid timestamps found in index.html"
+                else
+                  echo "Old timestamps extracted: $old_ts"
+                fi
               else
-                echo "Old timestamps extracted: $old_ts"
+                echo "WARNING: /usr/share/nginx/html/index.html does not exist, starting with empty timestamp list"
+                old_ts=""
               fi
 
               # build & write new HTML
