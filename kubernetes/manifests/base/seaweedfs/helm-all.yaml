@@ -45,7 +45,7 @@ spec:
               ec.balance -force
               volume.deleteEmpty -quietFor=24h -force
               volume.balance -force
-              volume.fix.replication
+              volume.fix.replication -force
               s3.clean.uploads -timeAgo=24h
               unlock
             """
@@ -54,19 +54,11 @@ spec:
           enabled: true
           index: leveldb
           readMode: proxy
-          extraArgs: ["-disk", "hdd,ssd"]
           dataDirs:
-            - name: slow
+            - name: data
               type: "persistentVolumeClaim"
               size: "100Gi"
               storageClass: "nfs-csi"
-              annotations:
-                "k8up.io/backup": "true"
-              maxVolumes: 0
-            - name: fast
-              type: "persistentVolumeClaim"
-              size: "100Gi"
-              storageClass: "csi-rbd-sc"
               annotations:
                 "k8up.io/backup": "true"
               maxVolumes: 0
@@ -97,19 +89,19 @@ spec:
             httpsPort: 0
             allowEmptyFolder: false
             createBuckets:
-              - name: fast-loki-data
+              - name: loki-data
                 anonymousRead: false
-              - name: fast-tofu-state
+              - name: tofu-state
                 anonymousRead: false
-              - name: fast-cnpg-backups
+              - name: cnpg-backups
                 anonymousRead: false
-              - name: fast-forgejo
+              - name: forgejo
                 anonymousRead: false
-              - name: fast-argo-artifact
+              - name: argo-artifact
                 anonymousRead: false
-              - name: slow-harbor-data
+              - name: harbor-data
                 anonymousRead: false
-              - name: slow-k8up-backups
+              - name: k8up-backups
                 anonymousRead: false
           livenessProbe:
             periodSeconds: 15
