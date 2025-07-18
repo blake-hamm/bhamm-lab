@@ -38,7 +38,7 @@ spec:
           enabled: true
           index: leveldb
           readMode: proxy
-          extraArgs: ["-disk", "slow,fast"]
+          extraArgs: ["-disk", "hdd,ssd"]
           dataDirs:
             - name: slow
               type: "persistentVolumeClaim"
@@ -56,11 +56,20 @@ spec:
               maxVolumes: 0
           config: |-
             [master.maintenance]
-             scripts = """
-               fs.configure -locationPrefix=/buckets/fast -disk=fast -apply
-               fs.configure -locationPrefix=/buckets/slow -disk=slow -apply
-             """
-             sleep_minutes = 15
+            scripts = """
+              lock
+              fs.configure -locationPrefix=/buckets/slow -disk=hdd -apply
+              fs.configure -locationPrefix=/buckets/fast -disk=ssd -apply
+              ec.encode -fullPercent=95 -quietFor=1h
+              ec.rebuild -force
+              ec.balance -force
+              volume.deleteEmpty -quietFor=24h -force
+              volume.balance -force
+              volume.fix.replication
+              s3.clean.uploads -timeAgo=24h
+              unlock
+            """
+            sleep_minutes = 15
           logs:
             type: "emptyDir"
           livenessProbe:
