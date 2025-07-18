@@ -45,6 +45,13 @@ spec:
               annotations:
                 "k8up.io/backup": "true"
               maxVolumes: 0
+            - name: fast
+              type: "persistentVolumeClaim"
+              size: "50G"
+              storageClass: "csi-rbd-sc"
+              annotations:
+                "k8up.io/backup": "true"
+              maxVolumes: 0
           idx: {}
           logs:
             type: "emptyDir"
