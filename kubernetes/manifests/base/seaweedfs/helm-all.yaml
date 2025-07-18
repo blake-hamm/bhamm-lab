@@ -23,7 +23,7 @@ spec:
           enabled: true
           data:
             type: "persistentVolumeClaim"
-            size: "10G"
+            size: "10Gi"
             storageClass: "csi-rbd-sc"
             annotations:
               "k8up.io/backup": "true"
@@ -41,14 +41,14 @@ spec:
           dataDirs:
             - name: slow
               type: "persistentVolumeClaim"
-              size: "50G"
+              size: "50Gi"
               storageClass: "nfs-csi"
               annotations:
                 "k8up.io/backup": "true"
               maxVolumes: 0
             - name: fast
               type: "persistentVolumeClaim"
-              size: "50G"
+              size: "50Gi"
               storageClass: "csi-rbd-sc"
               annotations:
                 "k8up.io/backup": "true"
@@ -68,7 +68,7 @@ spec:
           defaultReplicaPlacement: "000"
           data:
             type: "persistentVolumeClaim"
-            size: "10G"
+            size: "10Gi"
             storageClass: "csi-rbd-sc"
             annotations:
               "k8up.io/backup": "true"
