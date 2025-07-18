@@ -74,6 +74,14 @@ spec:
               "k8up.io/backup": "true"
           logs:
             type: "emptyDir"
+          extraVolumeMounts: |
+            - name: config-volume
+              mountPath: /etc/seaweedfs/filer.conf
+              subPath: filer.conf
+          extraVolumes: |
+            - name: config-volume
+              configMap:
+                name: seaweedfs-filer-config
           s3:
             enabled: true
             enableAuth: true
@@ -81,19 +89,19 @@ spec:
             httpsPort: 0
             allowEmptyFolder: false
             createBuckets:
-              - name: loki-data
+              - name: fast_loki_data
                 anonymousRead: false
-              - name: argo-artifact
+              - name: fast_tofu_state
                 anonymousRead: false
-              - name: harbor-data
+              - name: fast_cnpg_backups
                 anonymousRead: false
-              - name: forgejo
+              - name: fast_forgejo
                 anonymousRead: false
-              - name: tofu-state
+              - name: fast_argo_artifact
                 anonymousRead: false
-              - name: cnpg-backups
+              - name: slow_harbor_data
                 anonymousRead: false
-              - name: k8up-backups
+              - name: slow_k8up_backups
                 anonymousRead: false
           livenessProbe:
             periodSeconds: 15

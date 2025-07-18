@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: seaweedfs-filer-config
+  namespace: seaweedfs
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+data:
+  filer.conf: |
+    {
+      "locations": [
+        {
+          "locationPrefix": "/buckets/fast_",
+          "disk": "fast"
+        },
+        {
+          "locationPrefix": "/buckets/slow_",
+          "disk": "slow"
+        }
+      ]
+    }
