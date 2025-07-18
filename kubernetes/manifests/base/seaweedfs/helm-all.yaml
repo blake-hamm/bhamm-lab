@@ -81,19 +81,19 @@ spec:
             httpsPort: 0
             allowEmptyFolder: false
             createBuckets:
-              - name: fast_loki_data
+              - name: fast-loki-data
                 anonymousRead: false
-              - name: fast_tofu_state
+              - name: fast-tofu-state
                 anonymousRead: false
-              - name: fast_cnpg_backups
+              - name: fast-cnpg-backups
                 anonymousRead: false
-              - name: fast_forgejo
+              - name: fast-forgejo
                 anonymousRead: false
-              - name: fast_argo_artifact
+              - name: fast-argo-artifact
                 anonymousRead: false
-              - name: slow_harbor_data
+              - name: slow-harbor-data
                 anonymousRead: false
-              - name: slow_k8up_backups
+              - name: slow-k8up-backups
                 anonymousRead: false
           livenessProbe:
             periodSeconds: 15
