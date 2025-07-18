@@ -37,6 +37,7 @@ spec:
           enabled: true
           index: leveldb
           readMode: proxy
+          extraArgs: ["-disk", "slow,fast"]
           dataDirs:
             - name: slow
               type: "persistentVolumeClaim"
