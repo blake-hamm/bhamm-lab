@@ -96,6 +96,11 @@ spec:
             bound_service_account_namespaces: "*"
             policies: read_secrets
             ttl: 1h
+          - name: vault
+            bound_service_account_names: "default"
+            bound_service_account_namespaces: "vault"
+            policies: allow_secrets
+            ttl: 1h
           - name: sops
             bound_service_account_names: "sops-vault-sync-sa"
             bound_service_account_namespaces: "argo"
