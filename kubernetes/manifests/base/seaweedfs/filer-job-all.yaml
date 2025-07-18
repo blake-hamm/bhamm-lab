@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: seaweedfs-configure-tiered-storage
+  namespace: seaweedfs
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookFailed
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: configure
+          image: chrislusf/seaweedfs:latest # Match your SeaweedFS version
+          command: ["sh", "-c"]
+          args:
+            - |
+              # Wait for filer to be ready
+              until nc -z seaweedfs-filer 8888; do
+                echo "Waiting for filer...";
+                sleep 2;
+              done;
+
+              # Apply configuration
+              weed shell -filer=seaweedfs-filer:8888 <<EOF
+              fs.configure -locationPrefix=/buckets/fast_ -disk=fast -apply
+              fs.configure -locationPrefix=/buckets/slow_ -disk=slow -apply
+              exit
+              EOF
+      affinity:
+        podAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/component: filer
+                topologyKey: kubernetes.io/hostname
