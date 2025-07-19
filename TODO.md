@@ -17,9 +17,10 @@ x Ensure blue cluster restore test cnpg/pvc
 x Build 'kill switch' workflow
   x Remove ns/pvc
   x Remove argocd apps
-- Ensure green cnpg can have backup & restore
+x Ensure green cnpg can have backup & restore
 - Troubleshoot check/prune/backup jobs
 - Deploy core and manually configure
+- Update argocd sync docs
 
 ```
 This is complete when:
