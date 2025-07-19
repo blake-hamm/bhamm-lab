@@ -1,0 +1,83 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterWorkflowTemplate
+metadata:
+  name: kill-switch
+  annotations:
+    argocd.argoproj.io/sync-wave: "7"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  templates:
+    - name: cleanup
+      steps:
+        - - name: pause-argocd-apps
+            template: pause-apps
+        - - name: delete-pvcs
+            template: delete-pvcs
+        - - name: remove-pvc-finalizers
+            template: remove-finalizers
+        - - name: delete-argocd-apps
+            template: delete-apps
+    - name: pause-apps
+      script:
+        image: bitnami/kubectl
+        command: [bash]
+        source: |
+          # Pause all ArgoCD applications to stop syncing
+          kubectl get applications -n argocd -o name | xargs -I {} kubectl patch {} -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":null}}}'
+    - name: delete-pvcs
+      script:
+        image: bitnami/kubectl
+        command: [bash]
+        source: |
+          # Delete all PVCs in the default namespace
+          kubectl delete pvc --all --namespace default --force --grace-period=0
+    - name: remove-finalizers
+      script:
+        image: bitnami/kubectl
+        command: [bash]
+        source: |
+          # Remove finalizers from any PVCs stuck in terminating state
+          for pvc in $(kubectl get pvc --namespace default -o jsonpath='{.items[?(@.status.phase=="Terminating")].metadata.name}'); do
+            kubectl patch pvc $pvc --namespace default -p '{"metadata":{"finalizers":[]}}' --type=merge
+          done
+    - name: delete-apps
+      script:
+        image: bitnami/kubectl
+        command: [bash]
+        source: |
+          # Delete all ArgoCD applications to remove managed resources
+          kubectl delete applications --all -n argocd --force --grace-period=0
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: workflow-admin
+  namespace: argo
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: workflow-admin-role
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: workflow-admin-binding
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
+subjects:
+  - kind: ServiceAccount
+    name: workflow-admin
+    namespace: argo
+roleRef:
+  kind: ClusterRole
+  name: workflow-admin-role
+  apiGroup: rbac.authorization.k8s.io
