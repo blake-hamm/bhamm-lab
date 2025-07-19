@@ -4,7 +4,7 @@ metadata:
   name: seaweedfs
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "3"
 spec:
   destination:
     namespace: seaweedfs
@@ -23,11 +23,8 @@ spec:
           enabled: true
           volumeSizeLimitMB: 10000
           data:
-            type: "persistentVolumeClaim"
-            size: "10Gi"
-            storageClass: "csi-rbd-sc"
-            annotations:
-              "k8up.io/backup": "true"
+            type: "existingClaim"
+            claimName: "seaweedfs-master-data"
           livenessProbe:
             periodSeconds: 15
           readinessProbe:
@@ -39,11 +36,8 @@ spec:
           readMode: proxy
           dataDirs:
             - name: data
-              type: "persistentVolumeClaim"
-              size: "100Gi"
-              storageClass: "nfs-csi"
-              annotations:
-                "k8up.io/backup": "true"
+              type: "existingClaim"
+              claimName: "seaweedfs-volume-data"
               maxVolumes: 0
           logs:
             type: "emptyDir"
@@ -58,11 +52,8 @@ spec:
           storage: 10Gi
           defaultReplicaPlacement: "000"
           data:
-            type: "persistentVolumeClaim"
-            size: "10Gi"
-            storageClass: "csi-rbd-sc"
-            annotations:
-              "k8up.io/backup": "true"
+            type: "existingClaim"
+            claimName: "seaweedfs-filer-data"
           logs:
             type: "emptyDir"
           s3:
@@ -71,21 +62,21 @@ spec:
             port: 8333
             httpsPort: 0
             allowEmptyFolder: false
-            createBuckets:
-              - name: loki-data
-                anonymousRead: false
-              - name: tofu-state
-                anonymousRead: false
-              - name: cnpg-backups
-                anonymousRead: false
-              - name: forgejo
-                anonymousRead: false
-              - name: argo-artifact
-                anonymousRead: false
-              - name: harbor-data
-                anonymousRead: false
-              - name: k8up-backups
-                anonymousRead: false
+            # createBuckets:
+            #   - name: loki-data
+            #     anonymousRead: false
+            #   - name: tofu-state
+            #     anonymousRead: false
+            #   - name: cnpg-backups
+            #     anonymousRead: false
+            #   - name: forgejo
+            #     anonymousRead: false
+            #   - name: argo-artifact
+            #     anonymousRead: false
+            #   - name: harbor-data
+            #     anonymousRead: false
+            #   - name: k8up-backups
+            #     anonymousRead: false
           livenessProbe:
             periodSeconds: 15
           readinessProbe:
