@@ -26,11 +26,12 @@ spec:
   restoreMethod:
     folder:
       claimName: data-filer-seaweedfs-filer-0
+  snapshot: fd579873
 ---
 apiVersion: k8up.io/v1
 kind: Restore
 metadata:
-  name: seaweedfs-s3-offsite-data
+  name: seaweedfs-s3-offsite-master
   namespace: seaweedfs
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
@@ -55,6 +56,7 @@ spec:
   restoreMethod:
     folder:
       claimName: data-seaweedfs-seaweedfs-master-0
+  snapshot: a67e3b13
 ---
 apiVersion: k8up.io/v1
 kind: Restore
@@ -84,3 +86,4 @@ spec:
   restoreMethod:
     folder:
       claimName: data-seaweedfs-volume-0
+  snapshot: 669aa42e
