@@ -63,21 +63,21 @@ spec:
             port: 8333
             httpsPort: 0
             allowEmptyFolder: false
-            createBuckets:
-              - name: loki-data
-                anonymousRead: false
-              - name: tofu-state
-                anonymousRead: false
-              - name: cnpg-backups
-                anonymousRead: false
-              - name: forgejo
-                anonymousRead: false
-              - name: argo-artifact
-                anonymousRead: false
-              - name: harbor-data
-                anonymousRead: false
-              - name: k8up-backups
-                anonymousRead: false
+            # createBuckets:
+            #   - name: loki-data
+            #     anonymousRead: false
+            #   - name: tofu-state
+            #     anonymousRead: false
+            #   - name: cnpg-backups
+            #     anonymousRead: false
+            #   - name: forgejo
+            #     anonymousRead: false
+            #   - name: argo-artifact
+            #     anonymousRead: false
+            #   - name: harbor-data
+            #     anonymousRead: false
+            #   - name: k8up-backups
+            #     anonymousRead: false
           livenessProbe:
             periodSeconds: 15
           readinessProbe:
