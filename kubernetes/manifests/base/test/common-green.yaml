@@ -41,6 +41,7 @@ spec:
         k8up:
           backup:
             enabled: true
+            schedule: "*/30 * * * *"
             # restores:
             #   - snapshot: "latest"
             #     claimName: "test"
@@ -49,6 +50,7 @@ spec:
           backups:
             enabled: true
             retention: "3d"
+            schedule: "*/30 * * * * *"
             # restore:
             #   enabled: true
   syncPolicy:
