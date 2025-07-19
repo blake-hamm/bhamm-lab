@@ -8,10 +8,12 @@ spec:
       steps:
         - - name: pause-argocd-apps
             template: pause-apps
-        - - name: delete-pvcs
-            template: delete-pvcs
         - - name: remove-pvc-finalizers
             template: remove-finalizers
+        - - name: delete-pvcs
+            template: delete-pvcs
+        - - name: validate-pvcs
+            template: validate-pvcs
         - - name: delete-argocd-apps
             template: delete-apps
     - name: pause-apps
@@ -21,6 +23,17 @@ spec:
         source: |
           # Pause all ArgoCD applications to stop syncing
           kubectl get applications -n argocd -o name | xargs -I {} kubectl patch {} -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":null}}}'
+    - name: remove-finalizers
+      script:
+        image: bitnami/kubectl
+        command: [bash]
+        source: |
+          # Remove finalizers from all PVCs across all namespaces
+          for ns in $(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}'); do
+            for pvc in $(kubectl get pvc -n $ns -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
+              kubectl patch pvc $pvc -n $ns -p '{"metadata":{"finalizers":null}}' --type=merge
+            done
+          done
     - name: delete-pvcs
       script:
         image: bitnami/kubectl
@@ -28,16 +41,26 @@ spec:
         source: |
           # Delete all PVCs in all namespaces
           kubectl delete pvc --all --all-namespaces --force --grace-period=0
-    - name: remove-finalizers
+    - name: valid-pvcs
       script:
         image: bitnami/kubectl
         command: [bash]
         source: |
-          # Remove finalizers from any PVCs stuck in terminating state across all namespaces
-          for ns in $(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}'); do
-            for pvc in $(kubectl get pvc -n $ns -o jsonpath='{.items[?(@.status.phase=="Terminating")].metadata.name}' 2>/dev/null); do
-              kubectl patch pvc $pvc -n $ns -p '{"metadata":{"finalizers":[]}}' --type=merge
+          # Check for and clean up any stuck PVCs (retry up to 3 times)
+          for attempt in {1..3}; do
+            stuck_pvcs=false
+            for ns in $(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}'); do
+              for pvc in $(kubectl get pvc -n $ns -o jsonpath='{.items[?(@.status.phase=="Terminating")].metadata.name}' 2>/dev/null); do
+                kubectl patch pvc $pvc -n $ns -p '{"metadata":{"finalizers":null}}' --type=merge
+                stuck_pvcs=true
+              done
             done
+            if [ "$stuck_pvcs" = false ]; then
+              echo "No stuck PVCs found, cleanup complete."
+              break
+            fi
+            echo "Retrying cleanup of stuck PVCs (attempt $attempt)..."
+            sleep 5
           done
     - name: delete-apps
       script:
