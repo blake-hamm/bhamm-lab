@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ClusterWorkflowTemplate
 metadata:
-  name: cluster-kill-switch-template
+  name: kill-switch
 spec:
   templates:
     - name: cleanup
