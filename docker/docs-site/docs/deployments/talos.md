@@ -24,7 +24,10 @@ tofu -chdir=tofu/kubernetes plan -var 'environment=green' -var 'branch_name=feat
 tofu -chdir=tofu/kubernetes apply -var 'environment=green' -var 'branch_name=feature/refactor-cluster' -auto-approve
 
 # To destroy
-tofu -chdir=tofu/proxmox/talos destroy -var-file=dev.tfvars -auto-approve
+export KUBECONFIG=./tofu/proxmox/talos/result/kube-config-green.yaml
+argo submit   --from clusterworkflowtemplate/kill-switch   --namespace argo   --serviceaccount workflow-admin --entrypoint cleanup
+tofu -chdir=tofu/proxmox/talos workspace select -or-create=true green
+tofu -chdir=tofu/proxmox/talos destroy -var-file=blue.tfvars -auto-approve
 ```
 
 ```bash

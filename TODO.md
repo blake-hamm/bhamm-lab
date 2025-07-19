@@ -13,12 +13,13 @@ x Finalize storage
   x Transition all s3 usage to seaweedfs (k8up, cnpg)
   x Remove ceph rgw completely
   x Decommission rclone
-- Ensure blue cluster restore test cnpg/pvc
+x Ensure blue cluster restore test cnpg/pvc
+x Build 'kill switch' workflow
+  x Remove ns/pvc
+  x Remove argocd apps
+- Ensure green cnpg can have backup & restore
 - Troubleshoot check/prune/backup jobs
 - Deploy core and manually configure
-- Build 'kill switch' workflow
-  - Remove ns/pvc
-  - Remove argocd apps
 
 ```
 This is complete when:
