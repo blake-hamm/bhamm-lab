@@ -18,5 +18,5 @@ spec:
       secretAccessKey:
         name: cnpg-s3-backup-creds
         key: secret_key
-    retentionPolicy: "{{ .Values.postgresql.backups.retention }}"
+  retentionPolicy: "{{ .Values.postgresql.backups.retention }}"
 {{- end }}
