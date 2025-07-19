@@ -8,6 +8,8 @@ spec:
       steps:
         - - name: pause-argocd-apps
             template: pause-apps
+        - - name: delete-cnpg-clusters
+            template: delete-cnpg-clusters
         - - name: remove-pvc-finalizers
             template: remove-finalizers
         - - name: delete-pvcs
@@ -23,6 +25,12 @@ spec:
         source: |
           # Pause all ArgoCD applications to stop syncing
           kubectl get applications -n argocd -o name | xargs -I {} kubectl patch {} -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":null}}}'
+    - name: delete-cnpg-clusters
+      script:
+        image: bitnami/kubectl
+        command: [bash]
+        source: |
+          kubectl delete clusters.postgresql.cnpg.io --all --all-namespaces
     - name: remove-finalizers
       script:
         image: bitnami/kubectl
