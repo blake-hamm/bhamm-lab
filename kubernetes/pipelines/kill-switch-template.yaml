@@ -41,7 +41,7 @@ spec:
         source: |
           # Delete all PVCs in all namespaces
           kubectl delete pvc --all --all-namespaces --force --grace-period=0
-    - name: valid-pvcs
+    - name: validate-pvcs
       script:
         image: bitnami/kubectl
         command: [bash]
