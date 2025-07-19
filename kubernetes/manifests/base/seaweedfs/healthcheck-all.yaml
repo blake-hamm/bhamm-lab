@@ -72,4 +72,4 @@ spec:
               aws --endpoint-url $ENDPOINT_URL s3 rb s3://$BUCKET_NAME
               echo "S3 API test completed successfully"
       restartPolicy: Never
-  backoffLimit: 1
+  backoffLimit: 2
