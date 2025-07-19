@@ -3,6 +3,7 @@ kind: ClusterWorkflowTemplate
 metadata:
   name: kill-switch
 spec:
+  activeDeadlineSeconds: 600
   templates:
     - name: cleanup
       steps:
@@ -10,10 +11,10 @@ spec:
             template: pause-apps
         - - name: delete-cnpg-clusters
             template: delete-cnpg-clusters
-        - - name: remove-pvc-finalizers
-            template: remove-finalizers
         - - name: delete-pvcs
             template: delete-pvcs
+          - name: remove-finalizers
+            template: remove-finalizers
         - - name: validate-pvcs
             template: validate-pvcs
         - - name: delete-argocd-apps
@@ -30,17 +31,22 @@ spec:
         image: bitnami/kubectl
         command: [bash]
         source: |
-          kubectl delete clusters.postgresql.cnpg.io --all --all-namespaces
+          # Delete all CNPG PostgreSQL clusters across all namespaces
+          kubectl delete clusters.postgresql.cnpg.io --all --all-namespaces --force --grace-period=0
     - name: remove-finalizers
       script:
         image: bitnami/kubectl
         command: [bash]
         source: |
-          # Remove finalizers from all PVCs across all namespaces
-          for ns in $(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}'); do
-            for pvc in $(kubectl get pvc -n $ns -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
-              kubectl patch pvc $pvc -n $ns -p '{"metadata":{"finalizers":null}}' --type=merge
+          # Continuously remove finalizers from all PVCs across all namespaces
+          for attempt in {1..10}; do
+            for ns in $(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}'); do
+              for pvc in $(kubectl get pvc -n $ns -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
+                kubectl patch pvc $pvc -n $ns -p '{"metadata":{"finalizers":null}}' --type=merge
+              done
             done
+            echo "Completed finalizer removal attempt $attempt"
+            sleep 3
           done
     - name: delete-pvcs
       script:
