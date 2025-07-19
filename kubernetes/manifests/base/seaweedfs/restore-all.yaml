@@ -1,0 +1,86 @@
+apiVersion: k8up.io/v1
+kind: Restore
+metadata:
+  name: seaweedfs-s3-offsite-filer
+  namespace: seaweedfs
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  backend:
+    repoPasswordSecretRef:
+      name: seaweedfs-external-secret
+      key: repo-password
+    s3:
+      endpoint: https://storage.googleapis.com
+      bucket: bhamm-lab-k8up
+      accessKeyIDSecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKeySecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_SECRET_ACCESS_KEY
+  podSecurityContext:
+    fsGroup: 0
+    runAsUser: 0
+  restoreMethod:
+    folder:
+      claimName: data-filer-seaweedfs-filer-0
+---
+apiVersion: k8up.io/v1
+kind: Restore
+metadata:
+  name: seaweedfs-s3-offsite-data
+  namespace: seaweedfs
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  backend:
+    repoPasswordSecretRef:
+      name: seaweedfs-external-secret
+      key: repo-password
+    s3:
+      endpoint: https://storage.googleapis.com
+      bucket: bhamm-lab-k8up
+      accessKeyIDSecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKeySecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_SECRET_ACCESS_KEY
+  podSecurityContext:
+    fsGroup: 0
+    runAsUser: 0
+  restoreMethod:
+    folder:
+      claimName: data-seaweedfs-seaweedfs-master-0
+---
+apiVersion: k8up.io/v1
+kind: Restore
+metadata:
+  name: seaweedfs-s3-offsite-volume
+  namespace: seaweedfs
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  backend:
+    repoPasswordSecretRef:
+      name: seaweedfs-external-secret
+      key: repo-password
+    s3:
+      endpoint: https://storage.googleapis.com
+      bucket: bhamm-lab-k8up
+      accessKeyIDSecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKeySecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_SECRET_ACCESS_KEY
+  podSecurityContext:
+    fsGroup: 0
+    runAsUser: 0
+  restoreMethod:
+    folder:
+      claimName: data-seaweedfs-volume-0
