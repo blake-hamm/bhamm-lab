@@ -4,6 +4,7 @@ metadata:
   name: seaweedfs-s3-creds
   namespace: seaweedfs
   annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "5"
 spec:
   deletionPolicy: Delete
