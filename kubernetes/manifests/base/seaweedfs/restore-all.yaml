@@ -5,7 +5,7 @@ metadata:
   namespace: seaweedfs
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   backend:
     repoPasswordSecretRef:
@@ -25,7 +25,7 @@ spec:
     runAsUser: 0
   restoreMethod:
     folder:
-      claimName: data-filer-seaweedfs-filer-0
+      claimName: seaweedfs-filer-data
   snapshot: fd579873
 ---
 apiVersion: k8up.io/v1
@@ -35,7 +35,7 @@ metadata:
   namespace: seaweedfs
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   backend:
     repoPasswordSecretRef:
@@ -55,7 +55,7 @@ spec:
     runAsUser: 0
   restoreMethod:
     folder:
-      claimName: data-seaweedfs-seaweedfs-master-0
+      claimName: seaweedfs-master-data
   snapshot: a67e3b13
 ---
 apiVersion: k8up.io/v1
@@ -65,7 +65,7 @@ metadata:
   namespace: seaweedfs
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   backend:
     repoPasswordSecretRef:
@@ -85,5 +85,5 @@ spec:
     runAsUser: 0
   restoreMethod:
     folder:
-      claimName: data-seaweedfs-volume-0
+      claimName: seaweedfs-volume-data
   snapshot: 669aa42e
