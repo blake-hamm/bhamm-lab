@@ -33,7 +33,6 @@ spec:
             type: "emptyDir"
         volume:
           enabled: true
-          index: leveldb
           readMode: proxy
           dataDirs:
             - name: data
