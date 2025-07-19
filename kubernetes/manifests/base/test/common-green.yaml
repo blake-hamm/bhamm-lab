@@ -41,7 +41,7 @@ spec:
         k8up:
           backup:
             enabled: true
-            schedule: "*/30 * * * *"
+            # schedule: "*/30 * * * *"
             # restores:
             #   - snapshot: "latest"
             #     claimName: "test"
