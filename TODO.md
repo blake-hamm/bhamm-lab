@@ -1,24 +1,20 @@
-# Refactor cluster
-x Setup ceph rgw (replace with rclone s3 server)
-- Setup green deployment
-  x Talos deployment
-  x Sync all ns and 'external-secrets' in terraform w/ sops
-- Config argocd
-  x ArgoCD app health - https://argo-cd.readthedocs.io/en/stable/operator-manual/health/#argocd-app
-  x Adjust sync waves and add phases (hooks)
-  x Switch to nfs csi
-  - Ensure resource request/limits set (LimitRange manifest in common helm)
-  - Add namespace feature (privileged) to common helm
-x Run backups
-x Setup blue deployment (should restore cleanly w/out intervention)
-
-- Ensure green points to main
-- Finalize storage
-  - Ensure talos has storage accessible
-  - Setup local path provisioner with kustomize
-  - Have cnpg use local path
-  - Deploy seaweedfs (using local path)
-  - Remove ceph rgw completely
+# Stabilize
+x Ensure green points to main
+x Destroy green
+x Ceanup ceph kubernetes pool
+x Redeploy green
+x Finalize storage
+  x Ensure talos has storage accessible
+  x Setup local path provisioner with kustomize
+  x Have cnpg use local path
+  x Deploy seaweedfs
+    x Ensure PushSecret for s3 creds
+    x Ensure offsite backups
+  x Transition all s3 usage to seaweedfs (k8up, cnpg)
+  x Remove ceph rgw completely
+  x Decommission rclone
+- Ensure blue cluster restore test cnpg/pvc
+- Troubleshoot check/prune/backup jobs
 - Deploy core and manually configure
 - Build 'kill switch' workflow
   - Remove ns/pvc
@@ -255,6 +251,18 @@ Date: Sun, 04 May 2025 00:00:01 -0600
 - kube bench - https://github.com/aquasecurity/kube-bench
 
 ## Previous
+# Refactor cluster
+x Setup ceph rgw (replace with rclone s3 server)
+- Setup green deployment
+  x Talos deployment
+  x Sync all ns and 'external-secrets' in terraform w/ sops
+x Config argocd
+  x ArgoCD app health - https://argo-cd.readthedocs.io/en/stable/operator-manual/health/#argocd-app
+  x Adjust sync waves and add phases (hooks)
+  x Switch to nfs csi
+x Run backups
+x Setup blue deployment (should restore cleanly w/out intervention)
+
 # Refactor backups/storage
 x Add pvc dashy link
 x Deploy second minio tenant w/ nfs storage
