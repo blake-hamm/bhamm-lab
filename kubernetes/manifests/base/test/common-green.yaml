@@ -50,7 +50,7 @@ spec:
           backups:
             enabled: true
             retention: "3d"
-            # schedule: "*/30 * * * * *"
+            schedule: "0 */5 * * * *"
             # restore:
             #   enabled: true
   syncPolicy:
