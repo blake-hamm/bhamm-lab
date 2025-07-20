@@ -11,11 +11,13 @@
   - Cert manager
   - Kubernetes metrics
   - Vault
+  - Traefik
 -wave 0 seaweedfs ns
 -wave 1 cert manager smon for metrics
 -wave 1 k8up helm
 -wave 1 Checkpoint job for storage health
 -wave 1 Seaweedfs deployment
+-wave 1 Cilum config
 -wave 2 Vault
 -wave 2 CloudnativePG
 -wave 2 Checkpoint job for seaweedfs s3 health
@@ -39,8 +41,15 @@
 -wave 12 Test svc
 -wave 18 Test CronWorkflow (timestamp on cnpg)
 -wave 15 Cert manager common
--wave 16 Cert manager external dns challenge and metrics
-*At this point all my storage classes, secretes and s3 (ceph rgw and rclone w/ nfs pvc) should be functioning. I should also be able to deploy common helm charts w/ external secrets, k8up pvc restores and cnpg postgres databases restores.*
+-wave 15 Authelia Common
+-wave 15 Traefik Middleware
+-wave 16 Authelia Helm
+-wave 16 STAGE: Cert manager cluster issuer
+-wave 17 STAGE: Certificate in traefik ns
+-wave 18 PROD: Cert manager cluster issuer
+-wave 19 PROD: Certificate in traefik ns
+-wave 20 Traefik tls store
+*At this point all my storage classes, secretes and s3 (seaweedfs) should be functioning. I should also have ingress setup and sites should be accessible at my ip. I should also be able to deploy common helm charts w/ external secrets, k8up pvc restores, cnpg postgres databases restores and ingress.*
 
 ### Common helm chart
 -wave 14 external secrets (also, cnpg, k8up)
