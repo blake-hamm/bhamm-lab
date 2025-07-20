@@ -9,13 +9,13 @@ metadata:
 spec:
   acme:
     server: https://acme-staging-v02.api.letsencrypt.org/directory
-    email: bhamm-homelab@gmail.com
+    email: bhamm.lab@gmail.com
     privateKeySecretRef:
       name: letsencrypt
     solvers:
       - dns01:
           cloudflare:
-            email: bhamm-homelab@gmail.com
+            email: bhamm.lab@gmail.com
             apiTokenSecretRef:
               name: cert-manager-external-secret
               key: cloudflare-token
@@ -34,13 +34,13 @@ metadata:
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: bhamm-homelab@gmail.com
+    email: bhamm.lab@gmail.com
     privateKeySecretRef:
       name: letsencrypt
     solvers:
       - dns01:
           cloudflare:
-            email: bhamm-homelab@gmail.com
+            email: bhamm.lab@gmail.com
             apiTokenSecretRef:
               name: cert-manager-external-secret
               key: cloudflare-token
