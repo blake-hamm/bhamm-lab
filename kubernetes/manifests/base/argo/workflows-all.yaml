@@ -67,10 +67,10 @@ spec:
             bucket: argo-artifacts
             accessKeySecret:
               name: argo-external-secret
-              key: access_key
+              key: S3_ACCESS_KEY_ID
             secretKeySecret:
               name: argo-external-secret
-              key: secret_key
+              key: S3_SECRET_ACCESS_KEY
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

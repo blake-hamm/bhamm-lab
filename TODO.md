@@ -35,8 +35,8 @@ x Ensure base has authelia, treafik, lldap, certs as well
 - Ensure
   x Add loki (w/ seaweedfs)
   x Add alloy
-  - Argo artifacts (w/ seaweedfs)
-  - Argo common (combine events/workflows)
+  x Argo artifacts (w/ seaweedfs)
+  x Argo common (combine events/workflows)
 - Ensure monitor/ingress for all base:
   - Argo
   x Argocd
