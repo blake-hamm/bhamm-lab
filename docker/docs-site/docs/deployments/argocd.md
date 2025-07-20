@@ -20,24 +20,25 @@
 -wave 2 Checkpoint job for seaweedfs s3 health
 -wave 3 Checkpoint job for vault health
 -wave 3 External Secrets
--wave 3 argo events
+-wave 3 argo events helm
 -wave 3 Seaweedfs k8up offsite restore from gcp
 -wave 4 Vault secret store
 -wave 4 argo eventbus
 -wave 5 push seaweedfs s3 credentails to vault
+-wave 6 argo workflows helm
 -wave 7 Vault secret sync argo workflow
--wave 7 Pipelines app
+-wave 7 Automation app
 -wave 8 argo workflow - rclone s3 create buckets (k8up/cnpg)
 -wave 8 nfs common (secrets for k8up restore/backup)
 -wave 9 Test ns
--wave 10 Test cnpg
+-wave 10 Test common (k8up/cnpg backups)
 -wave 10 Test pvc
 -wave 11 Test dp
 -wave 12 Test CronWorkflow (timestamp on index.html in pvc)
 -wave 12 Test svc
--wave 13 Test common (k8up/cnpg backups)
 -wave 18 Test CronWorkflow (timestamp on cnpg)
 -wave 19 Cert manager external dns challenge and metrics
+-wave 20 argocd common
 *At this point all my storage classes, secretes and s3 (ceph rgw and rclone w/ nfs pvc) should be functioning. I should also be able to deploy common helm charts w/ external secrets, k8up pvc restores and cnpg postgres databases restores.*
 
 ## Core apps

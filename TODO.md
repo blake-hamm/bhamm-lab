@@ -19,13 +19,16 @@ x Build 'kill switch' workflow
   x Remove argocd apps
 x Ensure green cnpg can have backup & restore
 x Cleanup offsite restic backups
-- Troubleshoot test restore/backup in morning (confirmed bucket needs to be empty?)
-  - Verify test db timestamp table
-  - Remove full test common cnpg
-  - Watch filer logs
-  - Add test common cnpg with restore/backup
-  - Confirm test db is updated (might be missing one ts)
-- Troubleshoot check/prune/backup jobs
+x Troubleshoot test restore/backup in morning (confirmed bucket needs to be empty?)
+  x Verify test db timestamp table
+  x Remove full test common cnpg
+  x Watch filer logs
+  x Add test common cnpg with restore/backup
+  x Confirm test db is updated (might be missing one ts)
+  x RCA: cnpg `ScheduleBackup` had immediate: true for immediate backup, this would occur prior to the cluster being setup, causing a failure
+x Troubleshoot check/prune/backup jobs
+  x Seems okay for now, need to track...
+- Ensure base has authelia, treafik, certs as well
 - Deploy core and manually configure
 - Update argocd sync docs
 

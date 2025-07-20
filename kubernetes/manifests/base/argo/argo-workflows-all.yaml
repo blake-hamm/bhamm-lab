@@ -67,7 +67,7 @@ spec:
             #     filterGroupsRegex:
         artifactRepository:
           s3:
-            endpoint: "http://rgw.ceph.svc.cluster.local:7480"
+            endpoint: "http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333"
             bucket: argo-artifacts
             accessKeySecret:
               name: argo-external-secret
