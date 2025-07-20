@@ -51,6 +51,7 @@ x Ensure base has authelia, treafik, lldap, certs as well
   - harbor
   - forgejo
   - dashy (and update links)
+- Blue deployment (and switch)
 - Update DR docs (k8up/restic snapshots)
 
 ```
