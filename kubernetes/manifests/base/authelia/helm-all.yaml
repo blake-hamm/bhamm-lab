@@ -4,7 +4,7 @@ metadata:
   name: authelia
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "15"
+    argocd.argoproj.io/sync-wave: "16"
 spec:
   destination:
     namespace: authelia
@@ -17,8 +17,7 @@ spec:
     helm:
       valuesObject:
         pod:
-          kind: 'Deployment'
-          replicas: 1
+          kind: 'DaemonSet'
           extraVolumeMounts:
             - mountPath: '/app/custom-secrets'
               name: 'custom-secrets'
@@ -121,7 +120,7 @@ spec:
             cookies:
               - subdomain: 'auth'
                 domain: 'bhamm-lab.com'
-                authelia_url: 'https://auth.dev.bhamm-lab.com'
+                authelia_url: 'https://auth.bhamm-lab.com'
             redis:
               enabled: true
               deploy: true
@@ -150,8 +149,8 @@ spec:
                   public: false
                   authorization_policy: 'two_factor'
                   redirect_uris:
-                    - 'https://vault.dev.bhamm-lab.com/oidc/callback'
-                    - 'https://vault.dev.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback'
+                    - 'https://vault.bhamm-lab.com/oidc/callback'
+                    - 'https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback'
                     - 'http://localhost:8250/oidc/callback'
                   scopes:
                     - 'openid'
@@ -165,7 +164,7 @@ spec:
                   public: false
                   authorization_policy: 'two_factor'
                   redirect_uris:
-                    - 'https://argocd.dev.bhamm-lab.com/auth/callback'
+                    - 'https://argocd.bhamm-lab.com/auth/callback'
                   scopes:
                     - 'openid'
                     - 'groups'
@@ -192,20 +191,47 @@ spec:
                   public: false
                   authorization_policy: 'two_factor'
                   redirect_uris:
-                    - 'https://git.dev.bhamm-lab.com/user/oauth2/authelia/callback'
+                    - 'https://git.bhamm-lab.com/user/oauth2/authelia/callback'
                   scopes:
                     - 'openid'
                     - 'email'
                     - 'profile'
+                    - 'groups'
                   userinfo_signed_response_alg: 'none'
                   token_endpoint_auth_method: 'client_secret_basic'
                 - client_id: 'minio'
                   client_name: 'MinIO'
-                  client_secret: '$pbkdf2-sha512$310000$bMk3zrQxvMrpnDb8lafISw$tauR6Q0aaWsR9zrUdIAMrDzjfq1cJi5pSG/XKSNUtACzPp2slmS4tYRLcNho6YGOL1/eViC.tJx5QUCLbC9g0g'
+                  client_secret: '$pbkdf2-sha512$310000$U0PxZ6W3C4G8lPbYu5MEgg$ef2lbfABxs.OXuleAxY.yl0gPYp/9uz0UhB0JXZJT4GYBVx6l5bybIdA0mii7Bbqul9jM7PkDY6SXzthSY2Zew'
                   public: false
                   authorization_policy: 'two_factor'
                   redirect_uris:
-                    - 'https://minio.dev.bhamm-lab.com/oauth_callback'
+                    - 'https://minio.bhamm-lab.com/oauth_callback'
+                  scopes:
+                    - 'openid'
+                    - 'profile'
+                    - 'email'
+                    - 'groups'
+                  userinfo_signed_response_alg: 'none'
+                - client_id: 'minio-ceph'
+                  client_name: 'MinIO Ceph'
+                  client_secret: '$pbkdf2-sha512$310000$U0PxZ6W3C4G8lPbYu5MEgg$ef2lbfABxs.OXuleAxY.yl0gPYp/9uz0UhB0JXZJT4GYBVx6l5bybIdA0mii7Bbqul9jM7PkDY6SXzthSY2Zew'
+                  public: false
+                  authorization_policy: 'two_factor'
+                  redirect_uris:
+                    - 'https://minio-ceph.bhamm-lab.com/oauth_callback'
+                  scopes:
+                    - 'openid'
+                    - 'profile'
+                    - 'email'
+                    - 'groups'
+                  userinfo_signed_response_alg: 'none'
+                - client_id: 'minio-nfs'
+                  client_name: 'MinIO NFS'
+                  client_secret: '$pbkdf2-sha512$310000$U0PxZ6W3C4G8lPbYu5MEgg$ef2lbfABxs.OXuleAxY.yl0gPYp/9uz0UhB0JXZJT4GYBVx6l5bybIdA0mii7Bbqul9jM7PkDY6SXzthSY2Zew'
+                  public: false
+                  authorization_policy: 'two_factor'
+                  redirect_uris:
+                    - 'https://minio-nfs.bhamm-lab.com/oauth_callback'
                   scopes:
                     - 'openid'
                     - 'profile'
@@ -220,7 +246,7 @@ spec:
                   require_pkce: true
                   pkce_challenge_method: 'S256'
                   redirect_uris:
-                    - 'https://grafana.dev.bhamm-lab.com/login/generic_oauth'
+                    - 'https://grafana.bhamm-lab.com/login/generic_oauth'
                   scopes:
                     - 'openid'
                     - 'profile'
@@ -228,24 +254,37 @@ spec:
                     - 'email'
                   userinfo_signed_response_alg: 'none'
                   token_endpoint_auth_method: 'client_secret_basic'
-                  claims:
-                    email: uid # Map `uid` (or another LDAP attribute) to the `email` claim
-                    preferred_username: uid # Ensure the username is set
-                    name: displayName # Optionally map `displayName` or another attribute to the name claim
-                    # - client_id: 'immich'
-                    #   client_name: 'immich'
-                    #   client_secret: '$pbkdf2-sha512$310000$crIhYegN8o.n9A5GhzEirA$xXcrxnAM.R6No1LejuKcwcl2Q5LOMabAmBnuIuOsOPrYS3KYzp.FiCxokDFnNLLS4/WiAif3rGz6VklbXCovWw'
-                    #   public: false
-                    #   authorization_policy: 'two_factor'
-                    #   redirect_uris:
-                    #     - 'https://immich.bhamm-lab.com/auth/login'
-                    #     - 'https://immich.bhamm-lab.com/user-settings'
-                    #     - 'app.immich:///oauth-callback'
-                    #   scopes:
-                    #     - 'openid'
-                    #     - 'profile'
-                    #     - 'email'
-                    #   userinfo_signed_response_alg: 'none'
+                - client_id: 'harbor'
+                  client_name: 'Harbor'
+                  client_secret: '$pbkdf2-sha512$310000$GpH5jKZfiYXmgjMLe1gNnQ$tBffSkveAxfbPSdDq9SIssItEXKj5WDvgBFCuyLfXPCTtMtRhwIfTPPGDjBP48px0ZEpkJG4DdACWOMXhU3GHQ'
+                  public: false
+                  authorization_policy: 'two_factor'
+                  redirect_uris:
+                    - 'https://harbor.bhamm-lab.com/c/oidc/callback'
+                  grant_types:
+                    - 'refresh_token'
+                    - 'authorization_code'
+                  scopes:
+                    - 'openid'
+                    - 'profile'
+                    - 'groups'
+                    - 'email'
+                    - 'offline_access'
+                  userinfo_signed_response_alg: 'none'
+                - client_id: 'argoworkflows'
+                  client_name: 'Argo Workflows'
+                  client_secret: '$pbkdf2-sha512$310000$MxhhAocEQWNmHNKyLIE7Sg$CCf6xcnDFpaBVskhImasp51322SthPsytptHpuXA/oUae7xpsXj7xUwU8A85qi7H7TR7SdmmVBquK9V5YXWXqg'
+                  public: false
+                  authorization_policy: 'two_factor'
+                  redirect_uris:
+                    - 'https://argoworkflows.bhamm-lab.com/oauth2/callback'
+                  scopes:
+                    - 'openid'
+                    - 'groups'
+                    - 'email'
+                    - 'profile'
+                  userinfo_signed_response_alg: 'none'
+                  token_endpoint_auth_method: 'client_secret_post'
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
