@@ -123,44 +123,44 @@ spec:
           extraArgs:
             - '-config.expand-env=true'
           extraEnv:
-            - name: MINIO_ACCESS_KEY_ID
+            - name: S3_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
                   name: monitor-external-secret
-                  key: MINIO_ACCESS_KEY_ID
-            - name: MINIO_SECRET_ACCESS_KEY
+                  key: S3_ACCESS_KEY_ID
+            - name: S3_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
                   name: monitor-external-secret
-                  key: MINIO_SECRET_ACCESS_KEY
+                  key: S3_SECRET_ACCESS_KEY
         distributor:
           extraArgs:
             - '-config.expand-env=true'
           extraEnv:
-            - name: MINIO_ACCESS_KEY_ID
+            - name: S3_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
                   name: monitor-external-secret
-                  key: MINIO_ACCESS_KEY_ID
-            - name: MINIO_SECRET_ACCESS_KEY
+                  key: S3_ACCESS_KEY_ID
+            - name: S3_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
                   name: monitor-external-secret
-                  key: MINIO_SECRET_ACCESS_KEY
+                  key: S3_SECRET_ACCESS_KEY
         querier:
           extraArgs:
             - '-config.expand-env=true'
           extraEnv:
-            - name: MINIO_ACCESS_KEY_ID
+            - name: S3_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
                   name: monitor-external-secret
-                  key: MINIO_ACCESS_KEY_ID
-            - name: MINIO_SECRET_ACCESS_KEY
+                  key: S3_ACCESS_KEY_ID
+            - name: S3_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
                   name: monitor-external-secret
-                  key: MINIO_SECRET_ACCESS_KEY
+                  key: S3_SECRET_ACCESS_KEY
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
