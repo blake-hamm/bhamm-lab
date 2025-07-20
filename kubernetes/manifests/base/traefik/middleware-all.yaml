@@ -5,7 +5,7 @@ metadata:
   namespace: traefik
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "15"
 spec:
   headers:
     # Security Headers
@@ -46,7 +46,7 @@ metadata:
     app.kubernetes.io/name: 'authelia'
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "15"
 spec:
   forwardAuth:
     trustForwardHeader: true
