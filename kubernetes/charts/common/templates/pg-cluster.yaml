@@ -63,6 +63,6 @@ spec:
           # serverName: "{{ .Values.name }}-postgresql-latest"
           # {{- else }}
           serverName: "{{ .Values.name }}-postgresql"
-          {{- end }}
+          # {{- end }}
   {{- end }}
 {{- end }}
