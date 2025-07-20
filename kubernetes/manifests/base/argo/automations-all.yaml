@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: pipelines
+  name: automations
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "7"
@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
     targetRevision: feature/refactor-cluster
-    path: kubernetes/pipelines
+    path: kubernetes/automations
     directory:
       recurse: true
   destination:
