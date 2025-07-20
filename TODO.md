@@ -18,6 +18,7 @@ x Build 'kill switch' workflow
   x Remove ns/pvc
   x Remove argocd apps
 x Ensure green cnpg can have backup & restore
+x Cleanup offsite restic backups
 - Troubleshoot check/prune/backup jobs
 - Deploy core and manually configure
 - Update argocd sync docs
