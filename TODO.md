@@ -19,9 +19,9 @@ x Build 'kill switch' workflow
   x Remove argocd apps
 x Ensure green cnpg can have backup & restore
 x Cleanup offsite restic backups
-- Troubleshoot test restore/backup in morning
+- Troubleshoot test restore/backup in morning (confirmed bucket needs to be empty?)
   - Verify test db timestamp table
-  - Remove test common cnpg
+  - Remove full test common cnpg
   - Watch filer logs
   - Add test common cnpg with restore/backup
   - Confirm test db is updated (might be missing one ts)
