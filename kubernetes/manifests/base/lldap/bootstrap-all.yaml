@@ -54,3 +54,4 @@ spec:
                     - key: group-configs
                       path: group-configs.json
       restartPolicy: Never
+  backoffLimit: 2

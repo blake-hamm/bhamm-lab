@@ -43,7 +43,7 @@
 -wave 15 Cert manager common
 -wave 13 lldap Common
 -wave 13 lldap Helm
--wave 14 lldap bootstrap workflow
+-wave 14 lldap bootstrap job
 -wave 15 Authelia Common
 -wave 15 Authelia Helm
 -wave 15 Traefik Middleware
