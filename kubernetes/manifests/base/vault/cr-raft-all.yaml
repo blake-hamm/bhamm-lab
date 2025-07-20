@@ -115,21 +115,21 @@ spec:
             token_num_uses: 10
             token_ttl: 20m
             token_max_ttl: 30m
-            # - type: oidc
-            #   config:
-            #     oidc_discovery_url: https://auth.bhamm-lab.com
-            #     oidc_client_id: vault
-            #     oidc_client_secret: "${env `OIDC_VAULT_CLIENT_SECRET`}"
-            #     default_role: default
-            #     allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback"]
-            #   roles:
-            #     - name: default
-            #       role_type: oidc
-            #       allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback", "http://localhost:8250/oidc/callback"]
-            #       bound_audiences: vault
-            #       user_claim: sub
-            #       policies: admin
-            #       ttl: 1h
+      - type: oidc
+        config:
+          oidc_discovery_url: https://auth.bhamm-lab.com
+          oidc_client_id: vault
+          oidc_client_secret: "${env `OIDC_VAULT_CLIENT_SECRET`}"
+          default_role: default
+          allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback"]
+        roles:
+          - name: default
+            role_type: oidc
+            allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback", "http://localhost:8250/oidc/callback"]
+            bound_audiences: vault
+            user_claim: sub
+            policies: admin
+            ttl: 1h
     secrets:
       - path: secret
         type: kv
