@@ -34,6 +34,7 @@ x Troubleshoot check/prune/backup jobs
 - Ensure base has authelia, treafik, lldap, certs as well
 - Deploy core and manually configure
 - Update argocd sync docs
+- Update DR docs (k8up/restic snapshots)
 
 ```
 This is complete when:
