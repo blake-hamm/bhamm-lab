@@ -4,7 +4,7 @@ metadata:
   name: loki-distributed
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "21"
 spec:
   destination:
     namespace: monitor
@@ -101,9 +101,9 @@ spec:
               aws:
                 bucketnames: loki-data
                 region: us-east-1
-                endpoint: https://minio.ceph:443
-                access_key_id: "${MINIO_ACCESS_KEY_ID}"
-                secret_access_key: "${MINIO_SECRET_ACCESS_KEY}"
+                endpoint: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
+                access_key_id: "${S3_ACCESS_KEY_ID}"
+                secret_access_key: "${S3_SECRET_ACCESS_KEY}"
                 s3forcepathstyle: true
                 insecure: false
                 http_config:
@@ -164,7 +164,6 @@ spec:
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
-      - CreateNamespace=true
     automated:
       prune: true
       selfHeal: true
