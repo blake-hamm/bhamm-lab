@@ -16,7 +16,7 @@ spec:
     path: kubernetes/charts/common
     helm:
       valuesObject:
-        name: argo-workflows
+        name: argo
         externalSecrets:
           enabled: true
           secrets:
