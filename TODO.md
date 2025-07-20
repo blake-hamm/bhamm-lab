@@ -33,9 +33,9 @@ x Troubleshoot check/prune/backup jobs
 x Adjust common ingress route sync
 x Ensure base has authelia, treafik, lldap, certs as well
 - Ensure
-  - Add loki (w/ seaweedfs)
-  - Add alloy
-  - Argo artifacts (w/ seaweedfs)
+  x Add loki (w/ seaweedfs)
+  x Add alloy
+  x Argo artifacts (w/ seaweedfs)
 - Ensure monitor/ingress for all base:
   - Argo
   - Argocd
