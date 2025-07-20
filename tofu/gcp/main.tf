@@ -17,14 +17,14 @@ resource "google_kms_crypto_key" "k8up_crypto_key" {
   rotation_period = "7776000s" # 90 days
 
   lifecycle {
-    prevent_destroy = true # Protects the key from accidental deletion
+    prevent_destroy = true
   }
 }
 
 resource "google_storage_bucket" "k8up" {
   name          = "bhamm-lab-k8up"
   location      = var.region
-  force_destroy = true
+  force_destroy = false
 
   uniform_bucket_level_access = true
 
@@ -38,7 +38,7 @@ resource "google_storage_bucket" "k8up" {
 
   lifecycle_rule {
     condition {
-      age = 365
+      age = 30
     }
     action {
       type = "Delete"
@@ -115,7 +115,7 @@ resource "google_kms_crypto_key" "sops_crypto_key" {
   rotation_period = "7776000s" # 90 days
 
   lifecycle {
-    prevent_destroy = true # Protects the key from accidental deletion
+    prevent_destroy = true
   }
 }
 
