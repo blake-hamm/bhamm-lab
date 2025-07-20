@@ -277,7 +277,7 @@ spec:
                   public: false
                   authorization_policy: 'two_factor'
                   redirect_uris:
-                    - 'https://argoworkflows.bhamm-lab.com/oauth2/callback'
+                    - 'https://argo.bhamm-lab.com/oauth2/callback'
                   scopes:
                     - 'openid'
                     - 'groups'
