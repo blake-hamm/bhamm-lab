@@ -42,8 +42,8 @@
 -wave 18 Test CronWorkflow (timestamp on cnpg)
 -wave 15 Cert manager common
 -wave 15 Authelia Common
+-wave 15 Authelia Helm
 -wave 15 Traefik Middleware
--wave 16 Authelia Helm
 -wave 16 STAGE: Cert manager cluster issuer
 -wave 17 STAGE: Certificate in traefik ns
 -wave 18 PROD: Cert manager cluster issuer
