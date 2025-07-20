@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
     targetRevision: feature/refactor-cluster
-    path: kubernetes/automations
+    path: kubernetes/manifests/automations
     directory:
       recurse: true
   destination:
