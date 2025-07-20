@@ -33,8 +33,8 @@ spec:
     {{- if .Values.postgresql.restore.enabled }}
     recovery:
       source: clusterBackup
-      database: {{ .Values.postgresql.databaseName | default .Values.name }}
-      owner: {{ .Values.name }}
+      # database: {{ .Values.postgresql.databaseName | default .Values.name }}
+      # owner: {{ .Values.name }}
     {{- else }}
     initdb:
       database: {{ .Values.postgresql.databaseName | default .Values.name }}
