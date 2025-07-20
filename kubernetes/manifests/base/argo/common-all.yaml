@@ -35,7 +35,7 @@ spec:
             websocket: true
             routes:
               - kind: Rule
-                match: Host(`argoworkflows.bhamm-lab.com`)
+                match: Host(`argo.bhamm-lab.com`)
                 services:
                   - name: argo-workflows-server
                     scheme: http
