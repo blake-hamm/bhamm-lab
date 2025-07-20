@@ -27,6 +27,8 @@ spec:
           tag: "v0.6.1"
         hpa:
           enabled: false
+        ingress:
+          enabled: false
   ignoreDifferences:
     - group: ""
       kind: PersistentVolumeClaim
