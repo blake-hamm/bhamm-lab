@@ -59,6 +59,7 @@
 -wave 16 cnpg restore bucket cleanup job
 -wave 17 cnpg cluster
 -wave 18 cnpg backup
+-wave 25 Traefik ingressroute
 
 ## Core apps
 -wave -20 Sync common helm apps
