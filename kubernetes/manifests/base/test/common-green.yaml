@@ -51,8 +51,8 @@ spec:
             enabled: true
             retention: "3d"
             # schedule: "0 */5 * * * *"
-          restore:
-            enabled: true
+            # restore:
+            #   enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
