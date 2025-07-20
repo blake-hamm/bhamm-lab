@@ -8,7 +8,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: {{ .ingressClass }}
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "30"
+    argocd.argoproj.io/sync-wave: "25"
     {{- if .websocket }}
     traefik.ingress.kubernetes.io/websocket: "true"
     {{- end }}
