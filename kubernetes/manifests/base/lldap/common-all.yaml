@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: lldap-common
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "14"
 spec:
   destination:
     namespace: lldap

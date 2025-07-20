@@ -41,6 +41,8 @@
 -wave 12 Test svc
 -wave 18 Test CronWorkflow (timestamp on cnpg)
 -wave 15 Cert manager common
+-wave 14 lldap Common
+-wave 14 lldap Helm
 -wave 15 Authelia Common
 -wave 15 Authelia Helm
 -wave 15 Traefik Middleware
