@@ -32,13 +32,13 @@ x Troubleshoot check/prune/backup jobs
 # Polish
 x Adjust common ingress route sync
 x Ensure base has authelia, treafik, lldap, certs as well
-- Ensure
+x Ensure
   x Add loki (w/ seaweedfs)
   x Add alloy
   x Argo artifacts (w/ seaweedfs)
   x Argo common (combine events/workflows)
 - Ensure monitor/ingress for all base:
-  - Argo
+  x Argo
   x Argocd
   - Vault
   x Grafana

@@ -28,8 +28,7 @@ spec:
     - metadata:
         name: vault-raft
       spec:
-        # https://kubernetes.io/docs/concepts/storage/persistent-volumes/#class-1
-        # storageClassName: ""
+        storageClassName: "local-path"
         accessModes:
           - ReadWriteOnce
         volumeMode: Filesystem
