@@ -30,10 +30,26 @@ x Troubleshoot check/prune/backup jobs
   x Seems okay for now, need to track...
 
 # Polish
-- Adjust common ingress route sync
-- Ensure base has authelia, treafik, lldap, certs as well
-- Deploy core and manually configure
-- Update argocd sync docs
+x Adjust common ingress route sync
+x Ensure base has authelia, treafik, lldap, certs as well
+- Ensure
+  - Add loki (w/ seaweedfs)
+  - Add alloy
+  - Argo artifacts (w/ seaweedfs)
+- Ensure monitor/ingress for all base:
+  - Argo
+  - Argocd
+  - Vault
+  - Grafana
+  - Prometheus
+  x Authelia
+  - Seaweedfs (UI/s3)
+  - Traefik
+  - Test
+- Deploy core
+  - harbor
+  - forgejo
+  - dashy (and update links)
 - Update DR docs (k8up/restic snapshots)
 
 ```
