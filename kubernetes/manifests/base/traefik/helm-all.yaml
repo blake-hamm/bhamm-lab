@@ -57,7 +57,6 @@ spec:
           enabled: true
           type: LoadBalancer
           annotations:
-            lbipam.cilium.io/ips: 10.0.30.31
             lbipam.cilium.io/sharing-key: shared
             lbipam.cilium.io/sharing-cross-namespace: "*"
           labels: {}
