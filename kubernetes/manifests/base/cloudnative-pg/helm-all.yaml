@@ -17,6 +17,9 @@ spec:
     helm:
       valuesObject:
         monitoring:
+          additionalEnv:
+            - name: TZ
+              value: "America/Denver"
           podMonitorEnabled: true
           grafanaDashboard:
             create: true
