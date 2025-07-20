@@ -1,7 +1,7 @@
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: letsencrypt-stage
+  name: letsencrypt
   namespace: cert-manager
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
@@ -22,31 +22,32 @@ spec:
         selector:
           dnsZones:
             - "bhamm-lab.com"
----
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: letsencrypt
-  namespace: cert-manager
-  annotations:
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "17"
-spec:
-  acme:
-    server: https://acme-v02.api.letsencrypt.org/directory
-    email: bhamm.lab@gmail.com
-    privateKeySecretRef:
-      name: letsencrypt
-    solvers:
-      - dns01:
-          cloudflare:
-            email: bhamm.lab@gmail.com
-            apiTokenSecretRef:
-              name: cert-manager-external-secret
-              key: cloudflare-token
-        selector:
-          dnsZones:
-            - "bhamm-lab.com"
+
+# ---
+# apiVersion: cert-manager.io/v1
+# kind: ClusterIssuer
+# metadata:
+#   name: letsencrypt
+#   namespace: cert-manager
+#   annotations:
+#     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+#     argocd.argoproj.io/sync-wave: "17"
+# spec:
+#   acme:
+#     server: https://acme-v02.api.letsencrypt.org/directory
+#     email: bhamm.lab@gmail.com
+#     privateKeySecretRef:
+#       name: letsencrypt
+#     solvers:
+#       - dns01:
+#           cloudflare:
+#             email: bhamm.lab@gmail.com
+#             apiTokenSecretRef:
+#               name: cert-manager-external-secret
+#               key: cloudflare-token
+#         selector:
+#           dnsZones:
+#             - "bhamm-lab.com"
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
