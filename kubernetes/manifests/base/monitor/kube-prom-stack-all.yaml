@@ -126,7 +126,7 @@ spec:
                 url: https://raw.githubusercontent.com/blake-hamm/gpu-operator/refs/heads/feature/grafana-update/grafana/dashboard_gpu.json
                 token: ''
               k8up:
-                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/main/kubernetes/manifests/base/monitor/dashboards/k8up.json
+                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/feature/polish/kubernetes/manifests/base/monitor/dashboards/k8up.json
                 token: ''
               nfs:
                 url: https://raw.githubusercontent.com/blake-hamm/nfs-grafana/refs/heads/master/prometheus/nfs-full.json
