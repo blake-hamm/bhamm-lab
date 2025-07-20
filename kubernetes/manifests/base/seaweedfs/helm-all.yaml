@@ -19,6 +19,8 @@ spec:
         global:
           monitoring:
             enabled: true
+            additionalLabels:
+              release: monitor
         master:
           enabled: true
           volumeSizeLimitMB: 10000
