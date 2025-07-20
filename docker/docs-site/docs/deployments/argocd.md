@@ -37,9 +37,18 @@
 -wave 12 Test CronWorkflow (timestamp on index.html in pvc)
 -wave 12 Test svc
 -wave 18 Test CronWorkflow (timestamp on cnpg)
--wave 19 Cert manager external dns challenge and metrics
--wave 20 argocd common
+-wave 15 Cert manager common
+-wave 16 Cert manager external dns challenge and metrics
 *At this point all my storage classes, secretes and s3 (ceph rgw and rclone w/ nfs pvc) should be functioning. I should also be able to deploy common helm charts w/ external secrets, k8up pvc restores and cnpg postgres databases restores.*
+
+### Common helm chart
+-wave 14 external secrets (also, cnpg, k8up)
+-wave 15 k8up restore
+-wave 15 cnpg barman object store
+-wave 16 k8up backup + schedule
+-wave 16 cnpg restore bucket cleanup job
+-wave 17 cnpg cluster
+-wave 18 cnpg backup
 
 ## Core apps
 -wave -20 Sync common helm apps

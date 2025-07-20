@@ -28,7 +28,7 @@ x Troubleshoot test restore/backup in morning (confirmed bucket needs to be empt
   x RCA: cnpg `ScheduleBackup` had immediate: true for immediate backup, this would occur prior to the cluster being setup, causing a failure
 x Troubleshoot check/prune/backup jobs
   x Seems okay for now, need to track...
-- Ensure base has authelia, treafik, certs as well
+- Ensure base has authelia, treafik, lldap, certs as well
 - Deploy core and manually configure
 - Update argocd sync docs
 
