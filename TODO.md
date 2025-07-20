@@ -46,7 +46,7 @@ x Ensure
   x Authelia
   - Seaweedfs (UI/s3)
   x Traefik
-  - Test
+  x Test
 - Deploy core
   - harbor
   - forgejo

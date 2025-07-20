@@ -11,6 +11,13 @@ metadata:
     argocd.argoproj.io/sync-wave: "2"
 spec:
   size: 3
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              vault_cr: vault
+          topologyKey: kubernetes.io/hostname
   image: hashicorp/vault:1.19.3
   annotations:
     common/annotation: "true"
