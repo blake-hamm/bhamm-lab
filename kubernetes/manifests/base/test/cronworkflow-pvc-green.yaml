@@ -1,4 +1,3 @@
-# grants list/get on pods, and exec into them
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -52,30 +51,58 @@ spec:
             - |
               set -euo pipefail
 
+              echo "Starting timestamp update workflow at $(date -u +'%Y-%m-%d %T UTC')"
+
               # find the running nginx pod
+              echo "Querying for running nginx pod with label app=test"
               pod=$(kubectl get pods -n test -l app=test \
                     --field-selector=status.phase=Running \
-                    -o jsonpath='{.items[0].metadata.name}')
+                    -o jsonpath='{.items[0].metadata.name}' || echo "")
+              if [ -z "$pod" ]; then
+                echo "ERROR: No running pod found with label app=test"
+                exit 1
+              fi
+              echo "Found pod: $pod"
 
-              # extract up to 9 old timestamps via sed, drop blanks
-              old_ts=$(kubectl exec -n test "$pod" -- sh -c "
-                sed -n 's:.*<li>\\(.*\\)</li>:\\1:p' /usr/share/nginx/html/index.html \
-                || true" \
-                | grep -v '^$' \
-                | head -n9)
+              # check if index.html exists, then extract up to 9 old timestamps
+              echo "Checking if /usr/share/nginx/html/index.html exists in pod $pod"
+              if kubectl exec -n test "$pod" -- sh -c "test -f /usr/share/nginx/html/index.html"; then
+                echo "index.html exists, extracting old timestamps"
+                old_ts=$(kubectl exec -n test "$pod" -- sh -c \
+                  "sed -n 's:.*<li>\\(.*\\)</li>:\\1:p' /usr/share/nginx/html/index.html" \
+                  | grep -v '^$' \
+                  | head -n9)
+                if [ -z "$old_ts" ]; then
+                  echo "WARNING: No valid timestamps found in index.html"
+                else
+                  echo "Old timestamps extracted: $old_ts"
+                fi
+              else
+                echo "WARNING: /usr/share/nginx/html/index.html does not exist, starting with empty timestamp list"
+                old_ts=""
+              fi
 
               # build & write new HTML
+              echo "Generating new index.html content"
+              new_timestamp=$(date -u +'%Y-%m-%d %T UTC')
+              echo "New timestamp: $new_timestamp"
               kubectl exec -i -n test "$pod" -- tee /usr/share/nginx/html/index.html >/dev/null <<EOF
               <html>
               <head><title>Last Update Timestamps</title></head>
               <body>
                 <h1>Last 10 Update Timestamps (UTC):</h1>
                 <ul>
-                  <li>$(date -u +'%Y-%m-%d %T UTC')</li>
+                  <li>$new_timestamp</li>
               $(echo "$old_ts" | awk 'NF{printf "                <li>%s</li>\n", $0}')
                 </ul>
               </body>
               </html>
               EOF
+              if [ $? -eq 0 ]; then
+                echo "Successfully updated index.html on pod $pod at $new_timestamp"
+              else
+                echo "ERROR: Failed to update index.html on pod $pod"
+                exit 1
+              fi
 
               echo "index.html updated on $(date -u +'%Y-%m-%d %T UTC')"

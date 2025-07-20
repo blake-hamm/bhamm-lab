@@ -95,9 +95,9 @@ pve_ceph_fs:
     pgs: 32 # adjust later
     rule: replicated_rule
     storage: false
-pve_ceph_rgw_enabled: true
-pve_ceph_rgw_dns: "rgw.ceph.svc.cluster.local"
-pve_ceph_rgw_admin: true
+# pve_ceph_rgw_enabled: true
+# pve_ceph_rgw_dns: "rgw.ceph.svc.cluster.local"
+# pve_ceph_rgw_admin: true
 # pve_cluster_ha_groups:
 #   - name: main
 #     comment: "HA group"

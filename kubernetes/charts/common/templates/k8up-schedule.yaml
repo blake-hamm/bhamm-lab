@@ -13,7 +13,7 @@ spec:
       name: k8up
       key: repo-password
     s3:
-      endpoint: http://rclone-s3-nfs.nfs.svc.cluster.local:8080
+      endpoint: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
       bucket: k8up-backups
       accessKeyIDSecretRef:
         name: k8up
@@ -21,18 +21,21 @@ spec:
       secretAccessKeySecretRef:
         name: k8up
         key: secretAccessKeySecret
+  failedJobsHistoryLimit: 10
+  successfulJobsHistoryLimit: 10
   backup:
     schedule: "{{ .Values.k8up.backup.schedule }}"
-    failedJobsHistoryLimit: 2
-    successfulJobsHistoryLimit: 2
+    activeDeadlineSeconds: 2700
     # optional
     #promURL: https://prometheus-io-instance:8443
   check:
     schedule: "{{ .Values.k8up.backup.checkSchedule }}"
+    activeDeadlineSeconds: 900
     # optional
     #promURL: https://prometheus-io-instance:8443
   prune:
     schedule: "{{ .Values.k8up.backup.pruneSchedule }}"
+    activeDeadlineSeconds: 900
     retention:
       keepLast: 5
       keepDaily: 2

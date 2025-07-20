@@ -1,0 +1,67 @@
+apiVersion: k8up.io/v1
+kind: Backup
+metadata:
+  name: seaweedfs-s3-offsite
+  namespace: seaweedfs
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "14"
+spec:
+  failedJobsHistoryLimit: 10
+  successfulJobsHistoryLimit: 10
+  backend:
+    repoPasswordSecretRef:
+      name: seaweedfs-external-secret
+      key: repo-password
+    s3:
+      endpoint: https://storage.googleapis.com
+      bucket: bhamm-lab-k8up
+      accessKeyIDSecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKeySecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_SECRET_ACCESS_KEY
+---
+apiVersion: k8up.io/v1
+kind: Schedule
+metadata:
+  name: seaweedfs-s3-offsite
+  namespace: seaweedfs
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "14"
+spec:
+  backend:
+    repoPasswordSecretRef:
+      name: seaweedfs-external-secret
+      key: repo-password
+    s3:
+      endpoint: https://storage.googleapis.com
+      bucket: bhamm-lab-k8up
+      accessKeyIDSecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKeySecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_SECRET_ACCESS_KEY
+  failedJobsHistoryLimit: 10
+  successfulJobsHistoryLimit: 10
+  backup:
+    schedule: "0 3 * * *" #"0 0 1,15 * *" # First of each month
+    activeDeadlineSeconds: 45
+    # optional
+    #promURL: https://prometheus-io-instance:8443
+  check:
+    schedule: "0 4 * * *" #'0 0 2,16 * *' # Second of each month
+    activeDeadlineSeconds: 15
+    # optional
+    #promURL: https://prometheus-io-instance:8443
+  prune:
+    schedule: "0 5 * * *" #'0 0 2,16 * *' # Second of each month
+    activeDeadlineSeconds: 15
+    retention:
+      keepLast: 5
+      keepDaily: 3
+      keepWeekly: 2
+      keepMonthly: 2

@@ -10,7 +10,7 @@ metadata:
 spec:
   configuration:
     destinationPath: "s3://cnpg-backups/"
-    endpointURL: http://rclone-s3-nfs.nfs.svc.cluster.local:8080
+    endpointURL: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
     s3Credentials:
       accessKeyId:
         name: cnpg-s3-backup-creds
@@ -18,5 +18,5 @@ spec:
       secretAccessKey:
         name: cnpg-s3-backup-creds
         key: secret_key
-    retentionPolicy: "{{ .Values.postgresql.backups.retention }}"
+  retentionPolicy: "{{ .Values.postgresql.backups.retention }}"
 {{- end }}

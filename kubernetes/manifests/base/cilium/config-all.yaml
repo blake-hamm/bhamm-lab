@@ -1,0 +1,15 @@
+apiVersion: "cilium.io/v2alpha1"
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: external
+  namespace: kube-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  nodeSelector:
+    matchExpressions:
+      - key: node-role.kubernetes.io/control-plane
+        operator: DoesNotExist
+  interfaces:
+    - eth0
+  loadBalancerIPs: true

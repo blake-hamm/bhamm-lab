@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: test-common
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
 spec:
   destination:
     namespace: test
@@ -39,6 +41,7 @@ spec:
         k8up:
           backup:
             enabled: true
+            schedule: "0 */6 * * *"
             # restores:
             #   - snapshot: "latest"
             #     claimName: "test"
@@ -47,8 +50,9 @@ spec:
           backups:
             enabled: true
             retention: "3d"
-            # restore:
-            #   enabled: true
+            schedule: "0 0 */6 * * *"
+          restore:
+            enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

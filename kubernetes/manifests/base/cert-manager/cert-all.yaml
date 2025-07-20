@@ -1,0 +1,97 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-stage
+  namespace: cert-manager
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "16"
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: bhamm.lab@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt
+    solvers:
+      - dns01:
+          cloudflare:
+            email: bhamm.lab@gmail.com
+            apiTokenSecretRef:
+              name: cert-manager-external-secret
+              key: cloudflare-token
+        selector:
+          dnsZones:
+            - "bhamm-lab.com"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: bhamm-lab-tls-stage
+  namespace: traefik
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "17"
+spec:
+  secretName: bhamm-lab-tls-stage
+  issuerRef:
+    name: letsencrypt-stage
+    kind: ClusterIssuer
+  commonName: "*.bhamm-lab.com"
+  dnsNames:
+    - "bhamm-lab.com"
+    - "*.bhamm-lab.com"
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt
+  namespace: cert-manager
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "18"
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: bhamm.lab@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt
+    solvers:
+      - dns01:
+          cloudflare:
+            email: bhamm.lab@gmail.com
+            apiTokenSecretRef:
+              name: cert-manager-external-secret
+              key: cloudflare-token
+        selector:
+          dnsZones:
+            - "bhamm-lab.com"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: bhamm-lab-tls
+  namespace: traefik
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "19"
+spec:
+  secretName: bhamm-lab-tls
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer
+  commonName: "*.bhamm-lab.com"
+  dnsNames:
+    - "bhamm-lab.com"
+    - "*.bhamm-lab.com"
+---
+apiVersion: traefik.io/v1alpha1
+kind: TLSStore
+metadata:
+  name: default
+  namespace: traefik
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  defaultCertificate:
+    secretName: bhamm-lab-tls

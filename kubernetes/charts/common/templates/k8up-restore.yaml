@@ -8,6 +8,7 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "15"
 spec:
+  activeDeadlineSeconds: 900
   {{- if ne $restore.snapshot "latest" }}
   snapshot: {{ $restore.snapshot }}
   {{- end }}
@@ -19,7 +20,7 @@ spec:
       name: k8up
       key: repo-password
     s3:
-      endpoint: http://rclone-s3-nfs.nfs.svc.cluster.local:8080
+      endpoint: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
       bucket: k8up-backups
       accessKeyIDSecretRef:
         name: k8up

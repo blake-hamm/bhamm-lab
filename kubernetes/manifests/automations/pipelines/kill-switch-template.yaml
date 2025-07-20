@@ -1,0 +1,119 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterWorkflowTemplate
+metadata:
+  name: kill-switch
+spec:
+  activeDeadlineSeconds: 600
+  templates:
+    - name: cleanup
+      steps:
+        - - name: pause-argocd-apps
+            template: pause-apps
+        - - name: delete-cnpg-clusters
+            template: delete-cnpg-clusters
+        - - name: delete-pvcs
+            template: delete-pvcs
+          - name: remove-finalizers
+            template: remove-finalizers
+        - - name: validate-pvcs
+            template: validate-pvcs
+        - - name: delete-argocd-apps
+            template: delete-apps
+    - name: pause-apps
+      script:
+        image: bitnami/kubectl
+        command: [bash]
+        source: |
+          # Pause all ArgoCD applications to stop syncing
+          kubectl get applications -n argocd -o name | xargs -I {} kubectl patch {} -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":null}}}'
+    - name: delete-cnpg-clusters
+      script:
+        image: bitnami/kubectl
+        command: [bash]
+        source: |
+          # Delete all CNPG PostgreSQL clusters across all namespaces
+          kubectl delete clusters.postgresql.cnpg.io --all --all-namespaces --force --grace-period=0
+    - name: remove-finalizers
+      script:
+        image: bitnami/kubectl
+        command: [bash]
+        source: |
+          # Continuously remove finalizers from all PVCs across all namespaces
+          for attempt in {1..10}; do
+            for ns in $(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}'); do
+              for pvc in $(kubectl get pvc -n $ns -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
+                kubectl patch pvc $pvc -n $ns -p '{"metadata":{"finalizers":null}}' --type=merge
+              done
+            done
+            echo "Completed finalizer removal attempt $attempt"
+            sleep 3
+          done
+    - name: delete-pvcs
+      script:
+        image: bitnami/kubectl
+        command: [bash]
+        source: |
+          # Delete all PVCs in all namespaces
+          kubectl delete pvc --all --all-namespaces --force --grace-period=0
+    - name: validate-pvcs
+      script:
+        image: bitnami/kubectl
+        command: [bash]
+        source: |
+          # Check for and clean up any stuck PVCs (retry up to 3 times)
+          for attempt in {1..3}; do
+            stuck_pvcs=false
+            for ns in $(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}'); do
+              for pvc in $(kubectl get pvc -n $ns -o jsonpath='{.items[?(@.status.phase=="Terminating")].metadata.name}' 2>/dev/null); do
+                kubectl patch pvc $pvc -n $ns -p '{"metadata":{"finalizers":null}}' --type=merge
+                stuck_pvcs=true
+              done
+            done
+            if [ "$stuck_pvcs" = false ]; then
+              echo "No stuck PVCs found, cleanup complete."
+              break
+            fi
+            echo "Retrying cleanup of stuck PVCs (attempt $attempt)..."
+            sleep 5
+          done
+    - name: delete-apps
+      script:
+        image: bitnami/kubectl
+        command: [bash]
+        source: |
+          # Delete all ArgoCD applications to remove managed resources
+          kubectl delete applications --all -n argocd --force --grace-period=0
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: workflow-admin
+  namespace: argo
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: workflow-admin-role
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: workflow-admin-binding
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
+subjects:
+  - kind: ServiceAccount
+    name: workflow-admin
+    namespace: argo
+roleRef:
+  kind: ClusterRole
+  name: workflow-admin-role
+  apiGroup: rbac.authorization.k8s.io

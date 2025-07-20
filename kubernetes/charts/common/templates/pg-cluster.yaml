@@ -6,16 +6,19 @@ metadata:
   namespace: {{ .Values.name }}
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "16"
+    argocd.argoproj.io/sync-wave: "17"
 spec:
   {{- if .Values.postgresql.imageName }}
   imageName: {{ .Values.postgresql.imageName | quote }}
   {{- end }}
   instances: {{ .Values.postgresql.instances }}
   storage:
+    storageClass: local-path
     size: {{ .Values.postgresql.storageSize }}
-  {{- if .Values.postgresql.sharedPreloadLibraries }}
   postgresql:
+    parameters:
+      timezone: "America/Denver"
+  {{- if .Values.postgresql.sharedPreloadLibraries }}
     shared_preload_libraries: {{ toYaml .Values.postgresql.sharedPreloadLibraries | nindent 4 }}
   {{- end }}
   {{- if .Values.postgresql.managed.roles }}
@@ -56,6 +59,10 @@ spec:
         name: barman-cloud.cloudnative-pg.io
         parameters:
           barmanObjectName: "{{ .Values.name }}-cnpg-s3"
+          {{- if and .Values.postgresql.restore.enabled .Values.postgresql.backups.enabled }}
+          serverName: "{{ .Values.name }}-postgresql-latest"
+          {{- else }}
           serverName: "{{ .Values.name }}-postgresql"
+          {{- end }}
   {{- end }}
 {{- end }}

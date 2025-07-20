@@ -8,14 +8,14 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "16"
 spec:
-  failedJobsHistoryLimit: 2
-  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 10
+  successfulJobsHistoryLimit: 10
   backend:
     repoPasswordSecretRef:
       name: k8up
       key: repo-password
     s3:
-      endpoint: http://rclone-s3-nfs.nfs.svc.cluster.local:8080
+      endpoint: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
       bucket: k8up-backups
       accessKeyIDSecretRef:
         name: k8up

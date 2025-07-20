@@ -17,9 +17,9 @@ ingressRoutes: []
 k8up:
   backup:
     enabled: false
-    schedule: "0 1 * * *"
-    checkSchedule: "0 3 * * *"
-    pruneSchedule: "0 4 * * *"
+    schedule: "0 0 * * *"
+    checkSchedule: "0 1 * * *"
+    pruneSchedule: "0 2 * * *"
   restores: []
   # - snapshot: ""
   #   claimName: ""
@@ -36,7 +36,7 @@ postgresql:
     roles: []
   backups:
     enabled: false
-    schedule: "0 0 8 * * *" # 8 am utc/1 am mst
+    schedule: "0 0 1 * * *"
     retention: "30d"
   restore:
     enabled: false
