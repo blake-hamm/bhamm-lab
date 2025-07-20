@@ -21,8 +21,8 @@ spec:
       secretAccessKeySecretRef:
         name: k8up
         key: secretAccessKeySecret
-  failedJobsHistoryLimit: 4
-  successfulJobsHistoryLimit: 4
+  failedJobsHistoryLimit: 10
+  successfulJobsHistoryLimit: 10
   backup:
     schedule: "{{ .Values.k8up.backup.schedule }}"
     activeDeadlineSeconds: 2700
