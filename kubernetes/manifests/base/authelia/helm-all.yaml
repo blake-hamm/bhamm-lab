@@ -76,7 +76,7 @@ spec:
             ldap:
               enabled: true
               implementation: 'custom'
-              address: 'ldap://lldap-service.lldap:3890'
+              address: 'ldap://lldap.lldap.svc.cluster.local:3890'
               timeout: '15 seconds'
               base_dn: 'DC=bhamm-lab,DC=com'
               additional_users_dn: ou=people
