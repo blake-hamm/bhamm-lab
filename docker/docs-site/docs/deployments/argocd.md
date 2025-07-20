@@ -12,6 +12,7 @@
   - Kubernetes metrics
   - Vault
 -wave 0 seaweedfs ns
+-wave 1 cert manager smon for metrics
 -wave 1 k8up helm
 -wave 1 Checkpoint job for storage health
 -wave 1 Seaweedfs deployment
@@ -52,11 +53,6 @@
 
 ## Core apps
 -wave -20 Sync common helm apps
-  -wave 14 external-secrets
-  -wave 16 cnpg cluster
-  -wave 15 k8up restore
-  -wave 16 k8up backup/schedule
-  -wave 23 ingress
 -wave 20 Authelia db restore (common)
 -wave 20 Harbor
 -wave 20 Common: external secrets

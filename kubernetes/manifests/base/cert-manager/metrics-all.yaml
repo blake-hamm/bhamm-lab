@@ -5,7 +5,7 @@ metadata:
   namespace: cert-manager
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/sync-wave: "1"
   labels:
     release: monitor
 spec:
@@ -25,7 +25,7 @@ metadata:
   namespace: cert-manager
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/sync-wave: "1"
   labels:
     release: monitor
 spec:
@@ -45,7 +45,7 @@ metadata:
   namespace: cert-manager
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/sync-wave: "1"
   labels:
     release: monitor
 spec:
