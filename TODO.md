@@ -40,7 +40,7 @@ x Ensure
 - Ensure monitor/ingress for all base:
   x Argo
   x Argocd
-  - Vault
+  x Vault
   x Grafana
   x Prometheus
   x Authelia
