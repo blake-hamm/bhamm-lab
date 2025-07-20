@@ -18,6 +18,7 @@ spec:
       valuesObject:
         secret:
           create: false
+          useExisting: true
           name: lldap-external-secret
         env:
           TZ: "MST"
