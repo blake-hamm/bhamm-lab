@@ -23,15 +23,15 @@ spec:
             - name: RESTIC_COMPRESSION
               value: max
             - name: BACKUP_GLOBAL_CONCURRENT_ARCHIVE_JOBS_LIMIT
-              value: 1
+              value: "1"
             - name: BACKUP_GLOBAL_CONCURRENT_BACKUP_JOBS_LIMIT
-              value: 1
+              value: "1"
             - name: BACKUP_GLOBAL_CONCURRENT_CHECK_JOBS_LIMIT
-              value: 1
+              value: "1"
             - name: BACKUP_GLOBAL_CONCURRENT_PRUNE_JOBS_LIMIT
-              value: 1
+              value: "1"
             - name: BACKUP_GLOBAL_CONCURRENT_RESTORE_JOBS_LIMIT
-              value: 1
+              value: "1"
         metrics:
           service:
             port: 8080
