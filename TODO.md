@@ -37,14 +37,14 @@ x Ensure
   x Add alloy
   x Argo artifacts (w/ seaweedfs)
   x Argo common (combine events/workflows)
-- Ensure monitor/ingress for all base:
+x Ensure monitor/ingress for all base:
   x Argo
   x Argocd
   x Vault
   x Grafana
   x Prometheus
   x Authelia
-  - Seaweedfs (UI/s3)
+  x Seaweedfs (UI/s3)
   x Traefik
   x Test
 - Deploy core
