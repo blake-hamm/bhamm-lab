@@ -74,13 +74,7 @@ resource "google_service_account_key" "k8up_key" {
 resource "google_storage_hmac_key" "k8up_hmac" {
   service_account_email = google_service_account.k8up.email
 
-  # Optional: Force key rotation by tainting/recreating the resource
-  lifecycle {
-    ignore_changes = [service_account_email] # Keep this unless you want to rotate
-  }
-
-
-  # Save credentials to a local JSON file for sops
+  # Save credentials to a local JSON file for k8up
   provisioner "local-exec" {
     command = <<-EOT
       echo '{
