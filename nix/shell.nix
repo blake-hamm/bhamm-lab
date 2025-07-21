@@ -30,6 +30,7 @@ pkgs.mkShell {
     uv
     ceph-client
     minio-client
+    awscli
   ];
 
   packages = [
