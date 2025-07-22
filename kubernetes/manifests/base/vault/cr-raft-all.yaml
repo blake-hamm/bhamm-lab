@@ -17,7 +17,7 @@ spec:
         - labelSelector:
             matchLabels:
               vault_cr: vault
-          topologyKey: kubernetes.io/hostname
+          topologyKey: topology.kubernetes.io/zone
   image: hashicorp/vault:1.19.3
   annotations:
     common/annotation: "true"
