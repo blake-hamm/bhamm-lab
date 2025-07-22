@@ -26,7 +26,7 @@ spec:
   restoreMethod:
     folder:
       claimName: seaweedfs-filer-data
-  snapshot: d276d3e5
+  snapshot: 6125977d
 ---
 apiVersion: k8up.io/v1
 kind: Restore
@@ -56,7 +56,7 @@ spec:
   restoreMethod:
     folder:
       claimName: seaweedfs-master-data
-  snapshot: d3c091c5
+  snapshot: 6c4340a9
 ---
 apiVersion: k8up.io/v1
 kind: Restore
@@ -86,4 +86,4 @@ spec:
   restoreMethod:
     folder:
       claimName: seaweedfs-volume-data
-  snapshot: f3bb6520
+  snapshot: 12c05e38
