@@ -42,8 +42,8 @@ spec:
           backup:
             enabled: true
             schedule: "0 */6 * * *"
-            checkSchedule: "*/5 * * * *"
-            pruneSchedule: "*/10 * * * *"
+            # checkSchedule: "*/5 * * * *"
+            # pruneSchedule: "*/10 * * * *"
             # restores:
             #   - snapshot: "latest"
             #     claimName: "test"
