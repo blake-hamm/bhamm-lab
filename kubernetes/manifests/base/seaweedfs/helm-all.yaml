@@ -52,7 +52,7 @@ spec:
           encryptVolumeData: true
           enablePVC: true
           storage: 10Gi
-          defaultReplicaPlacement: "000"
+          defaultReplicaPlacement: "001"
           data:
             type: "existingClaim"
             claimName: "seaweedfs-filer-data"
