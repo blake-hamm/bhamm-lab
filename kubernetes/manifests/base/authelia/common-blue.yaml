@@ -39,9 +39,9 @@ spec:
         postgresql:
           enabled: true
           backups:
+            enabled: false
+          restore:
             enabled: true
-            # restore:
-            #   enabled: true
         ingressRoutes:
           - enabled: true
             name: authelia
