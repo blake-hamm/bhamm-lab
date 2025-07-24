@@ -37,7 +37,8 @@ spec:
           enabled: false
         volumes:
           antsle:
-            enabled: true
+            volume:
+              enabled: true
             replicas: 1
             rack: antsle
             nodeSelector: |
@@ -55,7 +56,8 @@ spec:
             readinessProbe:
               periodSeconds: 15
           aorus:
-            enabled: true
+            volume:
+              enabled: true
             replicas: 1
             rack: aorus
             nodeSelector: |
@@ -73,7 +75,8 @@ spec:
             readinessProbe:
               periodSeconds: 15
           super:
-            enabled: true
+            volume:
+              enabled: true
             replicas: 1
             rack: super
             nodeSelector: |
