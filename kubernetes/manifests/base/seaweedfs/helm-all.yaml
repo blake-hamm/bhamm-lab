@@ -11,9 +11,9 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    repoURL: https://github.com/seaweedfs/seaweedfs.git
-    targetRevision: "3.95"
-    path: k8s/charts/seaweedfs
+    repoURL: https://seaweedfs.github.io/seaweedfs/helm
+    chart: seaweedfs
+    targetRevision: 4.0.393
     helm:
       valuesObject:
         global:
@@ -34,69 +34,33 @@ spec:
           logs:
             type: "emptyDir"
         volume:
-          enabled: false
-        volumes:
-          antsle:
-            volume:
-            enabled: true
-            replicas: 1
-            rack: antsle
-            nodeSelector: |
-              topology.kubernetes.io/zone: antsle
-            readMode: proxy
-            dataDirs:
-              - name: data
-                type: "existingClaim"
-                claimName: "seaweedfs-volume-data-antsle"
-                maxVolumes: 0
-            logs:
-              type: "emptyDir"
-            livenessProbe:
-              periodSeconds: 15
-            readinessProbe:
-              periodSeconds: 15
-          aorus:
-            enabled: true
-            replicas: 1
-            rack: aorus
-            nodeSelector: |
-              topology.kubernetes.io/zone: aorus
-            readMode: proxy
-            dataDirs:
-              - name: data
-                type: "existingClaim"
-                claimName: "seaweedfs-volume-data-aorus"
-                maxVolumes: 0
-            logs:
-              type: "emptyDir"
-            livenessProbe:
-              periodSeconds: 15
-            readinessProbe:
-              periodSeconds: 15
-          super:
-            enabled: true
-            replicas: 1
-            rack: super
-            nodeSelector: |
-              topology.kubernetes.io/zone: super
-            readMode: proxy
-            dataDirs:
-              - name: data
-                type: "existingClaim"
-                claimName: "seaweedfs-volume-data-super"
-                maxVolumes: 0
-            logs:
-              type: "emptyDir"
-            livenessProbe:
-              periodSeconds: 15
-            readinessProbe:
-              periodSeconds: 15
+          enabled: true
+          replicas: 2
+          rack: antsle
+          nodeSelector: |
+            topology.kubernetes.io/zone: antsle
+          readMode: proxy
+          dataDirs:
+            - name: data0
+              type: "existingClaim"
+              claimName: "seaweedfs-volume-data-0"
+              maxVolumes: 0
+            - name: data1
+              type: "existingClaim"
+              claimName: "seaweedfs-volume-data-1"
+              maxVolumes: 0
+          logs:
+            type: "emptyDir"
+          livenessProbe:
+            periodSeconds: 15
+          readinessProbe:
+            periodSeconds: 15
         filer:
           enabled: true
           encryptVolumeData: true
           enablePVC: true
           storage: 10Gi
-          defaultReplicaPlacement: "010"
+          defaultReplicaPlacement: "001"
           data:
             type: "existingClaim"
             claimName: "seaweedfs-filer-data"
