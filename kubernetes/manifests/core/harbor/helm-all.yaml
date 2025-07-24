@@ -25,6 +25,13 @@ spec:
         externalURL: https://harbor.bhamm-lab.com
         persistence:
           enabled: true
+          persistentVolumeClaim:
+            registry:
+              annotations:
+                k8up.io/backup: "true"
+            jobservice:
+              annotations:
+                k8up.io/backup: "true"
           imageChartStorage:
             disableredirect: true
             type: filesystem

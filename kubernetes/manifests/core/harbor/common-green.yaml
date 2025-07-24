@@ -21,6 +21,9 @@ spec:
           enabled: true
           backups:
             enabled: true
+        k8up:
+          backup:
+            enabled: true
         externalSecrets:
           enabled: true
           secrets:
