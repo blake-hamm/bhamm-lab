@@ -11,9 +11,9 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    repoURL: https://seaweedfs.github.io/seaweedfs/helm
-    chart: seaweedfs
-    targetRevision: 4.0.395
+    repoURL: https://github.com/seaweedfs/seaweedfs.git
+    targetRevision: 3.95
+    path: k8s/charts/seaweedfs
     helm:
       valuesObject:
         global:
