@@ -56,6 +56,7 @@
 -wave 21 Monitor common
 -wave 21 Alloy
 *At this point all my storage classes, secretes and s3 (seaweedfs) should be functioning. I should also have ingress setup and sites should be accessible at my ip. I should also be able to deploy common helm charts w/ external secrets, k8up pvc restores, cnpg postgres databases restores and ingress.*
+-wave 25 Core apps
 
 ### Common helm chart
 -wave 14 external secrets (also, cnpg, k8up)
