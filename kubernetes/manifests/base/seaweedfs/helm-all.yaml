@@ -34,43 +34,62 @@ spec:
           logs:
             type: "emptyDir"
         volume:
-          enabled: true
-          replicas: 1
-          logs:
-            type: "emptyDir"
-          livenessProbe:
-            periodSeconds: 15
-          readinessProbe:
-            periodSeconds: 15
-          readMode: proxy
+          enabled: false
         volumes:
           antsle:
+            enabled: true
+            replicas: 1
             rack: antsle
             nodeSelector: |
               topology.kubernetes.io/zone: antsle
+            readMode: proxy
             dataDirs:
               - name: data
                 type: "existingClaim"
                 claimName: "seaweedfs-volume-data-antsle"
                 maxVolumes: 0
+            logs:
+              type: "emptyDir"
+            livenessProbe:
+              periodSeconds: 15
+            readinessProbe:
+              periodSeconds: 15
           aorus:
+            enabled: true
+            replicas: 1
             rack: aorus
             nodeSelector: |
               topology.kubernetes.io/zone: aorus
+            readMode: proxy
             dataDirs:
               - name: data
                 type: "existingClaim"
                 claimName: "seaweedfs-volume-data-aorus"
                 maxVolumes: 0
+            logs:
+              type: "emptyDir"
+            livenessProbe:
+              periodSeconds: 15
+            readinessProbe:
+              periodSeconds: 15
           super:
+            enabled: true
+            replicas: 1
             rack: super
             nodeSelector: |
               topology.kubernetes.io/zone: super
+            readMode: proxy
             dataDirs:
               - name: data
                 type: "existingClaim"
                 claimName: "seaweedfs-volume-data-super"
                 maxVolumes: 0
+            logs:
+              type: "emptyDir"
+            livenessProbe:
+              periodSeconds: 15
+            readinessProbe:
+              periodSeconds: 15
         filer:
           enabled: true
           encryptVolumeData: true
