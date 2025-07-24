@@ -35,7 +35,7 @@ spec:
             type: "emptyDir"
         volume:
           enabled: true
-          replicas: 2
+          replicas: 1
           readMode: proxy
           dataDirs:
             - name: data0
