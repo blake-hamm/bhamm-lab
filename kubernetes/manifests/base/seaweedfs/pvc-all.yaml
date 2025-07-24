@@ -1,7 +1,39 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: seaweedfs-volume-data
+  name: seaweedfs-volume-data-antsle
+  namespace: seaweedfs
+  annotations:
+    "k8up.io/backup": "true"
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  storageClassName: "nfs-csi"
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: seaweedfs-volume-data-aorus
+  namespace: seaweedfs
+  annotations:
+    "k8up.io/backup": "true"
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  storageClassName: "nfs-csi"
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: seaweedfs-volume-data-super
   namespace: seaweedfs
   annotations:
     "k8up.io/backup": "true"
