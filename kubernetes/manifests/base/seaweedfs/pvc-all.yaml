@@ -1,23 +1,7 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: seaweedfs-volume-data-0
-  namespace: seaweedfs
-  annotations:
-    "k8up.io/backup": "true"
-    argocd.argoproj.io/sync-wave: "1"
-spec:
-  storageClassName: "nfs-csi"
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 200Gi
----
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: seaweedfs-volume-data-1
+  name: seaweedfs-volume-data
   namespace: seaweedfs
   annotations:
     "k8up.io/backup": "true"

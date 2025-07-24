@@ -38,13 +38,9 @@ spec:
           replicas: 1
           readMode: proxy
           dataDirs:
-            - name: data0
+            - name: data
               type: "existingClaim"
-              claimName: "seaweedfs-volume-data-0"
-              maxVolumes: 0
-            - name: data1
-              type: "existingClaim"
-              claimName: "seaweedfs-volume-data-1"
+              claimName: "seaweedfs-volume-data"
               maxVolumes: 0
           logs:
             type: "emptyDir"
@@ -57,7 +53,7 @@ spec:
           encryptVolumeData: true
           enablePVC: true
           storage: 10Gi
-          defaultReplicaPlacement: "001"
+          defaultReplicaPlacement: "000"
           data:
             type: "existingClaim"
             claimName: "seaweedfs-filer-data"
