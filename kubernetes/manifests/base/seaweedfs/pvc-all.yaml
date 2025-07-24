@@ -12,7 +12,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 100Gi
+      storage: 200Gi
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
@@ -28,7 +28,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 100Gi
+      storage: 200Gi
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
