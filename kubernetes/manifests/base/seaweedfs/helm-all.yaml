@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/seaweedfs/seaweedfs.git
-    targetRevision: 3.95
+    targetRevision: "3.95"
     path: k8s/charts/seaweedfs
     helm:
       valuesObject:
