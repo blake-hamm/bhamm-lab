@@ -39,6 +39,8 @@ spec:
           antsle:
             replicas: 1
             rack: antsle
+            nodeSelector: |
+              topology.kubernetes.io/zone: antsle
             readMode: proxy
             dataDirs:
               - name: data
@@ -54,6 +56,8 @@ spec:
           aorus:
             replicas: 1
             rack: aorus
+            nodeSelector: |
+              topology.kubernetes.io/zone: aorus
             readMode: proxy
             dataDirs:
               - name: data
@@ -69,6 +73,8 @@ spec:
           super:
             replicas: 1
             rack: super
+            nodeSelector: |
+              topology.kubernetes.io/zone: super
             readMode: proxy
             dataDirs:
               - name: data
