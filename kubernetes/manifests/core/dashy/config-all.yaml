@@ -3,7 +3,7 @@ kind: Namespace
 metadata:
   name: dashy
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "20"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -11,7 +11,7 @@ metadata:
   name: dashy-config
   namespace: dashy
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "21"
 data:
   config.yml: |-
     ---

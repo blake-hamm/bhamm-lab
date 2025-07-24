@@ -1,11 +1,11 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: harbor-common
+  name: git-common
   namespace: argocd
 spec:
   destination:
-    namespace: harbor
+    namespace: git
     server: https://kubernetes.default.svc
   project: default
   source:
@@ -14,39 +14,39 @@ spec:
     path: kubernetes/charts/common
     helm:
       valuesObject:
-        name: harbor
+        name: git
+        externalSecrets:
+          enabled: true
+          secrets:
+            - secretKey: key
+              remoteRef:
+                key: /default/gitea
+                property: oidc_client_key
+            - secretKey: secret
+              remoteRef:
+                key: /default/gitea
+                property: oidc_client_secret
+        k8up:
+          backup:
+            enabled: true
         postgresql:
           enabled: true
           backups:
             enabled: true
-        externalSecrets:
-          enabled: true
-          secrets:
-            - secretKey: REGISTRY_STORAGE_S3_ACCESSKEY
-              remoteRef:
-                key: /core/minio
-                property: CONSOLE_ACCESS_KEY
-            - secretKey: REGISTRY_STORAGE_S3_SECRETKEY
-              remoteRef:
-                key: /core/minio
-                property: CONSOLE_SECRET_KEY
-            - secretKey: HARBOR_ADMIN_PASSWORD
-              remoteRef:
-                key: /core/harbor
-                property: HARBOR_ADMIN_PASSWORD
         ingressRoutes:
-          - name: harbor
+          - enabled: true
+            name: forgejo
             ingressClass: traefik-external
             websocket: true
             routes:
-              - match: Host(`harbor.bhamm-lab.com`)
-                kind: Rule
+              - kind: Rule
+                match: Host(`git.bhamm-lab.com`)
                 middlewares:
                   - name: default-headers
                 services:
-                  - name: harbor
+                  - name: git-forgejo-http
+                    port: 3000
                     scheme: http
-                    port: 80
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

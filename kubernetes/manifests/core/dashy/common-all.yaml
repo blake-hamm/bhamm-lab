@@ -1,11 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: git-common
+  name: dashy-common
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "24"
 spec:
   destination:
-    namespace: git
+    namespace: dashy
     server: https://kubernetes.default.svc
   project: default
   source:
@@ -14,39 +16,21 @@ spec:
     path: kubernetes/charts/common
     helm:
       valuesObject:
-        name: git
-        externalSecrets:
-          enabled: true
-          secrets:
-            - secretKey: key
-              remoteRef:
-                key: /default/gitea
-                property: oidc_client_key
-            - secretKey: secret
-              remoteRef:
-                key: /default/gitea
-                property: oidc_client_secret
-        k8up:
-          backup:
-            enabled: false
-        postgresql:
-          enabled: true
-          backups:
-            enabled: false
+        name: dashy
         ingressRoutes:
           - enabled: true
-            name: gitea
+            name: dashy
             ingressClass: traefik-external
-            websocket: true
             routes:
               - kind: Rule
-                match: Host(`git.dev.bhamm-lab.com`)
+                match: Host(`dashy.bhamm-lab.com`)
                 middlewares:
                   - name: default-headers
+                  - name: forwardauth-authelia
                 services:
-                  - name: git-forgejo-http
-                    port: 3000
+                  - name: dashy-service
                     scheme: http
+                    port: 80
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

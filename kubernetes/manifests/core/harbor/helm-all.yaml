@@ -4,7 +4,7 @@ metadata:
   name: harbor
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "-2"
+    argocd.argoproj.io/sync-wave: "20"
 spec:
   destination:
     namespace: harbor
@@ -27,12 +27,12 @@ spec:
           enabled: true
           imageChartStorage:
             disableredirect: true
-            type: s3
+            type: filesystem
             s3:
               existingSecret: "harbor-external-secret"
               region: us-east-1
               bucket: harbor-data
-              regionendpoint: https://minio-ceph-api.bhamm-lab.com
+              regionendpoint: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
               #encrypt: false
               #keyid: mykeyid
               #secure: true
@@ -51,9 +51,9 @@ spec:
             enabled: false
         enableMigrateHelmHook: false
         metrics:
-          enabled: false
+          enabled: true
           serviceMonitor:
-            enabled: false
+            enabled: true
             additionalLabels: {}
         cache:
           enabled: true
