@@ -40,6 +40,7 @@ spec:
           enabled: true
           backups:
             enabled: true
+            schedule: "0 0 */6 * * *"
           restore:
             enabled: true
         ingressRoutes:
