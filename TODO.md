@@ -1,34 +1,3 @@
-# Stabilize
-x Ensure green points to main
-x Destroy green
-x Ceanup ceph kubernetes pool
-x Redeploy green
-x Finalize storage
-  x Ensure talos has storage accessible
-  x Setup local path provisioner with kustomize
-  x Have cnpg use local path
-  x Deploy seaweedfs
-    x Ensure PushSecret for s3 creds
-    x Ensure offsite backups
-  x Transition all s3 usage to seaweedfs (k8up, cnpg)
-  x Remove ceph rgw completely
-  x Decommission rclone
-x Ensure blue cluster restore test cnpg/pvc
-x Build 'kill switch' workflow
-  x Remove ns/pvc
-  x Remove argocd apps
-x Ensure green cnpg can have backup & restore
-x Cleanup offsite restic backups
-x Troubleshoot test restore/backup in morning (confirmed bucket needs to be empty?)
-  x Verify test db timestamp table
-  x Remove full test common cnpg
-  x Watch filer logs
-  x Add test common cnpg with restore/backup
-  x Confirm test db is updated (might be missing one ts)
-  x RCA: cnpg `ScheduleBackup` had immediate: true for immediate backup, this would occur prior to the cluster being setup, causing a failure
-x Troubleshoot check/prune/backup jobs
-  x Seems okay for now, need to track...
-
 # Polish
 x Adjust common ingress route sync
 x Ensure base has authelia, treafik, lldap, certs as well
@@ -51,6 +20,10 @@ x Deploy core
   x harbor
   x forgejo
   - dashy (and update links)
+- Configure manually w/ backups
+  x Authelia
+  - Harbor
+  - Forgejo
 - Blue deployment (and switch)
 - Update DR docs (k8up/restic snapshots)
 
@@ -76,8 +49,8 @@ This is complete when:
 
 # Deploy docs site
 x Create ci/cd with argo workflows to deploy when docs change
-- Update docs flow and make less AI slop
-  - Add photo of rack
+x Update docs flow and make less AI slop
+  x Add photo of rack
 x Create architecture diagram
 x Update software architecture
 x Update backup docs
@@ -285,6 +258,37 @@ Date: Sun, 04 May 2025 00:00:01 -0600
 - kube bench - https://github.com/aquasecurity/kube-bench
 
 ## Previous
+# Stabilize
+x Ensure green points to main
+x Destroy green
+x Ceanup ceph kubernetes pool
+x Redeploy green
+x Finalize storage
+  x Ensure talos has storage accessible
+  x Setup local path provisioner with kustomize
+  x Have cnpg use local path
+  x Deploy seaweedfs
+    x Ensure PushSecret for s3 creds
+    x Ensure offsite backups
+  x Transition all s3 usage to seaweedfs (k8up, cnpg)
+  x Remove ceph rgw completely
+  x Decommission rclone
+x Ensure blue cluster restore test cnpg/pvc
+x Build 'kill switch' workflow
+  x Remove ns/pvc
+  x Remove argocd apps
+x Ensure green cnpg can have backup & restore
+x Cleanup offsite restic backups
+x Troubleshoot test restore/backup in morning (confirmed bucket needs to be empty?)
+  x Verify test db timestamp table
+  x Remove full test common cnpg
+  x Watch filer logs
+  x Add test common cnpg with restore/backup
+  x Confirm test db is updated (might be missing one ts)
+  x RCA: cnpg `ScheduleBackup` had immediate: true for immediate backup, this would occur prior to the cluster being setup, causing a failure
+x Troubleshoot check/prune/backup jobs
+  x Seems okay for now, need to track...
+
 # Refactor cluster
 x Setup ceph rgw (replace with rclone s3 server)
 - Setup green deployment
