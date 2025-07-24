@@ -36,9 +36,6 @@ spec:
         volume:
           enabled: true
           replicas: 2
-          rack: antsle
-          nodeSelector: |
-            topology.kubernetes.io/zone: antsle
           readMode: proxy
           dataDirs:
             - name: data0
