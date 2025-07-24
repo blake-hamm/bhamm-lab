@@ -47,9 +47,9 @@ x Ensure monitor/ingress for all base:
   x Seaweedfs (UI/s3)
   x Traefik
   x Test
-- Deploy core
-  - harbor
-  - forgejo
+x Deploy core
+  x harbor
+  x forgejo
   - dashy (and update links)
 - Blue deployment (and switch)
 - Update DR docs (k8up/restic snapshots)

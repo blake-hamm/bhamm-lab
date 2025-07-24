@@ -19,7 +19,6 @@ spec:
             apiTokenSecretRef:
               name: cert-manager-external-secret
               key: cloudflare-token
-          propagationPolicy: 600
         selector:
           dnsZones:
             - "bhamm-lab.com"
@@ -63,7 +62,6 @@ spec:
             apiTokenSecretRef:
               name: cert-manager-external-secret
               key: cloudflare-token
-          propagationPolicy: 600
         selector:
           dnsZones:
             - "bhamm-lab.com"
