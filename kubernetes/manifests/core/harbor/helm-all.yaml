@@ -28,22 +28,6 @@ spec:
           imageChartStorage:
             disableredirect: true
             type: filesystem
-            s3:
-              existingSecret: "harbor-external-secret"
-              region: us-east-1
-              bucket: harbor-data
-              regionendpoint: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
-              #encrypt: false
-              #keyid: mykeyid
-              #secure: true
-              #skipverify: false
-              #v4auth: true
-              #chunksize: "5242880"
-              #rootdirectory: /s3/object/name/prefix
-              #storageclass: STANDARD
-              #multipartcopychunksize: "33554432"
-              #multipartcopymaxconcurrency: 100
-              #multipartcopythresholdsize: "33554432"
         existingSecretAdminPassword: "harbor-external-secret"
         existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
         ipFamily:
