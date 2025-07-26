@@ -23,7 +23,7 @@ spec:
           - name: context
             value: "Argo Workflow"
           - name: argo-server-base-url
-            value: https://argoworkflows.bhamm-lab.com
+            value: https://argo.bhamm-lab.com
       container:
         image: curlimages/curl:latest
         env:
