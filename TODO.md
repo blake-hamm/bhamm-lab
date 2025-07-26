@@ -26,7 +26,7 @@ x Configure manually w/ backups
     x Ensure webhook sa has necessary permissions
   x Harbor
 - Update DR docs (k8up/restic snapshots)
-- Deploy docs site
+- Deploy docs site/media under 'apps'
 - Blue deployment (and switch)
   - Ensure harbor restore
 

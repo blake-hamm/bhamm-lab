@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: docs-common
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "25"
+spec:
+  destination:
+    namespace: docs
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    targetRevision: main
+    path: kubernetes/charts/common
+    helm:
+      valuesObject:
+        name: docs
+        ingressRoutes:
+          - enabled: true
+            name: docs
+            ingressClass: traefik-external
+            routes:
+              - kind: Rule
+                match: Host(`bhamm-lab.com`) && PathPrefix(`/docs/`)
+                middlewares:
+                  - name: default-headers
+                  - name: strip-docs-prefix
+                services:
+                  - name: docs-site
+                    scheme: http
+                    port: http
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
