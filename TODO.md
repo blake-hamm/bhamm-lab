@@ -22,8 +22,8 @@ x Deploy core
   - dashy (and update links)
 - Configure manually w/ backups
   x Authelia
+  x Forgejo
   - Harbor
-  - Forgejo
 - Blue deployment (and switch)
 - Update DR docs (k8up/restic snapshots)
 
