@@ -36,6 +36,18 @@ spec:
               remoteRef:
                 key: seaweedfs-s3-secret
                 property: admin_secret_access_key
+            - secretKey: robot-username
+              remoteRef:
+                key: /core/harbor
+                property: robot-username
+            - secretKey: robot-token
+              remoteRef:
+                key: /core/harbor
+                property: robot-token
+            - secretKey: forgejo-token
+              remoteRef:
+                key: /core/argo-workflows
+                property: forgejo-token
         ingressRoutes:
           - enabled: true
             name: argo-workflows
