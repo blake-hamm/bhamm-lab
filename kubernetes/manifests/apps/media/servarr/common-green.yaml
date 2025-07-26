@@ -24,10 +24,6 @@ spec:
               remoteRef:
                 key: /default/servarr
                 property: WIREGUARD_PRIVATE_KEY
-            - secretKey: GSP_GTN_API_KEY
-              remoteRef:
-                key: /default/servarr
-                property: GSP_GTN_API_KEY
             - secretKey: UN_SONARR_0_API_KEY
               remoteRef:
                 key: /default/servarr
