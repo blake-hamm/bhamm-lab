@@ -74,7 +74,7 @@
 -wave 21 Dashy deployment
 *At this point all my core k8s utilities should be run and confirmed with the test app. Everything should be accessible with my traefik lb ip. Data should be restored from k8up backups which are in the minio. I should also be able to deploy common helm charts w/ ingress (authelia/traefik) and k8up pvc backups/schedules.*
 
-## Other apps
--wave 25 apps/site
--wave 25 apps/media
+## Apps
+-wave 25 apps/site (docs)
+-wave 25 apps/media (immich/servar)
 *At this point all my 'fun' apps should be running and accessible.*
