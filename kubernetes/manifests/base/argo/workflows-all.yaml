@@ -28,6 +28,7 @@ spec:
             - ceph
             - nfs
             - test
+            - argo
           metricsConfig:
             enabled: false
           telemetryConfig:
