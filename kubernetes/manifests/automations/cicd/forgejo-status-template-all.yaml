@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
   name: forgejo-status
-  namespace: argo-events
+  namespace: argo
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "2"
@@ -31,7 +31,7 @@ spec:
           - name: FORGEJO_TOKEN
             valueFrom:
               secretKeyRef:
-                name: argo-events-external-secret
+                name: argo-external-secret
                 key: forgejo-token
         command: [sh, -c]
         args:

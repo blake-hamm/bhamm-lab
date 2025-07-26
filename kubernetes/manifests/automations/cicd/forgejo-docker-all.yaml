@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
   name: forgejo-docker-changes
-  namespace: argo-events
+  namespace: argo
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "3"
@@ -155,12 +155,12 @@ spec:
                         - name: ROBOT_USERNAME
                           valueFrom:
                             secretKeyRef:
-                              name: argo-events-external-secret
+                              name: argo-external-secret
                               key: robot-username
                         - name: ROBOT_TOKEN
                           valueFrom:
                             secretKeyRef:
-                              name: argo-events-external-secret
+                              name: argo-external-secret
                               key: robot-token
                       source: |
                         #!/bin/sh
