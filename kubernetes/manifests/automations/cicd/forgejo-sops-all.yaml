@@ -4,8 +4,8 @@ metadata:
   name: forgejo-sops-changes
   namespace: argo
   annotations:
+    argocd.argoproj.io/sync-wave: "7"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "3"
 spec:
   dependencies:
     - name: forgejo-push-event
