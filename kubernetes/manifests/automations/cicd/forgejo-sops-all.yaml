@@ -35,6 +35,7 @@ spec:
               metadata:
                 generateName: forgejo-sops-changes-
               spec:
+                serviceAccountName: argo-workflow
                 entrypoint: main
                 onExit: exit-handler
                 arguments:

@@ -49,6 +49,7 @@ spec:
               metadata:
                 generateName: forgejo-docker-changes-
               spec:
+                serviceAccountName: argo-workflow
                 entrypoint: main
                 onExit: exit-handler
                 arguments:

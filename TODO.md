@@ -23,6 +23,7 @@ x Deploy core
 - Configure manually w/ backups
   x Authelia
   x Forgejo
+    - Ensure webhook sa has necessary permissions
   - Harbor
 - Blue deployment (and switch)
 - Update DR docs (k8up/restic snapshots)
