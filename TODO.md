@@ -25,10 +25,14 @@ x Configure manually w/ backups
   x Forgejo
     x Ensure webhook sa has necessary permissions
   x Harbor
-- Update DR docs (k8up/restic snapshots)
-- Deploy docs site/media under 'apps'
+x Deploy docs site/media under 'apps'
+  x Config servarr (trashguides)
 - Blue deployment (and switch)
+  - Ensure forgejo restore
   - Ensure harbor restore
+  - Ensure immich restore
+  - Ensure servarr restore
+- Update DR docs (k8up/restic snapshots)
 
 ```
 This is complete when:
