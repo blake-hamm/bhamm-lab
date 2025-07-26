@@ -231,6 +231,7 @@ data:
         description: Visit Seaweedfs
         icon: https://raw.githubusercontent.com/seaweedfs/seaweedfs/refs/heads/master/note/seaweedfs.svg
         url: https://seaweedfs.bhamm-lab.com/
+        statusCheckAcceptCodes: '401'
       - title: Seaweedfs
         description: Seaweedfs grafana dashboard
         icon: hl-grafana

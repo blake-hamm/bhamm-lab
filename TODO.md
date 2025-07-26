@@ -19,7 +19,7 @@ x Ensure monitor/ingress for all base:
 x Deploy core
   x harbor
   x forgejo
-  - dashy (and update links)
+  x dashy (and update links)
 x Configure manually w/ backups
   x Authelia
   x Forgejo
@@ -28,6 +28,7 @@ x Configure manually w/ backups
 - Update DR docs (k8up/restic snapshots)
 - Deploy docs site
 - Blue deployment (and switch)
+  - Ensure harbor restore
 
 ```
 This is complete when:
