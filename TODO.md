@@ -20,13 +20,14 @@ x Deploy core
   x harbor
   x forgejo
   - dashy (and update links)
-- Configure manually w/ backups
+x Configure manually w/ backups
   x Authelia
   x Forgejo
-    - Ensure webhook sa has necessary permissions
-  - Harbor
-- Blue deployment (and switch)
+    x Ensure webhook sa has necessary permissions
+  x Harbor
 - Update DR docs (k8up/restic snapshots)
+- Deploy docs site
+- Blue deployment (and switch)
 
 ```
 This is complete when:
