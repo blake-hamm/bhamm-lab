@@ -34,47 +34,6 @@ x Deploy docs site/media under 'apps'
   - Ensure servarr restore
 - Update DR docs (k8up/restic snapshots)
 
-```
-This is complete when:
-
-    Adjust talos vm schematic, removing ucode
-    Setup pcie passthrough with new intel work talos vm node
-    Ensure talos vm has required software - https://github.com/siderolabs/extensions/pkgs/container/i915
-    Ensure taint on intel worker node and scheduling is disabled
-    Install NFD - https://nfd.sigs.k8s.io/deployment/helm
-    Install Intel GPU device plugin
-        https://intel.github.io/intel-device-plugins-for-kubernetes/cmd/gpu_plugin/README.html
-        https://github.com/intel/helm-charts/tree/main/charts/device-plugin-operator
-        https://github.com/intel/intel-device-plugins-for-kubernetes/blob/main/deployments/operator/samples/deviceplugin_v1_gpudeviceplugin.yaml
-    Ensure gpu metrics flowing and grafana dashboard enabled
-        https://intel.github.io/intel-device-plugins-for-kubernetes/cmd/gpu_plugin/monitoring.html#monitoring-gpus
-        https://github.com/intel/xpumanager/tree/master/deployment/kubernetes/monitoring
-    Adjust immich/jellyfin/servarr deployment to bypass vm taints and schedule to node
-    Adjust immich config to leverage gpu
-    Adjust jellyfin config to leverage gpu
-```
-
-# Deploy docs site
-x Create ci/cd with argo workflows to deploy when docs change
-x Update docs flow and make less AI slop
-  x Add photo of rack
-x Create architecture diagram
-x Update software architecture
-x Update backup docs
-x Update deployment docs
-x Update operations docs
-x Update security docs
-x Add AI docs
-x Add docs link to dashy
-x ADHOC: Fix backups
-  x Add prunes/checks to local backup schedule
-  x Compression w/ restic (need to test)
-  x Add k8up prometheus/grafana
-  x Check loki logs (ex: k8up, minio)
-  x Delete servarr download/media backups from k8up
-  x Delete pvc on nfs not in cluster
-  x Balance mergerfs
-
 # Start building website
 - Setup Hugo - https://github.com/adityatelange/hugo-PaperMod
 - Expose hugo homepage at bhamm-lab.com/
@@ -333,6 +292,27 @@ x Update secrets for servarr stack and connect
 x Ensure qbittorrent functions correctly
 x Add minio grafana
 x Update dashy links for minio
+
+# Deploy docs site
+x Create ci/cd with argo workflows to deploy when docs change
+x Update docs flow and make less AI slop
+  x Add photo of rack
+x Create architecture diagram
+x Update software architecture
+x Update backup docs
+x Update deployment docs
+x Update operations docs
+x Update security docs
+x Add AI docs
+x Add docs link to dashy
+x ADHOC: Fix backups
+  x Add prunes/checks to local backup schedule
+  x Compression w/ restic (need to test)
+  x Add k8up prometheus/grafana
+  x Check loki logs (ex: k8up, minio)
+  x Delete servarr download/media backups from k8up
+  x Delete pvc on nfs not in cluster
+  x Balance mergerfs
 
 # Servarr stack
 x Review hacks/default.bak
