@@ -59,7 +59,7 @@ spec:
               USER: git
               SCHEMA: public
             webhook:
-              ALLOWED_HOST_LIST: forgejo-eventsource-svc.argo-events.svc.cluster.local
+              ALLOWED_HOST_LIST: forgejo-eventsource-svc.argo.svc.cluster.local
               SKIP_TLS_VERIFY: true
           additionalConfigFromEnvs:
             - name: GITEA__DATABASE__PASSWD
