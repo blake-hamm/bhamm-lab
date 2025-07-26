@@ -35,7 +35,6 @@ spec:
               metadata:
                 generateName: forgejo-sops-changes-
               spec:
-                serviceAccountName: sops-vault-sync-sa
                 entrypoint: main
                 onExit: exit-handler
                 arguments:

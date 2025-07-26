@@ -49,7 +49,6 @@ spec:
               metadata:
                 generateName: forgejo-docker-changes-
               spec:
-                serviceAccountName: default
                 entrypoint: main
                 onExit: exit-handler
                 arguments:
