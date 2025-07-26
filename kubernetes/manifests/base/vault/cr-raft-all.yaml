@@ -102,7 +102,7 @@ spec:
             policies: allow_secrets
             ttl: 1h
           - name: sops
-            bound_service_account_names: "sops-vault-sync-sa"
+            bound_service_account_names: "argo-workflow"
             bound_service_account_namespaces: "argo"
             policies: allow_secrets
             ttl: 1h
