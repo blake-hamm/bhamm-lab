@@ -26,7 +26,7 @@ spec:
         k8up:
           backup:
             enabled: false
-          retores:
+          restores:
             - snapshot: "latest"
               claimName: "harbor-registry"
         externalSecrets:
