@@ -50,6 +50,7 @@ spec:
                 login: true
           backups:
             enabled: true
+            schedule: "0 0 */6 * * *"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
