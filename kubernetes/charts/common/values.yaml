@@ -23,6 +23,7 @@ k8up:
   restores: []
   # - snapshot: ""
   #   claimName: ""
+  #   fsGroup: 0
 postgresql:
   enabled: false
   instances: 3
