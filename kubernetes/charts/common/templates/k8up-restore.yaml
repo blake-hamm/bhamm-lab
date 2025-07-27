@@ -15,7 +15,7 @@ spec:
   restoreMethod:
     folder:
       claimName: {{ $restore.claimName }}
-  restoreFilter: "/data/{{ $restore.claimName }}"
+  restoreFilter: "--path '/data/{{ $restore.claimName }}'"
   backend:
     repoPasswordSecretRef:
       name: k8up
