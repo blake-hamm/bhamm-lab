@@ -32,7 +32,7 @@ spec:
           backup:
             enabled: false
           restores:
-            - snapshot: "81a30edc"
+            - snapshot: "latest"
               claimName: "gitea-shared-storage"
               fsGroup: 1000
         postgresql:
