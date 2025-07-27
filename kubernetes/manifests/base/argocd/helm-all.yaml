@@ -30,6 +30,7 @@ spec:
         configs:
           params:
             server.insecure: true
+            controller.sync.timeout.seconds: 300
           rbac:
             policy.default: 'role:admin'
             policy.csv: |
