@@ -27,7 +27,7 @@ spec:
           backup:
             enabled: false
           restores:
-            - snapshot: "latest"
+            - snapshot: "375dc20b"
               claimName: "harbor-registry"
         externalSecrets:
           enabled: true
