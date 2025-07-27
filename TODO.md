@@ -28,10 +28,9 @@ x Configure manually w/ backups
 x Deploy docs site/media under 'apps'
   x Config servarr (trashguides)
 - Blue deployment (and switch)
-  - Ensure forgejo restore
-  - Ensure harbor restore
-  - Ensure immich restore
-  - Ensure servarr restore
+  x Ensure base restore
+  - Ensure core restore
+  - Ensure apps restore
 - Update DR docs (k8up/restic snapshots)
 
 # Start building website
