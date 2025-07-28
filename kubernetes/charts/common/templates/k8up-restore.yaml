@@ -1,4 +1,5 @@
 {{- range $index, $restore := .Values.k8up.restores }}
+---
 apiVersion: k8up.io/v1
 kind: Restore
 metadata:
