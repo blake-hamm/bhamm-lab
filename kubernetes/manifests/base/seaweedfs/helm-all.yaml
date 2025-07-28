@@ -78,6 +78,9 @@ spec:
             type: "existingClaim"
             claimName: "seaweedfs-filer-logs"
           extraEnvironmentVars:
+            WEED_LEVELDB2_ENABLED: "false"
+            WEED_LEVELDB3_ENABLED: "true"
+            WEED_LEVELDB3_DIR: "/data/filerldb3"
             WEED_FILER_OPTIONS_RECURSIVE_DELETE: "false"
             WEED_FILER_BUCKETS_FOLDER: "/buckets"
           s3:
