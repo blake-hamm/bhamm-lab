@@ -110,7 +110,7 @@ metadata:
   namespace: servarr
   annotations:
     argocd.argoproj.io/sync-wave: "11"
-    k8up.io/backup: "false"
+    k8up.io/backup: "true"
 spec:
   accessModes:
     - ReadWriteMany
@@ -126,7 +126,7 @@ metadata:
   namespace: servarr
   annotations:
     argocd.argoproj.io/sync-wave: "11"
-    k8up.io/backup: "false"
+    k8up.io/backup: "true"
 spec:
   accessModes:
     - ReadWriteMany
