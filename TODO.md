@@ -27,9 +27,16 @@ x Configure manually w/ backups
   x Harbor
 x Deploy docs site/media under 'apps'
   x Config servarr (trashguides)
+- Green seaweedfs:
+  - Remove seaweedfs and pvc
+  - Add log pvc
+  - Adjust values for filerdb3 w/ idx pvc
+  - Ensure functional (loki logs, cnpg, k8up backups)
+  - Backup offsite
+  - Restore to blue
 - Blue deployment (and switch)
   x Ensure base restore
-  - Ensure core restore
+  x Ensure core restore
   - Ensure apps restore
 - Update DR docs (k8up/restic snapshots)
 
