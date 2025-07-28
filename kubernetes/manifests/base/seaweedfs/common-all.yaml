@@ -33,11 +33,11 @@ spec:
                 key: /core/k8up
                 property: AWS_SECRET_ACCESS_KEY
         ingressRoutes:
-          - name: ui
+          - name: master
             ingressClass: traefik-external
             websocket: true
             routes:
-              - match: Host(`seaweedfs.bhamm-lab.com`)
+              - match: Host(`master-swfs.bhamm-lab.com`)
                 kind: Rule
                 middlewares:
                   - name: default-headers
@@ -50,7 +50,7 @@ spec:
             ingressClass: traefik-external
             websocket: true
             routes:
-              - match: Host(`filer.bhamm-lab.com`)
+              - match: Host(`filer-swfs.bhamm-lab.com`)
                 kind: Rule
                 middlewares:
                   - name: default-headers
@@ -59,6 +59,19 @@ spec:
                   - name: seaweedfs-filer
                     scheme: http
                     port: 8888
+          - name: volume
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - match: Host(`volume-swfs.bhamm-lab.com`)
+                kind: Rule
+                middlewares:
+                  - name: default-headers
+                  - name: forwardauth-authelia
+                services:
+                  - name: seaweedfs-volume
+                    scheme: http
+                    port: 8080
           - name: s3
             ingressClass: traefik-external
             websocket: true
