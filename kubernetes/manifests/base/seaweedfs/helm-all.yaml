@@ -21,6 +21,13 @@ spec:
             enabled: true
             additionalLabels:
               release: monitor
+          extraEnvironmentVars:
+            WEED_CLUSTER_DEFAULT: "sw"
+            WEED_CLUSTER_SW_MASTER: "seaweedfs-master.seaweedfs:9333"
+            WEED_CLUSTER_SW_FILER: "seaweedfs-filer-client.seaweedfs:8888"
+            WEED_LEVELDB2_ENABLED: "false"
+            WEED_LEVELDB3_ENABLED: "true"
+            WEED_LEVELDB3_DIR: "/data/filerldb3"
         master:
           enabled: true
           replicas: 1
@@ -71,8 +78,6 @@ spec:
             type: "existingClaim"
             claimName: "seaweedfs-filer-logs"
           extraEnvironmentVars:
-            WEED_LEVELDB2_ENABLED: "false"
-            WEED_LEVELDB3_ENABLED: "true"
             WEED_FILER_OPTIONS_RECURSIVE_DELETE: "false"
             WEED_FILER_BUCKETS_FOLDER: "/buckets"
           s3:
