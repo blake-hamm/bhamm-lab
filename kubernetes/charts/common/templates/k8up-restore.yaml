@@ -2,7 +2,7 @@
 apiVersion: k8up.io/v1
 kind: Restore
 metadata:
-  name: {{ $.Values.name }}-{{ $index }}
+  name: {{ $.Values.name }}-{{ $restore.claimName }}
   namespace: {{ $.Values.name }}
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
