@@ -23,6 +23,10 @@ spec:
               release: monitor
         master:
           enabled: true
+          replicas: 1
+          resumeState: false
+          raftHashicorp: false
+          raftBootstrap: false
           volumeSizeLimitMB: 10000
           data:
             type: "existingClaim"
@@ -32,18 +36,24 @@ spec:
           readinessProbe:
             periodSeconds: 15
           logs:
-            type: "emptyDir"
+            type: "existingClaim"
+            claimName: "seaweedfs-master-logs"
         volume:
           enabled: true
           replicas: 1
+          index: leveldb
           readMode: proxy
           dataDirs:
             - name: data
               type: "existingClaim"
               claimName: "seaweedfs-volume-data"
               maxVolumes: 0
+          idx:
+            type: "existingClaim"
+            claimName: "seaweedfs-volume-idx"
           logs:
-            type: "emptyDir"
+            type: "existingClaim"
+            claimName: "seaweedfs-volume-logs"
           livenessProbe:
             periodSeconds: 15
           readinessProbe:
@@ -58,7 +68,12 @@ spec:
             type: "existingClaim"
             claimName: "seaweedfs-filer-data"
           logs:
-            type: "emptyDir"
+            type: "existingClaim"
+            claimName: "seaweedfs-filer-logs"
+          extraEnvironmentVars:
+            WEED_LEVELDB3_ENABLED: "true"
+            WEED_FILER_OPTIONS_RECURSIVE_DELETE: "false"
+            WEED_FILER_BUCKETS_FOLDER: "/buckets"
           s3:
             enabled: true
             enableAuth: true

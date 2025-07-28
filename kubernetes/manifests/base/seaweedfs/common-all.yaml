@@ -46,6 +46,19 @@ spec:
                   - name: seaweedfs-master
                     scheme: http
                     port: 9333
+          - name: filer
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - match: Host(`filer.bhamm-lab.com`)
+                kind: Rule
+                middlewares:
+                  - name: default-headers
+                  - name: forwardauth-authelia
+                services:
+                  - name: seaweedfs-filer
+                    scheme: http
+                    port: 8888
           - name: s3
             ingressClass: traefik-external
             websocket: true
