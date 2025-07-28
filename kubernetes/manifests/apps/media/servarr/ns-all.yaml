@@ -5,4 +5,4 @@ metadata:
   labels:
     pod-security.kubernetes.io/enforce: privileged
   annotations:
-    argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-wave: "10"
