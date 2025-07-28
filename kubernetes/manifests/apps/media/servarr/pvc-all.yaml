@@ -4,7 +4,7 @@ metadata:
   name: radarr-config
   namespace: servarr
   annotations:
-    argocd.argoproj.io/sync-wave: "11"
+    argocd.argoproj.io/sync-wave: "19"
     k8up.io/backup: "true"
 spec:
   accessModes:
@@ -19,7 +19,7 @@ metadata:
   name: jellyfin-config
   namespace: servarr
   annotations:
-    argocd.argoproj.io/sync-wave: "11"
+    argocd.argoproj.io/sync-wave: "19"
     k8up.io/backup: "true"
 spec:
   accessModes:
@@ -34,7 +34,7 @@ metadata:
   name: unpackerr-config
   namespace: servarr
   annotations:
-    argocd.argoproj.io/sync-wave: "11"
+    argocd.argoproj.io/sync-wave: "19"
     k8up.io/backup: "true"
 spec:
   accessModes:
@@ -49,7 +49,7 @@ metadata:
   name: sonarr-config
   namespace: servarr
   annotations:
-    argocd.argoproj.io/sync-wave: "11"
+    argocd.argoproj.io/sync-wave: "19"
     k8up.io/backup: "true"
 spec:
   accessModes:
@@ -64,7 +64,7 @@ metadata:
   name: prowlarr-config
   namespace: servarr
   annotations:
-    argocd.argoproj.io/sync-wave: "11"
+    argocd.argoproj.io/sync-wave: "19"
     k8up.io/backup: "true"
 spec:
   accessModes:
@@ -79,7 +79,7 @@ metadata:
   name: qbittorrent-config
   namespace: servarr
   annotations:
-    argocd.argoproj.io/sync-wave: "11"
+    argocd.argoproj.io/sync-wave: "19"
     k8up.io/backup: "true"
 spec:
   accessModes:
@@ -94,7 +94,7 @@ metadata:
   name: gluetun-config
   namespace: servarr
   annotations:
-    argocd.argoproj.io/sync-wave: "21"
+    argocd.argoproj.io/sync-wave: "19"
     k8up.io/backup: "true"
 spec:
   accessModes:
@@ -109,7 +109,7 @@ metadata:
   name: downloads
   namespace: servarr
   annotations:
-    argocd.argoproj.io/sync-wave: "11"
+    argocd.argoproj.io/sync-wave: "19"
     k8up.io/backup: "true"
 spec:
   accessModes:
@@ -125,7 +125,7 @@ metadata:
   name: media
   namespace: servarr
   annotations:
-    argocd.argoproj.io/sync-wave: "11"
+    argocd.argoproj.io/sync-wave: "19"
     k8up.io/backup: "true"
 spec:
   accessModes:
