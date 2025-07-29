@@ -24,8 +24,12 @@ spec:
             common:
               compactor_address: http://loki-distributed-compactor:3100
             compactor:
-              shared_store: filesystem
+              shared_store: s3
               working_directory: /var/loki/compactor
+              retention_enabled: true
+              retention_delete_delay: 2h
+              retention_delete_worker_count: 10
+              compaction_interval: 2h
             distributor:
               ring:
                 kvstore:
@@ -60,6 +64,7 @@ spec:
               split_queries_by_interval: 15m
               allow_structured_metadata: true
               volume_enabled: true
+              retention_period: 168h
             memberlist:
               cluster_label: loki-distributed.monitor
               join_members:
@@ -112,9 +117,6 @@ spec:
                 active_index_directory: /var/loki/index
                 cache_location: /var/loki/index_cache
                 cache_ttl: 24h
-            table_manager:
-              retention_deletes_enabled: false
-              retention_period: 0s
         serviceMonitor:
           enabled: true
           labels:
@@ -162,6 +164,21 @@ spec:
                   name: monitor-external-secret
                   key: S3_SECRET_ACCESS_KEY
         queryFrontend:
+          extraArgs:
+            - '-config.expand-env=true'
+          extraEnv:
+            - name: S3_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: monitor-external-secret
+                  key: S3_ACCESS_KEY_ID
+            - name: S3_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: monitor-external-secret
+                  key: S3_SECRET_ACCESS_KEY
+        compactor:
+          enabled: true
           extraArgs:
             - '-config.expand-env=true'
           extraEnv:
