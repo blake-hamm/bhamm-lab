@@ -55,7 +55,7 @@ spec:
           - name: IMMICH_MEDIA_LOCATION
             value: /upload
           - name: IMMICH_IGNORE_MOUNT_CHECK_ERRORS=true
-            value: true
+            value: "true"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
