@@ -12,8 +12,8 @@ spec:
   project: default
   source:
     repoURL: https://github.com/kubernetes-csi/csi-driver-nfs.git
-    targetRevision: v4.9.0
-    path: charts/v4.9.0/csi-driver-nfs
+    targetRevision: v4.11.0
+    path: charts/v4.11.0/csi-driver-nfs
     helm:
       valuesObject:
         controller:
@@ -31,11 +31,13 @@ spec:
             share: /mnt/storage/kubernetes
             subDir: green
           mountOptions:
+            - nfsvers=4.1
+            - proto=tcp
             - hard
+            - nointr
             - timeo=600
-            - retrans=2
-            - nfsvers=4.2
-            - noatime
+            - retrans=3
+            - actimeo=0
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
