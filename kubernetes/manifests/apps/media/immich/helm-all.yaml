@@ -54,8 +54,8 @@ spec:
             value: /usr/src/app/upload
           - name: IMMICH_MEDIA_LOCATION
             value: /upload
-          - name: IMMICH_IGNORE_MOUNT_CHECK_ERRORS=true
-            value: "true"
+          - name: IMMICH_IGNORE_MOUNT_CHECK_ERRORS
+            value: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
