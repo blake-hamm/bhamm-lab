@@ -29,7 +29,6 @@ spec:
           parameters:
             server: 10.0.20.11
             share: /mnt/storage/kubernetes
-            subDir: green/${pvc.metadata.namespace}-${pvc.metadata.name}
           mountOptions:
             - nfsvers=4.1
             - proto=tcp
