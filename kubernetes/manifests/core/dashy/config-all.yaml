@@ -227,10 +227,20 @@ data:
     - name: Storage
       icon: mdi-database
       items:
-      - title: Seaweedfs
-        description: Visit Seaweedfs
+      - title: Seaweedfs Master
+        description: Visit Seaweedfs master
         icon: https://raw.githubusercontent.com/seaweedfs/seaweedfs/refs/heads/master/note/seaweedfs.svg
-        url: https://seaweedfs.bhamm-lab.com/
+        url: https://master-swfs.bhamm-lab.com/
+        statusCheckAcceptCodes: '401'
+      - title: Seaweedfs Filer
+        description: Visit Seaweedfs filer
+        icon: https://raw.githubusercontent.com/seaweedfs/seaweedfs/refs/heads/master/note/seaweedfs.svg
+        url: https://filer-swfs.bhamm-lab.com/
+        statusCheckAcceptCodes: '401'
+      - title: Seaweedfs Volume
+        description: Visit Seaweedfs volume
+        icon: https://raw.githubusercontent.com/seaweedfs/seaweedfs/refs/heads/master/note/seaweedfs.svg
+        url: https://volume-swfs.bhamm-lab.com/ui/index.html
         statusCheckAcceptCodes: '401'
       - title: Seaweedfs
         description: Seaweedfs grafana dashboard
