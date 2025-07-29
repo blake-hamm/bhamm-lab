@@ -31,7 +31,12 @@ tofu -chdir=tofu/proxmox/talos destroy -var-file=blue.tfvars
 ```
 
 ```bash
+# To sync argocd apps
 export KUBECONFIG=./tofu/proxmox/talos/result/kube-config-blue.yaml
 kubectl config set-context --current --namespace=argocd
-argocd app get apps-blue --refresh
+argocd app get blue-base --refresh
+
+# To connect with talosctl
+export TALOSCONFIG=./tofu/proxmox/talos/result/talos-config-blue.yaml
+talosctl dashboard
 ```
