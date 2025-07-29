@@ -48,10 +48,14 @@ spec:
               secretKeyRef:
                 name: immich-postgresql-app
                 key: password
+          - name: TZ
+            value: America/Denver
           - name: UPLOAD_LOCATION
             value: /usr/src/app/upload
           - name: IMMICH_MEDIA_LOCATION
             value: /upload
+          - name: IMMICH_IGNORE_MOUNT_CHECK_ERRORS=true
+            value: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
