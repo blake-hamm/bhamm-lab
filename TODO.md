@@ -27,18 +27,19 @@ x Configure manually w/ backups
   x Harbor
 x Deploy docs site/media under 'apps'
   x Config servarr (trashguides)
-- Green seaweedfs:
-  - Remove seaweedfs and pvc
-  - Add log pvc
-  - Adjust values for filerdb3 w/ idx pvc
-  - Ensure functional (loki logs, cnpg, k8up backups)
-  - Backup offsite
-  - Restore to blue
-- Blue deployment (and switch)
+x Green seaweedfs:
+  x Remove seaweedfs and pvc
+  x Add log pvc
+  x Adjust values for filerdb3 w/ idx pvc
+  x Ensure functional (loki logs, cnpg, k8up backups)
+  x Backup offsite
+x Blue deployment (and switch)
+  - Restore blue - https://github.com/k8up-io/k8up/issues/867
   x Ensure base restore
-  x Ensure core restore
+  - Ensure core restore
   - Ensure apps restore
 - Update DR docs (k8up/restic snapshots)
+- Green destroy/apply on main
 
 # Start building website
 - Setup Hugo - https://github.com/adityatelange/hugo-PaperMod
