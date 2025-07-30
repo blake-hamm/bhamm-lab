@@ -16,9 +16,7 @@ spec:
     targetRevision: 3.4.1
     helm:
       valuesObject:
-        nameOverride: monitor
         namespaceOverride: monitor
-        fullnameOverride: monitor
         serviceMonitor:
           enabled: true
           namespace: monitoring
