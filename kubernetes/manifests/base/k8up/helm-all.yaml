@@ -36,27 +36,20 @@ spec:
           service:
             port: 8080
             type: ClusterIP
-            ipFamilyPolicy: ""
-            ipFamilies: []
-            nodePort: 0
-            annotations: {}
           serviceMonitor:
             enabled: true
             scrapeInterval: 60s
-            namespace: ""
             additionalLabels:
               release: monitor
           prometheusRule:
             enabled: false
-            namespace: ""
-            additionalLabels: {}
+            additionalLabels:
+              release: monitor
             createDefaultRules: true
             jobFailedRulesFor: ["archive", "backup", "check", "prune", "restore"]
-            additionalRules: []
           grafanaDashboard:
-            enabled: false
-            namespace: ""
-            additionalLabels: {}
+            enabled: true
+            namespace: monitor
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
