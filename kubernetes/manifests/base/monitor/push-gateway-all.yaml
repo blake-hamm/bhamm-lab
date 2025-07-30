@@ -19,7 +19,7 @@ spec:
         namespaceOverride: monitor
         serviceMonitor:
           enabled: true
-          namespace: monitoring
+          namespace: monitor
           additionalLabels:
             release: monitor
   syncPolicy:
