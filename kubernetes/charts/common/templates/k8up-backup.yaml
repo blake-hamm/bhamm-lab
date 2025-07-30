@@ -9,7 +9,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "16"
 spec:
   failedJobsHistoryLimit: 10
-  successfulJobsHistoryLimit:
+  successfulJobsHistoryLimit: 10
   promURL: http://prometheus-pushgateway.monitor.svc.cluster.local:9091
   backend:
     repoPasswordSecretRef:
