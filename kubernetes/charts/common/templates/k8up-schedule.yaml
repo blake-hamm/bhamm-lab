@@ -26,13 +26,11 @@ spec:
   backup:
     schedule: "{{ .Values.k8up.backup.schedule }}"
     activeDeadlineSeconds: 2700
-    # optional
-    #promURL: https://prometheus-io-instance:8443
+    promURL: http://prometheus-pushgateway.monitor.svc.cluster.local:9091
   check:
     schedule: "{{ .Values.k8up.backup.checkSchedule }}"
     activeDeadlineSeconds: 900
-    # optional
-    #promURL: https://prometheus-io-instance:8443
+    promURL: http://prometheus-pushgateway.monitor.svc.cluster.local:9091
   prune:
     schedule: "{{ .Values.k8up.backup.pruneSchedule }}"
     activeDeadlineSeconds: 900
