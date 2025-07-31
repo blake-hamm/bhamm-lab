@@ -4,7 +4,7 @@ metadata:
   name: seaweedfs-s3-healthcheck
   namespace: seaweedfs
   annotations:
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "6"
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/hook-delete-policy: HookFailed
 spec:
