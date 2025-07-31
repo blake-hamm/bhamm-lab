@@ -48,7 +48,7 @@ spec:
 
             # Clone repository
             echo "Cloning repository..."
-            git clone -b feature/polish https://github.com/blake-hamm/bhamm-lab.git /workspace/repo
+            git clone -b main https://github.com/blake-hamm/bhamm-lab.git /workspace/repo
 
             # Decrypt secrets
             echo "Decrypting secrets..."
