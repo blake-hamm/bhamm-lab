@@ -92,7 +92,7 @@ spec:
   restoreMethod:
     folder:
       claimName: seaweedfs-master-data
-  snapshot: 05478191
+  snapshot: '05478191'
 ---
 apiVersion: k8up.io/v1
 kind: Restore
