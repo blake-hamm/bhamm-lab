@@ -47,7 +47,7 @@ spec:
       backoff:
         duration: 5s
         factor: 2
-        maxDuration: 20m
+        maxDuration: 10m
 
 YAML
 }
