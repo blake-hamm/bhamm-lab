@@ -33,6 +33,11 @@ x Green seaweedfs:
   x Adjust values for filerdb3 w/ idx pvc
   x Ensure functional (loki logs, cnpg, k8up backups)
   x Backup offsite
+
+# Stabilize seaweedfs backups
+- Decide architecture
+- Ensure seaweedfs is paused during backup
+- After backup sync argocd
 x Blue deployment (and switch)
   - Restore blue - https://github.com/k8up-io/k8up/issues/867
   x Ensure base restore
