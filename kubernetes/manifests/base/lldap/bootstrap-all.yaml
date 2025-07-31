@@ -1,0 +1,57 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: lldap-bootstrap
+  namespace: lldap
+  annotations:
+    argocd.argoproj.io/sync-wave: "14"
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookFailed
+spec:
+  template:
+    spec:
+      containers:
+        - name: lldap-bootstrap
+          image: lldap/lldap:v0.6.1
+          command: ["/app/bootstrap.sh"]
+          env:
+            - name: LLDAP_URL
+              value: "http://lldap.lldap.svc.cluster.local:17170"
+            - name: LLDAP_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: lldap-external-secret
+                  key: lldap-ldap-user-name
+            - name: LLDAP_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: lldap-external-secret
+                  key: lldap-ldap-user-pass
+            - name: DO_CLEANUP
+              value: "true"
+          volumeMounts:
+            - name: user-configs
+              mountPath: /bootstrap/user-configs
+              readOnly: true
+            - name: group-configs
+              mountPath: /bootstrap/group-configs
+              readOnly: true
+      volumes:
+        - name: user-configs
+          projected:
+            sources:
+              - secret:
+                  name: lldap-external-secret
+                  items:
+                    - key: user-configs
+                      path: user-configs.json
+        - name: group-configs
+          projected:
+            sources:
+              - secret:
+                  name: lldap-external-secret
+                  items:
+                    - key: group-configs
+                      path: group-configs.json
+      restartPolicy: Never
+  backoffLimit: 2

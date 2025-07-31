@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prometheus-pushgateway
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  destination:
+    namespace: monitor
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: prometheus-pushgateway
+    repoURL: https://prometheus-community.github.io/helm-charts
+    targetRevision: 3.4.1
+    helm:
+      valuesObject:
+        namespaceOverride: monitor
+        serviceMonitor:
+          enabled: true
+          namespace: monitor
+          additionalLabels:
+            release: monitor
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true

@@ -4,7 +4,7 @@ metadata:
   name: seaweedfs
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-wave: "5"
 spec:
   destination:
     namespace: seaweedfs
@@ -19,8 +19,21 @@ spec:
         global:
           monitoring:
             enabled: true
+            additionalLabels:
+              release: monitor
+          extraEnvironmentVars:
+            WEED_CLUSTER_DEFAULT: "sw"
+            WEED_CLUSTER_SW_MASTER: "seaweedfs-master.seaweedfs:9333"
+            WEED_CLUSTER_SW_FILER: "seaweedfs-filer-client.seaweedfs:8888"
+            WEED_LEVELDB2_ENABLED: "false"
+            WEED_LEVELDB3_ENABLED: "true"
+            WEED_LEVELDB3_DIR: "/data/filerldb3"
         master:
           enabled: true
+          replicas: 1
+          resumeState: false
+          raftHashicorp: false
+          raftBootstrap: false
           volumeSizeLimitMB: 10000
           data:
             type: "existingClaim"
@@ -30,17 +43,24 @@ spec:
           readinessProbe:
             periodSeconds: 15
           logs:
-            type: "emptyDir"
+            type: "existingClaim"
+            claimName: "seaweedfs-master-logs"
         volume:
           enabled: true
+          replicas: 1
+          index: leveldb
           readMode: proxy
           dataDirs:
             - name: data
               type: "existingClaim"
               claimName: "seaweedfs-volume-data"
               maxVolumes: 0
+          idx:
+            type: "existingClaim"
+            claimName: "seaweedfs-volume-idx"
           logs:
-            type: "emptyDir"
+            type: "existingClaim"
+            claimName: "seaweedfs-volume-logs"
           livenessProbe:
             periodSeconds: 15
           readinessProbe:
@@ -55,28 +75,35 @@ spec:
             type: "existingClaim"
             claimName: "seaweedfs-filer-data"
           logs:
-            type: "emptyDir"
+            type: "existingClaim"
+            claimName: "seaweedfs-filer-logs"
+          extraEnvironmentVars:
+            WEED_LEVELDB2_ENABLED: "false"
+            WEED_LEVELDB3_ENABLED: "true"
+            WEED_LEVELDB3_DIR: "/data/filerldb3"
+            WEED_FILER_OPTIONS_RECURSIVE_DELETE: "false"
+            WEED_FILER_BUCKETS_FOLDER: "/buckets"
           s3:
             enabled: true
             enableAuth: true
             port: 8333
             httpsPort: 0
             allowEmptyFolder: false
-            # createBuckets:
-            #   - name: loki-data
-            #     anonymousRead: false
-            #   - name: tofu-state
-            #     anonymousRead: false
-            #   - name: cnpg-backups
-            #     anonymousRead: false
-            #   - name: forgejo
-            #     anonymousRead: false
-            #   - name: argo-artifact
-            #     anonymousRead: false
-            #   - name: harbor-data
-            #     anonymousRead: false
-            #   - name: k8up-backups
-            #     anonymousRead: false
+            createBuckets:
+              - name: argo-artifacts
+                anonymousRead: false
+                #   - name: loki-data
+                #     anonymousRead: false
+                #   - name: tofu-state
+                #     anonymousRead: false
+                #   - name: cnpg-backups
+                #     anonymousRead: false
+                #   - name: forgejo
+                #     anonymousRead: false
+                #   - name: harbor-data
+                #     anonymousRead: false
+                #   - name: k8up-backups
+                #     anonymousRead: false
           livenessProbe:
             periodSeconds: 15
           readinessProbe:

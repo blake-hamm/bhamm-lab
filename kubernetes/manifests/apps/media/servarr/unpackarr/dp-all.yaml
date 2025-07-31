@@ -1,0 +1,55 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: unpackerr
+  namespace: servarr
+  labels:
+    app: unpackerr
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: unpackerr
+  template:
+    metadata:
+      labels:
+        app: unpackerr
+    spec:
+      containers:
+        - name: unpackerr
+          image: golift/unpackerr
+          ports:
+            - containerPort: 5656
+          volumeMounts:
+            - name: unpackerr-config
+              mountPath: /config
+            - name: downloads
+              mountPath: /downloads
+          env:
+            - name: TZ
+              value: "America/Denver"
+            - name: UN_SONARR_0_URL
+              value: http://sonarr:8989
+            - name: UN_RADARR_0_URL
+              value: http://radarr:7878
+            - name: UN_SONARR_0_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: servarr-external-secret
+                  key: UN_SONARR_0_API_KEY
+            - name: UN_RADARR_0_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: servarr-external-secret
+                  key: UN_RADARR_0_API_KEY
+      volumes:
+        - name: unpackerr-config
+          persistentVolumeClaim:
+            claimName: unpackerr-config
+        - name: downloads
+          persistentVolumeClaim:
+            claimName: downloads

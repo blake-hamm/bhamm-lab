@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/refactor-cluster
+    targetRevision: main
     path: kubernetes/charts/common
     helm:
       valuesObject:
@@ -32,6 +32,64 @@ spec:
               remoteRef:
                 key: /core/k8up
                 property: AWS_SECRET_ACCESS_KEY
+        ingressRoutes:
+          - name: master
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - match: Host(`master-swfs.bhamm-lab.com`)
+                kind: Rule
+                middlewares:
+                  - name: default-headers
+                  - name: forwardauth-authelia
+                services:
+                  - name: seaweedfs-master
+                    scheme: http
+                    port: 9333
+          - name: filer
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - match: Host(`filer-swfs.bhamm-lab.com`)
+                kind: Rule
+                middlewares:
+                  - name: default-headers
+                  - name: forwardauth-authelia
+                services:
+                  - name: seaweedfs-filer
+                    scheme: http
+                    port: 8888
+          - name: volume
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - match: Host(`volume-swfs.bhamm-lab.com`)
+                kind: Rule
+                middlewares:
+                  - name: default-headers
+                  - name: forwardauth-authelia
+                services:
+                  - name: seaweedfs-volume
+                    scheme: http
+                    port: 8080
+          - name: s3
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - match: Host(`s3.bhamm-lab.com`)
+                kind: Rule
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: seaweedfs-s3
+                    scheme: http
+                    port: 8333
+              - kind: Rule
+                match: Host(`s3.bhamm-lab.com`) && Header(`Content-Type`, `application/grpc`)
+                services:
+                  - name: seaweedfs-s3
+                    port: 8333
+                    scheme: h2c
         k8up:
           backup:
             enabled: false

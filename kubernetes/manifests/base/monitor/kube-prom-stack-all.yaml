@@ -125,14 +125,8 @@ spec:
               amd-gpu:
                 url: https://raw.githubusercontent.com/blake-hamm/gpu-operator/refs/heads/feature/grafana-update/grafana/dashboard_gpu.json
                 token: ''
-              minio-cluster:
-                url: https://raw.githubusercontent.com/blake-hamm/minio/refs/heads/master/docs/metrics/prometheus/grafana/minio-dashboard.json
-                token: ''
-              minio-bucket:
-                url: https://raw.githubusercontent.com/blake-hamm/minio/refs/heads/master/docs/metrics/prometheus/grafana/bucket/minio-bucket.json
-                token: ''
               k8up:
-                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/main/kubernetes/manifests/core/monitor/dashboards/k8up.json
+                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/feature/polish/kubernetes/manifests/base/monitor/dashboards/k8up.json
                 token: ''
               nfs:
                 url: https://raw.githubusercontent.com/blake-hamm/nfs-grafana/refs/heads/master/prometheus/nfs-full.json
@@ -245,3 +239,9 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    retry:
+      limit: 10
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 10m

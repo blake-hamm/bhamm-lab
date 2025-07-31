@@ -10,6 +10,7 @@ metadata:
 spec:
   failedJobsHistoryLimit: 10
   successfulJobsHistoryLimit: 10
+  promURL: http://prometheus-pushgateway.monitor.svc.cluster.local:9091
   backend:
     repoPasswordSecretRef:
       name: k8up

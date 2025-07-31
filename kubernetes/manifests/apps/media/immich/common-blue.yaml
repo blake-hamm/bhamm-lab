@@ -1,0 +1,57 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: immich-common
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  destination:
+    namespace: immich
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    targetRevision: main
+    path: kubernetes/charts/common
+    helm:
+      valuesObject:
+        name: immich
+        ingressRoutes:
+          - enabled: true
+            name: immich
+            ingressClass: traefik-external
+            routes:
+              - match: Host(`immich.bhamm-lab.com`)
+                kind: Rule
+                services:
+                  - name: immich-server
+                    port: 2283
+                    scheme: http
+        k8up:
+          backup:
+            enabled: false
+          restores:
+            - snapshot: "16133b37"
+              claimName: "immich-library"
+        postgresql:
+          enabled: true
+          imageName: "ghcr.io/tensorchord/cloudnative-pgvecto.rs:16.5-v0.3.0@sha256:be3f025d79aa1b747817f478e07e71be43236e14d00d8a9eb3914146245035ba"
+          sharedPreloadLibraries:
+            - "vectors.so"
+          managed:
+            roles:
+              - name: immich
+                superuser: true
+                login: true
+          backups:
+            enabled: false
+          restore:
+            enabled: true
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

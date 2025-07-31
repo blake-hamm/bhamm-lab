@@ -3,7 +3,7 @@ kind: Namespace
 metadata:
   name: dashy
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "20"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -11,7 +11,7 @@ metadata:
   name: dashy-config
   namespace: dashy
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "21"
 data:
   config.yml: |-
     ---
@@ -175,7 +175,7 @@ data:
       - title: Argo Workflows
         description: Visit argo workflows
         icon: hl-argocd
-        url: https://argoworkflows.bhamm-lab.com/workflows
+        url: https://argo.bhamm-lab.com/workflows
       - title: Harbor
         description: Visit harbor
         icon: hl-harbor
@@ -227,23 +227,25 @@ data:
     - name: Storage
       icon: mdi-database
       items:
-      - title: Minio Ceph
-        description: Visit minio ceph
-        icon: hl-minio-light
-        url: https://minio-ceph.bhamm-lab.com/
-      - title: Minio NFS
-        description: Visit minio nfs
-        icon: hl-minio-light
-        url: https://minio-nfs.bhamm-lab.com/
-      - title: Minio
-        description: Minio grafana dashboard
+      - title: Seaweedfs Master
+        description: Visit Seaweedfs master
+        icon: https://raw.githubusercontent.com/seaweedfs/seaweedfs/refs/heads/master/note/seaweedfs.svg
+        url: https://master-swfs.bhamm-lab.com/
+        statusCheckAcceptCodes: '401'
+      - title: Seaweedfs Filer
+        description: Visit Seaweedfs filer
+        icon: https://raw.githubusercontent.com/seaweedfs/seaweedfs/refs/heads/master/note/seaweedfs.svg
+        url: https://filer-swfs.bhamm-lab.com/
+        statusCheckAcceptCodes: '401'
+      - title: Seaweedfs Volume
+        description: Visit Seaweedfs volume
+        icon: https://raw.githubusercontent.com/seaweedfs/seaweedfs/refs/heads/master/note/seaweedfs.svg
+        url: https://volume-swfs.bhamm-lab.com/ui/index.html
+        statusCheckAcceptCodes: '401'
+      - title: Seaweedfs
+        description: Seaweedfs grafana dashboard
         icon: hl-grafana
-        url: https://grafana.bhamm-lab.com/d/TgmJnqnnk/minio-dashboard?orgId=1&from=now-6h&to=now&timezone=browser&var-scrape_jobs=$__all
-        statusCheck: false
-      - title: Minio Bucket
-        description: Minio bucket grafana dashboard
-        icon: hl-grafana
-        url: https://grafana.bhamm-lab.com/d/TgmJnqnnk2/minio-bucket-dashboard?orgId=1&from=now-6h&to=now&timezone=America%2FDenver&var-scrape_jobs=minio-job-bucket
+        url: https://grafana.bhamm-lab.com/d/a24009d7-cbda-4443-a132-1cc1c4677304/seaweedfs?orgId=1&from=now-1d&to=now&timezone=browser&var-DS_PROMETHEUS=prometheus&var-NAMESPACE=seaweedfs
         statusCheck: false
       - title: Ceph
         description: Visit Ceph grafana dashboard

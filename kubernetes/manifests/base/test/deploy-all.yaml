@@ -71,7 +71,7 @@ metadata:
   name: test
   namespace: test
   annotations:
-    argocd.argoproj.io/sync-wave: "12"
+    argocd.argoproj.io/sync-wave: "20"
 spec:
   type: ClusterIP
   ports:

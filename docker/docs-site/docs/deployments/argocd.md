@@ -41,15 +41,22 @@
 -wave 12 Test svc
 -wave 18 Test CronWorkflow (timestamp on cnpg)
 -wave 15 Cert manager common
+-wave 13 lldap Common
+-wave 13 lldap Helm
+-wave 14 lldap bootstrap job
 -wave 15 Authelia Common
+-wave 15 Authelia Helm
 -wave 15 Traefik Middleware
--wave 16 Authelia Helm
 -wave 16 STAGE: Cert manager cluster issuer
 -wave 17 STAGE: Certificate in traefik ns
 -wave 18 PROD: Cert manager cluster issuer
 -wave 19 PROD: Certificate in traefik ns
 -wave 20 Traefik tls store
+-wave 21 Loki
+-wave 21 Monitor common
+-wave 21 Alloy
 *At this point all my storage classes, secretes and s3 (seaweedfs) should be functioning. I should also have ingress setup and sites should be accessible at my ip. I should also be able to deploy common helm charts w/ external secrets, k8up pvc restores, cnpg postgres databases restores and ingress.*
+-wave 25 Core apps
 
 ### Common helm chart
 -wave 14 external secrets (also, cnpg, k8up)
@@ -62,25 +69,12 @@
 -wave 25 Traefik ingressroute
 
 ## Core apps
--wave -20 Sync common helm apps
--wave 20 Authelia db restore (common)
 -wave 20 Harbor
--wave 20 Common: external secrets
--wave 21 Authelia
--wave 21 lldap
--wave 21 Traefik
--wave 21 Forgejo
--wave 22 lldap bootstrap
--wave 22 Checkpoint health job for:
-  - authelia
-  - traefik
-  - lldap
-  - Harbor
-  - Forgejo
--wave 23 Dashy deployment
+-wave 20 Forgejo
+-wave 21 Dashy deployment
 *At this point all my core k8s utilities should be run and confirmed with the test app. Everything should be accessible with my traefik lb ip. Data should be restored from k8up backups which are in the minio. I should also be able to deploy common helm charts w/ ingress (authelia/traefik) and k8up pvc backups/schedules.*
 
-## Other apps
--wave 25 apps/site
--wave 25 apps/media
+## Apps
+-wave 25 apps/site (docs)
+-wave 25 apps/media (immich/servar)
 *At this point all my 'fun' apps should be running and accessible.*

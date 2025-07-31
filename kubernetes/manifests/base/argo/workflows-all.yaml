@@ -1,0 +1,88 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argo-workflows
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  destination:
+    namespace: argo
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: argo-workflows
+    repoURL: https://argoproj.github.io/argo-helm
+    targetRevision: 0.42.5
+    helm:
+      valuesObject:
+        workflow:
+          serviceAccount:
+            create: true
+        controller:
+          workflowDefaults:
+            spec:
+              serviceAccountName: argo-workflow
+          workflowNamespaces:
+            - default
+            - ceph
+            - nfs
+            - test
+            - argo
+          metricsConfig:
+            enabled: false
+          telemetryConfig:
+            enabled: false
+          logging:
+            level: info
+        server:
+          authModes:
+            - sso
+          sso:
+            enabled: true
+            issuer: https://auth.bhamm-lab.com
+            clientId:
+              name: argo-external-secret
+              key: client-id
+            clientSecret:
+              name: argo-external-secret
+              key: client-secret
+            redirectUrl: "https://argo.bhamm-lab.com/oauth2/callback"
+            rbac:
+              enabled: false
+              secretWhitelist: []
+            scopes:
+              - 'openid'
+              - 'groups'
+              - 'email'
+              - 'profile'
+            sessionExpiry: ""
+            issuerAlias: ""
+            customGroupClaimName: ""
+            userInfoPath: ""
+            insecureSkipVerify: false
+            filterGroupsRegex:
+        artifactRepository:
+          s3:
+            endpoint: "seaweedfs-s3.seaweedfs.svc.cluster.local:8333"
+            insecure: true
+            bucket: argo-artifacts
+            accessKeySecret:
+              name: argo-external-secret
+              key: S3_ACCESS_KEY_ID
+            secretKeySecret:
+              name: argo-external-secret
+              key: S3_SECRET_ACCESS_KEY
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 10
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 5m

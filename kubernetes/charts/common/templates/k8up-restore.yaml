@@ -1,8 +1,9 @@
 {{- range $index, $restore := .Values.k8up.restores }}
+---
 apiVersion: k8up.io/v1
 kind: Restore
 metadata:
-  name: {{ $.Values.name }}-{{ $index }}
+  name: {{ $.Values.name }}-{{ $restore.claimName }}
   namespace: {{ $.Values.name }}
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
@@ -29,6 +30,6 @@ spec:
         name: k8up
         key: secretAccessKeySecret
   podSecurityContext:
-    fsGroup: 0
+    fsGroup: {{ default 0 $restore.fsGroup | int }}
     runAsUser: 0
 {{- end }}

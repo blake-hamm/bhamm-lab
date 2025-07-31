@@ -9,6 +9,7 @@ metadata:
 spec:
   failedJobsHistoryLimit: 10
   successfulJobsHistoryLimit: 10
+  promURL: http://prometheus-pushgateway.monitor.svc.cluster.local:9091
   backend:
     repoPasswordSecretRef:
       name: seaweedfs-external-secret
@@ -49,17 +50,15 @@ spec:
   successfulJobsHistoryLimit: 10
   backup:
     schedule: "0 3 * * *" #"0 0 1,15 * *" # First of each month
-    activeDeadlineSeconds: 45
-    # optional
-    #promURL: https://prometheus-io-instance:8443
+    activeDeadlineSeconds: 2700
+    promURL: http://prometheus-pushgateway.monitor.svc.cluster.local:9091
   check:
     schedule: "0 4 * * *" #'0 0 2,16 * *' # Second of each month
-    activeDeadlineSeconds: 15
-    # optional
-    #promURL: https://prometheus-io-instance:8443
+    activeDeadlineSeconds: 900
+    promURL: http://prometheus-pushgateway.monitor.svc.cluster.local:9091
   prune:
     schedule: "0 5 * * *" #'0 0 2,16 * *' # Second of each month
-    activeDeadlineSeconds: 15
+    activeDeadlineSeconds: 900
     retention:
       keepLast: 5
       keepDaily: 3

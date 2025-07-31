@@ -5,12 +5,18 @@ metadata:
   namespace: vault
   labels:
     app.kubernetes.io/name: vault
-    vault_cr: vault
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "2"
 spec:
   size: 3
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: vault
+          topologyKey: topology.kubernetes.io/zone
   image: hashicorp/vault:1.19.3
   annotations:
     common/annotation: "true"
@@ -28,8 +34,7 @@ spec:
     - metadata:
         name: vault-raft
       spec:
-        # https://kubernetes.io/docs/concepts/storage/persistent-volumes/#class-1
-        # storageClassName: ""
+        storageClassName: "local-path"
         accessModes:
           - ReadWriteOnce
         volumeMode: Filesystem
@@ -97,7 +102,7 @@ spec:
             policies: allow_secrets
             ttl: 1h
           - name: sops
-            bound_service_account_names: "sops-vault-sync-sa"
+            bound_service_account_names: "argo-workflow"
             bound_service_account_namespaces: "argo"
             policies: allow_secrets
             ttl: 1h
@@ -115,21 +120,21 @@ spec:
             token_num_uses: 10
             token_ttl: 20m
             token_max_ttl: 30m
-            # - type: oidc
-            #   config:
-            #     oidc_discovery_url: https://auth.bhamm-lab.com
-            #     oidc_client_id: vault
-            #     oidc_client_secret: "${env `OIDC_VAULT_CLIENT_SECRET`}"
-            #     default_role: default
-            #     allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback"]
-            #   roles:
-            #     - name: default
-            #       role_type: oidc
-            #       allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback", "http://localhost:8250/oidc/callback"]
-            #       bound_audiences: vault
-            #       user_claim: sub
-            #       policies: admin
-            #       ttl: 1h
+      - type: oidc
+        config:
+          oidc_discovery_url: https://auth.bhamm-lab.com
+          oidc_client_id: vault
+          oidc_client_secret: "${env `OIDC_VAULT_CLIENT_SECRET`}"
+          default_role: default
+          allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback"]
+        roles:
+          - name: default
+            role_type: oidc
+            allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback", "http://localhost:8250/oidc/callback"]
+            bound_audiences: vault
+            user_claim: sub
+            policies: admin
+            ttl: 1h
     secrets:
       - path: secret
         type: kv

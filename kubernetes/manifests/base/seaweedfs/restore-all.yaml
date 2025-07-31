@@ -1,0 +1,223 @@
+apiVersion: k8up.io/v1
+kind: Restore
+metadata:
+  name: seaweedfs-s3-offsite-filer-data
+  namespace: seaweedfs
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  failedJobsHistoryLimit: 10
+  successfulJobsHistoryLimit: 10
+  backend:
+    repoPasswordSecretRef:
+      name: seaweedfs-external-secret
+      key: repo-password
+    s3:
+      endpoint: https://storage.googleapis.com
+      bucket: bhamm-lab-k8up
+      accessKeyIDSecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKeySecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_SECRET_ACCESS_KEY
+  podSecurityContext:
+    fsGroup: 0
+    runAsUser: 0
+  restoreMethod:
+    folder:
+      claimName: seaweedfs-filer-data
+  snapshot: 62dc92c4
+---
+apiVersion: k8up.io/v1
+kind: Restore
+metadata:
+  name: seaweedfs-s3-offsite-filer-logs
+  namespace: seaweedfs
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  failedJobsHistoryLimit: 10
+  successfulJobsHistoryLimit: 10
+  backend:
+    repoPasswordSecretRef:
+      name: seaweedfs-external-secret
+      key: repo-password
+    s3:
+      endpoint: https://storage.googleapis.com
+      bucket: bhamm-lab-k8up
+      accessKeyIDSecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKeySecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_SECRET_ACCESS_KEY
+  podSecurityContext:
+    fsGroup: 0
+    runAsUser: 0
+  restoreMethod:
+    folder:
+      claimName: seaweedfs-filer-logs
+  snapshot: 104a7b8f
+---
+apiVersion: k8up.io/v1
+kind: Restore
+metadata:
+  name: seaweedfs-s3-offsite-master-data
+  namespace: seaweedfs
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  failedJobsHistoryLimit: 10
+  successfulJobsHistoryLimit: 10
+  backend:
+    repoPasswordSecretRef:
+      name: seaweedfs-external-secret
+      key: repo-password
+    s3:
+      endpoint: https://storage.googleapis.com
+      bucket: bhamm-lab-k8up
+      accessKeyIDSecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKeySecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_SECRET_ACCESS_KEY
+  podSecurityContext:
+    fsGroup: 0
+    runAsUser: 0
+  restoreMethod:
+    folder:
+      claimName: seaweedfs-master-data
+  snapshot: '05478191'
+---
+apiVersion: k8up.io/v1
+kind: Restore
+metadata:
+  name: seaweedfs-s3-offsite-master-logs
+  namespace: seaweedfs
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  failedJobsHistoryLimit: 10
+  successfulJobsHistoryLimit: 10
+  backend:
+    repoPasswordSecretRef:
+      name: seaweedfs-external-secret
+      key: repo-password
+    s3:
+      endpoint: https://storage.googleapis.com
+      bucket: bhamm-lab-k8up
+      accessKeyIDSecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKeySecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_SECRET_ACCESS_KEY
+  podSecurityContext:
+    fsGroup: 0
+    runAsUser: 0
+  restoreMethod:
+    folder:
+      claimName: seaweedfs-master-logs
+  snapshot: 47c2eb42
+---
+apiVersion: k8up.io/v1
+kind: Restore
+metadata:
+  name: seaweedfs-s3-offsite-volume-data
+  namespace: seaweedfs
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  failedJobsHistoryLimit: 10
+  successfulJobsHistoryLimit: 10
+  backend:
+    repoPasswordSecretRef:
+      name: seaweedfs-external-secret
+      key: repo-password
+    s3:
+      endpoint: https://storage.googleapis.com
+      bucket: bhamm-lab-k8up
+      accessKeyIDSecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKeySecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_SECRET_ACCESS_KEY
+  podSecurityContext:
+    fsGroup: 0
+    runAsUser: 0
+  restoreMethod:
+    folder:
+      claimName: seaweedfs-volume-data
+  snapshot: 0c2feef5
+---
+apiVersion: k8up.io/v1
+kind: Restore
+metadata:
+  name: seaweedfs-s3-offsite-volume-idx
+  namespace: seaweedfs
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  failedJobsHistoryLimit: 10
+  successfulJobsHistoryLimit: 10
+  backend:
+    repoPasswordSecretRef:
+      name: seaweedfs-external-secret
+      key: repo-password
+    s3:
+      endpoint: https://storage.googleapis.com
+      bucket: bhamm-lab-k8up
+      accessKeyIDSecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKeySecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_SECRET_ACCESS_KEY
+  podSecurityContext:
+    fsGroup: 0
+    runAsUser: 0
+  restoreMethod:
+    folder:
+      claimName: seaweedfs-volume-idx
+  snapshot: 89dd88c5
+---
+apiVersion: k8up.io/v1
+kind: Restore
+metadata:
+  name: seaweedfs-s3-offsite-volume-logs
+  namespace: seaweedfs
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  failedJobsHistoryLimit: 10
+  successfulJobsHistoryLimit: 10
+  backend:
+    repoPasswordSecretRef:
+      name: seaweedfs-external-secret
+      key: repo-password
+    s3:
+      endpoint: https://storage.googleapis.com
+      bucket: bhamm-lab-k8up
+      accessKeyIDSecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKeySecretRef:
+        name: seaweedfs-external-secret
+        key: AWS_SECRET_ACCESS_KEY
+  podSecurityContext:
+    fsGroup: 0
+    runAsUser: 0
+  restoreMethod:
+    folder:
+      claimName: seaweedfs-volume-logs
+  snapshot: b6e335f5

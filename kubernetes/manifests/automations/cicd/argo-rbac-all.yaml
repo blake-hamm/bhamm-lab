@@ -1,0 +1,40 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: argo-workflow-extra
+  namespace: argo
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
+rules:
+  # Workflow permissions
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflows"]
+    verbs: ["get", "list", "create", "update", "patch", "delete", "watch"]
+  # WorkflowTemplate permissions (this was missing!)
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflowtemplates"]
+    verbs: ["get", "list", "watch"]
+  # ClusterWorkflowTemplate permissions (in case you have cluster-level templates)
+  - apiGroups: ["argoproj.io"]
+    resources: ["clusterworkflowtemplates"]
+    verbs: ["get", "list", "watch"]
+  # Secrets (for accessing secrets like argo-external-secret)
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argo-workflow-binding-extra
+  namespace: argo
+  annotations:
+    argocd.argoproj.io/sync-wave: "7"
+subjects:
+  - kind: ServiceAccount
+    name: argo-workflow
+    namespace: argo
+roleRef:
+  kind: Role
+  name: argo-workflow-extra
+  apiGroup: rbac.authorization.k8s.io

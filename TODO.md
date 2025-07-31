@@ -1,80 +1,51 @@
-# Stabilize
-x Ensure green points to main
-x Destroy green
-x Ceanup ceph kubernetes pool
-x Redeploy green
-x Finalize storage
-  x Ensure talos has storage accessible
-  x Setup local path provisioner with kustomize
-  x Have cnpg use local path
-  x Deploy seaweedfs
-    x Ensure PushSecret for s3 creds
-    x Ensure offsite backups
-  x Transition all s3 usage to seaweedfs (k8up, cnpg)
-  x Remove ceph rgw completely
-  x Decommission rclone
-x Ensure blue cluster restore test cnpg/pvc
-x Build 'kill switch' workflow
-  x Remove ns/pvc
-  x Remove argocd apps
-x Ensure green cnpg can have backup & restore
-x Cleanup offsite restic backups
-x Troubleshoot test restore/backup in morning (confirmed bucket needs to be empty?)
-  x Verify test db timestamp table
-  x Remove full test common cnpg
-  x Watch filer logs
-  x Add test common cnpg with restore/backup
-  x Confirm test db is updated (might be missing one ts)
-  x RCA: cnpg `ScheduleBackup` had immediate: true for immediate backup, this would occur prior to the cluster being setup, causing a failure
-x Troubleshoot check/prune/backup jobs
-  x Seems okay for now, need to track...
-
 # Polish
-- Adjust common ingress route sync
-- Ensure base has authelia, treafik, lldap, certs as well
-- Deploy core and manually configure
-- Update argocd sync docs
+x Adjust common ingress route sync
+x Ensure base has authelia, treafik, lldap, certs as well
+x Ensure
+  x Add loki (w/ seaweedfs)
+  x Add alloy
+  x Argo artifacts (w/ seaweedfs)
+  x Argo common (combine events/workflows)
+x Ensure monitor/ingress for all base:
+  x Argo
+  x Argocd
+  x Vault
+  x Grafana
+  x Prometheus
+  x Authelia
+  x Seaweedfs (UI/s3)
+  x Traefik
+  x Test
+x Deploy core
+  x harbor
+  x forgejo
+  x dashy (and update links)
+x Configure manually w/ backups
+  x Authelia
+  x Forgejo
+    x Ensure webhook sa has necessary permissions
+  x Harbor
+x Deploy docs site/media under 'apps'
+  x Config servarr (trashguides)
+x Green seaweedfs:
+  x Remove seaweedfs and pvc
+  x Add log pvc
+  x Adjust values for filerdb3 w/ idx pvc
+  x Ensure functional (loki logs, cnpg, k8up backups)
+  x Backup offsite
 
-```
-This is complete when:
-
-    Adjust talos vm schematic, removing ucode
-    Setup pcie passthrough with new intel work talos vm node
-    Ensure talos vm has required software - https://github.com/siderolabs/extensions/pkgs/container/i915
-    Ensure taint on intel worker node and scheduling is disabled
-    Install NFD - https://nfd.sigs.k8s.io/deployment/helm
-    Install Intel GPU device plugin
-        https://intel.github.io/intel-device-plugins-for-kubernetes/cmd/gpu_plugin/README.html
-        https://github.com/intel/helm-charts/tree/main/charts/device-plugin-operator
-        https://github.com/intel/intel-device-plugins-for-kubernetes/blob/main/deployments/operator/samples/deviceplugin_v1_gpudeviceplugin.yaml
-    Ensure gpu metrics flowing and grafana dashboard enabled
-        https://intel.github.io/intel-device-plugins-for-kubernetes/cmd/gpu_plugin/monitoring.html#monitoring-gpus
-        https://github.com/intel/xpumanager/tree/master/deployment/kubernetes/monitoring
-    Adjust immich/jellyfin/servarr deployment to bypass vm taints and schedule to node
-    Adjust immich config to leverage gpu
-    Adjust jellyfin config to leverage gpu
-```
-
-# Deploy docs site
-x Create ci/cd with argo workflows to deploy when docs change
-- Update docs flow and make less AI slop
-  - Add photo of rack
-x Create architecture diagram
-x Update software architecture
-x Update backup docs
-x Update deployment docs
-x Update operations docs
-x Update security docs
-x Add AI docs
-x Add docs link to dashy
-x ADHOC: Fix backups
-  x Add prunes/checks to local backup schedule
-  x Compression w/ restic (need to test)
-  x Add k8up prometheus/grafana
-  x Check loki logs (ex: k8up, minio)
-  x Delete servarr download/media backups from k8up
-  x Delete pvc on nfs not in cluster
-  x Balance mergerfs
+# Stabilize seaweedfs backups
+- Decide architecture
+- Ensure seaweedfs is paused during backup
+- After backup sync argocd
+- Ensure seaweedfs/other k8up restores don't need snapshot
+x Blue deployment (and switch)
+  - Restore blue - https://github.com/k8up-io/k8up/issues/867
+  x Ensure base restore
+  - Ensure core restore
+  - Ensure apps restore
+- Update DR docs (k8up/restic snapshots)
+- Green destroy/apply on main
 
 # Start building website
 - Setup Hugo - https://github.com/adityatelange/hugo-PaperMod
@@ -266,6 +237,37 @@ Date: Sun, 04 May 2025 00:00:01 -0600
 - kube bench - https://github.com/aquasecurity/kube-bench
 
 ## Previous
+# Stabilize
+x Ensure green points to main
+x Destroy green
+x Ceanup ceph kubernetes pool
+x Redeploy green
+x Finalize storage
+  x Ensure talos has storage accessible
+  x Setup local path provisioner with kustomize
+  x Have cnpg use local path
+  x Deploy seaweedfs
+    x Ensure PushSecret for s3 creds
+    x Ensure offsite backups
+  x Transition all s3 usage to seaweedfs (k8up, cnpg)
+  x Remove ceph rgw completely
+  x Decommission rclone
+x Ensure blue cluster restore test cnpg/pvc
+x Build 'kill switch' workflow
+  x Remove ns/pvc
+  x Remove argocd apps
+x Ensure green cnpg can have backup & restore
+x Cleanup offsite restic backups
+x Troubleshoot test restore/backup in morning (confirmed bucket needs to be empty?)
+  x Verify test db timestamp table
+  x Remove full test common cnpg
+  x Watch filer logs
+  x Add test common cnpg with restore/backup
+  x Confirm test db is updated (might be missing one ts)
+  x RCA: cnpg `ScheduleBackup` had immediate: true for immediate backup, this would occur prior to the cluster being setup, causing a failure
+x Troubleshoot check/prune/backup jobs
+  x Seems okay for now, need to track...
+
 # Refactor cluster
 x Setup ceph rgw (replace with rclone s3 server)
 - Setup green deployment
@@ -303,6 +305,27 @@ x Update secrets for servarr stack and connect
 x Ensure qbittorrent functions correctly
 x Add minio grafana
 x Update dashy links for minio
+
+# Deploy docs site
+x Create ci/cd with argo workflows to deploy when docs change
+x Update docs flow and make less AI slop
+  x Add photo of rack
+x Create architecture diagram
+x Update software architecture
+x Update backup docs
+x Update deployment docs
+x Update operations docs
+x Update security docs
+x Add AI docs
+x Add docs link to dashy
+x ADHOC: Fix backups
+  x Add prunes/checks to local backup schedule
+  x Compression w/ restic (need to test)
+  x Add k8up prometheus/grafana
+  x Check loki logs (ex: k8up, minio)
+  x Delete servarr download/media backups from k8up
+  x Delete pvc on nfs not in cluster
+  x Balance mergerfs
 
 # Servarr stack
 x Review hacks/default.bak

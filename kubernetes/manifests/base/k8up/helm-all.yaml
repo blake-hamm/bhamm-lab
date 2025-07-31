@@ -13,7 +13,7 @@ spec:
   source:
     chart: k8up
     repoURL: https://k8up-io.github.io/k8up
-    targetRevision: 4.8.1
+    targetRevision: 4.8.4
     helm:
       valuesObject:
         k8up:
@@ -22,31 +22,34 @@ spec:
           envVars:
             - name: RESTIC_COMPRESSION
               value: max
+            - name: BACKUP_GLOBAL_CONCURRENT_ARCHIVE_JOBS_LIMIT
+              value: "1"
+            - name: BACKUP_GLOBAL_CONCURRENT_BACKUP_JOBS_LIMIT
+              value: "1"
+            - name: BACKUP_GLOBAL_CONCURRENT_CHECK_JOBS_LIMIT
+              value: "1"
+            - name: BACKUP_GLOBAL_CONCURRENT_PRUNE_JOBS_LIMIT
+              value: "1"
+            - name: BACKUP_GLOBAL_CONCURRENT_RESTORE_JOBS_LIMIT
+              value: "1"
         metrics:
           service:
             port: 8080
             type: ClusterIP
-            ipFamilyPolicy: ""
-            ipFamilies: []
-            nodePort: 0
-            annotations: {}
           serviceMonitor:
             enabled: true
             scrapeInterval: 60s
-            namespace: ""
             additionalLabels:
               release: monitor
           prometheusRule:
             enabled: false
-            namespace: ""
-            additionalLabels: {}
+            additionalLabels:
+              release: monitor
             createDefaultRules: true
             jobFailedRulesFor: ["archive", "backup", "check", "prune", "restore"]
-            additionalRules: []
           grafanaDashboard:
-            enabled: false
-            namespace: ""
-            additionalLabels: {}
+            enabled: true
+            namespace: monitor
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
