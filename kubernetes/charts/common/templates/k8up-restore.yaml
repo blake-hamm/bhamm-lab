@@ -30,6 +30,6 @@ spec:
         name: k8up
         key: secretAccessKeySecret
   podSecurityContext:
-    fsGroup: {{ default 0 $restore.claimName | int }}
+    fsGroup: {{ default 0 $restore.fsGroup | int }}
     runAsUser: 0
 {{- end }}

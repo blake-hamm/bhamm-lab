@@ -38,6 +38,7 @@ x Green seaweedfs:
 - Decide architecture
 - Ensure seaweedfs is paused during backup
 - After backup sync argocd
+- Ensure seaweedfs/other k8up restores don't need snapshot
 x Blue deployment (and switch)
   - Restore blue - https://github.com/k8up-io/k8up/issues/867
   x Ensure base restore
