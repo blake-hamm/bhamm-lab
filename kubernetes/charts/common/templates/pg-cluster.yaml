@@ -18,6 +18,8 @@ spec:
   postgresql:
     parameters:
       timezone: "America/Denver"
+  monitoring:
+    enablePodMonitor: true
   {{- if .Values.postgresql.sharedPreloadLibraries }}
     shared_preload_libraries: {{ toYaml .Values.postgresql.sharedPreloadLibraries | nindent 4 }}
   {{- end }}
