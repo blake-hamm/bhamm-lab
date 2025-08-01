@@ -1,39 +1,3 @@
-# Polish
-x Adjust common ingress route sync
-x Ensure base has authelia, treafik, lldap, certs as well
-x Ensure
-  x Add loki (w/ seaweedfs)
-  x Add alloy
-  x Argo artifacts (w/ seaweedfs)
-  x Argo common (combine events/workflows)
-x Ensure monitor/ingress for all base:
-  x Argo
-  x Argocd
-  x Vault
-  x Grafana
-  x Prometheus
-  x Authelia
-  x Seaweedfs (UI/s3)
-  x Traefik
-  x Test
-x Deploy core
-  x harbor
-  x forgejo
-  x dashy (and update links)
-x Configure manually w/ backups
-  x Authelia
-  x Forgejo
-    x Ensure webhook sa has necessary permissions
-  x Harbor
-x Deploy docs site/media under 'apps'
-  x Config servarr (trashguides)
-x Green seaweedfs:
-  x Remove seaweedfs and pvc
-  x Add log pvc
-  x Adjust values for filerdb3 w/ idx pvc
-  x Ensure functional (loki logs, cnpg, k8up backups)
-  x Backup offsite
-
 # Stabilize seaweedfs backups
 - Decide architecture
 - Ensure seaweedfs is paused during backup
@@ -237,6 +201,42 @@ Date: Sun, 04 May 2025 00:00:01 -0600
 - kube bench - https://github.com/aquasecurity/kube-bench
 
 ## Previous
+# Polish
+x Adjust common ingress route sync
+x Ensure base has authelia, treafik, lldap, certs as well
+x Ensure
+  x Add loki (w/ seaweedfs)
+  x Add alloy
+  x Argo artifacts (w/ seaweedfs)
+  x Argo common (combine events/workflows)
+x Ensure monitor/ingress for all base:
+  x Argo
+  x Argocd
+  x Vault
+  x Grafana
+  x Prometheus
+  x Authelia
+  x Seaweedfs (UI/s3)
+  x Traefik
+  x Test
+x Deploy core
+  x harbor
+  x forgejo
+  x dashy (and update links)
+x Configure manually w/ backups
+  x Authelia
+  x Forgejo
+    x Ensure webhook sa has necessary permissions
+  x Harbor
+x Deploy docs site/media under 'apps'
+  x Config servarr (trashguides)
+x Green seaweedfs:
+  x Remove seaweedfs and pvc
+  x Add log pvc
+  x Adjust values for filerdb3 w/ idx pvc
+  x Ensure functional (loki logs, cnpg, k8up backups)
+  x Backup offsite
+
 # Stabilize
 x Ensure green points to main
 x Destroy green

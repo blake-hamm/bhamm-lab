@@ -229,7 +229,7 @@ spec:
                   resources:
                     requests:
                       storage: 10Gi
-            retention: 5d
+            retention: 10d
             retentionSize: "10GiB"
   syncPolicy:
     syncOptions:
