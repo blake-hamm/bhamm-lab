@@ -18,7 +18,7 @@ spec:
   postgresql:
     parameters:
       timezone: {{ .Values.postgresql.timezone }}
-      shared_preload_libraries: {{ toYaml .Values.postgresql.sharedPreloadLibraries }}
+      shared_preload_libraries: {{ .Values.postgresql.sharedPreloadLibraries }}
   monitoring:
     enablePodMonitor: true
   {{- if .Values.postgresql.managed.roles }}
