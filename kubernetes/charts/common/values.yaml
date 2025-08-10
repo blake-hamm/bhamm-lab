@@ -27,7 +27,7 @@ postgresql:
   instances: 3
   storageSize: 5Gi
   imageName: ""
-  sharedPreloadLibraries: ""
+  sharedPreloadLibraries: [""]
   postInitSQL: ""
   databaseName: ""
   timezone: "America/Denver"
