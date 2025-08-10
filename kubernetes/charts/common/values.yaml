@@ -22,16 +22,12 @@ k8up:
     enabled: false
     config:
       fsGroup: 0
-  # - snapshot: ""
-  #   claimName: ""
-  #   fsGroup: 0
 postgresql:
   enabled: false
   instances: 3
   storageSize: 5Gi
   imageName: ""
-  sharedPreloadLibraries:
-    - ""
+  sharedPreloadLibraries: ""
   postInitSQL: ""
   databaseName: ""
   timezone: "America/Denver"
