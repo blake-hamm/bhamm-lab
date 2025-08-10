@@ -12,11 +12,13 @@ spec:
   project: default
   source:
     repoURL: https://code.forgejo.org/forgejo-helm/forgejo-helm.git
-    targetRevision: v13.0.0
+    targetRevision: v13.0.1
     path: .
     helm:
       valuesObject:
         replicaCount: 1
+        strategy:
+          type: 'Recreate'
         service:
           ssh:
             type: LoadBalancer
@@ -26,9 +28,6 @@ spec:
               lbipam.cilium.io/sharing-cross-namespace: "*"
         persistence:
           enabled: true
-          storageClass: "csi-cephfs-sc"
-          accessModes:
-            - ReadWriteMany
           annotations:
             k8up.io/backup: "true"
         gitea:

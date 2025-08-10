@@ -1,0 +1,125 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: seaweedfs-offsite-backup
+  namespace: seaweedfs
+  annotations:
+    argocd.argoproj.io/sync-wave: "25"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  schedule: "0 5 * * *"
+  timezone: America/Denver
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  workflowSpec:
+    entrypoint: main
+    templates:
+      - name: main
+        steps:
+          - - name: disable-base-argocd-autosync
+              template: disable-argocd-autosync
+              arguments:
+                parameters:
+                  - name: argocd-app
+                    value: "green-base"
+          - - name: disable-seaweedfs-argocd-autosync
+              template: disable-argocd-autosync
+              arguments:
+                parameters:
+                  - name: argocd-app
+                    value: "seaweedfs"
+          - - name: scale-seaweedfs-statefulset
+              template: scale-seaweedfs-statefulset
+          - - name: full-k8up-backup
+              templateRef:
+                name: manage-k8up
+                template: full-k8up-backup
+                clusterScope: true
+              arguments:
+                parameters:
+                  - name: target-namespace
+                    value: seaweedfs
+                  - name: location
+                    value: offsite
+                  - name: k8up-endpoint
+                    value: https://storage.googleapis.com
+                  - name: k8up-bucket
+                    value: bhamm-lab-k8up
+                  - name: k8up-secret
+                    value: seaweedfs-external-secret
+          - - name: enable-base-argocd-autosync
+              template: enable-argocd-autosync
+              arguments:
+                parameters:
+                  - name: argocd-app
+                    value: "green-base"
+      - name: disable-argocd-autosync
+        inputs:
+          parameters:
+            - name: argocd-app
+        resource:
+          action: patch
+          mergeStrategy: merge
+          manifest: |
+            spec:
+              syncPolicy: null
+          flags:
+            - applications.argoproj.io
+            - "{{inputs.parameters.argocd-app}}"
+            - -n
+            - argocd
+      - name: enable-argocd-autosync
+        inputs:
+          parameters:
+            - name: argocd-app
+        resource:
+          action: patch
+          mergeStrategy: merge
+          manifest: |
+            spec:
+              syncPolicy:
+                automated:
+                  prune: true
+                  selfHeal: true
+          flags:
+            - applications.argoproj.io
+            - "{{inputs.parameters.argocd-app}}"
+            - -n
+            - argocd
+      - name: scale-seaweedfs-statefulset
+        steps:
+          - - name: scale-filer
+              template: patch-statefulset
+              arguments:
+                parameters:
+                  - name: sts-name
+                    value: seaweedfs-filer
+          - - name: scale-volume
+              template: patch-statefulset
+              arguments:
+                parameters:
+                  - name: sts-name
+                    value: seaweedfs-volume
+          - - name: scale-master
+              template: patch-statefulset
+              arguments:
+                parameters:
+                  - name: sts-name
+                    value: seaweedfs-master
+      - name: patch-statefulset
+        inputs:
+          parameters:
+            - name: sts-name
+        resource:
+          action: patch
+          mergeStrategy: merge
+          successCondition: status.replicas == 0, status.availableReplicas == 0
+          manifest: |
+            spec:
+              replicas: 0
+          flags:
+            - statefulsets.apps
+            - "{{inputs.parameters.sts-name}}"
+            - -n
+            - seaweedfs

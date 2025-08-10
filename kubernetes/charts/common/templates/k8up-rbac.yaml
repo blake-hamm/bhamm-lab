@@ -1,0 +1,29 @@
+{{- if or .Values.k8up.backup.enabled .Values.k8up.restore.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: k8up-manager
+  namespace: {{ .Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
+rules:
+  - apiGroups: ["k8up.io"]
+    resources: ["backups", "checks", "prunes", "restores"]
+    verbs: ["create", "get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argo-workflow-k8up-manager
+  namespace: {{ .Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "7"
+subjects:
+  - kind: ServiceAccount
+    name: argo-workflow
+    namespace: {{ .Values.name }}
+roleRef:
+  kind: Role
+  name: k8up-manager
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

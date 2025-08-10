@@ -17,7 +17,9 @@ spec:
     size: {{ .Values.postgresql.storageSize }}
   postgresql:
     parameters:
-      timezone: "America/Denver"
+      timezone: {{ .Values.postgresql.timezone }}
+  monitoring:
+    enablePodMonitor: true
   {{- if .Values.postgresql.sharedPreloadLibraries }}
     shared_preload_libraries: {{ toYaml .Values.postgresql.sharedPreloadLibraries | nindent 4 }}
   {{- end }}

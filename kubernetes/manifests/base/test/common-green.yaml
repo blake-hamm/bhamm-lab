@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: main
+    targetRevision: feature/stabilize
     path: kubernetes/charts/common
     helm:
       valuesObject:
@@ -42,8 +42,8 @@ spec:
           backup:
             enabled: true
             schedule: "0 */6 * * *"
-            # checkSchedule: "*/5 * * * *"
-            # pruneSchedule: "*/10 * * * *"
+          restore:
+            enabled: false
             # restores:
             #   - snapshot: "latest"
             #     claimName: "test"
@@ -54,7 +54,7 @@ spec:
             retention: "3d"
             schedule: "0 0 */6 * * *"
           restore:
-            enabled: true
+            enabled: false
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

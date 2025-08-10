@@ -16,11 +16,13 @@ spec:
     targetRevision: v0.24.0
     helm:
       valuesObject:
+        additionalEnv:
+          - name: TZ
+            value: "America/Denver"
         monitoring:
-          additionalEnv:
-            - name: TZ
-              value: "America/Denver"
           podMonitorEnabled: true
+          podMonitorAdditionalLabels:
+            release: monitor
           grafanaDashboard:
             create: true
   syncPolicy:

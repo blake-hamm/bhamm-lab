@@ -4,12 +4,12 @@ metadata:
   name: automations
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/polish
+    targetRevision: feature/stabilize
     path: kubernetes/manifests/automations
     directory:
       recurse: true

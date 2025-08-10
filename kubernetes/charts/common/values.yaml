@@ -18,9 +18,10 @@ k8up:
   backup:
     enabled: false
     schedule: "0 */6 * * *"
-    pruneSchedule: "30 */6 * * *"
-    checkSchedule: "45 */6 * * *"
-  restores: []
+  restore:
+    enabled: false
+    config:
+      fsGroup: 0
   # - snapshot: ""
   #   claimName: ""
   #   fsGroup: 0

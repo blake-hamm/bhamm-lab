@@ -6,19 +6,15 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "6"
 rules:
-  # Workflow permissions
   - apiGroups: ["argoproj.io"]
     resources: ["workflows"]
     verbs: ["get", "list", "create", "update", "patch", "delete", "watch"]
-  # WorkflowTemplate permissions (this was missing!)
   - apiGroups: ["argoproj.io"]
     resources: ["workflowtemplates"]
     verbs: ["get", "list", "watch"]
-  # ClusterWorkflowTemplate permissions (in case you have cluster-level templates)
   - apiGroups: ["argoproj.io"]
     resources: ["clusterworkflowtemplates"]
     verbs: ["get", "list", "watch"]
-  # Secrets (for accessing secrets like argo-external-secret)
   - apiGroups: [""]
     resources: ["secrets"]
     verbs: ["get", "list", "watch"]

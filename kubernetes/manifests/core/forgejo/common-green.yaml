@@ -31,6 +31,8 @@ spec:
         k8up:
           backup:
             enabled: true
+          restore:
+            enabled: false
         postgresql:
           enabled: true
           backups:
