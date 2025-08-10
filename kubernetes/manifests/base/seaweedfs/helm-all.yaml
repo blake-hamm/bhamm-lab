@@ -31,7 +31,7 @@ spec:
         master:
           enabled: true
           replicas: 3
-          resumeState: false
+          resumeState: true
           raftHashicorp: true
           raftBootstrap: true
           volumePreallocate: true
