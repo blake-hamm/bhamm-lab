@@ -40,8 +40,7 @@ spec:
           sharedPreloadLibraries:
             - "vchord.so"
           postInitSQL:
-            - CREATE EXTENSION IF NOT EXISTS "vectors";
-            - CREATE EXTENSION IF NOT EXISTS "cube" CASCADE;
+            - CREATE EXTENSION IF NOT EXISTS "vchord" CASCADE;
             - CREATE EXTENSION IF NOT EXISTS "earthdistance" CASCADE;
           managed:
             roles:
