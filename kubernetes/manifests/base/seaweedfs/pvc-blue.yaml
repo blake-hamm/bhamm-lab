@@ -1,6 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: data-filer-seaweedfs-filer-0
   annotations:
     "k8up.io/backup": "true"
@@ -16,6 +17,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: data-filer-seaweedfs-filer-1
   annotations:
     "k8up.io/backup": "true"
@@ -31,6 +33,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: data-filer-seaweedfs-filer-2
   annotations:
     "k8up.io/backup": "true"
@@ -46,6 +49,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: data-seaweedfs-seaweedfs-master-0
   annotations:
     "k8up.io/backup": "true"
@@ -61,6 +65,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: data-seaweedfs-seaweedfs-master-1
   annotations:
     "k8up.io/backup": "true"
@@ -76,6 +81,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: data-seaweedfs-seaweedfs-master-2
   annotations:
     "k8up.io/backup": "true"
@@ -91,6 +97,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: data-seaweedfs-volume-0
   annotations:
     "k8up.io/backup": "true"
@@ -106,6 +113,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: data-seaweedfs-volume-1
   annotations:
     "k8up.io/backup": "true"
@@ -121,6 +129,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: data-seaweedfs-volume-2
   annotations:
     "k8up.io/backup": "true"
@@ -136,6 +145,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: idx-seaweedfs-volume-0
   annotations:
     "k8up.io/backup": "true"
@@ -151,6 +161,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: idx-seaweedfs-volume-1
   annotations:
     "k8up.io/backup": "true"
@@ -166,6 +177,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: idx-seaweedfs-volume-2
   annotations:
     "k8up.io/backup": "true"
@@ -181,6 +193,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: logs-seaweedfs-volume-0
   annotations:
     "k8up.io/backup": "true"
@@ -196,6 +209,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: logs-seaweedfs-volume-1
   annotations:
     "k8up.io/backup": "true"
@@ -211,6 +225,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: logs-seaweedfs-volume-2
   annotations:
     "k8up.io/backup": "true"
@@ -226,6 +241,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: seaweedfs-filer-log-volume-seaweedfs-filer-0
   annotations:
     "k8up.io/backup": "true"
@@ -241,6 +257,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: seaweedfs-filer-log-volume-seaweedfs-filer-1
   annotations:
     "k8up.io/backup": "true"
@@ -256,6 +273,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: seaweedfs-filer-log-volume-seaweedfs-filer-2
   annotations:
     "k8up.io/backup": "true"
@@ -271,6 +289,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: seaweedfs-master-log-volume-seaweedfs-master-0
   annotations:
     "k8up.io/backup": "true"
@@ -286,6 +305,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: seaweedfs-master-log-volume-seaweedfs-master-1
   annotations:
     "k8up.io/backup": "true"
@@ -301,6 +321,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: seaweedfs
   name: seaweedfs-master-log-volume-seaweedfs-master-2
   annotations:
     "k8up.io/backup": "true"
