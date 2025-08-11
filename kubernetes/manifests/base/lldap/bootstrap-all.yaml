@@ -5,8 +5,6 @@ metadata:
   namespace: lldap
   annotations:
     argocd.argoproj.io/sync-wave: "14"
-    argocd.argoproj.io/hook: Sync
-    argocd.argoproj.io/hook-delete-policy: HookFailed
 spec:
   template:
     spec:
