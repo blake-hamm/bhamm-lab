@@ -22,6 +22,12 @@ spec:
           name: lldap-external-secret
         env:
           TZ: "MST"
+        extraEnv:
+          - name: LLDAP_DATABASE_URL
+            valueFrom:
+              secretKeyRef:
+                name: lldap-postgresql-app
+                key: uri
         image:
           repository: "lldap/lldap"
           tag: "v0.6.1"
