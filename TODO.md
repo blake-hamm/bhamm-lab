@@ -5,11 +5,12 @@ x After backup sync argocd
 - Refactor seaweedfs backup to cluster workflow templates
   x Create k8up resource template
   x Adjust common helm to leverage argo
+  - Setup stable s3 credentials
   - Test k8up restore with blue seaweedfs
 x Blue deployment (and switch)
   x Restore seaweedfs w/out snapshot - https://github.com/k8up-io/k8up/issues/867
   x Ensure common k8up restores don't need snapshot
-  - PR to main (for common enhancements)
+  x PR to main (for common enhancements)
   - Ensure base restore
   - Ensure core restore
   - Ensure apps restore
