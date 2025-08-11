@@ -11,6 +11,12 @@ spec:
   entrypoint: main
   templates:
     - name: main
+      retryStrategy:
+        limit: 3
+        backoff:
+          duration: "10s"
+          factor: 2
+          maxDuration: "30s"
       steps:
         - - name: disable-base-argocd-autosync
             template: disable-argocd-autosync
