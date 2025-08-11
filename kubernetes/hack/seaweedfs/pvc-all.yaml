@@ -1,111 +1,314 @@
-kind: PersistentVolumeClaim
 apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
-  name: seaweedfs-volume-data
-  namespace: seaweedfs
+  name: data-filer-seaweedfs-filer-0
   annotations:
     "k8up.io/backup": "true"
     argocd.argoproj.io/sync-wave: "1"
 spec:
-  storageClassName: "nfs-csi"
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: csi-rbd-sc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-filer-seaweedfs-filer-1
+  annotations:
+    "k8up.io/backup": "true"
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: csi-rbd-sc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-filer-seaweedfs-filer-2
+  annotations:
+    "k8up.io/backup": "true"
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: csi-rbd-sc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-seaweedfs-seaweedfs-master-0
+  annotations:
+    "k8up.io/backup": "true"
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: csi-rbd-sc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-seaweedfs-seaweedfs-master-1
+  annotations:
+    "k8up.io/backup": "true"
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: csi-rbd-sc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-seaweedfs-seaweedfs-master-2
+  annotations:
+    "k8up.io/backup": "true"
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: csi-rbd-sc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-seaweedfs-volume-0
+  annotations:
+    "k8up.io/backup": "true"
+    argocd.argoproj.io/sync-wave: "1"
+spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 300Gi
+  storageClassName: nfs-csi
 ---
-kind: PersistentVolumeClaim
 apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
-  name: seaweedfs-volume-logs
-  namespace: seaweedfs
+  name: data-seaweedfs-volume-1
   annotations:
     "k8up.io/backup": "true"
     argocd.argoproj.io/sync-wave: "1"
 spec:
-  storageClassName: "csi-rbd-sc"
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 300Gi
+  storageClassName: nfs-csi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-seaweedfs-volume-2
+  annotations:
+    "k8up.io/backup": "true"
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 300Gi
+  storageClassName: nfs-csi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: idx-seaweedfs-volume-0
+  annotations:
+    "k8up.io/backup": "true"
+    argocd.argoproj.io/sync-wave: "1"
+spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 10Gi
+  storageClassName: csi-rbd-sc
 ---
-kind: PersistentVolumeClaim
 apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
-  name: seaweedfs-volume-idx
-  namespace: seaweedfs
+  name: idx-seaweedfs-volume-1
   annotations:
     "k8up.io/backup": "true"
     argocd.argoproj.io/sync-wave: "1"
 spec:
-  storageClassName: "csi-rbd-sc"
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 10Gi
+  storageClassName: csi-rbd-sc
 ---
-kind: PersistentVolumeClaim
 apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
-  name: seaweedfs-master-data
-  namespace: seaweedfs
+  name: idx-seaweedfs-volume-2
   annotations:
     "k8up.io/backup": "true"
     argocd.argoproj.io/sync-wave: "1"
 spec:
-  storageClassName: "csi-rbd-sc"
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 10Gi
+  storageClassName: csi-rbd-sc
 ---
-kind: PersistentVolumeClaim
 apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
-  name: seaweedfs-master-logs
-  namespace: seaweedfs
+  name: logs-seaweedfs-volume-0
   annotations:
     "k8up.io/backup": "true"
     argocd.argoproj.io/sync-wave: "1"
 spec:
-  storageClassName: "csi-rbd-sc"
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 10Gi
+  storageClassName: csi-rbd-sc
 ---
-kind: PersistentVolumeClaim
 apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
-  name: seaweedfs-filer-data
-  namespace: seaweedfs
+  name: logs-seaweedfs-volume-1
   annotations:
     "k8up.io/backup": "true"
     argocd.argoproj.io/sync-wave: "1"
 spec:
-  storageClassName: "csi-rbd-sc"
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 10Gi
+  storageClassName: csi-rbd-sc
 ---
-kind: PersistentVolumeClaim
 apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
-  name: seaweedfs-filer-logs
-  namespace: seaweedfs
+  name: logs-seaweedfs-volume-2
   annotations:
     "k8up.io/backup": "true"
     argocd.argoproj.io/sync-wave: "1"
 spec:
-  storageClassName: "csi-rbd-sc"
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 10Gi
+  storageClassName: csi-rbd-sc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: seaweedfs-filer-log-volume-seaweedfs-filer-0
+  annotations:
+    "k8up.io/backup": "true"
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: csi-rbd-sc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: seaweedfs-filer-log-volume-seaweedfs-filer-1
+  annotations:
+    "k8up.io/backup": "true"
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: csi-rbd-sc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: seaweedfs-filer-log-volume-seaweedfs-filer-2
+  annotations:
+    "k8up.io/backup": "true"
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: csi-rbd-sc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: seaweedfs-master-log-volume-seaweedfs-master-0
+  annotations:
+    "k8up.io/backup": "true"
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: csi-rbd-sc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: seaweedfs-master-log-volume-seaweedfs-master-1
+  annotations:
+    "k8up.io/backup": "true"
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: csi-rbd-sc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: seaweedfs-master-log-volume-seaweedfs-master-2
+  annotations:
+    "k8up.io/backup": "true"
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: csi-rbd-sc
