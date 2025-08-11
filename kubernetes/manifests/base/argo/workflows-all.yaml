@@ -20,6 +20,7 @@ spec:
           serviceAccount:
             create: true
         controller:
+          parallelism: 3
           metricsConfig:
             enabled: true
           serviceMonitor:
