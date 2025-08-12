@@ -1,5 +1,56 @@
 {{- if or .Values.k8up.backup.enabled .Values.k8up.restore.enabled }}
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ServiceAccount
+metadata:
+  name: argo-workflow
+  namespace: {{ .Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: argo-workflow-run
+  namespace: {{ .Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "watch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["patch"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflowtasksets", "workflowartifactgctasks"]
+    verbs: ["watch", "list"]
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflowtasksets/status", "workflowartifactgctasks/status", "workflowtaskresults"]
+    verbs: ["patch"]
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflowtaskresults"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argo-workflow-runner
+  namespace: {{ .Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "7"
+subjects:
+  - kind: ServiceAccount
+    name: argo-workflow
+    namespace: {{ .Values.name }}
+roleRef:
+  kind: Role
+  name: argo-workflow-run
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: k8up-manager
