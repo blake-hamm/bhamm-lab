@@ -7,6 +7,7 @@ x After backup sync argocd
   x Adjust common helm to leverage argo
   - Setup stable s3 credentials (stretch)
   - Test k8up restore with blue seaweedfs
+    - Ensure argo workflow rbac
 x Blue deployment (and switch)
   x Restore seaweedfs w/out snapshot - https://github.com/k8up-io/k8up/issues/867
   x Ensure common k8up restores don't need snapshot
