@@ -330,7 +330,7 @@ spec:
                 - name: target-namespace
                   value: "{{inputs.parameters.target-namespace}}"
                 - name: k8up-name
-                  value: "restore-{{inputs.parameters.location}}-{{item.pvc}}"
+                  value: "{{inputs.parameters.location}}-{{item.pvc}}"
                 - name: k8up-endpoint
                   value: "{{inputs.parameters.k8up-endpoint}}"
                 - name: k8up-bucket
@@ -352,7 +352,7 @@ spec:
                 - name: target-namespace
                   value: "{{inputs.parameters.target-namespace}}"
                 - name: k8up-name
-                  value: "restore-{{inputs.parameters.location}}-{{item.pvc}}"
+                  value: "{{inputs.parameters.location}}-{{item.pvc}}"
                 - name: kind
                   value: "Restore"
     - name: list-pvc-snapshots
