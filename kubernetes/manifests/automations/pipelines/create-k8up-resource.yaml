@@ -206,8 +206,8 @@ spec:
                 secretAccessKeySecretRef:
                   name: "{{inputs.parameters.k8up-secret}}"
                   key: AWS_SECRET_ACCESS_KEY
-            failedJobsHistoryLimit: 10
-            successfulJobsHistoryLimit: 10
+            failedJobsHistoryLimit: 30
+            successfulJobsHistoryLimit: 30
             activeDeadlineSeconds: 2700
             promURL: http://prometheus-pushgateway.monitor.svc.cluster.local:9091
     - name: create-k8up-resource-prune
@@ -240,8 +240,8 @@ spec:
                 secretAccessKeySecretRef:
                   name: "{{inputs.parameters.k8up-secret}}"
                   key: AWS_SECRET_ACCESS_KEY
-            failedJobsHistoryLimit: 10
-            successfulJobsHistoryLimit: 10
+            failedJobsHistoryLimit: 30
+            successfulJobsHistoryLimit: 30
             activeDeadlineSeconds: 2700
             retention:
               keepLast: 5
@@ -262,7 +262,7 @@ spec:
           set -euo pipefail
 
           max_retries=30
-          delay=20
+          delay=30
 
           echo "Waiting for {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} to complete..."
 
@@ -330,7 +330,7 @@ spec:
                 - name: target-namespace
                   value: "{{inputs.parameters.target-namespace}}"
                 - name: k8up-name
-                  value: "restore-{{inputs.parameters.location}}-{{item.pvc}}"
+                  value: "{{inputs.parameters.location}}-{{item.pvc}}"
                 - name: k8up-endpoint
                   value: "{{inputs.parameters.k8up-endpoint}}"
                 - name: k8up-bucket
@@ -352,7 +352,7 @@ spec:
                 - name: target-namespace
                   value: "{{inputs.parameters.target-namespace}}"
                 - name: k8up-name
-                  value: "restore-{{inputs.parameters.location}}-{{item.pvc}}"
+                  value: "{{inputs.parameters.location}}-{{item.pvc}}"
                 - name: kind
                   value: "Restore"
     - name: list-pvc-snapshots
@@ -427,8 +427,8 @@ spec:
                 secretAccessKeySecretRef:
                   name: "{{inputs.parameters.k8up-secret}}"
                   key: AWS_SECRET_ACCESS_KEY
-            failedJobsHistoryLimit: 10
-            successfulJobsHistoryLimit: 10
+            failedJobsHistoryLimit: 30
+            successfulJobsHistoryLimit: 30
             activeDeadlineSeconds: 2700
             podSecurityContext:
               fsGroup: {{inputs.parameters.fsGroup}}

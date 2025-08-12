@@ -68,6 +68,23 @@ spec:
                 - "CiliumIdentity"
                 clusters:
                 - "*"
+            resource.customizations.health.argoproj.io_Workflow: |
+              hs = {}
+              if obj.status ~= nil and obj.status.phase ~= nil then
+                if obj.status.phase == "Succeeded" then
+                  hs.status = "Healthy"
+                  hs.message = obj.status.phase
+                  return hs
+                end
+                if obj.status.phase == "Failed" or obj.status.phase == "Error" then
+                  hs.status = "Degraded"
+                  hs.message = obj.status.phase
+                  return hs
+                end
+              end
+              hs.status = "Progressing"
+              hs.message = "Waiting for workflow to complete"
+              return hs
             resource.customizations.health.argoproj.io_Application: |
               hs = {}
               hs.status = "Progressing"

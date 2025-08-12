@@ -31,16 +31,7 @@ spec:
             spec:
               serviceAccountName: argo-workflow
           workflowNamespaces:
-            - default
-            - ceph
-            - nfs
-            - test
             - argo
-            - seaweedfs
-            - git
-            - harbor
-            - immich
-            - servarr
         server:
           authModes:
             - sso

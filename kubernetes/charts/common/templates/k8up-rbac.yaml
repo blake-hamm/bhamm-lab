@@ -1,11 +1,62 @@
 {{- if or .Values.k8up.backup.enabled .Values.k8up.restore.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argo-workflow
+  namespace: {{ .Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: k8up-manager
+  name: {{ .Values.name }}-argo-workflow-run
   namespace: {{ .Values.name }}
   annotations:
-    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-wave: "0"
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "watch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["patch"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflowtasksets", "workflowartifactgctasks"]
+    verbs: ["watch", "list"]
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflowtasksets/status", "workflowartifactgctasks/status", "workflowtaskresults"]
+    verbs: ["patch"]
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflowtaskresults"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argo-workflow-runner
+  namespace: {{ .Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+subjects:
+  - kind: ServiceAccount
+    name: argo-workflow
+    namespace: {{ .Values.name }}
+roleRef:
+  kind: Role
+  name: {{ .Values.name }}-argo-workflow-run
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Values.name }}-k8up-manager
+  namespace: {{ .Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 rules:
   - apiGroups: ["k8up.io"]
     resources: ["backups", "checks", "prunes", "restores"]
@@ -17,13 +68,13 @@ metadata:
   name: argo-workflow-k8up-manager
   namespace: {{ .Values.name }}
   annotations:
-    argocd.argoproj.io/sync-wave: "7"
+    argocd.argoproj.io/sync-wave: "1"
 subjects:
   - kind: ServiceAccount
     name: argo-workflow
     namespace: {{ .Values.name }}
 roleRef:
   kind: Role
-  name: k8up-manager
+  name: {{ .Values.name }}-k8up-manager
   apiGroup: rbac.authorization.k8s.io
 {{- end }}
