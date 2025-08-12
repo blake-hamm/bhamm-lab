@@ -1,5 +1,5 @@
 {{- if or .Values.k8up.backup.enabled .Values.k8up.restore.enabled }}
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: argo-workflow
