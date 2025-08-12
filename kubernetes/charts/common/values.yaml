@@ -25,7 +25,7 @@ k8up:
 postgresql:
   enabled: false
   instances: 3
-  storageSize: 5Gi
+  storageSize: 2Gi
   imageName: ""
   sharedPreloadLibraries: [""]
   postInitSQL: ""
