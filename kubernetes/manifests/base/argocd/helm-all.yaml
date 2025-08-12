@@ -68,7 +68,7 @@ spec:
                 - "CiliumIdentity"
                 clusters:
                 - "*"
-            resource.customizations.health.argoproj.io/Workflow: |
+            resource.customizations.health.argoproj.io_Workflow: |
               hs = {}
               if obj.status ~= nil and obj.status.phase ~= nil then
                 if obj.status.phase == "Succeeded" then
