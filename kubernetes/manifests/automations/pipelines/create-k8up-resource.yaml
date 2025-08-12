@@ -262,7 +262,7 @@ spec:
           set -euo pipefail
 
           max_retries=30
-          delay=20
+          delay=30
 
           echo "Waiting for {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} to complete..."
 
