@@ -10,7 +10,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: argo-workflow-run
+  name: {{ .Values.name }}-argo-workflow-run
   namespace: {{ .Values.name }}
   annotations:
     argocd.argoproj.io/sync-wave: "0"
@@ -47,13 +47,13 @@ subjects:
     namespace: {{ .Values.name }}
 roleRef:
   kind: Role
-  name: argo-workflow-run
+  name: {{ .Values.name }}-argo-workflow-run
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: k8up-manager
+  name: {{ .Values.name }}-k8up-manager
   namespace: {{ .Values.name }}
   annotations:
     argocd.argoproj.io/sync-wave: "0"
@@ -75,7 +75,6 @@ subjects:
     namespace: {{ .Values.name }}
 roleRef:
   kind: Role
-  name: k8up-manager
-  namespace: {{ .Values.name }}
+  name: {{ .Values.name }}-k8up-manager
   apiGroup: rbac.authorization.k8s.io
 {{- end }}
