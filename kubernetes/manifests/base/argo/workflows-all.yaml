@@ -83,29 +83,3 @@ spec:
         duration: 5s
         factor: 2
         maxDuration: 5m
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: argo-workflow-run
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"
-rules:
-  - apiGroups: [""]
-    resources: ["pods", "pods/log"]
-    verbs: ["get", "watch"]
-  - apiGroups: [""]
-    resources: ["pods"]
-    verbs: ["patch"]
-  - apiGroups: [""]
-    resources: ["pods/exec"]
-    verbs: ["create"]
-  - apiGroups: ["argoproj.io"]
-    resources: ["workflowtasksets", "workflowartifactgctasks"]
-    verbs: ["watch", "list"]
-  - apiGroups: ["argoproj.io"]
-    resources: ["workflowtasksets/status", "workflowartifactgctasks/status", "workflowtaskresults"]
-    verbs: ["patch"]
-  - apiGroups: ["argoproj.io"]
-    resources: ["workflowtaskresults"]
-    verbs: ["create"]
