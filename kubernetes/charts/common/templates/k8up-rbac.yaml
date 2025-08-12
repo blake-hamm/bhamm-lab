@@ -5,7 +5,7 @@ metadata:
   name: argo-workflow
   namespace: {{ .Values.name }}
   annotations:
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "0"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -13,7 +13,7 @@ metadata:
   name: argo-workflow-run
   namespace: {{ .Values.name }}
   annotations:
-    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-wave: "0"
 rules:
   - apiGroups: [""]
     resources: ["pods", "pods/log"]
@@ -40,7 +40,7 @@ metadata:
   name: argo-workflow-runner
   namespace: {{ .Values.name }}
   annotations:
-    argocd.argoproj.io/sync-wave: "7"
+    argocd.argoproj.io/sync-wave: "1"
 subjects:
   - kind: ServiceAccount
     name: argo-workflow
@@ -56,7 +56,7 @@ metadata:
   name: k8up-manager
   namespace: {{ .Values.name }}
   annotations:
-    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-wave: "0"
 rules:
   - apiGroups: ["k8up.io"]
     resources: ["backups", "checks", "prunes", "restores"]
@@ -68,7 +68,7 @@ metadata:
   name: argo-workflow-k8up-manager
   namespace: {{ .Values.name }}
   annotations:
-    argocd.argoproj.io/sync-wave: "7"
+    argocd.argoproj.io/sync-wave: "1"
 subjects:
   - kind: ServiceAccount
     name: argo-workflow
