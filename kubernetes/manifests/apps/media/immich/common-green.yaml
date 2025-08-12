@@ -36,6 +36,7 @@ spec:
             #     claimName: "immich-library"
         postgresql:
           enabled: true
+          storageSize: 5Gi
           imageName: "ghcr.io/tensorchord/cloudnative-vectorchord:17.5-0.4.3"
           sharedPreloadLibraries:
             - "vchord.so"
