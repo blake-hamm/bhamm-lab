@@ -206,8 +206,8 @@ spec:
                 secretAccessKeySecretRef:
                   name: "{{inputs.parameters.k8up-secret}}"
                   key: AWS_SECRET_ACCESS_KEY
-            failedJobsHistoryLimit: 10
-            successfulJobsHistoryLimit: 10
+            failedJobsHistoryLimit: 30
+            successfulJobsHistoryLimit: 30
             activeDeadlineSeconds: 2700
             promURL: http://prometheus-pushgateway.monitor.svc.cluster.local:9091
     - name: create-k8up-resource-prune
@@ -240,8 +240,8 @@ spec:
                 secretAccessKeySecretRef:
                   name: "{{inputs.parameters.k8up-secret}}"
                   key: AWS_SECRET_ACCESS_KEY
-            failedJobsHistoryLimit: 10
-            successfulJobsHistoryLimit: 10
+            failedJobsHistoryLimit: 30
+            successfulJobsHistoryLimit: 30
             activeDeadlineSeconds: 2700
             retention:
               keepLast: 5
@@ -427,8 +427,8 @@ spec:
                 secretAccessKeySecretRef:
                   name: "{{inputs.parameters.k8up-secret}}"
                   key: AWS_SECRET_ACCESS_KEY
-            failedJobsHistoryLimit: 10
-            successfulJobsHistoryLimit: 10
+            failedJobsHistoryLimit: 30
+            successfulJobsHistoryLimit: 30
             activeDeadlineSeconds: 2700
             podSecurityContext:
               fsGroup: {{inputs.parameters.fsGroup}}
