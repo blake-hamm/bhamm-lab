@@ -90,6 +90,9 @@ spec:
               k8s-views-pods:
                 url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/master/dashboards/k8s-views-pods.json
                 token: ''
+              k8s-pv:
+                gnetId: 13646
+                revision: 2
               authelia:
                 url: https://raw.githubusercontent.com/authelia/authelia/refs/heads/master/examples/grafana-dashboards/simple.json
                 token: ''
