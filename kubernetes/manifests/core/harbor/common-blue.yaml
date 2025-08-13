@@ -26,9 +26,8 @@ spec:
         k8up:
           backup:
             enabled: false
-          restores:
-            - snapshot: "375dc20b"
-              claimName: "harbor-registry"
+          restore:
+            enabled: true
         externalSecrets:
           enabled: true
           secrets:
