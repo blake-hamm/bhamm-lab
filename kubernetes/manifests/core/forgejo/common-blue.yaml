@@ -40,7 +40,7 @@ spec:
           backups:
             enabled: false
           restore:
-            enabled: true
+            enabled: false
         ingressRoutes:
           - enabled: true
             name: forgejo
