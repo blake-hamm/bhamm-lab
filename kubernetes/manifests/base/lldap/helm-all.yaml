@@ -16,6 +16,7 @@ spec:
     targetRevision: main
     helm:
       valuesObject:
+        replicaCount: 3
         secret:
           create: false
           useExisting: true
