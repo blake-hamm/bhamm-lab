@@ -31,10 +31,8 @@ spec:
         k8up:
           backup:
             enabled: false
-          restores:
-            - snapshot: "81a30edc"
-              claimName: "gitea-shared-storage"
-              fsGroup: 1000
+          restore:
+            enabled: true
         postgresql:
           enabled: true
           backups:
