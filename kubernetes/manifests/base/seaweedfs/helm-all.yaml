@@ -25,62 +25,75 @@ spec:
             WEED_CLUSTER_DEFAULT: "sw"
             WEED_CLUSTER_SW_MASTER: "seaweedfs-master.seaweedfs:9333"
             WEED_CLUSTER_SW_FILER: "seaweedfs-filer-client.seaweedfs:8888"
-            WEED_LEVELDB2_ENABLED: "false"
-            WEED_LEVELDB3_ENABLED: "true"
-            WEED_LEVELDB3_DIR: "/data/filerldb3"
+          enableReplication: true
+          replicationPlacement: "002"
+          enableSecurity: false
         master:
           enabled: true
-          replicas: 1
-          resumeState: false
-          raftHashicorp: false
-          raftBootstrap: false
+          replicas: 3
+          resumeState: true
+          raftHashicorp: true
+          raftBootstrap: true
+          volumePreallocate: true
           volumeSizeLimitMB: 10000
           data:
-            type: "existingClaim"
-            claimName: "seaweedfs-master-data"
+            type: "persistentVolumeClaim"
+            size: 10Gi
+            annotations:
+              "k8up.io/backup": "true"
           livenessProbe:
             periodSeconds: 15
           readinessProbe:
             periodSeconds: 15
           logs:
-            type: "existingClaim"
-            claimName: "seaweedfs-master-logs"
+            type: "persistentVolumeClaim"
+            size: 10Gi
+            annotations:
+              "k8up.io/backup": "true"
         volume:
           enabled: true
-          replicas: 1
-          index: leveldb
+          replicas: 3
+          index: leveldbMedium
           readMode: proxy
           dataDirs:
             - name: data
-              type: "existingClaim"
-              claimName: "seaweedfs-volume-data"
+              type: "persistentVolumeClaim"
+              size: 300Gi
+              storageClass: nfs-csi
               maxVolumes: 0
+              annotations:
+                "k8up.io/backup": "true"
           idx:
-            type: "existingClaim"
-            claimName: "seaweedfs-volume-idx"
+            type: "persistentVolumeClaim"
+            size: 10Gi
+            annotations:
+              "k8up.io/backup": "true"
           logs:
-            type: "existingClaim"
-            claimName: "seaweedfs-volume-logs"
+            type: "persistentVolumeClaim"
+            size: 10Gi
+            annotations:
+              "k8up.io/backup": "true"
           livenessProbe:
             periodSeconds: 15
           readinessProbe:
             periodSeconds: 15
         filer:
           enabled: true
-          encryptVolumeData: true
+          replicas: 3
           enablePVC: true
           storage: 10Gi
-          defaultReplicaPlacement: "000"
           data:
-            type: "existingClaim"
-            claimName: "seaweedfs-filer-data"
+            type: "persistentVolumeClaim"
+            size: 10Gi
+            annotations:
+              "k8up.io/backup": "true"
           logs:
-            type: "existingClaim"
-            claimName: "seaweedfs-filer-logs"
+            type: "persistentVolumeClaim"
+            size: 10Gi
+            annotations:
+              "k8up.io/backup": "true"
           extraEnvironmentVars:
-            WEED_LEVELDB2_ENABLED: "false"
-            WEED_LEVELDB3_ENABLED: "true"
-            WEED_LEVELDB3_DIR: "/data/filerldb3"
+            WEED_LEVELDB2_ENABLED: "true"
             WEED_FILER_OPTIONS_RECURSIVE_DELETE: "false"
             WEED_FILER_BUCKETS_FOLDER: "/buckets"
           s3:
@@ -92,18 +105,16 @@ spec:
             createBuckets:
               - name: argo-artifacts
                 anonymousRead: false
-                #   - name: loki-data
-                #     anonymousRead: false
-                #   - name: tofu-state
-                #     anonymousRead: false
-                #   - name: cnpg-backups
-                #     anonymousRead: false
-                #   - name: forgejo
-                #     anonymousRead: false
-                #   - name: harbor-data
-                #     anonymousRead: false
-                #   - name: k8up-backups
-                #     anonymousRead: false
+              - name: loki-data
+                anonymousRead: false
+              - name: tofu-state
+                anonymousRead: false
+              - name: cnpg-backups
+                anonymousRead: false
+              - name: harbor-data
+                anonymousRead: false
+              - name: k8up-backups
+                anonymousRead: false
           livenessProbe:
             periodSeconds: 15
           readinessProbe:

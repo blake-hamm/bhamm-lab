@@ -6,8 +6,6 @@ metadata:
   namespace: {{ .Values.name }}
   annotations:
     argocd.argoproj.io/sync-wave: "16"
-    argocd.argoproj.io/hook: "Sync"
-    argocd.argoproj.io/hook-delete-policy: HookFailed
 spec:
   template:
     spec:

@@ -1,0 +1,439 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterWorkflowTemplate
+metadata:
+  name: manage-k8up
+  annotations:
+    argocd.argoproj.io/sync-wave: "7"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  templates:
+    - name: full-k8up-backup
+      inputs:
+        parameters:
+          - name: target-namespace
+          - name: location
+          - name: k8up-endpoint
+          - name: k8up-bucket
+          - name: k8up-secret
+      steps:
+        - - name: pre-k8up-check
+            template: k8up-check
+            arguments:
+              parameters:
+                - name: target-namespace
+                  value: "{{inputs.parameters.target-namespace}}"
+                - name: k8up-name
+                  value: "{{inputs.parameters.target-namespace}}-{{inputs.parameters.location}}-pre-{{workflow.creationTimestamp.s}}"
+                - name: k8up-endpoint
+                  value: "{{inputs.parameters.k8up-endpoint}}"
+                - name: k8up-bucket
+                  value: "{{inputs.parameters.k8up-bucket}}"
+                - name: k8up-secret
+                  value: "{{inputs.parameters.k8up-secret}}"
+        - - name: k8up-backup
+            template: k8up-backup
+            arguments:
+              parameters:
+                - name: target-namespace
+                  value: "{{inputs.parameters.target-namespace}}"
+                - name: k8up-name
+                  value: "{{inputs.parameters.target-namespace}}-{{inputs.parameters.location}}-{{workflow.creationTimestamp.s}}"
+                - name: k8up-endpoint
+                  value: "{{inputs.parameters.k8up-endpoint}}"
+                - name: k8up-bucket
+                  value: "{{inputs.parameters.k8up-bucket}}"
+                - name: k8up-secret
+                  value: "{{inputs.parameters.k8up-secret}}"
+        - - name: k8up-prune
+            template: k8up-prune
+            arguments:
+              parameters:
+                - name: target-namespace
+                  value: "{{inputs.parameters.target-namespace}}"
+                - name: k8up-name
+                  value: "{{inputs.parameters.target-namespace}}-{{inputs.parameters.location}}-{{workflow.creationTimestamp.s}}"
+                - name: k8up-endpoint
+                  value: "{{inputs.parameters.k8up-endpoint}}"
+                - name: k8up-bucket
+                  value: "{{inputs.parameters.k8up-bucket}}"
+                - name: k8up-secret
+                  value: "{{inputs.parameters.k8up-secret}}"
+        - - name: post-k8up-check
+            template: k8up-check
+            arguments:
+              parameters:
+                - name: target-namespace
+                  value: "{{inputs.parameters.target-namespace}}"
+                - name: k8up-name
+                  value: "{{inputs.parameters.target-namespace}}-{{inputs.parameters.location}}-post-{{workflow.creationTimestamp.s}}"
+                - name: k8up-endpoint
+                  value: "{{inputs.parameters.k8up-endpoint}}"
+                - name: k8up-bucket
+                  value: "{{inputs.parameters.k8up-bucket}}"
+                - name: k8up-secret
+                  value: "{{inputs.parameters.k8up-secret}}"
+    - name: k8up-check
+      inputs:
+        parameters:
+          - name: target-namespace
+          - name: k8up-name
+          - name: k8up-endpoint
+          - name: k8up-bucket
+          - name: k8up-secret
+      steps:
+        - - name: create-check
+            template: create-k8up-resource
+            arguments:
+              parameters:
+                - name: target-namespace
+                  value: "{{inputs.parameters.target-namespace}}"
+                - name: kind
+                  value: "Check"
+                - name: k8up-name
+                  value: "{{inputs.parameters.k8up-name}}"
+                - name: k8up-endpoint
+                  value: "{{inputs.parameters.k8up-endpoint}}"
+                - name: k8up-bucket
+                  value: "{{inputs.parameters.k8up-bucket}}"
+                - name: k8up-secret
+                  value: "{{inputs.parameters.k8up-secret}}"
+        - - name: wait-for-check
+            template: wait-for-k8up-resource
+            arguments:
+              parameters:
+                - name: target-namespace
+                  value: "{{inputs.parameters.target-namespace}}"
+                - name: kind
+                  value: "Check"
+                - name: k8up-name
+                  value: "{{inputs.parameters.k8up-name}}"
+    - name: k8up-backup
+      inputs:
+        parameters:
+          - name: target-namespace
+          - name: k8up-name
+          - name: k8up-endpoint
+          - name: k8up-bucket
+          - name: k8up-secret
+      steps:
+        - - name: create-backup
+            template: create-k8up-resource
+            arguments:
+              parameters:
+                - name: target-namespace
+                  value: "{{inputs.parameters.target-namespace}}"
+                - name: kind
+                  value: "Backup"
+                - name: k8up-name
+                  value: "{{inputs.parameters.k8up-name}}"
+                - name: k8up-endpoint
+                  value: "{{inputs.parameters.k8up-endpoint}}"
+                - name: k8up-bucket
+                  value: "{{inputs.parameters.k8up-bucket}}"
+                - name: k8up-secret
+                  value: "{{inputs.parameters.k8up-secret}}"
+        - - name: wait-for-backup
+            template: wait-for-k8up-resource
+            arguments:
+              parameters:
+                - name: target-namespace
+                  value: "{{inputs.parameters.target-namespace}}"
+                - name: kind
+                  value: "Backup"
+                - name: k8up-name
+                  value: "{{inputs.parameters.k8up-name}}"
+    - name: k8up-prune
+      inputs:
+        parameters:
+          - name: target-namespace
+          - name: k8up-name
+          - name: k8up-endpoint
+          - name: k8up-bucket
+          - name: k8up-secret
+      steps:
+        - - name: create-prune
+            template: create-k8up-resource-prune
+            arguments:
+              parameters:
+                - name: target-namespace
+                  value: "{{inputs.parameters.target-namespace}}"
+                - name: k8up-name
+                  value: "{{inputs.parameters.k8up-name}}"
+                - name: k8up-endpoint
+                  value: "{{inputs.parameters.k8up-endpoint}}"
+                - name: k8up-bucket
+                  value: "{{inputs.parameters.k8up-bucket}}"
+                - name: k8up-secret
+                  value: "{{inputs.parameters.k8up-secret}}"
+        - - name: wait-for-prune
+            template: wait-for-k8up-resource
+            arguments:
+              parameters:
+                - name: target-namespace
+                  value: "{{inputs.parameters.target-namespace}}"
+                - name: kind
+                  value: "Prune"
+                - name: k8up-name
+                  value: "{{inputs.parameters.k8up-name}}"
+    - name: create-k8up-resource
+      inputs:
+        parameters:
+          - name: target-namespace
+          - name: kind
+          - name: k8up-name
+          - name: k8up-endpoint
+          - name: k8up-bucket
+          - name: k8up-secret
+      resource:
+        action: create
+        manifest: |
+          apiVersion: k8up.io/v1
+          kind: "{{inputs.parameters.kind}}"
+          metadata:
+            name: "{{inputs.parameters.k8up-name}}"
+            namespace: "{{inputs.parameters.target-namespace}}"
+          spec:
+            backend:
+              repoPasswordSecretRef:
+                name: "{{inputs.parameters.k8up-secret}}"
+                key: repo-password
+              s3:
+                endpoint: "{{inputs.parameters.k8up-endpoint}}"
+                bucket: "{{inputs.parameters.k8up-bucket}}"
+                accessKeyIDSecretRef:
+                  name: "{{inputs.parameters.k8up-secret}}"
+                  key: AWS_ACCESS_KEY_ID
+                secretAccessKeySecretRef:
+                  name: "{{inputs.parameters.k8up-secret}}"
+                  key: AWS_SECRET_ACCESS_KEY
+            failedJobsHistoryLimit: 30
+            successfulJobsHistoryLimit: 30
+            activeDeadlineSeconds: 2700
+            promURL: http://prometheus-pushgateway.monitor.svc.cluster.local:9091
+    - name: create-k8up-resource-prune
+      inputs:
+        parameters:
+          - name: target-namespace
+          - name: k8up-name
+          - name: k8up-endpoint
+          - name: k8up-bucket
+          - name: k8up-secret
+      resource:
+        action: create
+        manifest: |
+          apiVersion: k8up.io/v1
+          kind: Prune
+          metadata:
+            name: "{{inputs.parameters.k8up-name}}"
+            namespace: "{{inputs.parameters.target-namespace}}"
+          spec:
+            backend:
+              repoPasswordSecretRef:
+                name: "{{inputs.parameters.k8up-secret}}"
+                key: repo-password
+              s3:
+                endpoint: "{{inputs.parameters.k8up-endpoint}}"
+                bucket: "{{inputs.parameters.k8up-bucket}}"
+                accessKeyIDSecretRef:
+                  name: "{{inputs.parameters.k8up-secret}}"
+                  key: AWS_ACCESS_KEY_ID
+                secretAccessKeySecretRef:
+                  name: "{{inputs.parameters.k8up-secret}}"
+                  key: AWS_SECRET_ACCESS_KEY
+            failedJobsHistoryLimit: 30
+            successfulJobsHistoryLimit: 30
+            activeDeadlineSeconds: 2700
+            retention:
+              keepLast: 5
+              keepDaily: 2
+              keepWeekly: 1
+              keepMonthly: 1
+              keepYearly: 1
+    - name: wait-for-k8up-resource
+      inputs:
+        parameters:
+          - name: target-namespace
+          - name: kind
+          - name: k8up-name
+      script:
+        image: bitnami/kubectl:1.29
+        command: [bash]
+        source: |-
+          set -euo pipefail
+
+          max_retries=30
+          delay=30
+
+          echo "Waiting for {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} to complete..."
+
+          for i in $(seq 1 $max_retries); do
+            echo "Check attempt $i/$max_retries"
+
+            # Get the completion status
+            status=$(kubectl get {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} -n {{inputs.parameters.target-namespace}} -o jsonpath='{.status.conditions[?(@.type=="Completed")].status}' 2>/dev/null || echo "")
+            reason=$(kubectl get {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} -n {{inputs.parameters.target-namespace}} -o jsonpath='{.status.conditions[?(@.type=="Completed")].reason}' 2>/dev/null || echo "")
+
+            echo "Status: '$status', Reason: '$reason'"
+
+            if [[ "$status" == "True" && "$reason" == "Succeeded" ]]; then
+              echo "✅ Resource completed successfully!"
+              exit 0
+            elif [[ "$reason" == "Failed" ]]; then
+              echo "❌ Resource failed!"
+              kubectl get {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} -n {{inputs.parameters.target-namespace}} -o yaml
+              exit 1
+            elif [[ -n "$status" ]]; then
+              echo "⚠️ Resource has completed condition but unexpected state: status=$status, reason=$reason"
+              if [[ "$i" -eq "$max_retries" ]]; then
+                echo "❌ Max retries reached with unexpected state"
+                kubectl get {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} -n {{inputs.parameters.target-namespace}} -o yaml
+                exit 1
+              fi
+            else
+              echo "⏳ Resource still running (no Completed condition yet)..."
+            fi
+
+            sleep $delay
+          done
+
+          echo "❌ Timeout waiting for resource to complete"
+          kubectl get {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} -n {{inputs.parameters.target-namespace}} -o yaml
+          exit 1
+    - name: full-k8up-restore
+      inputs:
+        parameters:
+          - name: target-namespace
+          - name: location
+          - name: k8up-endpoint
+          - name: k8up-bucket
+          - name: k8up-secret
+          - name: fsGroup
+            value: 0
+      dag:
+        tasks:
+          - name: list-snapshots
+            template: list-pvc-snapshots
+            arguments:
+              parameters:
+                - name: target-namespace
+                  value: "{{inputs.parameters.target-namespace}}"
+                - name: restic-repo
+                  value: "s3:{{inputs.parameters.k8up-endpoint}}/{{inputs.parameters.k8up-bucket}}"
+                - name: k8up-secret
+                  value: "{{inputs.parameters.k8up-secret}}"
+          - name: create-restore
+            dependencies: [list-snapshots]
+            withParam: "{{tasks.list-snapshots.outputs.parameters.pvc-snapshot-map}}"
+            template: create-k8up-resource-restore
+            arguments:
+              parameters:
+                - name: target-namespace
+                  value: "{{inputs.parameters.target-namespace}}"
+                - name: k8up-name
+                  value: "{{inputs.parameters.location}}-{{item.pvc}}"
+                - name: k8up-endpoint
+                  value: "{{inputs.parameters.k8up-endpoint}}"
+                - name: k8up-bucket
+                  value: "{{inputs.parameters.k8up-bucket}}"
+                - name: k8up-secret
+                  value: "{{inputs.parameters.k8up-secret}}"
+                - name: snapshot
+                  value: "{{item.snapshot}}"
+                - name: claimName
+                  value: "{{item.pvc}}"
+                - name: fsGroup
+                  value: "{{inputs.parameters.fsGroup}}"
+          - name: wait-for-restore
+            dependencies: [create-restore]
+            withParam: "{{tasks.list-snapshots.outputs.parameters.pvc-snapshot-map}}"
+            template: wait-for-k8up-resource
+            arguments:
+              parameters:
+                - name: target-namespace
+                  value: "{{inputs.parameters.target-namespace}}"
+                - name: k8up-name
+                  value: "{{inputs.parameters.location}}-{{item.pvc}}"
+                - name: kind
+                  value: "Restore"
+    - name: list-pvc-snapshots
+      inputs:
+        parameters:
+          - name: target-namespace
+          - name: k8up-secret
+          - name: restic-repo
+      outputs:
+        parameters:
+          - name: pvc-snapshot-map
+            valueFrom:
+              path: /tmp/pvc-snapshot-map.json
+      script:
+        image: restic/restic:latest
+        command: [sh]
+        env:
+          - name: RESTIC_REPOSITORY
+            value: "{{inputs.parameters.restic-repo}}"
+          - name: RESTIC_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "{{inputs.parameters.k8up-secret}}"
+                key: repo-password
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: "{{inputs.parameters.k8up-secret}}"
+                key: AWS_ACCESS_KEY_ID
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: "{{inputs.parameters.k8up-secret}}"
+                key: AWS_SECRET_ACCESS_KEY
+        source: |
+          set -euo pipefail
+          apk add --no-cache jq
+          echo "Listing snapshots for host {{inputs.parameters.target-namespace}}"
+          SNAPSHOT_MAP=$(restic snapshots --json --host "{{inputs.parameters.target-namespace}}" | jq -c '[group_by(.paths[0]) | map(max_by(.time)) | .[] | {pvc: (.paths[0] | split("/") | .[-1]), snapshot: .short_id}]')
+          echo "Snapshot map generated: $SNAPSHOT_MAP"
+          echo -n "$SNAPSHOT_MAP" > /tmp/pvc-snapshot-map.json
+    - name: create-k8up-resource-restore
+      inputs:
+        parameters:
+          - name: target-namespace
+          - name: k8up-name
+          - name: k8up-endpoint
+          - name: k8up-bucket
+          - name: k8up-secret
+          - name: snapshot
+          - name: claimName
+          - name: fsGroup
+      resource:
+        action: create
+        manifest: |
+          apiVersion: k8up.io/v1
+          kind: Restore
+          metadata:
+            name: "{{inputs.parameters.k8up-name}}"
+            namespace: "{{inputs.parameters.target-namespace}}"
+          spec:
+            backend:
+              repoPasswordSecretRef:
+                name: "{{inputs.parameters.k8up-secret}}"
+                key: repo-password
+              s3:
+                endpoint: "{{inputs.parameters.k8up-endpoint}}"
+                bucket: "{{inputs.parameters.k8up-bucket}}"
+                accessKeyIDSecretRef:
+                  name: "{{inputs.parameters.k8up-secret}}"
+                  key: AWS_ACCESS_KEY_ID
+                secretAccessKeySecretRef:
+                  name: "{{inputs.parameters.k8up-secret}}"
+                  key: AWS_SECRET_ACCESS_KEY
+            failedJobsHistoryLimit: 30
+            successfulJobsHistoryLimit: 30
+            activeDeadlineSeconds: 2700
+            podSecurityContext:
+              fsGroup: {{inputs.parameters.fsGroup}}
+              runAsUser: 0
+            restoreMethod:
+              folder:
+                claimName: "{{inputs.parameters.claimName}}"
+            snapshot: "{{inputs.parameters.snapshot}}"

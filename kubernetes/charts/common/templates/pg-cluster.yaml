@@ -17,10 +17,10 @@ spec:
     size: {{ .Values.postgresql.storageSize }}
   postgresql:
     parameters:
-      timezone: "America/Denver"
-  {{- if .Values.postgresql.sharedPreloadLibraries }}
+      timezone: {{ .Values.postgresql.timezone }}
     shared_preload_libraries: {{ toYaml .Values.postgresql.sharedPreloadLibraries | nindent 4 }}
-  {{- end }}
+  monitoring:
+    enablePodMonitor: true
   {{- if .Values.postgresql.managed.roles }}
   managed:
     roles:

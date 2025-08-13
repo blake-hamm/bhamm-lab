@@ -1,51 +1,34 @@
-# Polish
-x Adjust common ingress route sync
-x Ensure base has authelia, treafik, lldap, certs as well
-x Ensure
-  x Add loki (w/ seaweedfs)
-  x Add alloy
-  x Argo artifacts (w/ seaweedfs)
-  x Argo common (combine events/workflows)
-x Ensure monitor/ingress for all base:
-  x Argo
-  x Argocd
-  x Vault
-  x Grafana
-  x Prometheus
-  x Authelia
-  x Seaweedfs (UI/s3)
-  x Traefik
-  x Test
-x Deploy core
-  x harbor
-  x forgejo
-  x dashy (and update links)
-x Configure manually w/ backups
-  x Authelia
-  x Forgejo
-    x Ensure webhook sa has necessary permissions
-  x Harbor
-x Deploy docs site/media under 'apps'
-  x Config servarr (trashguides)
-x Green seaweedfs:
-  x Remove seaweedfs and pvc
-  x Add log pvc
-  x Adjust values for filerdb3 w/ idx pvc
-  x Ensure functional (loki logs, cnpg, k8up backups)
-  x Backup offsite
-
 # Stabilize seaweedfs backups
-- Decide architecture
-- Ensure seaweedfs is paused during backup
-- After backup sync argocd
-- Ensure seaweedfs/other k8up restores don't need snapshot
+x Decide architecture
+x Ensure seaweedfs is paused during backup
+x After backup sync argocd
+- Refactor seaweedfs backup to cluster workflow templates
+  x Create k8up resource template
+  x Adjust common helm to leverage argo
+  - Setup stable s3 credentials (stretch)
+  - Test k8up restore with blue seaweedfs
+    - Ensure argo workflow rbac
 x Blue deployment (and switch)
-  - Restore blue - https://github.com/k8up-io/k8up/issues/867
-  x Ensure base restore
+  x Restore seaweedfs w/out snapshot - https://github.com/k8up-io/k8up/issues/867
+  x Ensure common k8up restores don't need snapshot
+  x PR to main (for common enhancements)
+  - Ensure base restore
   - Ensure core restore
   - Ensure apps restore
 - Update DR docs (k8up/restic snapshots)
 - Green destroy/apply on main
+
+# Fix cephfs
+- Install fuse3 on talos worker images
+- Leverage fuse3 features in cephfs storage class
+- Test with forgejo + k8up backup
+
+# Deploy 'nice to haves'
+- Finance tracker - https://actualbudget.org/
+- CRM for leads - https://github.com/jontitmus-code/SuiteCRM8_docker/tree/master
+- Routing to 'public' net (for aubs)
+  - Deploy multiple traefik instances with argocd applicationset
+    - ex: https://grok.com/share/c2hhcmQtMw%3D%3D_eb8fd6b4-8f40-438e-a65e-bddf01f15f28
 
 # Start building website
 - Setup Hugo - https://github.com/adityatelange/hugo-PaperMod
@@ -237,6 +220,42 @@ Date: Sun, 04 May 2025 00:00:01 -0600
 - kube bench - https://github.com/aquasecurity/kube-bench
 
 ## Previous
+# Polish
+x Adjust common ingress route sync
+x Ensure base has authelia, treafik, lldap, certs as well
+x Ensure
+  x Add loki (w/ seaweedfs)
+  x Add alloy
+  x Argo artifacts (w/ seaweedfs)
+  x Argo common (combine events/workflows)
+x Ensure monitor/ingress for all base:
+  x Argo
+  x Argocd
+  x Vault
+  x Grafana
+  x Prometheus
+  x Authelia
+  x Seaweedfs (UI/s3)
+  x Traefik
+  x Test
+x Deploy core
+  x harbor
+  x forgejo
+  x dashy (and update links)
+x Configure manually w/ backups
+  x Authelia
+  x Forgejo
+    x Ensure webhook sa has necessary permissions
+  x Harbor
+x Deploy docs site/media under 'apps'
+  x Config servarr (trashguides)
+x Green seaweedfs:
+  x Remove seaweedfs and pvc
+  x Add log pvc
+  x Adjust values for filerdb3 w/ idx pvc
+  x Ensure functional (loki logs, cnpg, k8up backups)
+  x Backup offsite
+
 # Stabilize
 x Ensure green points to main
 x Destroy green

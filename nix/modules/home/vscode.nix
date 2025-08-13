@@ -15,6 +15,7 @@
         catppuccin.catppuccin-vsc
         catppuccin.catppuccin-vsc-icons
         hashicorp.terraform
+        rooveterinaryinc.roo-cline
         # dracula-theme.theme-dracula
         # vscodevim.vim
         # yzhang.markdown-all-in-one

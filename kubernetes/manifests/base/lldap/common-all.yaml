@@ -4,7 +4,7 @@ metadata:
   name: lldap-common
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "13"
+    argocd.argoproj.io/sync-wave: "12"
 spec:
   destination:
     namespace: lldap
@@ -44,6 +44,10 @@ spec:
               remoteRef:
                 key: /core/lldap
                 property: user-configs
+        postgresql:
+          enabled: true
+          backups:
+            enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

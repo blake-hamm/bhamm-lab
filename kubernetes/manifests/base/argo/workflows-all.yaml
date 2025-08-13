@@ -4,7 +4,7 @@ metadata:
   name: argo-workflows
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   destination:
     namespace: argo
@@ -20,21 +20,18 @@ spec:
           serviceAccount:
             create: true
         controller:
+          parallelism: 3
+          metricsConfig:
+            enabled: true
+          serviceMonitor:
+            enabled: true
+            additionalLabels:
+              release: monitor
           workflowDefaults:
             spec:
               serviceAccountName: argo-workflow
           workflowNamespaces:
-            - default
-            - ceph
-            - nfs
-            - test
             - argo
-          metricsConfig:
-            enabled: false
-          telemetryConfig:
-            enabled: false
-          logging:
-            level: info
         server:
           authModes:
             - sso

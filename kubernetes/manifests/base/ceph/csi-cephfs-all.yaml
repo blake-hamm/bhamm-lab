@@ -36,6 +36,9 @@ spec:
           pool: k8s_fs_data
           mounter: fuse
           fuseMountOptions: debug
+          provisionerSecret: csi-cephfs-secret
+          controllerExpandSecret: csi-cephfs-secret
+          nodeStageSecret: csi-cephfs-secret
         configMapName: ceph-fs-csi-config
         cephConfConfigMapName: ceph-fs-config
         kmsConfigMapName: ceph-fs-csi-encryption-kms-config

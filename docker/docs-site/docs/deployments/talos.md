@@ -25,7 +25,7 @@ tofu -chdir=tofu/kubernetes apply -var 'environment=blue' -var 'branch_name=feat
 
 # To destroy
 export KUBECONFIG=./tofu/proxmox/talos/result/kube-config-blue.yaml
-argo submit   --from clusterworkflowtemplate/kill-switch   --namespace argo   --serviceaccount workflow-admin --entrypoint cleanup
+argo submit   --from workflowtemplate/kill-switch   --namespace argo   --serviceaccount workflow-admin --entrypoint cleanup
 tofu -chdir=tofu/proxmox/talos workspace select -or-create=true blue
 tofu -chdir=tofu/proxmox/talos destroy -var-file=blue.tfvars
 ```

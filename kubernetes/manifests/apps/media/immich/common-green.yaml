@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: main
+    targetRevision: feature/dr
     path: kubernetes/charts/common
     helm:
       valuesObject:
@@ -36,12 +36,12 @@ spec:
             #     claimName: "immich-library"
         postgresql:
           enabled: true
-          imageName: "ghcr.io/tensorchord/cloudnative-pgvecto.rs:16.5-v0.3.0@sha256:be3f025d79aa1b747817f478e07e71be43236e14d00d8a9eb3914146245035ba"
+          storageSize: 5Gi
+          imageName: "ghcr.io/tensorchord/cloudnative-vectorchord:17.5-0.4.3"
           sharedPreloadLibraries:
-            - "vectors.so"
+            - "vchord.so"
           postInitSQL:
-            - CREATE EXTENSION IF NOT EXISTS "vectors";
-            - CREATE EXTENSION IF NOT EXISTS "cube" CASCADE;
+            - CREATE EXTENSION IF NOT EXISTS "vchord" CASCADE;
             - CREATE EXTENSION IF NOT EXISTS "earthdistance" CASCADE;
           managed:
             roles:
@@ -50,7 +50,8 @@ spec:
                 login: true
           backups:
             enabled: true
-            schedule: "0 0 */6 * * *"
+          restore:
+            enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

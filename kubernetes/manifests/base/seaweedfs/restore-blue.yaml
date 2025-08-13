@@ -1,0 +1,82 @@
+# Call 'full-k8up-restore' in seaweedfs namespace template in manage-k8up cluster workflow template.
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: seaweedfs-restore-all
+  namespace: seaweedfs
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  entrypoint: main
+  templates:
+    - name: main
+      retryStrategy:
+        limit: 3
+        backoff:
+          duration: "10s"
+          factor: 2
+          maxDuration: "30s"
+      steps:
+        - - name: disable-base-argocd-autosync
+            template: disable-argocd-autosync
+            arguments:
+              parameters:
+                - name: argocd-app
+                  value: "blue-base"
+        - - name: full-k8up-restore
+            templateRef:
+              name: manage-k8up
+              template: full-k8up-restore
+              clusterScope: true
+            arguments:
+              parameters:
+                - name: target-namespace
+                  value: seaweedfs
+                - name: location
+                  value: offsite
+                - name: k8up-endpoint
+                  value: https://storage.googleapis.com
+                - name: k8up-bucket
+                  value: bhamm-lab-k8up
+                - name: k8up-secret
+                  value: seaweedfs-external-secret
+        - - name: enable-base-argocd-autosync
+            template: enable-argocd-autosync
+            arguments:
+              parameters:
+                - name: argocd-app
+                  value: "blue-base"
+    - name: disable-argocd-autosync
+      inputs:
+        parameters:
+          - name: argocd-app
+      resource:
+        action: patch
+        mergeStrategy: merge
+        manifest: |
+          spec:
+            syncPolicy: null
+        flags:
+          - applications.argoproj.io
+          - "{{inputs.parameters.argocd-app}}"
+          - -n
+          - argocd
+    - name: enable-argocd-autosync
+      inputs:
+        parameters:
+          - name: argocd-app
+      resource:
+        action: patch
+        mergeStrategy: merge
+        manifest: |
+          spec:
+            syncPolicy:
+              automated:
+                prune: true
+                selfHeal: true
+        flags:
+          - applications.argoproj.io
+          - "{{inputs.parameters.argocd-app}}"
+          - -n
+          - argocd

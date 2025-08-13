@@ -16,6 +16,7 @@ spec:
     targetRevision: 4.8.4
     helm:
       valuesObject:
+        replicaCount: 3
         k8up:
           timezone: "America/Denver"
           skipWithoutAnnotation: true
@@ -23,15 +24,15 @@ spec:
             - name: RESTIC_COMPRESSION
               value: max
             - name: BACKUP_GLOBAL_CONCURRENT_ARCHIVE_JOBS_LIMIT
-              value: "1"
+              value: "3"
             - name: BACKUP_GLOBAL_CONCURRENT_BACKUP_JOBS_LIMIT
-              value: "1"
+              value: "3"
             - name: BACKUP_GLOBAL_CONCURRENT_CHECK_JOBS_LIMIT
-              value: "1"
+              value: "3"
             - name: BACKUP_GLOBAL_CONCURRENT_PRUNE_JOBS_LIMIT
-              value: "1"
+              value: "3"
             - name: BACKUP_GLOBAL_CONCURRENT_RESTORE_JOBS_LIMIT
-              value: "1"
+              value: "3"
         metrics:
           service:
             port: 8080
