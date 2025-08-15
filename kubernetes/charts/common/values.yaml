@@ -17,7 +17,7 @@ ingressRoutes: []
 k8up:
   backup:
     enabled: false
-    schedule: "0 */6 * * *"
+    schedule: "0 */12 * * *"
   restore:
     enabled: false
     config:
@@ -35,7 +35,7 @@ postgresql:
     roles: []
   backups:
     enabled: false
-    schedule: "0 15 */6 * * *"
+    schedule: "0 30 */12 * * *"
     retention: "30d"
   restore:
     enabled: false
