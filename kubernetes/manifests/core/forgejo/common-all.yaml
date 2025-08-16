@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: harbor-common
+  name: git-common
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "19"
 spec:
   destination:
-    namespace: harbor
+    namespace: git
     server: https://kubernetes.default.svc
   project: default
   source:
@@ -16,44 +16,43 @@ spec:
     path: kubernetes/charts/common
     helm:
       valuesObject:
-        name: harbor
-        postgresql:
-          enabled: true
-          backups:
-            enabled: true
-          restore:
-            enabled: true
-        k8up:
-          backup:
-            enabled: true
+        name: git
         externalSecrets:
           enabled: true
           secrets:
-            - secretKey: REGISTRY_STORAGE_S3_ACCESSKEY
+            - secretKey: key
               remoteRef:
-                key: seaweedfs-s3-secret
-                property: admin_access_key_id
-            - secretKey: REGISTRY_STORAGE_S3_SECRETKEY
+                key: /default/gitea
+                property: oidc_client_key
+            - secretKey: secret
               remoteRef:
-                key: seaweedfs-s3-secret
-                property: admin_secret_access_key
-            - secretKey: HARBOR_ADMIN_PASSWORD
-              remoteRef:
-                key: /core/harbor
-                property: HARBOR_ADMIN_PASSWORD
+                key: /default/gitea
+                property: oidc_client_secret
+        k8up:
+          backup:
+            enabled: true
+          restore:
+            enabled: true
+        postgresql:
+          enabled: true
+          backup:
+            enabled: true
+          restore:
+            enabled: false
         ingressRoutes:
-          - name: harbor
+          - enabled: true
+            name: forgejo
             ingressClass: traefik-external
             websocket: true
             routes:
-              - match: Host(`harbor.bhamm-lab.com`)
-                kind: Rule
+              - kind: Rule
+                match: Host(`git.bhamm-lab.com`)
                 middlewares:
                   - name: default-headers
                 services:
-                  - name: harbor
+                  - name: git-forgejo-http
+                    port: 3000
                     scheme: http
-                    port: 80
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

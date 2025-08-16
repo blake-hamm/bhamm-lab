@@ -1,4 +1,4 @@
-{{- if .Values.postgresql.backups.enabled }}
+{{- if .Values.postgresql.backup.enabled }}
 apiVersion: postgresql.cnpg.io/v1
 kind: ScheduledBackup
 metadata:
@@ -8,7 +8,7 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "18"
 spec:
-  schedule: "{{ .Values.postgresql.backups.schedule }}"
+  schedule: "{{ .Values.postgresql.backup.schedule }}"
   cluster:
     name: {{ .Values.name }}-postgresql
   method: plugin

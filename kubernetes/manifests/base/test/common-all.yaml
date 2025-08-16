@@ -43,13 +43,10 @@ spec:
             enabled: true
             schedule: "0 */6 * * *"
           restore:
-            enabled: false
-            # restores:
-            #   - snapshot: "latest"
-            #     claimName: "test"
+            enabled: true
         postgresql:
           enabled: true
-          backups:
+          backup:
             enabled: true
             retention: "3d"
             schedule: "0 0 */6 * * *"

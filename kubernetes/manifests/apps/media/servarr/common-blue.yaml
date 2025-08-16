@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: main
+    targetRevision: feature/dr
     path: kubernetes/charts/common
     helm:
       valuesObject:
@@ -35,21 +35,8 @@ spec:
         k8up:
           backup:
             enabled: false
-          restores:
-            - snapshot: "02c9bb2e"
-              claimName: "gluetun-config"
-            - snapshot: "403efab1"
-              claimName: "jellyfin-config"
-            - snapshot: "13d8cf03"
-              claimName: "prowlarr-config"
-            - snapshot: "158b9b42"
-              claimName: "qbittorrent-config"
-            - snapshot: "89f25a08"
-              claimName: "radarr-config"
-            - snapshot: "fc17c8a1"
-              claimName: "sonarr-config"
-            - snapshot: "18dd88d4"
-              claimName: "unpackerr-config"
+          restore:
+            enabled: true
         ingressRoutes:
           - enabled: true
             name: qbittorrent

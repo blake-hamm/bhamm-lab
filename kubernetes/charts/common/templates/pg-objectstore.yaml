@@ -1,15 +1,15 @@
-{{- if or .Values.postgresql.backups.enabled .Values.postgresql.restore.enabled }}
+{{- if .Values.postgresql.backup.enabled }}
 apiVersion: barmancloud.cnpg.io/v1
 kind: ObjectStore
 metadata:
-  name: {{ .Values.name }}-cnpg-s3
+  name: {{ .Values.name }}-backup
   namespace: {{ .Values.name }}
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "15"
 spec:
   configuration:
-    destinationPath: "s3://cnpg-backups/"
+    destinationPath: "{{ .Values.postgresql.basePath }}/{{ .Values.postgresql.backup.pathVersion }}/"
     endpointURL: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
     s3Credentials:
       accessKeyId:
@@ -18,5 +18,28 @@ spec:
       secretAccessKey:
         name: cnpg-s3-backup-creds
         key: secret_key
-  retentionPolicy: "{{ .Values.postgresql.backups.retention }}"
+  retentionPolicy: "{{ .Values.postgresql.backup.retention }}"
+---
+{{- end }}
+{{- if .Values.postgresql.restore.enabled }}
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: {{ .Values.name }}-restore
+  namespace: {{ .Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "15"
+spec:
+  configuration:
+    destinationPath: "{{ .Values.postgresql.basePath }}/{{ .Values.postgresql.restore.pathVersion }}/"
+    endpointURL: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
+    s3Credentials:
+      accessKeyId:
+        name: cnpg-s3-backup-creds
+        key: access_key
+      secretAccessKey:
+        name: cnpg-s3-backup-creds
+        key: secret_key
+  retentionPolicy: "{{ .Values.postgresql.restore.retention }}"
 {{- end }}
