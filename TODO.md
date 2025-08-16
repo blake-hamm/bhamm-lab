@@ -15,7 +15,7 @@ x After backup sync argocd
     x Enable Backups (common all)
     x Confirm blue common backups (swfs)
     x Merge with main so that blue = main
-    - Forgejo
+    x Forgejo
     - Confirm swfs backups
   x Ensure cnpg restore has backup plan
 x Blue deployment (and switch)
