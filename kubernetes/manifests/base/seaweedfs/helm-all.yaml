@@ -101,7 +101,7 @@ spec:
             enableAuth: true
             port: 8333
             httpsPort: 0
-            allowEmptyFolder: false
+            allowEmptyFolder: true
             createBuckets:
               - name: argo-artifacts
                 anonymousRead: false
