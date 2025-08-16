@@ -6,24 +6,27 @@ x After backup sync argocd
   x Create k8up resource template
   x Adjust common helm to leverage argo
   - Setup stable s3 credentials (stretch)
-  - Test k8up restore with blue seaweedfs
+  x Test k8up restore with blue seaweedfs
     x Ensure argo workflow rbac
   - Setup blue cluster
     - Forgejo
-    - Immich
+    x Immich
     x Jellyfinn
-    - Servarr
-    - Enable Backups (common all)
-  - Ensure cnpg restore has backup plan
+    x Servarr
+    x Enable Backups (common all)
+    - Confirm blue common backups (swfs)
+    - Confirm swfs backups
+    - Merge with main so that blue = main
+  x Ensure cnpg restore has backup plan
 x Blue deployment (and switch)
   x Restore seaweedfs w/out snapshot - https://github.com/k8up-io/k8up/issues/867
   x Ensure common k8up restores don't need snapshot
   x PR to main (for common enhancements)
+- Green deployment
   - Ensure base restore
   - Ensure core restore
   - Ensure apps restore
 - Update DR docs (k8up/restic snapshots)
-- Green destroy/apply on main
 
 # Fix cephfs
 - Install fuse3 on talos worker images
