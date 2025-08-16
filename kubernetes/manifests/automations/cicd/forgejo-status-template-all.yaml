@@ -15,7 +15,7 @@ spec:
           - name: git-sha
           - name: state
           - name: repo-owner
-            value: bhamm
+            value: blake-hamm
           - name: repo-name
             value: bhamm-lab
           - name: forgejo-host
