@@ -46,7 +46,7 @@ spec:
                 property: user-configs
         postgresql:
           enabled: true
-          backups:
+          backup:
             enabled: true
   syncPolicy:
     syncOptions:
