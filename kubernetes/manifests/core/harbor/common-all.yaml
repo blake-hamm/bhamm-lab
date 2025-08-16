@@ -19,13 +19,13 @@ spec:
         name: harbor
         postgresql:
           enabled: true
-          backups:
-            enabled: false
+          backup:
+            enabled: true
           restore:
             enabled: true
         k8up:
           backup:
-            enabled: false
+            enabled: true
           restore:
             enabled: true
         externalSecrets:
