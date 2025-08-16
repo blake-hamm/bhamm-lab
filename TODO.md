@@ -2,13 +2,13 @@
 x Decide architecture
 x Ensure seaweedfs is paused during backup
 x After backup sync argocd
-- Refactor seaweedfs backup to cluster workflow templates
+x Refactor seaweedfs backup to cluster workflow templates
   x Create k8up resource template
   x Adjust common helm to leverage argo
   - Setup stable s3 credentials (stretch)
   x Test k8up restore with blue seaweedfs
     x Ensure argo workflow rbac
-  - Setup blue cluster
+  x Setup blue cluster
     x Immich
     x Jellyfinn
     x Servarr
@@ -16,7 +16,7 @@ x After backup sync argocd
     x Confirm blue common backups (swfs)
     x Merge with main so that blue = main
     x Forgejo
-    - Confirm swfs backups
+    x Confirm swfs backups
   x Ensure cnpg restore has backup plan
 x Blue deployment (and switch)
   x Restore seaweedfs w/out snapshot - https://github.com/k8up-io/k8up/issues/867
