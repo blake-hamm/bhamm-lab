@@ -22,7 +22,7 @@ spec:
               arguments:
                 parameters:
                   - name: argocd-app
-                    value: "green-base"
+                    value: "blue-base"
           - - name: disable-seaweedfs-argocd-autosync
               template: disable-argocd-autosync
               arguments:
@@ -53,7 +53,7 @@ spec:
               arguments:
                 parameters:
                   - name: argocd-app
-                    value: "green-base"
+                    value: "blue-base"
       - name: disable-argocd-autosync
         inputs:
           parameters:
