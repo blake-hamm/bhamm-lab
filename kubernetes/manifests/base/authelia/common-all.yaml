@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: git-common
+  name: authelia-common
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "19"
+    argocd.argoproj.io/sync-wave: "14"
 spec:
   destination:
-    namespace: git
+    namespace: authelia
     server: https://kubernetes.default.svc
   project: default
   source:
@@ -16,44 +16,45 @@ spec:
     path: kubernetes/charts/common
     helm:
       valuesObject:
-        name: git
+        name: authelia
         externalSecrets:
           enabled: true
           secrets:
-            - secretKey: key
+            - secretKey: lldap_password
               remoteRef:
-                key: /default/gitea
-                property: oidc_client_key
-            - secretKey: secret
+                key: /core/authelia
+                property: lldap_password
+            - secretKey: storage_encryption_key
               remoteRef:
-                key: /default/gitea
-                property: oidc_client_secret
-        k8up:
-          backup:
-            enabled: false
-          restores:
-            - snapshot: "81a30edc"
-              claimName: "gitea-shared-storage"
-              fsGroup: 1000
+                key: /core/authelia
+                property: storage_encryption_key
+            - secretKey: oidc_jwks_pem
+              remoteRef:
+                key: /core/authelia
+                property: oidc_jwks_pem
+            - secretKey: oidc_jwks_crt
+              remoteRef:
+                key: /core/authelia
+                property: oidc_jwks_crt
         postgresql:
           enabled: true
-          backups:
-            enabled: false
+          backup:
+            enabled: true
           restore:
             enabled: true
         ingressRoutes:
           - enabled: true
-            name: forgejo
+            name: authelia
             ingressClass: traefik-external
             websocket: true
             routes:
               - kind: Rule
-                match: Host(`git.bhamm-lab.com`)
+                match: Host(`auth.bhamm-lab.com`)
                 middlewares:
                   - name: default-headers
                 services:
-                  - name: git-forgejo-http
-                    port: 3000
+                  - name: authelia
+                    port: 80
                     scheme: http
   syncPolicy:
     syncOptions:
