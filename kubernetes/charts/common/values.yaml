@@ -33,9 +33,14 @@ postgresql:
   timezone: "America/Denver"
   managed:
     roles: []
-  backups:
+  # -- Base path for all backups and restores in the S3 bucket.
+  basePath: "s3://cnpg-backups"
+  backup:
     enabled: false
+    pathVersion: "v1"
     schedule: "0 30 */12 * * *"
     retention: "30d"
   restore:
     enabled: false
+    pathVersion: "v1"
+    retention: "30d"

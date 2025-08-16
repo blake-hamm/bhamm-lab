@@ -9,6 +9,11 @@ x After backup sync argocd
   - Test k8up restore with blue seaweedfs
     x Ensure argo workflow rbac
   - Setup blue cluster
+    - Forgejo
+    - Immich
+    x Jellyfinn
+    - Servarr
+    - Enable Backups (common all)
   - Ensure cnpg restore has backup plan
 x Blue deployment (and switch)
   x Restore seaweedfs w/out snapshot - https://github.com/k8up-io/k8up/issues/867

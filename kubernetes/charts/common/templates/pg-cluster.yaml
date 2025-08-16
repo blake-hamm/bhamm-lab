@@ -32,7 +32,7 @@ spec:
   bootstrap:
     {{- if .Values.postgresql.restore.enabled }}
     recovery:
-      source: clusterBackup
+      source: clusterRestore
       database: {{ .Values.postgresql.databaseName | default .Values.name }}
       owner: {{ .Values.name }}
     {{- else }}
@@ -45,24 +45,19 @@ spec:
       {{- end }}
     {{- end }}
   enableSuperuserAccess: false
-  {{- if .Values.postgresql.backups.enabled }}
+  {{- if .Values.postgresql.backup.enabled }}
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
       parameters:
-        barmanObjectName: {{ .Values.name}}-cnpg-s3
+        barmanObjectName: "{{ .Values.name}}-backup"
   {{- end }}
   {{- if .Values.postgresql.restore.enabled }}
   externalClusters:
-    - name: clusterBackup
+    - name: clusterRestore
       plugin:
         name: barman-cloud.cloudnative-pg.io
         parameters:
-          barmanObjectName: "{{ .Values.name }}-cnpg-s3"
-          {{- if and .Values.postgresql.restore.enabled .Values.postgresql.backups.enabled }}
-          serverName: "{{ .Values.name }}-postgresql-latest"
-          {{- else }}
-          serverName: "{{ .Values.name }}-postgresql"
-          {{- end }}
+          barmanObjectName: "{{ .Values.name }}-restore"
   {{- end }}
 {{- end }}
