@@ -3,4 +3,5 @@ customization:
     officialExtensions:
       - siderolabs/qemu-guest-agent
       - siderolabs/nfsrahead
+      - siderolabs/fuse3
       - siderolabs/intel-ucode
