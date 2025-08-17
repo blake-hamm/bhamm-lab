@@ -22,10 +22,10 @@ x Blue deployment (and switch)
   x Restore seaweedfs w/out snapshot - https://github.com/k8up-io/k8up/issues/867
   x Ensure common k8up restores don't need snapshot
   x PR to main (for common enhancements)
-- Green deployment on feature/finalize-dr
-  - Ensure base restore
-  - Ensure core restore
-  - Ensure apps restore
+x Green deployment on feature/finalize-dr
+  x Ensure base restore
+  x Ensure core restore
+  x Ensure apps restore
 - Update DR docs (k8up/restic snapshots)
 
 # Fix cephfs
