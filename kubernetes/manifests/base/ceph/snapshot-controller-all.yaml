@@ -13,7 +13,7 @@ spec:
   source:
     path: deploy/kubernetes/snapshot-controller
     repoURL: https://github.com/kubernetes-csi/external-snapshotter
-    targetRevision: v8.2.0
+    targetRevision: v8.3.0
     kustomize:
       namespace: "ceph"
   syncPolicy:
