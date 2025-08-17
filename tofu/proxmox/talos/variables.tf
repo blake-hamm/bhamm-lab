@@ -153,21 +153,21 @@ variable "memory_base_worker" {
 }
 
 variable "disk_size_master" {
-  description = "Disk size in GB"
+  description = "Boot disk for master in gb"
   type        = number
   default     = 40
 }
 
 variable "disk_size_worker" {
-  description = "Disk size in GB"
+  description = "Boot disk for work in gb"
   type        = number
   default     = 60
 }
 
 variable "disk_size_worker_user" {
-  description = "Disk size in GB"
+  description = "User storage for local path privisioner in gb"
   type        = number
-  default     = 40
+  default     = 100
 }
 
 variable "vip" {

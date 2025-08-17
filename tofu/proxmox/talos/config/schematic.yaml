@@ -2,3 +2,5 @@ customization:
   systemExtensions:
     officialExtensions:
       - siderolabs/qemu-guest-agent
+      - siderolabs/nfsrahead
+      - siderolabs/intel-ucode
