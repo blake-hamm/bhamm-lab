@@ -40,8 +40,10 @@ spec:
           enabled: true
           backup:
             enabled: true
+            pathVersion: "v1.1"
           restore:
             enabled: true
+            pathVersion: "v1"
         ingressRoutes:
           - enabled: true
             name: authelia
