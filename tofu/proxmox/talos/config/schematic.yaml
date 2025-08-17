@@ -5,3 +5,4 @@ customization:
       - siderolabs/nfsrahead
       - siderolabs/fuse3
       - siderolabs/intel-ucode
+      - siderolabs/amd-ucode
