@@ -138,6 +138,7 @@ Date: Sun, 04 May 2025 00:00:01 -0600
 - Deploy openwebui - https://github.com/open-webui/helm-charts/tree/main/charts/open-webui (with ollama)
 
 # Finish
+- Consider having k8up restore create pvc automagically
 - Switch to nfs csi driver - https://github.com/kubernetes-csi/csi-driver-nfs
 - Switch vm zfs name (and confirm prod backups)
 - Make forgejo ha - https://code.forgejo.org/forgejo-helm/forgejo-helm/src/branch/main/docs/ha-setup.md
