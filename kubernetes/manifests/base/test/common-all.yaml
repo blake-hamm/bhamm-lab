@@ -49,7 +49,7 @@ spec:
             enabled: true
             retention: "3d"
           restore:
-            enabled: true
+            enabled: false
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
