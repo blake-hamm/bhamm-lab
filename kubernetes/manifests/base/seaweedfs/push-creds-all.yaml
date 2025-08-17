@@ -19,3 +19,4 @@ spec:
     - match:
         remoteRef:
           remoteKey: seaweedfs-s3-secret
+      conversionStrategy: None
