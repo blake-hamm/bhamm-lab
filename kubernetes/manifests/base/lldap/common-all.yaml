@@ -32,6 +32,10 @@ spec:
               remoteRef:
                 key: /core/lldap
                 property: lldap-jwt-secret
+            - secretKey: lldap-key-seed
+              remoteRef:
+                key: /core/lldap
+                property: lldap-key-seed
             - secretKey: base-dn
               remoteRef:
                 key: /core/lldap
