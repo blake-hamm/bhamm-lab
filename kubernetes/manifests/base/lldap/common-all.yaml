@@ -50,8 +50,6 @@ spec:
                 property: user-configs
         postgresql:
           enabled: true
-          backup:
-            enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
