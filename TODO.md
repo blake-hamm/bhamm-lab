@@ -26,7 +26,7 @@ x Green deployment on feature/finalize-dr
   x Ensure base restore
   x Ensure core restore
   x Ensure apps restore
-- Update DR docs (k8up/restic snapshots)
+x Update DR docs (k8up/restic snapshots)
 
 # Fix cephfs
 - Install fuse3 on talos worker images
