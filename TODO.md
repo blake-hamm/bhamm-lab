@@ -2,13 +2,13 @@
 x Decide architecture
 x Ensure seaweedfs is paused during backup
 x After backup sync argocd
-- Refactor seaweedfs backup to cluster workflow templates
+x Refactor seaweedfs backup to cluster workflow templates
   x Create k8up resource template
   x Adjust common helm to leverage argo
   - Setup stable s3 credentials (stretch)
   x Test k8up restore with blue seaweedfs
     x Ensure argo workflow rbac
-  - Setup blue cluster
+  x Setup blue cluster
     x Immich
     x Jellyfinn
     x Servarr
@@ -16,17 +16,17 @@ x After backup sync argocd
     x Confirm blue common backups (swfs)
     x Merge with main so that blue = main
     x Forgejo
-    - Confirm swfs backups
+    x Confirm swfs backups
   x Ensure cnpg restore has backup plan
 x Blue deployment (and switch)
   x Restore seaweedfs w/out snapshot - https://github.com/k8up-io/k8up/issues/867
   x Ensure common k8up restores don't need snapshot
   x PR to main (for common enhancements)
-- Green deployment
-  - Ensure base restore
-  - Ensure core restore
-  - Ensure apps restore
-- Update DR docs (k8up/restic snapshots)
+x Green deployment on feature/finalize-dr
+  x Ensure base restore
+  x Ensure core restore
+  x Ensure apps restore
+x Update DR docs (k8up/restic snapshots)
 
 # Fix cephfs
 - Install fuse3 on talos worker images
@@ -138,6 +138,7 @@ Date: Sun, 04 May 2025 00:00:01 -0600
 - Deploy openwebui - https://github.com/open-webui/helm-charts/tree/main/charts/open-webui (with ollama)
 
 # Finish
+- Consider having k8up restore create pvc automagically
 - Switch to nfs csi driver - https://github.com/kubernetes-csi/csi-driver-nfs
 - Switch vm zfs name (and confirm prod backups)
 - Make forgejo ha - https://code.forgejo.org/forgejo-helm/forgejo-helm/src/branch/main/docs/ha-setup.md

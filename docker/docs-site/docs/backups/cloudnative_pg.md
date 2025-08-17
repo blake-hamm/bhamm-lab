@@ -1,18 +1,24 @@
 # Cloudnative pg
-## WAL archive to minio
-I have refactore cnpg backups so that I don't need to deal with volume snapshots when backing up/restoring. Instead, backups are now orchestrated using minio and the WAL archiving pattern.
+## WAL archive to seaweedfs
+I have refactore cnpg backups so that I don't need to deal with volume snapshots when backing up/restoring. Instead, backups are now orchestrated using seaweedfs and the WAL archiving pattern.
 
 There are some manual steps involved with restoring backups:
-- Ensure data is available in minio tenant under `s3://pg-backups/<namespace>-postgresql`
-- Ensure no data or directory is empty at `s3://pg-backups/<namespace>-postgresql-latest` (this is the new target backup directory)
-
-Then, all you need to do in the values is enable:
+- Confirm the current version number in seaweedfs `cnpg-backups/v1`
+- Based on the version, adjust gitops accordingly:
 ```yaml
 postgresql:
+  enabled: true
+  backup:
+    enabled: true
+    pathVersion: "v1.1" # New target backup version
   restore:
     enabled: true
+    pathVersion: "v1" # Current version with latest backup in seaweedfs
 ```
 Everything else will be automagically handled!
+
+*Note: Depending on the timing of cnpg backups/wals and seaweedfs backups, you may fail to restore postgres clusters. It's imparitive the seaweedfs backup ran after cnpg backups fully completed* \
+**I highly recommend you only restore in the morning after a seaweedfs nightly backup occured and no other data was altered.**
 
 ## PVC Snapshots [Depreciated]
 For postgres, backups are orchestrated with the cloudnative pg operator. This can be configured with the common helm chart. One thing to note: *these backups require a volumesnapshot.* I still need to ensure a 'new' cluster is able to restore a cloudnative pg. Theoritically, these are the steps:

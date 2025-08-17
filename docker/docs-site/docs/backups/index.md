@@ -10,18 +10,17 @@
 ## Backup Architecture
 ```mermaid
 graph LR
-A[K8s PVCs] -->|k8up daily| B[Minio/NFS]
-C[CloudNative-PG DBs] -->|Native daily| D[Minio/NFS]
-B -->|Bi-monthly| E[GCP Storage]
-D -->|Bi-monthly| E[GCP Storage]
+A[k3s PVCs] -->|Every 3 hours| C[SeaweedFS]
+B[CloudNative-PG DBs] -->|Every 3 hours| C[SeaweedFS]
+C -->|Daily| D[GCP Cloud Storage]
 ```
 
 ## Backup Components
-| Component         | Tool/Method       | Frequency | Location         | Retention |
-|-------------------|-------------------|-----------|------------------|-----------|
-| Kubernetes PVCs   | k8up              | Daily     | Minio/NFS        | 30 days   |
-| PostgreSQL DBs    | CloudNative-PG    | Daily     | Minio/NFS (separate bucket) | 30 days |
-| Minio Bucket Data | PVC Backup        | 2x/month  | GCP Storage      | 6 months  |
+| Component         | Tool/Method       | Frequency | Location         |
+|-------------------|-------------------|-----------|------------------|
+| Kubernetes PVCs   | k8up              | 3 hrs     | Minio/NFS        |
+| PostgreSQL DBs    | CloudNative-PG    | 3 hrs     | Minio/NFS (separate bucket) |
+| Minio Bucket Data | PVC Backup        | Daily     | GCP Storage      |
 
 ## Restoration Workflow
 1. **Infrastructure Recovery**:
@@ -32,23 +31,23 @@ D -->|Bi-monthly| E[GCP Storage]
 2. **Data Recovery**:
 ```mermaid
 sequenceDiagram
-    participant GCP as GCP Storage
-    participant Minio as Minio/NFS
-    participant K8s as Kubernetes
-    GCP->>Minio: Restore PVC backups (if Minio unavailable)
-    Minio->>K8s: k8up restore PVCs
-    Minio->>Postgres: CloudNative-PG restore
+    participant GCP as GCP Cloud Storage
+    participant swfs as SeaweedFS
+    participant pvc as PVCs
+    participant cnpg as CNPG Databases
+
+    GCP->>swfs: Restore SeaweedFS
+    Note over swfs: SeaweedFS is restored
+    swfs->>pvc: Restore PVCs
+    swfs->>cnpg: Restore CNPG Databases
 ```
 
 ## Future Enhancements
 
 1. **Enhanced Recovery Reliability**:
-    - Clarify minio nfs recovery procedure and test with blue cluster
-    - Added explicit retention policies to GCP Storage
     - Define RTO and building testing environment
 
 2. **Automation Focus**:
-    - Removed manual failover procedures
     - Deprecated hardware-specific recovery steps
 
 3. **Hybrid Cloud High Availability**:

@@ -1,3 +1,54 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argo-workflow
+  namespace: seaweedfs
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: seaweedfs-argo-workflow-run
+  namespace: seaweedfs
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "watch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["patch"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflowtasksets", "workflowartifactgctasks"]
+    verbs: ["watch", "list"]
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflowtasksets/status", "workflowartifactgctasks/status", "workflowtaskresults"]
+    verbs: ["patch"]
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflowtaskresults"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argo-workflow-runner
+  namespace: seaweedfs
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+subjects:
+  - kind: ServiceAccount
+    name: argo-workflow
+    namespace: seaweedfs
+roleRef:
+  kind: Role
+  name: seaweedfs-argo-workflow-run
+  apiGroup: rbac.authorization.k8s.io
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:

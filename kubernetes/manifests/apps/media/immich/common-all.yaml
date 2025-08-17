@@ -31,6 +31,8 @@ spec:
         k8up:
           backup:
             enabled: true
+          restore:
+            enabled: true
         postgresql:
           enabled: true
           storageSize: 5Gi
@@ -47,8 +49,10 @@ spec:
                 login: true
           backup:
             enabled: true
+            pathVersion: "v1.1"
           restore:
-            enabled: false
+            enabled: true
+            pathVersion: "v1"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

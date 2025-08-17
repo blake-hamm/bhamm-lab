@@ -1,9 +1,14 @@
 # Kubernetes backups
 
 ## k8up
-k8up backups are used for pvc and tested with the `test` application. They require pvc to be labeled with `k8up.io/backup: "true"` and guarantee that data can be backed up on a schedule and restored. This can be configured in the `common` helm chart and more details can be found in the deployments/helm section of these docs.
-
-To backup the latest image, you can deploy with `latest` as the snapshot name to restore. Alternatively, you can look in the `snapshots` k8up crd to pick a specific image.
+k8up backups are used for pvc and tested with the `test` application. They require pvc to be labeled with `k8up.io/backup: "true"` and guarantee that data can be backed up on a schedule and restored. This can be configured in the `common` helm chart and more details can be found in the deployments/helm section of these docs. Specifically, you will need these values:
+```yaml
+k8up:
+  backup:
+    enabled: true
+  restore:
+    enabled: true
+```
 
 ## Minio [Depreciated]
 *Determined that this minio backups are functioning correctly.*

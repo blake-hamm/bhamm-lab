@@ -41,7 +41,6 @@ spec:
         k8up:
           backup:
             enabled: true
-            schedule: "0 */6 * * *"
           restore:
             enabled: true
         postgresql:
@@ -49,9 +48,8 @@ spec:
           backup:
             enabled: true
             retention: "3d"
-            schedule: "0 0 */6 * * *"
           restore:
-            enabled: true
+            enabled: false
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
