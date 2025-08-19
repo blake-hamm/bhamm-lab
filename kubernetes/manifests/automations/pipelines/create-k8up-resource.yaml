@@ -295,12 +295,12 @@ spec:
               echo "⏳ Resource still running (no Completed condition yet)..."
             fi
 
-            echo "Sleeping for $delay seconds..."
             sleep $delay
             delay=$((delay + add_delay))
             if [[ "$delay" -gt "$max_delay" ]]; then
               delay=$max_delay
             fi
+            echo "Sleeping for $delay seconds..."
           done
 
           echo "❌ Timeout waiting for resource to complete"
