@@ -20,7 +20,7 @@ spec:
       timezone: {{ .Values.postgresql.timezone }}
     shared_preload_libraries: {{ toYaml .Values.postgresql.sharedPreloadLibraries | nindent 4 }}
   monitoring:
-    enablePodMonitor: false
+    enablePodMonitor: true
   {{- if .Values.postgresql.managed.roles }}
   managed:
     roles:
