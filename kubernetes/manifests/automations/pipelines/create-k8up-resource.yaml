@@ -156,8 +156,8 @@ spec:
           - name: k8up-secret
       resource:
         action: create
-        successCondition: "status != nil && len(filter(status.conditions, {#.type == 'Completed'})) > 0 && filter(status.conditions, {#.type == 'Completed'})[0].status == 'True' && filter(status.conditions, {#.type == 'Completed'})[0].reason == 'Succeeded'"
-        failureCondition: "status != nil && len(filter(status.conditions, {#.type == 'Completed'})) > 0 && filter(status.conditions, {#.type == 'Completed'})[0].reason == 'Failed'"
+        successCondition: "status != nil, len(filter(status.conditions, {#.type == 'Completed'})) > 0, filter(status.conditions, {#.type == 'Completed'})[0].status == 'True', filter(status.conditions, {#.type == 'Completed'})[0].reason == 'Succeeded'"
+        failureCondition: "status != nil, len(filter(status.conditions, {#.type == 'Completed'})) > 0, filter(status.conditions, {#.type == 'Completed'})[0].reason == 'Failed'"
         manifest: |
           apiVersion: k8up.io/v1
           kind: "{{inputs.parameters.kind}}"
@@ -192,8 +192,8 @@ spec:
           - name: k8up-secret
       resource:
         action: create
-        successCondition: "status != nil && len(filter(status.conditions, {#.type == 'Completed'})) > 0 && filter(status.conditions, {#.type == 'Completed'})[0].status == 'True' && filter(status.conditions, {#.type == 'Completed'})[0].reason == 'Succeeded'"
-        failureCondition: "status != nil && len(filter(status.conditions, {#.type == 'Completed'})) > 0 && filter(status.conditions, {#.type == 'Completed'})[0].reason == 'Failed'"
+        successCondition: "status != nil, len(filter(status.conditions, {#.type == 'Completed'})) > 0, filter(status.conditions, {#.type == 'Completed'})[0].status == 'True', filter(status.conditions, {#.type == 'Completed'})[0].reason == 'Succeeded'"
+        failureCondition: "status != nil, len(filter(status.conditions, {#.type == 'Completed'})) > 0, filter(status.conditions, {#.type == 'Completed'})[0].reason == 'Failed'"
         manifest: |
           apiVersion: k8up.io/v1
           kind: Prune
@@ -319,8 +319,8 @@ spec:
           - name: fsGroup
       resource:
         action: create
-        successCondition: "status != nil && len(filter(status.conditions, {#.type == 'Completed'})) > 0 && filter(status.conditions, {#.type == 'Completed'})[0].status == 'True' && filter(status.conditions, {#.type == 'Completed'})[0].reason == 'Succeeded'"
-        failureCondition: "status != nil && len(filter(status.conditions, {#.type == 'Completed'})) > 0 && filter(status.conditions, {#.type == 'Completed'})[0].reason == 'Failed'"
+        successCondition: "status != nil, len(filter(status.conditions, {#.type == 'Completed'})) > 0, filter(status.conditions, {#.type == 'Completed'})[0].status == 'True', filter(status.conditions, {#.type == 'Completed'})[0].reason == 'Succeeded'"
+        failureCondition: "status != nil, len(filter(status.conditions, {#.type == 'Completed'})) > 0, filter(status.conditions, {#.type == 'Completed'})[0].reason == 'Failed'"
         manifest: |
           apiVersion: k8up.io/v1
           kind: Restore
