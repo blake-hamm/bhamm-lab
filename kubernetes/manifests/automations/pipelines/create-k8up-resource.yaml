@@ -261,9 +261,9 @@ spec:
         source: |-
           set -euo pipefail
 
-          max_retries=19
-          delay=15
-          add_delay=15
+          max_retries=23
+          delay=10
+          add_delay=10
           max_delay=300
 
           echo "Waiting for {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} to complete..."
