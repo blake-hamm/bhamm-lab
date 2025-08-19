@@ -207,24 +207,19 @@ spec:
                   - targets: ['minio-ceph-hl.ceph:9000', 'minio-nfs-hl.nfs:9000']
             ruleSelectorNilUsesHelmValues: false
             ruleSelector: {}
-            ruleNamespaceSelector:
-              any: true
+            ruleNamespaceSelector: {}
             serviceMonitorSelectorNilUsesHelmValues: false
             serviceMonitorSelector: {}
-            serviceMonitorNamespaceSelector:
-              any: true
+            serviceMonitorNamespaceSelector: {}
             podMonitorSelectorNilUsesHelmValues: false
             podMonitorSelector: {}
-            podMonitorNamespaceSelector:
-              any: true
+            podMonitorNamespaceSelector: {}
             probeSelectorNilUsesHelmValues: false
             probeSelector: {}
-            probeNamespaceSelector:
-              any: true
+            probeNamespaceSelector: {}
             scrapeConfigSelectorNilUsesHelmValues: false
             scrapeConfigSelector: {}
-            scrapeConfigNamespaceSelector:
-              any: true
+            scrapeConfigNamespaceSelector: {}
             storageSpec:
               volumeClaimTemplate:
                 metadata:
