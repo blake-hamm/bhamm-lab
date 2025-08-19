@@ -83,6 +83,11 @@ spec:
                   - name: loki-distributed-gateway
                     scheme: http
                     port: 80
+        k8up:
+          backup:
+            enabled: true
+          restore:
+            enabled: false
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
