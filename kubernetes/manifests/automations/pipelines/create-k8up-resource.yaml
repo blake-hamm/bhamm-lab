@@ -261,8 +261,10 @@ spec:
         source: |-
           set -euo pipefail
 
-          max_retries=30
-          delay=30
+          max_retries=23
+          delay=10
+          add_delay=10
+          max_delay=300
 
           echo "Waiting for {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} to complete..."
 
@@ -294,6 +296,11 @@ spec:
             fi
 
             sleep $delay
+            delay=$((delay + add_delay))
+            if [[ "$delay" -gt "$max_delay" ]]; then
+              delay=$max_delay
+            fi
+            echo "Sleeping for $delay seconds..."
           done
 
           echo "❌ Timeout waiting for resource to complete"
