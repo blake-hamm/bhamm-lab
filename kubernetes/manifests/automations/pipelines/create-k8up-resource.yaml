@@ -97,16 +97,6 @@ spec:
                   value: "{{inputs.parameters.k8up-bucket}}"
                 - name: k8up-secret
                   value: "{{inputs.parameters.k8up-secret}}"
-        - - name: wait-for-check
-            template: wait-for-k8up-resource
-            arguments:
-              parameters:
-                - name: target-namespace
-                  value: "{{inputs.parameters.target-namespace}}"
-                - name: kind
-                  value: "Check"
-                - name: k8up-name
-                  value: "{{inputs.parameters.k8up-name}}"
     - name: k8up-backup
       inputs:
         parameters:
@@ -132,16 +122,6 @@ spec:
                   value: "{{inputs.parameters.k8up-bucket}}"
                 - name: k8up-secret
                   value: "{{inputs.parameters.k8up-secret}}"
-        - - name: wait-for-backup
-            template: wait-for-k8up-resource
-            arguments:
-              parameters:
-                - name: target-namespace
-                  value: "{{inputs.parameters.target-namespace}}"
-                - name: kind
-                  value: "Backup"
-                - name: k8up-name
-                  value: "{{inputs.parameters.k8up-name}}"
     - name: k8up-prune
       inputs:
         parameters:
@@ -165,16 +145,6 @@ spec:
                   value: "{{inputs.parameters.k8up-bucket}}"
                 - name: k8up-secret
                   value: "{{inputs.parameters.k8up-secret}}"
-        - - name: wait-for-prune
-            template: wait-for-k8up-resource
-            arguments:
-              parameters:
-                - name: target-namespace
-                  value: "{{inputs.parameters.target-namespace}}"
-                - name: kind
-                  value: "Prune"
-                - name: k8up-name
-                  value: "{{inputs.parameters.k8up-name}}"
     - name: create-k8up-resource
       inputs:
         parameters:
@@ -186,6 +156,8 @@ spec:
           - name: k8up-secret
       resource:
         action: create
+        successCondition: "status != nil && len(filter(status.conditions, {#.type == 'Completed'})) > 0 && filter(status.conditions, {#.type == 'Completed'})[0].status == 'True' && filter(status.conditions, {#.type == 'Completed'})[0].reason == 'Succeeded'"
+        failureCondition: "status != nil && len(filter(status.conditions, {#.type == 'Completed'})) > 0 && filter(status.conditions, {#.type == 'Completed'})[0].reason == 'Failed'"
         manifest: |
           apiVersion: k8up.io/v1
           kind: "{{inputs.parameters.kind}}"
@@ -220,6 +192,8 @@ spec:
           - name: k8up-secret
       resource:
         action: create
+        successCondition: "status != nil && len(filter(status.conditions, {#.type == 'Completed'})) > 0 && filter(status.conditions, {#.type == 'Completed'})[0].status == 'True' && filter(status.conditions, {#.type == 'Completed'})[0].reason == 'Succeeded'"
+        failureCondition: "status != nil && len(filter(status.conditions, {#.type == 'Completed'})) > 0 && filter(status.conditions, {#.type == 'Completed'})[0].reason == 'Failed'"
         manifest: |
           apiVersion: k8up.io/v1
           kind: Prune
@@ -249,56 +223,6 @@ spec:
               keepWeekly: 1
               keepMonthly: 1
               keepYearly: 1
-    - name: wait-for-k8up-resource
-      inputs:
-        parameters:
-          - name: target-namespace
-          - name: kind
-          - name: k8up-name
-      script:
-        image: bitnami/kubectl:1.29
-        command: [bash]
-        source: |-
-          set -euo pipefail
-
-          max_retries=30
-          delay=30
-
-          echo "Waiting for {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} to complete..."
-
-          for i in $(seq 1 $max_retries); do
-            echo "Check attempt $i/$max_retries"
-
-            # Get the completion status
-            status=$(kubectl get {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} -n {{inputs.parameters.target-namespace}} -o jsonpath='{.status.conditions[?(@.type=="Completed")].status}' 2>/dev/null || echo "")
-            reason=$(kubectl get {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} -n {{inputs.parameters.target-namespace}} -o jsonpath='{.status.conditions[?(@.type=="Completed")].reason}' 2>/dev/null || echo "")
-
-            echo "Status: '$status', Reason: '$reason'"
-
-            if [[ "$status" == "True" && "$reason" == "Succeeded" ]]; then
-              echo "✅ Resource completed successfully!"
-              exit 0
-            elif [[ "$reason" == "Failed" ]]; then
-              echo "❌ Resource failed!"
-              kubectl get {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} -n {{inputs.parameters.target-namespace}} -o yaml
-              exit 1
-            elif [[ -n "$status" ]]; then
-              echo "⚠️ Resource has completed condition but unexpected state: status=$status, reason=$reason"
-              if [[ "$i" -eq "$max_retries" ]]; then
-                echo "❌ Max retries reached with unexpected state"
-                kubectl get {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} -n {{inputs.parameters.target-namespace}} -o yaml
-                exit 1
-              fi
-            else
-              echo "⏳ Resource still running (no Completed condition yet)..."
-            fi
-
-            sleep $delay
-          done
-
-          echo "❌ Timeout waiting for resource to complete"
-          kubectl get {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} -n {{inputs.parameters.target-namespace}} -o yaml
-          exit 1
     - name: full-k8up-restore
       inputs:
         parameters:
@@ -343,18 +267,6 @@ spec:
                   value: "{{item.pvc}}"
                 - name: fsGroup
                   value: "{{inputs.parameters.fsGroup}}"
-          - name: wait-for-restore
-            dependencies: [create-restore]
-            withParam: "{{tasks.list-snapshots.outputs.parameters.pvc-snapshot-map}}"
-            template: wait-for-k8up-resource
-            arguments:
-              parameters:
-                - name: target-namespace
-                  value: "{{inputs.parameters.target-namespace}}"
-                - name: k8up-name
-                  value: "{{inputs.parameters.location}}-{{item.pvc}}"
-                - name: kind
-                  value: "Restore"
     - name: list-pvc-snapshots
       inputs:
         parameters:
@@ -407,6 +319,8 @@ spec:
           - name: fsGroup
       resource:
         action: create
+        successCondition: "status != nil && len(filter(status.conditions, {#.type == 'Completed'})) > 0 && filter(status.conditions, {#.type == 'Completed'})[0].status == 'True' && filter(status.conditions, {#.type == 'Completed'})[0].reason == 'Succeeded'"
+        failureCondition: "status != nil && len(filter(status.conditions, {#.type == 'Completed'})) > 0 && filter(status.conditions, {#.type == 'Completed'})[0].reason == 'Failed'"
         manifest: |
           apiVersion: k8up.io/v1
           kind: Restore
