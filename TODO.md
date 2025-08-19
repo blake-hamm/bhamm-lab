@@ -1,33 +1,3 @@
-# Stabilize seaweedfs backups
-x Decide architecture
-x Ensure seaweedfs is paused during backup
-x After backup sync argocd
-x Refactor seaweedfs backup to cluster workflow templates
-  x Create k8up resource template
-  x Adjust common helm to leverage argo
-  - Setup stable s3 credentials (stretch)
-  x Test k8up restore with blue seaweedfs
-    x Ensure argo workflow rbac
-  x Setup blue cluster
-    x Immich
-    x Jellyfinn
-    x Servarr
-    x Enable Backups (common all)
-    x Confirm blue common backups (swfs)
-    x Merge with main so that blue = main
-    x Forgejo
-    x Confirm swfs backups
-  x Ensure cnpg restore has backup plan
-x Blue deployment (and switch)
-  x Restore seaweedfs w/out snapshot - https://github.com/k8up-io/k8up/issues/867
-  x Ensure common k8up restores don't need snapshot
-  x PR to main (for common enhancements)
-x Green deployment on feature/finalize-dr
-  x Ensure base restore
-  x Ensure core restore
-  x Ensure apps restore
-x Update DR docs (k8up/restic snapshots)
-
 # Fix cephfs
 - Install fuse3 on talos worker images
 - Leverage fuse3 features in cephfs storage class
@@ -231,6 +201,36 @@ Date: Sun, 04 May 2025 00:00:01 -0600
 - kube bench - https://github.com/aquasecurity/kube-bench
 
 ## Previous
+# Stabilize seaweedfs backups
+x Decide architecture
+x Ensure seaweedfs is paused during backup
+x After backup sync argocd
+x Refactor seaweedfs backup to cluster workflow templates
+  x Create k8up resource template
+  x Adjust common helm to leverage argo
+  - Setup stable s3 credentials (stretch)
+  x Test k8up restore with blue seaweedfs
+    x Ensure argo workflow rbac
+  x Setup blue cluster
+    x Immich
+    x Jellyfinn
+    x Servarr
+    x Enable Backups (common all)
+    x Confirm blue common backups (swfs)
+    x Merge with main so that blue = main
+    x Forgejo
+    x Confirm swfs backups
+  x Ensure cnpg restore has backup plan
+x Blue deployment (and switch)
+  x Restore seaweedfs w/out snapshot - https://github.com/k8up-io/k8up/issues/867
+  x Ensure common k8up restores don't need snapshot
+  x PR to main (for common enhancements)
+x Green deployment on feature/finalize-dr
+  x Ensure base restore
+  x Ensure core restore
+  x Ensure apps restore
+x Update DR docs (k8up/restic snapshots)
+
 # Polish
 x Adjust common ingress route sync
 x Ensure base has authelia, treafik, lldap, certs as well

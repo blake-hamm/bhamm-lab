@@ -205,21 +205,11 @@ spec:
                   insecure_skip_verify: true
                 static_configs:
                   - targets: ['minio-ceph-hl.ceph:9000', 'minio-nfs-hl.nfs:9000']
-            scrapeConfigSelector:
-              matchExpressions:
-                - key: release
-                  operator: In
-                  values: [monitor, kube-prometheus-stack]
-            serviceMonitorSelector:
-              matchExpressions:
-                - key: release
-                  operator: In
-                  values: [monitor, kube-prometheus-stack]
-            podMonitorSelector:
-              matchExpressions:
-                - key: release
-                  operator: In
-                  values: [monitor, kube-prometheus-stack]
+            ruleSelectorNilUsesHelmValues: false
+            serviceMonitorSelectorNilUsesHelmValues: false
+            podMonitorSelectorNilUsesHelmValues: false
+            probeSelectorNilUsesHelmValues: false
+            scrapeConfigSelectorNilUsesHelmValues: false
             storageSpec:
               volumeClaimTemplate:
                 metadata:
