@@ -214,6 +214,8 @@ spec:
               volumeClaimTemplate:
                 metadata:
                   name: prometheus
+                  annotations:
+                    k8up.io/backup: "true"
                 spec:
                   accessModes: ["ReadWriteOnce"]
                   resources:
