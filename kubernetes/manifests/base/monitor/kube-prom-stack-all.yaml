@@ -206,10 +206,25 @@ spec:
                 static_configs:
                   - targets: ['minio-ceph-hl.ceph:9000', 'minio-nfs-hl.nfs:9000']
             ruleSelectorNilUsesHelmValues: false
+            ruleSelector: {}
+            ruleNamespaceSelector:
+              any: true
             serviceMonitorSelectorNilUsesHelmValues: false
+            serviceMonitorSelector: {}
+            serviceMonitorNamespaceSelector:
+              any: true
             podMonitorSelectorNilUsesHelmValues: false
+            podMonitorSelector: {}
+            podMonitorNamespaceSelector:
+              any: true
             probeSelectorNilUsesHelmValues: false
+            probeSelector: {}
+            probeNamespaceSelector:
+              any: true
             scrapeConfigSelectorNilUsesHelmValues: false
+            scrapeConfigSelector: {}
+            scrapeConfigNamespaceSelector:
+              any: true
             storageSpec:
               volumeClaimTemplate:
                 metadata:
