@@ -255,7 +255,7 @@ data:
       - title: PVC
         description: View pvc grafana dashboard
         icon: https://raw.githubusercontent.com/kubernetes/community/b51e2a3bce5d115b138df9d49c1ba8017cffdd45/icons/svg/resources/labeled/pvc.svg
-        url: https://grafana.bhamm-lab.com/d/919b92a8e8041bd567af9edab12c840c/kubernetes-persistent-volumes?orgId=1&from=now-24h&to=now&timezone=America%2FDenver&var-datasource=default&var-cluster=&var-namespace=authelia&var-volume=authelia-postgresql-1&refresh=10s
+        url: https://grafana.bhamm-lab.com/d/919b92a8e8041bd567af9edab12c840c/kubernetes-persistent-volumes?orgId=1&from=now-2d&to=now&timezone=America%2FDenver&var-datasource=default&var-cluster=&var-namespace=git&var-volume=gitea-shared-storage&refresh=10s
         statusCheck: false
       - title: NFS
         description: View nfs grafana dashboard
@@ -266,4 +266,9 @@ data:
         description: View k8up backup dashboard
         icon: mdi-backup-restore
         url: https://grafana.bhamm-lab.com/d/b11899bb-52b1-4f0a-a434-b5420d4541ab/k8up?orgId=1&from=now-7d&to=now&timezone=browser&var-namespace=$__all
+        statusCheck: false
+      - title: cnpg
+        description: View cnpg dashboard
+        icon: hl-postgres
+        url: https://grafana.bhamm-lab.com/d/cloudnative-pg/cloudnativepg?orgId=1&from=now-2d&to=now&timezone=browser&var-DS_PROMETHEUS=prometheus&var-operatorNamespace=cnpg-system&var-namespace=authelia&var-cluster=authelia-postgresql&var-instances=$__all&refresh=30s
         statusCheck: false
