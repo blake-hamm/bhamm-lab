@@ -29,6 +29,7 @@ spec:
               enabled: false
         alertmanager:
           enabled: true
+          externalUrl: https://alertmanager.bhamm-lab.com
         grafana:
           enabled: true
           defaultDashboardsTimezone: America/Denver
