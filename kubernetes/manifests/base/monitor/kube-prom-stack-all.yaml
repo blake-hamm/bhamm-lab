@@ -162,6 +162,7 @@ spec:
           fullnameOverride: "prometheus"
         prometheus:
           prometheusSpec:
+            externalUrl: https://prometheus.bhamm-lab.com
             additionalScrapeConfigs:
               - job_name: opnsense
                 static_configs:
