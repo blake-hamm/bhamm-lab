@@ -179,34 +179,6 @@ spec:
                       - '10.0.20.11:9283' # Aorus
                       - '10.0.20.12:9283' # Antsle
                       - '10.0.20.13:9283' # Super
-              - job_name: minio-job
-                metrics_path: /minio/v2/metrics/cluster
-                scheme: https
-                tls_config:
-                  insecure_skip_verify: true
-                static_configs:
-                  - targets: ['minio-ceph-hl.ceph:9000', 'minio-nfs-hl.nfs:9000']
-              - job_name: minio-job-node
-                metrics_path: /minio/v2/metrics/node
-                scheme: https
-                tls_config:
-                  insecure_skip_verify: true
-                static_configs:
-                  - targets: ['minio-ceph-hl.ceph:9000', 'minio-nfs-hl.nfs:9000']
-              - job_name: minio-job-bucket
-                metrics_path: /minio/v2/metrics/bucket
-                scheme: https
-                tls_config:
-                  insecure_skip_verify: true
-                static_configs:
-                  - targets: ['minio-ceph-hl.ceph:9000', 'minio-nfs-hl.nfs:9000']
-              - job_name: minio-job-resource
-                metrics_path: /minio/v2/metrics/resource
-                scheme: https
-                tls_config:
-                  insecure_skip_verify: true
-                static_configs:
-                  - targets: ['minio-ceph-hl.ceph:9000', 'minio-nfs-hl.nfs:9000']
             ruleSelectorNilUsesHelmValues: false
             serviceMonitorSelectorNilUsesHelmValues: false
             podMonitorSelectorNilUsesHelmValues: false
