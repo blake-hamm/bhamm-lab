@@ -22,12 +22,9 @@
 
 # Prep for exposure
 - Add kubernetes metrics
-- Switch from dev/prod to blue/green
-- Refactor gitea actions as argo workflows
 - Traefik
-  - setup new ip for dmz
-  - block *.bhamm-lab.com from public
-  - Setup split dns (wildcard internal, www. dmz)
+  - Setup new traefik instance (external)
+  - Setup cloudflare tunnel - https://github.com/adyanth/cloudflare-operator/blob/main/docs/getting-started.md
 
 # Expose bhamm-lab.com
 - Setup alerts for nodes and traefik
