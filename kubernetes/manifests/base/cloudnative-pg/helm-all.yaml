@@ -13,7 +13,7 @@ spec:
   source:
     chart: cloudnative-pg
     repoURL: https://cloudnative-pg.github.io/charts
-    targetRevision: v0.24.0
+    targetRevision: v0.26.1
     helm:
       valuesObject:
         additionalEnv:
