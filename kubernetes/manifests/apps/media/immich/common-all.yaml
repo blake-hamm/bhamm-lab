@@ -28,6 +28,10 @@ spec:
                   - name: immich-server
                     port: 2283
                     scheme: http
+        pvc:
+          - name: immich-library
+            storageSize: 500Gi
+            storageClassName: nfs-csi
         k8up:
           backup:
             enabled: true

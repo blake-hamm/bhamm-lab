@@ -17,7 +17,7 @@ spec:
     helm:
       valuesObject:
         image:
-          tag: v1.135.3
+          tag: v1.139.2
         immich:
           metrics:
             enabled: true
@@ -54,10 +54,6 @@ spec:
             value: America/Denver
           - name: UPLOAD_LOCATION
             value: /usr/src/app/upload
-          - name: IMMICH_MEDIA_LOCATION
-            value: /upload
-          - name: IMMICH_IGNORE_MOUNT_CHECK_ERRORS
-            value: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

@@ -1,6 +1,10 @@
 # Intel arc
 x Ensure common helm can reate pvc
-- (remove creation from immich, servarr, harbor, git)
+- Remove auto creation from:
+  x servarr
+  - immich
+  - harbor
+  - git
 - Test in blue
 - Fix immich pvc and library (use latest image)
 
