@@ -41,7 +41,7 @@ spec:
         pvc:
           - name: test
             accessMode: "ReadWriteOnce"
-            storage: 1Gi
+            storageSize: 1Gi
             storageClassName: "csi-rbd-sc"
         k8up:
           backup:

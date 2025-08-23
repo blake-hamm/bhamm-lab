@@ -17,6 +17,6 @@ spec:
   storageClassName: {{ .storageClassName | default "csi-rbd-sc" }}
   resources:
     requests:
-      storage: {{ .storage | default "1Gi" }}
+      storage: {{ .storageSize | default "1Gi" }}
 {{- end }}
 {{- end -}}
