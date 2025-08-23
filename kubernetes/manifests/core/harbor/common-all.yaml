@@ -25,6 +25,10 @@ spec:
           restore:
             enabled: true
             pathVersion: "v1.1"
+        pvc:
+          - name: harbor-jobservice
+          - name: harbor-registry
+            storageSize: 5Gi
         k8up:
           backup:
             enabled: true

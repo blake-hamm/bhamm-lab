@@ -2,8 +2,8 @@
 x Ensure common helm can reate pvc
 - Remove auto creation from:
   x servarr
-  - immich
-  - harbor
+  x immich
+  x harbor
   - git
 - Test in blue
 - Fix immich pvc and library (use latest image)
