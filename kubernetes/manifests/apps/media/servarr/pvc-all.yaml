@@ -16,21 +16,6 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: jellyfin-config
-  namespace: servarr
-  annotations:
-    argocd.argoproj.io/sync-wave: "19"
-    k8up.io/backup: "true"
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
   name: unpackerr-config
   namespace: servarr
   annotations:
