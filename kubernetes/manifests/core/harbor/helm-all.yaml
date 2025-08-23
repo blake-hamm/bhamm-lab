@@ -27,6 +27,7 @@ spec:
           enabled: true
           persistentVolumeClaim:
             registry:
+              size: 20Gi
               annotations:
                 k8up.io/backup: "true"
             jobservice:
