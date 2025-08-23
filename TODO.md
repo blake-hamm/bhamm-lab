@@ -1,5 +1,5 @@
 # Intel arc
-- Ensure common helm can reate pvc
+x Ensure common helm can reate pvc
 - (remove creation from immich, servarr, harbor, git)
 - Test in blue
 - Fix immich pvc and library (use latest image)
