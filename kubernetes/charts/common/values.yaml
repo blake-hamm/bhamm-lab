@@ -44,3 +44,8 @@ postgresql:
     enabled: false
     pathVersion: "v1"
     retention: "30d"
+pvc: []
+# - name: my-pvc-1
+#   storage: 10Gi
+#   storageClassName: local-path
+#   accessMode: ReadWriteOnce
