@@ -5,7 +5,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ .name }}
-  namespace: {{ .Values.name }}
+  namespace: {{ $.Values.name }}
   annotations:
     argocd.argoproj.io/sync-wave: "1"
     {{- if $.Values.k8up.backup.enabled }}
