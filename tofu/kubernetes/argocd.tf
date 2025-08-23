@@ -39,7 +39,6 @@ spec:
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
-      - ServerSideApply=true
     automated:
       prune: true
       selfHeal: true
@@ -49,6 +48,5 @@ spec:
         duration: 5s
         factor: 2
         maxDuration: 10m
-
 YAML
 }
