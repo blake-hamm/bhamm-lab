@@ -27,9 +27,8 @@ spec:
           enabled: true
           persistentVolumeClaim:
             registry:
-              annotations:
-                k8up.io/backup: "true"
-            jobservice:
+              existingClaim: "harbor-registry"
+            trivy:
               annotations:
                 k8up.io/backup: "true"
           imageChartStorage:
