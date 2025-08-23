@@ -28,8 +28,7 @@ spec:
               lbipam.cilium.io/sharing-cross-namespace: "*"
         persistence:
           enabled: true
-          annotations:
-            k8up.io/backup: "true"
+          create: false
         gitea:
           oauth:
             - name: 'authelia'

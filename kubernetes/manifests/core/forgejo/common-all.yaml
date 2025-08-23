@@ -28,6 +28,9 @@ spec:
               remoteRef:
                 key: /default/gitea
                 property: oidc_client_secret
+        pvc:
+          - name: gitea-shared-storage
+            storageSize: 10Gi
         k8up:
           backup:
             enabled: true

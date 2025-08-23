@@ -4,7 +4,7 @@ x Ensure common helm can reate pvc
   x servarr
   x immich
   x harbor
-  - git
+  x git
 - Test in blue
 - Fix immich pvc and library (use latest image)
 
