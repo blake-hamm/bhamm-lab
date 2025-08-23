@@ -1,5 +1,5 @@
 global:
-  domain: ${domain}
+  domain: argocd.bhamm-lab.com
 controller:
   replicas: 1
 server:
@@ -11,7 +11,9 @@ repoServer:
 configs:
   params:
     server.insecure: true
-    controller.sync.timeout.seconds: 300
+    controller.sync.timeout.seconds: 900
+    controller.status.processors: 50
+    controller.operation.processors: 30
   rbac:
     policy.default: 'role:admin'
     policy.csv: |
@@ -22,6 +24,22 @@ configs:
       p, role:admin, exec, create, */*, allow
       g, oidc:lldap_admin, role:admin
   cm:
+    oidc.config: |
+      name: Authelia
+      issuer: https://auth.bhamm-lab.com
+      clientID: argocd
+      clientSecret: $argocd-external-secret:oidc_client_secret
+      cliClientID: 'argocd-cli'
+      requestedScopes:
+        - 'openid'
+        - 'profile'
+        - 'email'
+        - 'groups'
+      requestedIDTokenClaims:
+        groups:
+          essential: true
+    server.session.cookie.sameSite: "None"
+    server.session.cookie.secure: "true"
     resource.exclusions: |
       - apiGroups:
         - velero.io
@@ -33,6 +51,23 @@ configs:
         - "CiliumIdentity"
         clusters:
         - "*"
+    resource.customizations.health.argoproj.io_Workflow: |
+      hs = {}
+      if obj.status ~= nil and obj.status.phase ~= nil then
+        if obj.status.phase == "Succeeded" then
+          hs.status = "Healthy"
+          hs.message = obj.status.phase
+          return hs
+        end
+        if obj.status.phase == "Failed" or obj.status.phase == "Error" then
+          hs.status = "Degraded"
+          hs.message = obj.status.phase
+          return hs
+        end
+      end
+      hs.status = "Progressing"
+      hs.message = "Waiting for workflow to complete"
+      return hs
     resource.customizations.health.argoproj.io_Application: |
       hs = {}
       hs.status = "Progressing"
