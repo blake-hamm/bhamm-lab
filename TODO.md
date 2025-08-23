@@ -1,3 +1,8 @@
+# Intel arc
+- Ensure common helm can reate pvc
+- (remove creation from immich, servarr, harbor, git)
+- Test in blue
+
 # Fix cephfs
 - Install fuse3 on talos worker images
 - Leverage fuse3 features in cephfs storage class
