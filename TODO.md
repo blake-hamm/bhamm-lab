@@ -2,6 +2,7 @@
 - Ensure common helm can reate pvc
 - (remove creation from immich, servarr, harbor, git)
 - Test in blue
+- Fix immich pvc and library (use latest image)
 
 # Fix cephfs
 - Install fuse3 on talos worker images
