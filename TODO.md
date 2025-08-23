@@ -2,9 +2,11 @@
 x Ensure common helm can reate pvc
 - Remove auto creation from:
   x servarr
-  x immich
-  x harbor
-  x git
+  - immich
+  - harbor
+  - git
+  - seaweedfs
+- Setup harbor image cache for talos
 - Test in blue
 - Fix immich pvc and library (use latest image)
 
