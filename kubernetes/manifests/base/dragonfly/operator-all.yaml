@@ -21,7 +21,7 @@ spec:
         grafanaDashboard:
           enabled: true
           labels:
-            grafana_dashboard: "1"
+            grafana_dashboard: 1
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
