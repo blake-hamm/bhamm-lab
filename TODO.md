@@ -7,6 +7,7 @@ x Remove pvc creation from:
   x git
 x Setup harbor image cache for talos
 - Test in blue
+- Create immich custom helm chart following docker compose
 - Fix immich pvc and library (use latest image)
 
 # Fix cephfs
