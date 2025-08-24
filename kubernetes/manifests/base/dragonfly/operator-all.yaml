@@ -20,6 +20,8 @@ spec:
           enabled: true
         grafanaDashboard:
           enabled: true
+          labels:
+            grafana_dashboard: "1"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
