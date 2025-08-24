@@ -280,8 +280,8 @@ spec:
                   access_token_signed_response_alg: 'none'
                   userinfo_signed_response_alg: 'none'
                   token_endpoint_auth_method: 'client_secret_basic'
-                - client_id: 'argoworkflows'
-                  client_name: 'Argo Workflows'
+                - client_id: 'argo'
+                  client_name: 'Argo'
                   client_secret: '$pbkdf2-sha512$310000$MxhhAocEQWNmHNKyLIE7Sg$CCf6xcnDFpaBVskhImasp51322SthPsytptHpuXA/oUae7xpsXj7xUwU8A85qi7H7TR7SdmmVBquK9V5YXWXqg'
                   public: false
                   authorization_policy: 'two_factor'
