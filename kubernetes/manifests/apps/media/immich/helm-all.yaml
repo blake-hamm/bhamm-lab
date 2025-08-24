@@ -54,6 +54,8 @@ spec:
             value: America/Denver
           - name: UPLOAD_LOCATION
             value: /usr/src/app/upload
+          - name: IMMICH_IGNORE_MOUNT_CHECK_ERRORS
+            value: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
