@@ -6,7 +6,8 @@ x Remove pvc creation from:
   x harbor
   x git
 x Setup harbor image cache for talos
-- Test in blue
+x Test in blue
+- Install dragonfly operator
 - Create immich custom helm chart following docker compose
 - Fix immich pvc and library (use latest image)
 

@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dragonflydb
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  destination:
+    namespace: dragonflydb
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: dragonfly-operator
+    repoURL: https://dragonflydb.github.io/dragonfly-operator/charts
+    targetRevision: v1.2.1
+    helm:
+      valuesObject:
+        serviceMonitor:
+          enabled: true
+        grafanaDashboard:
+          enabled: true
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
