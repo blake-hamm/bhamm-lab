@@ -11,8 +11,8 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    chart: dragonfly
-    repoURL: ghcr.io/dragonflydb/dragonfly/helm/dragonfly
+    repoURL: https://github.com/dragonflydb/dragonfly-operator.git
+    path: charts/dragonfly-operator
     targetRevision: v1.2.1
     helm:
       valuesObject:
