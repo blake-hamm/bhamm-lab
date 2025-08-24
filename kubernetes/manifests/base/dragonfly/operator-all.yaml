@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     chart: dragonfly
-    repoURL: oci://ghcr.io/dragonflydb/dragonfly/helm/dragonfly
+    repoURL: ghcr.io/dragonflydb/dragonfly/helm/dragonfly
     targetRevision: v1.2.1
     helm:
       valuesObject:
