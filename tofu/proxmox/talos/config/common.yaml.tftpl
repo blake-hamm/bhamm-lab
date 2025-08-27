@@ -2,6 +2,12 @@ machine:
   nodeLabels:
     topology.kubernetes.io/region: ${cluster_name}
     topology.kubernetes.io/zone: ${node_name}
+%{ if taint != null }
+  kubelet:
+    extraConfig:
+      registerWithTaints:
+        - "${taint}=true:NoSchedule"
+%{ endif }
   network:
     hostname: ${hostname}
     interfaces:
