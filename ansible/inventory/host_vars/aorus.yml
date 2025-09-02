@@ -66,7 +66,7 @@ snapraid_content_files:
   - /var/snapraid.content
 # https://github.com/geerlingguy/ansible-role-nfs
 nfs_exports:
-  - /mnt/storage/kubernetes 10.0.30.0/24(rw,sync,subtree_check,no_root_squash,fsid=1)
+  - /mnt/storage/kubernetes 10.0.30.0/24(rw,sync,no_subtree_check,no_root_squash,fsid=1)
 # Install pbs
 pve_pcie_passthrough_enabled: true
 pve_iommu_passthrough_mode: true
