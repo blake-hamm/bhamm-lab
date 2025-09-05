@@ -48,6 +48,7 @@ data "talos_machine_configuration" "this" {
       mtu          = var.mtu
       gateway      = var.network_gateway
       vip          = each.value.vip
+      taint        = try(each.value.taint, "")
     }), each.value.machine_type == "controlplane" ?
     templatefile("${path.module}/config/master.yaml.tftpl", {
       # kubelet = var.cluster.kubelet

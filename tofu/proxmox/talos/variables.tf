@@ -48,7 +48,7 @@ variable "proxmox_nodes" {
   }))
   default = [
     { name = "super", multiplier = 1.6 },
-    { name = "aorus", multiplier = 1.4 },
+    { name = "aorus", multiplier = 1 },
     { name = "antsle", multiplier = 1 },
   ]
 }
@@ -179,4 +179,16 @@ variable "extra_manifests" {
   description = "Extra kubernetes manifests to deploy."
   type        = list(string)
   default     = []
+}
+
+variable "enable_intel_gpu_worker" {
+  description = "Enable the creation of an Intel GPU worker node."
+  type        = bool
+  default     = false
+}
+
+variable "intel_gpu_worker_id" {
+  description = "The PCI ID of the Intel GPU for passthrough."
+  type        = string
+  default     = "0000:08:00.0"
 }

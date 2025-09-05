@@ -4,13 +4,13 @@ resource "proxmox_virtual_environment_vm" "this" {
   name      = each.value.hostname
   node_name = each.value.host_node
   vm_id     = each.value.vm_id
-  tags = [
+  tags = toset(concat([
     "talos",
     "tofu",
     var.environment,
     each.value.machine_type,
     each.value.host_node,
-  ]
+  ], each.value.taint != null ? [each.value.taint] : []))
   machine       = "q35"
   scsi_hardware = "virtio-scsi-single"
   bios          = "seabios"
@@ -23,6 +23,16 @@ resource "proxmox_virtual_environment_vm" "this" {
   agent {
     enabled = true
     trim    = true
+  }
+
+  dynamic "hostpci" {
+    for_each = each.value.taint == "intel-gpu" ? [0] : []
+    content {
+      device = "hostpci0"
+      id     = var.intel_gpu_worker_id
+      pcie   = true
+      rombar = true
+    }
   }
 
   cpu {
@@ -52,7 +62,7 @@ resource "proxmox_virtual_environment_vm" "this" {
     ssd          = true
     file_format  = "raw"
     size         = each.value.disk_size
-    file_id      = proxmox_virtual_environment_download_file.this.id
+    file_id      = each.value.taint == "intel-gpu" ? proxmox_virtual_environment_download_file.intel_gpu[0].id : proxmox_virtual_environment_download_file.this.id
   }
 
   dynamic "disk" {

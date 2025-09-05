@@ -4,7 +4,7 @@ metadata:
   name: harbor
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "19"
+    argocd.argoproj.io/sync-wave: "20"
 spec:
   destination:
     namespace: harbor
@@ -27,10 +27,8 @@ spec:
           enabled: true
           persistentVolumeClaim:
             registry:
-              size: 20Gi
-              annotations:
-                k8up.io/backup: "true"
-            jobservice:
+              existingClaim: "harbor-registry"
+            trivy:
               annotations:
                 k8up.io/backup: "true"
           imageChartStorage:

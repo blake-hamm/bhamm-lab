@@ -1,0 +1,22 @@
+{{- if .Values.pvc -}}
+{{- range .Values.pvc }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    {{- if $.Values.k8up.backup.enabled }}
+    k8up.io/backup: "true"
+    {{- end }}
+spec:
+  accessModes:
+    - {{ .accessMode | default "ReadWriteOnce" }}
+  storageClassName: {{ .storageClassName | default "csi-rbd-sc" }}
+  resources:
+    requests:
+      storage: {{ .storageSize | default "1Gi" }}
+{{- end }}
+{{- end -}}

@@ -5,7 +5,7 @@ resource "helm_release" "argocd" {
   name             = "argocd"
   repository       = "https://argoproj.github.io/argo-helm"
   chart            = "argo-cd"
-  version          = "7.8.2"
+  version          = "8.2.7"
   namespace        = "argocd"
   create_namespace = true
   values = [
@@ -39,7 +39,6 @@ spec:
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
-      - ServerSideApply=true
     automated:
       prune: true
       selfHeal: true
@@ -49,6 +48,5 @@ spec:
         duration: 5s
         factor: 2
         maxDuration: 10m
-
 YAML
 }

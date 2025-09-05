@@ -5,23 +5,6 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "9"
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: test
-  namespace: test
-  labels:
-    app: test
-  annotations:
-    argocd.argoproj.io/sync-wave: "10"
-    k8up.io/backup: "true"
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:

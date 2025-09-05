@@ -1,3 +1,16 @@
+# Intel arc
+x Ensure common helm can reate pvc
+x Remove pvc creation from:
+  x servarr
+  x immich
+  x harbor
+  x git
+x Setup harbor image cache for talos
+x Test in blue
+- Install dragonfly operator
+- Create immich custom helm chart following docker compose
+- Fix immich pvc and library (use latest image)
+
 # Fix cephfs
 - Install fuse3 on talos worker images
 - Leverage fuse3 features in cephfs storage class
@@ -22,12 +35,9 @@
 
 # Prep for exposure
 - Add kubernetes metrics
-- Switch from dev/prod to blue/green
-- Refactor gitea actions as argo workflows
 - Traefik
-  - setup new ip for dmz
-  - block *.bhamm-lab.com from public
-  - Setup split dns (wildcard internal, www. dmz)
+  - Setup new traefik instance (external)
+  - Setup cloudflare tunnel - https://github.com/adyanth/cloudflare-operator/blob/main/docs/getting-started.md
 
 # Expose bhamm-lab.com
 - Setup alerts for nodes and traefik
