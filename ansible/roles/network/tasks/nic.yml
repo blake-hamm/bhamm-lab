@@ -67,18 +67,3 @@
   loop:
     - {name: net.core.rmem_max, value: 16777216}
     - {name: net.core.wmem_max, value: 16777216}
-- name: Install cpufrequtils
-  ansible.builtin.apt:
-    name: cpufrequtils
-    state: present
-- name: Set CPU performance governor
-  ansible.builtin.lineinfile:
-    path: /etc/default/cpufrequtils
-    regexp: '^GOVERNOR='
-    line: 'GOVERNOR="performance"'
-    state: present
-    create: true
-    owner: root
-    group: root
-    mode: '0644'
-  notify: Restart cpufrequtils

@@ -1,4 +1,4 @@
-network_10gb_nics: [enp4s0f0, enp4s0f1]
+network_10gb_nics: [enp65s0f0, enp65s0f1]
 network_nameservers:
   - 10.0.20.1
   - 9.9.9.9
@@ -6,30 +6,30 @@ network_nameservers:
 # proxmox_reset_ceph: true
 ceph_device: /dev/nvme0n1
 # https://github.com/AerisCloud/ansible-disk
-# disk_enable_partioning: false
+# disk_enable_partioning: true
 # disk_additional_disks:
-#   # 4 tb ssd
-#   - disk: /dev/disk/by-id/ata-SAMSUNG_MZ7L33T8HBLT-00A07_S6ERNT0WB00833
+#   # 4 tb ssd - /dev/disk/by-id/ata-SAMSUNG_MZ7L33T8HBLT-00A07_S6ERNT0WB00833
+#   - disk: /dev/sda
 #     fstype: xfs
 #     mount_options: defaults,noatime,nodiratime,discard,nofail
 #     mount: /mnt/parity1
-#   # 4 tb ssd
-#   - disk: /dev/disk/by-id/ata-SAMSUNG_MZ7L33T8HBLT-00A07_S6ERNT0WB00736
+#   # 4 tb ssd - /dev/disk/by-id/ata-SAMSUNG_MZ7L33T8HBLT-00A07_S6ERNT0WB00736
+#   - disk: /dev/sdc
 #     fstype: xfs
 #     mount_options: defaults,noatime,nodiratime,discard,nofail
 #     mount: /mnt/data1
-#   # 2 tb ssd
-#   - disk: /dev/disk/by-id/ata-PNY_CS900_2TB_SSD_PNY225122122301009C8
+#   # 2 tb ssd - /dev/disk/by-id/ata-PNY_CS900_2TB_SSD_PNY225122122301009C8
+#   - disk: /dev/sdf
 #     fstype: xfs
 #     mount_options: defaults,noatime,nodiratime,discard,nofail
 #     mount: /mnt/data2
-#   # 2 tb ssd
-#   - disk: /dev/disk/by-id/ata-PNY_CS900_2TB_SSD_PNY225122122301009CB
+#   # 2 tb ssd - /dev/disk/by-id/ata-PNY_CS900_2TB_SSD_PNY225122122301009CB
+#   - disk: /dev/sde
 #     fstype: xfs
 #     mount_options: defaults,noatime,nodiratime,discard,nofail
 #     mount: /mnt/data3
-#   # 1 tb ssd
-#   - disk: /dev/disk/by-id/ata-CT1000BX500SSD1_2308E6B0E700
+#   # 1 tb ssd - /dev/disk/by-id/ata-CT1000BX500SSD1_2308E6B0E700
+#   - disk: /dev/sdd
 #     fstype: xfs
 #     mount_options: defaults,noatime,nodiratime,discard,nofail
 #     mount: /mnt/data4
@@ -73,11 +73,11 @@ pve_iommu_passthrough_mode: true
 pve_iommu_unsafe_interrupts: false
 pve_mediated_devices_enabled: false
 pve_pcie_ovmf_enabled: false
-pve_pci_device_ids:
-  - id: "1002:744c"
-  - id: "1002:ab30"
-  - id: "8086:56a6"
-  - id: "8086:4f92"
+# pve_pci_device_ids:
+#   - id: "1002:744c"
+#   - id: "1002:ab30"
+#   - id: "8086:56a6"
+#   - id: "8086:4f92"
 pve_vfio_blacklist_drivers:
   - name: "radeon"
   - name: "amdgpu"
