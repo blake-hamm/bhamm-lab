@@ -1,3 +1,7 @@
+# Method integration
+x Fix ceph fs
+- Refactor tofu config to leverage method node for talos
+
 # Intel arc
 x Ensure common helm can reate pvc
 x Remove pvc creation from:

@@ -5,7 +5,7 @@ provider "proxmox" {
     agent    = true
     username = "root"
     node {
-      name    = "aorus"
+      name    = "method"
       address = "10.0.20.11"
       port    = "4185"
     }
