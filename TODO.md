@@ -1,5 +1,6 @@
 # Method integration
 x Fix ceph fs
+- Adjust gitops cnpg backup versions
 - Refactor tofu config to leverage method node for talos
 
 # Intel arc

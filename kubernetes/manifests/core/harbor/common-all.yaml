@@ -21,10 +21,10 @@ spec:
           enabled: true
           backup:
             enabled: true
-            pathVersion: "v1.2"
+            pathVersion: "v1.3"
           restore:
             enabled: true
-            pathVersion: "v1.1"
+            pathVersion: "v1.2"
         pvc:
           - name: harbor-registry
             storageSize: 50Gi
