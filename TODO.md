@@ -1,7 +1,15 @@
 # Method integration
 x Fix ceph fs
-- Adjust gitops cnpg backup versions
-- Refactor tofu config to leverage method node for talos
+- Permamently delete blue talos nodes
+- Recover blue cluster
+  - Delete all nfs pvc
+  - Restore nfs
+  - Ensure local backup
+- Ensure successful blue cluster offsite backup
+x Refactor tofu config to leverage method node for talos
+x Adjust gitops cnpg backup versions
+- Deploy green cluster
+- Reduce frequency of cnpg and k8up onsite backups
 
 # Intel arc
 x Ensure common helm can reate pvc
