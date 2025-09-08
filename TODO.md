@@ -1,9 +1,8 @@
 # Method integration
 x Fix ceph fs
-- Permamently delete blue talos nodes
-- Recover blue cluster
-  - Delete all nfs pvc
-  - Restore nfs
+x Recover blue cluster
+  x Delete all nfs pvc
+  x Restore nfs
   - Ensure local backup
 - Ensure successful blue cluster offsite backup
 x Refactor tofu config to leverage method node for talos
