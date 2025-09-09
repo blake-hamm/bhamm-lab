@@ -1,10 +1,11 @@
+{ pkgs, ... }:
 {
   # Required package for CIFS mounting
   environment.systemPackages = [ pkgs.cifs-utils ];
 
   fileSystems = {
     # Mount the k8s Samba share
-    "/mnt/samba/k8s" = {
+    "/mnt/storage/k8s" = {
       device = "//10.0.20.11/k8s";
       fsType = "cifs";
       options =
@@ -16,7 +17,7 @@
     };
 
     # Mount the bhamm Samba share
-    "/mnt/samba/bhamm" = {
+    "/mnt/storage/bhamm" = {
       device = "//10.0.20.11/bhamm";
       fsType = "cifs";
       options =
