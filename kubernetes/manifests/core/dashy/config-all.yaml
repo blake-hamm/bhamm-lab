@@ -65,8 +65,8 @@ data:
     - name: Servers
       icon: fas fa-server
       items:
-      - title: Aorus
-        description: Visit aorus proxmox server
+      - title: Method
+        description: Visit method proxmox server
         icon: hl-proxmox
         url: https://10.0.20.11:8006/
         statusCheckAllowInsecure: true
@@ -80,9 +80,9 @@ data:
         icon: hl-proxmox
         url: https://10.0.20.13:8006/
         statusCheckAllowInsecure: true
-      - title: PiKVM
-        description: Visit PiKVM (usually plugged into aorus)
-        icon: hl-pikvm-light
+      - title: Method ipmi
+        description: Visit method ipmi interface
+        icon: hl-supermicro
         url: https://10.0.10.21/
         statusCheck: false
       - title: Antsle ipmi

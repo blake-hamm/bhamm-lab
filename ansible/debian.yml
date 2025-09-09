@@ -9,11 +9,10 @@
   hosts: debian_bare_metal
   roles:
     - network
-    - mrlesmithjr.zfs
   become: true
-  tags: [network, zfs]
-- name: Configure Storage/NFS server 'aorus'
-  hosts: aorus
+  tags: [network]
+- name: Configure Storage/NFS server 'method'
+  hosts: method
   become: true
   roles:
     - aeriscloud.disk
@@ -27,3 +26,9 @@
     - proxmox
     - prometheus.prometheus.node_exporter
   tags: [proxmox]
+- name: Configure debian bare metal machines
+  hosts: debian_bare_metal
+  roles:
+    - mrlesmithjr.zfs
+  become: true
+  tags: [zfs]
