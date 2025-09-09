@@ -47,6 +47,14 @@
         }
       ] }}
   loop: "{{ groups['proxmox'] }}"
+- name: Create directory for node's ssh_known_hosts
+  ansible.builtin.file:
+    path: "/etc/pve/nodes/{{ item.hostname }}"
+    state: directory
+    owner: root
+    group: www-data
+    mode: "0755"
+  loop: "{{ known_hosts_entries }}"
 - name: Create file for node's ssh_known_hosts
   ansible.builtin.file:
     path: "/etc/pve/nodes/{{ item.hostname }}/ssh_known_hosts"

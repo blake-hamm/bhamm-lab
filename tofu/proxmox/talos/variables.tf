@@ -48,7 +48,7 @@ variable "proxmox_nodes" {
   }))
   default = [
     { name = "super", multiplier = 1.6 },
-    { name = "aorus", multiplier = 1 },
+    { name = "method", multiplier = 1.6 },
     { name = "antsle", multiplier = 1 },
   ]
 }
@@ -125,7 +125,7 @@ variable "file_datastore_id" {
 variable "proxmox_file_node" {
   description = "Node to download the talos image to"
   type        = string
-  default     = "aorus"
+  default     = "method"
 }
 
 variable "cpu_cores_master" {
