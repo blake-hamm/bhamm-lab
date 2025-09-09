@@ -75,7 +75,6 @@ samba_server_string: "Homelab Storage Server"
 samba_log_level: "1"
 samba_interfaces:
   - vmbr0.20
-  - vmbr0.30
 samba_shares:
   - name: k8s
     comment: 'Kubernetes storage for k8s cluster'
@@ -86,6 +85,8 @@ samba_shares:
     browseable: false
     create_mode: '0664'
     directory_mode: '0775'
+    owner: nobody
+    group: nogroup
     hosts_allow:
       - 10.0.30.
       - 10.0.80.
@@ -99,6 +100,8 @@ samba_shares:
     browseable: false
     create_mode: '0664'
     directory_mode: '0775'
+    owner: nobody
+    group: nogroup
     hosts_allow:
       - 10.0.80.
       - 127.0.0.1
