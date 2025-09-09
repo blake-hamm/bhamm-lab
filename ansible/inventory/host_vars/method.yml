@@ -67,6 +67,43 @@ snapraid_content_files:
 # https://github.com/geerlingguy/ansible-role-nfs
 nfs_exports:
   - /mnt/storage/kubernetes 10.0.30.0/24(rw,sync,no_subtree_check,no_root_squash,fsid=1)
+# https://github.com/vladgh/ansible-collection-vladgh-samba
+samba_map_to_guest: "Bad User"
+samba_shares_root: "/mnt/storage"
+samba_guest_account: "nobody"
+samba_server_string: "Homelab Storage Server"
+samba_log_level: "1"
+samba_shares:
+  - name: k8s
+    comment: 'Kubernetes storage for k8s cluster'
+    path: /mnt/storage/k8s
+    public: true
+    guest_ok: true
+    read_only: false
+    browseable: false
+    create_mode: '0664'
+    directory_mode: '0775'
+    hosts_allow:
+      - 10.0.30.
+      - 10.0.80.
+      - 127.0.0.1
+  - name: bhamm
+    comment: 'Personal storage for trusted devices'
+    path: /mnt/storage/bhamm
+    public: true
+    guest_ok: true
+    read_only: false
+    browseable: false
+    create_mode: '0664'
+    directory_mode: '0775'
+    hosts_allow:
+      - 10.0.80.
+      - 127.0.0.1
+samba_enable_netbios: false
+samba_wins_support: false
+samba_local_master: false
+samba_domain_master: false
+samba_preferred_master: false
 # Install pbs
 pve_pcie_passthrough_enabled: true
 pve_iommu_passthrough_mode: true

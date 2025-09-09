@@ -11,7 +11,7 @@
     - network
   become: true
   tags: [network]
-- name: Configure Storage/NFS server 'method'
+- name: Configure Storage server 'method'
   hosts: method
   become: true
   roles:
@@ -19,7 +19,8 @@
     - tigattack.mergerfs
     - ironicbadger.snapraid
     - geerlingguy.nfs
-  tags: [storage, nfs]
+    - vladgh.samba.server
+  tags: [storage, nfs, samba]
 - name: Install proxmox
   hosts: proxmox
   roles:
