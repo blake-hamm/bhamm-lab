@@ -55,7 +55,7 @@ spec:
             retention: "3d"
             pathVersion: "v1.1"
           restore:
-            enabled: true
+            enabled: false
             pathVersion: "v1"
   syncPolicy:
     syncOptions:
