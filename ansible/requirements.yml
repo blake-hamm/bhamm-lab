@@ -17,6 +17,9 @@ collections:
   - name: grafana.grafana
     version: "5.7.0"
     source: https://galaxy.ansible.com
+  - name: vladgh.samba
+    version: "3.5.3"
+    source: https://galaxy.ansible.com
 roles:
   - name: geerlingguy.ntp
     version: "2.5.0"

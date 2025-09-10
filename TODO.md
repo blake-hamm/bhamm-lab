@@ -1,12 +1,13 @@
 # Fix nfs
-- Switch from nfs to smb
-  - Ansible playbook for smb share for kubernetes
-  - Kubernetes gitops for smb csi driver
-  - Destroy all nfs pvc
-  - Destoy nfs gitops resources/storage class
-  - Create smb storage class
-  - Ensure pvc are created
+x Switch from nfs to smb
+  x Ansible playbook for smb share for kubernetes
+  x Kubernetes gitops for smb csi driver
+  x Destroy all nfs pvc
+  x Destoy nfs gitops resources/storage class
+  x Create smb storage class
+  x Ensure pvc are created
   - Test with 24hr watch
+  - Restore blue cluster with smb
 
 # Method integration
 x Fix ceph fs
