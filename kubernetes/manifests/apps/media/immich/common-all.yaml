@@ -31,7 +31,7 @@ spec:
         pvc:
           - name: immich-library
             storageSize: 500Gi
-            storageClassName: nfs-csi
+            storageClassName: smb-csi
         k8up:
           backup:
             enabled: true
