@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ username, pkgs, ... }:
 {
   # Required package for CIFS mounting
   environment.systemPackages = [ pkgs.cifs-utils ];
@@ -17,7 +17,7 @@
     };
 
     # Mount the bhamm Samba share
-    "/mnt/storage/bhamm" = {
+    "/home/${username}/smb" = {
       device = "//10.0.20.11/bhamm";
       fsType = "cifs";
       options =
