@@ -131,13 +131,13 @@ variable "proxmox_file_node" {
 variable "cpu_cores_master" {
   description = "Number of CPU cores for master nodes"
   type        = number
-  default     = 4
+  default     = 2
 }
 
 variable "cpu_cores_worker" {
   description = "Number of CPU cores for worker nodes"
   type        = number
-  default     = 4
+  default     = 6
 }
 
 variable "memory_base_master" {
@@ -149,7 +149,7 @@ variable "memory_base_master" {
 variable "memory_base_worker" {
   description = "Base memory allocation in MB for worker nodes"
   type        = number
-  default     = 16384
+  default     = 14336
 }
 
 variable "disk_size_master" {
