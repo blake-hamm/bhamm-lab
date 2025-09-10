@@ -8,6 +8,8 @@ metadata:
 provisioner: smb.csi.k8s.io
 parameters:
   source: "//10.0.20.11/k8s"
+volumeBindingMode: Immediate
+allowVolumeExpansion: true
 mountOptions:
   - noperm
   - mfsymlinks
