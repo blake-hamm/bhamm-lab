@@ -7,7 +7,7 @@ x Switch from nfs to smb
   x Create smb storage class
   x Ensure pvc are created
   - Test with 24hr watch
-  - Restore blue cluster with smb
+  - Restore green cluster with smb
 
 # Method integration
 x Fix ceph fs
