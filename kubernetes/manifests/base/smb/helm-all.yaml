@@ -20,6 +20,7 @@ spec:
           tolerations: {}
         linux:
           enabled: true
+          tolerations: {}
         windows:
           enabled: false
   syncPolicy:
