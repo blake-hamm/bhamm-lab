@@ -16,6 +16,8 @@ spec:
     targetRevision: v1.18.0
     helm:
       values: |
+        controller:
+          tolerations: {}
         linux:
           enabled: true
         windows:
