@@ -1,0 +1,16 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: smb-k8s
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: smb.csi.k8s.io
+parameters:
+  source: "//10.0.20.11/k8s"
+mountOptions:
+  - noperm
+  - mfsymlinks
+  - cache=strict
+  - noserverino
+  - guest
