@@ -6,20 +6,9 @@ x Switch from nfs to smb
   x Destoy nfs gitops resources/storage class
   x Create smb storage class
   x Ensure pvc are created
+  - Manually run swfs backup to confirm logs (timeout?)
   - Test with 24hr watch
   - Restore green cluster with smb
-
-# Method integration
-x Fix ceph fs
-x Recover blue cluster
-  x Delete all nfs pvc
-  x Restore nfs
-  - Ensure local backup
-- Ensure successful blue cluster offsite backup
-x Refactor tofu config to leverage method node for talos
-x Adjust gitops cnpg backup versions
-- Deploy green cluster
-- Reduce frequency of cnpg and k8up onsite backups
 
 # Intel arc
 x Ensure common helm can reate pvc
@@ -234,6 +223,15 @@ Date: Sun, 04 May 2025 00:00:01 -0600
 - kube bench - https://github.com/aquasecurity/kube-bench
 
 ## Previous
+# Method integration
+x Fix ceph fs
+x Recover blue cluster
+  x Delete all nfs pvc
+  x Restore nfs
+x Refactor tofu config to leverage method node for talos
+x Adjust gitops cnpg backup versions
+x Reduce frequency of cnpg and k8up onsite backups
+
 # Stabilize seaweedfs backups
 x Decide architecture
 x Ensure seaweedfs is paused during backup
