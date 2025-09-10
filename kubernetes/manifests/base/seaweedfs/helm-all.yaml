@@ -59,7 +59,7 @@ spec:
             - name: data
               type: "persistentVolumeClaim"
               size: 300Gi
-              storageClass: nfs-csi
+              storageClass: smb-csi
               maxVolumes: 0
               annotations:
                 "k8up.io/backup": "true"

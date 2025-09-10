@@ -42,11 +42,11 @@ spec:
           - name: gluetun-config
           - name: downloads
             storageSize: 1Ti
-            storageClassName: nfs-csi
+            storageClassName: smb-csi
             accessMode: ReadWriteMany
           - name: media
             storageSize: 1Ti
-            storageClassName: nfs-csi
+            storageClassName: smb-csi
             accessMode: ReadWriteMany
         k8up:
           backup:

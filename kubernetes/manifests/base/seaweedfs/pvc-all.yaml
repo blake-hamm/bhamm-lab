@@ -108,7 +108,7 @@ spec:
   resources:
     requests:
       storage: 300Gi
-  storageClassName: nfs-csi
+  storageClassName: smb-csi
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -124,7 +124,7 @@ spec:
   resources:
     requests:
       storage: 300Gi
-  storageClassName: nfs-csi
+  storageClassName: smb-csi
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -140,7 +140,7 @@ spec:
   resources:
     requests:
       storage: 300Gi
-  storageClassName: nfs-csi
+  storageClassName: smb-csi
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
