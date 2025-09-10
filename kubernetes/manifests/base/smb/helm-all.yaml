@@ -15,7 +15,7 @@ spec:
     chart: csi-driver-smb
     targetRevision: v1.18.0
     helm:
-      values: |
+      valuesObject:
         controller:
           tolerations: {}
         linux:
