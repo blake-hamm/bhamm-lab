@@ -1,3 +1,25 @@
+# Fix nfs
+- Switch from nfs to smb
+  - Ansible playbook for smb share for kubernetes
+  - Kubernetes gitops for smb csi driver
+  - Destroy all nfs pvc
+  - Destoy nfs gitops resources/storage class
+  - Create smb storage class
+  - Ensure pvc are created
+  - Test with 24hr watch
+
+# Method integration
+x Fix ceph fs
+x Recover blue cluster
+  x Delete all nfs pvc
+  x Restore nfs
+  - Ensure local backup
+- Ensure successful blue cluster offsite backup
+x Refactor tofu config to leverage method node for talos
+x Adjust gitops cnpg backup versions
+- Deploy green cluster
+- Reduce frequency of cnpg and k8up onsite backups
+
 # Intel arc
 x Ensure common helm can reate pvc
 x Remove pvc creation from:

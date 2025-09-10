@@ -53,10 +53,10 @@ spec:
                 login: true
           backup:
             enabled: true
-            pathVersion: "v1.2"
+            pathVersion: "v1.3"
           restore:
             enabled: true
-            pathVersion: "v1.1"
+            pathVersion: "v1.2"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

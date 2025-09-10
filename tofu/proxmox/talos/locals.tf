@@ -25,11 +25,11 @@ locals {
     hostname     = "${var.environment}-talos-worker-intel-gpu"
     ip           = format(var.worker_ip_format, var.count_worker)
     machine_type = "worker"
-    host_node    = "aorus"
+    host_node    = "method"
     vm_id        = var.worker_vm_id_start + var.count_worker
     cpu          = var.cpu_cores_worker
     disk_size    = var.disk_size_worker
-    memory       = floor(var.memory_base_worker * var.proxmox_nodes[1].multiplier) # 1 is aorus node
+    memory       = floor(var.memory_base_worker * var.proxmox_nodes[1].multiplier) # 1 is method node
     vip          = null
     taint        = "intel-gpu"
   }]
