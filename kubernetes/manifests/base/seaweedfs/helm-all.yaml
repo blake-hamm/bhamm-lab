@@ -26,12 +26,12 @@ spec:
             WEED_CLUSTER_SW_MASTER: "seaweedfs-master.seaweedfs:9333"
             WEED_CLUSTER_SW_FILER: "seaweedfs-filer-client.seaweedfs:8888"
           enableReplication: true
-          replicationPlacement: "002"
+          replicationPlacement: "001"
           enableSecurity: false
         master:
           enabled: true
           replicas: 3
-          resumeState: true
+          resumeState: false
           raftHashicorp: true
           raftBootstrap: true
           volumePreallocate: true
@@ -110,8 +110,6 @@ spec:
               - name: tofu-state
                 anonymousRead: false
               - name: cnpg-backups
-                anonymousRead: false
-              - name: harbor-data
                 anonymousRead: false
               - name: k8up-backups
                 anonymousRead: false
