@@ -1,7 +1,7 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: smb-k8s
+  name: smb-csi
   annotations:
     argocd.argoproj.io/sync-wave: "1"
     storageclass.kubernetes.io/is-default-class: "false"
