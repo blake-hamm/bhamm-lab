@@ -143,7 +143,7 @@ variable "cpu_cores_worker" {
 variable "memory_base_master" {
   description = "Base memory allocation in MB for master nodes"
   type        = number
-  default     = 8192
+  default     = 6144
 }
 
 variable "memory_base_worker" {
