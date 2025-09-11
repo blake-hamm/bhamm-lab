@@ -30,6 +30,8 @@ spec:
           workflowDefaults:
             spec:
               serviceAccountName: argo-workflow
+            ttlStrategy:
+              secondsAfterCompletion: 86400
           workflowNamespaces:
             - argo
         server:
