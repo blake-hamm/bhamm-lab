@@ -39,7 +39,6 @@ spec:
               value: "30"
             - name: BACKUP_PROMURL
               value: "http://prometheus-pushgateway.monitor.svc.cluster.local:9091"
-              # Set global k8up s3 and repo credentials (and remove extra secret)
         metrics:
           service:
             port: 8080
