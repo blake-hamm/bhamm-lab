@@ -33,6 +33,12 @@ spec:
               value: "3"
             - name: BACKUP_GLOBAL_CONCURRENT_RESTORE_JOBS_LIMIT
               value: "3"
+            - name: BACKUP_GLOBAL_FAILED_JOBS_HISTORY_LIMIT
+              value: "30"
+            - name: BACKUP_GLOBAL_SUCCESSFUL_JOBS_HISTORY_LIMIT
+              value: "30"
+            - name: BACKUP_PROMURL
+              value: "http://prometheus-pushgateway.monitor.svc.cluster.local:9091"
         metrics:
           service:
             port: 8080
