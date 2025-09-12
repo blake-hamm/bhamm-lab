@@ -74,9 +74,25 @@ spec:
             annotations:
               "k8up.io/backup": "true"
           livenessProbe:
-            periodSeconds: 15
+            enabled: true
+            httpGet:
+              path: /healthz
+              scheme: HTTP
+            initialDelaySeconds: 180
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 6
+            timeoutSeconds: 30
           readinessProbe:
-            periodSeconds: 15
+            enabled: true
+            httpGet:
+              path: /healthz
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            successThreshold: 1
+            failureThreshold: 25
+            timeoutSeconds: 30
         filer:
           enabled: true
           replicas: 3
