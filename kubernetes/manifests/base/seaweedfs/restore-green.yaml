@@ -6,7 +6,7 @@ metadata:
   namespace: seaweedfs
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   entrypoint: main
   templates:

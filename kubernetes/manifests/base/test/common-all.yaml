@@ -53,10 +53,8 @@ spec:
           backup:
             enabled: true
             retention: "3d"
-            pathVersion: "v1.3"
           restore:
             enabled: true
-            pathVersion: "v1.1"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

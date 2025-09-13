@@ -23,6 +23,10 @@ spec:
     data:
       jobs: 1
   retentionPolicy: "{{ .Values.postgresql.backup.retention }}"
+  instanceSidecarConfiguration:
+    resources:
+      limits:
+        memory: 500Mi
 ---
 {{- end }}
 {{- if .Values.postgresql.restore.enabled }}
@@ -50,4 +54,8 @@ spec:
     data:
       jobs: 1
   retentionPolicy: "{{ .Values.postgresql.restore.retention }}"
+  instanceSidecarConfiguration:
+    resources:
+      limits:
+        memory: 500Mi
 {{- end }}

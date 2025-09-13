@@ -4,7 +4,7 @@
     state: present
 - name: Enable NIC offload features
   ansible.builtin.command: |
-    ethtool -K {{ nic_name }} tso on gso on gro on lro on tx on rx on
+    ethtool -K {{ nic_name }} tso on gso on gro off lro off tx on rx on
   changed_when: false
   loop_control:
     loop_var: nic_name
@@ -56,8 +56,14 @@
     reload: true
     sysctl_set: true
   loop:
-    - {name: net.core.rmem_max, value: 16777216}
-    - {name: net.core.wmem_max, value: 16777216}
+    - {name: net.core.rmem_max, value: 67108864}
+    - {name: net.core.wmem_max, value: 67108864}
+    - {name: net.core.netdev_max_backlog, value: 30000}
+    - {name: net.ipv4.tcp_rmem, value: "8192 65536 67108864"}
+    - {name: net.ipv4.tcp_wmem, value: "8192 65536 67108864"}
+    - {name: net.ipv4.tcp_window_scaling, value: 1}
+    - {name: net.ipv4.tcp_sack, value: 1}
+    - {name: net.ipv4.tcp_slow_start_after_idle, value: 0}
 - name: Persist socket buffer sizes
   ansible.builtin.lineinfile:
     path: /etc/sysctl.conf
@@ -65,5 +71,11 @@
     line: "{{ item.name }} = {{ item.value }}"
     state: present
   loop:
-    - {name: net.core.rmem_max, value: 16777216}
-    - {name: net.core.wmem_max, value: 16777216}
+    - {name: net.core.rmem_max, value: 67108864}
+    - {name: net.core.wmem_max, value: 67108864}
+    - {name: net.core.netdev_max_backlog, value: 30000}
+    - {name: net.ipv4.tcp_rmem, value: "8192 65536 67108864"}
+    - {name: net.ipv4.tcp_wmem, value: "8192 65536 67108864"}
+    - {name: net.ipv4.tcp_window_scaling, value: 1}
+    - {name: net.ipv4.tcp_sack, value: 1}
+    - {name: net.ipv4.tcp_slow_start_after_idle, value: 0}

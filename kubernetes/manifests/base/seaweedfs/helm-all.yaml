@@ -26,12 +26,12 @@ spec:
             WEED_CLUSTER_SW_MASTER: "seaweedfs-master.seaweedfs:9333"
             WEED_CLUSTER_SW_FILER: "seaweedfs-filer-client.seaweedfs:8888"
           enableReplication: true
-          replicationPlacement: "002"
+          replicationPlacement: "001"
           enableSecurity: false
         master:
           enabled: true
           replicas: 3
-          resumeState: true
+          resumeState: false
           raftHashicorp: true
           raftBootstrap: true
           volumePreallocate: true
@@ -74,9 +74,25 @@ spec:
             annotations:
               "k8up.io/backup": "true"
           livenessProbe:
-            periodSeconds: 15
+            enabled: true
+            httpGet:
+              path: /healthz
+              scheme: HTTP
+            initialDelaySeconds: 180
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 6
+            timeoutSeconds: 30
           readinessProbe:
-            periodSeconds: 15
+            enabled: true
+            httpGet:
+              path: /healthz
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            successThreshold: 1
+            failureThreshold: 25
+            timeoutSeconds: 30
         filer:
           enabled: true
           replicas: 3
@@ -110,8 +126,6 @@ spec:
               - name: tofu-state
                 anonymousRead: false
               - name: cnpg-backups
-                anonymousRead: false
-              - name: harbor-data
                 anonymousRead: false
               - name: k8up-backups
                 anonymousRead: false
