@@ -40,10 +40,8 @@ spec:
           enabled: true
           backup:
             enabled: true
-            pathVersion: "v1"
           restore:
             enabled: true
-            pathVersion: "v1"
         ingressRoutes:
           - enabled: true
             name: forgejo
