@@ -18,6 +18,10 @@ spec:
       secretAccessKey:
         name: cnpg-s3-backup-creds
         key: secret_key
+    wal:
+      maxParallel: 1
+    data:
+      jobs: 1
   retentionPolicy: "{{ .Values.postgresql.backup.retention }}"
 ---
 {{- end }}
@@ -41,5 +45,9 @@ spec:
       secretAccessKey:
         name: cnpg-s3-backup-creds
         key: secret_key
+    wal:
+      maxParallel: 1
+    data:
+      jobs: 1
   retentionPolicy: "{{ .Values.postgresql.restore.retention }}"
 {{- end }}
