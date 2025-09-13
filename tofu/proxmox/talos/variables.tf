@@ -1,7 +1,7 @@
 variable "talos_version" {
   description = "Talos version to use"
   type        = string
-  default     = "v1.10.6"
+  default     = "v1.11.1"
 }
 
 variable "talos_factory_url" {
@@ -48,7 +48,7 @@ variable "proxmox_nodes" {
   }))
   default = [
     { name = "super", multiplier = 1.6 },
-    { name = "aorus", multiplier = 1 },
+    { name = "method", multiplier = 1.6 },
     { name = "antsle", multiplier = 1 },
   ]
 }
@@ -125,31 +125,31 @@ variable "file_datastore_id" {
 variable "proxmox_file_node" {
   description = "Node to download the talos image to"
   type        = string
-  default     = "aorus"
+  default     = "method"
 }
 
 variable "cpu_cores_master" {
   description = "Number of CPU cores for master nodes"
   type        = number
-  default     = 4
+  default     = 2
 }
 
 variable "cpu_cores_worker" {
   description = "Number of CPU cores for worker nodes"
   type        = number
-  default     = 4
+  default     = 6
 }
 
 variable "memory_base_master" {
   description = "Base memory allocation in MB for master nodes"
   type        = number
-  default     = 8192
+  default     = 6144
 }
 
 variable "memory_base_worker" {
   description = "Base memory allocation in MB for worker nodes"
   type        = number
-  default     = 16384
+  default     = 14336
 }
 
 variable "disk_size_master" {

@@ -9,21 +9,27 @@
   hosts: debian_bare_metal
   roles:
     - network
-    - mrlesmithjr.zfs
   become: true
-  tags: [network, zfs]
-- name: Configure Storage/NFS server 'aorus'
-  hosts: aorus
+  tags: [network]
+- name: Configure Storage server 'method'
+  hosts: method
   become: true
   roles:
     - aeriscloud.disk
     - tigattack.mergerfs
     - ironicbadger.snapraid
     - geerlingguy.nfs
-  tags: [storage, nfs]
+    - vladgh.samba.server
+  tags: [storage, nfs, samba]
 - name: Install proxmox
   hosts: proxmox
   roles:
     - proxmox
     - prometheus.prometheus.node_exporter
   tags: [proxmox]
+- name: Configure debian bare metal machines
+  hosts: debian_bare_metal
+  roles:
+    - mrlesmithjr.zfs
+  become: true
+  tags: [zfs]

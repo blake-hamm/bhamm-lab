@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/intel-arc
+    targetRevision: main
     path: kubernetes/charts/common
     helm:
       valuesObject:
@@ -53,10 +53,8 @@ spec:
           backup:
             enabled: true
             retention: "3d"
-            pathVersion: "v1.1"
           restore:
-            enabled: false
-            pathVersion: "v1"
+            enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

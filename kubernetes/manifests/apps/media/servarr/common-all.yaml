@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/intel-arc
+    targetRevision: main
     path: kubernetes/charts/common
     helm:
       valuesObject:
@@ -42,11 +42,11 @@ spec:
           - name: gluetun-config
           - name: downloads
             storageSize: 1Ti
-            storageClassName: nfs-csi
+            storageClassName: smb-csi
             accessMode: ReadWriteMany
           - name: media
             storageSize: 1Ti
-            storageClassName: nfs-csi
+            storageClassName: smb-csi
             accessMode: ReadWriteMany
         k8up:
           backup:

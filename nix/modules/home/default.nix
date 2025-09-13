@@ -12,5 +12,6 @@
     ./uhk.nix
     ./docker.nix
     ./virtualization.nix
+    ./samba.nix
   ];
 }
