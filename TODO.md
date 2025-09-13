@@ -6,9 +6,9 @@ x Switch from nfs to smb
   x Destoy nfs gitops resources/storage class
   x Create smb storage class
   x Ensure pvc are created
-  - Manually run swfs backup to confirm logs (timeout?)
-  - Test with 24hr watch
-  - Restore green cluster with smb
+  x Manually run swfs backup to confirm logs (timeout?)
+  x Test with 24hr watch
+  x Restore green cluster with smb
 
 # Intel arc
 x Ensure common helm can reate pvc
