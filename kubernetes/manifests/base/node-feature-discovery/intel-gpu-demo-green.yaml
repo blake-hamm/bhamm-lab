@@ -26,12 +26,11 @@ spec:
                   operator: "Exists"
                   effect: "NoSchedule"
             - op: add
-              path: /spec/containers/0/resources
-              value:
-                limits:
-                  memory: 6Gi
-                requests:
-                  memory: 2Gi
+              path: /spec/containers/0/resources/limits/memory
+              value: "6Gi"
+            - op: add
+              path: /spec/containers/0/resources/requests/memory
+              value: "2Gi"
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
