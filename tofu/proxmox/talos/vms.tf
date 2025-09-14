@@ -42,7 +42,7 @@ resource "proxmox_virtual_environment_vm" "this" {
 
   memory {
     dedicated = each.value.memory
-    floating  = 1
+    floating  = 0
   }
 
   network_device {
