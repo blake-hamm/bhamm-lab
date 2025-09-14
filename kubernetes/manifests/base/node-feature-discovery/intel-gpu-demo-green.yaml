@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: intel-gpu-demo
+  namespace: argocd
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/intel/intel-device-plugins-for-kubernetes.git
+    path: deployments/gpu_pytorch_demo
+    targetRevision: v0.34.0
+    kustomize:
+      patches:
+        - target:
+            version: v1
+            kind: Pod
+            name: intel-gpu-pytorch-demo
+          patch: |-
+            - op: add
+              path: /spec/tolerations
+              value:
+                - key: "intel.com/gpu"
+                  operator: "Exists"
+                  effect: "NoSchedule"
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true
