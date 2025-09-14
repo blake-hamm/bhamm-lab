@@ -15,7 +15,17 @@ spec:
     repoURL: https://kubernetes-sigs.github.io/node-feature-discovery/charts
     targetRevision: v0.17.3
     helm:
-      valuesObject: {}
+      valuesObject:
+        prometheus:
+          enable: true
+        master:
+          priorityClassName: system-cluster-critical
+        worker:
+          priorityClassName: system-cluster-critical
+          tolerations:
+            - key: "intel.com/gpu"
+              operator: "Exists"
+              effect: "NoSchedule"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
