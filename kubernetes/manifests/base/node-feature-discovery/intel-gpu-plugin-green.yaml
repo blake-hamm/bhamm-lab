@@ -1,0 +1,60 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: intel-gpu-nfr
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  destination:
+    namespace: node-feature-discovery
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/intel/intel-device-plugins-for-kubernetes.git
+    path: deployments/nfd/overlays/node-feature-rules
+    targetRevision: v0.32.1
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: intel-gpu-plugin-green
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  destination:
+    namespace: intel-gpu-plugin
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/intel/intel-device-plugins-for-kubernetes.git
+    path: deployments/gpu_plugin
+    targetRevision: v0.32.1
+    kustomize:
+      patches:
+        - target:
+            group: apps
+            version: v1
+            kind: DaemonSet
+            name: intel-gpu-plugin
+          patch: |-
+            - op: add
+              path: /spec/template/spec/tolerations/-
+              value:
+                key: "intel.com/gpu"
+                operator: "Exists"
+                effect: "NoSchedule"
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true
