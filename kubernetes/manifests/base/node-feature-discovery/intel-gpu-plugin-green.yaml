@@ -46,11 +46,11 @@ spec:
             name: intel-gpu-plugin
           patch: |-
             - op: add
-              path: /spec/template/spec/tolerations/-
+              path: /spec/template/spec/tolerations
               value:
-                key: "intel.com/gpu"
-                operator: "Exists"
-                effect: "NoSchedule"
+                - key: "intel.com/gpu"
+                  operator: "Exists"
+                  effect: "NoSchedule"
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
