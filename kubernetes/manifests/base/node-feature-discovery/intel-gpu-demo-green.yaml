@@ -38,3 +38,10 @@ spec:
     automated:
       prune: true
       selfHeal: true
+  ignoreDifferences:
+    - group: ""
+      kind: Pod
+      name: training-pod
+      namespace: intel-gpu-plugin
+      jsonPointers:
+        - /spec/tolerations
