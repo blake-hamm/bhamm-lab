@@ -181,14 +181,8 @@ variable "extra_manifests" {
   default     = []
 }
 
-variable "enable_intel_gpu_worker" {
-  description = "Enable the creation of an Intel GPU worker node."
-  type        = bool
-  default     = false
-}
-
 variable "intel_gpu_worker_id" {
-  description = "The PCI ID of the Intel GPU for passthrough."
-  type        = string
-  default     = "0000:08:00.0"
+  description = "A list of PCI IDs for the Intel GPU and related devices for passthrough."
+  type        = list(string)
+  default     = []
 }

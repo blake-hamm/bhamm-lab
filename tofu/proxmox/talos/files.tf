@@ -6,7 +6,7 @@ data "http" "schematic_id" {
 }
 
 data "http" "schematic_id_intel_gpu" {
-  count = var.enable_intel_gpu_worker ? 1 : 0
+  count = length(var.intel_gpu_worker_id) == 0 ? 0 : 1
 
   url          = "${var.talos_factory_url}/schematics"
   method       = "POST"
@@ -14,7 +14,7 @@ data "http" "schematic_id_intel_gpu" {
 }
 
 resource "proxmox_virtual_environment_download_file" "intel_gpu" {
-  count = var.enable_intel_gpu_worker ? 1 : 0
+  count = length(var.intel_gpu_worker_id) == 0 ? 0 : 1
 
   node_name               = var.proxmox_file_node
   content_type            = "iso"

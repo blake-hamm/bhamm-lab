@@ -6,7 +6,8 @@ machine:
   kubelet:
     extraConfig:
       registerWithTaints:
-        - "${taint}=true:NoSchedule"
+        - key: ${taint.key}
+          effect: ${taint.effect}
 %{ endif }
   network:
     hostname: ${hostname}

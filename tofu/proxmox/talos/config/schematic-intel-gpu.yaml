@@ -5,5 +5,4 @@ customization:
       - siderolabs/fuse3
       - siderolabs/intel-ucode
       - siderolabs/amd-ucode
-      - siderolabs/i915-driver
-      # - siderolabs/nfsrahead
+      - siderolabs/i915
