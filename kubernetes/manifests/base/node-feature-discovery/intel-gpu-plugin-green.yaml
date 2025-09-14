@@ -46,11 +46,56 @@ spec:
             name: intel-gpu-plugin
           patch: |-
             - op: add
+              path: /spec/template/spec/nodeSelector
+              value:
+                intel.feature.node.kubernetes.io/gpu: "true"
+            - op: add
               path: /spec/template/spec/tolerations
               value:
                 - key: "intel.com/gpu"
                   operator: "Exists"
                   effect: "NoSchedule"
+            - op: add
+              path: /spec/template/spec/volumes/-
+              value:
+                name: levelzerosocket
+                emptyDir: {}
+            - op: replace
+              path: /spec/template/spec/containers/0/args
+              value:
+                - "-v=2"
+                - "-enable-monitoring"
+                - "-health-management"
+                - "-allow-ids=0x56a6,0x56a5,0x56a1,0x56a0,0x5694,0x5693,0x5692,0x5691,0x5690,0x56b3,0x56b2,0x56a4,0x56a3,0x5697,0x5696,0x5695,0x56b1,0x56b0,0x56a2,0x56ba,0x56bc,0x56bd,0x56bb"
+            - op: add
+              path: /spec/template/spec/containers/0/volumeMounts/-
+              value:
+                name: levelzerosocket
+                mountPath: /var/lib/levelzero
+            - op: add
+              path: /spec/template/spec/containers/-
+              value:
+                name: intel-gpu-levelzero
+                image: intel/intel-gpu-levelzero:devel
+                imagePullPolicy: IfNotPresent
+                args:
+                  - "-v=2"
+                resources:
+                  requests:
+                    cpu: 25m
+                    memory: 50Mi
+                  limits:
+                    cpu: 50m
+                    memory: 100Mi
+                securityContext:
+                  readOnlyRootFilesystem: true
+                  privileged: true
+                  capabilities:
+                    drop:
+                      - ALL
+                volumeMounts:
+                - name: levelzerosocket
+                  mountPath: /var/lib/levelzero
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
