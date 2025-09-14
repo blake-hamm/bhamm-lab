@@ -33,7 +33,7 @@ locals {
     disk_size_user = var.disk_size_worker_user
     memory         = floor(var.memory_base_worker * var.proxmox_nodes[1].multiplier)
     vip            = null
-    taint          = { key = "node-role.kubernetes.io/intel-gpu", effect = "NoSchedule" }
+    taint          = { key = "intel.com/gpu", effect = "NoSchedule" }
     vm_tag         = "intel-gpu"
     hostpci        = var.intel_gpu_worker_id
   }]
