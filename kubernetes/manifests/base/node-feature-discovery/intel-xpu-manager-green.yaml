@@ -52,6 +52,37 @@ spec:
               path: /spec/template/spec/nodeSelector
               value:
                 intel.feature.node.kubernetes.io/gpu: "true"
+            - op: add
+              path: /spec/template/spec/containers/-
+              value:
+                name: metrics-proxy
+                image: nginx:alpine
+                ports:
+                - containerPort: 8080
+                  name: http-metrics
+                command: ["/bin/sh"]
+                args:
+                - "-c"
+                - |
+                  cat > /tmp/default.conf << 'EOF'
+                  server {
+                      listen 8080;
+                      location /metrics {
+                          proxy_pass http://localhost:29999/metrics;
+                          proxy_hide_header Content-Type;
+                          add_header Content-Type "text/plain; version=0.0.4; charset=utf-8";
+                      }
+                  }
+                  EOF
+                  cp /tmp/default.conf /etc/nginx/conf.d/default.conf
+                  nginx -g 'daemon off;'
+                resources:
+                  requests:
+                    cpu: 10m
+                    memory: 16Mi
+                  limits:
+                    cpu: 50m
+                    memory: 32Mi
   syncPolicy:
     automated:
       prune: true
@@ -72,11 +103,11 @@ metadata:
 spec:
   ports:
     - name: metrics
-      port: 29999
+      port: 8080
+      targetPort: 8080
       protocol: TCP
   selector:
     app: intel-xpumanager
-  sessionAffinity: None
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -101,5 +132,3 @@ spec:
       scrapeTimeout: 10s
       scheme: http
       honorLabels: true
-      params:
-        fallback_scrape_protocol: ["PrometheusText0.0.4"]
