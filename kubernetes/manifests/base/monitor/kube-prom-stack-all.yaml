@@ -132,6 +132,9 @@ spec:
               nfs:
                 url: https://raw.githubusercontent.com/blake-hamm/nfs-grafana/refs/heads/master/prometheus/nfs-full.json
                 token: ''
+              nfd:
+                url: https://raw.githubusercontent.com/kubernetes-sigs/node-feature-discovery/refs/heads/master/examples/grafana-dashboard.json
+                token: ''
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
