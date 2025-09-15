@@ -72,7 +72,6 @@ spec:
             - op: replace
               path: /spec/template/spec/containers/0/args
               value:
-                - "-v=2"
                 - "-enable-monitoring"
                 - "-health-management"
                 - "-shared-dev-num=2" # Enable immich and jellyfin
