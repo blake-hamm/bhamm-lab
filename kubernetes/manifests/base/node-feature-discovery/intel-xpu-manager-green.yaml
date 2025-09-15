@@ -33,6 +33,13 @@ spec:
             kind: DaemonSet
             name: intel-xpumanager
           patch: |-
+            # Required for - https://github.com/intel/xpumanager/issues/100
+            - op: replace
+              path: /spec/template/spec/containers/0/image
+              value: ghcr.io/soliddowant/xpumanager:1.2.41
+            - op: replace
+              path: /spec/template/spec/containers/1/image
+              value: ghcr.io/soliddowant/xpumanager:1.2.41
             - op: remove
               path: /spec/template/spec/imagePullSecrets
             - op: add
