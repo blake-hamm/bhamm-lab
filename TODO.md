@@ -1,15 +1,3 @@
-# Fix nfs
-x Switch from nfs to smb
-  x Ansible playbook for smb share for kubernetes
-  x Kubernetes gitops for smb csi driver
-  x Destroy all nfs pvc
-  x Destoy nfs gitops resources/storage class
-  x Create smb storage class
-  x Ensure pvc are created
-  x Manually run swfs backup to confirm logs (timeout?)
-  x Test with 24hr watch
-  x Restore green cluster with smb
-
 # Intel arc
 x Ensure common helm can reate pvc
 x Remove pvc creation from:
@@ -19,6 +7,7 @@ x Remove pvc creation from:
   x git
 x Setup harbor image cache for talos
 x Test in blue
+- Schedule servarr and immich to intel gpu node
 - Install dragonfly operator
 - Create immich custom helm chart following docker compose
 - Fix immich pvc and library (use latest image)
@@ -223,6 +212,18 @@ Date: Sun, 04 May 2025 00:00:01 -0600
 - kube bench - https://github.com/aquasecurity/kube-bench
 
 ## Previous
+# Fix nfs
+x Switch from nfs to smb
+  x Ansible playbook for smb share for kubernetes
+  x Kubernetes gitops for smb csi driver
+  x Destroy all nfs pvc
+  x Destoy nfs gitops resources/storage class
+  x Create smb storage class
+  x Ensure pvc are created
+  x Manually run swfs backup to confirm logs (timeout?)
+  x Test with 24hr watch
+  x Restore green cluster with smb
+
 # Method integration
 x Fix ceph fs
 x Recover blue cluster
