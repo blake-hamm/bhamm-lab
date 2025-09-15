@@ -48,29 +48,6 @@ spec:
                 - key: "intel.com/gpu"
                   operator: "Exists"
                   effect: "NoSchedule"
-            - op: add
-              path: /spec/template/spec/nodeSelector
-              value:
-                kubernetes.io/hostname: green-talos-worker-intel-gpu
-            - op: replace
-              path: /spec/template/spec/containers/1/startupProbe/failureThreshold
-              value: 60
-            - op: replace
-              path: /spec/template/spec/containers/1/startupProbe/periodSeconds
-              value: 10
-            - op: replace
-              path: /spec/template/spec/containers/1/startupProbe/initialDelaySeconds
-              value: 30
-            - op: add
-              path: /spec/template/spec/containers/0/env/-
-              value:
-                name: SPDLOG_LEVEL
-                value: debug
-            - op: add
-              path: /spec/template/spec/containers/1/env/-
-              value:
-                name: GUNICORN_TIMEOUT
-                value: "300"
   syncPolicy:
     automated:
       prune: true
