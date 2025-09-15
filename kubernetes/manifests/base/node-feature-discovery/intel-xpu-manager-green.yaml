@@ -13,10 +13,9 @@ spec:
   source:
     repoURL: https://github.com/intel/xpumanager.git
     targetRevision: v1.3.2
-    directory:
-      path: deployment/kubernetes/daemonset/base
+    path: deployment/kubernetes/daemonset/base
     kustomize:
-      patchesJson6902:
+      patches:
         - target:
             group: apps
             version: v1
