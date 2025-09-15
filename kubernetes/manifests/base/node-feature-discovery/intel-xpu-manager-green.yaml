@@ -93,7 +93,7 @@ spec:
       app: intel-xpumanager
   namespaceSelector:
     matchNames:
-      - default
+      - intel-xpumanager
   endpoints:
     - port: metrics
       path: /metrics
