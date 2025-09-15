@@ -1,0 +1,81 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: intel-xpumanager
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: intel-xpumanager
+  source:
+    repoURL: https://github.com/intel/xpumanager.git
+    targetRevision: v1.3.2
+    directory:
+      path: deployment/kubernetes/daemonset/base
+    kustomize:
+      patchesJson6902:
+        - target:
+            group: apps
+            version: v1
+            kind: DaemonSet
+            name: intel-xpumanager
+          patch: |-
+            - op: add
+              path: /spec/template/spec/tolerations
+              value:
+                - key: "intel.com/gpu"
+                  operator: "Exists"
+                  effect: "NoSchedule"
+            - op: add
+              path: /spec/template/spec/nodeSelector
+              value:
+                kubernetes.io/hostname: green-talos-worker-intel-gpu
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: intel-xpumanager
+  name: intel-xpumanager
+  namespace: intel-xpumanager
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  ports:
+    - name: metrics
+      port: 29999
+      protocol: TCP
+  selector:
+    app: intel-xpumanager
+  sessionAffinity: None
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: intel-xpumanager
+  namespace: intel-xpumanager
+  labels:
+    app: intel-xpumanager
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  selector:
+    matchLabels:
+      app: intel-xpumanager
+  namespaceSelector:
+    matchNames:
+      - default
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 5s
