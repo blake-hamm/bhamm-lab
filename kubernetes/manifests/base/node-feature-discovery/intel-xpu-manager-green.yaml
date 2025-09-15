@@ -97,4 +97,9 @@ spec:
   endpoints:
     - port: metrics
       path: /metrics
-      interval: 5s
+      interval: 15s
+      scrapeTimeout: 10s
+      scheme: http
+      honorLabels: true
+      params:
+        fallback_scrape_protocol: ["PrometheusText0.0.4"]
