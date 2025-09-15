@@ -135,6 +135,9 @@ spec:
               nfd:
                 url: https://raw.githubusercontent.com/blake-hamm/node-feature-discovery/refs/heads/master/examples/grafana-dashboard.json
                 token: ''
+              xpumanager:
+                url: https://raw.githubusercontent.com/intel/xpumanager/refs/heads/master/deployment/kubernetes/monitoring/grafana-dashboard.json
+                token: ''
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
