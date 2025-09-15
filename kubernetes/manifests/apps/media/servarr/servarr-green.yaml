@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: servarr-green
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  destination:
+    namespace: servarr
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/bhamm/bhamm-lab.git
+    path: kubernetes/manifests/apps/media/servarr
+    targetRevision: feature/intel-arc
+    kustomize:
+      resources:
+        - namespace.yaml
+        - ./unpackarr/base
+        - ./prowlarr/base
+        - ./radarr/base
+        - ./flaresolverr/base
+        - ./qbittorent/base
+        - ./sonarr/base
+        - ./jellyfin/base
+      patches:
+        - target:
+            group: apps
+            version: v1
+            kind: Deployment
+          patch: |-
+            - op: add
+              path: /spec/template/spec/tolerations
+              value:
+                - key: "intel.com/gpu"
+                  operator: "Exists"
+                  effect: "NoSchedule"
+            - op: add
+              path: /spec/template/spec/nodeSelector
+              value:
+                kubernetes.io/hostname: green-talos-worker-intel-gpu
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true
