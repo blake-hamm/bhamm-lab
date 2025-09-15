@@ -15,15 +15,6 @@ spec:
     path: kubernetes/manifests/apps/media/servarr
     targetRevision: feature/intel-arc
     kustomize:
-      components:
-        - namespace.yaml
-        - ./unpackarr/base
-        - ./prowlarr/base
-        - ./radarr/base
-        - ./flaresolverr/base
-        - ./qbittorent/base
-        - ./sonarr/base
-        - ./jellyfin/base
       patches:
         - target:
             group: apps
