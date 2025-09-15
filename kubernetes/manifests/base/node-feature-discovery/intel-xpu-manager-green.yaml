@@ -42,6 +42,9 @@ spec:
               value: ghcr.io/soliddowant/xpumanager:1.2.41
             - op: remove
               path: /spec/template/spec/imagePullSecrets
+            - op: replace
+              path: /spec/template/spec/hostNetwork
+              value: false
             - op: add
               path: /spec/template/spec/tolerations
               value:
@@ -52,6 +55,7 @@ spec:
               path: /spec/template/spec/nodeSelector
               value:
                 intel.feature.node.kubernetes.io/gpu: "true"
+            # Add nginx proxy to fix Content-Type header
             - op: add
               path: /spec/template/spec/containers/-
               value:
