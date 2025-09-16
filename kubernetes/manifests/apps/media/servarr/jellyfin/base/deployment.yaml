@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: jellyfin
-          image: nyanmisaka/jellyfin:latest
+          image: jellyfin/jellyfin:latest
           ports:
             - containerPort: 8096 # HTTP UI port
             - containerPort: 1900 # DLNA SSDP port
