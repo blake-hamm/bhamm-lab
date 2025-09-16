@@ -78,6 +78,7 @@ x Schedule servarr to intel gpu node
 
 # Upgrade servarr
 x https://github.com/nzbgetcom/nzbget/blob/develop/docker/README.md
+- https://trash-guides.info/
 - https://configarr.de/docs/installation/kubernetes/
 - Jellyseerr/Ombi
 - Bazarr
