@@ -25,7 +25,6 @@ spec:
       labels:
         app: intel-gpu-exporter
     spec:
-      hostPID: true
       nodeSelector:
         intel.feature.node.kubernetes.io/gpu: "true"
       tolerations:
@@ -39,7 +38,7 @@ spec:
             - containerPort: 8080
               name: metrics
           securityContext:
-            privileged: true
+            privileged: false
           resources:
             requests:
               cpu: 50m
