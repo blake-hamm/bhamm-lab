@@ -7,9 +7,9 @@ x Remove pvc creation from:
   x git
 x Setup harbor image cache for talos
 x Test in blue
-- Schedule servarr and immich to intel gpu node
+x Schedule servarr to intel gpu node
 - Install dragonfly operator
-- Create immich custom helm chart following docker compose
+- Create immich custom helm chart following latest immich docker compose
 - Fix immich pvc and library (use latest image)
 
 # Fix cephfs
@@ -77,8 +77,13 @@ x Test in blue
 - Change frequency of dashy pings
 
 # Upgrade servarr
+x https://github.com/nzbgetcom/nzbget/blob/develop/docker/README.md
 - https://configarr.de/docs/installation/kubernetes/
-- https://github.com/nzbgetcom/nzbget/blob/develop/docker/README.md
+- Jellyseerr/Ombi
+- Bazarr
+- Lidarr
+- Readarr
+- Grafana
 
 # Troubleshot
 ```bash

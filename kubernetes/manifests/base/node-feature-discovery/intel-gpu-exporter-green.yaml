@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: intel-gpu-monitoring
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: intel-gpu-exporter
+  namespace: intel-gpu-monitoring
+  labels:
+    app: intel-gpu-exporter
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  selector:
+    matchLabels:
+      app: intel-gpu-exporter
+  template:
+    metadata:
+      labels:
+        app: intel-gpu-exporter
+    spec:
+      hostPID: true
+      nodeSelector:
+        intel.feature.node.kubernetes.io/gpu: "true"
+      tolerations:
+        - key: "intel.com/gpu"
+          operator: "Exists"
+          effect: "NoSchedule"
+      containers:
+        - name: intel-gpu-exporter
+          image: harbor.bhamm-lab.com/library/intel-gpu-exporter:latest
+          ports:
+            - containerPort: 8080
+              name: metrics
+          securityContext:
+            privileged: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          volumeMounts:
+            - name: dev-dri
+              mountPath: /dev/dri
+              readOnly: true
+            - name: sys
+              mountPath: /sys
+              readOnly: true
+      volumes:
+        - name: dev-dri
+          hostPath:
+            path: /dev/dri
+        - name: sys
+          hostPath:
+            path: /sys
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: intel-gpu-exporter
+  namespace: intel-gpu-monitoring
+  labels:
+    app: intel-gpu-exporter
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  ports:
+    - port: 8080
+      name: metrics
+  selector:
+    app: intel-gpu-exporter
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: intel-gpu-exporter
+  namespace: intel-gpu-monitoring
+  labels:
+    app: intel-gpu-exporter
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  selector:
+    matchLabels:
+      app: intel-gpu-exporter
+  endpoints:
+    - port: metrics
+      interval: 15s
+      path: /metrics
