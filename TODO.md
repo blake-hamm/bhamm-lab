@@ -76,6 +76,10 @@ x Test in blue
 - Try argocd w/ gitea internal svc
 - Change frequency of dashy pings
 
+# Upgrade servarr
+- https://configarr.de/docs/installation/kubernetes/
+- https://github.com/nzbgetcom/nzbget/blob/develop/docker/README.md
+
 # Troubleshot
 ```bash
 From root@aorus.bhamm-lab.com Sun May 04 00:00:04 2025
