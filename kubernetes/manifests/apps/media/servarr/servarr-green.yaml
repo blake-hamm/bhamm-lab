@@ -31,6 +31,23 @@ spec:
               path: /spec/template/spec/nodeSelector
               value:
                 kubernetes.io/hostname: green-talos-worker-intel-gpu
+        - target:
+            group: apps
+            version: v1
+            kind: Deployment
+            name: jellyfin
+          patch: |-
+            - op: add
+              path: /spec/template/spec/containers/0/securityContext
+              value:
+                privileged: true
+            - op: add
+              path: /spec/template/spec/containers/0/resources
+              value:
+                limits:
+                  gpu.intel.com/i915: 1
+                requests:
+                  gpu.intel.com/i915: 1
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
