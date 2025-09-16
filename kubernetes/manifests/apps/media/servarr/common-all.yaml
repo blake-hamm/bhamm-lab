@@ -32,6 +32,14 @@ spec:
               remoteRef:
                 key: /default/servarr
                 property: UN_RADARR_0_API_KEY
+            - secretKey: NZBGET_USER
+              remoteRef:
+                key: /default/servarr
+                property: lldap-ldap-user-name
+            - secretKey: NZBGET_PASS
+              remoteRef:
+                key: /default/servarr
+                property: lldap-ldap-user-pass
         pvc:
           - name: radarr-config
           - name: unpackerr-config
