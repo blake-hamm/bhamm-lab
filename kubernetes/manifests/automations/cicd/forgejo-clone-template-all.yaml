@@ -29,4 +29,4 @@ spec:
           #!/bin/sh
           echo "Cloning {{inputs.parameters.url}}#{{inputs.parameters.branch}}"
           SHORT_BRANCH=$(echo "{{inputs.parameters.branch}}" | sed 's|refs/heads/||')
-          git clone --depth 1 --branch "$SHORT_BRANCH" "{{inputs.parameters.url}}" /workspace
+          git clone --recurse-submodules --depth 1 --branch "$SHORT_BRANCH" "{{inputs.parameters.url}}" /workspace
