@@ -65,6 +65,19 @@ spec:
             enabled: true
         ingressRoutes:
           - enabled: true
+            name: nzbget
+            ingressClass: traefik-external
+            # websocket: true
+            routes:
+              - kind: Rule
+                match: Host(`nzbget.bhamm-lab.com`)
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: nzbget
+                    scheme: http
+                    port: webui
+          - enabled: true
             name: qbittorrent
             ingressClass: traefik-external
             # websocket: true
