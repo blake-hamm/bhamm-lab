@@ -38,10 +38,6 @@ spec:
             name: jellyfin
           patch: |-
             - op: add
-              path: /spec/template/spec/containers/0/securityContext
-              value:
-                privileged: true
-            - op: add
               path: /spec/template/spec/containers/0/resources
               value:
                 limits:
