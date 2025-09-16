@@ -48,6 +48,8 @@ spec:
           - name: prowlarr-config
           - name: qbittorrent-config
           - name: gluetun-config
+          - name: nzbget-gluetun-config
+          - name: nzbget-config
           - name: downloads
             storageSize: 1Ti
             storageClassName: smb-csi
