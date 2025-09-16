@@ -38,7 +38,7 @@ spec:
             - containerPort: 8080
               name: metrics
           securityContext:
-            privileged: false
+            privileged: true
           resources:
             requests:
               cpu: 50m
