@@ -19,7 +19,6 @@ repos:
       - id: destroyed-symlinks
       - id: detect-private-key
       - id: fix-byte-order-marker
-      - id: forbid-submodules
       - id: mixed-line-ending
       - id: trailing-whitespace
   - repo: https://github.com/google/yamlfmt

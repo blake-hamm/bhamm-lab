@@ -1,0 +1,3 @@
+[submodule "docker/intel-gpu-exporter"]
+	path = docker/intel-gpu-exporter
+	url = git@github.com:blake-hamm/intel-gpu-exporter.git
