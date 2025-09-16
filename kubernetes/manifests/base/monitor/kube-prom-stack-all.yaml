@@ -120,6 +120,10 @@ spec:
                 gnetId: 4260
                 revision: 12
                 datasource: Prometheus
+              intel-gpu-exporter:
+                url: 23251
+                revision: 1
+                datasource: Prometheus
               amd-overview:
                 url: https://raw.githubusercontent.com/blake-hamm/gpu-operator/refs/heads/feature/grafana-update/grafana/dashboard_overview.json
                 token: ''
@@ -135,10 +139,6 @@ spec:
               nfd:
                 url: https://raw.githubusercontent.com/blake-hamm/node-feature-discovery/refs/heads/master/examples/grafana-dashboard.json
                 token: ''
-              intel-gpu-exporter:
-                url: 23251
-                revision: 1
-                datasource: Prometheus
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
