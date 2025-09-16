@@ -9,3 +9,4 @@ resources:
   - ./qbittorent/base
   - ./sonarr/base
   - ./jellyfin/base
+  - ./nzbget/base
