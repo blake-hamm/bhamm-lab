@@ -44,7 +44,7 @@ spec:
               name: metrics
           env:
             - name: REFRESH_PERIOD_MS
-              value: "1000"
+              value: "15000"
           securityContext:
             privileged: true
           volumeMounts:
