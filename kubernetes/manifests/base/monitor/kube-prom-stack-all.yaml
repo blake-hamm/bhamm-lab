@@ -139,6 +139,9 @@ spec:
                 url: https://raw.githubusercontent.com/blake-hamm/intel-gpu-exporter/refs/heads/main/examples/simple-grafana-dash.json
                 token: ''
                 datasource: Prometheus
+              xpumanager:
+                url: https://raw.githubusercontent.com/intel/xpumanager/refs/heads/master/deployment/kubernetes/monitoring/grafana-dashboard.json
+                token: ''
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
