@@ -24,7 +24,7 @@ k8up:
       fsGroup: 0
 postgresql:
   enabled: false
-  instances: 3
+  instances: 1
   storageSize: 2Gi
   imageName: ""
   sharedPreloadLibraries: [""]
@@ -49,3 +49,23 @@ pvc: []
 #   storageSize: 10Gi
 #   storageClassName: local-path
 #   accessMode: ReadWriteOnce
+dragonfly:
+  enabled: false
+  replicas: 1
+  image: "dragonflydb/dragonfly:latest"
+  resources:
+    requests:
+      cpu: 500m
+      memory: 500Mi
+    limits:
+      cpu: 600m
+      memory: 750Mi
+  snapshot:
+    enabled: false
+    cron: "*/5 * * * *"
+    pvc:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 2Gi
