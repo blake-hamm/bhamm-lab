@@ -46,7 +46,6 @@ spec:
       - name: update-timestamp
         container:
           image: alpine/kubectl:latest
-          command: [bash, -c]
           args:
             - |
               set -euo pipefail
