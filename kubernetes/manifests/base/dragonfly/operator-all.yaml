@@ -16,12 +16,10 @@ spec:
     targetRevision: v1.2.1
     helm:
       valuesObject:
+        rbacProxy:
+          enabled: false
         serviceMonitor:
           enabled: true
-          interval: 30s
-          telemetryPath: /metrics
-          path: /metrics
-          timeout: 10s
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
