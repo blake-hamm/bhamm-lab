@@ -44,7 +44,7 @@ spec:
               name: metrics
           env:
             - name: REFRESH_PERIOD_MS
-              value: "15000"
+              value: "10000"
           securityContext:
             privileged: true
           volumeMounts:
@@ -89,5 +89,5 @@ spec:
       app: intel-gpu-exporter
   endpoints:
     - port: metrics
-      interval: 15s
+      interval: 10s
       path: /metrics
