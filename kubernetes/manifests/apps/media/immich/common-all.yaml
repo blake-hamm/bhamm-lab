@@ -59,6 +59,9 @@ spec:
             enabled: false
         dragonfly:
           enabled: true
+          args:
+            - "--cluster_mode=emulated"
+            - "--default_lua_flags=allow-undeclared-keys"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

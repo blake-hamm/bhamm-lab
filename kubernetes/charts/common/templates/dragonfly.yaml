@@ -9,6 +9,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "17"
 spec:
   replicas: {{ .Values.dragonfly.replicas }}
+  args: {{ .Values.dragonfly.args | toYaml | nindent 4 }}
   resources:
 {{ toYaml .Values.dragonfly.resources | indent 4 }}
   {{- if .Values.dragonfly.snapshot.enabled }}
