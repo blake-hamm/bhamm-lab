@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: main
+    targetRevision: feature/intel-arc
     path: kubernetes/charts/common
     helm:
       valuesObject:
@@ -32,6 +32,8 @@ spec:
           - name: immich-library
             storageSize: 500Gi
             storageClassName: smb-csi
+          - name: immich-ml-cache
+            storageSize: 100Gi
         k8up:
           backup:
             enabled: true
@@ -55,6 +57,8 @@ spec:
             enabled: true
           restore:
             enabled: true
+        dragonfly:
+          enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
