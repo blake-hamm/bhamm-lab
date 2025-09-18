@@ -46,9 +46,10 @@ spec:
       - name: update-timestamp
         container:
           image: alpine/kubectl:latest
+          command: ["/bin/sh", "-c"]
           args:
             - |
-              set -euo pipefail
+              set -eu
 
               echo "Starting timestamp update workflow at $(date -u +'%Y-%m-%d %T UTC')"
 

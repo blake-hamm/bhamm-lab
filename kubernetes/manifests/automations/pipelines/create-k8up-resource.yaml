@@ -251,9 +251,10 @@ spec:
           - name: kind
           - name: k8up-name
       script:
+        command: ["/bin/sh", "-c"]
         image: alpine/kubectl
         source: |-
-          set -euo pipefail
+          set -eu
 
           max_retries=50
           delay=10
@@ -271,16 +272,16 @@ spec:
 
             echo "Status: '$status', Reason: '$reason'"
 
-            if [[ "$status" == "True" && "$reason" == "Succeeded" ]]; then
+            if [ "$status" = "True" ] && [ "$reason" = "Succeeded" ]; then
               echo "✅ Resource completed successfully!"
               exit 0
-            elif [[ "$reason" == "Failed" ]]; then
+            elif [ "$reason" = "Failed" ]; then
               echo "❌ Resource failed!"
               kubectl get {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} -n {{inputs.parameters.target-namespace}} -o yaml
               exit 1
-            elif [[ -n "$status" ]]; then
+            elif [ -n "$status" ]; then
               echo "⚠️ Resource has completed condition but unexpected state: status=$status, reason=$reason"
-              if [[ "$i" -eq "$max_retries" ]]; then
+              if [ "$i" -eq "$max_retries" ]; then
                 echo "❌ Max retries reached with unexpected state"
                 kubectl get {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} -n {{inputs.parameters.target-namespace}} -o yaml
                 exit 1
@@ -291,7 +292,7 @@ spec:
 
             sleep $delay
             delay=$((delay + add_delay))
-            if [[ "$delay" -gt "$max_delay" ]]; then
+            if [ "$delay" -gt "$max_delay" ]; then
               delay=$max_delay
             fi
             echo "Sleeping for $delay seconds..."
