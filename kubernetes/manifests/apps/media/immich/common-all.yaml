@@ -33,7 +33,7 @@ spec:
             storageSize: 500Gi
             storageClassName: smb-csi
           - name: immich-ml-cache
-            storageSize: 100Gi
+            storageSize: 20Gi
         k8up:
           backup:
             enabled: true
