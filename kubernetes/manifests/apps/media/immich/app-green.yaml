@@ -246,18 +246,18 @@ spec:
             httpGet:
               path: /ping
               port: http
-            initialDelaySeconds: 0
-            periodSeconds: 10
-            timeoutSeconds: 1
-            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 15
+            failureThreshold: 5
           readinessProbe:
             httpGet:
               path: /ping
               port: http
-            initialDelaySeconds: 0
-            periodSeconds: 10
-            timeoutSeconds: 1
-            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 15
+            failureThreshold: 5
           startupProbe:
             httpGet:
               path: /ping
@@ -265,7 +265,7 @@ spec:
             initialDelaySeconds: 0
             periodSeconds: 10
             timeoutSeconds: 1
-            failureThreshold: 60
+            failureThreshold: 120
           env:
             - name: DB_HOSTNAME
               value: immich-postgresql-rw
@@ -289,6 +289,10 @@ spec:
               value: "/library"
             - name: TZ
               value: America/Denver
+            - name: MACHINE_LEARNING_PRELOAD__CLIP
+              value: "ViT-B-32__openai"
+            - name: MACHINE_LEARNING_PRELOAD__FACIAL_RECOGNITION
+              value: "buffalo_l"
           volumeMounts:
             - name: immich-ml-cache
               mountPath: /cache
