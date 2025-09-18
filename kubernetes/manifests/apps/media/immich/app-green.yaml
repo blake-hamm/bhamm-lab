@@ -28,6 +28,12 @@ spec:
       labels:
         app: immich-server
     spec:
+      nodeSelector:
+        intel.feature.node.kubernetes.io/gpu: "true"
+      tolerations:
+        - key: "intel.com/gpu"
+          operator: "Exists"
+          effect: "NoSchedule"
       containers:
         - name: immich-server
           image: ghcr.io/immich-app/immich-server:v1.142.1
@@ -167,6 +173,12 @@ spec:
       labels:
         app: immich-machine-learning
     spec:
+      nodeSelector:
+        intel.feature.node.kubernetes.io/gpu: "true"
+      tolerations:
+        - key: "intel.com/gpu"
+          operator: "Exists"
+          effect: "NoSchedule"
       containers:
         - name: immich-machine-learning
           image: ghcr.io/immich-app/immich-machine-learning:v1.142.1
