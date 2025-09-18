@@ -7,6 +7,22 @@ metadata:
     argocd.argoproj.io/sync-wave: "24"
 data:
   immich-config.yaml: |
+    machineLearning:
+      clip:
+        enabled: true
+        modelName: ViT-B-32__openai
+      duplicateDetection:
+        enabled: true
+        maxDistance: 0.01
+      enabled: true
+      facialRecognition:
+        enabled: true
+        maxDistance: 0.5
+        minFaces: 3
+        minScore: 0.7
+        modelName: buffalo_l
+      urls:
+        - http://immich-machine-learning:3003
     ffmpeg:
       accel: qsv
       accelDecode: true
@@ -97,16 +113,12 @@ spec:
               value: immich
             - name: REDIS_HOSTNAME
               value: immich-dragonfly
-            - name: IMMICH_MACHINE_LEARNING_URL
-              value: http://immich-machine-learning:3003
             - name: IMMICH_TELEMETRY_INCLUDE
               value: "all"
             - name: IMMICH_CONFIG_FILE
               value: "/config/immich-config.yaml"
             - name: TZ
               value: America/Denver
-              # - name: IMMICH_IGNORE_MOUNT_CHECK_ERRORS
-              #   value: true
           livenessProbe:
             httpGet:
               path: /api/server/ping
@@ -221,7 +233,7 @@ spec:
           effect: "NoSchedule"
       containers:
         - name: immich-machine-learning
-          image: ghcr.io/immich-app/immich-machine-learning:v1.142.1
+          image: ghcr.io/immich-app/immich-machine-learning:v1.142.1-openvino
           ports:
             - name: http
               containerPort: 3003
@@ -269,8 +281,6 @@ spec:
               value: immich-dragonfly
             - name: TRANSFORMERS_CACHE
               value: "/cache"
-            - name: DEVICE
-              value: cpu
             - name: UPLOAD_LOCATION
               value: "/library"
             - name: TZ
@@ -278,6 +288,11 @@ spec:
           volumeMounts:
             - name: immich-ml-cache
               mountPath: /cache
+          resources:
+            limits:
+              gpu.intel.com/i915: 1
+            requests:
+              gpu.intel.com/i915: 1
       volumes:
         - name: immich-ml-cache
           persistentVolumeClaim:
