@@ -105,6 +105,11 @@ spec:
               mountPath: /usr/src/app/upload
             - name: config
               mountPath: /config
+          resources:
+            limits:
+              gpu.intel.com/i915: 1
+            requests:
+              gpu.intel.com/i915: 1
       volumes:
         - name: immich-data
           persistentVolumeClaim:
