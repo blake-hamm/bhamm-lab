@@ -29,8 +29,8 @@ spec:
                     port: 2283
                     scheme: http
         pvc:
-          - name: immich-library
-            storageSize: 500Gi
+          - name: immich-data
+            storageSize: 1Ti
             storageClassName: smb-csi
           - name: immich-ml-cache
             storageSize: 20Gi

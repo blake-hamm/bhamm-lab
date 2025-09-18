@@ -65,7 +65,7 @@ spec:
             - name: IMMICH_CONFIG_FILE
               value: "/config/immich-config.yaml"
             - name: UPLOAD_LOCATION
-              value: "/library"
+              value: "/data/library"
             - name: TZ
               value: America/Denver
           livenessProbe:
@@ -93,14 +93,14 @@ spec:
             timeoutSeconds: 1
             failureThreshold: 30
           volumeMounts:
-            - name: immich-library
-              mountPath: /library
+            - name: immich-data
+              mountPath: /data
             - name: config
               mountPath: /config
       volumes:
-        - name: immich-library
+        - name: immich-data
           persistentVolumeClaim:
-            claimName: immich-library
+            claimName: immich-data
         - name: config
           configMap:
             name: immich-config
