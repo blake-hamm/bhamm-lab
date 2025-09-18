@@ -45,8 +45,6 @@ spec:
           env:
             - name: REFRESH_PERIOD_MS
               value: "15000"
-            - name: DEBUG
-              value: "true"
           securityContext:
             privileged: true
           volumeMounts:
