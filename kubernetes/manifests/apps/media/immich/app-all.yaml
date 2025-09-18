@@ -1,0 +1,248 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: immich-config
+  namespace: immich
+  annotations:
+    argocd.argoproj.io/sync-wave: "24"
+data:
+  immich-config.yaml: |
+    {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: immich-server
+  namespace: immich
+  annotations:
+    argocd.argoproj.io/sync-wave: "25"
+  labels:
+    app: immich-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: immich-server
+  template:
+    metadata:
+      labels:
+        app: immich-server
+    spec:
+      containers:
+        - name: immich-server
+          image: ghcr.io/immich-app/immich-server:v1.142.1
+          ports:
+            - name: http
+              containerPort: 2283
+              protocol: TCP
+            - name: metrics-api
+              containerPort: 8081
+              protocol: TCP
+            - name: metrics-ms
+              containerPort: 8082
+              protocol: TCP
+          env:
+            - name: DB_HOSTNAME
+              value: immich-postgresql-rw
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: immich-postgresql-app
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: immich-postgresql-app
+                  key: password
+            - name: DB_DATABASE_NAME
+              value: immich
+            - name: REDIS_HOSTNAME
+              value: immich-dragonfly
+            - name: IMMICH_MACHINE_LEARNING_URL
+              value: http://immich-machine-learning:3003
+            - name: IMMICH_TELEMETRY_INCLUDE
+              value: "all"
+            - name: IMMICH_CONFIG_FILE
+              value: "/config/immich-config.yaml"
+            - name: UPLOAD_LOCATION
+              value: "/library"
+            - name: TZ
+              value: America/Denver
+          livenessProbe:
+            httpGet:
+              path: /api/server/ping
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/server/ping
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /api/server/ping
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 30
+          volumeMounts:
+            - name: immich-library
+              mountPath: /library
+            - name: config
+              mountPath: /config
+      volumes:
+        - name: immich-library
+          persistentVolumeClaim:
+            claimName: immich-library
+        - name: config
+          configMap:
+            name: immich-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: immich-server
+  namespace: immich
+  annotations:
+    argocd.argoproj.io/sync-wave: "26"
+spec:
+  selector:
+    app: immich-server
+  ports:
+    - name: http
+      protocol: TCP
+      port: 2283
+      targetPort: 2283
+    - name: metrics-api
+      protocol: TCP
+      port: 8081
+      targetPort: 8081
+    - name: metrics-ms
+      protocol: TCP
+      port: 8082
+      targetPort: 8082
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: immich-server
+  namespace: immich
+  annotations:
+    argocd.argoproj.io/sync-wave: "27"
+  labels:
+    app: immich-server
+spec:
+  selector:
+    matchLabels:
+      app: immich-server
+  endpoints:
+    - port: metrics-api
+      scheme: http
+    - port: metrics-ms
+      scheme: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: immich-machine-learning
+  namespace: immich
+  annotations:
+    argocd.argoproj.io/sync-wave: "25"
+  labels:
+    app: immich-machine-learning
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: immich-machine-learning
+  template:
+    metadata:
+      labels:
+        app: immich-machine-learning
+    spec:
+      containers:
+        - name: immich-machine-learning
+          image: ghcr.io/immich-app/immich-machine-learning:v1.142.1
+          ports:
+            - name: http
+              containerPort: 3003
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /ping
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 60
+          env:
+            - name: DB_HOSTNAME
+              value: immich-postgresql-rw
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: immich-postgresql-app
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: immich-postgresql-app
+                  key: password
+            - name: DB_DATABASE_NAME
+              value: immich
+            - name: REDIS_HOSTNAME
+              value: immich-dragonfly
+            - name: TRANSFORMERS_CACHE
+              value: "/cache"
+            - name: DEVICE
+              value: cpu
+            - name: UPLOAD_LOCATION
+              value: "/library"
+            - name: TZ
+              value: America/Denver
+          volumeMounts:
+            - name: immich-model-cache
+              mountPath: /cache
+      volumes:
+        - name: immich-model-cache
+          persistentVolumeClaim:
+            claimName: immich-model-cache
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: immich-machine-learning
+  namespace: immich
+  annotations:
+    argocd.argoproj.io/sync-wave: "26"
+spec:
+  selector:
+    app: immich-machine-learning
+  ports:
+    - name: http
+      protocol: TCP
+      port: 3003
+      targetPort: 3003
