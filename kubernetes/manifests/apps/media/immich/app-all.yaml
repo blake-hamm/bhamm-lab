@@ -224,12 +224,12 @@ spec:
             - name: TZ
               value: America/Denver
           volumeMounts:
-            - name: immich-model-cache
+            - name: immich-ml-cache
               mountPath: /cache
       volumes:
-        - name: immich-model-cache
+        - name: immich-ml-cache
           persistentVolumeClaim:
-            claimName: immich-model-cache
+            claimName: immich-ml-cache
 ---
 apiVersion: v1
 kind: Service
