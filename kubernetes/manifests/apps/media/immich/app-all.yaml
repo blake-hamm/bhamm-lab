@@ -65,7 +65,7 @@ spec:
             - name: IMMICH_CONFIG_FILE
               value: "/config/immich-config.yaml"
             - name: UPLOAD_LOCATION
-              value: "/data"
+              value: "/data/upload"
             - name: TZ
               value: America/Denver
               # - name: IMMICH_IGNORE_MOUNT_CHECK_ERRORS
