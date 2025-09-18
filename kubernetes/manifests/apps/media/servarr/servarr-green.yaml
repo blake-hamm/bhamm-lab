@@ -30,7 +30,7 @@ spec:
             - op: add
               path: /spec/template/spec/nodeSelector
               value:
-                kubernetes.io/hostname: green-talos-worker-intel-gpu
+                intel.feature.node.kubernetes.io/gpu: true
         - target:
             group: apps
             version: v1
