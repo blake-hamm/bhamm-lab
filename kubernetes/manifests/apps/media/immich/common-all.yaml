@@ -56,7 +56,7 @@ spec:
           backup:
             enabled: true
           restore:
-            enabled: true
+            enabled: false
         dragonfly:
           enabled: true
   syncPolicy:
