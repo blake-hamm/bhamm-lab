@@ -20,6 +20,8 @@ metadata:
     app: immich-server
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: immich-server
@@ -165,6 +167,8 @@ metadata:
     app: immich-machine-learning
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: immich-machine-learning
