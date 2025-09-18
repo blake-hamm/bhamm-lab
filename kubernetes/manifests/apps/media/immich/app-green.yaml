@@ -150,8 +150,12 @@ spec:
               mountPath: /config
           resources:
             limits:
+              cpu: "2"
+              memory: "8Gi"
               gpu.intel.com/i915: 1
             requests:
+              cpu: "500m"
+              memory: "2Gi"
               gpu.intel.com/i915: 1
       volumes:
         - name: immich-data
@@ -290,8 +294,12 @@ spec:
               mountPath: /cache
           resources:
             limits:
+              cpu: "4"
+              memory: "8Gi"
               gpu.intel.com/i915: 1
             requests:
+              cpu: "500m"
+              memory: "1Gi"
               gpu.intel.com/i915: 1
       volumes:
         - name: immich-ml-cache
