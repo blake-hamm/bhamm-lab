@@ -64,8 +64,6 @@ spec:
               value: "all"
             - name: IMMICH_CONFIG_FILE
               value: "/config/immich-config.yaml"
-            - name: UPLOAD_LOCATION
-              value: "/data/upload"
             - name: TZ
               value: America/Denver
               # - name: IMMICH_IGNORE_MOUNT_CHECK_ERRORS
@@ -96,7 +94,7 @@ spec:
             failureThreshold: 30
           volumeMounts:
             - name: immich-data
-              mountPath: /data
+              mountPath: /usr/src/app/upload
             - name: config
               mountPath: /config
       volumes:
