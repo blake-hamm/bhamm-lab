@@ -45,7 +45,7 @@ spec:
     templates:
       - name: update-timestamp
         container:
-          image: bitnami/kubectl:latest
+          image: alpine/kubectl:latest
           command: [bash, -c]
           args:
             - |

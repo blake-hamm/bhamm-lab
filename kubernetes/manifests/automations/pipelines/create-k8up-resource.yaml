@@ -251,7 +251,7 @@ spec:
           - name: kind
           - name: k8up-name
       script:
-        image: bitnami/kubectl:1.29
+        image: alpine/kubectl
         command: [bash]
         source: |-
           set -euo pipefail
