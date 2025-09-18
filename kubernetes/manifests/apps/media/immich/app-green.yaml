@@ -20,7 +20,7 @@ data:
         - webm
       acceptedVideoCodecs:
         - h264
-        - hvec
+        - hevc
         - av1
         - vp9
       bframes: -1
@@ -33,7 +33,7 @@ data:
       refs: 0
       targetAudioCodec: aac
       targetResolution: "720"
-      targetVideoCodec: h264_qsv
+      targetVideoCodec: h264
       temporalAQ: false
       threads: 0
       tonemap: hable
