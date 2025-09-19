@@ -145,6 +145,23 @@ spec:
                     path: '/app/custom-secrets/oidc.jwk.RS256.pem'
                   certificate_chain:
                     path: '/app/custom-secrets/oidc.jwk.RS256.crt'
+              claims_policies:
+                immich_policy:
+                  default:
+                    immich_role: user
+                    immich_quota: 0
+                  rules:
+                    - group: admin
+                      immich_role: admin
+                      immich_quota: 0
+                    - group: wife
+                      immich_role: user
+                      immich_quota: 0
+              scopes:
+                immich_scope:
+                  claims:
+                    - immich_role
+                    - immich_quota
               clients:
                 - client_id: 'vault'
                   client_name: 'HashiCorp Vault'
@@ -297,6 +314,7 @@ spec:
                 - client_id: 'immich'
                   client_name: 'immich'
                   client_secret: '$pbkdf2-sha512$310000$wDz7kkyl23Vaq/lR6UUucQ$5IB9s7WHexynP8RKhwp7pkbH3xasLBs6JlTurQ2Oh44f3VOR/V0WbofyVZzAtiDs2ZzOHYn1/r1orKpcNDeJvg'
+                  claims_policy: immich_role
                   authorization_policy: 'two_factor'
                   require_pkce: false
                   pkce_challenge_method: ''
@@ -308,6 +326,7 @@ spec:
                     - 'openid'
                     - 'profile'
                     - 'email'
+                    - 'immich_scope'
                   response_types:
                     - 'code'
                   grant_types:
