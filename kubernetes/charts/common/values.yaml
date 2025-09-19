@@ -17,7 +17,7 @@ ingressRoutes: []
 k8up:
   backup:
     enabled: false
-    schedule: "0 */6 * * *"
+    schedule: "0 */12 * * *"
   restore:
     enabled: false
     config:
@@ -38,7 +38,7 @@ postgresql:
   backup:
     enabled: false
     pathVersion: "v1"
-    schedule: "0 30 */6 * * *"
+    schedule: "0 30 */12 * * *"
     retention: "30d"
   restore:
     enabled: false
@@ -66,7 +66,7 @@ dragonfly:
     cron: "*/5 * * * *"
     pvc:
       accessModes:
-      - ReadWriteOnce
+        - ReadWriteOnce
       resources:
         requests:
           storage: 2Gi

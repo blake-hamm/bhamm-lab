@@ -206,7 +206,7 @@ spec:
                 secretAccessKeySecretRef:
                   name: "{{inputs.parameters.k8up-secret}}"
                   key: AWS_SECRET_ACCESS_KEY
-            activeDeadlineSeconds: 18000
+            activeDeadlineSeconds: 36000
     - name: create-k8up-resource-prune
       inputs:
         parameters:
@@ -237,7 +237,7 @@ spec:
                 secretAccessKeySecretRef:
                   name: "{{inputs.parameters.k8up-secret}}"
                   key: AWS_SECRET_ACCESS_KEY
-            activeDeadlineSeconds: 18000
+            activeDeadlineSeconds: 36000
             retention:
               keepLast: 5
               keepDaily: 2
@@ -256,10 +256,10 @@ spec:
         source: |-
           set -eu
 
-          max_retries=50
+          max_retries=90
           delay=10
           add_delay=10
-          max_delay=300
+          max_delay=600
 
           echo "Waiting for {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} to complete..."
 
@@ -429,7 +429,7 @@ spec:
                 secretAccessKeySecretRef:
                   name: "{{inputs.parameters.k8up-secret}}"
                   key: AWS_SECRET_ACCESS_KEY
-            activeDeadlineSeconds: 18000
+            activeDeadlineSeconds: 36000
             podSecurityContext:
               fsGroup: {{inputs.parameters.fsGroup}}
               runAsUser: 0
