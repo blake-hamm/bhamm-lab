@@ -10,3 +10,4 @@ resources:
   - ./sonarr/base
   - ./jellyfin/base
   - ./nzbget/base
+  - ./recyclarr/base

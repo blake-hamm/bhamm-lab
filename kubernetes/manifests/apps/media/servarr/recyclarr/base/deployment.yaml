@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recyclarr
+  namespace: servarr
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: recyclarr
+  template:
+    metadata:
+      labels:
+        app: recyclarr
+    spec:
+      containers:
+        - name: recyclarr
+          image: ghcr.io/recyclarr/recyclarr:latest
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "64Mi"
+            limits:
+              cpu: "100m"
+              memory: "128Mi"
+          volumeMounts:
+            - name: config
+              mountPath: /config/recyclarr.yml
+              subPath: recyclarr.yml
+          env:
+            - name: TZ
+              value: America/Denver
+            - name: UN_SONARR_0_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: servarr-external-secret
+                  key: UN_SONARR_0_API_KEY
+            - name: UN_RADARR_0_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: servarr-external-secret
+                  key: UN_RADARR_0_API_KEY
+      volumes:
+        - name: config
+          configMap:
+            name: recyclarr
