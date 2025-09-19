@@ -173,8 +173,6 @@ spec:
           volumeMounts:
             - name: immich-data
               mountPath: /usr/src/app/upload
-            - name: config
-              mountPath: /config
             - name: templated-config
               mountPath: /templated-config
           resources:
