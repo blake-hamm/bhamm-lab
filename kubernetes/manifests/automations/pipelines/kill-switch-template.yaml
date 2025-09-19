@@ -26,21 +26,18 @@ spec:
     - name: pause-apps
       script:
         image: alpine/kubectl
-        command: [bash]
         source: |
           # Pause all ArgoCD applications to stop syncing
           kubectl get applications -n argocd -o name | xargs -I {} kubectl patch {} -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":null}}}'
     - name: delete-cnpg-clusters
       script:
         image: alpine/kubectl
-        command: [bash]
         source: |
           # Delete all CNPG PostgreSQL clusters across all namespaces
           kubectl delete clusters.postgresql.cnpg.io --all --all-namespaces --force --grace-period=0
     - name: remove-finalizers
       script:
         image: alpine/kubectl
-        command: [bash]
         source: |
           # Continuously remove finalizers from all PVCs across all namespaces
           for attempt in {1..10}; do
@@ -55,14 +52,12 @@ spec:
     - name: delete-pvcs
       script:
         image: alpine/kubectl
-        command: [bash]
         source: |
           # Delete all PVCs in all namespaces
           kubectl delete pvc --all --all-namespaces --force --grace-period=0
     - name: validate-pvcs
       script:
         image: alpine/kubectl
-        command: [bash]
         source: |
           # Check for and clean up any stuck PVCs (retry up to 3 times)
           for attempt in {1..3}; do
@@ -83,7 +78,6 @@ spec:
     - name: delete-apps
       script:
         image: alpine/kubectl
-        command: [bash]
         source: |
           # Delete all ArgoCD applications to remove managed resources
           kubectl delete applications --all -n argocd --force --grace-period=0
