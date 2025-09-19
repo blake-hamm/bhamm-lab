@@ -128,6 +128,11 @@ data:
         description: Visit qbittorrent
         icon: hl-qbittorrent
         url: https://qbittorrent.bhamm-lab.com/
+      - title: Intel GPU
+        description: Visit Intel gpu exporter grafana dashboard
+        icon: hl-grafana
+        url: https://grafana.bhamm-lab.com/d/ddittat0n2i9se/intel-igpu?orgId=1&from=now-6h&to=now&timezone=browser&refresh=10s
+        statusCheck: false
 
     - name: Monitoring
       icon: mdi-finance
