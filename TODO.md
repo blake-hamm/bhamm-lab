@@ -1,6 +1,12 @@
 # Adjust storage config
 x Switch swfs to local storage
 x Switch cnpg to ceph for ha
+- Wait for swfs backup
+- Deploy blue cluster (for harbor and testing)
+- Switch traffic, test and destroy green cluster
+- Merge branch with main
+- Deploy green cluster with new storage config
+- Switch traffic, test and destroy blue
 - Create argo workflow to cleanup ceph
 
 # Deploy 'nice to haves'
