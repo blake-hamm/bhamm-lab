@@ -98,7 +98,7 @@ spec:
           image: bhgedigital/envsubst:latest
           command: ["/bin/sh", "-c"]
           args:
-            - envsubst < /config/config.yaml > /templated-config/config.yaml
+            - envsubst < /config/immich-config.yaml > /templated-config/config.yaml
           env:
             - name: IMMICH_OIDC_CLIENT_SECRET
               valueFrom:
