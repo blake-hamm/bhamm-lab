@@ -14,7 +14,7 @@ spec:
   {{- end }}
   instances: {{ .Values.postgresql.instances }}
   storage:
-    storageClass: local-path
+    storageClass: csi-rbd-sc
     size: {{ .Values.postgresql.storageSize }}
   postgresql:
     parameters:
