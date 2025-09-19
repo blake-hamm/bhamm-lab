@@ -20,7 +20,10 @@ spec:
           tolerations: {}
         linux:
           enabled: true
-          tolerations: {}
+          tolerations:
+            - key: "intel.com/gpu"
+              operator: "Exists"
+              effect: "NoSchedule"
         windows:
           enabled: false
   syncPolicy:

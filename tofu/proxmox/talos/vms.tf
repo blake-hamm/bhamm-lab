@@ -10,7 +10,7 @@ resource "proxmox_virtual_environment_vm" "this" {
     var.environment,
     each.value.machine_type,
     each.value.host_node,
-  ], each.value.taint != null ? [each.value.taint] : []))
+  ], each.value.vm_tag != null ? [each.value.vm_tag] : []))
   machine       = "q35"
   scsi_hardware = "virtio-scsi-single"
   bios          = "seabios"
@@ -26,10 +26,10 @@ resource "proxmox_virtual_environment_vm" "this" {
   }
 
   dynamic "hostpci" {
-    for_each = each.value.taint == "intel-gpu" ? [0] : []
+    for_each = try(each.value.hostpci, {})
     content {
-      device = "hostpci0"
-      id     = var.intel_gpu_worker_id
+      device = "hostpci${hostpci.key}"
+      id     = hostpci.value
       pcie   = true
       rombar = true
     }
@@ -42,7 +42,7 @@ resource "proxmox_virtual_environment_vm" "this" {
 
   memory {
     dedicated = each.value.memory
-    floating  = 1
+    floating  = 0
   }
 
   network_device {
@@ -62,7 +62,7 @@ resource "proxmox_virtual_environment_vm" "this" {
     ssd          = true
     file_format  = "raw"
     size         = each.value.disk_size
-    file_id      = each.value.taint == "intel-gpu" ? proxmox_virtual_environment_download_file.intel_gpu[0].id : proxmox_virtual_environment_download_file.this.id
+    file_id      = each.value.vm_tag == "intel-gpu" ? proxmox_virtual_environment_download_file.intel_gpu[0].id : proxmox_virtual_environment_download_file.this.id
   }
 
   dynamic "disk" {

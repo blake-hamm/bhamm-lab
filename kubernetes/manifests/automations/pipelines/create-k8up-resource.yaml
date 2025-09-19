@@ -206,7 +206,7 @@ spec:
                 secretAccessKeySecretRef:
                   name: "{{inputs.parameters.k8up-secret}}"
                   key: AWS_SECRET_ACCESS_KEY
-            activeDeadlineSeconds: 10800
+            activeDeadlineSeconds: 36000
     - name: create-k8up-resource-prune
       inputs:
         parameters:
@@ -237,7 +237,7 @@ spec:
                 secretAccessKeySecretRef:
                   name: "{{inputs.parameters.k8up-secret}}"
                   key: AWS_SECRET_ACCESS_KEY
-            activeDeadlineSeconds: 10800
+            activeDeadlineSeconds: 36000
             retention:
               keepLast: 5
               keepDaily: 2
@@ -251,15 +251,15 @@ spec:
           - name: kind
           - name: k8up-name
       script:
-        image: bitnami/kubectl:1.29
-        command: [bash]
+        command: ["/bin/sh", "-c"]
+        image: alpine/kubectl
         source: |-
-          set -euo pipefail
+          set -eu
 
-          max_retries=50
+          max_retries=90
           delay=10
           add_delay=10
-          max_delay=300
+          max_delay=600
 
           echo "Waiting for {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} to complete..."
 
@@ -272,16 +272,16 @@ spec:
 
             echo "Status: '$status', Reason: '$reason'"
 
-            if [[ "$status" == "True" && "$reason" == "Succeeded" ]]; then
+            if [ "$status" = "True" ] && [ "$reason" = "Succeeded" ]; then
               echo "✅ Resource completed successfully!"
               exit 0
-            elif [[ "$reason" == "Failed" ]]; then
+            elif [ "$reason" = "Failed" ]; then
               echo "❌ Resource failed!"
               kubectl get {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} -n {{inputs.parameters.target-namespace}} -o yaml
               exit 1
-            elif [[ -n "$status" ]]; then
+            elif [ -n "$status" ]; then
               echo "⚠️ Resource has completed condition but unexpected state: status=$status, reason=$reason"
-              if [[ "$i" -eq "$max_retries" ]]; then
+              if [ "$i" -eq "$max_retries" ]; then
                 echo "❌ Max retries reached with unexpected state"
                 kubectl get {{inputs.parameters.kind}}/{{inputs.parameters.k8up-name}} -n {{inputs.parameters.target-namespace}} -o yaml
                 exit 1
@@ -292,7 +292,7 @@ spec:
 
             sleep $delay
             delay=$((delay + add_delay))
-            if [[ "$delay" -gt "$max_delay" ]]; then
+            if [ "$delay" -gt "$max_delay" ]; then
               delay=$max_delay
             fi
             echo "Sleeping for $delay seconds..."
@@ -429,7 +429,7 @@ spec:
                 secretAccessKeySecretRef:
                   name: "{{inputs.parameters.k8up-secret}}"
                   key: AWS_SECRET_ACCESS_KEY
-            activeDeadlineSeconds: 10800
+            activeDeadlineSeconds: 36000
             podSecurityContext:
               fsGroup: {{inputs.parameters.fsGroup}}
               runAsUser: 0

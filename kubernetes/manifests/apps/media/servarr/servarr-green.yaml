@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: servarr-green
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  destination:
+    namespace: servarr
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    path: kubernetes/manifests/apps/media/servarr
+    targetRevision: feature/intel-arc
+    kustomize:
+      patches:
+        - target:
+            group: apps
+            version: v1
+            kind: Deployment
+          patch: |-
+            - op: add
+              path: /spec/template/spec/tolerations
+              value:
+                - key: "intel.com/gpu"
+                  operator: "Exists"
+                  effect: "NoSchedule"
+            - op: add
+              path: /spec/template/spec/nodeSelector
+              value:
+                intel.feature.node.kubernetes.io/gpu: "true"
+        - target:
+            group: apps
+            version: v1
+            kind: Deployment
+            name: jellyfin
+          patch: |-
+            - op: add
+              path: /spec/template/spec/containers/0/resources
+              value:
+                limits:
+                  gpu.intel.com/i915: 1
+                requests:
+                  gpu.intel.com/i915: 1
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true

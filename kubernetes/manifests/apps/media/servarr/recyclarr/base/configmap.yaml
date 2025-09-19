@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: recyclarr
+  namespace: servarr
+  annotations:
+    argocd.argoproj.io/sync-wave: "21"
+data:
+  recyclarr.yml: |-
+    sonarr:
+      sonarr:
+        base_url: http://sonarr.servarr.svc.cluster.local:8989
+        api_key: !env_var UN_SONARR_0_API_KEY
+        quality_definition:
+          type: series
+        media_naming:
+          season: default
+          series: jellyfin-tvdb
+          episodes:
+            rename: true
+            standard: default
+            daily: default
+            anime: default
+        include:
+          - template: sonarr-quality-definition-series
+          - template: sonarr-v4-custom-formats-anime
+          - template: sonarr-v4-quality-profile-anime
+          - template: sonarr-v4-custom-formats-web-1080p
+          - template: sonarr-v4-quality-profile-web-1080p
+    radarr:
+      radarr:
+        base_url: http://radarr.servarr.svc.cluster.local:7878
+        api_key: !env_var UN_RADARR_0_API_KEY
+        quality_definition:
+          type: movie
+        media_naming:
+          folder: jellyfin-imdb
+          movie:
+            rename: true
+            standard: jellyfin-imdb
+        include:
+          - template: radarr-quality-definition-movie
+          - template: radarr-custom-formats-hd-bluray-web
+          - template: radarr-quality-profile-hd-bluray-web
+          - template: radarr-custom-formats-anime
+          - template: radarr-quality-profile-anime

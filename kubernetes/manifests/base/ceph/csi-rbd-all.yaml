@@ -25,6 +25,11 @@ spec:
     targetRevision: 3.14.2
     helm:
       valuesObject:
+        nodeplugin:
+          tolerations:
+            - key: "intel.com/gpu"
+              operator: "Exists"
+              effect: "NoSchedule"
         provisioner:
           replicaCount: 3
         csiConfig:

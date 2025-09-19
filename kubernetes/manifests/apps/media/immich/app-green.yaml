@@ -1,0 +1,359 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: immich-config
+  namespace: immich
+  annotations:
+    argocd.argoproj.io/sync-wave: "24"
+data:
+  immich-config.yaml: |
+    machineLearning:
+      clip:
+        enabled: true
+        modelName: ViT-B-32__openai
+      duplicateDetection:
+        enabled: true
+        maxDistance: 0.01
+      enabled: true
+      facialRecognition:
+        enabled: true
+        maxDistance: 0.5
+        minFaces: 3
+        minScore: 0.7
+        modelName: buffalo_l
+      urls:
+        - http://immich-machine-learning:3003
+    oauth:
+      enabled: true
+      issuerUrl: "https://auth.bhamm-lab.com/.well-known/openid-configuration"
+      clientId: "immich"
+      clientSecret: "$IMMICH_OIDC_CLIENT_SECRET"
+      scope: "openid email profile groups"
+      buttonText: "Login with Authelia"
+      autoRegister: true
+      storageLabelClaim: "preferred_username"
+      roleClaim: "groups"
+      autoLaunch: true
+    passwordLogin:
+      enabled: false
+    ffmpeg:
+      accel: qsv
+      accelDecode: true
+      acceptedAudioCodecs:
+        - aac
+        - mp3
+        - libopus
+      acceptedContainers:
+        - mov
+        - ogg
+        - webm
+      acceptedVideoCodecs:
+        - h264
+        - hevc
+        - av1
+        - vp9
+      bframes: -1
+      cqMode: auto
+      crf: 23
+      gopSize: 0
+      maxBitrate: "0"
+      preferredHwDevice: auto
+      preset: faster
+      refs: 0
+      targetAudioCodec: aac
+      targetResolution: "720"
+      targetVideoCodec: h264
+      temporalAQ: false
+      threads: 0
+      tonemap: hable
+      transcode: all
+      twoPass: false
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: immich-server
+  namespace: immich
+  annotations:
+    argocd.argoproj.io/sync-wave: "25"
+  labels:
+    app: immich-server
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: immich-server
+  template:
+    metadata:
+      labels:
+        app: immich-server
+    spec:
+      nodeSelector:
+        intel.feature.node.kubernetes.io/gpu: "true"
+      tolerations:
+        - key: "intel.com/gpu"
+          operator: "Exists"
+          effect: "NoSchedule"
+      initContainers:
+        - name: envsubst
+          image: bhgedigital/envsubst:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - envsubst < /config/immich-config.yaml > /templated-config/config.yaml
+          env:
+            - name: IMMICH_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: immich-external-secret
+                  key: oidc_client_secret
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: templated-config
+              mountPath: /templated-config
+      containers:
+        - name: immich-server
+          image: ghcr.io/immich-app/immich-server:v1.142.1
+          ports:
+            - name: http
+              containerPort: 2283
+              protocol: TCP
+            - name: metrics-api
+              containerPort: 8081
+              protocol: TCP
+            - name: metrics-ms
+              containerPort: 8082
+              protocol: TCP
+          env:
+            - name: DB_HOSTNAME
+              value: immich-postgresql-rw
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: immich-postgresql-app
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: immich-postgresql-app
+                  key: password
+            - name: DB_DATABASE_NAME
+              value: immich
+            - name: REDIS_HOSTNAME
+              value: immich-dragonfly
+            - name: IMMICH_TELEMETRY_INCLUDE
+              value: "all"
+            - name: IMMICH_CONFIG_FILE
+              value: "/templated-config/config.yaml"
+            - name: TZ
+              value: America/Denver
+          livenessProbe:
+            httpGet:
+              path: /api/server/ping
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/server/ping
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /api/server/ping
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 30
+          volumeMounts:
+            - name: immich-data
+              mountPath: /usr/src/app/upload
+            - name: templated-config
+              mountPath: /templated-config
+          resources:
+            limits:
+              cpu: "2"
+              memory: "8Gi"
+              gpu.intel.com/i915: 1
+            requests:
+              cpu: "500m"
+              memory: "2Gi"
+              gpu.intel.com/i915: 1
+      volumes:
+        - name: immich-data
+          persistentVolumeClaim:
+            claimName: immich-data
+        - name: config
+          configMap:
+            name: immich-config
+        - name: templated-config
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: immich-server
+  namespace: immich
+  annotations:
+    argocd.argoproj.io/sync-wave: "26"
+spec:
+  selector:
+    app: immich-server
+  ports:
+    - name: http
+      protocol: TCP
+      port: 2283
+      targetPort: 2283
+    - name: metrics-api
+      protocol: TCP
+      port: 8081
+      targetPort: 8081
+    - name: metrics-ms
+      protocol: TCP
+      port: 8082
+      targetPort: 8082
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: immich-server
+  namespace: immich
+  annotations:
+    argocd.argoproj.io/sync-wave: "27"
+  labels:
+    app: immich-server
+spec:
+  selector:
+    matchLabels:
+      app: immich-server
+  endpoints:
+    - port: metrics-api
+      scheme: http
+    - port: metrics-ms
+      scheme: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: immich-machine-learning
+  namespace: immich
+  annotations:
+    argocd.argoproj.io/sync-wave: "25"
+  labels:
+    app: immich-machine-learning
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: immich-machine-learning
+  template:
+    metadata:
+      labels:
+        app: immich-machine-learning
+    spec:
+      nodeSelector:
+        intel.feature.node.kubernetes.io/gpu: "true"
+      tolerations:
+        - key: "intel.com/gpu"
+          operator: "Exists"
+          effect: "NoSchedule"
+      containers:
+        - name: immich-machine-learning
+          image: ghcr.io/immich-app/immich-machine-learning:v1.142.1-openvino
+          ports:
+            - name: http
+              containerPort: 3003
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 15
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 15
+            failureThreshold: 5
+          startupProbe:
+            httpGet:
+              path: /ping
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 120
+          env:
+            - name: DB_HOSTNAME
+              value: immich-postgresql-rw
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: immich-postgresql-app
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: immich-postgresql-app
+                  key: password
+            - name: DB_DATABASE_NAME
+              value: immich
+            - name: REDIS_HOSTNAME
+              value: immich-dragonfly
+            - name: TRANSFORMERS_CACHE
+              value: "/cache"
+            - name: UPLOAD_LOCATION
+              value: "/library"
+            - name: TZ
+              value: America/Denver
+            - name: MACHINE_LEARNING_PRELOAD__CLIP
+              value: "ViT-B-32__openai"
+            - name: MACHINE_LEARNING_PRELOAD__FACIAL_RECOGNITION
+              value: "buffalo_l"
+          volumeMounts:
+            - name: immich-ml-cache
+              mountPath: /cache
+          resources:
+            limits:
+              cpu: "4"
+              memory: "8Gi"
+              gpu.intel.com/i915: 1
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+              gpu.intel.com/i915: 1
+      volumes:
+        - name: immich-ml-cache
+          persistentVolumeClaim:
+            claimName: immich-ml-cache
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: immich-machine-learning
+  namespace: immich
+  annotations:
+    argocd.argoproj.io/sync-wave: "26"
+spec:
+  selector:
+    app: immich-machine-learning
+  ports:
+    - name: http
+      protocol: TCP
+      port: 3003
+      targetPort: 3003

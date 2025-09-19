@@ -1,32 +1,7 @@
-# Fix nfs
-x Switch from nfs to smb
-  x Ansible playbook for smb share for kubernetes
-  x Kubernetes gitops for smb csi driver
-  x Destroy all nfs pvc
-  x Destoy nfs gitops resources/storage class
-  x Create smb storage class
-  x Ensure pvc are created
-  x Manually run swfs backup to confirm logs (timeout?)
-  x Test with 24hr watch
-  x Restore green cluster with smb
-
-# Intel arc
-x Ensure common helm can reate pvc
-x Remove pvc creation from:
-  x servarr
-  x immich
-  x harbor
-  x git
-x Setup harbor image cache for talos
-x Test in blue
-- Install dragonfly operator
-- Create immich custom helm chart following docker compose
-- Fix immich pvc and library (use latest image)
-
-# Fix cephfs
-- Install fuse3 on talos worker images
-- Leverage fuse3 features in cephfs storage class
-- Test with forgejo + k8up backup
+# Adjust storage config
+- Switch swfs to local storage
+- Switch cnpg to ceph for ha
+- Create argo workflow to cleanup ceph
 
 # Deploy 'nice to haves'
 - Finance tracker - https://actualbudget.org/
@@ -82,12 +57,25 @@ x Test in blue
 - Setup zfs exporter and grafana - https://github.com/aroberts/ansible-role-zfs_exporter
 - Setup snapraid/mergerfs grafana - https://github.com/ljmerza/snapraid-collector
 
+# Fix cephfs
+- Install fuse3 on talos worker images
+- Leverage fuse3 features in cephfs storage class
+- Test with forgejo + k8up backup
+
 # Refactor internal coms
-- Change harbor s3 integration to use internal minio svc instead of traefik ingress
-- Try argocd w/ gitea internal svc
 - Change frequency of dashy pings
 
-# Troubleshot
+# Upgrade servarr
+x https://github.com/nzbgetcom/nzbget/blob/develop/docker/README.md
+- https://trash-guides.info/
+- https://configarr.de/docs/installation/kubernetes/
+- Jellyseerr/Ombi
+- Bazarr
+- Lidarr
+- Readarr
+- Grafana
+
+# Troubleshot snapraid
 ```bash
 From root@aorus.bhamm-lab.com Sun May 04 00:00:04 2025
 Envelope-to: root@aorus.bhamm-lab.com
@@ -123,48 +111,23 @@ Date: Sun, 04 May 2025 00:00:01 -0600
 - Integrate proxmox with traefik
 
 # AI
-- Switch to garage https://garagehq.deuxfleurs.fr/documentation/cookbook/kubernetes/
-- Setup with talos - https://github.com/siderolabs/talos/discussions/10286
-- Transtion amd operator to use custom docker image - https://instinct.docs.amd.com/projects/gpu-operator/en/latest/drivers/precompiled-driver.html
-- Create node taint to deny scheduling to gpu vm
+- Install framework machines
 - Deploy openwebui - https://github.com/open-webui/helm-charts/tree/main/charts/open-webui (with ollama)
 
 # Finish
-- Consider having k8up restore create pvc automagically
-- Switch to nfs csi driver - https://github.com/kubernetes-csi/csi-driver-nfs
-- Switch vm zfs name (and confirm prod backups)
-- Make forgejo ha - https://code.forgejo.org/forgejo-helm/forgejo-helm/src/branch/main/docs/ha-setup.md
 - Expose hubble and/or setup cilium prom/grafana metrics
 - Setup kubernetes metrics in talos
 - Setup cilium monitoring
-- Ensure HA with node affinity towards vm hosts (aorus, antsle, super)
-- Leverage redis operator
 - Install proxmox cloud controller
-- Argo event/workflow for terraform/ansible and decom gitea actions
 - Fix TZ on all services
-- Make ha with 3 replicas for all services
-- Switch to cilium
-- cloudnative pg monitoring
 - Further restrict proxmox users (ansible, tofu remove)
 - Install awx - https://github.com/ansible-community/awx-operator-helm
-- Use gitea container registry
-  - sync sops workflow
-- Convert sync sops to vault job as argo workflow template
-  - Trigger from argo event when vault is ready
-  - Trigger from argo event on secret changes in git
 - Document secret rotation
-- Refactor argocd projects into 'core', 'default'
 - Deploy
-  - docs site
-  - vpn
   - netbootxyz
   - home assistant
-  - servarr
-    - jellyfin
-    - flaresolver
   - Integrate proxmox UI into traefik
 - Expose docs site and vpn
-- Install mergerfs/snapraid on aorus node
 - More fine grain vault security access
 - Consider refactoring proxmox ansible to terraform
   - ACL's
@@ -174,34 +137,15 @@ Date: Sun, 04 May 2025 00:00:01 -0600
   - Storage (pbs,nfs)
 - Implement devsec.os_hardening
 - Implement debian firewall rules
-- 3-2-1 backups
-  - Setup ceph backups (consider decomissioning k8up if volume snapshots work)
-  - Configure snapraid/mergerfs
-  - Ensure monitoring
-  - Expose nfs
-  - Create nfs storage class
-  - Setup minio tenant with nfs storage class
-  - Refactor k8up prune
-    - Move generate secret into template with var
-    - Make global prune job that doesn't conflict w/ backup schedule
-  - Refactor k8up backups to minio
-  - Ensure minio backup bucket syncs to gcp
-  - Ensure on new cluster, minio bucket is restored first, then deploy backup
 - Setup CI/CD for other services
   - Ansible bare metal
   - Ansible opnsense
   - Terrafrom gcp
-- Setup service mesh (istio/hashicorp consul)
-- Consider refactoring minio to primary storage and k8up sync to gcp
-- Audit backups
-  - Use example site for continuous backups/gitops updates with argo workflow/k8up/cloudnativepg
-  - s3 to s3 backups
-  - DR architecture diagram
+- DR architecture diagram
 - Consider argocd application sets - https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Use-Cases/
 - Install renovate bot - https://docs.renovatebot.com/modules/platform/gitea/
   - Setup repo mirroring with public images
   - Setup argo workflow to handle this
-- Consider using cilium - https://cilium.io/
 - audit and rotate secrets
 - Automated opnsense backups - https://www.zenarmor.com/docs/network-security-tutorials/opnsense-security-and-hardening-best-practice-guide#regularly-backup-and-protect-backup-files
 - Deploy elasticsearch operator
@@ -211,18 +155,37 @@ Date: Sun, 04 May 2025 00:00:01 -0600
 - blackbox exporter - https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus-blackbox-exporter/values.yaml
   - omada equipment
     - snmp exporter
-- Migrate from k3s to something more robust
-  - Confirm monitoring for
-    - kube scheduler
-    - kube etcd
-    - kube controller
-    - kube proxy
-  - Or this - https://fabianlee.org/2022/07/02/prometheus-installing-kube-prometheus-stack-on-k3s-cluster/
 - traefik waf https://plugins.traefik.io/plugins/628c9eadffc0cd18356a9799/modsecurity-plugin
 - k8up - https://grafana.com/grafana/dashboards/20166-k8up/ (stretch)
 - kube bench - https://github.com/aquasecurity/kube-bench
 
 ## Previous
+# Intel arc
+x Ensure common helm can reate pvc
+x Remove pvc creation from:
+  x servarr
+  x immich
+  x harbor
+  x git
+x Setup harbor image cache for talos
+x Test in blue
+x Schedule servarr to intel gpu node
+x Install dragonfly operator
+x Create immich custom helm chart following latest immich docker compose
+x Fix immich pvc and library (use latest image)
+
+# Fix nfs
+x Switch from nfs to smb
+  x Ansible playbook for smb share for kubernetes
+  x Kubernetes gitops for smb csi driver
+  x Destroy all nfs pvc
+  x Destoy nfs gitops resources/storage class
+  x Create smb storage class
+  x Ensure pvc are created
+  x Manually run swfs backup to confirm logs (timeout?)
+  x Test with 24hr watch
+  x Restore green cluster with smb
+
 # Method integration
 x Fix ceph fs
 x Recover blue cluster

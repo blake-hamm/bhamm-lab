@@ -32,6 +32,14 @@ spec:
               remoteRef:
                 key: /default/servarr
                 property: UN_RADARR_0_API_KEY
+            - secretKey: NZBGET_USER
+              remoteRef:
+                key: /core/lldap
+                property: lldap-ldap-user-name
+            - secretKey: NZBGET_PASS
+              remoteRef:
+                key: /core/lldap
+                property: lldap-ldap-user-pass
         pvc:
           - name: radarr-config
           - name: unpackerr-config
@@ -40,6 +48,8 @@ spec:
           - name: prowlarr-config
           - name: qbittorrent-config
           - name: gluetun-config
+          - name: nzbget-gluetun-config
+          - name: nzbget-config
           - name: downloads
             storageSize: 1Ti
             storageClassName: smb-csi
@@ -54,6 +64,19 @@ spec:
           restore:
             enabled: true
         ingressRoutes:
+          - enabled: true
+            name: nzbget
+            ingressClass: traefik-external
+            # websocket: true
+            routes:
+              - kind: Rule
+                match: Host(`nzbget.bhamm-lab.com`)
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: nzbget
+                    scheme: http
+                    port: webui
           - enabled: true
             name: qbittorrent
             ingressClass: traefik-external

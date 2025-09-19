@@ -16,6 +16,8 @@ spec:
     targetRevision: v1.2.1
     helm:
       valuesObject:
+        rbacProxy:
+          enabled: false
         serviceMonitor:
           enabled: true
   syncPolicy:

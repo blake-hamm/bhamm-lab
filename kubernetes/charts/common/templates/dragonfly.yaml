@@ -1,0 +1,21 @@
+{{- if .Values.dragonfly.enabled -}}
+apiVersion: dragonflydb.io/v1alpha1
+kind: Dragonfly
+metadata:
+  name: {{ .Values.name }}-dragonfly
+  namespace: {{ .Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "17"
+spec:
+  replicas: {{ .Values.dragonfly.replicas }}
+  args: {{ .Values.dragonfly.args | toYaml | nindent 4 }}
+  resources:
+{{ toYaml .Values.dragonfly.resources | indent 4 }}
+  {{- if .Values.dragonfly.snapshot.enabled }}
+  snapshot:
+    cron: "{{ .Values.dragonfly.snapshot.cron }}"
+    persistentVolumeClaimSpec:
+{{ toYaml .Values.dragonfly.snapshot.pvc | indent 6 }}
+  {{- end }}
+{{- end -}}

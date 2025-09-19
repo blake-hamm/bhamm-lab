@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: intel-gpu-monitoring
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: intel-gpu-exporter
+  namespace: intel-gpu-monitoring
+  labels:
+    app: intel-gpu-exporter
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  selector:
+    matchLabels:
+      app: intel-gpu-exporter
+  template:
+    metadata:
+      labels:
+        app: intel-gpu-exporter
+    spec:
+      nodeSelector:
+        intel.feature.node.kubernetes.io/gpu: "true"
+      hostPID: true
+      tolerations:
+        - key: "intel.com/gpu"
+          operator: "Exists"
+          effect: "NoSchedule"
+      volumes:
+        - name: dev-dri
+          hostPath:
+            path: /dev/dri
+      containers:
+        - name: intel-gpu-exporter
+          image: harbor.bhamm-lab.com/library/intel-gpu-exporter:latest
+          ports:
+            - containerPort: 8080
+              name: metrics
+          env:
+            - name: REFRESH_PERIOD_MS
+              value: "10000"
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: dev-dri
+              mountPath: /dev/dri
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: intel-gpu-exporter
+  namespace: intel-gpu-monitoring
+  labels:
+    app: intel-gpu-exporter
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  ports:
+    - port: 8080
+      name: metrics
+  selector:
+    app: intel-gpu-exporter
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: intel-gpu-exporter
+  namespace: intel-gpu-monitoring
+  labels:
+    app: intel-gpu-exporter
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  selector:
+    matchLabels:
+      app: intel-gpu-exporter
+  endpoints:
+    - port: metrics
+      interval: 10s
+      path: /metrics

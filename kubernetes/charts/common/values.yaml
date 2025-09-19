@@ -17,14 +17,14 @@ ingressRoutes: []
 k8up:
   backup:
     enabled: false
-    schedule: "0 */6 * * *"
+    schedule: "0 */12 * * *"
   restore:
     enabled: false
     config:
       fsGroup: 0
 postgresql:
   enabled: false
-  instances: 3
+  instances: 1
   storageSize: 2Gi
   imageName: ""
   sharedPreloadLibraries: [""]
@@ -38,7 +38,7 @@ postgresql:
   backup:
     enabled: false
     pathVersion: "v1"
-    schedule: "0 30 */6 * * *"
+    schedule: "0 30 */12 * * *"
     retention: "30d"
   restore:
     enabled: false
@@ -49,3 +49,24 @@ pvc: []
 #   storageSize: 10Gi
 #   storageClassName: local-path
 #   accessMode: ReadWriteOnce
+dragonfly:
+  enabled: false
+  replicas: 1
+  image: "dragonflydb/dragonfly:latest"
+  args: []
+  resources:
+    requests:
+      cpu: 500m
+      memory: 500Mi
+    limits:
+      cpu: 600m
+      memory: 750Mi
+  snapshot:
+    enabled: false
+    cron: "*/5 * * * *"
+    pvc:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 2Gi

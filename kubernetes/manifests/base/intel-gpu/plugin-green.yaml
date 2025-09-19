@@ -1,0 +1,114 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: intel-gpu-plugin
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: intel-gpu-nfr
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  destination:
+    namespace: node-feature-discovery
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/intel/intel-device-plugins-for-kubernetes.git
+    path: deployments/nfd/overlays/node-feature-rules
+    targetRevision: v0.34.0
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: intel-gpu-plugin-green
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  destination:
+    namespace: intel-gpu-plugin
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/intel/intel-device-plugins-for-kubernetes.git
+    path: deployments/gpu_plugin
+    targetRevision: v0.34.0
+    kustomize:
+      patches:
+        - target:
+            group: apps
+            version: v1
+            kind: DaemonSet
+            name: intel-gpu-plugin
+          patch: |-
+            - op: add
+              path: /spec/template/spec/nodeSelector
+              value:
+                intel.feature.node.kubernetes.io/gpu: "true"
+            - op: add
+              path: /spec/template/spec/tolerations
+              value:
+                - key: "intel.com/gpu"
+                  operator: "Exists"
+                  effect: "NoSchedule"
+            - op: add
+              path: /spec/template/spec/volumes/-
+              value:
+                name: levelzerosocket
+                emptyDir: {}
+            - op: replace
+              path: /spec/template/spec/containers/0/args
+              value:
+                - "-enable-monitoring"
+                - "-health-management"
+                - "-shared-dev-num=3" # Enable exporter, immich and jellyfin
+                - "-allow-ids=0x56a6,0x56a5,0x56a1,0x56a0,0x5694,0x5693,0x5692,0x5691,0x5690,0x56b3,0x56b2,0x56a4,0x56a3,0x5697,0x5696,0x5695,0x56b1,0x56b0,0x56a2,0x56ba,0x56bc,0x56bd,0x56bb"
+            - op: add
+              path: /spec/template/spec/containers/0/volumeMounts/-
+              value:
+                name: levelzerosocket
+                mountPath: /var/lib/levelzero
+            - op: add
+              path: /spec/template/spec/containers/-
+              value:
+                name: intel-gpu-levelzero
+                image: intel/intel-gpu-levelzero:devel
+                imagePullPolicy: IfNotPresent
+                args:
+                  - "-v=2"
+                resources:
+                  requests:
+                    cpu: 25m
+                    memory: 50Mi
+                  limits:
+                    cpu: 50m
+                    memory: 100Mi
+                securityContext:
+                  readOnlyRootFilesystem: true
+                  privileged: true
+                  capabilities:
+                    drop:
+                      - ALL
+                volumeMounts:
+                - name: levelzerosocket
+                  mountPath: /var/lib/levelzero
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true
