@@ -17,6 +17,13 @@ spec:
     helm:
       valuesObject:
         name: immich
+        externalSecrets:
+          enabled: true
+          secrets:
+            - secretKey: oidc_client_secret
+              remoteRef:
+                key: /default/immich
+                property: oidc_client_secret
         ingressRoutes:
           - enabled: true
             name: immich
