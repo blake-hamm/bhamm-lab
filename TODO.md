@@ -1,6 +1,6 @@
 # Adjust storage config
-- Switch swfs to local storage
-- Switch cnpg to ceph for ha
+x Switch swfs to local storage
+x Switch cnpg to ceph for ha
 - Create argo workflow to cleanup ceph
 
 # Deploy 'nice to haves'
