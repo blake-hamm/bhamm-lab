@@ -8,10 +8,10 @@ metadata:
 data:
   recyclarr.yml: |-
     sonarr:
-      main:
+      sonarr:
         base_url: http://sonarr.servarr.svc.cluster.local:8989
         api_key: !env_var UN_SONARR_0_API_KEY
     radarr:
-      main:
+      radarr:
         base_url: http://radarr.servarr.svc.cluster.local:7878
         api_key: !env_var UN_RADARR_0_API_KEY
