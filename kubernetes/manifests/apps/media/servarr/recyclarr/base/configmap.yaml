@@ -11,7 +11,17 @@ data:
       sonarr:
         base_url: http://sonarr.servarr.svc.cluster.local:8989
         api_key: !env_var UN_SONARR_0_API_KEY
+        quality_definition:
+          type: series
+        include:
+          - template: web-1080p-v4
+          - template: anime-sonarr-v4
     radarr:
       radarr:
         base_url: http://radarr.servarr.svc.cluster.local:7878
         api_key: !env_var UN_RADARR_0_API_KEY
+        quality_definition:
+          type: series
+        include:
+          - template: hd-bluray-web
+          - template: anime-radarr
