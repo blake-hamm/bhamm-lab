@@ -145,23 +145,6 @@ spec:
                     path: '/app/custom-secrets/oidc.jwk.RS256.pem'
                   certificate_chain:
                     path: '/app/custom-secrets/oidc.jwk.RS256.crt'
-              claims_policies:
-                immich_policy:
-                  default:
-                    immich_role: user
-                    immich_quota: 0
-                  rules:
-                    - group: admin
-                      immich_role: admin
-                      immich_quota: 0
-                    - group: wife
-                      immich_role: user
-                      immich_quota: 0
-              scopes:
-                immich_scope:
-                  claims:
-                    - immich_role
-                    - immich_quota
               clients:
                 - client_id: 'vault'
                   client_name: 'HashiCorp Vault'
