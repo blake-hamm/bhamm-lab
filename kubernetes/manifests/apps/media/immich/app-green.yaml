@@ -23,6 +23,16 @@ data:
         modelName: buffalo_l
       urls:
         - http://immich-machine-learning:3003
+    oauth:
+      enabled: true
+      issuerUrl: "https://auth.bhamm-lab.com/.well-known/openid-configuration"
+      clientId: "immich"
+      clientSecret: "$IMMICH_OIDC_CLIENT_SECRET"
+      scope: "openid email profile groups"
+      buttonText: "Login with Authelia"
+      autoRegister: true
+      storageLabelClaim: "preferred_username"
+      roleClaim: "groups"
     ffmpeg:
       accel: qsv
       accelDecode: true
@@ -83,6 +93,23 @@ spec:
         - key: "intel.com/gpu"
           operator: "Exists"
           effect: "NoSchedule"
+      initContainers:
+        - name: envsubst
+          image: bhgedigital/envsubst:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - envsubst < /config/config.yaml > /templated-config/config.yaml
+          env:
+            - name: IMMICH_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: immich-external-secret
+                  key: oidc_client_secret
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: templated-config
+              mountPath: /templated-config
       containers:
         - name: immich-server
           image: ghcr.io/immich-app/immich-server:v1.142.1
@@ -116,7 +143,7 @@ spec:
             - name: IMMICH_TELEMETRY_INCLUDE
               value: "all"
             - name: IMMICH_CONFIG_FILE
-              value: "/config/immich-config.yaml"
+              value: "/templated-config/config.yaml"
             - name: TZ
               value: America/Denver
           livenessProbe:
@@ -148,6 +175,8 @@ spec:
               mountPath: /usr/src/app/upload
             - name: config
               mountPath: /config
+            - name: templated-config
+              mountPath: /templated-config
           resources:
             limits:
               cpu: "2"
@@ -164,6 +193,8 @@ spec:
         - name: config
           configMap:
             name: immich-config
+        - name: templated-config
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service

@@ -297,7 +297,6 @@ spec:
                 - client_id: 'immich'
                   client_name: 'immich'
                   client_secret: '$pbkdf2-sha512$310000$wDz7kkyl23Vaq/lR6UUucQ$5IB9s7WHexynP8RKhwp7pkbH3xasLBs6JlTurQ2Oh44f3VOR/V0WbofyVZzAtiDs2ZzOHYn1/r1orKpcNDeJvg'
-                  claims_policy: immich_role
                   authorization_policy: 'two_factor'
                   require_pkce: false
                   pkce_challenge_method: ''
@@ -309,7 +308,7 @@ spec:
                     - 'openid'
                     - 'profile'
                     - 'email'
-                    - 'immich_scope'
+                    - 'groups'
                   response_types:
                     - 'code'
                   grant_types:
