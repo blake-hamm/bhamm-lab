@@ -13,6 +13,14 @@ data:
         api_key: !env_var UN_SONARR_0_API_KEY
         quality_definition:
           type: series
+        media_naming:
+          season: default
+          series: jellyfin-tvdb
+          episodes:
+            rename: true
+            standard: default
+            daily: default
+            anime: default
         include:
           - template: sonarr-quality-definition-series
           - template: sonarr-v4-custom-formats-anime
@@ -25,6 +33,11 @@ data:
         api_key: !env_var UN_RADARR_0_API_KEY
         quality_definition:
           type: movie
+        media_naming:
+          folder: jellyfin-imdb
+          movie:
+            rename: true
+            standard: jellyfin-imdb
         include:
           - template: radarr-quality-definition-movie
           - template: radarr-custom-formats-hd-bluray-web
