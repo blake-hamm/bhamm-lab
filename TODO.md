@@ -3,7 +3,7 @@ x Switch swfs to local storage
 x Switch cnpg to ceph for ha
 x Wait for swfs backup
 x Deploy blue cluster (for harbor and testing)
-- Switch traffic, test and destroy green cluster
+x Switch traffic, test and destroy green cluster
 - Merge branch with main
 - Deploy green cluster with new storage config
 - Switch traffic, test and destroy blue
