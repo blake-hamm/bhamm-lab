@@ -15,7 +15,7 @@ spec:
         limit: "10"
         retryPolicy: "Always"
       container:
-        image: debian:bookworm-slim
+        image: debian:trixie-slim
         command: ["/bin/bash", "-c"]
         args:
           - |
