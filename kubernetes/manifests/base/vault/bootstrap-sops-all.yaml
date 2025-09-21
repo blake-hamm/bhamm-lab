@@ -15,7 +15,7 @@ spec:
         limit: "10"
         retryPolicy: "Always"
       container:
-        image: debian:bookworm-slim
+        image: debian:trixie-slim
         command: ["/bin/bash", "-c"]
         args:
           - |
@@ -42,8 +42,8 @@ spec:
                 ssh-client
 
             # Install sops
-            curl -LO https://github.com/getsops/sops/releases/download/v3.9.4/sops-v3.9.4.linux.amd64
-            mv sops-v3.9.4.linux.amd64 /usr/local/bin/sops
+            curl -LO https://github.com/getsops/sops/releases/download/v3.10.2/sops-v3.10.2.linux.amd64 && \
+            mv sops-v3.10.2.linux.amd64 /usr/local/bin/sops && \
             chmod +x /usr/local/bin/sops
 
             # Clone repository

@@ -1,6 +1,12 @@
 # Adjust storage config
-- Switch swfs to local storage
-- Switch cnpg to ceph for ha
+x Switch swfs to local storage
+x Switch cnpg to ceph for ha
+x Wait for swfs backup
+x Deploy blue cluster (for harbor and testing)
+x Switch traffic, test and destroy green cluster
+- Merge branch with main
+- Deploy green cluster with new storage config
+- Switch traffic, test and destroy blue
 - Create argo workflow to cleanup ceph
 
 # Deploy 'nice to haves'
@@ -74,6 +80,7 @@ x https://github.com/nzbgetcom/nzbget/blob/develop/docker/README.md
 - Lidarr
 - Readarr
 - Grafana
+- https://github.com/d3v1l1989/seasonarr
 
 # Troubleshot snapraid
 ```bash
