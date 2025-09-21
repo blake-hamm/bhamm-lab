@@ -4,7 +4,7 @@ metadata:
   name: local-path-provisioner
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   destination:
     namespace: local-path-storage
