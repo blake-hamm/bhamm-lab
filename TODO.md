@@ -80,6 +80,7 @@ x https://github.com/nzbgetcom/nzbget/blob/develop/docker/README.md
 - Lidarr
 - Readarr
 - Grafana
+- https://github.com/d3v1l1989/seasonarr
 
 # Troubleshot snapraid
 ```bash
