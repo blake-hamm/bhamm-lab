@@ -83,6 +83,7 @@ metadata:
     app: intel-gpu-exporter
   annotations:
     argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   selector:
     matchLabels:
