@@ -35,15 +35,6 @@ resource "google_storage_bucket" "k8up" {
   encryption {
     default_kms_key_name = google_kms_crypto_key.k8up_crypto_key.id
   }
-
-  lifecycle_rule {
-    condition {
-      age = 30
-    }
-    action {
-      type = "Delete"
-    }
-  }
 }
 
 resource "google_service_account" "k8up" {
