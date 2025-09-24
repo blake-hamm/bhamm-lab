@@ -99,7 +99,7 @@ spec:
                         - name: prepare-config
                           template: prepare-docker-config
                         - name: build-and-push
-                          template: build-and-push-kaniko
+                          template: build-and-push-buildah
                           depends: "extract-dockerfiles && clone-repo && prepare-config"
                           arguments:
                             parameters:
