@@ -99,7 +99,7 @@ spec:
                         - name: prepare-config
                           template: prepare-docker-config
                         - name: build-and-push
-                          template: build-and-push-buildkit
+                          template: build-and-push-kaniko
                           depends: "extract-dockerfiles && clone-repo && prepare-config"
                           arguments:
                             parameters:
@@ -145,7 +145,7 @@ spec:
                     outputs:
                       artifacts:
                         - name: docker-creds
-                          path: /tmp/docker-config
+                          path: /kaniko/.docker
                           archive:
                             none: {}
                     script:
@@ -166,15 +166,15 @@ spec:
                               key: robot-token
                       source: |
                         #!/bin/sh
-                        mkdir -p /tmp/docker-config
+                        mkdir -p /kaniko/.docker
                         echo '{
                           "auths": {
                             "'"${REGISTRY}"'": {
                               "auth": "'"$(echo -n "${ROBOT_USERNAME}:${ROBOT_TOKEN}" | base64)"'"
                             }
                           }
-                        }' > /tmp/docker-config/config.json
-                  - name: build-and-push-buildkit
+                        }' > /kaniko/.docker/config.json
+                  - name: build-and-push-kaniko
                     inputs:
                       parameters:
                         - name: dockerfile
@@ -182,37 +182,27 @@ spec:
                         - name: repository
                           path: /workspace
                         - name: docker-config
-                          path: /tmp/docker-config
-                    securityContext:
-                      fsGroup: 1000
+                          path: /kaniko/.docker
                     container:
-                      image: moby/buildkit:v0.13.2
-                      command: ["sh", "-c"]
-                      env:
-                        - name: DOCKER_CONFIG
-                          value: /tmp/docker-config
-                      securityContext:
-                        runAsUser: 1000
-                        runAsGroup: 1000
+                      image: gcr.io/chainguard-dev/kaniko:debug
+                      command: ["/busybox/sh", "-c"]
                       args:
                         - |
-                          rootlesskit buildkitd --addr unix:///run/user/1000/buildkit/buildkitd.sock &
-                          sleep 5
-
+                          # Show debug info
                           echo "Workspace contents:"
                           ls -laR /workspace
 
+                          # Build using parameter from stdout
                           full_path="/workspace/{{inputs.parameters.dockerfile}}"
                           context_dir=$(dirname "$full_path")
                           image_name=$(basename "$context_dir")
-                          dockerfile_name=$(basename "$full_path")
 
-                          buildctl --addr unix:///run/user/1000/buildkit/buildkitd.sock build \
-                            --frontend dockerfile.v0 \
-                            --local context="$context_dir" \
-                            --local dockerfile="$context_dir" \
-                            --opt "filename=$dockerfile_name" \
-                            --output "type=image,name=harbor.bhamm-lab.com/library/$image_name:latest,push=true,registry.insecure=true"
+                          /kaniko/executor \
+                            --context "dir://$context_dir" \
+                            --dockerfile "$full_path" \
+                            --destination "harbor.bhamm-lab.com/library/$image_name:latest" \
+                            --skip-tls-verify \
+                            --verbosity=debug
                   - name: exit-handler
                     steps:
                       - - name: final-status
