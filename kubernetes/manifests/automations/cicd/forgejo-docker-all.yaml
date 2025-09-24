@@ -192,9 +192,10 @@ spec:
                       securityContext:
                         runAsUser: 1000
                         runAsGroup: 1000
+                        fsGroup: 1000
                       args:
                         - |
-                          buildkitd --addr unix:///run/user/1000/buildkit/buildkitd.sock &
+                          rootlesskit buildkitd --addr unix:///run/user/1000/buildkit/buildkitd.sock &
                           sleep 5
 
                           echo "Workspace contents:"
