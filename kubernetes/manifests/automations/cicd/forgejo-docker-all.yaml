@@ -184,7 +184,7 @@ spec:
                         - name: docker-config
                           path: /kaniko/.docker
                     container:
-                      image: gcr.io/chainguard-dev/kaniko:debug
+                      image: gcr.io/chainguard-dev/kaniko:latest
                       command: ["/busybox/sh", "-c"]
                       args:
                         - |
