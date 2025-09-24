@@ -221,6 +221,18 @@ spec:
                       securityContext:
                         runAsUser: 1000
                         runAsGroup: 1000
+                  - name: exit-handler
+                    steps:
+                      - - name: final-status
+                          templateRef:
+                            name: forgejo-status
+                            template: forgejo-status
+                          arguments:
+                            parameters:
+                              - name: git-sha
+                                value: "{{workflow.parameters.git-sha}}"
+                              - name: state
+                                value: "{{=workflow.status == 'Succeeded' ? 'success' : 'failure'}}"
           parameters:
             - src:
                 dependencyName: forgejo-push-event
