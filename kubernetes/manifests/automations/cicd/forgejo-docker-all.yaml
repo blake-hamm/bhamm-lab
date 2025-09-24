@@ -145,7 +145,7 @@ spec:
                     outputs:
                       artifacts:
                         - name: docker-creds
-                          path: /root/.docker
+                          path: /tmp/docker-config
                           archive:
                             none: {}
                     script:
@@ -166,14 +166,14 @@ spec:
                               key: robot-token
                       source: |
                         #!/bin/sh
-                        mkdir -p /root/.docker
+                        mkdir -p /tmp/docker-config
                         echo '{
                           "auths": {
                             "'"${REGISTRY}"'": {
                               "auth": "'"$(echo -n "${ROBOT_USERNAME}:${ROBOT_TOKEN}" | base64)"'"
                             }
                           }
-                        }' > /root/.docker/config.json
+                        }' > /tmp/docker-config/config.json
                   - name: build-and-push-buildkit
                     inputs:
                       parameters:
@@ -182,15 +182,19 @@ spec:
                         - name: repository
                           path: /workspace
                         - name: docker-config
-                          path: /root/.docker
+                          path: /tmp/docker-config
                     container:
                       image: moby/buildkit:v0.13.2
                       command: ["sh", "-c"]
+                      env:
+                        - name: DOCKER_CONFIG
+                          value: /tmp/docker-config
                       securityContext:
-                        privileged: true
+                        runAsUser: 1000
+                        runAsGroup: 1000
                       args:
                         - |
-                          buildkitd --addr unix:///run/buildkit/buildkitd.sock &
+                          buildkitd --addr unix:///run/user/1000/buildkit/buildkitd.sock &
                           sleep 5
 
                           echo "Workspace contents:"
@@ -201,7 +205,7 @@ spec:
                           image_name=$(basename "$context_dir")
                           dockerfile_name=$(basename "$full_path")
 
-                          buildctl --addr unix:///run/buildkit/buildkitd.sock build \
+                          buildctl --addr unix:///run/user/1000/buildkit/buildkitd.sock build \
                             --frontend dockerfile.v0 \
                             --local context="$context_dir" \
                             --local dockerfile="$context_dir" \
