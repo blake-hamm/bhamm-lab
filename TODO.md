@@ -6,7 +6,7 @@ x Deploy blue cluster (for harbor and testing)
 x Switch traffic, test and destroy green cluster
 x Merge branch with main
 x Deploy green cluster with new storage config
-- Switch traffic, test and destroy blue
+x Switch traffic, test and destroy blue
 - Create argo workflow to cleanup ceph
 
 # Deploy 'nice to haves'
