@@ -218,9 +218,6 @@ spec:
                           buildah push \
                             --tls-verify=false \
                             "harbor.bhamm-lab.com/library/$image_name:latest"
-                      securityContext:
-                        runAsUser: 1000
-                        runAsGroup: 1000
                   - name: exit-handler
                     steps:
                       - - name: final-status
