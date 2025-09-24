@@ -183,6 +183,8 @@ spec:
                           path: /workspace
                         - name: docker-config
                           path: /tmp/docker-config
+                    securityContext:
+                      fsGroup: 1000
                     container:
                       image: moby/buildkit:v0.13.2
                       command: ["sh", "-c"]
@@ -192,7 +194,6 @@ spec:
                       securityContext:
                         runAsUser: 1000
                         runAsGroup: 1000
-                        fsGroup: 1000
                       args:
                         - |
                           rootlesskit buildkitd --addr unix:///run/user/1000/buildkit/buildkitd.sock &
