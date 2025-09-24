@@ -145,7 +145,7 @@ spec:
                     outputs:
                       artifacts:
                         - name: docker-creds
-                          path: /kaniko/.docker
+                          path: /home/build/.docker # Changed to non-root user home
                           archive:
                             none: {}
                     script:
@@ -166,15 +166,22 @@ spec:
                               key: robot-token
                       source: |
                         #!/bin/sh
-                        mkdir -p /kaniko/.docker
+                        # Create directory for non-root user
+                        mkdir -p /home/build/.docker
+                        chown -R 1000:1000 /home/build/.docker
+
                         echo '{
                           "auths": {
                             "'"${REGISTRY}"'": {
                               "auth": "'"$(echo -n "${ROBOT_USERNAME}:${ROBOT_TOKEN}" | base64)"'"
                             }
                           }
-                        }' > /kaniko/.docker/config.json
-                  - name: build-and-push-kaniko
+                        }' > /home/build/.docker/config.json
+
+                        # Ensure proper ownership
+                        chown 1000:1000 /home/build/.docker/config.json
+                        chmod 600 /home/build/.docker/config.json
+                  - name: build-and-push-buildah
                     inputs:
                       parameters:
                         - name: dockerfile
@@ -182,39 +189,39 @@ spec:
                         - name: repository
                           path: /workspace
                         - name: docker-config
-                          path: /kaniko/.docker
+                          path: /home/build/.docker
                     container:
-                      image: gcr.io/chainguard-dev/kaniko:latest
-                      command: ["/busybox/sh", "-c"]
+                      image: quay.io/buildah/stable:latest
+                      command: ["/bin/sh", "-c"]
                       args:
                         - |
                           # Show debug info
                           echo "Workspace contents:"
                           ls -laR /workspace
 
-                          # Build using parameter from stdout
+                          # Ensure we can write to storage
+                          export BUILDAH_ISOLATION=chroot
+                          export STORAGE_DRIVER=vfs
+
+                          # Extract image name from dockerfile path
                           full_path="/workspace/{{inputs.parameters.dockerfile}}"
                           context_dir=$(dirname "$full_path")
                           image_name=$(basename "$context_dir")
 
-                          /kaniko/executor \
-                            --context "dir://$context_dir" \
-                            --dockerfile "$full_path" \
-                            --destination "harbor.bhamm-lab.com/library/$image_name:latest" \
-                            --skip-tls-verify \
-                            --verbosity=debug
-                  - name: exit-handler
-                    steps:
-                      - - name: final-status
-                          templateRef:
-                            name: forgejo-status
-                            template: forgejo-status
-                          arguments:
-                            parameters:
-                              - name: git-sha
-                                value: "{{workflow.parameters.git-sha}}"
-                              - name: state
-                                value: "{{=workflow.status == 'Succeeded' ? 'success' : 'failure'}}"
+                          # Build with buildah
+                          buildah bud \
+                            --file "$full_path" \
+                            --tag "harbor.bhamm-lab.com/library/$image_name:latest" \
+                            "$context_dir"
+
+                          # Push with buildah
+                          buildah push \
+                            --tls-verify=false \
+                            "harbor.bhamm-lab.com/library/$image_name:latest"
+                      securityContext:
+                        runAsUser: 1000
+                        runAsGroup: 1000
+                        fsGroup: 1000
           parameters:
             - src:
                 dependencyName: forgejo-push-event
