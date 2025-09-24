@@ -60,7 +60,7 @@ metadata:
 rules:
   - apiGroups: ["k8up.io"]
     resources: ["backups", "checks", "prunes", "restores"]
-    verbs: ["create", "get", "list", "watch"]
+    verbs: ["create", "get", "list", "watch", "patch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
