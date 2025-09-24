@@ -145,7 +145,7 @@ spec:
                     outputs:
                       artifacts:
                         - name: docker-creds
-                          path: /kaniko/.docker
+                          path: /root/.docker
                           archive:
                             none: {}
                     script:
@@ -166,15 +166,15 @@ spec:
                               key: robot-token
                       source: |
                         #!/bin/sh
-                        mkdir -p /kaniko/.docker
+                        mkdir -p /root/.docker
                         echo '{
                           "auths": {
                             "'"${REGISTRY}"'": {
                               "auth": "'"$(echo -n "${ROBOT_USERNAME}:${ROBOT_TOKEN}" | base64)"'"
                             }
                           }
-                        }' > /kaniko/.docker/config.json
-                  - name: build-and-push-kaniko
+                        }' > /root/.docker/config.json
+                  - name: build-and-push-buildkit
                     inputs:
                       parameters:
                         - name: dockerfile
@@ -182,27 +182,31 @@ spec:
                         - name: repository
                           path: /workspace
                         - name: docker-config
-                          path: /kaniko/.docker
+                          path: /root/.docker
                     container:
-                      image: gcr.io/kaniko-project/executor:debug
-                      command: ["/busybox/sh", "-c"]
+                      image: moby/buildkit:v0.13.2
+                      command: ["sh", "-c"]
+                      securityContext:
+                        privileged: true
                       args:
                         - |
-                          # Show debug info
+                          buildkitd --addr unix:///run/buildkit/buildkitd.sock &
+                          sleep 5
+
                           echo "Workspace contents:"
                           ls -laR /workspace
 
-                          # Build using parameter from stdout
                           full_path="/workspace/{{inputs.parameters.dockerfile}}"
                           context_dir=$(dirname "$full_path")
                           image_name=$(basename "$context_dir")
+                          dockerfile_name=$(basename "$full_path")
 
-                          /kaniko/executor \
-                            --context "dir://$context_dir" \
-                            --dockerfile "$full_path" \
-                            --destination "harbor.bhamm-lab.com/library/$image_name:latest" \
-                            --skip-tls-verify \
-                            --verbosity=debug
+                          buildctl --addr unix:///run/buildkit/buildkitd.sock build \
+                            --frontend dockerfile.v0 \
+                            --local context="$context_dir" \
+                            --local dockerfile="$context_dir" \
+                            --opt "filename=$dockerfile_name" \
+                            --output "type=image,name=harbor.bhamm-lab.com/library/$image_name:latest,push=true,registry.insecure=true"
                   - name: exit-handler
                     steps:
                       - - name: final-status

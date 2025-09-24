@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: release/refactor-storage
+    targetRevision: release/adjust-storage
     path: kubernetes/manifests/automations
     directory:
       recurse: true
