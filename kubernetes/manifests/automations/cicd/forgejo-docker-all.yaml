@@ -99,7 +99,7 @@ spec:
                         - name: prepare-config
                           template: prepare-docker-config
                         - name: build-and-push
-                          template: build-and-push-buildah
+                          template: build-and-push-buildkit
                           depends: "extract-dockerfiles && clone-repo && prepare-config"
                           arguments:
                             parameters:
@@ -181,7 +181,7 @@ spec:
                         # Ensure proper ownership
                         chown 1000:1000 /home/build/.docker/config.json
                         chmod 600 /home/build/.docker/config.json
-                  - name: build-and-push-buildah
+                  - name: build-and-push-buildkit
                     inputs:
                       parameters:
                         - name: dockerfile
@@ -191,33 +191,35 @@ spec:
                         - name: docker-config
                           path: /home/build/.docker
                     container:
-                      image: quay.io/buildah/stable:latest
+                      readinessProbe:
+                        exec:
+                          command: [sh, -c, "buildctl debug workers"]
+                        initialDelaySeconds: 5
+                        periodSeconds: 30
+                      image: moby/buildkit:v0.9.3-rootless
                       command: ["/bin/sh", "-c"]
+                      env:
+                        - name: BUILDKITD_FLAGS
+                          value: --oci-worker-no-process-sandbox
+                        - name: DOCKER_CONFIG
+                          value: /home/build/.docker
                       args:
                         - |
-                          # Show debug info
-                          echo "Workspace contents:"
-                          ls -laR /workspace
+                          set -ex
 
-                          # Ensure we can write to storage
-                          export BUILDAH_ISOLATION=chroot
-                          export STORAGE_DRIVER=vfs
-
-                          # Extract image name from dockerfile path
-                          full_path="/workspace/{{inputs.parameters.dockerfile}}"
+                          DOCKERFILE_PATH="{{inputs.parameters.dockerfile}}"
+                          full_path="/workspace/$DOCKERFILE_PATH"
                           context_dir=$(dirname "$full_path")
                           image_name=$(basename "$context_dir")
+                          IMAGE_TAG="harbor.bhamm-lab.com/library/$image_name:latest"
 
-                          # Build with buildah
-                          buildah bud \
-                            --file "$full_path" \
-                            --tag "harbor.bhamm-lab.com/library/$image_name:latest" \
-                            "$context_dir"
+                          cd "$context_dir"
 
-                          # Push with buildah
-                          buildah push \
-                            --tls-verify=false \
-                            "harbor.bhamm-lab.com/library/$image_name:latest"
+                          buildctl-daemonless.sh build \
+                            --frontend dockerfile.v0 \
+                            --local context=. \
+                            --local dockerfile=. \
+                            --output "type=image,name=$IMAGE_TAG,push=true"
                   - name: exit-handler
                     steps:
                       - - name: final-status
