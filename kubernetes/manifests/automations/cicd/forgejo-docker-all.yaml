@@ -104,6 +104,7 @@ spec:
                                 value: "{{inputs.parameters.branch}}"
                         - name: prepare-config
                           template: prepare-docker-config
+                          depends: "clone-repo"
                         - name: build-and-push
                           template: build-and-push-buildkit
                           depends: "extract-dockerfiles && clone-repo && prepare-config"
