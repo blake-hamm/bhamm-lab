@@ -202,18 +202,24 @@ spec:
                           value: --oci-worker-no-process-sandbox
                         - name: DOCKER_CONFIG
                           value: /home/build/.docker
-                      command:
-                        - buildctl-daemonless.sh
+                      command: ["/bin/sh", "-c"]
                       args:
-                        - build
-                        - --frontend
-                        - dockerfile.v0
-                        - --local
-                        - context={{workflow.artifacts.repository.path}}/{{dirname inputs.parameters.dockerfile}}
-                        - --local
-                        - dockerfile={{workflow.artifacts.repository.path}}/{{dirname inputs.parameters.dockerfile}}
-                        - --output
-                        - type=image,name=harbor.bhamm-lab.com/library/{{basename (dirname inputs.parameters.dockerfile)}}:latest,push=true
+                        - |
+                          set -ex
+
+                          DOCKERFILE_PATH="{{inputs.parameters.dockerfile}}"
+                          full_path="/workspace/$DOCKERFILE_PATH"
+                          context_dir=$(dirname "$full_path")
+                          image_name=$(basename "$context_dir")
+                          IMAGE_TAG="harbor.bhamm-lab.com/library/$image_name:latest"
+
+                          # Use buildctl-daemonless.sh directly with explicit paths
+                          buildctl-daemonless.sh build \
+                            --frontend dockerfile.v0 \
+                            --local "context=$context_dir" \
+                            --local "dockerfile=$context_dir" \
+                            --output "type=image,name=$IMAGE_TAG,push=true" \
+                            --opt target=production
                   - name: exit-handler
                     steps:
                       - - name: final-status
