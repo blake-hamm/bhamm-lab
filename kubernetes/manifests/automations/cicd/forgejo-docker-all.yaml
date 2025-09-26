@@ -196,6 +196,13 @@ spec:
                           value: --oci-worker-no-process-sandbox
                         - name: DOCKER_CONFIG
                           value: /home/build/.docker
+                      securityContext:
+                        seccompProfile:
+                          type: Unconfined
+                        appArmorProfile:
+                          type: Unconfined
+                        runAsUser: 1000
+                        runAsGroup: 1000
                       command:
                         - buildctl-daemonless.sh
                       args:
