@@ -196,7 +196,7 @@ spec:
                           command: [sh, -c, "buildctl debug workers"]
                         initialDelaySeconds: 5
                         periodSeconds: 30
-                      image: moby/buildkit:v0.9.3-rootless
+                      image: moby/buildkit:v0.24.0-rootless
                       command: ["/bin/sh", "-c"]
                       env:
                         - name: BUILDKITD_FLAGS
