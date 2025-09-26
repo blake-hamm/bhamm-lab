@@ -54,6 +54,8 @@ spec:
                 serviceAccountName: argo-workflow
                 entrypoint: main
                 onExit: exit-handler
+                volumeGC:
+                  strategy: OnWorkflowCompletion
                 volumeClaimTemplates:
                   - metadata:
                       name: docker-workspace
