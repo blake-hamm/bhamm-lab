@@ -203,11 +203,11 @@ spec:
                         - --frontend
                         - dockerfile.v0
                         - --local
-                        - context=/workspace/{{inputs.parameters.dockerfile | replace "/Dockerfile" ""}}
+                        - context=/workspace/{{inputs.parameters.dockerfile}}
                         - --local
-                        - dockerfile=/workspace/{{inputs.parameters.dockerfile | replace "/Dockerfile" ""}}
+                        - dockerfile=/workspace/{{inputs.parameters.dockerfile}}
                         - --output
-                        - type=image,name=harbor.bhamm-lab.com/library/{{inputs.parameters.dockerfile | replace "docker/" "" | replace "/Dockerfile" ""}}:latest,push=true
+                        - type=image,name=harbor.bhamm-lab.com/library/{{inputs.parameters.dockerfile}}:latest,push=true
                   - name: exit-handler
                     steps:
                       - - name: final-status
