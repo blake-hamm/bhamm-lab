@@ -191,6 +191,9 @@ spec:
                         - name: docker-config
                           path: /home/build/.docker
                     container:
+                      securityContext:
+                        seccompProfile:
+                          type: RuntimeDefault
                       readinessProbe:
                         exec:
                           command: [sh, -c, "buildctl debug workers"]
