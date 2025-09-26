@@ -54,16 +54,9 @@ spec:
                 serviceAccountName: argo-workflow
                 entrypoint: main
                 onExit: exit-handler
-                volumeGC:
-                  strategy: OnWorkflowCompletion
-                volumeClaimTemplates:
-                  - metadata:
-                      name: docker-workspace
-                    spec:
-                      accessModes: ["ReadWriteOnce"]
-                      resources:
-                        requests:
-                          storage: 1Gi
+                volumes:
+                  - name: work
+                    emptyDir: {}
                 arguments:
                   parameters:
                     - name: commits
@@ -134,7 +127,7 @@ spec:
                         - .
                       workingDir: /workspace
                       volumeMounts:
-                        - name: docker-workspace
+                        - name: work
                           mountPath: /workspace
                   - name: extract-dockerfiles
                     inputs:
@@ -171,7 +164,7 @@ spec:
                       image: alpine:latest
                       command: [sh]
                       volumeMounts:
-                        - name: docker-workspace
+                        - name: work
                           mountPath: /workspace
                       env:
                         - name: REGISTRY
@@ -204,7 +197,7 @@ spec:
                         - name: dockerfile
                     container:
                       volumeMounts:
-                        - name: docker-workspace
+                        - name: work
                           mountPath: /workspace
                       securityContext:
                         allowPrivilegeEscalation: false
