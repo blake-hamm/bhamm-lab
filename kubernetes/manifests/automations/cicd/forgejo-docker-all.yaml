@@ -115,16 +115,13 @@ spec:
                         - name: branch
                     container:
                       image: alpine/git:v2.26.2
-                      command: [git, clone]
+                      command: ["/bin/sh", "-c"]
                       args:
-                        - --recurse-submodules
-                        - --branch
-                        - "{{inputs.parameters.branch}}"
-                        - --single-branch
-                        - --depth
-                        - "1"
-                        - "{{inputs.parameters.url}}"
-                        - .
+                        - |
+                          set -ex
+                          echo "Cloning {{inputs.parameters.url}}#{{inputs.parameters.branch}}"
+                          SHORT_BRANCH=$(echo "{{inputs.parameters.branch}}" | sed 's|refs/heads/||')
+                          git clone --recurse-submodules --depth 1 --branch "$SHORT_BRANCH" --single-branch "{{inputs.parameters.url}}" .
                       workingDir: /workspace
                       volumeMounts:
                         - name: work
