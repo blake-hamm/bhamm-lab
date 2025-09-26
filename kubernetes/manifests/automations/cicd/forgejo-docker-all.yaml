@@ -213,12 +213,10 @@ spec:
                           image_name=$(basename "$context_dir")
                           IMAGE_TAG="harbor.bhamm-lab.com/library/$image_name:latest"
 
-                          cd "$context_dir"
-
                           buildctl-daemonless.sh build \
                             --frontend dockerfile.v0 \
-                            --local context=. \
-                            --local dockerfile=. \
+                            --local "context=$context_dir" \
+                            --local "dockerfile=$context_dir" \
                             --output "type=image,name=$IMAGE_TAG,push=true"
                   - name: exit-handler
                     steps:
