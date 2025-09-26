@@ -201,13 +201,15 @@ spec:
                         - name: podman-config
                           path: /home/podman/.config
                     container:
-                      image: quay.io/podman/stable:v4.9.0
+                      image: quay.io/podman/stable:v5.6.1
                       securityContext:
                         runAsUser: 1000
                         runAsGroup: 1000
                         runAsNonRoot: true
                         allowPrivilegeEscalation: false
                       env:
+                        - name: CONTAINERS_STORAGE_CONF
+                          value: /dev/null
                         - name: CONTAINERS_REGISTRIES_CONF
                           value: /home/podman/.config/containers/registries.conf
                         - name: REGISTRY_AUTH_FILE
