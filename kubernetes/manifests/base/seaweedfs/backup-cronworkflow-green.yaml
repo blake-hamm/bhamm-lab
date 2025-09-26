@@ -14,7 +14,7 @@ spec:
   failedJobsHistoryLimit: 3
   workflowSpec:
     entrypoint: main
-    onExit: enable-base-argocd-autosync
+    onExit: exit-handler
     templates:
       - name: main
         steps:
@@ -49,12 +49,14 @@ spec:
                     value: bhamm-lab-k8up
                   - name: k8up-secret
                     value: seaweedfs-external-secret
-      - name: enable-base-argocd-autosync
-        template: enable-argocd-autosync
-        arguments:
-          parameters:
-            - name: argocd-app
-              value: "green-base"
+      - name: exit-handler
+        steps:
+          - - name: enable-base-argocd-autosync
+              template: enable-argocd-autosync
+              arguments:
+                parameters:
+                  - name: argocd-app
+                    value: "green-base"
       - name: disable-argocd-autosync
         inputs:
           parameters:
