@@ -145,7 +145,7 @@ spec:
                     outputs:
                       artifacts:
                         - name: docker-creds
-                          path: /home/build/.docker # Changed to non-root user home
+                          path: /home/build/.docker
                           archive:
                             none: {}
                     script:
@@ -166,9 +166,7 @@ spec:
                               key: robot-token
                       source: |
                         #!/bin/sh
-                        # Create directory for non-root user
                         mkdir -p /home/build/.docker
-                        chown -R 1000:1000 /home/build/.docker
 
                         echo '{
                           "auths": {
@@ -177,10 +175,6 @@ spec:
                             }
                           }
                         }' > /home/build/.docker/config.json
-
-                        # Ensure proper ownership
-                        chown 1000:1000 /home/build/.docker/config.json
-                        chmod 600 /home/build/.docker/config.json
                   - name: build-and-push-buildkit
                     inputs:
                       parameters:
@@ -202,24 +196,18 @@ spec:
                           value: --oci-worker-no-process-sandbox
                         - name: DOCKER_CONFIG
                           value: /home/build/.docker
-                      command: ["/bin/sh", "-c"]
+                      command:
+                        - buildctl-daemonless.sh
                       args:
-                        - |
-                          set -ex
-
-                          DOCKERFILE_PATH="{{inputs.parameters.dockerfile}}"
-                          full_path="/workspace/$DOCKERFILE_PATH"
-                          context_dir=$(dirname "$full_path")
-                          image_name=$(basename "$context_dir")
-                          IMAGE_TAG="harbor.bhamm-lab.com/library/$image_name:latest"
-
-                          # Use buildctl-daemonless.sh directly with explicit paths
-                          buildctl-daemonless.sh build \
-                            --frontend dockerfile.v0 \
-                            --local "context=$context_dir" \
-                            --local "dockerfile=$context_dir" \
-                            --output "type=image,name=$IMAGE_TAG,push=true" \
-                            --opt target=production
+                        - build
+                        - --frontend
+                        - dockerfile.v0
+                        - --local
+                        - context=/workspace/{{inputs.parameters.dockerfile | replace "/Dockerfile" ""}}
+                        - --local
+                        - dockerfile=/workspace/{{inputs.parameters.dockerfile | replace "/Dockerfile" ""}}
+                        - --output
+                        - type=image,name=harbor.bhamm-lab.com/library/{{inputs.parameters.dockerfile | replace "docker/" "" | replace "/Dockerfile" ""}}:latest,push=true
                   - name: exit-handler
                     steps:
                       - - name: final-status
