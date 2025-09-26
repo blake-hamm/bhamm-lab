@@ -54,6 +54,14 @@ spec:
                 serviceAccountName: argo-workflow
                 entrypoint: main
                 onExit: exit-handler
+                volumeClaimTemplates:
+                  - metadata:
+                      name: docker-workspace
+                    spec:
+                      accessModes: ["ReadWriteOnce"]
+                      resources:
+                        requests:
+                          storage: 1Gi
                 arguments:
                   parameters:
                     - name: commits
@@ -87,9 +95,7 @@ spec:
                               - name: commits
                                 value: "{{inputs.parameters.commits}}"
                         - name: clone-repo
-                          templateRef:
-                            name: clone-repo
-                            template: clone-repo
+                          template: clone-repo
                           arguments:
                             parameters:
                               - name: url
@@ -105,12 +111,28 @@ spec:
                             parameters:
                               - name: dockerfile
                                 value: "{{item}}"
-                            artifacts:
-                              - name: repository
-                                from: "{{tasks.clone-repo.outputs.artifacts.repo}}"
-                              - name: docker-config
-                                from: "{{tasks.prepare-config.outputs.artifacts.docker-creds}}"
                           withParam: "{{tasks.extract-dockerfiles.outputs.result}}"
+                  - name: clone-repo
+                    inputs:
+                      parameters:
+                        - name: url
+                        - name: branch
+                    container:
+                      image: alpine/git:v2.26.2
+                      command: [git, clone]
+                      args:
+                        - --recurse-submodules
+                        - --branch
+                        - "{{inputs.parameters.branch}}"
+                        - --single-branch
+                        - --depth
+                        - "1"
+                        - "{{inputs.parameters.url}}"
+                        - .
+                      workingDir: /workspace
+                      volumeMounts:
+                        - name: docker-workspace
+                          mountPath: /workspace
                   - name: extract-dockerfiles
                     inputs:
                       parameters:
@@ -142,15 +164,12 @@ spec:
 
                         print(json.dumps(docker_files))
                   - name: prepare-docker-config
-                    outputs:
-                      artifacts:
-                        - name: docker-creds
-                          path: /home/build/.docker # Changed to non-root user home
-                          archive:
-                            none: {}
                     script:
                       image: alpine:latest
                       command: [sh]
+                      volumeMounts:
+                        - name: docker-workspace
+                          mountPath: /workspace
                       env:
                         - name: REGISTRY
                           value: "harbor.bhamm-lab.com"
@@ -166,31 +185,24 @@ spec:
                               key: robot-token
                       source: |
                         #!/bin/sh
-                        # Create directory for non-root user
-                        mkdir -p /home/build/.docker
-                        chown -R 1000:1000 /home/build/.docker
-
+                        set -e
+                        DOCKER_DIR="/workspace/.docker"
+                        mkdir -p ${DOCKER_DIR}
                         echo '{
                           "auths": {
                             "'"${REGISTRY}"'": {
                               "auth": "'"$(echo -n "${ROBOT_USERNAME}:${ROBOT_TOKEN}" | base64)"'"
                             }
                           }
-                        }' > /home/build/.docker/config.json
-
-                        # Ensure proper ownership
-                        chown 1000:1000 /home/build/.docker/config.json
-                        chmod 600 /home/build/.docker/config.json
+                        }' > ${DOCKER_DIR}/config.json
                   - name: build-and-push-buildkit
                     inputs:
                       parameters:
                         - name: dockerfile
-                      artifacts:
-                        - name: repository
-                          path: /workspace
-                        - name: docker-config
-                          path: /home/build/.docker
                     container:
+                      volumeMounts:
+                        - name: docker-workspace
+                          mountPath: /workspace
                       securityContext:
                         allowPrivilegeEscalation: false
                         runAsNonRoot: true
@@ -211,7 +223,7 @@ spec:
                         - name: BUILDKITD_FLAGS
                           value: --oci-worker-no-process-sandbox
                         - name: DOCKER_CONFIG
-                          value: /home/build/.docker
+                          value: /workspace/.docker
                       args:
                         - |
                           set -ex
