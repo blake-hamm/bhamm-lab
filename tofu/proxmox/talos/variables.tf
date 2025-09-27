@@ -1,7 +1,7 @@
 variable "talos_version" {
   description = "Talos version to use"
   type        = string
-  default     = "v1.11.1"
+  default     = "v1.11.2"
 }
 
 variable "talos_factory_url" {

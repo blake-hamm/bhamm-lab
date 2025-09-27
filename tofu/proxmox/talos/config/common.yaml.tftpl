@@ -43,20 +43,25 @@ machine:
       docker.io:
         endpoints:
           - https://harbor.bhamm-lab.com/v2/dockerhub
+          - https://registry-1.docker.io
         overridePath: true
       ghcr.io:
         endpoints:
           - https://harbor.bhamm-lab.com/v2/ghcr
+          - https://ghcr.io
         overridePath: true
       gcr.io:
         endpoints:
           - https://harbor.bhamm-lab.com/v2/gcr
+          - https://gcr.io
         overridePath: true
       registry.k8s.io:
         endpoints:
           - https://harbor.bhamm-lab.com/v2/k8s
+          - https://registry.k8s.io
         overridePath: true
       quay.io:
         endpoints:
           - https://harbor.bhamm-lab.com/v2/quay
+          - https://quay.io
         overridePath: true
