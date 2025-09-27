@@ -184,7 +184,7 @@ spec:
                         - name: docker-config
                           path: /kaniko/.docker
                     container:
-                      image: gcr.io/kaniko-project/executor:debug
+                      image: gcr.io/kaniko-project/executor:v1.24.0-debug
                       command: ["/busybox/sh", "-c"]
                       args:
                         - |
