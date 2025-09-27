@@ -32,33 +32,33 @@ spec:
               serviceAccountName: argo-workflow
           workflowNamespaces:
             - argo
-            # server:
-            #   authModes:
-            #     - sso
-            #   sso:
-            #     enabled: true
-            #     issuer: https://auth.bhamm-lab.com
-            #     clientId:
-            #       name: argo-external-secret
-            #       key: client-id
-            #     clientSecret:
-            #       name: argo-external-secret
-            #       key: client-secret
-            #     redirectUrl: "https://argo.bhamm-lab.com/oauth2/callback"
-            #     rbac:
-            #       enabled: false
-            #       secretWhitelist: []
-            #     scopes:
-            #       - 'openid'
-            #       - 'groups'
-            #       - 'email'
-            #       - 'profile'
-            #     sessionExpiry: ""
-            #     issuerAlias: ""
-            #     customGroupClaimName: ""
-            #     userInfoPath: ""
-            #     insecureSkipVerify: false
-            #     filterGroupsRegex:
+        server:
+          authModes:
+            - sso
+          sso:
+            enabled: true
+            issuer: https://auth.bhamm-lab.com
+            clientId:
+              name: argo-external-secret
+              key: client-id
+            clientSecret:
+              name: argo-external-secret
+              key: client-secret
+            redirectUrl: "https://argo.bhamm-lab.com/oauth2/callback"
+            rbac:
+              enabled: false
+              secretWhitelist: []
+            scopes:
+              - 'openid'
+              - 'groups'
+              - 'email'
+              - 'profile'
+            sessionExpiry: ""
+            issuerAlias: ""
+            customGroupClaimName: ""
+            userInfoPath: ""
+            insecureSkipVerify: false
+            filterGroupsRegex:
         artifactRepository:
           s3:
             endpoint: "seaweedfs-s3.seaweedfs.svc.cluster.local:8333"
