@@ -106,8 +106,6 @@ spec:
                             artifacts:
                               - name: repository
                                 from: "{{tasks.clone-repo.outputs.artifacts.repo}}"
-                              - name: podman-config
-                                from: "{{tasks.prepare-config.outputs.artifacts.podman-creds}}"
                           withParam: "{{tasks.extract-dockerfiles.outputs.result}}"
                   - name: extract-dockerfiles
                     inputs:
