@@ -96,11 +96,9 @@ spec:
                                 value: "{{inputs.parameters.repoUrl}}"
                               - name: branch
                                 value: "{{inputs.parameters.branch}}"
-                        - name: prepare-config
-                          template: prepare-podman-config
                         - name: build-and-push
                           template: build-and-push-podman
-                          depends: "extract-dockerfiles && clone-repo && prepare-config"
+                          depends: "extract-dockerfiles && clone-repo"
                           arguments:
                             parameters:
                               - name: dockerfile
@@ -141,18 +139,26 @@ spec:
                                         docker_files.append(dockerfile_path)
 
                         print(json.dumps(docker_files))
-                  - name: prepare-podman-config
-                    outputs:
+                  - name: build-and-push-podman
+                    inputs:
+                      parameters:
+                        - name: dockerfile
                       artifacts:
-                        - name: podman-creds
-                          path: /home/podman/.config
-                          archive:
-                            none: {}
-                    script:
-                      image: alpine:latest
-                      command: [sh]
+                        - name: repository
+                          path: /workspace
+                    container:
+                      image: quay.io/podman/stable:v5.6.1
+                      securityContext:
+                        runAsUser: 1000
+                        runAsGroup: 1000
+                        runAsNonRoot: true
+                        allowPrivilegeEscalation: false
                       env:
-                        - name: REGISTRY
+                        - name: CONTAINERS_STORAGE_CONF
+                          value: /dev/null
+                        - name: STORAGE_DRIVER
+                          value: vfs
+                        - name: HARBOR_REGISTRY
                           value: "harbor.bhamm-lab.com"
                         - name: ROBOT_USERNAME
                           valueFrom:
@@ -164,82 +170,35 @@ spec:
                             secretKeyRef:
                               name: argo-external-secret
                               key: robot-token
-                      source: |
-                        #!/bin/sh
-                        # Create directories for podman config
-                        mkdir -p /home/podman/.config/containers
-
-                        # Create registries.conf for Harbor
-                        cat > /home/podman/.config/containers/registries.conf << EOF
-                        [registries.search]
-                        registries = ['${REGISTRY}']
-
-                        [registries.insecure]
-                        registries = []
-
-                        [registries.block]
-                        registries = []
-                        EOF
-
-                        # Create auth.json for Harbor authentication
-                        cat > /home/podman/.config/containers/auth.json << EOF
-                        {
-                          "auths": {
-                            "${REGISTRY}": {
-                              "auth": "$(echo -n "${ROBOT_USERNAME}:${ROBOT_TOKEN}" | base64)"
-                            }
-                          }
-                        }
-                        EOF
-                  - name: build-and-push-podman
-                    inputs:
-                      parameters:
-                        - name: dockerfile
-                      artifacts:
-                        - name: repository
-                          path: /workspace
-                        - name: podman-config
-                          path: /home/podman/.config
-                    container:
-                      image: quay.io/podman/stable:v5.6.1
-                      securityContext:
-                        runAsUser: 1000
-                        runAsGroup: 1000
-                        runAsNonRoot: true
-                        allowPrivilegeEscalation: false
-                      env:
-                        - name: CONTAINERS_STORAGE_CONF
-                          value: /dev/null
-                        - name: CONTAINERS_REGISTRIES_CONF
-                          value: /home/podman/.config/containers/registries.conf
-                        - name: REGISTRY_AUTH_FILE
-                          value: /home/podman/.config/containers/auth.json
-                        - name: STORAGE_DRIVER
-                          value: vfs
-                        - name: STORAGE_OPTS
-                          value: vfs.imagestore=/tmp/podman-storage
                       command: [sh, -c]
                       args:
                         - |
                           set -ex
 
-                          # Set up storage directory
+                          # Set up storage directories
                           mkdir -p /tmp/podman-storage
+                          mkdir -p /tmp/podman-run
 
                           DOCKERFILE_PATH="{{inputs.parameters.dockerfile}}"
                           full_path="/workspace/$DOCKERFILE_PATH"
                           context_dir=$(dirname "$full_path")
                           image_name=$(basename "$context_dir")
-                          IMAGE_TAG="harbor.bhamm-lab.com/library/$image_name:latest"
+                          IMAGE_TAG="${HARBOR_REGISTRY}/library/$image_name:latest"
 
                           echo "Building image: $IMAGE_TAG"
-                          echo "Context: $context_dir"
-                          echo "Dockerfile: $full_path"
+
+                          # Login to Harbor
+                          echo "$ROBOT_TOKEN" | podman login --username "$ROBOT_USERNAME" --password-stdin "$HARBOR_REGISTRY" \
+                            --storage-driver vfs \
+                            --root /tmp/podman-storage \
+                            --runroot /tmp/podman-run
 
                           # Build the image
                           podman build \
                             --storage-driver vfs \
                             --root /tmp/podman-storage \
+                            --runroot /tmp/podman-run \
+                            --storage-opt vfs.ignore_chown_errors=true \
                             -f "$full_path" \
                             -t "$IMAGE_TAG" \
                             "$context_dir"
@@ -248,6 +207,7 @@ spec:
                           podman push \
                             --storage-driver vfs \
                             --root /tmp/podman-storage \
+                            --runroot /tmp/podman-run \
                             "$IMAGE_TAG"
                   - name: exit-handler
                     steps:
