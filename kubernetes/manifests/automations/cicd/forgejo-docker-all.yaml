@@ -96,9 +96,11 @@ spec:
                                 value: "{{inputs.parameters.repoUrl}}"
                               - name: branch
                                 value: "{{inputs.parameters.branch}}"
+                        - name: prepare-config
+                          template: prepare-docker-config
                         - name: build-and-push
-                          template: build-and-push-podman
-                          depends: "extract-dockerfiles && clone-repo"
+                          template: build-and-push-kaniko
+                          depends: "extract-dockerfiles && clone-repo && prepare-config"
                           arguments:
                             parameters:
                               - name: dockerfile
@@ -106,6 +108,8 @@ spec:
                             artifacts:
                               - name: repository
                                 from: "{{tasks.clone-repo.outputs.artifacts.repo}}"
+                              - name: docker-config
+                                from: "{{tasks.prepare-config.outputs.artifacts.docker-creds}}"
                           withParam: "{{tasks.extract-dockerfiles.outputs.result}}"
                   - name: extract-dockerfiles
                     inputs:
@@ -137,26 +141,18 @@ spec:
                                         docker_files.append(dockerfile_path)
 
                         print(json.dumps(docker_files))
-                  - name: build-and-push-podman
-                    inputs:
-                      parameters:
-                        - name: dockerfile
+                  - name: prepare-docker-config
+                    outputs:
                       artifacts:
-                        - name: repository
-                          path: /workspace
-                    container:
-                      image: quay.io/podman/stable:v5.6.1
-                      securityContext:
-                        runAsUser: 1000
-                        runAsGroup: 1000
-                        runAsNonRoot: true
-                        allowPrivilegeEscalation: false
+                        - name: docker-creds
+                          path: /kaniko/.docker
+                          archive:
+                            none: {}
+                    script:
+                      image: alpine:latest
+                      command: [sh]
                       env:
-                        - name: CONTAINERS_STORAGE_CONF
-                          value: /dev/null
-                        - name: STORAGE_DRIVER
-                          value: vfs
-                        - name: HARBOR_REGISTRY
+                        - name: REGISTRY
                           value: "harbor.bhamm-lab.com"
                         - name: ROBOT_USERNAME
                           valueFrom:
@@ -168,45 +164,45 @@ spec:
                             secretKeyRef:
                               name: argo-external-secret
                               key: robot-token
-                      command: [sh, -c]
+                      source: |
+                        #!/bin/sh
+                        mkdir -p /kaniko/.docker
+                        echo '{
+                          "auths": {
+                            "'"${REGISTRY}"'": {
+                              "auth": "'"$(echo -n "${ROBOT_USERNAME}:${ROBOT_TOKEN}" | base64)"'"
+                            }
+                          }
+                        }' > /kaniko/.docker/config.json
+                  - name: build-and-push-kaniko
+                    inputs:
+                      parameters:
+                        - name: dockerfile
+                      artifacts:
+                        - name: repository
+                          path: /workspace
+                        - name: docker-config
+                          path: /kaniko/.docker
+                    container:
+                      image: gcr.io/kaniko-project/executor:debug
+                      command: ["/busybox/sh", "-c"]
                       args:
                         - |
-                          set -ex
+                          # Show debug info
+                          echo "Workspace contents:"
+                          ls -laR /workspace
 
-                          # Set up storage directories
-                          mkdir -p /tmp/podman-storage
-                          mkdir -p /tmp/podman-run
-
-                          DOCKERFILE_PATH="{{inputs.parameters.dockerfile}}"
-                          full_path="/workspace/$DOCKERFILE_PATH"
+                          # Build using parameter from stdout
+                          full_path="/workspace/{{inputs.parameters.dockerfile}}"
                           context_dir=$(dirname "$full_path")
                           image_name=$(basename "$context_dir")
-                          IMAGE_TAG="${HARBOR_REGISTRY}/library/$image_name:latest"
 
-                          echo "Building image: $IMAGE_TAG"
-
-                          # Login to Harbor
-                          echo "$ROBOT_TOKEN" | podman login --username "$ROBOT_USERNAME" --password-stdin "$HARBOR_REGISTRY" \
-                            --storage-driver vfs \
-                            --root /tmp/podman-storage \
-                            --runroot /tmp/podman-run
-
-                          # Build the image
-                          podman build \
-                            --storage-driver vfs \
-                            --root /tmp/podman-storage \
-                            --runroot /tmp/podman-run \
-                            --storage-opt vfs.ignore_chown_errors=true \
-                            -f "$full_path" \
-                            -t "$IMAGE_TAG" \
-                            "$context_dir"
-
-                          # Push the image
-                          podman push \
-                            --storage-driver vfs \
-                            --root /tmp/podman-storage \
-                            --runroot /tmp/podman-run \
-                            "$IMAGE_TAG"
+                          /kaniko/executor \
+                            --context "dir://$context_dir" \
+                            --dockerfile "$full_path" \
+                            --destination "harbor.bhamm-lab.com/library/$image_name:latest" \
+                            --skip-tls-verify \
+                            --verbosity=debug
                   - name: exit-handler
                     steps:
                       - - name: final-status
