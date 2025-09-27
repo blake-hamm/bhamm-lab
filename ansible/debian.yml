@@ -26,6 +26,8 @@
   roles:
     - proxmox
     - prometheus.prometheus.node_exporter
+    - prometheus.prometheus.systemd_exporter
+    - prometheus.prometheus.smartctl_exporter
   tags: [proxmox]
 - name: Configure debian bare metal machines
   hosts: debian_bare_metal
