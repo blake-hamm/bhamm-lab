@@ -35,7 +35,6 @@ WORKDIR /app
 # Copy only what's needed
 COPY --from=builder /app/.venv /app/.venv
 COPY clean.py .
-COPY result/ ./result/
 
 # Configure environment
 ENV PATH="/app/.venv/bin:$PATH"

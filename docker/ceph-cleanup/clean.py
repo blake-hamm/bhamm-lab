@@ -214,18 +214,70 @@ def get_trash_images() -> List[Dict]:
 
 
 def purge_from_trash(trash_id: str) -> bool:
-    """Permanently delete an image from the Ceph RBD trash."""
+    """Enhanced version that handles protected snapshots properly."""
     if DRY_RUN:
-        logger.info(f"[DRY RUN] Would purge trash ID {trash_id}")
+        logger.info(f"[DRY RUN] Would purge all snapshots and trash image {trash_id}")
         return True
 
-    result = run_ceph_command(["trash", "rm", "-p", CEPH_POOL, trash_id], json_output=False, rbd=True)
-    if result is not None:
-        logger.info(f"Successfully purged {trash_id} from trash")
-        return True
-    else:
-        logger.error(f"Failed to purge {trash_id} from trash")
+    try:
+        # Step 1: Get all snapshots for this trash image
+        snap_list_cmd = ["snap", "ls", "-p", CEPH_POOL, "--image-id", trash_id, "--all"]
+        snapshots = run_ceph_command(snap_list_cmd, rbd=True)
+
+        if snapshots is None:
+            logger.error(f"Failed to list snapshots for trash image {trash_id}")
+            return False
+
+        if not snapshots:
+            logger.info(f"No snapshots found for trash image {trash_id}")
+        else:
+            logger.info(f"Found {len(snapshots)} snapshots for trash image {trash_id}")
+
+            # Step 2: Unprotect all snapshots first
+            for snap in snapshots:
+                snap_name = snap['name']
+                protected = snap.get('protected', False)
+
+                if protected == 'yes' or protected is True:
+                    logger.info(f"Unprotecting snapshot {snap_name}")
+                    unprotect_cmd = ["snap", "unprotect", "-p", CEPH_POOL, "--image-id", trash_id, "--snap", snap_name]
+                    run_ceph_command(unprotect_cmd, json_output=False, rbd=True)  # Don't fail if already unprotected
+
+            # Step 3: Now purge all snapshots
+            logger.info(f"Purging all snapshots for trash image {trash_id}")
+            purge_cmd = ["snap", "purge", "-p", CEPH_POOL, "--image-id", trash_id]
+
+            purge_result = run_ceph_command(purge_cmd, json_output=False, rbd=True)
+            if purge_result is None:
+                logger.error(f"Failed to purge snapshots for trash image {trash_id}")
+                return False
+
+            # Step 4: Verify snapshots are gone
+            verification_cmd = ["snap", "ls", "-p", CEPH_POOL, "--image-id", trash_id]
+            remaining_snaps = run_ceph_command(verification_cmd, rbd=True)
+
+            if remaining_snaps and len(remaining_snaps) > 0:
+                logger.error(f"Still found {len(remaining_snaps)} snapshots after purge - manual cleanup required")
+                return False
+            else:
+                logger.info(f"Verified: All snapshots successfully removed")
+
+        # Step 5: Remove the image from trash
+        logger.info(f"Removing trash image {trash_id}")
+        trash_rm_cmd = ["trash", "rm", "-p", CEPH_POOL, trash_id]
+
+        trash_result = run_ceph_command(trash_rm_cmd, json_output=False, rbd=True)
+        if trash_result is not None:
+            logger.info(f"Successfully removed trash image {trash_id}")
+            return True
+        else:
+            logger.error(f"Failed to remove trash image {trash_id}")
+            return False
+
+    except Exception as e:
+        logger.error(f"Error in trash cleanup for {trash_id}: {e}")
         return False
+
 
 
 def main():
