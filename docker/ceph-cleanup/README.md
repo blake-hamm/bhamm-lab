@@ -8,6 +8,6 @@ docker build -t ceph-cleaner docker/ceph-cleanup
 
 # Run script
 docker run -it --rm \
-  -v ./tofu/proxmox/talos/result/kube-config-prod.yaml:/root/.kube/config \
+  -v ./tofu/proxmox/talos/result/kube-config-green.yaml:/root/.kube/config \
   ceph-cleaner
 ```

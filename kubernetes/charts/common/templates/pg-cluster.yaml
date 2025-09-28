@@ -13,6 +13,7 @@ spec:
   imageName: {{ .Values.postgresql.imageName | quote }}
   {{- end }}
   instances: {{ .Values.postgresql.instances }}
+  resources: {{ toYaml .Values.postgresql.resources | nindent 4 }}
   storage:
     storageClass: csi-rbd-sc
     size: {{ .Values.postgresql.storageSize }}

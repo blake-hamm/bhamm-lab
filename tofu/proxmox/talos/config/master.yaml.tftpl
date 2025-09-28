@@ -12,3 +12,7 @@ cluster:
         disabled: false
   extraManifests: ${extra_manifests}
   inlineManifests: ${inline_manifests}
+  etcd:
+    extraArgs:
+      heartbeat-interval: "1000"
+      election-timeout: "10000"

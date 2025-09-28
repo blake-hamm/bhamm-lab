@@ -1,5 +1,5 @@
 # Stage 1: Builder with UV
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm as builder
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm AS builder
 
 # Install system deps for UV and Ceph
 RUN apt-get update && apt-get install -y \

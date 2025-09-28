@@ -7,6 +7,8 @@ ssh_authorized_keys:
   root:
     - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKsS2H4frdi7AvzkGMPMRaQ+B46Af5oaRFtNJY3uCHt blake.j.hamm@gmail.com
     - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEn6e5VeOkY4WcW0wPmz8uWj+yd+kulj7Ls7upTdKFUO gitea@bhamm-lab.com
+network_nameservers:
+  - 10.0.20.1
 # vars for ansible/roles/proxmox
 ntp_enabled: true
 ntp_manage_config: true
@@ -74,17 +76,16 @@ pve_storages: []
 #     server: 192.168.69.12
 #     export: /mnt/storage/proxmox
 pve_ceph_enabled: true
-pve_ceph_network: '10.0.20.0/24' #,10.0.30.0/24'
+pve_ceph_network: '10.0.20.0/24'
 pve_ceph_cluster_network: '10.0.50.0/24'
 pve_ceph_repository_line: "deb http://download.proxmox.com/debian/ceph-squid bookworm no-subscription"
 pve_ceph_osds:
   - device: "{{ ceph_device }}"
 pve_ceph_pools:
   - name: kubernetes
-    pgs: 32 # adjust later
     rule: replicated_rule
     application: rbd
-    autoscale_mode: "warn"
+    autoscale_mode: 'on'
     storage: true
 pve_ceph_fs:
   - name: ceph_fs

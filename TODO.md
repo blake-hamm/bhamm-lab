@@ -7,7 +7,9 @@ x Switch traffic, test and destroy green cluster
 x Merge branch with main
 x Deploy green cluster with new storage config
 x Switch traffic, test and destroy blue
+- Troubleshoot remaining orphaned data cleanup
 - Create argo workflow to cleanup ceph
+- Setup smartctl exporter - https://github.com/prometheus-community/smartctl_exporter
 
 # Deploy 'nice to haves'
 - Finance tracker - https://actualbudget.org/

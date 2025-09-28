@@ -26,6 +26,13 @@ postgresql:
   enabled: false
   instances: 1
   storageSize: 2Gi
+  resources:
+    requests:
+      memory: "200Mi"
+      cpu: "250m"
+    limits:
+      memory: "1000Mi"
+      cpu: "1500m"
   imageName: ""
   sharedPreloadLibraries: [""]
   postInitSQL: ""
