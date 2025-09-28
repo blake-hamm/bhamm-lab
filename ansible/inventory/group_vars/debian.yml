@@ -31,3 +31,4 @@ alloy_config: |
     }
     forward_to = [loki.write.loki.receiver]
   }
+smartctl_exporter_smartctl_device_include: "^/dev/sd[a-z]+$"
