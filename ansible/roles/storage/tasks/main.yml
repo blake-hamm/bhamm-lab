@@ -1,0 +1,17 @@
+# tasks file for storage
+- name: Resize root LV to 100GB
+  community.general.lvol:
+    vg: "{{ ansible_hostname }}-vg"
+    lv: root
+    size: 100g
+    resizefs: true
+- name: Resize swap LV to 4GB
+  community.general.lvol:
+    vg: "{{ ansible_hostname }}-vg"
+    lv: swap_1
+    size: 4g
+    force: true
+- name: Extra config for proxmox storage
+  ansible.builtin.include_tasks:
+    file: proxmox.yml
+  when: "'proxmox' in group_names"

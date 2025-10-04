@@ -1,0 +1,29 @@
+- name: Create logical volume for VM storage
+  community.general.lvol:
+    vg: "{{ ansible_hostname }}-vg"
+    lv: vmstore
+    size: 800g
+    resizefs: true
+- name: Format the logical volume with ext4
+  community.general.filesystem:
+    fstype: ext4
+    dev: "/dev/{{ ansible_hostname }}-vg/vmstore"
+- name: Create the mount point directory
+  ansible.builtin.file:
+    path: /mnt/vmstore
+    state: directory
+    mode: '0755'
+- name: Mount the logical volume
+  ansible.posix.mount:
+    path: /mnt/vmstore
+    src: "/dev/{{ ansible_hostname }}-vg/vmstore"
+    fstype: ext4
+    state: mounted
+    opts: defaults
+- name: Ensure volume is persistent on boot
+  ansible.posix.mount:
+    path: /mnt/vmstore
+    src: "/dev/{{ ansible_hostname }}-vg/vmstore"
+    fstype: ext4
+    opts: defaults
+    state: present
