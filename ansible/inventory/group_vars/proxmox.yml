@@ -64,7 +64,7 @@ pve_roles:
       - "SDN.Use"
 pve_manage_ssh: false
 pve_ssh_port: "{{ ansible_port }}"
-pve_zfs_enabled: true
+pve_zfs_enabled: false
 pve_storages: []
 #   - name: vms
 #     type: zfs # Need to enable this somehow
@@ -79,23 +79,17 @@ pve_ceph_enabled: true
 pve_ceph_network: '10.0.20.0/24'
 pve_ceph_cluster_network: '10.0.50.0/24'
 pve_ceph_repository_line: "deb http://download.proxmox.com/debian/ceph-squid bookworm no-subscription"
-pve_ceph_osds:
-  - device: "{{ ceph_device }}"
 pve_ceph_pools:
-  - name: kubernetes
+  - name: osd
     rule: replicated_rule
     application: rbd
     autoscale_mode: 'on'
     storage: true
 pve_ceph_fs:
-  - name: ceph_fs
-    pgs: 32 # adjust later
+  - name: cephfs
+    pgs: 32
     rule: replicated_rule
     storage: true
-  - name: k8s_fs
-    pgs: 32 # adjust later
-    rule: replicated_rule
-    storage: false
 # pve_ceph_rgw_enabled: true
 # pve_ceph_rgw_dns: "rgw.ceph.svc.cluster.local"
 # pve_ceph_rgw_admin: true

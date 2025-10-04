@@ -5,22 +5,19 @@
     - grafana.grafana.alloy
   tags: [security]
   become: true
-- name: Configure debian bare metal machines
-  hosts: debian_bare_metal
+- name: Configure debian network
+  hosts: debian
   roles:
     - network
   become: true
   tags: [network]
-- name: Configure Storage server 'method'
-  hosts: method
+- name: Configure Storage
+  hosts: debian
   become: true
   roles:
     - aeriscloud.disk
-    - tigattack.mergerfs
-    - ironicbadger.snapraid
-    - geerlingguy.nfs
-    - vladgh.samba.server
-  tags: [storage, nfs, samba]
+    - storage
+  tags: [storage]
 - name: Install proxmox
   hosts: proxmox
   roles:
@@ -29,9 +26,3 @@
     - prometheus.prometheus.systemd_exporter
     - prometheus.prometheus.smartctl_exporter
   tags: [proxmox]
-- name: Configure debian bare metal machines
-  hosts: debian_bare_metal
-  roles:
-    - mrlesmithjr.zfs
-  become: true
-  tags: [zfs]

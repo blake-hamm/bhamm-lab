@@ -17,9 +17,6 @@ collections:
   - name: grafana.grafana
     version: "5.7.0"
     source: https://galaxy.ansible.com
-  - name: vladgh.samba
-    version: "3.5.3"
-    source: https://galaxy.ansible.com
 roles:
   - name: geerlingguy.ntp
     version: "2.5.0"
@@ -28,15 +25,3 @@ roles:
     version: "v1.9.4"
   - name: aeriscloud.disk
     version: "v2.6.4"
-  - name: tigattack.mergerfs
-    version: "2.0.1"
-  - name: ironicbadger.snapraid
-    version: "1.0.0"
-  - name: geerlingguy.nfs
-    version: "2.1.0"
-  - name: xanmanning.k3s
-    src: https://github.com/blake-hamm/ansible-role-k3s.git
-    version: "main"
-  - name: mrlesmithjr.zfs
-    src: https://github.com/blake-hamm/ansible-zfs.git
-    version: "master"
