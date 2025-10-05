@@ -27,3 +27,20 @@
     fstype: ext4
     opts: defaults
     state: present
+- name: Install parted package
+  ansible.builtin.package:
+    name: parted
+    state: present
+    update_cache: true
+- name: Create Ceph DB/WAL partitions
+  community.general.parted:
+    device: "{{ ceph_nvme_device }}"
+    number: "{{ item.number }}"
+    name: "{{ item.name }}"
+    part_start: "{{ item.start }}"
+    part_end: "{{ item.end }}"
+    label: gpt
+    align: optimal
+    unit: GB
+    state: present
+  loop: "{{ ceph_partitions }}"

@@ -23,5 +23,3 @@ roles:
   - src: https://github.com/lae/ansible-role-proxmox.git
     name: lae.proxmox
     version: "v1.9.4"
-  - name: aeriscloud.disk
-    version: "v2.6.4"

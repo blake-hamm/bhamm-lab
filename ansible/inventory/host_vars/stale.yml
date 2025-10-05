@@ -1,3 +1,20 @@
 network_10gb_nics: [eno3, eno4]
-
 # Ceph config for proxmox
+ceph_nvme_device: /dev/nvme0n1
+ceph_partitions:
+  - number: 1
+    name: osd1_db
+    start: 1GB
+    end: 101GB # 100GB for 1TB OSD DB
+  - number: 2
+    name: osd1_wal
+    start: 101GB
+    end: 111GB # 10GB for 1TB OSD WAL
+  - number: 3
+    name: osd2_db
+    start: 111GB
+    end: 495GB # 384GB for 3.84TB OSD DB
+  - number: 4
+    name: osd2_wal
+    start: 495GB
+    end: 533GB # 38GB for 3.84TB OSD WAL
