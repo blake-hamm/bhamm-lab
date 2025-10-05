@@ -7,7 +7,6 @@
     ./gnome.nix
     ./kitty.nix
     ./vscode.nix
-    ./firefox.nix
     ./extras.nix
     ./uhk.nix
     ./docker.nix
