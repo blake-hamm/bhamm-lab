@@ -1,4 +1,4 @@
-network_10gb_nics: [eno3, eno4]
+network_10gb_nics: [eno7, eno8]
 # Ceph config for proxmox
 ceph_nvme_device: /dev/nvme0n1
 ceph_partitions:

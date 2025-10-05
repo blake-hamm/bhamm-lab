@@ -41,6 +41,6 @@
     part_end: "{{ item.end }}"
     label: gpt
     align: optimal
-    unit: GB
-    state: present
+    unit: GiB
+    state: "{{ item.state | default('present') }}"
   loop: "{{ ceph_partitions }}"

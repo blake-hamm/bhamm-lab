@@ -1,15 +1,15 @@
 # debian bootstrap args: ansible_port=22 ansible_ssh_common_args="-o PasswordAuthentication=yes"
-#method ansible_host=10.0.20.11
-#super ansible_host=10.0.20.13
+method ansible_host=10.0.20.11
+indy ansible_host=10.0.20.12
 stale ansible_host=10.0.20.13
 opnsense ansible_host=10.0.9.1
 
 [debian]
-#method
-#antsle
+method
+indy
 stale
 
 [proxmox]
-#method
-#antsle
+method
+indy
 stale

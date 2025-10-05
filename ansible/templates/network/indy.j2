@@ -3,15 +3,15 @@ auto lo
 iface lo inet loopback
 
 # SFP+ NIC (10Gb) on trunk port: no IP assigned here
-auto eno7np2
-iface eno7np2 inet manual
+auto eno7
+iface eno7 inet manual
     mtu 9000
 
-# VLAN-aware Bridge on eno7np2
+# VLAN-aware Bridge on eno7
 # This bridge is set to be VLAN aware and recognizes VLANs 20 and 30.
 auto vmbr0
 iface vmbr0 inet manual
-    bridge-ports eno7np2
+    bridge-ports eno7
     bridge-stp off
     bridge-fd 0
     bridge-vlan-aware yes
@@ -22,7 +22,7 @@ iface vmbr0 inet manual
 # Metal interface on VLAN 20 via the bridge:
 auto vmbr0.20
 iface vmbr0.20 inet static
-    address 10.0.20.13/24
+    address 10.0.20.12/24
     netmask 255.255.255.0
     gateway 10.0.20.2
     dns-nameservers 10.0.20.1
@@ -31,19 +31,19 @@ iface vmbr0.20 inet static
 # Kubernetes interface on VLAN 30 via the bridge:
 auto vmbr0.30
 iface vmbr0.30 inet static
-    address 10.0.30.13/24
+    address 10.0.30.12/24
     netmask 255.255.255.0
     dns-nameservers 10.0.30.1
     mtu 9000
 
-# Ceph Interface (10Gb) - VLAN 50 on eno8np3 remains unchanged:
-auto eno8np3
-iface eno8np3 inet manual
+# Ceph Interface (10Gb) - VLAN 50 on eno8 remains unchanged:
+auto eno8
+iface eno8 inet manual
     mtu 9000
 
-auto eno8np3.50
-iface eno8np3.50 inet static
-    address 10.0.50.13/24
+auto eno8.50
+iface eno8.50 inet static
+    address 10.0.50.12/24
     netmask 255.255.255.0
-    vlan-raw-device eno8np3
+    vlan-raw-device eno8
     mtu 9000

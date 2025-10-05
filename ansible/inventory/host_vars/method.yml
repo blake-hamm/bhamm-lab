@@ -1,38 +1,25 @@
 network_10gb_nics: [enp65s0f0, enp65s0f1]
 # Ceph config for proxmox
-# proxmox_reset_ceph: true
-ceph_device: /dev/nvme0n1
-# https://github.com/AerisCloud/ansible-disk
-# disk_enable_partioning: true
-# disk_additional_disks:
-#   # 4 tb ssd - /dev/disk/by-id/ata-SAMSUNG_MZ7L33T8HBLT-00A07_S6ERNT0WB00833
-#   - disk: /dev/sda
-#     fstype: xfs
-#     mount_options: defaults,noatime,nodiratime,discard,nofail
-#     mount: /mnt/parity1
-#   # 4 tb ssd - /dev/disk/by-id/ata-SAMSUNG_MZ7L33T8HBLT-00A07_S6ERNT0WB00736
-#   - disk: /dev/sdc
-#     fstype: xfs
-#     mount_options: defaults,noatime,nodiratime,discard,nofail
-#     mount: /mnt/data1
-#   # 2 tb ssd - /dev/disk/by-id/ata-PNY_CS900_2TB_SSD_PNY225122122301009C8
-#   - disk: /dev/sdf
-#     fstype: xfs
-#     mount_options: defaults,noatime,nodiratime,discard,nofail
-#     mount: /mnt/data2
-#   # 2 tb ssd - /dev/disk/by-id/ata-PNY_CS900_2TB_SSD_PNY225122122301009CB
-#   - disk: /dev/sde
-#     fstype: xfs
-#     mount_options: defaults,noatime,nodiratime,discard,nofail
-#     mount: /mnt/data3
-#   # 1 tb ssd - /dev/disk/by-id/ata-CT1000BX500SSD1_2308E6B0E700
-#   - disk: /dev/sdd
-#     fstype: xfs
-#     mount_options: defaults,noatime,nodiratime,discard,nofail
-#     mount: /mnt/data4
-# additional_fs_utils:
-#   - xfsprogs
+ceph_nvme_device: /dev/nvme0n1
+ceph_partitions:
+  - number: 1
+    name: osd1_db
+    start: 1GiB
+    end: 101GiB # 100GiB for 1TB OSD DB
+  - number: 2
+    name: osd1_wal
+    start: 101GiB
+    end: 111GiB # 10GiB for 1TB OSD WAL
+  - number: 3
+    name: osd2_db
+    start: 111GiB
+    end: 495GiB # 384GiB for 3.84TB OSD DB
+  - number: 4
+    name: osd2_wal
+    start: 495GiB
+    end: 533GiB # 38GiB for 3.84TB OSD WAL
 # Proxmox config
+# proxmox_reset_ceph: true
 pve_pcie_passthrough_enabled: true
 pve_iommu_passthrough_mode: true
 pve_iommu_unsafe_interrupts: false

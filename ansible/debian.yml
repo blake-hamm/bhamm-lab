@@ -15,7 +15,6 @@
   hosts: debian
   become: true
   roles:
-    - aeriscloud.disk
     - storage
   tags: [storage]
 - name: Install proxmox
