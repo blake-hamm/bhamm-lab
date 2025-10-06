@@ -1,13 +1,17 @@
 # tasks file for storage
+- name: Rename volume group
+  community.general.lvg_rename:
+    vg: "{{ ansible_hostname }}-vg"
+    vg_new: local-vg
 - name: Resize root LV to 100GB
   community.general.lvol:
-    vg: "{{ ansible_hostname }}-vg"
+    vg: "local-vg"
     lv: root
     size: 100g
     resizefs: true
 - name: Resize swap LV to 4GB
   community.general.lvol:
-    vg: "{{ ansible_hostname }}-vg"
+    vg: "local-vg"
     lv: swap_1
     size: 4g
     force: true

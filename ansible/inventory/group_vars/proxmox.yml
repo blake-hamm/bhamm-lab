@@ -67,7 +67,11 @@ pve_roles:
 pve_manage_ssh: false
 pve_ssh_port: "{{ ansible_port }}"
 pve_zfs_enabled: false
-pve_storages: []
+pve_storages:
+  - name: lvm
+    type: lvm
+    content: ["images", "rootdir"]
+    vgname: local-vg
 #   - name: vms
 #     type: zfs # Need to enable this somehow
 #     content: [ "images" ]
