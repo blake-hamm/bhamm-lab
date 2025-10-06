@@ -44,3 +44,8 @@
     unit: GiB
     state: "{{ item.state | default('present') }}"
   loop: "{{ ceph_partitions }}"
+- name: Load FUSE kernel module
+  community.general.modprobe:
+    name: fuse
+    persistent: "present"
+    state: present

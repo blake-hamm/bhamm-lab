@@ -19,6 +19,7 @@
   tags: [storage]
 - name: Install proxmox
   hosts: proxmox
+  become: true
   roles:
     - proxmox
     - prometheus.prometheus.node_exporter
