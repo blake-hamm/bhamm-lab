@@ -33,17 +33,13 @@ pve_iommu_passthrough_mode: true
 pve_iommu_unsafe_interrupts: false
 pve_mediated_devices_enabled: false
 pve_pcie_ovmf_enabled: false
-# pve_pci_device_ids:
-#   - id: "1002:744c"
-#   - id: "1002:ab30"
-#   - id: "8086:56a6"
-#   - id: "8086:4f92"
+pve_pci_device_ids:
+  - id: "8086:56a6" # Intel arc
+  - id: "8086:4f92" # Intel arc audio
+  - id: "1b21:1064" # Sata device
 pve_vfio_blacklist_drivers:
-  - name: "radeon"
-  - name: "amdgpu"
   - name: "snd_hda_intel"
   - name: "i915"
   - name: "xe"
-  - name: "ahci"
 pve_pcie_ignore_msrs: false
 pve_pcie_report_msrs: true

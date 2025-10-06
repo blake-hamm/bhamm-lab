@@ -1,0 +1,14 @@
+# handlers file for network
+- name: Reload udev and devices
+  ansible.builtin.shell: |
+    udevadm control --reload
+    udevadm trigger --action=change --type=devices --subsystem-match=block
+  changed_when: false
+- name: Update initramfs
+  ansible.builtin.command:
+    cmd: update-initramfs -u
+  changed_when: false
+- name: Update fstab and GRUB
+  ansible.builtin.command:
+    cmd: update-grub
+  changed_when: false
