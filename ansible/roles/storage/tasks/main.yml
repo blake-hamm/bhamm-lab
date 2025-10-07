@@ -20,39 +20,26 @@
     lv: root
     size: 100g
     resizefs: true
-- name: Resize swap LV to 4GB
-  community.general.lvol:
-    vg: local-vg
-    lv: swap_1
-    size: 4g
-    force: true
 - name: Update /etc/fstab root entry
   ansible.builtin.replace:
     path: /etc/fstab
     regexp: "{{ storage_old_root | regex_escape }}"
     replace: "{{ storage_new_root }}"
   notify: Update fstab and GRUB
-- name: Update /etc/fstab swap entry
-  ansible.builtin.replace:
-    path: /etc/fstab
-    regexp: "{{ storage_old_swap | regex_escape }}"
-    replace: "{{ storage_new_swap }}"
-  notify: Update fstab and GRUB
-- name: Ensure resume hook points to new swap LV
+- name: Ensure root LV is set exactly once via grub.d drop-in
   ansible.builtin.copy:
-    dest: /etc/initramfs-tools/conf.d/resume
-    content: |
-      RESUME={{ storage_new_swap }}
+    dest: /etc/default/grub.d/10-root-lv.cfg
     owner: root
     group: root
     mode: '0644'
-  notify: Update initramfs
-- name: Set GRUB_CMDLINE_LINUX to include new root LV
-  ansible.builtin.replace:
-    path: /etc/default/grub
-    regexp: '^GRUB_CMDLINE_LINUX="(.+)"'
-    replace: 'GRUB_CMDLINE_LINUX="root={{ storage_new_root }} \1"'
+    content: |
+      # Managed by Ansible: force single root= parameter
+      GRUB_CMDLINE_LINUX="root={{ storage_new_root }} $GRUB_CMDLINE_LINUX"
   notify: Update fstab and GRUB
+- name: Swap config
+  ansible.builtin.include_tasks:
+    file: swap.yml
+  when: storage_resize_swap
 - name: Extra config for Proxmox storage
   ansible.builtin.include_tasks:
     file: proxmox.yml
