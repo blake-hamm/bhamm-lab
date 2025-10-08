@@ -9,14 +9,7 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "2"
 spec:
-  size: 3
-  affinity:
-    podAntiAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchLabels:
-              app.kubernetes.io/name: vault
-          topologyKey: topology.kubernetes.io/zone
+  size: 1
   image: hashicorp/vault:1.19.3
   annotations:
     common/annotation: "true"
@@ -32,9 +25,8 @@ spec:
   serviceType: ClusterIP
   volumeClaimTemplates:
     - metadata:
-        name: vault-raft
+        name: vault-file
       spec:
-        storageClassName: "local-path"
         accessModes:
           - ReadWriteOnce
         volumeMode: Filesystem
@@ -42,7 +34,7 @@ spec:
           requests:
             storage: 1Gi
   volumeMounts:
-    - name: vault-raft
+    - name: vault-file
       mountPath: /vault/file
   caNamespaces: ["*"]
   unsealConfig:
@@ -55,8 +47,8 @@ spec:
       secretNamespace: vault
   config:
     storage:
-      raft:
-        path: "/vault/file"
+      file:
+        path: "${ .Env.VAULT_STORAGE_FILE }"
     listener:
       tcp:
         address: "0.0.0.0:8200"
