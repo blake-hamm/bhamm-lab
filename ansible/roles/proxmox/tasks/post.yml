@@ -1,3 +1,19 @@
 - name: Enable prometheus on ceph
   ansible.builtin.command: ceph mgr module enable prometheus
   changed_when: false
+- name: Enable msgr2 on monitors
+  ansible.builtin.command: ceph mon enable-msgr2
+  changed_when: false
+- name: Ensure [global] section has ms_bind_port in ceph.conf
+  community.general.ini_file:
+    path: /etc/pve/ceph.conf
+    section: global
+    option: ms_bind_port
+    value: "3300"
+    backup: true
+    owner: root
+    group: www-data
+    mode: '0640'
+  notify:
+    - Restart ceph mons
+    - Restart ceph osds

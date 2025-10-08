@@ -6,3 +6,13 @@
   ansible.builtin.command: update-grub
   become: true
   changed_when: false
+- name: Restart ceph mons
+  ansible.builtin.systemd:
+    name: ceph-mon@{{ inventory_hostname }}.service
+    state: restarted
+    enabled: true
+- name: Restart ceph osds
+  ansible.builtin.systemd:
+    name: ceph-osd.target
+    state: restarted
+    enabled: true
