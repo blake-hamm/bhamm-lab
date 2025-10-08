@@ -39,6 +39,8 @@ spec:
             size: 10Gi
             annotations:
               "k8up.io/backup": "true"
+          logs:
+            type: "emptyDir"
           livenessProbe:
             periodSeconds: 15
           readinessProbe:
@@ -60,6 +62,8 @@ spec:
             size: 10Gi
             annotations:
               "k8up.io/backup": "true"
+          logs:
+            type: "emptyDir"
           livenessProbe:
             enabled: true
             httpGet:
@@ -90,6 +94,8 @@ spec:
             size: 10Gi
             annotations:
               "k8up.io/backup": "true"
+          logs:
+            type: "emptyDir"
           extraEnvironmentVars:
             WEED_LEVELDB2_ENABLED: "true"
             WEED_FILER_OPTIONS_RECURSIVE_DELETE: "false"
