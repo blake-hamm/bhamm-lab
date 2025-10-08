@@ -74,7 +74,6 @@ spec:
           key: OIDC_VAULT_CLIENT_SECRET
   statsdDisabled: false
   serviceMonitorEnabled: true
-  serviceRegistrationEnabled: true
   externalConfig:
     purgeUnmanagedConfig:
       enabled: true
