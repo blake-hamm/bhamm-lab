@@ -1,3 +1,17 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vault-file
+  namespace: vault
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
 apiVersion: "vault.banzaicloud.com/v1alpha1"
 kind: "Vault"
 metadata:
@@ -23,16 +37,10 @@ spec:
     bhamm-lab.com/log-format: "string"
   serviceAccount: vault
   serviceType: ClusterIP
-  volumeClaimTemplates:
-    - metadata:
-        name: vault-file
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        volumeMode: Filesystem
-        resources:
-          requests:
-            storage: 1Gi
+  volumes:
+    - name: vault-file
+      persistentVolumeClaim:
+        claimName: vault-file
   volumeMounts:
     - name: vault-file
       mountPath: /vault/file
