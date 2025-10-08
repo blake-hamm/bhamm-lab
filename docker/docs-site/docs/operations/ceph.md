@@ -8,15 +8,20 @@
 ## To create the ceph csi credentials
 ```bash
 # rbd secret
-ceph auth get-or-create client.k8s-rbd \
-  mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=replicapool'
+ceph auth get-or-create client.k8s-rbd
+ceph auth caps client.k8s-rbd \
+  mon 'allow r' \
+  osd 'allow class-read object_prefix rbd_children, allow rwx pool=osd'
 
 # cephfs secret
-ceph auth get-or-create client.k8s-cephfs \
+ceph auth get-or-create client.k8s-cephf
+ceph auth caps client.k8s-cephfs \
   mon 'allow r' \
-  mds 'allow rw path=/'
-ceph auth get-or-create client.k8s-cephfs-admin \
+  mds 'allow rw path=/' \
+  osd 'allow rw pool=cephfs_data'
+ceph auth get-or-create client.k8s-cephfs-admin
+ceph auth caps client.k8s-cephfs-admin \
   mon 'allow r' \
-  osd 'allow rwx' \
-  mds 'allow rw path=/'
+  mds 'allow rw path=/' \
+  osd 'allow rwx pool=cephfs_data'
 ```
