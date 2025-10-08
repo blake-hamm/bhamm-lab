@@ -26,14 +26,12 @@ spec:
             WEED_CLUSTER_SW_MASTER: "seaweedfs-master.seaweedfs:9333"
             WEED_CLUSTER_SW_FILER: "seaweedfs-filer-client.seaweedfs:8888"
           enableReplication: true
-          replicationPlacement: "001"
+          replicationPlacement: "000"
           enableSecurity: false
         master:
           enabled: true
-          replicas: 3
+          replicas: 1
           resumeState: false
-          raftHashicorp: true
-          raftBootstrap: true
           volumePreallocate: true
           volumeSizeLimitMB: 10000
           data:
@@ -45,11 +43,6 @@ spec:
             periodSeconds: 15
           readinessProbe:
             periodSeconds: 15
-          logs:
-            type: "persistentVolumeClaim"
-            size: 10Gi
-            annotations:
-              "k8up.io/backup": "true"
         volume:
           enabled: true
           replicas: 3
@@ -63,11 +56,6 @@ spec:
               annotations:
                 "k8up.io/backup": "true"
           idx:
-            type: "persistentVolumeClaim"
-            size: 10Gi
-            annotations:
-              "k8up.io/backup": "true"
-          logs:
             type: "persistentVolumeClaim"
             size: 10Gi
             annotations:
@@ -98,11 +86,6 @@ spec:
           enablePVC: true
           storage: 10Gi
           data:
-            type: "persistentVolumeClaim"
-            size: 10Gi
-            annotations:
-              "k8up.io/backup": "true"
-          logs:
             type: "persistentVolumeClaim"
             size: 10Gi
             annotations:
