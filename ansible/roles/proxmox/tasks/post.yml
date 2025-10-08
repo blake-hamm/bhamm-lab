@@ -17,3 +17,6 @@
   notify:
     - Restart ceph mons
     - Restart ceph osds
+- name: Create cephfs subvolume group
+  ansible.builtin.command: ceph fs subvolumegroup create cephfs csi
+  changed_when: false
