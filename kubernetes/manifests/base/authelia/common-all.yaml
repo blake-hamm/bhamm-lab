@@ -56,6 +56,8 @@ spec:
                   - name: authelia
                     port: 80
                     scheme: http
+        dragonfly:
+          enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

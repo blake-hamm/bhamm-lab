@@ -126,7 +126,7 @@ spec:
                 authelia_url: 'https://auth.bhamm-lab.com'
             redis:
               enabled: true
-              deploy: true
+              deploy: false
               host: 'authelia-redis-master'
           identity_providers:
             oidc:
