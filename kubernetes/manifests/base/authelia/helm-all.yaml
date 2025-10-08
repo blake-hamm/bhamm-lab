@@ -127,7 +127,7 @@ spec:
             redis:
               enabled: true
               deploy: false
-              host: 'authelia-redis-master'
+              host: 'authelia-dragonfly'
           identity_providers:
             oidc:
               enabled: true
