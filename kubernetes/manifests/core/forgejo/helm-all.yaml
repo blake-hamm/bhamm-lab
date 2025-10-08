@@ -83,7 +83,7 @@ spec:
         valkey-cluster:
           enabled: false
         valkey:
-          enabled: true
+          enabled: false
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
