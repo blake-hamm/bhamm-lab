@@ -67,8 +67,6 @@ spec:
     telemetry:
       prometheus_retention_time: "24h"
       disable_hostname: true
-    api_addr: https://vault.vault:8200
-    cluster_addr: "https://${.Env.POD_NAME}:8201"
     ui: true
   envsConfig:
     - name: OIDC_VAULT_CLIENT_SECRET
