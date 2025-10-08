@@ -39,8 +39,8 @@ spec:
           create: true
           name: csi-cephfs-sc
           clusterID: "25afe9dc-2a59-4135-b1fc-6728b065c2a9"
-          fsName: k8s_fs
-          pool: k8s_fs_data
+          fsName: cephfs
+          pool: cephfs_data
           mounter: fuse
           fuseMountOptions: debug
           provisionerSecret: csi-cephfs-secret
