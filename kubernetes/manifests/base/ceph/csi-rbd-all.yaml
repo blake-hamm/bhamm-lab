@@ -44,7 +44,7 @@ spec:
           annotations:
             storageclass.kubernetes.io/is-default-class: "true"
           clusterID: "25afe9dc-2a59-4135-b1fc-6728b065c2a9"
-          pool: rbd
+          pool: osd
           mountOptions:
             - discard
           provisionerSecret: csi-rbd-secret
