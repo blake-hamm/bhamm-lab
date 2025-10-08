@@ -33,8 +33,6 @@ spec:
               - "10.0.20.12:3300"
               - "10.0.20.13:6789"
               - "10.0.20.13:3300"
-            cephFS:
-              subvolumeGroup: "csi"
         storageClass:
           create: true
           name: csi-cephfs-sc
