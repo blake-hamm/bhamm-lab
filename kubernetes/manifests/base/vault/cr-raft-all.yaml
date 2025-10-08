@@ -48,7 +48,7 @@ spec:
   config:
     storage:
       file:
-        path: "${ .Env.VAULT_STORAGE_FILE }"
+        path: /vault/file
     listener:
       tcp:
         address: "0.0.0.0:8200"
