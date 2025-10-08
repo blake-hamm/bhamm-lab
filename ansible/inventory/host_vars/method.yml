@@ -37,6 +37,7 @@ pve_pci_device_ids:
   - id: "8086:56a6" # Intel arc
   - id: "8086:4f92" # Intel arc audio
   - id: "1b21:1064" # Sata device
+  - id: "2116:2116" # Sata device
 pve_vfio_blacklist_drivers:
   - name: "snd_hda_intel"
   - name: "i915"
