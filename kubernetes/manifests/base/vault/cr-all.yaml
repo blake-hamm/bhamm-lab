@@ -67,7 +67,7 @@ spec:
     telemetry:
       prometheus_retention_time: "24h"
       disable_hostname: true
-    api_addr: https://vault-0.vault.svc.cluster.local:8200
+    api_addr: https://vault.vault:8200
     cluster_addr: "https://${.Env.POD_NAME}:8201"
     ui: true
   envsConfig:
