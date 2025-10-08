@@ -1,5 +1,4 @@
-# Sops sync (used in forgejo webhook - ci)
-#  - syncs on changes to sops file
+# Sops sync
 FROM harbor.bhamm-lab.com/dockerhub/debian:trixie-slim
 
 # Install base dependencies
