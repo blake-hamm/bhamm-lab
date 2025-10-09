@@ -1,8 +1,0 @@
-apiVersion: v1alpha1
-kind: UserVolumeConfig
-name: local-path-provisioner
-provisioning:
-  diskSelector:
-    match: "!system_disk"
-  minSize: 20GiB
-  maxSize: 100GiB

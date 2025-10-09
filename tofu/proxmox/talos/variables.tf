@@ -164,12 +164,6 @@ variable "disk_size_worker" {
   default     = 60
 }
 
-variable "disk_size_worker_user" {
-  description = "User storage for local path privisioner in gb"
-  type        = number
-  default     = 40
-}
-
 variable "vip" {
   description = "VIP endpoint for cluster"
   type        = string
