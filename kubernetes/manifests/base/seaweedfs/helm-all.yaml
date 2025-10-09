@@ -53,7 +53,7 @@ spec:
           dataDirs:
             - name: data
               type: "persistentVolumeClaim"
-              size: 300Gi
+              size: 500Gi
               maxVolumes: 0
               annotations:
                 "k8up.io/backup": "true"
