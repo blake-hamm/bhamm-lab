@@ -12,3 +12,4 @@
   when: proxmox_pbs
 - name: Run post tasks
   ansible.builtin.include_tasks: post.yml
+  run_once: true

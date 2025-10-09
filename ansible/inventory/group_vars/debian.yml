@@ -31,4 +31,8 @@ alloy_config: |
     }
     forward_to = [loki.write.loki.receiver]
   }
-smartctl_exporter_smartctl_device_include: "^/dev/sd[a-z]+$"
+smartctl_exporter_smartctl_interval: "1h"
+smartctl_exporter_smartctl_rescan: "6h"
+smartctl_exporter_system_user: "root"
+smartctl_exporter_system_group: "root"
+smartctl_exporter_log_level: "warn"
