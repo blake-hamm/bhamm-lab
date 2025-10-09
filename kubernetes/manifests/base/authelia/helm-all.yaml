@@ -130,6 +130,9 @@ spec:
               host: 'authelia-dragonfly'
           identity_providers:
             oidc:
+              claims_policies:
+                grafana:
+                  id_token: ['email', 'name', 'groups', 'preferred_username']
               enabled: true
               authorization_policies:
                 policy_name:
@@ -255,6 +258,11 @@ spec:
                     - 'profile'
                     - 'groups'
                     - 'email'
+                  response_types:
+                    - 'code'
+                  grant_types:
+                    - 'authorization_code'
+                  access_token_signed_response_alg: 'none'
                   userinfo_signed_response_alg: 'none'
                   token_endpoint_auth_method: 'client_secret_basic'
                 - client_id: 'harbor'
