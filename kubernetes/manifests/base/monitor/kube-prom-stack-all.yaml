@@ -57,7 +57,8 @@ spec:
               groups_attribute_path: groups
               name_attribute_path: name
               use_pkce: true
-              role_attribute_path: contains(groups[*], 'admin') && 'Admin' || 'Viewer'
+              role_attribute_path: contains(groups[*], 'admin') && 'Admin'
+              role_attribute_strict: false
               allow_sign_up: true
               allow_assign_grafana_admin: true
               auto_login: true
