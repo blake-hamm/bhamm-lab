@@ -62,6 +62,7 @@ spec:
               allow_sign_up: true
               allow_assign_grafana_admin: true
               auto_login: true
+              auto_assign_org_role: Viewer
           sidecar:
             dashboards:
               enabled: true
