@@ -141,6 +141,10 @@ spec:
                 url: https://raw.githubusercontent.com/blake-hamm/intel-gpu-exporter/refs/heads/main/examples/simple-grafana-dash.json
                 token: ''
                 datasource: Prometheus
+              smartctl-exporter:
+                gnetId: 22381
+                revision: 1
+                datasource: Prometheus
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
@@ -176,18 +180,24 @@ spec:
               - job_name: opnsense
                 static_configs:
                   - targets: ['10.0.9.1:9100']
-              - job_name: 'proxmox_nodes'
+              - job_name: 'nodes'
                 static_configs:
                   - targets:
-                      - '10.0.20.11:9100' # Aorus
-                      - '10.0.20.12:9100' # Antsle
-                      - '10.0.20.13:9100' # Super
+                      - '10.0.20.11:9100' # Method
+                      - '10.0.20.12:9100' # Indy
+                      - '10.0.20.13:9100' # Stale
               - job_name: 'ceph'
                 static_configs:
                   - targets:
-                      - '10.0.20.11:9283' # Aorus
-                      - '10.0.20.12:9283' # Antsle
-                      - '10.0.20.13:9283' # Super
+                      - '10.0.20.11:9283' # Method
+                      - '10.0.20.12:9283' # Indy
+                      - '10.0.20.13:9283' # Stale
+              - job_name: 'smartctl'
+                static_configs:
+                  - targets:
+                      - '10.0.20.11:9633' # Method
+                      - '10.0.20.12:9633' # Indy
+                      - '10.0.20.13:9633' # Stale
             ruleSelectorNilUsesHelmValues: false
             serviceMonitorSelectorNilUsesHelmValues: false
             podMonitorSelectorNilUsesHelmValues: false
