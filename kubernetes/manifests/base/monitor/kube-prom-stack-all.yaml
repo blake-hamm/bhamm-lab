@@ -190,12 +190,14 @@ spec:
                       - '10.0.20.12:9100' # Indy
                       - '10.0.20.13:9100' # Stale
               - job_name: 'ceph'
+                scrape_interval: 1m
                 static_configs:
                   - targets:
                       - '10.0.20.11:9283' # Method
                       - '10.0.20.12:9283' # Indy
                       - '10.0.20.13:9283' # Stale
               - job_name: 'smartctl'
+                scrape_interval: 1m
                 static_configs:
                   - targets:
                       - '10.0.20.11:9633' # Method
