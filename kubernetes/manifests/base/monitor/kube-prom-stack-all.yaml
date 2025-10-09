@@ -145,9 +145,8 @@ spec:
                 url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/feature/expand-ceph/kubernetes/manifests/base/monitor/dashboards/smartctl.json
                 token: ''
               systemd-exporter:
-                gnetId: 22872
-                revision: 1
-                datasource: Prometheus
+                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/feature/expand-ceph/kubernetes/manifests/base/monitor/dashboards/systemd.json
+                token: ''
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
