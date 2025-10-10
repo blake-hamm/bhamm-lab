@@ -16,7 +16,7 @@ sudo wipefs --all /dev/sdX
 sudo dd if=/dev/zero of=/dev/sdX bs=1M count=10
 
 # To flash device
-sudo dd if=~/Downloads/debian-live-13.0.0-amd64-standard.iso of=/dev/sdX bs=4M status=progress oflag=sync
+sudo dd if=~/Downloads/debian-12.11.0-amd64-netinst.iso of=/dev/sdX bs=4M status=progress oflag=sync
 ```
 
 # PCI

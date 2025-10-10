@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: CronWorkflow
 metadata:
-  name: seaweedfs-offsite-backup
+  name: seaweedfs-onsite-backup
   namespace: seaweedfs
   annotations:
     argocd.argoproj.io/sync-wave: "25"
@@ -42,9 +42,9 @@ spec:
                   - name: target-namespace
                     value: seaweedfs
                   - name: location
-                    value: offsite
+                    value: onsite
                   - name: k8up-endpoint
-                    value: https://storage.googleapis.com
+                    value: http://10.0.20.199:9000 # Minio through truenas
                   - name: k8up-bucket
                     value: bhamm-lab-k8up
                   - name: k8up-secret

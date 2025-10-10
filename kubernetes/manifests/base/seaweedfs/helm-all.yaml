@@ -26,14 +26,12 @@ spec:
             WEED_CLUSTER_SW_MASTER: "seaweedfs-master.seaweedfs:9333"
             WEED_CLUSTER_SW_FILER: "seaweedfs-filer-client.seaweedfs:8888"
           enableReplication: true
-          replicationPlacement: "001"
+          replicationPlacement: "000"
           enableSecurity: false
         master:
           enabled: true
-          replicas: 3
+          replicas: 1
           resumeState: false
-          raftHashicorp: true
-          raftBootstrap: true
           volumePreallocate: true
           volumeSizeLimitMB: 10000
           data:
@@ -41,25 +39,21 @@ spec:
             size: 10Gi
             annotations:
               "k8up.io/backup": "true"
+          logs:
+            type: "emptyDir"
           livenessProbe:
             periodSeconds: 15
           readinessProbe:
             periodSeconds: 15
-          logs:
-            type: "persistentVolumeClaim"
-            size: 10Gi
-            annotations:
-              "k8up.io/backup": "true"
         volume:
           enabled: true
-          replicas: 3
+          replicas: 2
           index: leveldbMedium
           readMode: proxy
           dataDirs:
             - name: data
               type: "persistentVolumeClaim"
-              size: 300Gi
-              storageClass: smb-csi
+              size: 500Gi
               maxVolumes: 0
               annotations:
                 "k8up.io/backup": "true"
@@ -69,10 +63,7 @@ spec:
             annotations:
               "k8up.io/backup": "true"
           logs:
-            type: "persistentVolumeClaim"
-            size: 10Gi
-            annotations:
-              "k8up.io/backup": "true"
+            type: "emptyDir"
           livenessProbe:
             enabled: true
             httpGet:
@@ -95,7 +86,7 @@ spec:
             timeoutSeconds: 30
         filer:
           enabled: true
-          replicas: 3
+          replicas: 2
           enablePVC: true
           storage: 10Gi
           data:
@@ -104,10 +95,7 @@ spec:
             annotations:
               "k8up.io/backup": "true"
           logs:
-            type: "persistentVolumeClaim"
-            size: 10Gi
-            annotations:
-              "k8up.io/backup": "true"
+            type: "emptyDir"
           extraEnvironmentVars:
             WEED_LEVELDB2_ENABLED: "true"
             WEED_FILER_OPTIONS_RECURSIVE_DELETE: "false"

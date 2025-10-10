@@ -1,0 +1,46 @@
+# tasks/storage.yml
+- name: Rename volume group
+  community.general.lvg_rename:
+    vg: "{{ ansible_hostname }}-vg"
+    vg_new: local-vg
+  notify: Reload udev and devices
+- name: Ensure old LV symlink exists for grub-probe
+  ansible.builtin.file:
+    src: "/dev/mapper/local--vg-root"
+    path: "/dev/mapper/{{ ansible_hostname }}--vg-root"
+    state: link
+  notify: Reload udev and devices
+- name: Trigger udev to recognize new device names
+  ansible.builtin.command:
+    cmd: udevadm trigger --action=change --type=devices --subsystem-match=block
+  changed_when: false
+- name: Resize root LV to 100GB
+  community.general.lvol:
+    vg: local-vg
+    lv: root
+    size: 100g
+    resizefs: true
+- name: Update /etc/fstab root entry
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: "{{ storage_old_root | regex_escape }}"
+    replace: "{{ storage_new_root }}"
+  notify: Update fstab and GRUB
+- name: Ensure root LV is set exactly once via grub.d drop-in
+  ansible.builtin.copy:
+    dest: /etc/default/grub.d/10-root-lv.cfg
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      # Managed by Ansible: force single root= parameter
+      GRUB_CMDLINE_LINUX="root={{ storage_new_root }} $GRUB_CMDLINE_LINUX"
+  notify: Update fstab and GRUB
+- name: Swap config
+  ansible.builtin.include_tasks:
+    file: swap.yml
+  when: storage_resize_swap
+- name: Extra config for Proxmox storage
+  ansible.builtin.include_tasks:
+    file: proxmox.yml
+  when: "'proxmox' in group_names"

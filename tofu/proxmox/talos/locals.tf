@@ -23,37 +23,35 @@ locals {
   ]
 
   intel_gpu_worker_node = [{
-    hostname       = "${var.environment}-talos-worker-intel-gpu"
-    ip             = format(var.worker_ip_format, var.count_worker)
-    machine_type   = "worker"
-    host_node      = "method"
-    vm_id          = var.worker_vm_id_start + var.count_worker
-    cpu            = var.cpu_cores_worker
-    disk_size      = var.disk_size_worker
-    disk_size_user = var.disk_size_worker_user
-    memory         = floor(var.memory_base_worker * var.proxmox_nodes[1].multiplier)
-    vip            = null
-    taint          = { key = "intel.com/gpu", effect = "NoSchedule" }
-    vm_tag         = "intel-gpu"
-    hostpci        = var.intel_gpu_worker_id
+    hostname     = "${var.environment}-talos-worker-intel-gpu"
+    ip           = format(var.worker_ip_format, var.count_worker)
+    machine_type = "worker"
+    host_node    = "method"
+    vm_id        = var.worker_vm_id_start + var.count_worker
+    cpu          = var.cpu_cores_worker
+    disk_size    = var.disk_size_worker
+    memory       = floor(var.memory_base_worker * var.proxmox_nodes[1].multiplier)
+    vip          = null
+    taint        = { key = "intel.com/gpu", effect = "NoSchedule" }
+    vm_tag       = "intel-gpu"
+    hostpci      = var.intel_gpu_worker_id
   }]
 
   worker_nodes = concat(
     [
       for idx in range(var.count_worker) : {
-        hostname       = "${var.environment}-talos-worker-${idx}"
-        ip             = format(var.worker_ip_format, idx)
-        machine_type   = "worker"
-        host_node      = var.proxmox_nodes[idx].name
-        vm_id          = var.worker_vm_id_start + idx
-        cpu            = var.cpu_cores_worker
-        disk_size      = var.disk_size_worker
-        disk_size_user = var.disk_size_worker_user
-        memory         = floor(var.memory_base_worker * var.proxmox_nodes[idx].multiplier)
-        vip            = null
-        taint          = null
-        vm_tag         = null
-        hostpci        = {}
+        hostname     = "${var.environment}-talos-worker-${idx}"
+        ip           = format(var.worker_ip_format, idx)
+        machine_type = "worker"
+        host_node    = var.proxmox_nodes[idx].name
+        vm_id        = var.worker_vm_id_start + idx
+        cpu          = var.cpu_cores_worker
+        disk_size    = var.disk_size_worker
+        memory       = floor(var.memory_base_worker * var.proxmox_nodes[idx].multiplier)
+        vip          = null
+        taint        = null
+        vm_tag       = null
+        hostpci      = {}
       }
     ],
     length(var.intel_gpu_worker_id) > 0 ? local.intel_gpu_worker_node : [],

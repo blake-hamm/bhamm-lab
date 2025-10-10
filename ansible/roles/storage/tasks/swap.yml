@@ -1,0 +1,44 @@
+# swap.yml
+- name: Disable all swap devices
+  ansible.builtin.command:
+    cmd: swapoff -a
+  changed_when: false
+- name: Resize swap LV to 4GB
+  community.general.lvol:
+    vg: local-vg
+    lv: swap_1
+    size: 4g
+    force: true
+- name: Update /etc/fstab swap entry
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: "{{ storage_old_swap | regex_escape }}"
+    replace: "{{ storage_new_swap }}"
+  notify: Update fstab and GRUB
+- name: Ensure resume hook points to new swap LV
+  ansible.builtin.copy:
+    dest: /etc/initramfs-tools/conf.d/resume
+    content: |
+      RESUME={{ storage_new_swap }}
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Update initramfs
+- name: Reinitialize swap signature on LV
+  ansible.builtin.command:
+    cmd: mkswap "{{ storage_new_swap }}"
+  changed_when: false
+- name: Ensure correct swap LV entry in /etc/fstab
+  ansible.posix.mount:
+    path: none
+    src: "{{ storage_new_swap }}"
+    fstype: swap
+    opts: sw
+    state: present
+- name: Reload systemd to pick up fstab changes
+  ansible.builtin.systemd:
+    daemon_reload: true
+- name: Enable all swap devices
+  ansible.builtin.command:
+    cmd: swapon -a
+  changed_when: false

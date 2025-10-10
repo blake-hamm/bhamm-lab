@@ -26,7 +26,7 @@ variable "proxmox_url" {
 }
 
 variable "environment" {
-  description = "Environment name (e.g., dev, prod)"
+  description = "Environment name (e.g., blue, green)"
   type        = string
 }
 
@@ -47,9 +47,9 @@ variable "proxmox_nodes" {
     multiplier = number
   }))
   default = [
-    { name = "super", multiplier = 1.6 },
+    { name = "indy", multiplier = 1.6 },
     { name = "method", multiplier = 1.6 },
-    { name = "antsle", multiplier = 1 },
+    { name = "stale", multiplier = 1 },
   ]
 }
 
@@ -113,13 +113,13 @@ variable "mtu" {
 variable "vm_datastore_id" {
   description = "Datastore ID for vm's in Proxmox"
   type        = string
-  default     = "zfs"
+  default     = "lvm"
 }
 
 variable "file_datastore_id" {
   description = "Datastore ID for files in Proxmox"
   type        = string
-  default     = "ceph_fs"
+  default     = "cephfs"
 }
 
 variable "proxmox_file_node" {
@@ -162,12 +162,6 @@ variable "disk_size_worker" {
   description = "Boot disk for work in gb"
   type        = number
   default     = 60
-}
-
-variable "disk_size_worker_user" {
-  description = "User storage for local path privisioner in gb"
-  type        = number
-  default     = 100
 }
 
 variable "vip" {

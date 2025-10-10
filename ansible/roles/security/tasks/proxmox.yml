@@ -58,10 +58,12 @@
 - name: Create file for node's ssh_known_hosts
   ansible.builtin.file:
     path: "/etc/pve/nodes/{{ item.hostname }}/ssh_known_hosts"
-    state: file
+    state: touch
     owner: root
     group: www-data
     mode: "0640"
+    modification_time: preserve
+    access_time: preserve
   loop: "{{ known_hosts_entries }}"
 - name: Add entries to node's known_hosts file
   ansible.builtin.known_hosts:
@@ -70,3 +72,17 @@
     key: "{{ item.hostname }} {{ item.key }}"
     state: present
   loop: "{{ known_hosts_entries }}"
+- name: Build ssh_remote_hosts for DevSec SSH hardening role
+  ansible.builtin.set_fact:
+    ssh_remote_hosts: >-
+      {{ ssh_remote_hosts | default([]) + [
+        {
+          'names': [hostvars[item].ansible_default_ipv4.address, hostvars[item].ansible_hostname],
+          'options': [
+            'IdentityFile /root/.ssh/id_ed25519',
+            'Port ' + (pve_ssh_port | default(22) | string),
+            'StrictHostKeyChecking no'
+          ]
+        }
+      ] }}
+  loop: "{{ groups[pve_group] }}"

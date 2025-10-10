@@ -10,12 +10,12 @@ provider "proxmox" {
       port    = "4185"
     }
     node {
-      name    = "antsle"
+      name    = "indy"
       address = "10.0.20.12"
       port    = "4185"
     }
     node {
-      name    = "super"
+      name    = "stale"
       address = "10.0.20.13"
       port    = "4185"
     }

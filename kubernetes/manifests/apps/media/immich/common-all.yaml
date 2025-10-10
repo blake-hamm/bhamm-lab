@@ -37,8 +37,7 @@ spec:
                     scheme: http
         pvc:
           - name: immich-data
-            storageSize: 1Ti
-            storageClassName: smb-csi
+            storageSize: 500Gi
           - name: immich-ml-cache
             storageSize: 20Gi
         k8up:

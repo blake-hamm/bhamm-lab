@@ -1,141 +1,46 @@
 network_10gb_nics: [enp65s0f0, enp65s0f1]
 # Ceph config for proxmox
-# proxmox_reset_ceph: true
-ceph_device: /dev/nvme0n1
-# https://github.com/AerisCloud/ansible-disk
-# disk_enable_partioning: true
-# disk_additional_disks:
-#   # 4 tb ssd - /dev/disk/by-id/ata-SAMSUNG_MZ7L33T8HBLT-00A07_S6ERNT0WB00833
-#   - disk: /dev/sda
-#     fstype: xfs
-#     mount_options: defaults,noatime,nodiratime,discard,nofail
-#     mount: /mnt/parity1
-#   # 4 tb ssd - /dev/disk/by-id/ata-SAMSUNG_MZ7L33T8HBLT-00A07_S6ERNT0WB00736
-#   - disk: /dev/sdc
-#     fstype: xfs
-#     mount_options: defaults,noatime,nodiratime,discard,nofail
-#     mount: /mnt/data1
-#   # 2 tb ssd - /dev/disk/by-id/ata-PNY_CS900_2TB_SSD_PNY225122122301009C8
-#   - disk: /dev/sdf
-#     fstype: xfs
-#     mount_options: defaults,noatime,nodiratime,discard,nofail
-#     mount: /mnt/data2
-#   # 2 tb ssd - /dev/disk/by-id/ata-PNY_CS900_2TB_SSD_PNY225122122301009CB
-#   - disk: /dev/sde
-#     fstype: xfs
-#     mount_options: defaults,noatime,nodiratime,discard,nofail
-#     mount: /mnt/data3
-#   # 1 tb ssd - /dev/disk/by-id/ata-CT1000BX500SSD1_2308E6B0E700
-#   - disk: /dev/sdd
-#     fstype: xfs
-#     mount_options: defaults,noatime,nodiratime,discard,nofail
-#     mount: /mnt/data4
-# additional_fs_utils:
-#   - xfsprogs
-# https://github.com/tigattack/ansible-role-mergerfs
-mergerfs_install_tools: true
-mergerfs_mounts:
-  - path: /mnt/storage
-    branches:
-      - /mnt/data*
-    options: defaults,use_ino,allow_other,category.create=mfs,minfreespace=100G,fsname=mergerfs,noforget,inodecalc=path-hash
-# https://github.com/ironicbadger/ansible-role-snapraid
-snapraid_install: true
-snapraid_runner: false
-snapraid_parity_disks:
-  - path: /mnt/parity1
-    content: true
-snapraid_data_disks:
-  - path: /mnt/data1
-    content: true
-  - path: /mnt/data2
-    content: true
-  - path: /mnt/data3
-    content: true
-  - path: /mnt/data4
-    content: true
-snapraid_config_excludes:
-  - "*.unrecoverable"
-  - /lost+found/
-  - "*.!sync"
-  - /tmp/
-snapraid_content_files:
-  - /var/snapraid.content
-# https://github.com/geerlingguy/ansible-role-nfs
-nfs_exports:
-  - /mnt/storage/kubernetes 10.0.30.0/24(rw,sync,no_subtree_check,no_root_squash,fsid=1)
-# https://github.com/vladgh/ansible-collection-vladgh-samba
-samba_map_to_guest: "Bad User"
-samba_shares_root: "/mnt/storage"
-samba_guest_account: "nobody"
-samba_server_string: "Homelab Storage Server"
-samba_log_level: "1"
-samba_interfaces:
-  - vmbr0.20
-samba_shares:
-  - name: k8s
-    comment: 'Kubernetes storage for k8s cluster'
-    path: /mnt/storage/k8s
-    public: true
-    guest_ok: true
-    read_only: false
-    browseable: false
-    create_mode: '0664'
-    directory_mode: '0775'
-    owner: nobody
-    group: nogroup
-    hosts_allow:
-      - 10.0.30.
-      - 10.0.80.
-      - 127.0.0.1
-  - name: bhamm
-    comment: 'Personal storage for trusted devices'
-    path: /mnt/storage/bhamm
-    public: true
-    guest_ok: true
-    read_only: false
-    browseable: false
-    create_mode: '0664'
-    directory_mode: '0775'
-    owner: nobody
-    group: nogroup
-    hosts_allow:
-      - 10.0.80.
-      - 127.0.0.1
-samba_enable_netbios: false
-samba_wins_support: false
-samba_local_master: false
-samba_domain_master: false
-samba_preferred_master: false
-# Install pbs
+ceph_nvme_device: /dev/nvme0n1
+ceph_partitions:
+  - number: 1
+    name: osd1_db
+    start: 1GiB
+    end: 101GiB # 100GiB for 1TB OSD DB
+  - number: 2
+    name: osd1_wal
+    start: 101GiB
+    end: 111GiB # 10GiB for 1TB OSD WAL
+  - number: 3
+    name: osd2_db
+    start: 111GiB
+    end: 495GiB # 384GiB for 3.84TB OSD DB
+  - number: 4
+    name: osd2_wal
+    start: 495GiB
+    end: 533GiB # 38GiB for 3.84TB OSD WAL
+# Proxmox config
+pve_ceph_osds:
+  - device: /dev/sde # 1 TB
+    block.db: /dev/disk/by-id/nvme-SHGP31-1000GM-2_AS0CN42841190CT25-part1
+    block.wal: /dev/disk/by-id/nvme-SHGP31-1000GM-2_AS0CN42841190CT25-part2
+    crush.device.class: ssd
+  - device: /dev/sdd # 3.84 TB
+    block.db: /dev/disk/by-id/nvme-SHGP31-1000GM-2_AS0CN42841190CT25-part3
+    block.wal: /dev/disk/by-id/nvme-SHGP31-1000GM-2_AS0CN42841190CT25-part4
+    crush.device.class: ssd
 pve_pcie_passthrough_enabled: true
 pve_iommu_passthrough_mode: true
 pve_iommu_unsafe_interrupts: false
 pve_mediated_devices_enabled: false
 pve_pcie_ovmf_enabled: false
-# pve_pci_device_ids:
-#   - id: "1002:744c"
-#   - id: "1002:ab30"
-#   - id: "8086:56a6"
-#   - id: "8086:4f92"
+pve_pci_device_ids:
+  - id: "8086:56a6" # Intel arc
+  - id: "8086:4f92" # Intel arc audio
+  - id: "1b21:1064" # Sata device
+  - id: "2116:2116" # Sata device
 pve_vfio_blacklist_drivers:
-  - name: "radeon"
-  - name: "amdgpu"
   - name: "snd_hda_intel"
   - name: "i915"
   - name: "xe"
 pve_pcie_ignore_msrs: false
 pve_pcie_report_msrs: true
-# zfs config
-zfs_create_pools: true
-zfs_pools:
-  - name: main
-    action: create
-    options:
-      ashift: 12
-    compression: lz4
-    devices:
-      - ata-Samsung_SSD_870_EVO_1TB_S75BNL0Y201685W
-      - ata-Samsung_SSD_870_EVO_1TB_S75BNL0Y201833B
-    type: mirror
-    state: present

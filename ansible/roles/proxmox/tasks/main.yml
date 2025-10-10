@@ -2,24 +2,14 @@
 - name: Run pre tasks
   ansible.builtin.include_tasks: pre.yml
 - name: Prepare for ceph
-  ansible.builtin.include_tasks:
-    file: ceph.yml
-    apply:
-      become: true
+  ansible.builtin.include_tasks: ceph.yml
   when: proxmox_reset_ceph
 - name: Run lae proxmox ansible role
   ansible.builtin.include_role:
     name: lae.proxmox
-    apply:
-      become: true
 - name: Install pbs
-  ansible.builtin.include_tasks:
-    file: pbs.yml
-    apply:
-      become: true
+  ansible.builtin.include_tasks: pbs.yml
   when: proxmox_pbs
 - name: Run post tasks
-  ansible.builtin.include_tasks:
-    file: post.yml
-    apply:
-      become: true
+  ansible.builtin.include_tasks: post.yml
+  run_once: true

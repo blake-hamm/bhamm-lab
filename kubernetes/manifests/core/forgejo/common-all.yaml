@@ -56,6 +56,8 @@ spec:
                   - name: git-forgejo-http
                     port: 3000
                     scheme: http
+        dragonfly:
+          enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

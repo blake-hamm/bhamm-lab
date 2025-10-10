@@ -1,0 +1,30 @@
+network_10gb_nics: [eno3, eno4]
+# Ceph config for proxmox
+ceph_nvme_device: /dev/nvme0n1
+ceph_partitions:
+  - number: 1
+    name: osd1_db
+    start: 1GiB
+    end: 101GiB # 100GiB for 1TB OSD DB
+  - number: 2
+    name: osd1_wal
+    start: 101GiB
+    end: 111GiB # 10GiB for 1TB OSD WAL
+  - number: 3
+    name: osd2_db
+    start: 111GiB
+    end: 495GiB # 384GiB for 3.84TB OSD DB
+  - number: 4
+    name: osd2_wal
+    start: 495GiB
+    end: 533GiB # 38GiB for 3.84TB OSD WAL
+# Proxmox config
+pve_ceph_osds:
+  - device: /dev/sdc # 1 TB
+    block.db: /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part1
+    block.wal: /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part2
+    crush.device.class: ssd
+  - device: /dev/sdb # 3.84 TB
+    block.db: /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part3
+    block.wal: /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part4
+    crush.device.class: ssd

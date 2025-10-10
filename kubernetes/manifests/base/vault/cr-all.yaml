@@ -1,3 +1,17 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vault-file
+  namespace: vault
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
 apiVersion: "vault.banzaicloud.com/v1alpha1"
 kind: "Vault"
 metadata:
@@ -9,14 +23,7 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "2"
 spec:
-  size: 3
-  affinity:
-    podAntiAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchLabels:
-              app.kubernetes.io/name: vault
-          topologyKey: topology.kubernetes.io/zone
+  size: 1
   image: hashicorp/vault:1.19.3
   annotations:
     common/annotation: "true"
@@ -24,25 +31,14 @@ spec:
     type/instance: "vault"
   vaultConfigurerAnnotations:
     type/instance: "vaultconfigurer"
-  vaultLabels:
-    bhamm-lab.com/log-format: "json"
-  vaultConfigurerLabels:
-    bhamm-lab.com/log-format: "string"
   serviceAccount: vault
   serviceType: ClusterIP
-  volumeClaimTemplates:
-    - metadata:
-        name: vault-raft
-      spec:
-        storageClassName: "local-path"
-        accessModes:
-          - ReadWriteOnce
-        volumeMode: Filesystem
-        resources:
-          requests:
-            storage: 1Gi
+  volumes:
+    - name: vault-file
+      persistentVolumeClaim:
+        claimName: vault-file
   volumeMounts:
-    - name: vault-raft
+    - name: vault-file
       mountPath: /vault/file
   caNamespaces: ["*"]
   unsealConfig:
@@ -55,8 +51,8 @@ spec:
       secretNamespace: vault
   config:
     storage:
-      raft:
-        path: "/vault/file"
+      file:
+        path: /vault/file
     listener:
       tcp:
         address: "0.0.0.0:8200"
@@ -67,7 +63,7 @@ spec:
     telemetry:
       prometheus_retention_time: "24h"
       disable_hostname: true
-    api_addr: https://vault.vault:8200
+    api_addr: https://${.Env.POD_NAME}:8200
     cluster_addr: "https://${.Env.POD_NAME}:8201"
     ui: true
   envsConfig:
@@ -78,7 +74,6 @@ spec:
           key: OIDC_VAULT_CLIENT_SECRET
   statsdDisabled: false
   serviceMonitorEnabled: true
-  serviceRegistrationEnabled: true
   externalConfig:
     purgeUnmanagedConfig:
       enabled: true
@@ -120,35 +115,24 @@ spec:
             token_num_uses: 10
             token_ttl: 20m
             token_max_ttl: 30m
-            # - type: oidc
-            #   config:
-            #     oidc_discovery_url: https://auth.bhamm-lab.com
-            #     oidc_client_id: vault
-            #     oidc_client_secret: "${env `OIDC_VAULT_CLIENT_SECRET`}"
-            #     default_role: default
-            #     allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback"]
-            #   roles:
-            #     - name: default
-            #       role_type: oidc
-            #       allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback", "http://localhost:8250/oidc/callback"]
-            #       bound_audiences: vault
-            #       user_claim: sub
-            #       policies: admin
-            #       ttl: 1h
+      - type: oidc
+        config:
+          oidc_discovery_url: https://auth.bhamm-lab.com
+          oidc_client_id: vault
+          oidc_client_secret: "${env `OIDC_VAULT_CLIENT_SECRET`}"
+          default_role: default
+          allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback"]
+        roles:
+          - name: default
+            role_type: oidc
+            allowed_redirect_uris: ["https://vault.bhamm-lab.com/oidc/callback", "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback", "http://localhost:8250/oidc/callback"]
+            bound_audiences: vault
+            user_claim: sub
+            policies: admin
+            ttl: 1h
     secrets:
       - path: secret
         type: kv
         description: General secrets.
         options:
           version: 2
----
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: vault
-  namespace: vault
-  labels:
-    release: monitor
-  annotations:
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "2"

@@ -22,7 +22,7 @@ iface vmbr0 inet manual
 # Metal interface on VLAN 20 via the bridge:
 auto vmbr0.20
 iface vmbr0.20 inet static
-    address 10.0.20.13/24
+    address 10.0.20.12/24
     netmask 255.255.255.0
     gateway 10.0.20.2
     dns-nameservers 10.0.20.1
@@ -31,7 +31,7 @@ iface vmbr0.20 inet static
 # Kubernetes interface on VLAN 30 via the bridge:
 auto vmbr0.30
 iface vmbr0.30 inet static
-    address 10.0.30.13/24
+    address 10.0.30.12/24
     netmask 255.255.255.0
     dns-nameservers 10.0.30.1
     mtu 9000
@@ -43,7 +43,7 @@ iface eno8np3 inet manual
 
 auto eno8np3.50
 iface eno8np3.50 inet static
-    address 10.0.50.13/24
+    address 10.0.50.12/24
     netmask 255.255.255.0
     vlan-raw-device eno8np3
     mtu 9000

@@ -13,6 +13,7 @@
       virt-manager
       obs-studio
       shotcut
+      brave
       # signal-desktop
       # gnome-network-displays
       # steam

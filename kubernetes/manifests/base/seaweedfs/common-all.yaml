@@ -24,14 +24,22 @@ spec:
               remoteRef:
                 key: /core/k8up
                 property: repo-password
-            - secretKey: AWS_ACCESS_KEY_ID
+            - secretKey: GCP_AWS_ACCESS_KEY_ID
               remoteRef:
                 key: /core/k8up
                 property: AWS_ACCESS_KEY_ID
-            - secretKey: AWS_SECRET_ACCESS_KEY
+            - secretKey: GCP_AWS_SECRET_ACCESS_KEY
               remoteRef:
                 key: /core/k8up
                 property: AWS_SECRET_ACCESS_KEY
+            - secretKey: AWS_ACCESS_KEY_ID
+              remoteRef:
+                key: /core/k8up
+                property: S3_ACCESS_KEY_ID
+            - secretKey: AWS_SECRET_ACCESS_KEY
+              remoteRef:
+                key: /core/k8up
+                property: S3_SECRET_ACCESS_KEY
         ingressRoutes:
           - name: master
             ingressClass: traefik-external

@@ -1,0 +1,22 @@
+- name: Install parted package
+  ansible.builtin.package:
+    name: parted
+    state: present
+    update_cache: true
+- name: Create Ceph DB/WAL partitions
+  community.general.parted:
+    device: "{{ ceph_nvme_device }}"
+    number: "{{ item.number }}"
+    name: "{{ item.name }}"
+    part_start: "{{ item.start }}"
+    part_end: "{{ item.end }}"
+    label: gpt
+    align: optimal
+    unit: GiB
+    state: "{{ item.state | default('present') }}"
+  loop: "{{ ceph_partitions }}"
+- name: Load FUSE kernel module
+  community.general.modprobe:
+    name: fuse
+    persistent: "present"
+    state: present

@@ -12,15 +12,15 @@ spec:
   project: default
   source:
     chart: metrics-server
-    repoURL: https://charts.bitnami.com/bitnami
-    targetRevision: 6.2.12
+    repoURL: https://kubernetes-sigs.github.io/metrics-server
+    targetRevision: 3.13.0
     helm:
       valuesObject:
-        networkPolicy:
-          enabled: false
-        apiService:
-          create: true
-        extraArgs:
+        metrics:
+          enabled: true
+        serviceMonitor:
+          enabled: true
+        args:
           - --kubelet-insecure-tls
           - --kubelet-preferred-address-types=InternalIP
   syncPolicy:

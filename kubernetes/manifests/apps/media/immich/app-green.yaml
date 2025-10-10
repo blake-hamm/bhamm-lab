@@ -115,7 +115,7 @@ spec:
               mountPath: /templated-config
       containers:
         - name: immich-server
-          image: ghcr.io/immich-app/immich-server:v1.142.1
+          image: ghcr.io/immich-app/immich-server:v2.0.1
           ports:
             - name: http
               containerPort: 2283
@@ -269,7 +269,7 @@ spec:
           effect: "NoSchedule"
       containers:
         - name: immich-machine-learning
-          image: ghcr.io/immich-app/immich-machine-learning:v1.142.1-openvino
+          image: ghcr.io/immich-app/immich-machine-learning:v2.0.1-openvino
           ports:
             - name: http
               containerPort: 3003

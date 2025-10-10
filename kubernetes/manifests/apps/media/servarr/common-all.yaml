@@ -52,11 +52,11 @@ spec:
           - name: nzbget-config
           - name: downloads
             storageSize: 1Ti
-            storageClassName: smb-csi
+            storageClassName: csi-cephfs-sc
             accessMode: ReadWriteMany
           - name: media
             storageSize: 1Ti
-            storageClassName: smb-csi
+            storageClassName: csi-cephfs-sc
             accessMode: ReadWriteMany
         k8up:
           backup:

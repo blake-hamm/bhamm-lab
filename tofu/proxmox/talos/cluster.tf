@@ -55,7 +55,7 @@ data "talos_machine_configuration" "this" {
       extra_manifests = jsonencode(var.extra_manifests)
       # api_server = var.cluster.api_server
       inline_manifests = jsonencode(terraform_data.cilium_bootstrap_inline_manifests.output)
-    }) : file("${path.module}/config/user-volume.yaml")
+    }) : ""
   ]
 }
 

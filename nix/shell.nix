@@ -31,6 +31,7 @@ pkgs.mkShell {
     ceph-client
     minio-client
     awscli
+    smartmontools
   ];
 
   packages = [
