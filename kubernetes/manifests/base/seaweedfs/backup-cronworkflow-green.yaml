@@ -44,7 +44,7 @@ spec:
                   - name: location
                     value: offsite
                   - name: k8up-endpoint
-                    value: https://storage.googleapis.com
+                    value: http://10.0.20.199:9000 # Minio through truenas
                   - name: k8up-bucket
                     value: bhamm-lab-k8up
                   - name: k8up-secret
