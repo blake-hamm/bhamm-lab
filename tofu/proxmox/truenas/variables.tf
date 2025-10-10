@@ -47,7 +47,7 @@ variable "cpu_cores" {
 
 variable "memory" {
   description = "The amount of memory for the VM in MB."
-  default     = 18432
+  default     = 10240
   type        = number
 }
 
