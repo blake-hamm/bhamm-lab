@@ -187,10 +187,7 @@ spec:
                 --s3-chunk-size=32M \
                 --s3-upload-concurrency=24 \
                 --s3-disable-checksum \
-                --multi-thread-cutoff=64M \
-                --multi-thread-streams=8 \
-                --multi-thread-chunk-size=32M \
                 --disable-http2 \
-                --bwlimit=90M \
+                --server-side-across-configs \
                 --stats=30s
               rclone check onsite:seaweedfs offsite:seaweedfs --one-way --checksum
