@@ -24,14 +24,18 @@ spec:
               remoteRef:
                 key: /core/k8up
                 property: repo-password
-            - secretKey: GCP_AWS_ACCESS_KEY_ID
+            - secretKey: R2_ACCESS_KEY_ID
               remoteRef:
-                key: /core/k8up
-                property: AWS_ACCESS_KEY_ID
-            - secretKey: GCP_AWS_SECRET_ACCESS_KEY
+                key: /external/cloudflare
+                property: r2-access-key-id
+            - secretKey: R2_SECRET_ACCESS_KEY
               remoteRef:
-                key: /core/k8up
-                property: AWS_SECRET_ACCESS_KEY
+                key: /external/cloudflare
+                property: r2-secret-access-key
+            - secretKey: R2_ENDPOINT
+              remoteRef:
+                key: /external/cloudflare
+                property: r2-endpoint
             - secretKey: AWS_ACCESS_KEY_ID
               remoteRef:
                 key: /core/k8up
@@ -40,6 +44,10 @@ spec:
               remoteRef:
                 key: /core/k8up
                 property: S3_SECRET_ACCESS_KEY
+            - secretKey: AWS_SECRET_ACCESS_KEY
+              remoteRef:
+                key: /core/k8up
+                property: S3_ENDPOINT
         ingressRoutes:
           - name: master
             ingressClass: traefik-external
