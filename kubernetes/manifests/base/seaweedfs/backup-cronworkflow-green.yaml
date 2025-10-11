@@ -179,4 +179,4 @@ spec:
                 secret_access_key $R2_SECRET_ACCESS_KEY \
                 endpoint $R2_ENDPOINT
               # Sync from onsite to r2
-              rclone sync onsite:seaweedfs offsite:seaweedfs --progress
+              rclone sync onsite:seaweedfs offsite:seaweedfs --progress --checksum --fast-list
