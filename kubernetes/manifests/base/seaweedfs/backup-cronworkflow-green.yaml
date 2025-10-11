@@ -46,7 +46,7 @@ spec:
                   - name: k8up-endpoint
                     value: http://10.0.20.199:9000 # Minio through truenas
                   - name: k8up-bucket
-                    value: bhamm-lab-k8up
+                    value: seaweedfs
                   - name: k8up-secret
                     value: seaweedfs-external-secret
       - name: exit-handler
