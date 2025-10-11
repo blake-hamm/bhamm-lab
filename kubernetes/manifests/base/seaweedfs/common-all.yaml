@@ -44,7 +44,7 @@ spec:
               remoteRef:
                 key: /core/k8up
                 property: S3_SECRET_ACCESS_KEY
-            - secretKey: AWS_SECRET_ACCESS_KEY
+            - secretKey: AWS_ENDPOINT
               remoteRef:
                 key: /core/k8up
                 property: S3_ENDPOINT
