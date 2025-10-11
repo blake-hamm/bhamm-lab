@@ -193,3 +193,4 @@ spec:
                 --disable-http2 \
                 --bwlimit=90M \
                 --stats=30s
+              rclone check onsite:seaweedfs offsite:seaweedfs --one-way --checksum
