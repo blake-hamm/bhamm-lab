@@ -188,6 +188,5 @@ spec:
                 --s3-upload-concurrency=24 \
                 --s3-disable-checksum \
                 --disable-http2 \
-                --server-side-across-configs \
                 --stats=30s
               rclone check onsite:seaweedfs offsite:seaweedfs --one-way --checksum
