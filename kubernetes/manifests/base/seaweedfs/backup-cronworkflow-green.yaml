@@ -49,6 +49,8 @@ spec:
                     value: seaweedfs
                   - name: k8up-secret
                     value: seaweedfs-external-secret
+          - - name: rclone-sync
+              template: rclone-sync
       - name: exit-handler
         steps:
           - - name: enable-base-argocd-autosync
@@ -126,3 +128,55 @@ spec:
             - "{{inputs.parameters.sts-name}}"
             - -n
             - seaweedfs
+      - name: rclone-sync
+        container:
+          image: rclone/rclone
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: seaweedfs-external-secret
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: seaweedfs-external-secret
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: seaweedfs-external-secret
+                  key: AWS_ENDPOINT
+            - name: R2_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: seaweedfs-external-secret
+                  key: R2_ACCESS_KEY_ID
+            - name: R2_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: seaweedfs-external-secret
+                  key: R2_SECRET_ACCESS_KEY
+            - name: R2_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: seaweedfs-external-secret
+                  key: R2_ENDPOINT
+          command: [/bin/sh, -c]
+          args:
+            - |
+              set -ex
+              # Configure rclone for onsite Minio
+              rclone config create onsite s3 \
+                provider Minio \
+                access_key_id $AWS_ACCESS_KEY_ID \
+                secret_access_key $AWS_SECRET_ACCESS_KEY \
+                endpoint $AWS_ENDPOINT
+              # Configure rclone for Cloudflare R2
+              rclone config create offsite s3 \
+                provider Cloudflare \
+                access_key_id $R2_ACCESS_KEY_ID \
+                secret_access_key $R2_SECRET_ACCESS_KEY \
+                endpoint $R2_ENDPOINT
+              # Sync from onsite to r2
+              rclone sync onsite:seaweedfs offsite:seaweedfs --progress
