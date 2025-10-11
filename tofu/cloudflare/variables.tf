@@ -12,7 +12,7 @@ variable "cloudflare_account_id" {
 variable "truenas_bucket_name" {
   description = "The name of the R2 bucket for TrueNAS."
   type        = string
-  default     = "truenas-backups"
+  default     = "seaweedfs"
 }
 
 variable "truenas_bucket_location" {
