@@ -32,6 +32,7 @@ pkgs.mkShell {
     minio-client
     awscli
     smartmontools
+    rclone
   ];
 
   packages = [
