@@ -270,13 +270,13 @@ data:
       - title: TrueNAS
         description: Visit TrueNAS Site
         icon: mdi-nas
-        url: https://10.0.20.199/
-        statusCheck: true
+        url: https://10.0.20.199/ui/signin
+        statusCheckAllowInsecure: true
       - title: PBS
         description: Proxmox Backup Server Volume
         icon: hl-proxmox
         url: https://10.0.30.199:8007/
-        statusCheck: true
+        statusCheckAllowInsecure: true
       - title: k8up
         description: View k8up backup dashboard
         icon: mdi-backup-restore
