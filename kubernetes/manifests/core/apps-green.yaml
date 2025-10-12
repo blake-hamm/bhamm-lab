@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: release/expand-ceph
+    targetRevision: main
     path: kubernetes/manifests/apps
     directory:
       recurse: true
