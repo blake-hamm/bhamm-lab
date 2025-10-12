@@ -75,7 +75,7 @@ data:
         icon: hl-proxmox
         url: https://10.0.20.12:8006/
         statusCheckAllowInsecure: true
-      - title: Indy
+      - title: Stale
         description: Visit super proxmox server
         icon: hl-proxmox
         url: https://10.0.20.13:8006/
@@ -90,7 +90,7 @@ data:
         icon: hl-supermicro
         url: https://10.0.10.22/
         statusCheck: false
-      - title: Indy ipmi
+      - title: Stale ipmi
         description: Visit super ipmi interface
         icon: hl-supermicro
         url: https://10.0.10.23/
