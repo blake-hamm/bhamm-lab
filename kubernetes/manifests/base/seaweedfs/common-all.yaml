@@ -48,6 +48,10 @@ spec:
               remoteRef:
                 key: /core/k8up
                 property: S3_ENDPOINT
+            - secretKey: seaweedfs_s3_config
+              remoteRef:
+                key: /core/seaweedfs
+                property: seaweedfs_s3_config
         ingressRoutes:
           - name: master
             ingressClass: traefik-external
