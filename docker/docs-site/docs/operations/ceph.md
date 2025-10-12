@@ -11,7 +11,9 @@
 ceph auth get-or-create client.k8s-rbd
 ceph auth caps client.k8s-rbd \
   mon 'allow r' \
-  osd 'allow class-read object_prefix rbd_children, allow rwx pool=osd'
+  osd 'allow class-read object_prefix rbd_children, allow rwx pool=osd' \
+  mgr 'allow *'
+
 
 # cephfs secret
 ceph auth get-or-create client.k8s-cephfs
