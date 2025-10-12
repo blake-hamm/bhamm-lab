@@ -269,9 +269,9 @@ data:
         statusCheck: false
       - title: TrueNAS
         description: Visit TrueNAS Site
-        icon: mdi-nas
+        icon: hl-truenas-scale
         url: https://10.0.20.199/ui/signin
-        statusCheckAllowInsecure: true
+        statusCheck: false
       - title: PBS
         description: Proxmox Backup Server Volume
         icon: hl-proxmox
