@@ -103,6 +103,7 @@ spec:
           s3:
             enabled: true
             enableAuth: true
+            existingConfigSecret: seaweedfs-external-secret
             port: 8333
             httpsPort: 0
             allowEmptyFolder: true
