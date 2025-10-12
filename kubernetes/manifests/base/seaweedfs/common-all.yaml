@@ -52,6 +52,14 @@ spec:
               remoteRef:
                 key: /core/seaweedfs
                 property: seaweedfs_s3_config
+            - secretKey: admin_access_key_id
+              remoteRef:
+                key: /core/seaweedfs
+                property: admin_access_key_id
+            - secretKey: admin_secret_access_key
+              remoteRef:
+                key: /core/seaweedfs
+                property: admin_secret_access_key
         ingressRoutes:
           - name: master
             ingressClass: traefik-external
