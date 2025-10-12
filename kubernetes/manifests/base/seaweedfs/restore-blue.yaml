@@ -34,11 +34,11 @@ spec:
                 - name: target-namespace
                   value: seaweedfs
                 - name: location
-                  value: offsite
+                  value: onsite
                 - name: k8up-endpoint
-                  value: https://storage.googleapis.com
+                  value: http://10.0.20.199:9000 # Minio through truenas
                 - name: k8up-bucket
-                  value: bhamm-lab-k8up
+                  value: seaweedfs
                 - name: k8up-secret
                   value: seaweedfs-external-secret
         - - name: enable-base-argocd-autosync

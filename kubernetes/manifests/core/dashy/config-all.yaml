@@ -70,12 +70,12 @@ data:
         icon: hl-proxmox
         url: https://10.0.20.11:8006/
         statusCheckAllowInsecure: true
-      - title: Antsle
+      - title: Indy
         description: Visit antsle proxmox server
         icon: hl-proxmox
         url: https://10.0.20.12:8006/
         statusCheckAllowInsecure: true
-      - title: Super
+      - title: Stale
         description: Visit super proxmox server
         icon: hl-proxmox
         url: https://10.0.20.13:8006/
@@ -85,12 +85,12 @@ data:
         icon: hl-supermicro
         url: https://10.0.10.21/
         statusCheck: false
-      - title: Antsle ipmi
+      - title: Indy ipmi
         description: Visit antsle ipmi interface
         icon: hl-supermicro
         url: https://10.0.10.22/
         statusCheck: false
-      - title: Super ipmi
+      - title: Stale ipmi
         description: Visit super ipmi interface
         icon: hl-supermicro
         url: https://10.0.10.23/
@@ -98,7 +98,7 @@ data:
       - title: Exporter
         description: Visit node exporter grafana dashboard
         icon: hl-grafana
-        url: https://grafana.bhamm-lab.com/d/rYdddlPWk/node-exporter-full?orgId=1&from=now-24h&to=now&timezone=browser&var-datasource=default&var-job=proxmox_nodes&var-node=10.0.20.11:9100&var-diskdevices=%5Ba-z%5D%2B%7Cnvme%5B0-9%5D%2Bn%5B0-9%5D%2B%7Cmmcblk%5B0-9%5D%2B&refresh=1m
+        url: https://grafana.bhamm-lab.com/d/rYdddlPWk/node-exporter-full?orgId=1&from=now-24h&to=now&timezone=browser&var-datasource=default&var-job=nodes&var-node=10.0.20.11:9100&var-diskdevices=%5Ba-z%5D%2B%7Cnvme%5B0-9%5D%2Bn%5B0-9%5D%2B%7Cmmcblk%5B0-9%5D%2B&refresh=1m
         statusCheck: false
 
     - name: Media
@@ -252,6 +252,11 @@ data:
         icon: hl-grafana
         url: https://grafana.bhamm-lab.com/d/a24009d7-cbda-4443-a132-1cc1c4677304/seaweedfs?orgId=1&from=now-1d&to=now&timezone=browser&var-DS_PROMETHEUS=prometheus&var-NAMESPACE=seaweedfs
         statusCheck: false
+      - title: Minio
+        description: Minio (on TrueNAS)
+        icon: hl-minio
+        url: http://10.0.20.199:9002/
+        statusCheck: true
       - title: Ceph
         description: Visit Ceph grafana dashboard
         icon: hl-ceph
@@ -262,11 +267,16 @@ data:
         icon: https://raw.githubusercontent.com/kubernetes/community/b51e2a3bce5d115b138df9d49c1ba8017cffdd45/icons/svg/resources/labeled/pvc.svg
         url: https://grafana.bhamm-lab.com/d/919b92a8e8041bd567af9edab12c840c/kubernetes-persistent-volumes?orgId=1&from=now-2d&to=now&timezone=America%2FDenver&var-datasource=default&var-cluster=&var-namespace=git&var-volume=gitea-shared-storage&refresh=10s
         statusCheck: false
-      - title: NFS
-        description: View nfs grafana dashboard
+      - title: TrueNAS
+        description: Visit TrueNAS Site
         icon: mdi-nas
-        url: https://grafana.bhamm-lab.com/d/vfsuyqfSk/nfs?orgId=1&from=now-24h&to=now&timezone=browser&var-job=proxmox_nodes&var-node=10.0.20.11&var-port=9100
-        statusCheck: false
+        url: https://10.0.20.199/
+        statusCheck: true
+      - title: PBS
+        description: Proxmox Backup Server Volume
+        icon: hl-proxmox
+        url: https://10.0.30.199:8007/
+        statusCheck: true
       - title: k8up
         description: View k8up backup dashboard
         icon: mdi-backup-restore
