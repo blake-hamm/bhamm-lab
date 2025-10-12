@@ -47,8 +47,8 @@ variable "proxmox_nodes" {
     multiplier = number
   }))
   default = [
-    { name = "indy", multiplier = 1.6 },
-    { name = "method", multiplier = 1.6 },
+    { name = "indy", multiplier = 1.5 },
+    { name = "method", multiplier = 1.4 },
     { name = "stale", multiplier = 1 },
   ]
 }
