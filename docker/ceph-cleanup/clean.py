@@ -31,7 +31,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Configuration
-CEPH_POOL = "kubernetes"
+CEPH_POOL = "osd"
 CEPH_CONF = "./result/ceph.conf"
 CEPH_KEYRING="./result/ceph.client.k8s-cleaner.keyring"
 CEPH_USER="k8s-cleaner"
