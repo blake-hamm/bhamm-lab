@@ -87,7 +87,7 @@ spec:
           backup:
             enabled: true
           restore:
-            enabled: false
+            enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
