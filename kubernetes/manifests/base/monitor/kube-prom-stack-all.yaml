@@ -142,7 +142,7 @@ spec:
                 token: ''
                 datasource: Prometheus
               smartctl-exporter:
-                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads//main/kubernetes/manifests/base/monitor/dashboards/smartctl.json
+                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/main/kubernetes/manifests/base/monitor/dashboards/smartctl.json
                 token: ''
               systemd-exporter:
                 url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/main/kubernetes/manifests/base/monitor/dashboards/systemd.json
