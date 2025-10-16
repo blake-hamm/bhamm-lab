@@ -19,6 +19,8 @@ spec:
       labels:
         app: qbittorrent
     spec:
+      securityContext:
+        fsGroup: 1000
       containers:
         - name: gluetun
           image: ghcr.io/qdm12/gluetun:v3.39.0
@@ -47,6 +49,7 @@ spec:
                   name: servarr-external-secret
                   key: WIREGUARD_PRIVATE_KEY
           securityContext:
+            runAsUser: 0
             capabilities:
               add:
                 - NET_ADMIN
@@ -70,6 +73,8 @@ spec:
               value: "America/Denver"
             - name: WEBUI_PORT
               value: "8080"
+          securityContext:
+            runAsUser: 1000
         - name: port-sync
           image: ghcr.io/bjw-s-labs/gluetun-qb-port-sync:latest
           env:
@@ -90,6 +95,8 @@ spec:
           volumeMounts:
             - name: port-forward-config
               mountPath: /config
+          securityContext:
+            runAsUser: 1000
       volumes:
         - name: gluetun-config
           persistentVolumeClaim:

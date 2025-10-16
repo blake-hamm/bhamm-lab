@@ -129,6 +129,10 @@ data:
         description: Visit prowlarr
         icon: hl-prowlarr
         url: https://prowlarr.bhamm-lab.com/
+      - title: nzbget
+        description: Visit nzbget
+        icon: hl-nzbget
+        url: https://nzbget.bhamm-lab.com/
       - title: Qbittorrent
         description: Visit qbittorrent
         icon: hl-qbittorrent

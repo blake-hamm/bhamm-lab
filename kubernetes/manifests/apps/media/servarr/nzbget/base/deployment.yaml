@@ -19,6 +19,8 @@ spec:
       labels:
         app: nzbget
     spec:
+      securityContext:
+        fsGroup: 1000
       containers:
         - name: gluetun
           image: ghcr.io/qdm12/gluetun:v3.39.0
@@ -45,6 +47,7 @@ spec:
                   name: servarr-external-secret
                   key: WIREGUARD_PRIVATE_KEY
           securityContext:
+            runAsUser: 0
             capabilities:
               add:
                 - NET_ADMIN
