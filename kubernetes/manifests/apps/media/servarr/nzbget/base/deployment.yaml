@@ -20,7 +20,6 @@ spec:
         app: nzbget
     spec:
       securityContext:
-        runAsUser: 1000
         fsGroup: 1000
       containers:
         - name: gluetun
@@ -48,6 +47,7 @@ spec:
                   name: servarr-external-secret
                   key: WIREGUARD_PRIVATE_KEY
           securityContext:
+            runAsUser: 0
             capabilities:
               add:
                 - NET_ADMIN
@@ -82,6 +82,8 @@ spec:
               mountPath: /config
             - name: downloads
               mountPath: /downloads
+          securityContext:
+            runAsUser: 1000
       volumes:
         - name: gluetun-config
           persistentVolumeClaim:
