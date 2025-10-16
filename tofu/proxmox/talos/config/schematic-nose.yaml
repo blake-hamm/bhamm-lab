@@ -1,0 +1,9 @@
+customization:
+  extraKernelArgs:
+   - vlan=enp191s0.30:enp191s0
+   - 'ip=10.0.30.78::10.0.30.3:255.255.255.0:test:enp191s0.30::10.0.30.1:::'
+  systemExtensions:
+    officialExtensions:
+      - siderolabs/fuse3
+      - siderolabs/amd-ucode
+      - siderolabs/amdgpu
