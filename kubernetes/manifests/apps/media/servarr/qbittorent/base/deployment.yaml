@@ -19,6 +19,9 @@ spec:
       labels:
         app: qbittorrent
     spec:
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
       containers:
         - name: gluetun
           image: ghcr.io/qdm12/gluetun:v3.39.0
