@@ -82,8 +82,6 @@ spec:
               mountPath: /config
             - name: downloads
               mountPath: /downloads
-          securityContext:
-            runAsUser: 1000
       volumes:
         - name: gluetun-config
           persistentVolumeClaim:
