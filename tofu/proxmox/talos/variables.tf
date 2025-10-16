@@ -180,3 +180,15 @@ variable "intel_gpu_worker_id" {
   type        = list(string)
   default     = []
 }
+
+variable "bare_metal_workers" {
+  description = "A map of bare metal workers to add to the cluster."
+  type = map(object({
+    ip = string
+    taint = object({
+      key    = string
+      effect = string
+    })
+  }))
+  default = {}
+}

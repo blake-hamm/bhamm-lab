@@ -48,7 +48,9 @@ data "talos_machine_configuration" "this" {
       mtu          = var.mtu
       gateway      = var.network_gateway
       vip          = each.value.vip
+      interface    = each.value.interface
       taint        = try(each.value.taint, "")
+      vlan_id      = var.vlan_id
     }), each.value.machine_type == "controlplane" ?
     templatefile("${path.module}/config/master.yaml.tftpl", {
       # kubelet = var.cluster.kubelet
@@ -59,26 +61,50 @@ data "talos_machine_configuration" "this" {
   ]
 }
 
-resource "talos_machine_configuration_apply" "this" {
-  depends_on                  = [proxmox_virtual_environment_vm.this]
-  for_each                    = local.all_nodes
+resource "talos_machine_configuration_apply" "vms" {
+  depends_on = [proxmox_virtual_environment_vm.this]
+  for_each   = { for k, v in local.all_nodes : k => v if v.is_vm }
+
   node                        = each.value.ip
   client_configuration        = talos_machine_secrets.this.client_configuration
   machine_configuration_input = data.talos_machine_configuration.this[each.key].machine_configuration
+
   lifecycle {
     replace_triggered_by = [proxmox_virtual_environment_vm.this[each.key]]
   }
 }
 
+resource "talos_machine_configuration_apply" "bare_metal" {
+  depends_on = [talos_machine_configuration_apply.vms]
+  for_each   = { for k, v in local.all_nodes : k => v if !v.is_vm }
+
+  node                        = each.value.ip
+  client_configuration        = talos_machine_secrets.this.client_configuration
+  machine_configuration_input = data.talos_machine_configuration.this[each.key].machine_configuration
+  config_patches = [
+    yamlencode({
+      machine = {
+        install = {
+          disk = "/dev/nvme0n1"
+        }
+      }
+    })
+  ]
+}
+
 resource "talos_machine_bootstrap" "this" {
-  depends_on           = [talos_machine_configuration_apply.this]
+  depends_on = [
+    talos_machine_configuration_apply.vms,
+    talos_machine_configuration_apply.bare_metal
+  ]
   node                 = [for node in local.master_nodes : node.ip][0]
   client_configuration = talos_machine_secrets.this.client_configuration
 }
 
 data "talos_cluster_health" "this" {
   depends_on = [
-    talos_machine_configuration_apply.this,
+    talos_machine_configuration_apply.vms,
+    talos_machine_configuration_apply.bare_metal,
     talos_machine_bootstrap.this
   ]
   skip_kubernetes_checks = false
@@ -93,8 +119,7 @@ data "talos_cluster_health" "this" {
 
 resource "talos_cluster_kubeconfig" "this" {
   depends_on = [
-    talos_machine_bootstrap.this,
-    data.talos_cluster_health.this
+    talos_machine_bootstrap.this
   ]
   node                 = var.vip
   client_configuration = talos_machine_secrets.this.client_configuration

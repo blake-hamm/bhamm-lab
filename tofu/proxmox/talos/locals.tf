@@ -19,6 +19,8 @@ locals {
       taint        = null
       vm_tag       = null
       hostpci      = {}
+      interface    = "eth0"
+      is_vm        = true
     }
   ]
 
@@ -35,7 +37,28 @@ locals {
     taint        = { key = "intel.com/gpu", effect = "NoSchedule" }
     vm_tag       = "intel-gpu"
     hostpci      = var.intel_gpu_worker_id
+    interface    = "eth0"
+    is_vm        = true
   }]
+
+  bare_metal_worker_nodes = [
+    for name, config in var.bare_metal_workers : {
+      hostname     = "${var.environment}-talos-worker-${name}"
+      ip           = config.ip
+      machine_type = "worker"
+      host_node    = "bare-metal"
+      taint        = { key = config.taint.key, effect = config.taint.effect }
+      is_vm        = false
+      vm_id        = null
+      cpu          = null
+      disk_size    = null
+      memory       = null
+      vip          = null
+      vm_tag       = null
+      hostpci      = null
+      interface    = "enp191s0"
+    }
+  ]
 
   worker_nodes = concat(
     [
@@ -52,9 +75,12 @@ locals {
         taint        = null
         vm_tag       = null
         hostpci      = {}
+        interface    = "eth0"
+        is_vm        = true
       }
     ],
     length(var.intel_gpu_worker_id) > 0 ? local.intel_gpu_worker_node : [],
+    length(var.bare_metal_workers) > 0 ? local.bare_metal_worker_nodes : [],
   )
 
   all_nodes = {

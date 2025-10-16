@@ -45,6 +45,6 @@ talosctl dashboard
 ```bash
 # To get id:
 curl -X POST --data-binary @tofu/proxmox/talos/config/schematic-nose.yaml https://factory.talos.dev/schematics
-# Which can populate:
+# Which can populate an iso that can be uploaded to piKVM:
 # https://factory.talos.dev/image/<id>/v1.11.2/metal-amd64.iso
 ```

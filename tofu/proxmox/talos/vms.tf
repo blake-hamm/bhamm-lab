@@ -1,5 +1,5 @@
 resource "proxmox_virtual_environment_vm" "this" {
-  for_each = local.all_nodes
+  for_each = { for k, v in local.all_nodes : k => v if v.is_vm }
 
   name      = each.value.hostname
   node_name = each.value.host_node

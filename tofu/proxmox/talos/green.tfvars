@@ -10,4 +10,3 @@ intel_gpu_worker_id = [
   "0000:83:00.0",
   "0000:84:00.0"
 ]
-# enable_gpu_worker  = false
