@@ -63,6 +63,8 @@ spec:
             enabled: true
           restore:
             enabled: true
+            config:
+              fsGroup: 1000
         ingressRoutes:
           - enabled: true
             name: nzbget
