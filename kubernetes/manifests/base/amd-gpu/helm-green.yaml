@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://rocm.github.io/k8s-device-plugin
-    chart: amd-gpu-helm
+    chart: amd-gpu
     targetRevision: 0.20.0
     helm:
       valuesObject:
