@@ -1,5 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: amd
 resources:
   - https://raw.githubusercontent.com/ROCm/k8s-device-plugin/v1.31.0.7/k8s-ds-amdgpu-dp-health.yaml
   - https://raw.githubusercontent.com/ROCm/k8s-device-plugin/v1.31.0.7/k8s-ds-amdgpu-labeller.yaml
