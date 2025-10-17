@@ -11,7 +11,7 @@ spec:
     server: https://kubernetes.default.svc
     namespace: amd
   source:
-    repoURL: https://github.com/your-org/your-repo.git
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
     path: kubernetes/manifests/base/amd-gpu
     targetRevision: feature/framework-mainboards
   syncPolicy:
