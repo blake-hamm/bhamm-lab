@@ -54,6 +54,8 @@ spec:
         node_selector_enabled: true
         node_selector:
           feature.node.kubernetes.io/pci-0380_1002.present: "true"
+          kubernetes.io/arch: amd64
+          feature.node.kubernetes.io/pci-0300_1002.present: null # In amd helm chart
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
