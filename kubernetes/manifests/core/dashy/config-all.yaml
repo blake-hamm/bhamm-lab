@@ -133,6 +133,7 @@ data:
         description: Visit nzbget
         icon: hl-nzbget
         url: https://nzbget.bhamm-lab.com/
+        statusCheckAcceptCodes: '401'
       - title: Qbittorrent
         description: Visit qbittorrent
         icon: hl-qbittorrent
