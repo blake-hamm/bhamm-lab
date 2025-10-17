@@ -55,7 +55,13 @@ spec:
         node_selector:
           feature.node.kubernetes.io/pci-0380_1002.present: "true"
           kubernetes.io/arch: amd64
-          feature.node.kubernetes.io/pci-0300_1002.present: null
+    kustomize:
+      patches:
+        - patch: |-
+            - op: remove
+              path: /spec/template/spec/nodeSelector/feature.node.kubernetes.io~1pci-0300_1002.present
+          target:
+            kind: DaemonSet
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
