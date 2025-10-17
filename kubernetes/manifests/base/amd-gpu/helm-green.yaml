@@ -68,6 +68,7 @@ metadata:
   name: amd-gpu-device-plugin-daemonset
   namespace: amd
   annotations:
+    argocd.argoproj.io/sync-options: ServerSideApply=true
     argocd.argoproj.io/sync-wave: "3"
 spec:
   template:
@@ -81,6 +82,7 @@ metadata:
   name: amd-gpu-labeller-daemonset
   namespace: amd
   annotations:
+    argocd.argoproj.io/sync-options: ServerSideApply=true
     argocd.argoproj.io/hook-weight: "3"
 spec:
   template:
