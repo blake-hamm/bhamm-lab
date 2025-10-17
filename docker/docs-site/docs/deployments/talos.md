@@ -47,4 +47,9 @@ talosctl dashboard
 curl -X POST --data-binary @tofu/proxmox/talos/config/schematic-amd-framework.yaml https://factory.talos.dev/schematics
 # Which can populate an iso that can be uploaded to piKVM:
 # https://factory.talos.dev/image/<id>/v1.11.2/metal-amd64.iso
+
+# To upgrade a bare metal node:
+talosctl upgrade --nodes 10.0.30.79 \
+  --image  factory.talos.dev/metal-installer/<id>:v1.11.2 \
+  --wait --debug
 ```

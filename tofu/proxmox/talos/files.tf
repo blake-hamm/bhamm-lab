@@ -13,6 +13,14 @@ data "http" "schematic_id_intel_gpu" {
   request_body = local.schematic_intel_gpu
 }
 
+data "http" "schematic_id_amd_framework" {
+  count = length(var.metal_amd_framework_workers) == 0 ? 0 : 1
+
+  url          = "${var.talos_factory_url}/schematics"
+  method       = "POST"
+  request_body = local.schematic_amd_framework
+}
+
 resource "proxmox_virtual_environment_download_file" "intel_gpu" {
   count = length(var.intel_gpu_worker_id) == 0 ? 0 : 1
 

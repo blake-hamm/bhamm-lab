@@ -41,16 +41,18 @@ data "talos_machine_configuration" "this" {
   machine_secrets  = talos_machine_secrets.this.machine_secrets
   config_patches = [
     templatefile("${path.module}/config/common.yaml.tftpl", {
-      node_name    = each.value.host_node
-      cluster_name = var.environment
-      hostname     = each.key
-      ip           = each.value.ip
-      mtu          = var.mtu
-      gateway      = var.network_gateway
-      vip          = each.value.vip
-      interface    = each.value.interface
-      taint        = try(each.value.taint, "")
-      vlan_id      = var.vlan_id
+      schematic_id  = each.value.schematic_id
+      talos_version = var.talos_version
+      node_name     = each.value.host_node
+      cluster_name  = var.environment
+      hostname      = each.key
+      ip            = each.value.ip
+      mtu           = var.mtu
+      gateway       = var.network_gateway
+      vip           = each.value.vip
+      interface     = each.value.interface
+      taint         = try(each.value.taint, "")
+      vlan_id       = var.vlan_id
     }), each.value.machine_type == "controlplane" ?
     templatefile("${path.module}/config/master.yaml.tftpl", {
       # kubelet = var.cluster.kubelet

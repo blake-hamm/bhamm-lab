@@ -10,7 +10,7 @@ intel_gpu_worker_id = [
   "0000:83:00.0",
   "0000:84:00.0"
 ]
-bare_metal_workers = {
+metal_amd_framework_workers = {
   nose = {
     ip = "10.0.30.78"
     taint = {

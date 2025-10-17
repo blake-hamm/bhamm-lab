@@ -181,8 +181,8 @@ variable "intel_gpu_worker_id" {
   default     = []
 }
 
-variable "bare_metal_workers" {
-  description = "A map of bare metal workers to add to the cluster."
+variable "metal_amd_framework_workers" {
+  description = "A map of framework amd metal workers to add to the cluster."
   type = map(object({
     ip = string
     taint = object({
