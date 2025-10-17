@@ -1,91 +1,59 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: amd-gpu-plugin
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
-spec:
-  destination:
-    namespace: amd
-    server: https://kubernetes.default.svc
-  project: default
-  source:
-    repoURL: https://rocm.github.io/k8s-device-plugin
-    chart: amd-gpu
-    targetRevision: 0.20.0
-    helm:
-      valuesObject:
-        nfd:
-          enabled: false
-        labeller:
-          enabled: true
-        dp:
-          image:
-            tag: "1.31.0.7"
-          updateStrategy:
-            type: RollingUpdate
-            rollingUpdate:
-              maxUnavailable: 1
-        lbl:
-          image:
-            tag: "labeller-1.31.0.7"
-          securityContext:
-            privileged: true
-            capabilities:
-              drop:
-                - ALL
-              add:
-                - CAP_SYS_ADMIN
-            readOnlyRootFilesystem: false
-          updateStrategy:
-            type: RollingUpdate
-            rollingUpdate:
-              maxUnavailable: 1
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-        tolerations:
-          - key: "amd.com/gpu"
-            operator: "Exists"
-            effect: "NoSchedule"
-        node_selector_enabled: true
-        node_selector:
-          feature.node.kubernetes.io/pci-0380_1002.present: "true"
-  syncPolicy:
-    syncOptions:
-      - ApplyOutOfSyncOnly=true
-      - CreateNamespace=true
-    automated:
-      prune: true
-      selfHeal: true
----
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: amd-gpu-device-plugin-daemonset
-  namespace: amd
-  annotations:
-    argocd.argoproj.io/sync-options: ServerSideApply=true
-    argocd.argoproj.io/sync-wave: "3"
-spec:
-  template:
-    spec:
-      nodeSelector:
-        feature.node.kubernetes.io/pci-0380_1002.present: "true"
----
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: amd-gpu-labeller-daemonset
-  namespace: amd
-  annotations:
-    argocd.argoproj.io/sync-options: ServerSideApply=true
-    argocd.argoproj.io/hook-weight: "3"
-spec:
-  template:
-    spec:
-      nodeSelector:
-        feature.node.kubernetes.io/pci-0380_1002.present: "true"
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+commonNamespace: amd
+resources:
+  - https://raw.githubusercontent.com/ROCm/k8s-device-plugin/master/k8s-ds-amdgpu-dp-health.yaml
+  - https://raw.githubusercontent.com/ROCm/k8s-device-plugin/master/k8s-ds-amdgpu-labeller.yaml
+patchesJson6902:
+  - target:
+      group: apps
+      version: v1
+      kind: DaemonSet
+      name: amdgpu-device-plugin-daemonset
+    patch: |-
+      [
+        {
+          "op": "replace",
+          "path": "/spec/template/spec/nodeSelector",
+          "value": {
+            "feature.node.kubernetes.io/pci-0380_1002.present": "true"
+          }
+        },
+        {
+          "op": "replace",
+          "path": "/spec/template/spec/tolerations",
+          "value": [
+            {
+              "key": "amd.com/gpu",
+              "operator": "Exists",
+              "effect": "NoSchedule"
+            }
+          ]
+        }
+      ]
+  - target:
+      group: apps
+      version: v1
+      kind: DaemonSet
+      name: amdgpu-labeller-daemonset
+    patch: |-
+      [
+        {
+          "op": "replace",
+          "path": "/spec/template/spec/nodeSelector",
+          "value": {
+            "feature.node.kubernetes.io/pci-0380_1002.present": "true"
+          }
+        },
+        {
+          "op": "replace",
+          "path": "/spec/template/spec/tolerations",
+          "value": [
+            {
+              "key": "amd.com/gpu",
+              "operator": "Exists",
+              "effect": "NoSchedule"
+            }
+          ]
+        }
+      ]
