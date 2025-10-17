@@ -1,0 +1,63 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: amd-gpu-plugin
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  destination:
+    namespace: amd
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://rocm.github.io/k8s-device-plugin
+    chart: amd-gpu-helm
+    targetRevision: 0.20.0
+    helm:
+      valuesObject:
+        nfd:
+          enabled: false
+        labeller:
+          enabled: true
+        dp:
+          image:
+            tag: "1.31.0.7"
+          updateStrategy:
+            type: RollingUpdate
+            rollingUpdate:
+              maxUnavailable: 1
+        lbl:
+          image:
+            tag: "labeller-1.31.0.7"
+          securityContext:
+            privileged: true
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - CAP_SYS_ADMIN
+            readOnlyRootFilesystem: false
+          updateStrategy:
+            type: RollingUpdate
+            rollingUpdate:
+              maxUnavailable: 1
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+        tolerations:
+          - key: "amd.com/gpu"
+            operator: "Exists"
+            effect: "NoSchedule"
+        node_selector_enabled: true
+        node_selector:
+          feature.node.kubernetes.io/pci-0380_1002.present: "true"
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
