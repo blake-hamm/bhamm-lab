@@ -54,14 +54,6 @@ spec:
         node_selector_enabled: true
         node_selector:
           feature.node.kubernetes.io/pci-0380_1002.present: "true"
-          kubernetes.io/arch: amd64
-    kustomize:
-      patches:
-        - patch: |-
-            - op: remove
-              path: /spec/template/spec/nodeSelector/feature.node.kubernetes.io~1pci-0300_1002.present
-          target:
-            kind: DaemonSet
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
@@ -69,3 +61,29 @@ spec:
     automated:
       prune: true
       selfHeal: true
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: amdgpu-device-plugin-daemonset
+  namespace: amd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  template:
+    spec:
+      nodeSelector:
+        feature.node.kubernetes.io/pci-0380_1002.present: "true"
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: amdgpu-labeller-daemonset
+  namespace: amd
+  annotations:
+    argocd.argoproj.io/hook-weight: "3"
+spec:
+  template:
+    spec:
+      nodeSelector:
+        feature.node.kubernetes.io/pci-0380_1002.present: "true"
