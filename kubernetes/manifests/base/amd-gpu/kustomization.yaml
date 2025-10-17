@@ -14,6 +14,11 @@ patchesJson6902:
       [
         {
           "op": "replace",
+          "path": "/spec/template/spec/containers/0/image",
+          "value": "rocm/k8s-device-plugin:1.31.0.8"
+        },
+        {
+          "op": "replace",
           "path": "/spec/template/spec/nodeSelector",
           "value": {
             "feature.node.kubernetes.io/pci-0380_1002.present": "true"
@@ -38,6 +43,11 @@ patchesJson6902:
       name: amdgpu-labeller-daemonset
     patch: |-
       [
+        {
+          "op": "replace",
+          "path": "/spec/template/spec/containers/0/image",
+          "value": "rocm/k8s-device-plugin:labeller-1.31.0.8"
+        },
         {
           "op": "replace",
           "path": "/spec/template/spec/nodeSelector",
