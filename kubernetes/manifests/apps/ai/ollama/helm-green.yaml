@@ -18,7 +18,7 @@ spec:
       valuesObject:
         image:
           repository: ghcr.io/rjmalagon/ollama-linux-amd-apu
-          tag: "rocm-6.4.3-latest"
+          tag: "rocm-6.4.4-latest"
         knative:
           enabled: false
         ollama:
@@ -78,14 +78,6 @@ spec:
             value: "0"
           - name: OLLAMA_DEBUG
             value: "1"
-          - name: OLLAMA_AMD_USE_VRAM
-            value: "1"
-          - name: OLLAMA_AMD_DISABLE_GTT
-            value: "1"
-          - name: OLLAMA_AMD_FORCE_DISCRETE
-            value: "1"
-          - name: OLLAMA_LOW_VRAM_THRESHOLD
-            value: "0"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
