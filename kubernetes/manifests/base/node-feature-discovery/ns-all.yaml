@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: node-feature-discovery
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
-  labels:
-    pod-security.kubernetes.io/enforce: privileged
