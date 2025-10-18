@@ -75,7 +75,7 @@ spec:
           - name: HCC_AMDGPU_TARGET
             value: gfx1151
           - name: HSA_ENABLE_SDMA
-            value: 0
+            value: "0"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
