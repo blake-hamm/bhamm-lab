@@ -12,8 +12,8 @@ spec:
   project: default
   source:
     chart: ollama
-    repoURL: https://otwld.github.io/ollama-helm/
-    targetRevision: 0.4.0
+    repoURL: https://otwld.github.io/ollama-helm
+    targetRevision: 1.32.0
     helm:
       valuesObject:
         replicaCount: 1
@@ -60,9 +60,6 @@ spec:
           - key: "amd.com/gpu"
             operator: "Exists"
             effect: "NoSchedule"
-        resources:
-          limits:
-            amd.com/gpu: 1
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
