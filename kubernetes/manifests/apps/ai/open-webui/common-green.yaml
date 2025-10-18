@@ -27,7 +27,7 @@ spec:
                 middlewares:
                   - name: default-headers
                 services:
-                  - name: ollama
+                  - name: open-webui
                     scheme: http
                     port: http
         postgresql:
