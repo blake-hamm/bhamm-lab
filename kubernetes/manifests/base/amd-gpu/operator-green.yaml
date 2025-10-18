@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://rocm.github.io/gpu-operator
-    chart: rocm-operator
+    chart: gpu-operator-charts
     targetRevision: v1.4.0
     helm:
       valuesObject:
