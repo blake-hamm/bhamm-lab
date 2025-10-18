@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Job
+metadata:
+  name: pytorch-gpu-pod
+  labels:
+    purpose: demo-pytorch-amdgpu
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  containers:
+    - name: pytorch-gpu-container
+      image: rocm/pytorch:latest
+      workingDir: /root
+      command: ["/bin/bash", "-c", "--"]
+      args: ["rocm-smi > /tmp/rocm-smi-output; git clone https://github.com/ROCm/pytorch-micro-benchmarking.git; cd pytorch-micro-benchmarking;  python micro_benchmarking_pytorch.py --network resnet50 --compile > /tmp/benchmark-output"]
+      resources:
+        limits:
+          amd.com/gpu: 1
