@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: https://rocm.github.io/device-metrics-exporter
     chart: exporter
-    targetRevision: 0.20.0
+    targetRevision: v1.4.0
     helm:
       valuesObject:
         nodeSelector:
