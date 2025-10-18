@@ -1,3 +1,6 @@
 [submodule "docker/intel-gpu-exporter"]
 	path = docker/intel-gpu-exporter
 	url = https://github.com/blake-hamm/intel-gpu-exporter.git
+[submodule "docker/ollama-rocm-docker-gfx1151"]
+	path = docker/ollama-rocm-docker-gfx1151
+	url = https://github.com/blake-hamm/ollama-rocm-docker-gfx1151.git
