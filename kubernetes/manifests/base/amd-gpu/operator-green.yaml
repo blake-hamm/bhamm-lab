@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: amd-operator
+  name: rocm-operator
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "1"
@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://rocm.github.io/gpu-operator
-    chart: amd-gpu-operator
+    chart: rocm-operator
     targetRevision: v1.4.0
     helm:
       valuesObject:
