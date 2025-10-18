@@ -4,8 +4,6 @@ metadata:
   name: amd-vram-debug
   namespace: amd
 spec:
-  hostPID: true
-  hostNetwork: true
   tolerations:
     - key: "amd.com/gpu"
       operator: "Exists"
