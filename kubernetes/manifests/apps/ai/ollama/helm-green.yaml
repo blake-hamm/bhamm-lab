@@ -11,7 +11,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    chart: traefik
+    chart: ollama
     repoURL: https://otwld.github.io/ollama-helm/
     targetRevision: 0.4.0
     helm:
