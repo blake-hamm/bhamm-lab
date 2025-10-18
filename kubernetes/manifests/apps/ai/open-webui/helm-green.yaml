@@ -1,0 +1,147 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: open-webui
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "26"
+spec:
+  destination:
+    namespace: open-webui
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: open-webui
+    repoURL: https://helm.openwebui.com
+    targetRevision: 8.12.2
+    helm:
+      valuesObject:
+        ollama:
+          enabled: false
+        ollamaUrls:
+          - "http://ollama.ollama.svc.cluster.local:11434"
+        pipelines:
+          enabled: true
+          extraEnvVars: []
+        strategy: {}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          failureThreshold: 1
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/db
+            port: http
+          failureThreshold: 1
+          periodSeconds: 10
+        startupProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          failureThreshold: 20
+        persistence:
+          enabled: true
+          existingClaim: "open-webui-data"
+          provider: local
+        tolerations:
+          - key: "amd.com/gpu"
+            operator: "Exists"
+            effect: "NoSchedule"
+        affinity:
+          podAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                    - key: app.kubernetes.io/name
+                      operator: In
+                      values:
+                        - ollama
+                topologyKey: "kubernetes.io/hostname"
+        extraEnvVars:
+          - name: DATABASE_URL
+            valueFrom:
+              secretKeyRef:
+                name: open-webui-postgresql-app
+                key: uri
+        sso:
+          # -- **Enable SSO authentication globally** must enable to use SSO authentication
+          # @section -- SSO Configuration
+          enabled: false
+          # -- Enable account creation when logging in with OAuth (distinct from regular signup)
+          # @section -- SSO Configuration
+          enableSignup: false
+          # -- Allow logging into accounts that match email from OAuth provider (considered insecure)
+          # @section -- SSO Configuration
+          mergeAccountsByEmail: false
+          # -- Enable OAuth role management through access token roles claim
+          # @section -- SSO Configuration
+          enableRoleManagement: false
+          # -- Enable OAuth group management through access token groups claim
+          # @section -- SSO Configuration
+          enableGroupManagement: false
+          oidc:
+            # -- Enable OIDC authentication
+            # @section -- OIDC configuration
+            enabled: false
+            # -- OIDC client ID
+            # @section -- OIDC configuration
+            clientId: ""
+            # -- OIDC client secret (ignored if clientExistingSecret is set)
+            # @section -- OIDC configuration
+            clientSecret: ""
+            # -- OICD client secret from existing secret
+            # @section -- OIDC configuration
+            clientExistingSecret: ""
+            # -- OIDC client secret key from existing secret
+            # @section -- OIDC configuration
+            clientExistingSecretKey: ""
+            # -- OIDC provider well known URL
+            # @section -- OIDC configuration
+            providerUrl: ""
+            # -- Name of the provider to show on the UI
+            # @section -- OIDC configuration
+            providerName: "SSO"
+            # -- Scopes to request (space-separated).
+            # @section -- OIDC configuration
+            scopes: "openid email profile"
+          roleManagement:
+            # -- The claim that contains the roles (can be nested, e.g., user.roles)
+            # @section -- Role management configuration
+            rolesClaim: "roles"
+            # -- Comma-separated list of roles allowed to log in (receive open webui role user)
+            # @section -- Role management configuration
+            allowedRoles: ""
+            # -- Comma-separated list of roles allowed to log in as admin (receive open webui role admin)
+            # @section -- Role management configuration
+            adminRoles: ""
+          groupManagement:
+            # -- The claim that contains the groups (can be nested, e.g., user.memberOf)
+            # @section -- SSO Configuration
+            groupsClaim: "groups"
+          trustedHeader:
+            # -- Enable trusted header authentication
+            # @section -- SSO trusted header authentication
+            enabled: false
+            # -- Header containing the user's email address
+            # @section -- SSO trusted header authentication
+            emailHeader: ""
+            # -- Header containing the user's name (optional, used for new user creation)
+            # @section -- SSO trusted header authentication
+            nameHeader: ""
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 10
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 10m
