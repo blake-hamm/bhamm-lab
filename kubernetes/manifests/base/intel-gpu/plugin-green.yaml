@@ -13,7 +13,7 @@ metadata:
   name: intel-gpu-nfr
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   destination:
     namespace: node-feature-discovery
@@ -36,7 +36,7 @@ metadata:
   name: intel-gpu-plugin-green
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   destination:
     namespace: intel-gpu-plugin

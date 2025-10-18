@@ -17,7 +17,7 @@ spec:
     helm:
       valuesObject:
         node-feature-discovery:
-          enabled: true
+          enabled: false
         kmm:
           enabled: true
         installdefaultNFDRule: true

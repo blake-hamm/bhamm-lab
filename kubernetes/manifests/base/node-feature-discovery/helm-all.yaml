@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: node-feature-discovery
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  destination:
+    namespace: node-feature-discovery
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: node-feature-discovery
+    repoURL: https://kubernetes-sigs.github.io/node-feature-discovery/charts
+    targetRevision: v0.17.3
+    helm:
+      valuesObject:
+        prometheus:
+          enable: true
+        master:
+          priorityClassName: system-cluster-critical
+        worker:
+          priorityClassName: system-cluster-critical
+          tolerations:
+            - key: "node-role.kubernetes.io/control-plane"
+              operator: "Exists"
+              effect: "NoSchedule"
+            - key: "intel.com/gpu"
+              operator: "Exists"
+              effect: "NoSchedule"
+            - key: "amd.com/gpu"
+              operator: "Exists"
+              effect: "NoSchedule"
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
