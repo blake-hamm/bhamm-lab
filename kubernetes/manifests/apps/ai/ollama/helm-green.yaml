@@ -60,6 +60,9 @@ spec:
           - key: "amd.com/gpu"
             operator: "Exists"
             effect: "NoSchedule"
+        resources:
+          limits:
+            amd.com/gpu: 1
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
