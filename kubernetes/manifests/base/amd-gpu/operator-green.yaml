@@ -1,0 +1,79 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: amd-operator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  destination:
+    namespace: amd
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://rocm.github.io/gpu-operator
+    chart: amd-gpu-operator
+    targetRevision: v1.4.0
+    helm:
+      valuesObject:
+        node-feature-discovery:
+          enabled: false
+        kmm:
+          enabled: false
+        installdefaultNFDRule: true
+        deviceConfig:
+          spec:
+            selector:
+              feature.node.kubernetes.io/pci-0380_1002.present: "true"
+            driver:
+              enable: false
+              blacklist: false
+            devicePlugin:
+              devicePluginImage: rocm/k8s-device-plugin:latest
+              devicePluginTolerations:
+                - key: "amd.com/gpu"
+                  operator: "Exists"
+                  effect: "NoSchedule"
+              devicePluginArguments: {}
+              enableNodeLabeller: true
+              nodeLabellerImage: rocm/k8s-device-plugin:labeller-latest
+              nodeLabellerTolerations:
+                - key: "amd.com/gpu"
+                  operator: "Exists"
+                  effect: "NoSchedule"
+              nodeLabellerArguments: []
+            metricsExporter:
+              enable: true
+              tolerations:
+                - key: "amd.com/gpu"
+                  operator: "Exists"
+                  effect: "NoSchedule"
+              selector:
+                feature.node.kubernetes.io/pci-0380_1002.present: "true"
+              prometheus:
+                serviceMonitor:
+                  enable: true
+                  interval: 30s
+            testRunner:
+              enable: true
+              image: docker.io/rocm/test-runner:v1.4.0
+              selector:
+                feature.node.kubernetes.io/pci-0380_1002.present: "true"
+            configManager:
+              enable: false
+        controllerManager:
+          manager:
+            tolerations:
+              - key: "amd.com/gpu"
+                operator: "Exists"
+                effect: "NoSchedule"
+          nodeSelector:
+            feature.node.kubernetes.io/pci-0380_1002.present: "true"
+          affinity: {}
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
