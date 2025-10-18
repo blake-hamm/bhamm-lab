@@ -16,6 +16,9 @@ spec:
     targetRevision: 1.32.0
     helm:
       valuesObject:
+        image:
+          repository: ghcr.io/rjmalagon/ollama-linux-amd-apu
+          tag: "rocm-6.4.3-latest"
         knative:
           enabled: false
         ollama:
@@ -71,6 +74,8 @@ spec:
             value: 11.5.1
           - name: HCC_AMDGPU_TARGET
             value: gfx1151
+          - name: HSA_ENABLE_SDMA
+            value: 0
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
