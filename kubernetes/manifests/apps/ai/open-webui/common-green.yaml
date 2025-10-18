@@ -17,19 +17,19 @@ spec:
     helm:
       valuesObject:
         name: open-webui
-        # ingressRoutes:
-        #   - name: ollama
-        #     ingressClass: traefik-external
-        #     websocket: true
-        #     routes:
-        #       - match: Host(`ollama.bhamm-lab.com`)
-        #         kind: Rule
-        #         middlewares:
-        #           - name: default-headers
-        #         services:
-        #           - name: ollama
-        #             scheme: http
-        #             port: http
+        ingressRoutes:
+          - name: open-webui
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - match: Host(`open-webui.bhamm-lab.com`)
+                kind: Rule
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: ollama
+                    scheme: http
+                    port: http
         postgresql:
           enabled: true
           backup:
