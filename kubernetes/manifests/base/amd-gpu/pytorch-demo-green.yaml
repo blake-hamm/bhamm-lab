@@ -2,6 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: pytorch-gpu-demo
+  namespace: amd
   labels:
     purpose: demo-pytorch-amdgpu
   annotations:
