@@ -32,7 +32,7 @@ spec:
                     port: http
         pvc:
           - name: ollama-data
-            storageSize: 100Gi
+            storageSize: 500Gi
         k8up:
           backup:
             enabled: true
