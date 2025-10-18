@@ -12,8 +12,6 @@ spec:
     - name: debug
       image: rocm/pytorch:latest
       command: ["/bin/sleep", "infinity"]
-      securityContext:
-        privileged: true
       env:
         - name: HSA_OVERRIDE_GFX_VERSION
           value: "11.5.1"
