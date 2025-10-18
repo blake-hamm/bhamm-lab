@@ -12,8 +12,8 @@ spec:
   project: default
   source:
     repoURL: https://rocm.github.io/device-metrics-exporter
-    chart: exporter
-    targetRevision: 1.4.0
+    chart: rocm-device-metrics/device-metrics-exporter-charts
+    targetRevision: v1.4.0
     helm:
       valuesObject:
         nodeSelector:
