@@ -17,13 +17,19 @@ spec:
     helm:
       valuesObject:
         name: ollama
-        externalSecrets:
-          enabled: false
-          secrets:
-            - secretKey: repo-password
-              remoteRef:
-                key: /core/k8up
-                property: repo-password
+        ingressRoutes:
+          - name: ollama
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - match: Host(`ollama.bhamm-lab.com`)
+                kind: Rule
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: ollama
+                    scheme: http
+                    port: http
         pvc:
           - name: ollama-data
             storageSize: 100Gi
