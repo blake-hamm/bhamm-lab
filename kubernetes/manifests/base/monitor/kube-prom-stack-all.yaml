@@ -122,9 +122,6 @@ spec:
                 gnetId: 4260
                 revision: 12
                 datasource: Prometheus
-              amd-overview:
-                url: https://raw.githubusercontent.com/blake-hamm/device-metrics-exporter/refs/heads/main/grafana/dashboard_overview.json
-                token: ''
               amd-gpu:
                 url: https://raw.githubusercontent.com/blake-hamm/device-metrics-exporter/refs/heads/main/grafana/dashboard_gpu.json
                 token: ''
