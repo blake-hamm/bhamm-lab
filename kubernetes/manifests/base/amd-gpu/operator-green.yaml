@@ -56,6 +56,10 @@ spec:
                   interval: 30s
             testRunner:
               enable: true
+              tolerations:
+                - key: "amd.com/gpu"
+                  operator: "Exists"
+                  effect: "NoSchedule"
               image: docker.io/rocm/test-runner:v1.4.0
               selector:
                 feature.node.kubernetes.io/pci-0380_1002.present: "true"
