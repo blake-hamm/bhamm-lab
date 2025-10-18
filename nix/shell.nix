@@ -33,6 +33,7 @@ pkgs.mkShell {
     awscli
     smartmontools
     rclone
+    wl-clipboard
   ];
 
   packages = [

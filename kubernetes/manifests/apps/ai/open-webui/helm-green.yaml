@@ -60,6 +60,8 @@ spec:
                       operator: In
                       values:
                         - ollama
+                namespaces:
+                  - ollama
                 topologyKey: "kubernetes.io/hostname"
         extraEnvVars:
           - name: DATABASE_URL
