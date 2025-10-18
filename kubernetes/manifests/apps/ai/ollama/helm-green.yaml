@@ -76,6 +76,12 @@ spec:
             value: gfx1151
           - name: HSA_ENABLE_SDMA
             value: "0"
+          - name: OLLAMA_DEBUG
+            value: "1"
+          - name: AMD_DIRECT_VRAM_ACCESS
+            value: "1"
+          - name: OLLAMA_LOW_VRAM_THRESHOLD
+            value: "0"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
