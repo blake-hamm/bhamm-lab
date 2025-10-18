@@ -78,7 +78,11 @@ spec:
             value: "0"
           - name: OLLAMA_DEBUG
             value: "1"
-          - name: AMD_DIRECT_VRAM_ACCESS
+          - name: OLLAMA_AMD_USE_VRAM
+            value: "1"
+          - name: OLLAMA_AMD_DISABLE_GTT
+            value: "1"
+          - name: OLLAMA_AMD_FORCE_DISCRETE
             value: "1"
           - name: OLLAMA_LOW_VRAM_THRESHOLD
             value: "0"
