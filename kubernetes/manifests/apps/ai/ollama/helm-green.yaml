@@ -1,0 +1,75 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ollama
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "24"
+spec:
+  destination:
+    namespace: ollama
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: traefik
+    repoURL: https://traefik.github.io/charts
+    targetRevision: v29.0.0
+    helm:
+      valuesObject:
+        replicaCount: 1
+        knative:
+          enabled: false
+        ollama:
+          gpu:
+            enabled: true
+            draEnabled: false
+            type: 'amd'
+            number: 1
+          models:
+            # -- List of models to pull at container startup
+            # The more you add, the longer the container will take to start if models are not present
+            # pull:
+            #  - llama2
+            #  - mistral
+            pull: []
+            # -- List of models to load in memory at container startup
+            # run:
+            #  - llama2
+            #  - mistral
+            run: []
+            # -- List of models to create at container startup, there are two options
+            # 1. Create a raw model
+            # 2. Load a model from configMaps, configMaps must be created before and are loaded as volume in "/models" directory.
+            # create:
+            #  - name: llama3.1-ctx32768
+            #    configMapRef: my-configmap
+            #    configMapKeyRef: configmap-key
+            #  - name: llama3.1-ctx32768
+            #    template: |
+            #      FROM llama3.1
+            #      PARAMETER num_ctx 32768
+            create: []
+            # -- Automatically remove models present on the disk but not specified in the values file
+            clean: false
+        persistentVolume:
+          enabled: true
+          existingClaim: "ollama-data"
+        nodeSelector:
+          feature.node.kubernetes.io/amd-gpu: "true"
+        tolerations:
+          - key: "amd.com/gpu"
+            operator: "Exists"
+            effect: "NoSchedule"
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 10
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 10m
