@@ -123,10 +123,10 @@ spec:
                 revision: 12
                 datasource: Prometheus
               amd-overview:
-                url: https://raw.githubusercontent.com/blake-hamm/gpu-operator/refs/heads/feature/grafana-update/grafana/dashboard_overview.json
+                url: https://raw.githubusercontent.com/blake-hamm/device-metrics-exporter/refs/heads/main/grafana/dashboard_overview.json
                 token: ''
               amd-gpu:
-                url: https://raw.githubusercontent.com/blake-hamm/gpu-operator/refs/heads/feature/grafana-update/grafana/dashboard_gpu.json
+                url: https://raw.githubusercontent.com/blake-hamm/device-metrics-exporter/refs/heads/main/grafana/dashboard_gpu.json
                 token: ''
               k8up:
                 url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/main/kubernetes/manifests/base/monitor/dashboards/k8up.json
