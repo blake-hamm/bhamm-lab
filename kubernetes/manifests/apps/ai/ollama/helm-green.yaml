@@ -59,6 +59,13 @@ spec:
           - key: "amd.com/gpu"
             operator: "Exists"
             effect: "NoSchedule"
+        resources:
+          requests:
+            memory: 12Gi
+            cpu: 2000m
+          limits:
+            memory: 20Gi
+            cpu: 4000m
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
