@@ -4,6 +4,6 @@ ADD . /app
 
 WORKDIR /app
 
-RUN uv sync --locked
+RUN uv sync
 
 CMD ["uv" "run" "python", "main.py"]
