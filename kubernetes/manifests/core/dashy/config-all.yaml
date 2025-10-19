@@ -195,10 +195,23 @@ data:
         description: Visit harbor
         icon: hl-harbor
         url: https://harbor.bhamm-lab.com/
-      - title: 7900xtx
+
+    - name: AI
+      icon: mdi-brain
+      items:
+      - title: Open Webui
+        description: Visit Open Webui
+        icon: hl-open-webui
+        url: https://open-webui.bhamm-lab.com/
+      - title: Llama Swap
+        description: Visit Llama Swap
+        icon: ':llama:'
+        url: https://llama-swap.bhamm-lab.com/ui/
+        statusCheckAcceptCodes: '401'
+      - title: AMD GPU
         description: Visit AMD gpu grafana dashboard
-        icon: hl-amd-light
-        url: https://grafana.bhamm-lab.com/d/ae0aj8euc43r4b/gpu?orgId=1&from=now-24h&to=now&timezone=browser&var-g_gpu_uuid=&var-g_cluster_name=&var-g_hostname=&var-g_gpu_id=&var-g_gpu_partition_id=&var-g_gpu_vbios=&var-g_driver=&var-g_card_vendor=&var-g_card_series=&var-g_card_model=&var-g_serial_number=
+        icon: hl-grafana
+        url: https://grafana.bhamm-lab.com/d/98f69bf1-720b-4690-933d-36e6ceb799e0/amd-gpu-v2?orgId=1&from=now-6h&to=now&timezone=browser&var-hostname=green-talos-worker-nose&var-gpu_id=0
         statusCheck: false
 
     - name: Security

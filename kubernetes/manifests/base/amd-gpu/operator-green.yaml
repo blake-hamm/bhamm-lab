@@ -1,0 +1,83 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rocm-operator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  destination:
+    namespace: amd
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://rocm.github.io/gpu-operator
+    chart: gpu-operator-charts
+    targetRevision: v1.4.0
+    helm:
+      valuesObject:
+        node-feature-discovery:
+          enabled: false
+        kmm:
+          enabled: true
+        installdefaultNFDRule: true
+        deviceConfig:
+          spec:
+            selector:
+              feature.node.kubernetes.io/amd-gpu: "true"
+            driver:
+              enable: false
+              blacklist: false
+            devicePlugin:
+              devicePluginImage: rocm/k8s-device-plugin:latest
+              devicePluginTolerations:
+                - key: "amd.com/gpu"
+                  operator: "Exists"
+                  effect: "NoSchedule"
+              devicePluginArguments: {}
+              enableNodeLabeller: true
+              nodeLabellerImage: rocm/k8s-device-plugin:labeller-latest
+              nodeLabellerTolerations:
+                - key: "amd.com/gpu"
+                  operator: "Exists"
+                  effect: "NoSchedule"
+              nodeLabellerArguments: []
+            metricsExporter:
+              enable: true
+              tolerations:
+                - key: "amd.com/gpu"
+                  operator: "Exists"
+                  effect: "NoSchedule"
+              selector:
+                feature.node.kubernetes.io/amd-gpu: "true"
+              prometheus:
+                serviceMonitor:
+                  enable: true
+                  interval: 30s
+            testRunner:
+              enable: true
+              tolerations:
+                - key: "amd.com/gpu"
+                  operator: "Exists"
+                  effect: "NoSchedule"
+              image: docker.io/rocm/test-runner:v1.4.0
+              selector:
+                feature.node.kubernetes.io/amd-gpu: "true"
+            configManager:
+              enable: false
+        controllerManager:
+          manager:
+            tolerations:
+              - key: "amd.com/gpu"
+                operator: "Exists"
+                effect: "NoSchedule"
+          nodeSelector:
+            feature.node.kubernetes.io/amd-gpu: "true"
+          affinity: {}
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

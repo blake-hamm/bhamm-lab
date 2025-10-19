@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llama-swap
+  namespace: llama-swap
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: llama-swap
+  template:
+    metadata:
+      labels:
+        app: llama-swap
+    spec:
+      tolerations:
+        - key: "amd.com/gpu"
+          operator: "Exists"
+          effect: "NoSchedule"
+      initContainers:
+        - name: model-downloader
+          image: harbor.bhamm-lab.com/library/model-downloader:latest
+          command: ["uv", "run", "python", "main.py"]
+          volumeMounts:
+            - name: models
+              mountPath: /models
+            - name: config
+              mountPath: /config
+          env:
+            - name: CONFIG_FILE
+              value: "/config/downloads.yaml"
+          resources:
+            requests:
+              memory: 2Gi
+              cpu: 500m
+            limits:
+              memory: 6Gi
+              cpu: 1
+      containers:
+        - name: llama-swap
+          image: ghcr.io/mostlygeek/llama-swap:vulkan
+          args:
+            - --config
+            - /config/llama-swap.yaml
+            - --listen
+            - 0.0.0.0:8080
+          env:
+            - name: GGML_VULKAN_DEVICE
+              value: "0"
+            - name: GGML_VK_VISIBLE_DEVICES
+              value: "0"
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            limits:
+              amd.com/gpu: 1
+              memory: 16Gi
+              cpu: 8
+            requests:
+              amd.com/gpu: 1
+              cpu: 2
+              memory: 8Gi
+          volumeMounts:
+            - name: models
+              mountPath: /models
+            - name: config
+              mountPath: /config
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 60
+            timeoutSeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 5
+      volumes:
+        - name: models
+          persistentVolumeClaim:
+            claimName: llama-swap-models
+        - name: config
+          configMap:
+            name: config

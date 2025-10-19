@@ -1,0 +1,111 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: open-webui
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "26"
+spec:
+  destination:
+    namespace: open-webui
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: open-webui
+    repoURL: https://helm.openwebui.com
+    targetRevision: 8.12.2
+    helm:
+      valuesObject:
+        ollama:
+          enabled: false
+        ollamaUrls: []
+        pipelines:
+          enabled: true
+          extraEnvVars: []
+        strategy: {}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          failureThreshold: 1
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/db
+            port: http
+          failureThreshold: 1
+          periodSeconds: 10
+        startupProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          failureThreshold: 20
+        persistence:
+          enabled: true
+          existingClaim: "open-webui-data"
+          provider: local
+        tolerations:
+          - key: "amd.com/gpu"
+            operator: "Exists"
+            effect: "NoSchedule"
+        affinity:
+          podAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - llama-swap
+                namespaces:
+                  - llama-swap
+                topologyKey: "kubernetes.io/hostname"
+        extraEnvVars:
+          - name: DATABASE_URL
+            valueFrom:
+              secretKeyRef:
+                name: open-webui-postgresql-app
+                key: uri
+          - name: ENABLE_LOGIN_FORM
+            value: "False"
+        enableOpenaiApi: true
+        openaiBaseApiUrl: "http://llama-swap.llama-swap.svc.cluster.local:8080/v1"
+        openaiBaseApiUrls: []
+        openaiApiKey: ""
+        openaiApiKeys: []
+        sso:
+          enabled: true
+          enableSignup: true
+          mergeAccountsByEmail: true
+          enableRoleManagement: true
+          enableGroupManagement: true
+          oidc:
+            enabled: true
+            clientId: "open-webui"
+            clientSecret: ""
+            clientExistingSecret: "open-webui-external-secret"
+            clientExistingSecretKey: "OAUTH_CLIENT_SECRET"
+            providerUrl: "https://auth.bhamm-lab.com/.well-known/openid-configuration"
+            providerName: "Authelia"
+            scopes: "openid email profile groups"
+          roleManagement:
+            rolesClaim: "groups"
+            allowedRoles: "user,admin"
+            adminRoles: "admin"
+          groupManagement:
+            groupsClaim: "groups"
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 10
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 10m

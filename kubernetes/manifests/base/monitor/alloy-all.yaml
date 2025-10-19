@@ -119,6 +119,9 @@ spec:
             - key: "node-role.kubernetes.io/control-plane"
               operator: "Exists"
               effect: "NoSchedule"
+            - key: "amd.com/gpu"
+              operator: "Exists"
+              effect: "NoSchedule"
         serviceMonitor:
           enabled: true
           additionalLabels:

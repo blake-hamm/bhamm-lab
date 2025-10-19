@@ -1,0 +1,10 @@
+[project]
+name = "model-downloader"
+version = "0.1.0"
+description = "Tool to download models from hugging face to a local directory based on a yaml."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pyyaml>=6.0",
+    "huggingface-hub>=0.20.3",
+]

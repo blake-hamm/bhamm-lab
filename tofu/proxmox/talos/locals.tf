@@ -1,9 +1,11 @@
 locals {
   # Gather metadata to download talos image
-  schematic              = file("${path.module}/config/schematic.yaml")
-  schematic_id           = jsondecode(data.http.schematic_id.response_body)["id"]
-  schematic_intel_gpu    = file("${path.module}/config/schematic-intel-gpu.yaml")
-  schematic_id_intel_gpu = length(var.intel_gpu_worker_id) > 0 ? jsondecode(data.http.schematic_id_intel_gpu[0].response_body)["id"] : null
+  schematic                  = file("${path.module}/config/schematic.yaml")
+  schematic_id               = jsondecode(data.http.schematic_id.response_body)["id"]
+  schematic_intel_gpu        = file("${path.module}/config/schematic-intel-gpu.yaml")
+  schematic_id_intel_gpu     = length(var.intel_gpu_worker_id) > 0 ? jsondecode(data.http.schematic_id_intel_gpu[0].response_body)["id"] : null
+  schematic_amd_framework    = file("${path.module}/config/schematic-amd-framework.yaml")
+  schematic_id_amd_framework = length(var.metal_amd_framework_workers) > 0 ? jsondecode(data.http.schematic_id_amd_framework[0].response_body)["id"] : null
   # Talos vm config
   master_nodes = [
     for idx in range(var.count_master) : {
@@ -19,6 +21,9 @@ locals {
       taint        = null
       vm_tag       = null
       hostpci      = {}
+      interface    = "eth0"
+      is_vm        = true
+      schematic_id = local.schematic_id
     }
   ]
 
@@ -35,7 +40,30 @@ locals {
     taint        = { key = "intel.com/gpu", effect = "NoSchedule" }
     vm_tag       = "intel-gpu"
     hostpci      = var.intel_gpu_worker_id
+    interface    = "eth0"
+    is_vm        = true
+    schematic_id = local.schematic_id_intel_gpu
   }]
+
+  metal_amd_framework_nodes = [
+    for name, config in var.metal_amd_framework_workers : {
+      hostname     = "${var.environment}-talos-worker-${name}"
+      ip           = config.ip
+      machine_type = "worker"
+      host_node    = "bare-metal"
+      taint        = { key = config.taint.key, effect = config.taint.effect }
+      is_vm        = false
+      vm_id        = null
+      cpu          = null
+      disk_size    = null
+      memory       = null
+      vip          = null
+      vm_tag       = null
+      hostpci      = null
+      interface    = "enp191s0"
+      schematic_id = local.schematic_id_amd_framework
+    }
+  ]
 
   worker_nodes = concat(
     [
@@ -52,9 +80,13 @@ locals {
         taint        = null
         vm_tag       = null
         hostpci      = {}
+        interface    = "eth0"
+        is_vm        = true
+        schematic_id = local.schematic_id
       }
     ],
     length(var.intel_gpu_worker_id) > 0 ? local.intel_gpu_worker_node : [],
+    length(var.metal_amd_framework_workers) > 0 ? local.metal_amd_framework_nodes : [],
   )
 
   all_nodes = {
