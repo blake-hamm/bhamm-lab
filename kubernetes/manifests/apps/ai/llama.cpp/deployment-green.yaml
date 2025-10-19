@@ -106,7 +106,7 @@ spec:
             httpGet:
               path: /health
               port: 8080
-            initialDelaySeconds: 120 # Increased - model loading takes time
+            initialDelaySeconds: 240
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
