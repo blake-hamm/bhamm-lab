@@ -12,7 +12,7 @@ data:
         filename: Llama-3.3-70B-Instruct-Q4_K_M.gguf
         revision: main
   llama-swap.yaml: |
-    healthCheckTimeout: 300
+    healthCheckTimeout: 420
     logLevel: info
     metricsMaxInMemory: 2000
     startPort: 10001
