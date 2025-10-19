@@ -109,17 +109,17 @@ spec:
               path: /health
               port: 8080
             initialDelaySeconds: 300
-            periodSeconds: 10
+            periodSeconds: 20
             timeoutSeconds: 5
-            failureThreshold: 3
+            failureThreshold: 5
           readinessProbe:
             httpGet:
               path: /health
               port: 8080
             initialDelaySeconds: 300
-            periodSeconds: 5
+            periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 3
+            failureThreshold: 5
       volumes:
         - name: models
           persistentVolumeClaim:
