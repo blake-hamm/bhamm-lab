@@ -60,7 +60,7 @@ spec:
                       values:
                         - llama-cpp
                 namespaces:
-                  - ollama
+                  - llama-cpp
                 topologyKey: "kubernetes.io/hostname"
         extraEnvVars:
           - name: DATABASE_URL
