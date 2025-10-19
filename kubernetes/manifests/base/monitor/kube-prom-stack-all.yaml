@@ -123,7 +123,7 @@ spec:
                 revision: 12
                 datasource: Prometheus
               amd-gpu:
-                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/feature/framework-mainboards/kubernetes/manifests/base/monitor/dashboards/amd-gpu.json
+                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/main/kubernetes/manifests/base/monitor/dashboards/amd-gpu.json
                 token: ''
               k8up:
                 url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/main/kubernetes/manifests/base/monitor/dashboards/k8up.json
