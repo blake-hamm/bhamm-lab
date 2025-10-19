@@ -18,8 +18,7 @@ spec:
       valuesObject:
         ollama:
           enabled: false
-        ollamaUrls:
-          - "http://ollama.ollama.svc.cluster.local:11434"
+        ollamaUrls: []
         pipelines:
           enabled: true
           extraEnvVars: []
@@ -56,10 +55,10 @@ spec:
             requiredDuringSchedulingIgnoredDuringExecution:
               - labelSelector:
                   matchExpressions:
-                    - key: app.kubernetes.io/name
+                    - key: app
                       operator: In
                       values:
-                        - ollama
+                        - llama-cpp
                 namespaces:
                   - ollama
                 topologyKey: "kubernetes.io/hostname"
