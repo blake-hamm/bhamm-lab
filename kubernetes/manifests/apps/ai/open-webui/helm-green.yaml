@@ -69,7 +69,7 @@ spec:
                 name: open-webui-postgresql-app
                 key: uri
           - name: ENABLE_LOGIN_FORM
-            value: False
+            value: "False"
         enableOpenaiApi: true
         openaiBaseApiUrl: "http://llama-swap.llama-swap.svc.cluster.local:8080/v1"
         openaiBaseApiUrls: []
