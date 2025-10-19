@@ -15,10 +15,6 @@ spec:
       labels:
         app: llama-cpp
     spec:
-      securityContext:
-        fsGroup: 1000
-        runAsUser: 1000
-        runAsGroup: 1000
       tolerations:
         - key: "amd.com/gpu"
           operator: "Exists"
