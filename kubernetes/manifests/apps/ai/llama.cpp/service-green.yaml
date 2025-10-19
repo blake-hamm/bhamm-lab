@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: llama-cpp-server
   namespace: llama-cpp
+  annotations:
+    argocd.argoproj.io/sync-wave: "23"
 spec:
   type: ClusterIP
   selector:
