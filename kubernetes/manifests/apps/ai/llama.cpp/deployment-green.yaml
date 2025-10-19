@@ -80,7 +80,7 @@ spec:
               memory: 20Gi
             requests:
               amd.com/gpu: 1
-              memory: 15Gi
+              memory: 8Gi
           volumeMounts:
             - name: models
               mountPath: /models
