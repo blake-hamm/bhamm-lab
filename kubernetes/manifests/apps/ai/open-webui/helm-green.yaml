@@ -68,6 +68,11 @@ spec:
               secretKeyRef:
                 name: open-webui-postgresql-app
                 key: uri
+        enableOpenaiApi: true
+        openaiBaseApiUrl: "http://llama-cpp-server.llama-cpp.svc.cluster.local:8080/v1"
+        openaiBaseApiUrls: []
+        openaiApiKey: ""
+        openaiApiKeys: []
         sso:
           # -- **Enable SSO authentication globally** must enable to use SSO authentication
           # @section -- SSO Configuration
