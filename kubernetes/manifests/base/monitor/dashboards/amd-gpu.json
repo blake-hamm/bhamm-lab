@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 50,
+  "id": 19,
   "links": [],
   "panels": [
     {
@@ -181,13 +181,12 @@
         }
       },
       "pluginVersion": "12.1.1",
-      "repeatDirection": "h",
       "targets": [
         {
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "100*sum(gpu_used_vram / gpu_total_vram )",
+          "expr": "100*sum(gpu_used_vram) / sum(gpu_total_vram )",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -202,7 +201,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "100*(1-sum(gpu_used_vram / gpu_total_vram ))",
+          "expr": "100*(1-sum(gpu_used_vram) / sum(gpu_total_vram ))",
           "hide": false,
           "instant": false,
           "legendFormat": "Available VRAM",
@@ -294,13 +293,12 @@
         }
       },
       "pluginVersion": "12.1.1",
-      "repeatDirection": "h",
       "targets": [
         {
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "100*sum(gpu_used_gtt / gpu_total_gtt )",
+          "expr": "100*sum(gpu_used_gtt) / sum(gpu_total_gtt)",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -315,7 +313,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "100*(1-sum(gpu_used_gtt / gpu_total_gtt ))",
+          "expr": "100*(1-sum(gpu_used_gtt) / sum(gpu_total_gtt ))",
           "hide": false,
           "instant": false,
           "legendFormat": "Available GTT",
@@ -845,5 +843,5 @@
   "timezone": "browser",
   "title": "AMD GPU v2",
   "uid": "98f69bf1-720b-4690-933d-36e6ceb799e0",
-  "version": 13
+  "version": 1
 }
