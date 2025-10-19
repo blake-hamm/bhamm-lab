@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: llama-swap
-  namespace: llama-cpp
+  namespace: llama-swap
   annotations:
     argocd.argoproj.io/sync-wave: "22"
 spec:
