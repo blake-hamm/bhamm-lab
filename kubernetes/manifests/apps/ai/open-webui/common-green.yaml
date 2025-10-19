@@ -30,6 +30,13 @@ spec:
                   - name: open-webui
                     scheme: http
                     port: http
+        externalSecrets:
+          enabled: true
+          secrets:
+            - secretKey: OAUTH_CLIENT_SECRET
+              remoteRef:
+                key: /default/open-webui
+                property: oidc
         postgresql:
           enabled: true
           backup:
