@@ -33,8 +33,6 @@ data:
       "ctx-medium": 4096
       "ctx-small": 2048
 
-      "ttl": 1800 # 30 minutes
-
     models:
       # Primary large instruction model - Llama 3.3 70B
       "llama-70b":
@@ -46,7 +44,7 @@ data:
           -c ${ctx-large}
           --parallel 4
           --cont-batching
-        ttl: ${ttl}
+        ttl: 1800
         aliases:
           - "llama-3.3-70b-instruct"
           - "llama3-70b"
