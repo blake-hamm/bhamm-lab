@@ -46,7 +46,6 @@ def download_model(model: dict) -> bool:
             filename=filename,
             revision=revision,
             local_dir=str(MODELS_DIR),
-            local_dir_use_symlinks=False,
         )
 
         logging.info(f"Download complete: {cached_path}")
