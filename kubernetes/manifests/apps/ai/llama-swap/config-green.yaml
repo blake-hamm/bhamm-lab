@@ -1,0 +1,161 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  namespace: llama-swap
+  annotations:
+    argocd.argoproj.io/sync-wave: "21"
+data:
+  downloads.yaml: |
+    models:
+      - repo_id: bartowski/Llama-3.3-70B-Instruct-GGUF
+        filename: Llama-3.3-70B-Instruct-Q4_K_M.gguf
+        revision: main
+  llama-swap.yaml: |
+    healthCheckTimeout: 300
+    logLevel: info
+    metricsMaxInMemory: 2000
+    startPort: 10001
+    macros:
+      # Base llama-server command with common Vulkan/AMD settings
+      "llama-base": >
+        llama-server
+        --host 0.0.0.0
+        --port ${PORT}
+        -ngl 999
+        --flash-attn
+        --metrics
+        --no-webui
+        -v
+
+      # Context sizes for different model tiers
+      "ctx-large": 8192
+      "ctx-medium": 4096
+      "ctx-small": 2048
+
+      "ttl": 1800 # 30 minutes
+
+    models:
+      # Primary large instruction model - Llama 3.3 70B
+      "llama-70b":
+        name: "Llama 3.3 70B Instruct Q4_K_M"
+        description: "Large instruction-following model, best for complex reasoning and long conversations"
+        cmd: |
+          ${llama-base}
+          -m /models/Llama-3.3-70B-Instruct-Q4_K_M.gguf
+          -c ${ctx-large}
+          --parallel 4
+          --cont-batching
+        ttl: ${ttl}
+        aliases:
+          - "llama-3.3-70b-instruct"
+          - "llama3-70b"
+        metadata:
+          context_length: ${ctx-large}
+          quantization: "Q4_K_M"
+          vram_estimate_gb: 45
+
+      # # Medium-sized model for faster responses
+      # "qwen-32b":
+      #   name: "Qwen 2.5 32B Instruct Q4_K_M"
+      #   description: "Balanced model for general tasks with good speed/quality tradeoff"
+      #   cmd: |
+      #     ${llama-base}
+      #     -m /models/Qwen2.5-32B-Instruct-Q4_K_M.gguf
+      #     -c ${ctx-large}
+      #     --parallel 4
+      #     --cont-batching
+      #   ttl: ${ttl}
+      #   aliases:
+      #     - "qwen2.5-32b"
+      #     - "qwen-32b-instruct"
+      #   metadata:
+      #     context_length: ${ctx-large}
+      #     quantization: "Q4_K_M"
+      #     vram_estimate_gb: 20
+
+      # # Coding specialist model
+      # "deepseek-coder-33b":
+      #   name: "DeepSeek Coder 33B Instruct Q4_K_M"
+      #   description: "Specialized coding model for programming tasks"
+      #   cmd: |
+      #     ${llama-base}
+      #     -m /models/deepseek-coder-33b-instruct-Q4_K_M.gguf
+      #     -c ${ctx-medium}
+      #     --parallel 4
+      #     --cont-batching
+      #   ttl: ${ttl}
+      #   aliases:
+      #     - "deepseek-coder"
+      #     - "coder-33b"
+      #   metadata:
+      #     context_length: ${ctx-medium}
+      #     quantization: "Q4_K_M"
+      #     vram_estimate_gb: 20
+      #     best_for: "code_generation"
+
+      # # Small fast model for quick queries
+      # "qwen-7b":
+      #   name: "Qwen 2.5 7B Instruct Q4_K_M"
+      #   description: "Small fast model for quick queries and testing"
+      #   cmd: |
+      #     ${llama-base}
+      #     -m /models/Qwen2.5-7B-Instruct-Q4_K_M.gguf
+      #     -c ${ctx-medium}
+      #     --parallel 4
+      #     --cont-batching
+      #   ttl: 600  # Unload after 10 minutes
+      #   aliases:
+      #     - "qwen-7b-instruct"
+      #     - "quick"
+      #     - "fast"
+      #   metadata:
+      #     context_length: ${ctx-medium}
+      #     quantization: "Q4_K_M"
+      #     vram_estimate_gb: 5
+
+      # # Embedding model - small, persistent for RAG workflows
+      # "nomic-embed":
+      #   name: "Nomic Embed Text v1.5 Q8_0"
+      #   description: "Embedding model for semantic search and RAG"
+      #   cmd: |
+      #     ${llama-base}
+      #     -m /models/nomic-embed-text-v1.5-Q8_0.gguf
+      #     -c 8192
+      #     --embedding
+      #     --parallel 8
+      #   ttl: 0
+      #   aliases:
+      #     - "nomic-embed-text"
+      #     - "embeddings"
+      #   unlisted: false
+      #   metadata:
+      #     context_length: 8192
+      #     quantization: "Q8_0"
+      #     vram_estimate_gb: 1
+      #     model_type: "embedding"
+
+    # Groups configuration
+    # groups:
+    #   "large-models":
+    #     swap: true       # Only one model from this group can run at once
+    #     exclusive: true  # Unload other groups when loading a large model
+    #     members:
+    #       - "llama-70b"
+    #       - "qwen-32b"
+    #       - "deepseek-coder-33b"
+
+    #   # Small utility models - can run alongside others
+    #   "utility-models":
+    #     swap: false       # All models in this group can run simultaneously
+    #     exclusive: false  # Don't unload other groups
+    #     persistent: true  # Don't let other groups unload this one
+    #     members:
+    #       - "qwen-7b"
+    #       - "nomic-embed"
+
+    # Startup hooks
+    # hooks:
+    #   on_startup:
+    #     preload:
+    #       - "nomic-embed"
