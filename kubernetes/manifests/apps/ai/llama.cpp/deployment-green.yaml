@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llama-cpp-server
+  namespace: llama-cpp
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: llama-cpp
+  template:
+    metadata:
+      labels:
+        app: llama-cpp
+    spec:
+      tolerations:
+        - key: "amd.com/gpu"
+          operator: "Exists"
+          effect: "NoSchedule"
+      initContainers:
+        - name: model-downloader
+          image: harbor.bhamm-lab.com/library/model-downloader:latest
+          command: ["uv", "run", "python", "main.py"]
+          volumeMounts:
+            - name: models
+              mountPath: /models
+            - name: model-config
+              mountPath: /config
+          resources:
+            requests:
+              memory: 2Gi
+              cpu: 500m
+            limits:
+              memory: 6Gi
+              cpu: 4
+      containers:
+        - name: llama-server
+          image: ghcr.io/ggml-org/llama.cpp:server-vulkan
+          # The image entrypoint is the server, so we just pass args directly.
+          args:
+            - "--host"
+            - "0.0.0.0"
+            - "--port"
+            - "8080"
+            - "-m"
+            - "/models/$(MODEL_FILE)"
+            - "-ngl"
+            - "$(GPU_LAYERS)"
+            - "-c"
+            - "$(CONTEXT_SIZE)"
+            - "-b"
+            - "$(BATCH_SIZE)"
+            - "-np"
+            - "$(PARALLEL)"
+            - "--metrics"
+            - "-v"
+          env:
+            - name: MODEL_FILE
+              value: "Llama-3.3-70B-Instruct-Q4_K_M.gguf"
+            - name: GPU_LAYERS
+              value: "999"
+            - name: CONTEXT_SIZE
+              value: "16384"
+            - name: BATCH_SIZE
+              value: "512"
+            - name: PARALLEL
+              value: "4"
+            - name: GGML_VULKAN_DEVICE
+              value: "0"
+            - name: GGML_VK_VISIBLE_DEVICES
+              value: "0"
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            limits:
+              amd.com/gpu: 1
+              memory: 20Gi
+            requests:
+              amd.com/gpu: 1
+              memory: 15Gi
+          volumeMounts:
+            - name: models
+              mountPath: /models
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 3
+      volumes:
+        - name: models
+          persistentVolumeClaim:
+            claimName: llama-cpp-models
+        - name: model-config
+          configMap:
+            name: llama-models-config
+            items:
+              - key: models.yaml
+                path: models.yaml

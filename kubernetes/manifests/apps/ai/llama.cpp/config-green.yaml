@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: llama-models-config
+  namespace: llama-cpp
+  annotations:
+    argocd.argoproj.io/sync-wave: "21"
+data:
+  models.yaml: |
+    models:
+      - repo_id: bartowski/Llama-3.3-70B-Instruct-GGUF
+        filename: Llama-3.3-70B-Instruct-Q4_K_M.gguf
+        revision: main
