@@ -68,23 +68,11 @@ spec:
                 --host 0.0.0.0 \
                 --port 8080 \
                 -m "$MODEL_PATH" \
-                -ngl ${GPU_LAYERS} \
-                -c ${CONTEXT_SIZE} \
-                -b ${BATCH_SIZE} \
-                -np ${PARALLEL} \
                 --metrics \
                 -v
           env:
             - name: MODEL_FILE
               value: "Llama-3.3-70B-Instruct-Q4_K_M.gguf"
-            - name: GPU_LAYERS
-              value: "999"
-            - name: CONTEXT_SIZE
-              value: "16384"
-            - name: BATCH_SIZE
-              value: "512"
-            - name: PARALLEL
-              value: "4"
             - name: GGML_VULKAN_DEVICE
               value: "0"
             - name: GGML_VK_VISIBLE_DEVICES
