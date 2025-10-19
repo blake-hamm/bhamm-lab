@@ -29,7 +29,7 @@ data:
         -v
 
       # Context sizes for different model tiers
-      "ctx-large": 8192
+      "ctx-large": 16384
       "ctx-medium": 4096
       "ctx-small": 2048
 
