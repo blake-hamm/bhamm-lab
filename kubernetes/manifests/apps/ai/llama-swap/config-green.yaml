@@ -19,7 +19,7 @@ data:
     macros:
       # Base llama-server command with common Vulkan/AMD settings
       "llama-base": >
-        llama-server
+        /app/llama-server
         --host 0.0.0.0
         --port ${PORT}
         -ngl 999
