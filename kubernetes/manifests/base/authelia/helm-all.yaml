@@ -324,6 +324,27 @@ spec:
                   access_token_signed_response_alg: 'none'
                   userinfo_signed_response_alg: 'none'
                   token_endpoint_auth_method: 'client_secret_post'
+                - client_id: 'open-webui'
+                  client_name: 'Open WebUI'
+                  client_secret: '$pbkdf2-sha512$310000$JIyI.uQZOrGhu3Ym2ZVVHQ$crcz2WSCELmOD0B.zA1bR3zRTPoUH35kqIy4/VqO1J444Zxa9kFoAhDEC69rr8avHoPag4W3unL.nysJJQ5KbA'
+                  public: false
+                  authorization_policy: 'two_factor'
+                  require_pkce: false
+                  pkce_challenge_method: ''
+                  redirect_uris:
+                    - 'https://open-webui.bhamm-lab.com/oauth/oidc/callback'
+                  scopes:
+                    - 'openid'
+                    - 'profile'
+                    - 'groups'
+                    - 'email'
+                  response_types:
+                    - 'code'
+                  grant_types:
+                    - 'authorization_code'
+                  access_token_signed_response_alg: 'none'
+                  userinfo_signed_response_alg: 'none'
+                  token_endpoint_auth_method: 'client_secret_basic'
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
