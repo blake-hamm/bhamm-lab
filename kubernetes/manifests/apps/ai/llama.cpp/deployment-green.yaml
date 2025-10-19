@@ -15,6 +15,10 @@ spec:
       labels:
         app: llama-cpp
     spec:
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+        runAsGroup: 1000
       tolerations:
         - key: "amd.com/gpu"
           operator: "Exists"
@@ -38,23 +42,40 @@ spec:
       containers:
         - name: llama-server
           image: ghcr.io/ggml-org/llama.cpp:server-vulkan
+          # Use shell wrapper to expand environment variables
+          command: ["/bin/sh", "-c"]
           args:
-            - "--host"
-            - "0.0.0.0"
-            - "--port"
-            - "8080"
-            - "-m"
-            - "/models/$(MODEL_FILE)"
-            - "-ngl"
-            - "$(GPU_LAYERS)"
-            - "-c"
-            - "$(CONTEXT_SIZE)"
-            - "-b"
-            - "$(BATCH_SIZE)"
-            - "-np"
-            - "$(PARALLEL)"
-            - "--metrics"
-            - "-v"
+            - |
+              set -e
+
+              # Debug: show what's in /models
+              echo "=== Models directory ==="
+              ls -lah /models/ || true
+
+              # Construct model path
+              MODEL_PATH="/models/${MODEL_FILE}"
+
+              # Verify file exists
+              if [ ! -f "$MODEL_PATH" ]; then
+                echo "ERROR: Model file not found: $MODEL_PATH"
+                echo "Available files:"
+                ls -lah /models/
+                exit 1
+              fi
+
+              echo "✓ Starting llama-server with model: $MODEL_PATH"
+
+              # Start server with expanded variables
+              exec /llama-server \
+                --host 0.0.0.0 \
+                --port 8080 \
+                -m "$MODEL_PATH" \
+                -ngl ${GPU_LAYERS} \
+                -c ${CONTEXT_SIZE} \
+                -b ${BATCH_SIZE} \
+                -np ${PARALLEL} \
+                --metrics \
+                -v
           env:
             - name: MODEL_FILE
               value: "Llama-3.3-70B-Instruct-Q4_K_M.gguf"
@@ -79,7 +100,7 @@ spec:
               memory: 20Gi
             requests:
               amd.com/gpu: 1
-              memory: 8Gi
+              memory: 10Gi
           volumeMounts:
             - name: models
               mountPath: /models
@@ -87,7 +108,7 @@ spec:
             httpGet:
               path: /health
               port: 8080
-            initialDelaySeconds: 60
+            initialDelaySeconds: 120 # Increased - model loading takes time
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
@@ -95,7 +116,7 @@ spec:
             httpGet:
               path: /health
               port: 8080
-            initialDelaySeconds: 30
+            initialDelaySeconds: 90
             periodSeconds: 5
             timeoutSeconds: 5
             failureThreshold: 3
