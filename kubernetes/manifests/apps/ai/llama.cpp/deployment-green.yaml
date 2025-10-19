@@ -100,22 +100,6 @@ spec:
           volumeMounts:
             - name: models
               mountPath: /models
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            initialDelaySeconds: 120 # Increased - model loading takes time
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            initialDelaySeconds: 90
-            periodSeconds: 5
-            timeoutSeconds: 5
-            failureThreshold: 3
       volumes:
         - name: models
           persistentVolumeClaim:
