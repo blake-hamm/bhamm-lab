@@ -94,10 +94,10 @@ spec:
             limits:
               amd.com/gpu: 1
               memory: 20Gi
-              cpu: 1
+              cpu: 4
             requests:
               amd.com/gpu: 1
-              cpu: 4
+              cpu: 1
               memory: 10Gi
           volumeMounts:
             - name: models
