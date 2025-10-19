@@ -35,7 +35,7 @@ spec:
               cpu: 500m
             limits:
               memory: 6Gi
-              cpu: 4
+              cpu: 1
       containers:
         - name: llama-server
           image: ghcr.io/ggml-org/llama.cpp:server-vulkan
@@ -94,12 +94,30 @@ spec:
             limits:
               amd.com/gpu: 1
               memory: 20Gi
+              cpu: 1
             requests:
               amd.com/gpu: 1
+              cpu: 4
               memory: 10Gi
           volumeMounts:
             - name: models
               mountPath: /models
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 120 # Increased - model loading takes time
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 3
       volumes:
         - name: models
           persistentVolumeClaim:
