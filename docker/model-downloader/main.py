@@ -6,6 +6,7 @@ import logging
 import shutil
 from pathlib import Path
 from huggingface_hub import hf_hub_download
+from huggingface_hub.utils import enable_progress_bars
 
 logging.basicConfig(
     level=logging.INFO,
@@ -40,7 +41,6 @@ def download_model(model: dict) -> bool:
             repo_id=repo_id,
             filename=filename,
             revision=revision,
-            resume_download=True,
             cache_dir=CACHE_DIR,
         )
         logging.info(f"Moving downloaded file to {filepath}")
@@ -85,4 +85,5 @@ def main():
     logging.info("All models are ready!")
 
 if __name__ == "__main__":
+    enable_progress_bars()
     main()
