@@ -58,9 +58,9 @@ spec:
                     - key: app
                       operator: In
                       values:
-                        - llama-cpp
+                        - llama-swap
                 namespaces:
-                  - llama-cpp
+                  - llama-swap
                 topologyKey: "kubernetes.io/hostname"
         extraEnvVars:
           - name: DATABASE_URL
@@ -69,7 +69,7 @@ spec:
                 name: open-webui-postgresql-app
                 key: uri
         enableOpenaiApi: true
-        openaiBaseApiUrl: "http://llama-cpp-server.llama-cpp.svc.cluster.local:8080/v1"
+        openaiBaseApiUrl: "http://llama-swap.llama-swap.svc.cluster.local:8080/v1"
         openaiBaseApiUrls: []
         openaiApiKey: ""
         openaiApiKeys: []
