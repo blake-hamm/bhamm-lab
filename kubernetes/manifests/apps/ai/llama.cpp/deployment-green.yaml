@@ -22,6 +22,7 @@ spec:
       initContainers:
         - name: model-downloader
           image: harbor.bhamm-lab.com/library/model-downloader:latest
+          imagePullPolicy: Always
           command: ["uv", "run", "python", "main.py"]
           volumeMounts:
             - name: models
