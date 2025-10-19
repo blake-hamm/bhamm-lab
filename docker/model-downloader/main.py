@@ -5,7 +5,7 @@ import hashlib
 import logging
 import shutil
 from pathlib import Path
-from huggingface_hub import hf_hub_download, HfHubHTTPError
+from huggingface_hub import hf_hub_download
 
 logging.basicConfig(
     level=logging.INFO,
@@ -48,7 +48,7 @@ def download_model(model: dict) -> bool:
         logging.info("Download complete.")
         return True
 
-    except (HfHubHTTPError, IOError) as e:
+    except Exception as e:
         logging.error(f"Download failed: {e}")
         if filepath.exists():
             filepath.unlink()
