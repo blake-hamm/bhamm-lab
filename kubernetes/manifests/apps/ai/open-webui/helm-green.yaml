@@ -74,70 +74,26 @@ spec:
         openaiApiKey: ""
         openaiApiKeys: []
         sso:
-          # -- **Enable SSO authentication globally** must enable to use SSO authentication
-          # @section -- SSO Configuration
-          enabled: false
-          # -- Enable account creation when logging in with OAuth (distinct from regular signup)
-          # @section -- SSO Configuration
-          enableSignup: false
-          # -- Allow logging into accounts that match email from OAuth provider (considered insecure)
-          # @section -- SSO Configuration
-          mergeAccountsByEmail: false
-          # -- Enable OAuth role management through access token roles claim
-          # @section -- SSO Configuration
-          enableRoleManagement: false
-          # -- Enable OAuth group management through access token groups claim
-          # @section -- SSO Configuration
-          enableGroupManagement: false
+          enabled: true
+          enableSignup: true
+          mergeAccountsByEmail: true
+          enableRoleManagement: true
+          enableGroupManagement: true
           oidc:
-            # -- Enable OIDC authentication
-            # @section -- OIDC configuration
-            enabled: false
-            # -- OIDC client ID
-            # @section -- OIDC configuration
-            clientId: ""
-            # -- OIDC client secret (ignored if clientExistingSecret is set)
-            # @section -- OIDC configuration
+            enabled: true
+            clientId: "open-webui"
             clientSecret: ""
-            # -- OICD client secret from existing secret
-            # @section -- OIDC configuration
-            clientExistingSecret: ""
-            # -- OIDC client secret key from existing secret
-            # @section -- OIDC configuration
-            clientExistingSecretKey: ""
-            # -- OIDC provider well known URL
-            # @section -- OIDC configuration
-            providerUrl: ""
-            # -- Name of the provider to show on the UI
-            # @section -- OIDC configuration
-            providerName: "SSO"
-            # -- Scopes to request (space-separated).
-            # @section -- OIDC configuration
-            scopes: "openid email profile"
+            clientExistingSecret: "open-webui-external-secret"
+            clientExistingSecretKey: "OAUTH_CLIENT_SECRET"
+            providerUrl: "https://auth.bhamm-lab.com/.well-known/openid-configuration"
+            providerName: "Authelia"
+            scopes: "openid email profile groups"
           roleManagement:
-            # -- The claim that contains the roles (can be nested, e.g., user.roles)
-            # @section -- Role management configuration
-            rolesClaim: "roles"
-            # -- Comma-separated list of roles allowed to log in (receive open webui role user)
-            # @section -- Role management configuration
-            allowedRoles: ""
-            # -- Comma-separated list of roles allowed to log in as admin (receive open webui role admin)
-            # @section -- Role management configuration
-            adminRoles: ""
+            rolesClaim: "groups"
+            allowedRoles: "user,admin"
+            adminRoles: "admin"
           groupManagement:
-            # -- The claim that contains the groups (can be nested, e.g., user.memberOf)
-            # @section -- SSO Configuration
             groupsClaim: "groups"
-          trustedHeader:
-            # -- Enable trusted header authentication
-            # @section -- SSO trusted header authentication
-            enabled: false
-            # -- Header containing the user's email address
-            # @section -- SSO trusted header authentication
-            emailHeader: ""
-            # -- Header containing the user's name (optional, used for new user creation)
-            # @section -- SSO trusted header authentication
-            nameHeader: ""
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
