@@ -39,7 +39,6 @@ spec:
       containers:
         - name: llama-server
           image: ghcr.io/ggml-org/llama.cpp:server-vulkan
-          # Use shell wrapper to expand environment variables
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -63,7 +62,7 @@ spec:
               echo "✓ Starting llama-server with model: $MODEL_PATH"
 
               # Start server with expanded variables
-              exec /llama-server \
+              exec /app/llama-server \
                 --host 0.0.0.0 \
                 --port 8080 \
                 -m "$MODEL_PATH" \
