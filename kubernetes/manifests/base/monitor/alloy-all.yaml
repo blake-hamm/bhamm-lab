@@ -81,7 +81,7 @@ spec:
               loki.process "pod_logs" {
                 stage.labels {
                   values = {
-                    hostname = sys.env("HOSTNAME")
+                    hostname = sys.env("HOSTNAME"),
                   }
                 }
 
@@ -114,7 +114,7 @@ spec:
               // Discover all .log files and specific non-.log files under /var/log
               local.file_match "host_log_files" {
                 path_targets = [
-                  { __path__  = "/var/log/syslog" },
+                  { __path__ = "/var/log/syslog" },
                   { __path__ = "/var/log/messages" },
                 ]
               }
@@ -134,7 +134,7 @@ spec:
                 }
                 stage.labels {
                   values = {
-                    hostname = sys.env("HOSTNAME")
+                    hostname = sys.env("HOSTNAME"),
                   }
                 }
                 forward_to = [loki.write.loki.receiver]
