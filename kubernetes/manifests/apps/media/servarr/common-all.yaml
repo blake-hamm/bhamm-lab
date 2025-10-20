@@ -44,7 +44,7 @@ spec:
           - name: radarr-config
           - name: unpackerr-config
           - name: jellyfin-config
-            storageSize: 2Gi
+            storageSize: 3Gi
           - name: sonarr-config
           - name: prowlarr-config
           - name: qbittorrent-config
