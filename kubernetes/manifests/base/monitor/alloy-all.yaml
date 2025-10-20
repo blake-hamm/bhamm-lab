@@ -81,7 +81,7 @@ spec:
               loki.process "pod_logs" {
                 stage.static_labels {
                     values = {
-                      cluster = "default",
+                      hostname = "${HOSTNAME}"
                     }
                 }
 
@@ -106,8 +106,27 @@ spec:
                 stage.labels {
                   values = {
                     kubernetes_cluster_events = "job",
+                    hostname = "${HOSTNAME}"
                   }
                 }
+              }
+
+              // Add host-logs
+              loki.source.file "host_logs" {
+                include = [
+                  "/var/log/**/*.log",
+                  "/var/log/messages",
+                ]
+                forward_to = [loki.process.host_logs.receiver]
+              }
+              loki.process "host_logs" {
+                stage.labels {
+                  values = {
+                    job     = "host-logs",
+                    hostname = "${HOSTNAME}"
+                  }
+                }
+                forward_to = [loki.write.loki.receiver]
               }
           mounts:
             varlog: true
