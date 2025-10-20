@@ -111,18 +111,25 @@ spec:
                 }
               }
 
-              // Add host-logs
-              loki.source.file "host_logs" {
-                include = [
-                  "/var/log/**/*.log",
-                  "/var/log/messages",
+              // Discover all .log files and specific non-.log files under /var/log
+              local.file_match "host_log_files" {
+                path_targets = [
+                  { __path__ = "/var/log/**/*.log" },
+                  { __path__ = "/var/log/messages" },
                 ]
-                forward_to = [loki.process.host_logs.receiver]
               }
+
+              // Tail discovered files
+              loki.source.file "host_logs" {
+                targets    = local.file_match.host_log_files.targets
+                forward_to = [loki.process.host_logs.receiver]
+                tail_from_end = true
+              }
+
               loki.process "host_logs" {
-                stage.labels {
+                stage.static_labels {
                   values = {
-                    job     = "host-logs",
+                    job      = "host-logs",
                     hostname = "${HOSTNAME}",
                   }
                 }
