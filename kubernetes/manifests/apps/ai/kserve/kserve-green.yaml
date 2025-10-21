@@ -30,7 +30,7 @@ spec:
               additionalIngressDomains: []
               domainTemplate: "{{ .Name }}-{{ .Namespace }}.{{ .IngressDomain }}"
               disableIstioVirtualHost: true
-              disableIngressCreation: true
+              disableIngressCreation: false
               ingressGateway:
                 enableGatewayApi: false
                 createGateway: false
