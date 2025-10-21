@@ -16,6 +16,16 @@ spec:
     targetRevision: feature/enhance-openwebui
     directory:
       include: "kustomization.yaml"
+    kustomize:
+      patches:
+        - target:
+            kind: ConfigMap
+            name: config-network
+            namespace: knative-serving
+          patch: |-
+            - op: add
+              path: /data/ingress-class
+              value: kourier.ingress.networking.knative.dev
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
