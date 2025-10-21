@@ -1,0 +1,12 @@
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "pmml-demo"
+  annotations:
+    argocd.argoproj.io/sync-wave: "26"
+spec:
+  predictor:
+    model:
+      modelFormat:
+        name: pmml
+      storageUri: "gs://kfserving-examples/models/pmml"
