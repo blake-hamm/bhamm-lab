@@ -1,0 +1,67 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kserve
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "25"
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kserve
+  project: default
+  source:
+    repoURL: oci://ghcr.io/kserve/charts/kserve
+    targetRevision: v0.15.2
+    chart: kserve
+    helm:
+      valuesObject:
+        kserve:
+          service:
+            serviceClusterIPNone: false
+          metricsaggregator:
+            enablePrometheusScraping: "true"
+          controller:
+            deploymentMode: "Knative"
+            metricsBindAddress: "127.0.0.1"
+            metricsBindPort: "8080"
+            gateway:
+              domain: example.com
+              additionalIngressDomains: []
+              domainTemplate: "{{ .Name }}-{{ .Namespace }}.{{ .IngressDomain }}"
+              disableIstioVirtualHost: true
+              disableIngressCreation: true # Default is false
+              ingressGateway:
+                enableGatewayApi: false
+                createGateway: false
+                className: istio
+            # -- Indicates whether to create an addressable resolver ClusterRole for Knative Eventing.
+            # This ClusterRole grants the necessary permissions for the Knative's DomainMapping reconciler to resolve InferenceService addressables.
+            knativeAddressableResolver:
+              enabled: false
+          localmodel:
+            enabled: false
+            jobNamespace: kserve-localmodel-jobs
+            jobTTLSecondsAfterFinished: 3600
+            securityContext:
+              fsGroup: 1000
+            disableVolumeManagement: false
+            agent:
+              nodeSelector: {}
+              affinity: {}
+              tolerations: []
+              hostPath: /mnt/models
+              reconcilationFrequencyInSecs: 60
+              securityContext:
+                runAsUser: 1000
+                runAsNonRoot: true
+          autoscaler:
+            scaleUpStabilizationWindowSeconds: "0"
+            scaleDownStabilizationWindowSeconds: "300"
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true

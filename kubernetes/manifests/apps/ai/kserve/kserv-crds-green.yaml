@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kserve-crds
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "24"
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kserve
+  project: default
+  source:
+    repoURL: oci://ghcr.io/kserve/charts/kserve-crds
+    targetRevision: v0.15.2
+    chart: kserve-crds
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true
