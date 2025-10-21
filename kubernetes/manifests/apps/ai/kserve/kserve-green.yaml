@@ -22,7 +22,7 @@ spec:
           metricsaggregator:
             enablePrometheusScraping: "true"
           controller:
-            deploymentMode: "RawDeployment"
+            deploymentMode: "Serverless"
             metricsBindAddress: "127.0.0.1"
             metricsBindPort: "8080"
             gateway:
