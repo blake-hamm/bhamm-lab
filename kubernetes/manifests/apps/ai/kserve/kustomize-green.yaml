@@ -14,8 +14,6 @@ spec:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
     path: kubernetes/manifests/apps/ai/kserve
     targetRevision: feature/enhance-openwebui
-    directory:
-      include: "kustomization.yaml"
     kustomize:
       patches:
         - target:
