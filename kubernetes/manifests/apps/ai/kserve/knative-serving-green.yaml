@@ -17,6 +17,7 @@ spec:
   ingress:
     kourier:
       enabled: true
+      service-type: ClusterIP
   config:
     network:
       ingress-class: "kourier.ingress.networking.knative.dev"
