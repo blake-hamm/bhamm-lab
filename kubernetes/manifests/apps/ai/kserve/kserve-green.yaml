@@ -11,7 +11,7 @@ spec:
     namespace: kserve
   project: default
   source:
-    repoURL: oci://ghcr.io/kserve/charts/kserve
+    repoURL: ghcr.io/kserve/charts/kserve
     targetRevision: v0.15.2
     chart: kserve
     helm:
