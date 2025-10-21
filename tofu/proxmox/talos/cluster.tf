@@ -53,6 +53,7 @@ data "talos_machine_configuration" "this" {
       interface     = each.value.interface
       taint         = try(each.value.taint, "")
       vlan_id       = var.vlan_id
+      nameservers   = var.dns_servers
     }), each.value.machine_type == "controlplane" ?
     templatefile("${path.module}/config/master.yaml.tftpl", {
       # kubelet = var.cluster.kubelet
@@ -90,7 +91,8 @@ resource "talos_machine_configuration_apply" "bare_metal" {
           disk = "/dev/nvme0n1"
         }
       }
-    })
+    }),
+    file("${path.module}/config/volumes-amd-framework.yaml")
   ]
 }
 

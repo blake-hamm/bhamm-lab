@@ -1,0 +1,17 @@
+apiVersion: v1alpha1
+kind: VolumeConfig
+name: EPHEMERAL
+provisioning:
+  diskSelector:
+    match: disk.transport == 'nvme'
+  minSize: 100GB
+  maxSize: 150GB
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: local-path-provisioner
+provisioning:
+  diskSelector:
+    match: disk.transport == 'nvme'
+  minSize: 200GB
+  maxSize: 325GB

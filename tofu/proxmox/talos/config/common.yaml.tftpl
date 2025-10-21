@@ -1,6 +1,6 @@
 machine:
   install:
-    image: ghcr.io/siderolabs/installer/${schematic_id}:${talos_version}
+    image: factory.talos.dev/installer/${schematic_id}:${talos_version}
   nodeLabels:
     topology.kubernetes.io/region: ${cluster_name}
     topology.kubernetes.io/zone: ${node_name}
@@ -13,6 +13,7 @@ machine:
 %{ endif }
   network:
     hostname: ${hostname}
+    nameservers: ${jsonencode(nameservers)}
     interfaces:
       - addresses:
           - ${ip}/24
