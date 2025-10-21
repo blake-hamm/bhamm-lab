@@ -11,9 +11,9 @@ spec:
     namespace: kserve
   project: default
   source:
-    repoURL: ghcr.io/kserve/charts/kserve-crds
+    repoURL: https://github.com/kserve/kserve.git
     targetRevision: v0.15.2
-    chart: kserve-crds
+    path: charts/kserve-crd
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
