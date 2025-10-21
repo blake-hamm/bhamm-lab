@@ -12,7 +12,7 @@ spec:
     chart: knative-operator
   destination:
     server: https://kubernetes.default.svc
-    namespace: kserve
+    namespace: knative-operator
   project: default
   syncPolicy:
     syncOptions:
