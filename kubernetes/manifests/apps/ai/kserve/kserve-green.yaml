@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: https://github.com/kserve/kserve.git
     targetRevision: v0.15.2
-    path: charts/kserve
+    path: charts/kserve-resources
     helm:
       valuesObject:
         kserve:
