@@ -1,14 +1,15 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kserver-kustomize
+  name: knative-operator
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "21"
 spec:
   source:
-    repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/enhance-openwebui
-    path: kubernetes/manifests/apps/ai/kserve
-    kustomize: {}
+    repoURL: https://knative.github.io/operator
+    targetRevision: knative-v1.19.6
+    chart: knative-operator
   destination:
     server: https://kubernetes.default.svc
     namespace: kserve
@@ -17,7 +18,6 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ApplyOutOfSyncOnly=true
-      - ApplyServerSide=true
     automated:
       prune: true
       selfHeal: true
