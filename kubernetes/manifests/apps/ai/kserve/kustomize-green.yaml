@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kserver-kustomize
+  namespace: argocd
+spec:
+  source:
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    targetRevision: feature/enhance-openwebui
+    path: kubernetes/manifests/apps/ai/kserve
+    kustomize: {}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kserve
+  project: default
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - ApplyServerSide=true
+    automated:
+      prune: true
+      selfHeal: true
