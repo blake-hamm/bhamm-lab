@@ -52,4 +52,11 @@ curl -X POST --data-binary @tofu/proxmox/talos/config/schematic-amd-framework.ya
 talosctl upgrade --nodes 10.0.30.79 \
   --image  factory.talos.dev/metal-installer/<id>:v1.11.2 \
   --wait --debug
+
+# To remove a node from a cluster
+talosctl -n 10.0.30.79 reset
+
+# To get disk and volume status info
+talosctl -n 10.0.30.79 get disks -o yaml
+talosctl -n 10.0.30.79 get volumestatus -o yaml
 ```
