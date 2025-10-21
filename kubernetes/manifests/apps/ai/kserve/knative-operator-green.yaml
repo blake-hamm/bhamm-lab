@@ -8,7 +8,7 @@ metadata:
 spec:
   source:
     repoURL: https://knative.github.io/operator
-    targetRevision: 1.19.6
+    targetRevision: v1.19.3
     chart: knative-operator
   destination:
     server: https://kubernetes.default.svc
