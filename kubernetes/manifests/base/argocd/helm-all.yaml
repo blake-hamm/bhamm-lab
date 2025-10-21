@@ -59,6 +59,8 @@ spec:
                   essential: true
             server.session.cookie.sameSite: "None"
             server.session.cookie.secure: "true"
+            resource.compareoptions: |
+              ignoreAggregatedRoles: true
             resource.exclusions: |
               - apiGroups:
                 - velero.io
