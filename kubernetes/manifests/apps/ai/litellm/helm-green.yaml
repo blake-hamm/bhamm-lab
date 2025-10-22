@@ -56,10 +56,10 @@ spec:
           database: litellm
           url: postgresql://$(DATABASE_USERNAME):$(DATABASE_PASSWORD)@$(DATABASE_HOST)/$(DATABASE_NAME)
           secret:
-            name: postgres
+            name: litellm-postgresql-app
             usernameKey: username
             passwordKey: password
-            endpointKey: ""
+            endpointKey: host
           deployStandalone: false
         # requires cache: true in config file
         # either enable this or pass a secret for REDIS_HOST, REDIS_PORT, REDIS_PASSWORD or REDIS_URL
@@ -87,8 +87,6 @@ spec:
               enabled: false
         # Additional environment variables to be added to the deployment as a list of k8s env vars
         extraEnvVars:
-          - name: DATABASE_URL
-            value: "litellm-postgresql-rw"
           - name: LITELLM_MASTER_KEY
             valueFrom:
               secretKeyRef:
