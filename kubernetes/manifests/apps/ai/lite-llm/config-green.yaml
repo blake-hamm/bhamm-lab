@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: config
-  namespace: llama-swap
+  name: litellm-config
+  namespace: litellm
   annotations:
     argocd.argoproj.io/sync-wave: "23"
 data:
