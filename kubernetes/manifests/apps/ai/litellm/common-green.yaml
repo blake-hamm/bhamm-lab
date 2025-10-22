@@ -38,11 +38,6 @@ spec:
             enabled: false
         dragonfly:
           enabled: true
-        k8up:
-          backup:
-            enabled: true
-          restore:
-            enabled: false
         externalSecrets:
           enabled: true
           secrets:
