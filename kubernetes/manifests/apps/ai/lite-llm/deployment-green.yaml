@@ -23,7 +23,7 @@ spec:
             - "/app/config.yaml"
           ports:
             - containerPort: 4000
-          envFrom:
+          env:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
