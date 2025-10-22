@@ -18,22 +18,32 @@ spec:
       containers:
         - name: litellm
           image: ghcr.io/berriai/litellm:main-v1.30.3
-          # args:
-          #   - "--config"
-          #   - "/app/config.yaml"
+          args:
+            - "--config"
+            - "/app/config.yaml"
           ports:
             - containerPort: 4000
-          extraEnvVars:
+          envFrom:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: litellm-postgresql-app
                   key: uri
-          #   volumeMounts:
-          #     - name: config-volume
-          #       mountPath: /app/config.yaml
-          #       subPath: config.yaml
-          # volumes:
-          #   - name: config-volume
-          #     configMap:
-          #       name: litellm-config
+            - name: LITELLM_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-external-secret
+                  key: LITELLM_MASTER_KEY
+            - name: LITELLM_SALT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-external-secret
+                  key: LITELLM_SALT_KEY
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+      volumes:
+        - name: config-volume
+          configMap:
+            name: litellm-config

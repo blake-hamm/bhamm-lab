@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  namespace: llama-swap
+  annotations:
+    argocd.argoproj.io/sync-wave: "23"
+data:
+  config.yaml: |
+    model_list:
+      - model_name: llama-70b
+        litellm_params:
+          model: openai/llama-70b
+          api_base: http://llama-swap.llama-swap.svc.cluster.local:8080/v1
+          api_key: ""
