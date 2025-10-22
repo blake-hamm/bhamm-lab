@@ -47,7 +47,7 @@ spec:
                 api_key: "dummy"
         resources:
           requests:
-            cpu: 300m
+            cpu: 500m
             memory: 1024Mi
           limits:
             cpu: 1000m
