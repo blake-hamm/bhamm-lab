@@ -4,7 +4,7 @@ metadata:
   name: litellm-common
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-wave: "18"
 spec:
   destination:
     namespace: litellm
@@ -17,7 +17,12 @@ spec:
     helm:
       valuesObject:
         name: litellm
-        pvc: []
+        postgresql:
+          enabled: true
+          backup:
+            enabled: true
+          restore:
+            enabled: false
         k8up:
           backup:
             enabled: false
