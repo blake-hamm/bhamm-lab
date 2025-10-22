@@ -43,10 +43,10 @@ spec:
                 api_base: http://llama-swap.llama-swap.svc.cluster.local:8080/v1
                 api_key: "dummy"
         resources:
-          limits:
+          requests:
             cpu: 200m
             memory: 256Mi
-          requests:
+          limits:
             cpu: 300m
             memory: 512Mi
         nodeSelector:
