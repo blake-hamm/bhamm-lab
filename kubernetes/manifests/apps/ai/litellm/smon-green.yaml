@@ -4,6 +4,7 @@ metadata:
   name: litellm
   namespace: litellm
   annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "26"
   labels:
     app.kubernetes.io/name: litellm
