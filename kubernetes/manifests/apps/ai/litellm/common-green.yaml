@@ -23,6 +23,8 @@ spec:
             enabled: true
           restore:
             enabled: false
+        dragonfly:
+          enabled: true
         k8up:
           backup:
             enabled: true
