@@ -32,6 +32,7 @@ spec:
             redis_port: os.environ/REDIS_PORT
             redis_password: os.environ/REDIS_PASSWORD
           litellm_settings:
+            callbacks: ["prometheus"]
             cache: True
             cache_params:
               type: redis
