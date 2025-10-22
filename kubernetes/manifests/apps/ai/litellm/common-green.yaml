@@ -17,6 +17,19 @@ spec:
     helm:
       valuesObject:
         name: litellm
+        ingressRoutes:
+          - name: litellm
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - match: Host(`litellm.bhamm-lab.com`)
+                kind: Rule
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: litellm
+                    scheme: http
+                    port: http
         postgresql:
           enabled: true
           backup:
