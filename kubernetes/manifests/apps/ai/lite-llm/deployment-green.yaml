@@ -23,6 +23,12 @@ spec:
           #   - "/app/config.yaml"
           ports:
             - containerPort: 4000
+          extraEnvVars:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-postgresql-app
+                  key: uri
           #   volumeMounts:
           #     - name: config-volume
           #       mountPath: /app/config.yaml
