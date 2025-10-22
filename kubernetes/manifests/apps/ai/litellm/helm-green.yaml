@@ -36,6 +36,19 @@ spec:
         proxyConfigMap:
           create: true
         proxy_config:
+          router_settings:
+            routing_strategy: simple-shuffle
+            redis_host: os.environ/REDIS_HOST
+            redis_port: os.environ/REDIS_PORT
+            redis_password: os.environ/REDIS_PASSWORD
+          litellm_settings:
+            cache: True
+            cache_params:
+              type: redis
+              host: os.environ/REDIS_HOST
+              port: os.environ/REDIS_PORT
+              password: os.environ/REDIS_PASSWORD
+              supported_call_types: [] # Disabled llm caching (use qdrant instead)
           model_list:
             - model_name: llama-70b
               litellm_params:
@@ -65,31 +78,14 @@ spec:
             passwordKey: password
             endpointKey: host
           deployStandalone: false
-        # requires cache: true in config file
-        # either enable this or pass a secret for REDIS_HOST, REDIS_PORT, REDIS_PASSWORD or REDIS_URL
-        # with cache: true to use existing redis instance
-        redis:
-          enabled: false
-          architecture: standalone
-        # Prisma migration job settings
+        envVars:
+          REDIS_HOST: "litellm-dragonfly"
+          REDIS_PORT: "6379"
+          REIDS_PASSWORD: ""
         migrationJob:
-          enabled: true # Enable or disable the schema migration Job
-          retries: 3 # Number of retries for the Job in case of failure
-          backoffLimit: 4 # Backoff limit for Job restarts
-          disableSchemaUpdate: false # Skip schema migrations for specific environments. When True, the job will exit with code 0.
-          annotations: {}
-          ttlSecondsAfterFinished: 120
-          resources:
-            requests:
-              cpu: 100m
-              memory: 100Mi
-          extraContainers: []
           hooks:
             argocd:
               enabled: true
-            helm:
-              enabled: false
-        # Additional environment variables to be added to the deployment as a list of k8s env vars
         extraEnvVars:
           - name: LITELLM_MASTER_KEY
             valueFrom:
