@@ -16,7 +16,7 @@ spec:
     path: deploy/charts/litellm-helm
     helm:
       valuesObject:
-        replicaCount: 2
+        replicaCount: 1
         image:
           repository: ghcr.io/berriai/litellm
           pullPolicy: Always
