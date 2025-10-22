@@ -21,16 +21,6 @@ spec:
           repository: ghcr.io/berriai/litellm
           pullPolicy: Always
           tag: "v1.77.7-stable"
-        # At the time of writing, the litellm docker image requires write access to the
-        #  filesystem on startup so that prisma can install some dependencies.
-        podSecurityContext: {}
-        securityContext: {}
-        # capabilities:
-        #   drop:
-        #     - ALL
-        # readOnlyRootFilesystem: false
-        # runAsNonRoot: true
-        # runAsUser: 1000
         masterkeySecretName: "litellm-external-secret"
         masterkeySecretKey: "LITELLM_MASTER_KEY"
         proxyConfigMap:
@@ -57,11 +47,11 @@ spec:
                 api_key: "dummy"
         resources:
           requests:
-            cpu: 100m
-            memory: 512Mi
-          limits:
             cpu: 300m
             memory: 1024Mi
+          limits:
+            cpu: 1000m
+            memory: 2048Mi
         nodeSelector:
           feature.node.kubernetes.io/amd-gpu: "true"
         tolerations:
