@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: litellm-proxy
+  namespace: litellm
+  annotations:
+    argocd.argoproj.io/sync-wave: "24"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: litellm-proxy
+  template:
+    metadata:
+      labels:
+        app: litellm-proxy
+    spec:
+      containers:
+        - name: litellm
+          image: ghcr.io/berriai/litellm:main-v1.30.3
+          # args:
+          #   - "--config"
+          #   - "/app/config.yaml"
+          ports:
+            - containerPort: 4000
+          #   volumeMounts:
+          #     - name: config-volume
+          #       mountPath: /app/config.yaml
+          #       subPath: config.yaml
+          # volumes:
+          #   - name: config-volume
+          #     configMap:
+          #       name: litellm-config
