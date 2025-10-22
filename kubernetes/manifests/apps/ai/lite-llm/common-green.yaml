@@ -25,9 +25,20 @@ spec:
             enabled: false
         k8up:
           backup:
-            enabled: false
+            enabled: true
           restore:
             enabled: false
+        externalSecrets:
+          enabled: true
+          secrets:
+            - secretKey: LITELLM_MASTER_KEY
+              remoteRef:
+                key: /default/litellm
+                property: LITELLM_MASTER_KEY
+            - secretKey: LITELLM_SALT_KEY
+              remoteRef:
+                key: /default/litellm
+                property: LITELLM_SALT_KEY
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
