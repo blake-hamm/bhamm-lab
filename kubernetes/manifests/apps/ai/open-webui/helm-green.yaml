@@ -64,7 +64,7 @@ spec:
           - name: ENABLE_LOGIN_FORM
             value: "False"
         enableOpenaiApi: true
-        openaiBaseApiUrl: "http://litellm.litellm.svc.cluster.local:4000"
+        openaiBaseApiUrl: "http://litellm.litellm.svc.cluster.local:4000/v1"
         openaiBaseApiUrls: []
         openaiApiKey: ""
         openaiApiKeys: []
