@@ -54,6 +54,12 @@ spec:
             - "on"
             - --host
             - 0.0.0.0
+            - --metrics
+            - --no-webui
+            - --parallel
+            - "2"
+            - -c # Context size
+            - "16384"
             - -v
             - -hf
             - unsloth/gpt-oss-120b-GGUF
