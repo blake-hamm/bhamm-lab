@@ -1,0 +1,28 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: litellm-l7-visibility
+  namespace: litellm
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: litellm
+      app.kubernetes.io/instance: litellm
+  ingress:
+    - fromEndpoints:
+        - matchLabels: {} # Allow from any pod
+      toPorts:
+        - ports:
+            - port: "4000"
+              protocol: TCP
+          rules:
+            http: [{}] # Enable HTTP inspection
+  egress:
+    - toEndpoints:
+        - matchLabels: {}
+      toPorts:
+        - ports:
+            - port: "4000"
+              protocol: TCP
+          rules:
+            http: [{}]
