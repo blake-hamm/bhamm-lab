@@ -51,38 +51,12 @@ spec:
         - key: "amd.com/gpu"
           operator: "Exists"
           effect: "NoSchedule"
-      initContainers:
-        - name: model-downloader
-          image: harbor.bhamm-lab.com/library/model-downloader:latest
-          command: ["uv", "run", "python", "main.py"]
-          volumeMounts:
-            - name: models
-              mountPath: /models
-            - name: config
-              mountPath: /config
-          env:
-            - name: CONFIG_FILE
-              value: "/config/downloads.yaml"
-          resources:
-            requests:
-              memory: 2Gi
-              cpu: 500m
-            limits:
-              memory: 6Gi
-              cpu: 1
       containers:
         - name: llama-swap
-          image: kyuz0/amd-strix-halo-toolboxes:rocm-6.4.4
-          # args:
-          #   - --config
-          #   - /config/llama-swap.yaml
-          #   - --listen
-          #   - 0.0.0.0:8080
-          # env:
-          #   - name: GGML_VULKAN_DEVICE
-          #     value: "0"
-          #   - name: GGML_VK_VISIBLE_DEVICES
-          #     value: "0"
+          image: kyuz0/amd-strix-halo-toolboxes:rocm-6.4.4-rocwmma
+          args:
+            - llama-cli
+            - --list-devices
           ports:
             - containerPort: 8080
               name: http
@@ -98,8 +72,6 @@ spec:
           volumeMounts:
             - name: models
               mountPath: /models
-            - name: config
-              mountPath: /config
           livenessProbe:
             httpGet:
               path: /health
@@ -120,6 +92,3 @@ spec:
         - name: models
           persistentVolumeClaim:
             claimName: gpt-oss-120b
-        - name: config
-          configMap:
-            name: gpt-oss-120b
