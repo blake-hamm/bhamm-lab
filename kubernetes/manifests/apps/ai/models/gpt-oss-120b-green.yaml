@@ -54,6 +54,7 @@ spec:
             - "on"
             - --host
             - 0.0.0.0
+            - -v
             - -hf
             - unsloth/gpt-oss-120b-GGUF
           ports:
