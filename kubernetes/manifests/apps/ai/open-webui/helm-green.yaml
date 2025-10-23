@@ -50,19 +50,12 @@ spec:
           - key: "amd.com/gpu"
             operator: "Exists"
             effect: "NoSchedule"
-        affinity:
-          podAffinity:
-            requiredDuringSchedulingIgnoredDuringExecution:
-              - labelSelector:
-                  matchExpressions:
-                    - key: app
-                      operator: In
-                      values:
-                        - llama-swap
-                namespaces:
-                  - llama-swap
-                topologyKey: "kubernetes.io/hostname"
         extraEnvVars:
+          - name: OPENAI_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: open-webui-external-secrets
+                key: OPENAI_API_KEY
           - name: DATABASE_URL
             valueFrom:
               secretKeyRef:
@@ -71,7 +64,7 @@ spec:
           - name: ENABLE_LOGIN_FORM
             value: "False"
         enableOpenaiApi: true
-        openaiBaseApiUrl: "http://llama-swap.llama-swap.svc.cluster.local:8080/v1"
+        openaiBaseApiUrl: "http://litellm.litellm.svc.cluster.local:4000"
         openaiBaseApiUrls: []
         openaiApiKey: ""
         openaiApiKeys: []

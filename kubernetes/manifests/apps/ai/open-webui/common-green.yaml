@@ -33,6 +33,10 @@ spec:
         externalSecrets:
           enabled: true
           secrets:
+            - secretKey: OPENAI_API_KEY
+              remoteRef:
+                key: /default/litellm
+                property: LITELLM_MASTER_KEY
             - secretKey: OAUTH_CLIENT_SECRET
               remoteRef:
                 key: /default/open-webui
