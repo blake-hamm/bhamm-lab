@@ -62,4 +62,7 @@ talosctl -n 10.0.30.79 get volumestatus -o yaml
 
 # To reboot
 talosctl reboot -n 10.0.30.78
+
+# View all resources
+talosctl get rd -n 10.0.30.78
 ```
