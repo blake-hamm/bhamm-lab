@@ -9,20 +9,6 @@ spec:
       app.kubernetes.io/name: litellm
       app.kubernetes.io/instance: litellm
   ingress:
-    - fromEndpoints:
-        - matchLabels: {} # Allow from any pod
-      toPorts:
-        - ports:
-            - port: "4000"
-              protocol: TCP
-          rules:
-            http: [{}] # Enable HTTP inspection
+    - {}
   egress:
-    - toEndpoints:
-        - matchLabels: {}
-      toPorts:
-        - ports:
-            - port: "4000"
-              protocol: TCP
-          rules:
-            http: [{}]
+    - {}
