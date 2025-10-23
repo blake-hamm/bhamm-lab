@@ -1,0 +1,124 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  namespace: gpt-oss-120b
+  annotations:
+    argocd.argoproj.io/sync-wave: "21"
+data:
+  downloads.yaml: |
+    models:
+      - repo_id: unsloth/gpt-oss-120b-GGUF
+        filename: gpt-oss-120b-F16.gguf
+        revision: main
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gpt-oss-120b
+  annotations:
+    k8up.io/backup: "true"
+    argocd.argoproj.io/sync-wave: "21"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: local-path
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gpt-oss-120b
+  namespace: models
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: gpt-oss-120b
+  template:
+    metadata:
+      labels:
+        app: gpt-oss-120b
+    spec:
+      tolerations:
+        - key: "amd.com/gpu"
+          operator: "Exists"
+          effect: "NoSchedule"
+      initContainers:
+        - name: model-downloader
+          image: harbor.bhamm-lab.com/library/model-downloader:latest
+          command: ["uv", "run", "python", "main.py"]
+          volumeMounts:
+            - name: models
+              mountPath: /models
+            - name: config
+              mountPath: /config
+          env:
+            - name: CONFIG_FILE
+              value: "/config/downloads.yaml"
+          resources:
+            requests:
+              memory: 2Gi
+              cpu: 500m
+            limits:
+              memory: 6Gi
+              cpu: 1
+      containers:
+        - name: llama-swap
+          image: kyuz0/amd-strix-halo-toolboxes:rocm-6.4.4
+          # args:
+          #   - --config
+          #   - /config/llama-swap.yaml
+          #   - --listen
+          #   - 0.0.0.0:8080
+          # env:
+          #   - name: GGML_VULKAN_DEVICE
+          #     value: "0"
+          #   - name: GGML_VK_VISIBLE_DEVICES
+          #     value: "0"
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            limits:
+              amd.com/gpu: 1
+              memory: 100Gi
+              cpu: 8
+            requests:
+              amd.com/gpu: 1
+              cpu: 2
+              memory: 70Gi
+          volumeMounts:
+            - name: models
+              mountPath: /models
+            - name: config
+              mountPath: /config
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 60
+            timeoutSeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 5
+      volumes:
+        - name: models
+          persistentVolumeClaim:
+            claimName: gpt-oss-120b
+        - name: config
+          configMap:
+            name: gpt-oss-120b
