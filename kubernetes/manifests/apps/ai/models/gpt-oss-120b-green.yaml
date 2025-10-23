@@ -1,21 +1,7 @@
 apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: gpt-oss-120b
-  namespace: models
-  annotations:
-    argocd.argoproj.io/sync-wave: "21"
-data:
-  downloads.yaml: |
-    models:
-      - repo_id: unsloth/gpt-oss-120b-GGUF
-        filename: gpt-oss-120b-F16.gguf
-        revision: main
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: gpt-oss-120b
+  name: gpt-oss-120b-cache
   namespace: models
   annotations:
     k8up.io/backup: "true"
@@ -54,9 +40,22 @@ spec:
       containers:
         - name: llama-swap
           image: kyuz0/amd-strix-halo-toolboxes:rocm-6.4.4-rocwmma
+          env:
+            - name: LLAMA_CACHE
+              value: "/models/cache"
+            - name: HF_HOME
+              value: "/models/cache/huggingface"
           args:
-            - llama-cli
-            - --list-devices
+            - llama-server
+            - --no-mmap
+            - -ngl
+            - 999
+            - -fa
+            - on
+            - --host
+            - 0.0.0.0
+            - -hf
+            - unsloth/gpt-oss-120b-GGUF
           ports:
             - containerPort: 8080
               name: http
@@ -70,8 +69,8 @@ spec:
               cpu: 2
               memory: 70Gi
           volumeMounts:
-            - name: models
-              mountPath: /models
+            - name: model-cache
+              mountPath: /models/cache
           livenessProbe:
             httpGet:
               path: /health
@@ -89,6 +88,6 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 5
       volumes:
-        - name: models
+        - name: model-cache
           persistentVolumeClaim:
-            claimName: gpt-oss-120b
+            claimName: gpt-oss-120b-cache
