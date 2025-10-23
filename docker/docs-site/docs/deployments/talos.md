@@ -59,4 +59,7 @@ talosctl -n 10.0.30.79 reset
 # To get disk and volume status info
 talosctl -n 10.0.30.79 get disks -o yaml
 talosctl -n 10.0.30.79 get volumestatus -o yaml
+
+# To reboot
+talosctl reboot -n 10.0.30.78
 ```
