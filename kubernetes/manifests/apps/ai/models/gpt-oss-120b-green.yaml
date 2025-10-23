@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: config
-  namespace: gpt-oss-120b
+  name: gpt-oss-120b
+  namespace: models
   annotations:
     argocd.argoproj.io/sync-wave: "21"
 data:
@@ -16,6 +16,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: gpt-oss-120b
+  namespace: models
   annotations:
     k8up.io/backup: "true"
     argocd.argoproj.io/sync-wave: "21"
