@@ -19,7 +19,7 @@ metadata:
   namespace: models
   annotations:
     k8up.io/backup: "true"
-    argocd.argoproj.io/sync-wave: "21"
+    argocd.argoproj.io/sync-wave: "22"
 spec:
   accessModes:
     - ReadWriteOnce
