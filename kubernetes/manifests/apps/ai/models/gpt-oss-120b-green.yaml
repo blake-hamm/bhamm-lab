@@ -49,9 +49,9 @@ spec:
             - llama-server
             - --no-mmap
             - -ngl
-            - '999'
+            - "999"
             - -fa
-            - on
+            - "on"
             - --host
             - 0.0.0.0
             - -hf
