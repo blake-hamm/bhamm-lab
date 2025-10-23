@@ -48,7 +48,7 @@ spec:
   endpoints:
     - port: envoy-metrics
       interval: 30s
-      path: /stats/prometheus
+      path: /metrics
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
