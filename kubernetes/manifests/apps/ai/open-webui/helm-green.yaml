@@ -54,7 +54,7 @@ spec:
           - name: OPENAI_API_KEY
             valueFrom:
               secretKeyRef:
-                name: open-webui-external-secrets
+                name: open-webui-external-secret
                 key: OPENAI_API_KEY
           - name: DATABASE_URL
             valueFrom:
