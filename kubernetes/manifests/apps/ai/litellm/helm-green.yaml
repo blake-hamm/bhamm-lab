@@ -46,6 +46,11 @@ spec:
                 model: openai/llama-70b
                 api_base: http://llama-swap.llama-swap.svc.cluster.local:8080/v1
                 api_key: "dummy"
+            - model_name: gpt-oss-120b
+              litellm_params:
+                model: openai/gpt-oss-120b
+                api_base: http://gpt-oss-120b.models.svc.cluster.local:8080/v1
+                api_key: "dummy"
         resources:
           requests:
             cpu: 500m
