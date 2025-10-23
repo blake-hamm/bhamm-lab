@@ -29,7 +29,7 @@ spec:
       io.cilium/app: operator
       name: cilium-operator
   endpoints:
-    - port: prometheus
+    - port: metrics
       interval: 30s
       path: /metrics
 ---
@@ -44,7 +44,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      k8s-app: cilium
+      k8s-app: cilium-envoy
   endpoints:
     - port: envoy-metrics
       interval: 30s
