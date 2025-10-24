@@ -117,6 +117,8 @@ metadata:
   namespace: models
   annotations:
     argocd.argoproj.io/sync-wave: "23"
+  labels:
+    app: gpt-oss-120b
 spec:
   type: ClusterIP
   selector:
@@ -126,3 +128,21 @@ spec:
       protocol: TCP
       port: 8080
       targetPort: http
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: gpt-oss-120b
+  namespace: models
+spec:
+  selector:
+    matchLabels:
+      app: gpt-oss-120b
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      scheme: http
+  targetLabels:
+    - app
