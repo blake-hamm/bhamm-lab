@@ -167,6 +167,6 @@ spec:
   triggers:
     - type: prometheus
       metadata:
-        query: max_over_time(llamacpp:requests_processing{app="gpt-oss-120b"}[30m]) or vector(0)
+        query: max(max_over_time(llamacpp:requests_processing{app="gpt-oss-120b"}[30m])) or vector(0)
         serverAddress: http://monitor-prometheus.monitor.svc.cluster.local:9090
         threshold: "0"
