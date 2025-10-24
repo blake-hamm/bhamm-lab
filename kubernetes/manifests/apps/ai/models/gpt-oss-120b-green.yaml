@@ -65,7 +65,7 @@ spec:
             - "0"
             - -v
             - -hf
-            - unsloth/gpt-oss-120b-GGUF
+            - ggml-org/gpt-oss-120b-GGUF
           ports:
             - containerPort: 8080
               name: http
