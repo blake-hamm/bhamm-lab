@@ -39,7 +39,7 @@ spec:
           effect: "NoSchedule"
       containers:
         - name: gpt-oss-120b
-          image: kyuz0/amd-strix-halo-toolboxes:rocm-6.4.4-rocwmma
+          image: kyuz0/amd-strix-halo-toolboxes:vulkan-amdvlk
           env:
             - name: LLAMA_CACHE
               value: "/models/cache"
