@@ -17,9 +17,16 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: argo
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      namespace: models
+      jsonPointers:
+        - /spec/replicas
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
+      - RespectIgnoreDifferences=true
     automated:
       prune: true
       selfHeal: true

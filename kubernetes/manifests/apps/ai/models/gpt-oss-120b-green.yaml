@@ -134,6 +134,8 @@ kind: ServiceMonitor
 metadata:
   name: gpt-oss-120b
   namespace: models
+  annotations:
+    argocd.argoproj.io/sync-wave: "24"
 spec:
   selector:
     matchLabels:
@@ -146,3 +148,25 @@ spec:
       scheme: http
   targetLabels:
     - app
+---
+apiVersion: elasti.truefoundry.com/v1alpha1
+kind: ElastiService
+metadata:
+  name: gpt-oss-120b
+  namespace: models
+  annotations:
+    argocd.argoproj.io/sync-wave: "25"
+spec:
+  minTargetReplicas: 1
+  service: gpt-oss-120b
+  cooldownPeriod: 1800
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gpt-oss-120b
+  triggers:
+    - type: prometheus
+      metadata:
+        query: llamacpp:requests_processing{app="gpt-oss-120b"} or vector(0)
+        serverAddress: http://monitor-prometheus.monitor.svc.cluster.local:9090
+        threshold: "0"
