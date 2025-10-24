@@ -58,6 +58,7 @@ spec:
             - --no-webui
             - --parallel
             - "2"
+            - --jinja
             - -c # Context size
             - "16384"
             - -v
