@@ -159,7 +159,7 @@ metadata:
 spec:
   minTargetReplicas: 1
   service: gpt-oss-120b
-  cooldownPeriod: 300
+  cooldownPeriod: 1800 # 30 minutes
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
@@ -167,6 +167,6 @@ spec:
   triggers:
     - type: prometheus
       metadata:
-        query: max(max_over_time(llamacpp:requests_processing{app="gpt-oss-120b"}[30m])) or vector(0)
+        query: max(llamacpp:requests_processing{app="gpt-oss-120b"}) or vector(0)
         serverAddress: http://monitor-prometheus.monitor.svc.cluster.local:9090
         threshold: "1"
