@@ -91,8 +91,10 @@ resource "talos_machine_configuration_apply" "bare_metal" {
           disk = "/dev/nvme0n1"
           extraKernelArgs = [
             "amd_iommu=off",
-            "amdgpu.gttsize=131072",
-            "ttm.pages_limit=33554432"
+            "amdgpu.gttsize=122800",
+            "amdgpu.vm_fragment_size=8",
+            "ttm.pages_limit=31457280",
+            "ttm.page_pool_size=15728640"
           ]
         }
       }
