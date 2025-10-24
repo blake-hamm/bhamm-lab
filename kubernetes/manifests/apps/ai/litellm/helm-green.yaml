@@ -41,11 +41,6 @@ spec:
               password: os.environ/REDIS_PASSWORD
               supported_call_types: [] # Disabled llm caching (use qdrant instead)
           model_list:
-            - model_name: llama-70b
-              litellm_params:
-                model: openai/llama-70b
-                api_base: http://llama-swap.llama-swap.svc.cluster.local:8080/v1
-                api_key: "dummy"
             - model_name: gpt-oss-120b
               litellm_params:
                 model: openai/gpt-oss-120b
