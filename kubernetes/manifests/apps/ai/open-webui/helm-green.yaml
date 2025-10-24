@@ -27,19 +27,19 @@ spec:
           httpGet:
             path: /health
             port: http
-          failureThreshold: 1
+          failureThreshold: 2
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /health/db
             port: http
-          failureThreshold: 1
+          failureThreshold: 2
           periodSeconds: 10
         startupProbe:
           httpGet:
             path: /health
             port: http
-          initialDelaySeconds: 30
+          initialDelaySeconds: 5
           periodSeconds: 5
           failureThreshold: 20
         persistence:
