@@ -17,6 +17,40 @@ spec:
     helm:
       valuesObject:
         models:
+          - name: qwen3-embedding-8b
+            enabled: true
+            pvc:
+              storage: "20Gi"
+            args:
+              - llama-server
+              - --no-mmap
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --embeddings
+              - -ub
+              - "2048"
+              - -b
+              - "2048"
+              - -c
+              - "0"
+              - -v
+              - -hf
+              - Qwen/Qwen3-Embedding-8B-GGUF
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "25Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "1"
+                memory: "15Gi"
           - name: gpt-oss-120b
             enabled: true
             pvc:
