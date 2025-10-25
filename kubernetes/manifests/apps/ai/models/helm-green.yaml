@@ -17,6 +17,40 @@ spec:
     helm:
       valuesObject:
         models:
+          - name: gpt-oss-120b
+            enabled: true
+            pvc:
+              storage: "80Gi"
+            args:
+              - llama-server
+              - --no-mmap
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "2048"
+              - -b
+              - "2048"
+              - -c
+              - "0"
+              - -v
+              - -hf
+              - ggml-org/gpt-oss-120b-GGUF
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "100Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "1"
+                memory: "70Gi"
           - name: gpt-oss-20b
             enabled: true
             pvc:
