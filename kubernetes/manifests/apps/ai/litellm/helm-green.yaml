@@ -24,28 +24,8 @@ spec:
         masterkeySecretName: "litellm-external-secret"
         masterkeySecretKey: "LITELLM_MASTER_KEY"
         proxyConfigMap:
-          create: true
-        proxy_config:
-          router_settings:
-            routing_strategy: simple-shuffle
-            redis_host: os.environ/REDIS_HOST
-            redis_port: os.environ/REDIS_PORT
-            redis_password: os.environ/REDIS_PASSWORD
-          litellm_settings:
-            callbacks: ["prometheus"]
-            cache: True
-            cache_params:
-              type: redis
-              host: os.environ/REDIS_HOST
-              port: os.environ/REDIS_PORT
-              password: os.environ/REDIS_PASSWORD
-              supported_call_types: [] # Disabled llm caching (use qdrant instead)
-          model_list:
-            - model_name: gpt-oss-120b
-              litellm_params:
-                model: openai/gpt-oss-120b
-                api_base: http://gpt-oss-120b.models.svc.cluster.local:8080/v1
-                api_key: "dummy"
+          name: litellm-config
+          create: false
         resources:
           requests:
             cpu: 500m

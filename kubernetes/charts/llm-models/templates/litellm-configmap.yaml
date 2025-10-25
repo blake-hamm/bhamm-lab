@@ -1,0 +1,21 @@
+{{- if .Values.global.litellm.manage_config }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: litellm-config
+  namespace: litellm
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+data:
+  config.yaml: |
+    {{- $litellmConfig := deepCopy .Values.global.litellm.config | mustToYaml | fromYaml }}
+    {{- $models := list }}
+    {{- range .Values.models }}
+    {{- if .enabled }}
+    {{- $model := dict "model_name" .name "litellm_params" (dict "model" (printf "openai/%s" .name) "api_base" (printf "http://%s.models.svc.cluster.local:8080/v1" .name) "api_key" "dummy") }}
+    {{- $models = append $models $model }}
+    {{- end }}
+    {{- end }}
+    {{- $_ := set $litellmConfig "model_list" $models }}
+    {{- toYaml $litellmConfig | nindent 4 }}
+{{- end }}

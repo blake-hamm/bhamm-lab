@@ -32,6 +32,23 @@ global:
     - key: "amd.com/gpu"
       operator: "Exists"
       effect: "NoSchedule"
+  litellm:
+    manage_config: true
+    config:
+      router_settings:
+        routing_strategy: simple-shuffle
+        redis_host: os.environ/REDIS_HOST
+        redis_port: os.environ/REDIS_PORT
+        redis_password: os.environ/REDIS_PASSWORD
+      litellm_settings:
+        callbacks: ["prometheus"]
+        cache: True
+        cache_params:
+          type: redis
+          host: os.environ/REDIS_HOST
+          port: os.environ/REDIS_PORT
+          password: os.environ/REDIS_PASSWORD
+          supported_call_types: [] # Disabled llm caching (use qdrant instead)
 
 models: []
   # - name: gpt-oss-120b
