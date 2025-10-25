@@ -1,0 +1,20 @@
+{{- range .Values.models }}
+{{- if .enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.global.namespace }}
+  labels:
+    app: {{ .name }}
+    release: {{ $.Release.Name }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .name }}
+  ports:
+    - name: http
+      port: {{ coalesce .service.port $.Values.global.service.port }}
+      targetPort: http
+{{- end }}
+{{- end }}

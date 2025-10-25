@@ -1,0 +1,97 @@
+global:
+  namespace: models
+  image:
+    repository: kyuz0/amd-strix-halo-toolboxes
+    tag: vulkan-amdvlk
+    pullPolicy: IfNotPresent
+  pvc:
+    storageClassName: local-path
+  service:
+    port: 8080
+  zeroscaling:
+    enabled: true
+    minReplicas: 1
+    cooldownPeriod: 900
+    trigger:
+      query: >-
+        sum(rate(llamacpp:requests_processing{app="{{ .Release.Name }}"}[2m]))
+        or
+        vector(0)
+      threshold: "1"
+  resources:
+    limits:
+      amd.com/gpu: 1
+      memory: "50Gi"
+      cpu: "4"
+    requests:
+      amd.com/gpu: 1
+      cpu: "1"
+      memory: "30Gi"
+  tolerations:
+    - key: "amd.com/gpu"
+      operator: "Exists"
+      effect: "NoSchedule"
+
+models: []
+  # - name: gpt-oss-120b
+  #   enabled: true
+  #   pvc:
+  #     storage: "100Gi"
+  #     storageClassName: local-path
+  #   args:
+  #     - llama-server
+  #     - --no-mmap
+  #     - -ngl
+  #     - "999"
+  #     - -fa
+  #     - "on"
+  #     - --host
+  #     - 0.0.0.0
+  #     - --metrics
+  #     - --no-webui
+  #     - --jinja
+  #     - -ub
+  #     - "2048"
+  #     - -b
+  #     - "2048"
+  #     - -c
+  #     - "0"
+  #     - -v
+  #     - -hf
+  #     - ggml-org/gpt-oss-120b-GGUF
+  #   service:
+  #     port: 8080
+  #   resources:
+  #     limits:
+  #       amd.com/gpu: 1
+  #       memory: "100Gi"
+  #       cpu: "8"
+  #     requests:
+  #       amd.com/gpu: 1
+  #       cpu: "2"
+  #       memory: "70Gi"
+  #   zeroscaling:
+  #     enabled: true
+  #     minReplicas: 1
+  #     cooldownPeriod: 1800
+  #     trigger:
+  #       query: max(llamacpp:requests_processing{app="gpt-oss-120b"}) or vector(0)
+  #       threshold: "1"
+
+  # - name: another-model
+  #   enabled: true
+  #   image:
+  #     repository: another/repo
+  #     tag: latest
+  #   pvc:
+  #     name: another-model-cache
+  #     storage: "50Gi"
+  #     storageClassName: local-path
+  #   args:
+  #     - some-other-command
+  #     - --model-path
+  #     - /models/another-model
+  #   service:
+  #     port: 8081
+  #   zeroscaling:
+  #     enabled: false

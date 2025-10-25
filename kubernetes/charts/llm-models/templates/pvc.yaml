@@ -1,0 +1,19 @@
+{{- range .Values.models }}
+{{- if .enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ .name }}-cache"
+  namespace: {{ $.Values.global.namespace }}
+  labels:
+    app: {{ .name }}
+    release: {{ $.Release.Name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .pvc.storage }}
+  storageClassName: {{ coalesce .pvc.storageClassName $.Values.global.pvc.storageClassName }}
+{{- end }}
+{{- end }}

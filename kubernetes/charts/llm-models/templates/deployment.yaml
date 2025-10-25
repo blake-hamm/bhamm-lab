@@ -1,0 +1,52 @@
+{{- range .Values.models }}
+{{- if .enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.global.namespace }}
+  labels:
+    app: {{ .name }}
+    release: {{ $.Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .name }}
+        release: {{ $.Release.Name }}
+    spec:
+      tolerations:
+{{ toYaml $.Values.global.tolerations | indent 8 }}
+      containers:
+        - name: {{ .name }}
+          image: "{{ $.Values.global.image.repository }}:{{ $.Values.global.image.tag }}"
+          imagePullPolicy: {{ $.Values.global.image.pullPolicy }}
+          args:
+{{ toYaml .args | indent 12 }}
+          env:
+            - name: LLAMA_CACHE
+              value: "/models/cache"
+            - name: HF_HOME
+              value: "/models/cache/huggingface"
+          resources:
+            limits:
+              amd.com/gpu: {{ $.Values.global.resources.limits.amd.com/gpu }}
+              memory: {{ $.Values.global.resources.limits.memory }}
+              cpu: {{ $.Values.global.resources.limits.cpu }}
+            requests:
+              amd.com/gpu: {{ $.Values.global.resources.requests.amd.com/gpu }}
+              memory: {{ $.Values.global.resources.requests.memory }}
+              cpu: {{ $.Values.global.resources.requests.cpu }}
+          volumeMounts:
+            - name: model-cache
+              mountPath: /models/cache
+      volumes:
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName: "{{ .name }}-cache"
+{{- end }}
+{{- end }}
