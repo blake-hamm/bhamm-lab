@@ -41,6 +41,30 @@ spec:
           volumeMounts:
             - name: model-cache
               mountPath: /models/cache
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 0
+            periodSeconds: 60
+            timeoutSeconds: 5
+            failureThreshold: 3
       volumes:
         - name: model-cache
           persistentVolumeClaim:
