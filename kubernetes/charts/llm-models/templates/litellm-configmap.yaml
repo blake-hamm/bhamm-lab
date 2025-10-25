@@ -5,7 +5,7 @@ metadata:
   name: litellm-config
   namespace: litellm
   annotations:
-    argocd.argoproj.io/sync-wave: "30"
+    argocd.argoproj.io/sync-wave: "22"
 data:
   config.yaml: |
     {{- $litellmConfig := deepCopy .Values.global.litellm.config | toYaml | fromYaml }}
