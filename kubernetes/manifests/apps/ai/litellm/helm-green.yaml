@@ -72,7 +72,7 @@ spec:
         envVars:
           REDIS_HOST: "litellm-dragonfly"
           REDIS_PORT: "6379"
-          REIDS_PASSWORD: ""
+          REDIS_PASSWORD: ""
         migrationJob:
           hooks:
             argocd:
