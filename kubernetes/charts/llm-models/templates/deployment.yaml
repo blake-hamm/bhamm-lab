@@ -5,6 +5,8 @@ kind: Deployment
 metadata:
   name: {{ .name }}
   namespace: {{ $.Values.global.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
   labels:
     app: {{ .name }}
     release: {{ $.Release.Name }}

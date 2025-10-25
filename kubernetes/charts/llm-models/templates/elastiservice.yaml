@@ -5,6 +5,8 @@ kind: ElastiService
 metadata:
   name: {{ .name }}
   namespace: {{ $.Values.global.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "25"
   labels:
     app: {{ .name }}
     release: {{ $.Release.Name }}

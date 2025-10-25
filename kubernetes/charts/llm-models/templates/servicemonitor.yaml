@@ -5,6 +5,8 @@ kind: ServiceMonitor
 metadata:
   name: {{ .name }}
   namespace: {{ $.Values.global.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "24"
   labels:
     app: {{ .name }}
     release: {{ $.Release.Name }}
