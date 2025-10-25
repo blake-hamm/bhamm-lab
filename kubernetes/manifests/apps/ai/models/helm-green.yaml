@@ -53,6 +53,8 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "15Gi"
+            zeroscaling:
+              cooldownPeriod: 300
           - name: nomic-embed-code
             enabled: true
             pvc:
@@ -89,6 +91,8 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "35Gi"
+            zeroscaling:
+              cooldownPeriod: 300
           - name: e5-mistral-7b-instruct-embed
             enabled: true
             pvc:
@@ -123,6 +127,8 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "20Gi"
+            zeroscaling:
+              cooldownPeriod: 300
           - name: gpt-oss-120b
             enabled: true
             pvc:
