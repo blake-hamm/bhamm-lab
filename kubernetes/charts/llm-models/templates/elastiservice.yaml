@@ -11,9 +11,9 @@ metadata:
     app: {{ .name }}
     release: {{ $.Release.Name }}
 spec:
-  minTargetReplicas: {{ coalesce .zeroscaling.minReplicas $.Values.global.zeroscaling.minReplicas }}
+  minTargetReplicas: {{ coalesce (default dict .zeroscaling).minReplicas $.Values.global.zeroscaling.minReplicas }}
   service: {{ .name }}
-  cooldownPeriod: {{ coalesce .zeroscaling.cooldownPeriod $.Values.global.zeroscaling.cooldownPeriod }}
+  cooldownPeriod: {{ coalesce (default dict .zeroscaling).cooldownPeriod $.Values.global.zeroscaling.cooldownPeriod }}
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
