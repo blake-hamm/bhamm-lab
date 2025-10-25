@@ -1,0 +1,66 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: reloader
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  destination:
+    namespace: reloader
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: reloader
+    repoURL: https://stakater.github.io/stakater-charts
+    targetRevision: v2.2.3
+    helm:
+      valuesObject:
+        reloader:
+          deployment:
+            env:
+              # Open supports Key value pair as environment variables.
+              open:
+              # secret supports Key value pair as environment variables. It gets the values based on keys from default reloader secret if any.
+              secret:
+              #  ALERT_ON_RELOAD: <"true"|"false">
+              #  ALERT_SINK: <"slack"> # By default it will be a raw text based webhook
+              #  ALERT_WEBHOOK_URL: <"webhook_url">
+              #  ALERT_ADDITIONAL_INFO: <"Additional Info like Cluster Name if needed">
+              # field supports Key value pair as environment variables. It gets the values from other fields of pod.
+              field:
+              # existing secret, you can specify multiple existing secrets, for each
+              # specify the env var name followed by the key in existing secret that
+              # will be used to populate the env var
+              existing:
+              #  existing_secret_name:
+              #    ALERT_ON_RELOAD: alert_on_reload_key
+              #    ALERT_SINK: alert_sink_key
+              #    ALERT_WEBHOOK_URL: alert_webhook_key
+              #    ALERT_ADDITIONAL_INFO: alert_additional_info_key
+            livenessProbe:
+              timeoutSeconds: 5
+              failureThreshold: 5
+              periodSeconds: 10
+              successThreshold: 1
+            readinessProbe:
+              timeoutSeconds: 15
+              failureThreshold: 5
+              periodSeconds: 10
+              successThreshold: 1
+            resources:
+              limits:
+                cpu: "100m"
+                memory: "512Mi"
+              requests:
+                cpu: "10m"
+                memory: "128Mi"
+          podMonitor:
+            enabled: true
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
