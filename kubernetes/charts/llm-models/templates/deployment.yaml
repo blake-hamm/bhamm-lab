@@ -43,6 +43,9 @@ spec:
           volumeMounts:
             - name: model-cache
               mountPath: /models/cache
+          ports:
+            - containerPort: 8080
+              name: http
           startupProbe:
             httpGet:
               path: /health
