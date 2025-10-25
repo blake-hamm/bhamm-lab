@@ -351,7 +351,7 @@ spec:
                   public: false
                   authorization_policy: 'two_factor'
                   redirect_uris:
-                    - 'https://litellm.example.com/sso/callback'
+                    - 'https://litellm.example.com/sso/key/generate'
                   scopes:
                     - 'openid'
                     - 'profile'
