@@ -351,8 +351,8 @@ spec:
                   public: false
                   authorization_policy: 'two_factor'
                   redirect_uris:
-                    - 'https://litellm.example.com/sso/key/generate'
-                    - 'https://litellm.example.com/sso/callback'
+                    - 'https://litellm.bhamm-lab.com/sso/key/generate'
+                    - 'https://litellm.bhamm-lab.com/sso/callback'
                   scopes:
                     - 'openid'
                     - 'profile'
