@@ -1,10 +1,11 @@
 {{- range .Values.models }}
 {{- if .enabled }}
+{{- $merged := mergeOverwrite (deepCopy $.Values.global) . -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .name }}
-  namespace: {{ $.Values.global.namespace }}
+  namespace: {{ $merged.namespace }}
   annotations:
     argocd.argoproj.io/sync-wave: "22"
   labels:
@@ -22,11 +23,11 @@ spec:
         release: {{ $.Release.Name }}
     spec:
       tolerations:
-{{ toYaml $.Values.global.tolerations | indent 8 }}
+{{ toYaml $merged.tolerations | indent 8 }}
       containers:
         - name: {{ .name }}
-          image: "{{ coalesce (default dict .image).repository $.Values.global.image.repository }}:{{ coalesce (default dict .image).tag $.Values.global.image.tag }}"
-          imagePullPolicy: {{ coalesce (default dict .image).pullPolicy $.Values.global.image.pullPolicy }}
+          image: "{{ $merged.image.repository }}:{{ $merged.image.tag }}"
+          imagePullPolicy: {{ $merged.image.pullPolicy }}
           args:
 {{ toYaml .args | indent 12 }}
           env:
@@ -35,11 +36,7 @@ spec:
             - name: HF_HOME
               value: "/models/cache/huggingface"
           resources:
-{{- with .resources }}
-{{ toYaml . | indent 12 }}
-{{- else }}
-{{ toYaml $.Values.global.resources | indent 12 }}
-{{- end }}
+{{ toYaml $merged.resources | indent 12 }}
           volumeMounts:
             - name: model-cache
               mountPath: /models/cache

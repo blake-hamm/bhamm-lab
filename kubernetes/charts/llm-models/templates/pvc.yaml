@@ -1,10 +1,11 @@
 {{- range .Values.models }}
 {{- if .enabled }}
+{{- $merged := mergeOverwrite (deepCopy $.Values.global) . -}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: "{{ .name }}-cache"
-  namespace: {{ $.Values.global.namespace }}
+  namespace: {{ $merged.namespace }}
   annotations:
     argocd.argoproj.io/sync-wave: "22"
   labels:
@@ -15,7 +16,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ coalesce (default dict .pvc).storage $.Values.global.pvc.storage }}
-  storageClassName: {{ coalesce (default dict .pvc).storageClassName $.Values.global.pvc.storageClassName }}
+      storage: {{ $merged.pvc.storage }}
+  storageClassName: {{ $merged.pvc.storageClassName }}
 {{- end }}
 {{- end }}

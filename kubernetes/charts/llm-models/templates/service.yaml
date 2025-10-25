@@ -1,10 +1,11 @@
 {{- range .Values.models }}
 {{- if .enabled }}
+{{- $merged := mergeOverwrite (deepCopy $.Values.global) . -}}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .name }}
-  namespace: {{ $.Values.global.namespace }}
+  namespace: {{ $merged.namespace }}
   annotations:
     argocd.argoproj.io/sync-wave: "23"
   labels:
@@ -16,7 +17,7 @@ spec:
     app: {{ .name }}
   ports:
     - name: http
-      port: {{ coalesce (default dict .service).port $.Values.global.service.port }}
+      port: {{ $merged.service.port }}
       targetPort: http
 {{- end }}
 {{- end }}

@@ -1,19 +1,20 @@
 {{- range .Values.models }}
-{{- if and .enabled (coalesce (default dict .zeroscaling).enabled $.Values.global.zeroscaling.enabled) }}
+{{- $merged := mergeOverwrite (deepCopy $.Values.global) . -}}
+{{- if and .enabled $merged.zeroscaling.enabled }}
 apiVersion: elasti.truefoundry.com/v1alpha1
 kind: ElastiService
 metadata:
   name: {{ .name }}
-  namespace: {{ $.Values.global.namespace }}
+  namespace: {{ $merged.namespace }}
   annotations:
     argocd.argoproj.io/sync-wave: "25"
   labels:
     app: {{ .name }}
     release: {{ $.Release.Name }}
 spec:
-  minTargetReplicas: {{ coalesce (default dict .zeroscaling).minReplicas $.Values.global.zeroscaling.minReplicas }}
+  minTargetReplicas: {{ $merged.zeroscaling.minReplicas }}
   service: {{ .name }}
-  cooldownPeriod: {{ coalesce (default dict .zeroscaling).cooldownPeriod $.Values.global.zeroscaling.cooldownPeriod }}
+  cooldownPeriod: {{ $merged.zeroscaling.cooldownPeriod }}
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
@@ -21,8 +22,8 @@ spec:
   triggers:
     - type: prometheus
       metadata:
-        query: {{ tpl (coalesce (default dict (default dict .zeroscaling).trigger).query $.Values.global.zeroscaling.trigger.query) $ }}
+        query: {{ tpl $merged.zeroscaling.trigger.query $ }}
         serverAddress: http://monitor-prometheus.monitor.svc.cluster.local:9090
-        threshold: "{{ coalesce (default dict (default dict .zeroscaling).trigger).threshold $.Values.global.zeroscaling.trigger.threshold }}"
+        threshold: "{{ $merged.zeroscaling.trigger.threshold }}"
 {{- end }}
 {{- end }}
