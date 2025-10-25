@@ -14,7 +14,7 @@ spec:
     app: {{ .name }}
   ports:
     - name: http
-      port: {{ coalesce .service.port $.Values.global.service.port }}
+      port: {{ coalesce (default dict .service).port $.Values.global.service.port }}
       targetPort: http
 {{- end }}
 {{- end }}
