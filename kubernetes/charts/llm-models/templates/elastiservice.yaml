@@ -1,5 +1,5 @@
 {{- range .Values.models }}
-{{- if and .enabled .zeroscaling (coalesce .zeroscaling.enabled $.Values.global.zeroscaling.enabled) }}
+{{- if and .enabled (coalesce (default dict .zeroscaling).enabled $.Values.global.zeroscaling.enabled) }}
 apiVersion: elasti.truefoundry.com/v1alpha1
 kind: ElastiService
 metadata:
