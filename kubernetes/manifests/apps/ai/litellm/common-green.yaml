@@ -53,6 +53,10 @@ spec:
               remoteRef:
                 key: /default/litellm
                 property: GENERIC_CLIENT_SECRET
+            - secretKey: GENERIC_CLIENT_STATE
+              remoteRef:
+                key: /default/litellm
+                property: GENERIC_CLIENT_STATE
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

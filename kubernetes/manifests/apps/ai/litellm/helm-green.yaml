@@ -115,6 +115,11 @@ spec:
             value: name
           - name: GENERIC_USER_ROLE_ATTRIBUTE
             value: groups
+          - name: GENERIC_CLIENT_STATE
+            valueFrom:
+              secretKeyRef:
+                name: litellm-external-secret
+                key: GENERIC_CLIENT_STATE
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
