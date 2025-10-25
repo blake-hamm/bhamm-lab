@@ -51,6 +51,8 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "70Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
           - name: gpt-oss-20b
             enabled: true
             pvc:
