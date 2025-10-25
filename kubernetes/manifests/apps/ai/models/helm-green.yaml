@@ -363,12 +363,12 @@ spec:
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "80Gi"
+                memory: "100Gi"
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
                 cpu: "1"
-                memory: "60Gi"
+                memory: "80Gi"
           - name: glm-32b
             enabled: true
             pvc:
