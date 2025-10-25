@@ -21,7 +21,6 @@ spec:
             enabled: true
             pvc:
               storage: "15Gi"
-              storageClassName: local-path
             args:
               - llama-server
               - --no-mmap
