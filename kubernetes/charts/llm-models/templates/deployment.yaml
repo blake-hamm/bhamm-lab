@@ -23,20 +23,20 @@ spec:
         release: {{ $.Release.Name }}
     spec:
       tolerations:
-{{ toYaml $merged.tolerations | indent 8 }}
+{{- toYaml $merged.tolerations | nindent 8 }}
       containers:
         - name: {{ .name }}
           image: "{{ $merged.image.repository }}:{{ $merged.image.tag }}"
           imagePullPolicy: {{ $merged.image.pullPolicy }}
           args:
-{{ toYaml .args | indent 12 }}
+{{- toYaml $merged.args | nindent 12 }}
           env:
             - name: LLAMA_CACHE
               value: "/models/cache"
             - name: HF_HOME
               value: "/models/cache/huggingface"
           resources:
-{{ toYaml $merged.resources | indent 12 }}
+{{- toYaml $merged.resources | nindent 12 }}
           volumeMounts:
             - name: model-cache
               mountPath: /models/cache
