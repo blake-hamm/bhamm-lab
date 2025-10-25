@@ -56,7 +56,7 @@ spec:
           - name: gpt-oss-20b
             enabled: true
             pvc:
-              storage: "15Gi"
+              storage: "20Gi"
             args:
               - llama-server
               - --no-mmap
@@ -81,7 +81,7 @@ spec:
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "20Gi"
+                memory: "25Gi"
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
