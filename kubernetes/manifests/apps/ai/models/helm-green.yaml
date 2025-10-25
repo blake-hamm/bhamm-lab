@@ -1,0 +1,68 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: green-apps
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argo
+  source:
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    targetRevision: feature/enhance-openwebui
+    path: kubernetes/charts/llm-models
+    helm:
+      valuesObject:
+        models:
+          - name: gpt-oss-20b
+            enabled: true
+            pvc:
+              storage: "15Gi"
+              storageClassName: local-path
+            args:
+              - llama-server
+              - --no-mmap
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "2048"
+              - -b
+              - "2048"
+              - -c
+              - "0"
+              - -v
+              - -hf
+              - ggml-org/gpt-oss-20b-GGUF
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "20Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "1"
+                memory: "15Gi"
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      namespace: models
+      jsonPointers:
+        - /spec/replicas
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - RespectIgnoreDifferences=true
+    automated:
+      prune: true
+      selfHeal: true
