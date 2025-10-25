@@ -35,6 +35,9 @@ global:
 models: []
   # - name: gpt-oss-120b
   #   enabled: true
+  #   image:
+  #     repository: kyuz0/amd-strix-halo-toolboxes
+  #     tag: vulkan-amdvlk
   #   pvc:
   #     storage: "100Gi"
   #     storageClassName: local-path
