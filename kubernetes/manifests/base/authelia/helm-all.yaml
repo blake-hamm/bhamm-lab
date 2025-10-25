@@ -345,27 +345,6 @@ spec:
                   access_token_signed_response_alg: 'none'
                   userinfo_signed_response_alg: 'none'
                   token_endpoint_auth_method: 'client_secret_basic'
-                - client_id: 'litellm'
-                  client_name: 'LiteLLM Proxy'
-                  client_secret: '$pbkdf2-sha512$310000$QYDiQ1SG2t4yHB6ieTXcjA$HLgDP0i/cwtFEVCc4kKZR3axZHSbAkXQDvU4F3ZWZodRUgNNvPkywTTcKoZ5lEP91GDTJBTUDN0yL0/fQQ2vuQ'
-                  public: false
-                  authorization_policy: 'two_factor'
-                  redirect_uris:
-                    - 'https://litellm.bhamm-lab.com/sso/key/generate'
-                    - 'https://litellm.bhamm-lab.com/sso/callback'
-                  scopes:
-                    - 'openid'
-                    - 'profile'
-                    - 'email'
-                    - 'groups'
-                    - 'offline_access'
-                  grant_types:
-                    - 'authorization_code'
-                    - 'refresh_token'
-                  response_types:
-                    - 'code'
-                  token_endpoint_auth_method: 'client_secret_basic'
-                  userinfo_signed_response_alg: 'none'
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
