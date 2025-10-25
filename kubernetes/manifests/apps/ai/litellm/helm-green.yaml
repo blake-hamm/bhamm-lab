@@ -26,6 +26,8 @@ spec:
         proxyConfigMap:
           create: true
         proxy_config:
+          general_settings:
+            ui_access_mode: admin_only
           router_settings:
             routing_strategy: simple-shuffle
             redis_host: os.environ/REDIS_HOST
@@ -88,6 +90,31 @@ spec:
               secretKeyRef:
                 name: litellm-external-secret
                 key: LITELLM_SALT_KEY
+          - name: GENERIC_CLIENT_ID
+            value: litellm
+          - name: GENERIC_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: litellm-external-secret
+                key: GENERIC_CLIENT_SECRET
+          - name: GENERIC_AUTHORIZATION_ENDPOINT
+            value: https://auth.bhamm-lab.com/api/oidc/authorization
+          - name: GENERIC_TOKEN_ENDPOINT
+            value: https://auth.bhamm-lab.com/api/oidc/token
+          - name: GENERIC_USERINFO_ENDPOINT
+            value: https://auth.bhamm-lab.com/api/oidc/userinfo
+          - name: PROXY_BASE_URL
+            value: https://litellm.bhamm-lab.com
+          - name: GENERIC_SCOPE
+            value: openid profile email groups
+          - name: GENERIC_USER_ID_ATTRIBUTE
+            value: sub
+          - name: GENERIC_USER_EMAIL_ATTRIBUTE
+            value: email
+          - name: GENERIC_USER_DISPLAY_NAME_ATTRIBUTE
+            value: name
+          - name: GENERIC_USER_ROLE_ATTRIBUTE
+            value: groups
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
