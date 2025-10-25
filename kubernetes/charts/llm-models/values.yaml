@@ -6,6 +6,7 @@ global:
     pullPolicy: IfNotPresent
   pvc:
     storageClassName: local-path
+    storage: "10Gi"
   service:
     port: 8080
   zeroscaling:

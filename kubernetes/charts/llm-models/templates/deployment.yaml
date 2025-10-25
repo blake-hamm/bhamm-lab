@@ -23,8 +23,8 @@ spec:
 {{ toYaml $.Values.global.tolerations | indent 8 }}
       containers:
         - name: {{ .name }}
-          image: "{{ coalesce .image.repository $.Values.global.image.repository }}:{{ coalesce .image.tag $.Values.global.image.tag }}"
-          imagePullPolicy: {{ coalesce .image.pullPolicy $.Values.global.image.pullPolicy }}
+          image: "{{ coalesce (default dict .image).repository $.Values.global.image.repository }}:{{ coalesce (default dict .image).tag $.Values.global.image.tag }}"
+          imagePullPolicy: {{ coalesce (default dict .image).pullPolicy $.Values.global.image.pullPolicy }}
           args:
 {{ toYaml .args | indent 12 }}
           env:

@@ -19,8 +19,8 @@ spec:
   triggers:
     - type: prometheus
       metadata:
-        query: {{ tpl (coalesce .zeroscaling.trigger.query $.Values.global.zeroscaling.trigger.query) . }}
+        query: {{ tpl (coalesce (default dict (default dict .zeroscaling).trigger).query $.Values.global.zeroscaling.trigger.query) . }}
         serverAddress: http://monitor-prometheus.monitor.svc.cluster.local:9090
-        threshold: "{{ coalesce .zeroscaling.trigger.threshold $.Values.global.zeroscaling.trigger.threshold }}"
+        threshold: "{{ coalesce (default dict (default dict .zeroscaling).trigger).threshold $.Values.global.zeroscaling.trigger.threshold }}"
 {{- end }}
 {{- end }}

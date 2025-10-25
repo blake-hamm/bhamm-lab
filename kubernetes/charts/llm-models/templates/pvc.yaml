@@ -13,7 +13,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .pvc.storage }}
-  storageClassName: {{ coalesce .pvc.storageClassName $.Values.global.pvc.storageClassName }}
+      storage: {{ coalesce (default dict .pvc).storage $.Values.global.pvc.storage }}
+  storageClassName: {{ coalesce (default dict .pvc).storageClassName $.Values.global.pvc.storageClassName }}
 {{- end }}
 {{- end }}
