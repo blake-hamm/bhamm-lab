@@ -1,5 +1,6 @@
 {{- range .Values.models }}
 {{- if .enabled }}
+---
 {{- $merged := mergeOverwrite (deepCopy $.Values.global) . -}}
 apiVersion: apps/v1
 kind: Deployment
@@ -29,9 +30,7 @@ spec:
           image: "{{ $merged.image.repository }}:{{ $merged.image.tag }}"
           imagePullPolicy: {{ $merged.image.pullPolicy }}
           args:
-            {{- range $merged.args }}
-            - {{ . }}
-            {{- end }}
+{{- toYaml $merged.args | nindent 12 }}
           env:
             - name: LLAMA_CACHE
               value: "/models/cache"

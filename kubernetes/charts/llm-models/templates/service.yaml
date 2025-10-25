@@ -1,5 +1,6 @@
 {{- range .Values.models }}
 {{- if .enabled }}
+---
 {{- $merged := mergeOverwrite (deepCopy $.Values.global) . -}}
 apiVersion: v1
 kind: Service

@@ -1,5 +1,6 @@
 {{- range .Values.models }}
 {{- if .enabled }}
+---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:

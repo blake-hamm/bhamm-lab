@@ -1,6 +1,7 @@
 {{- range .Values.models }}
 {{- $merged := mergeOverwrite (deepCopy $.Values.global) . -}}
 {{- if and .enabled $merged.zeroscaling.enabled }}
+---
 apiVersion: elasti.truefoundry.com/v1alpha1
 kind: ElastiService
 metadata:
