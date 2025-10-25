@@ -199,6 +199,74 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "15Gi"
+          - name: qwen3-30b-base
+            enabled: true
+            pvc:
+              storage: "70Gi"
+            args:
+              - llama-server
+              - --no-mmap
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "2048"
+              - -b
+              - "2048"
+              - -c
+              - "0"
+              - -v
+              - -hf
+              - unsloth/Qwen3-30B-A3B-GGUF
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "100Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "1"
+                memory: "70Gi"
+          - name: qwen3-30b-instruct
+            enabled: true
+            pvc:
+              storage: "70Gi"
+            args:
+              - llama-server
+              - --no-mmap
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "2048"
+              - -b
+              - "2048"
+              - -c
+              - "0"
+              - -v
+              - -hf
+              - unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "100Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "1"
+                memory: "70Gi"
   ignoreDifferences:
     - group: apps
       kind: Deployment
