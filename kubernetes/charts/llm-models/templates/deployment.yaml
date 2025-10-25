@@ -29,7 +29,9 @@ spec:
           image: "{{ $merged.image.repository }}:{{ $merged.image.tag }}"
           imagePullPolicy: {{ $merged.image.pullPolicy }}
           args:
-{{- toYaml $merged.args | nindent 12 }}
+            {{- range $merged.args }}
+            - {{ . }}
+            {{- end }}
           env:
             - name: LLAMA_CACHE
               value: "/models/cache"
