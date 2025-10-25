@@ -8,7 +8,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "30"
 data:
   config.yaml: |
-    {{- $litellmConfig := deepCopy .Values.global.litellm.config | mustToYaml | fromYaml }}
+    {{- $litellmConfig := deepCopy .Values.global.litellm.config | toYaml | fromYaml }}
     {{- $models := list }}
     {{- range .Values.models }}
     {{- if .enabled }}
