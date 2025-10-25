@@ -337,6 +337,8 @@ spec:
                 memory: "70Gi"
           - name: gemma3-27b
             enabled: true
+            image:
+              tag: rocm-6.4.4-rocwmma
             pvc:
               storage: "60Gi"
             args:
