@@ -507,6 +507,74 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "55Gi"
+          - name: mistral-small
+            enabled: true
+            pvc:
+              storage: "55Gi"
+            args:
+              - llama-server
+              - --no-mmap
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "2048"
+              - -b
+              - "2048"
+              - -c
+              - "0"
+              - -v
+              - -hf
+              - unsloth/Mistral-Small-3.2-24B-Instruct-2506-GGUF
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "75Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "1"
+                memory: "55Gi"
+          - name: mistral-large
+            enabled: true
+            pvc:
+              storage: "90Gi"
+            args:
+              - llama-server
+              - --no-mmap
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "2048"
+              - -b
+              - "2048"
+              - -c
+              - "0"
+              - -v
+              - -hf
+              - MaziyarPanahi/Mistral-Large-Instruct-2411-GGUF
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "110Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "1"
+                memory: "90Gi"
   ignoreDifferences:
     - group: apps
       kind: Deployment
