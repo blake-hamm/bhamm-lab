@@ -463,7 +463,7 @@ spec:
               - "0"
               - -v
               - -hf
-              - TheBloke/Mixtral-8x7B-Instruct-v0.1-GGUF
+              - mradermacher/Mixtral-8x7B-Instruct-v0.1-GGUF
             resources:
               limits:
                 amd.com/gpu: 1
@@ -497,7 +497,7 @@ spec:
               - "0"
               - -v
               - -hf
-              - TheBloke/Mixtral-8x7B-v0.1-GGUF
+              - mradermacher/Mixtral-8x7B-v0.1-GGUF
             resources:
               limits:
                 amd.com/gpu: 1
