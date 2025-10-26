@@ -233,6 +233,8 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "70Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
           - name: qwen-thinking
             enabled: true
             pvc:
@@ -267,6 +269,8 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "70Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
           - name: qwen-coder
             enabled: true
             pvc:
@@ -301,6 +305,8 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "70Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
           - name: gemma
             enabled: true
             image:
@@ -337,6 +343,8 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "80Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
           - name: glm-air-reap
             enabled: true
             pvc:
@@ -371,6 +379,8 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "90Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
           - name: glm-air
             enabled: true
             pvc:
@@ -405,6 +415,8 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "90Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
           - name: devstral
             enabled: true
             pvc:
@@ -439,6 +451,8 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "55Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
           - name: llama-3
             enabled: true
             pvc:
@@ -473,6 +487,8 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "90Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
           - name: llama-4
             enabled: true
             pvc:
@@ -507,6 +523,8 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "90Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
           - name: code-llama
             enabled: true
             pvc:
@@ -609,6 +627,8 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "70Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
           - name: deepseek-llama-distill
             enabled: true
             pvc:
@@ -643,6 +663,8 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "90Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
   ignoreDifferences:
     - group: apps
       kind: Deployment
