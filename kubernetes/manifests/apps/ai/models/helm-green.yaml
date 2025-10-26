@@ -38,7 +38,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "0"
+              - "32768"
               - -v
               - --pooling
               - last
@@ -76,7 +76,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "0"
+              - "32768"
               - -v
               - --pooling
               - last
@@ -114,7 +114,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "0"
+              - "32768"
               - -v
               - -hf
               - second-state/E5-Mistral-7B-Instruct-Embedding-GGUF
@@ -150,7 +150,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "0"
+              - "32768"
               - -v
               - -hf
               - ggml-org/gpt-oss-120b-GGUF
@@ -186,7 +186,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "0"
+              - "32768"
               - -v
               - -hf
               - ggml-org/gpt-oss-20b-GGUF
@@ -220,7 +220,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "0"
+              - "32768"
               - -v
               - -hf
               - unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF
@@ -254,7 +254,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "0"
+              - "32768"
               - -v
               - -hf
               - unsloth/Qwen3-30B-A3B-Thinking-2507-GGUF
@@ -288,7 +288,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "0"
+              - "32768"
               - -v
               - -hf
               - unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF
@@ -324,7 +324,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "0"
+              - "32768"
               - -v
               - -hf
               - unsloth/gemma-3-27b-it-GGUF
@@ -358,7 +358,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "0"
+              - "32768"
               - -v
               - -hf
               - unsloth/GLM-4-32B-0414-GGUF
@@ -392,7 +392,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "0"
+              - "32768"
               - -v
               - -hf
               - unsloth/GLM-Z1-32B-0414-GGUF
@@ -426,7 +426,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "0"
+              - "32768"
               - -v
               - -hf
               - mradermacher/Mixtral-8x7B-Instruct-v0.1-GGUF
@@ -460,7 +460,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "0"
+              - "32768"
               - -v
               - -hf
               - MaziyarPanahi/Mistral-Large-Instruct-2411-GGUF
@@ -494,7 +494,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "0"
+              - "32768"
               - -v
               - -hf
               - unsloth/Llama-3.3-70B-Instruct-GGUF:Q6_K_XL
@@ -528,7 +528,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "0"
+              - "32768"
               - -v
               - -hf
               - unsloth/Llama-4-Scout-17B-16E-Instruct-GGUF:Q5_K_XL
@@ -562,7 +562,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "0"
+              - "32768"
               - -v
               - -hf
               - TheBloke/Phind-CodeLlama-34B-v2-GGUF
@@ -596,7 +596,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "0"
+              - "32768"
               - -v
               - -hf
               - TheBloke/CodeLlama-34B-Python-GGUF
