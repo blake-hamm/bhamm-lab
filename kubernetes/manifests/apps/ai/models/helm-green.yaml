@@ -609,6 +609,40 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "90Gi"
+          - name: code-llama
+            enabled: true
+            pvc:
+              storage: "40Gi"
+            args:
+              - llama-server
+              - --no-mmap
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "2048"
+              - -b
+              - "2048"
+              - -c
+              - "0"
+              - -v
+              - -hf
+              - TheBloke/Phind-CodeLlama-34B-v2-GGUF
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "60Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "1"
+                memory: "40Gi"
   ignoreDifferences:
     - group: apps
       kind: Deployment
