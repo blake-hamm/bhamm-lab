@@ -531,7 +531,7 @@ spec:
               - "32768"
               - -v
               - -hf
-              - unsloth/Llama-4-Scout-17B-16E-Instruct-GGUF:Q5_K_XL
+              - unsloth/Llama-4-Scout-17B-16E-Instruct-GGUF:Q8_K_XL
             resources:
               limits:
                 amd.com/gpu: 1
@@ -609,6 +609,74 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "40Gi"
+          - name: deepseek-qwen-distill
+            enabled: true
+            pvc:
+              storage: "70Gi"
+            args:
+              - llama-server
+              - --no-mmap
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "2048"
+              - -b
+              - "2048"
+              - -c
+              - "32768"
+              - -v
+              - -hf
+              - unsloth/DeepSeek-R1-Distill-Qwen-32B-GGUF
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "90Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "1"
+                memory: "70Gi"
+          - name: deepseek-llama-distill
+            enabled: true
+            pvc:
+              storage: "90Gi"
+            args:
+              - llama-server
+              - --no-mmap
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "2048"
+              - -b
+              - "2048"
+              - -c
+              - "32768"
+              - -v
+              - -hf
+              - unsloth/DeepSeek-R1-Distill-Llama-70B-GGUF:Q8_K_XL
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "110Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "1"
+                memory: "90Gi"
   ignoreDifferences:
     - group: apps
       kind: Deployment
