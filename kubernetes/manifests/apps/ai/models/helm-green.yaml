@@ -599,7 +599,7 @@ spec:
               - "0"
               - -v
               - -hf
-              - unsloth/Llama-3.3-70B-Instruct-GGUF:Q8_K_XL
+              - unsloth/Llama-3.3-70B-Instruct-GGUF:Q6_K_XL
             resources:
               limits:
                 amd.com/gpu: 1
@@ -634,6 +634,40 @@ spec:
               - -v
               - -hf
               - TheBloke/Phind-CodeLlama-34B-v2-GGUF
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "60Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "1"
+                memory: "40Gi"
+          - name: code-llama-python
+            enabled: true
+            pvc:
+              storage: "40Gi"
+            args:
+              - llama-server
+              - --no-mmap
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "2048"
+              - -b
+              - "2048"
+              - -c
+              - "0"
+              - -v
+              - -hf
+              - TheBloke/CodeLlama-34B-Python-GGUF
             resources:
               limits:
                 amd.com/gpu: 1
