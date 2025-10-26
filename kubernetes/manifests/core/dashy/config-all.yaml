@@ -98,7 +98,8 @@ data:
       - title: PiKVM
         description: Visit PiKVM connected to talos nose/tail (framework mainboards)
         icon: hl-pikvm
-        hurl: https://10.0.10.24/
+        url: https://10.0.10.24/
+        statusCheck: false
       - title: Exporter
         description: Visit node exporter grafana dashboard
         icon: hl-grafana
