@@ -95,6 +95,10 @@ data:
         icon: hl-supermicro
         url: https://10.0.10.23/
         statusCheck: false
+      - title: PiKVM
+        description: Visit PiKVM connected to talos nose/tail (framework mainboards)
+        icon: hl-pikvm
+        hurl: https://10.0.10.24/
       - title: Exporter
         description: Visit node exporter grafana dashboard
         icon: hl-grafana
