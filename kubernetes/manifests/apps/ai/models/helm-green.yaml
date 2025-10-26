@@ -439,6 +439,74 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "70Gi"
+          - name: mixtral-instruct
+            enabled: true
+            pvc:
+              storage: "55Gi"
+            args:
+              - llama-server
+              - --no-mmap
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "2048"
+              - -b
+              - "2048"
+              - -c
+              - "0"
+              - -v
+              - -hf
+              - TheBloke/Mixtral-8x7B-Instruct-v0.1-GGUF
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "75Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "1"
+                memory: "55Gi"
+          - name: mixtral
+            enabled: true
+            pvc:
+              storage: "55Gi"
+            args:
+              - llama-server
+              - --no-mmap
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "2048"
+              - -b
+              - "2048"
+              - -c
+              - "0"
+              - -v
+              - -hf
+              - TheBloke/Mixtral-8x7B-v0.1-GGUF
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "75Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "1"
+                memory: "55Gi"
   ignoreDifferences:
     - group: apps
       kind: Deployment
