@@ -374,7 +374,7 @@ spec:
           - name: glm-air
             enabled: true
             pvc:
-              storage: "60Gi"
+              storage: "90Gi"
             args:
               - llama-server
               - --no-mmap
@@ -399,12 +399,12 @@ spec:
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "90Gi"
+                memory: "110Gi"
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
                 cpu: "1"
-                memory: "70Gi"
+                memory: "90Gi"
           - name: mixtral-instruct
             enabled: true
             pvc:
