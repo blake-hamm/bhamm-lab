@@ -93,6 +93,42 @@ spec:
                 memory: "35Gi"
             zeroscaling:
               cooldownPeriod: 300
+          - name: e5-mistral-7b-instruct-embed
+            enabled: true
+            pvc:
+              storage: "20Gi"
+            args:
+              - llama-server
+              - --no-mmap
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --embeddings
+              - -ub
+              - "2048"
+              - -b
+              - "2048"
+              - -c
+              - "0"
+              - -v
+              - -hf
+              - second-state/E5-Mistral-7B-Instruct-Embedding-GGUF
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "30Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "1"
+                memory: "20Gi"
+            zeroscaling:
+              cooldownPeriod: 300
           - name: gpt-oss-120b
             enabled: true
             pvc:
@@ -129,6 +165,40 @@ spec:
                 memory: "70Gi"
             zeroscaling:
               cooldownPeriod: 1800
+          - name: gpt-oss-20b
+            enabled: true
+            pvc:
+              storage: "20Gi"
+            args:
+              - llama-server
+              - --no-mmap
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "2048"
+              - -b
+              - "2048"
+              - -c
+              - "0"
+              - -v
+              - -hf
+              - ggml-org/gpt-oss-20b-GGUF
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "25Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "1"
+                memory: "15Gi"
           - name: qwen3-30b-instruct
             enabled: true
             pvc:
