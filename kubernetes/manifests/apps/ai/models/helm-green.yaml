@@ -17,7 +17,7 @@ spec:
     helm:
       valuesObject:
         models:
-          - name: qwen3-embedding-8b
+          - name: qwen-embed
             enabled: true
             pvc:
               storage: "20Gi"
@@ -55,7 +55,7 @@ spec:
                 memory: "15Gi"
             zeroscaling:
               cooldownPeriod: 300
-          - name: nomic-embed-code
+          - name: nomic-embed
             enabled: true
             pvc:
               storage: "35Gi"
@@ -93,7 +93,7 @@ spec:
                 memory: "35Gi"
             zeroscaling:
               cooldownPeriod: 300
-          - name: e5-mistral-7b-instruct-embed
+          - name: mistral-embed
             enabled: true
             pvc:
               storage: "20Gi"
@@ -199,7 +199,7 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "15Gi"
-          - name: qwen3-30b-instruct
+          - name: qwen-instruct
             enabled: true
             pvc:
               storage: "70Gi"
@@ -233,7 +233,7 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "70Gi"
-          - name: qwen3-30b-thinking
+          - name: qwen-thinking
             enabled: true
             pvc:
               storage: "70Gi"
@@ -267,7 +267,7 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "70Gi"
-          - name: qwen3-30b-coder
+          - name: qwen-coder
             enabled: true
             pvc:
               storage: "70Gi"
@@ -301,7 +301,7 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "70Gi"
-          - name: gemma3-27b
+          - name: gemma
             enabled: true
             image:
               tag: rocm-6.4.4-rocwmma
@@ -337,10 +337,10 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "80Gi"
-          - name: glm-32b
+          - name: glm-air-reap
             enabled: true
             pvc:
-              storage: "60Gi"
+              storage: "90Gi"
             args:
               - llama-server
               - --no-mmap
@@ -361,17 +361,17 @@ spec:
               - "32768"
               - -v
               - -hf
-              - unsloth/GLM-4-32B-0414-GGUF
+              - bartowski/cerebras_GLM-4.5-Air-REAP-82B-A12B-GGUF
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "90Gi"
+                memory: "110Gi"
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
                 cpu: "1"
-                memory: "70Gi"
-          - name: glm-32b-thinking
+                memory: "90Gi"
+          - name: glm-air
             enabled: true
             pvc:
               storage: "60Gi"
@@ -395,7 +395,7 @@ spec:
               - "32768"
               - -v
               - -hf
-              - unsloth/GLM-Z1-32B-0414-GGUF
+              - bartowski/zai-org_GLM-4.5-Air-GGUF:Q5_K_M
             resources:
               limits:
                 amd.com/gpu: 1
