@@ -575,7 +575,7 @@ spec:
                 amd.com/gpu: 1
                 cpu: "1"
                 memory: "90Gi"
-          - name: llama
+          - name: llama-3
             enabled: true
             pvc:
               storage: "90Gi"
@@ -600,6 +600,40 @@ spec:
               - -v
               - -hf
               - unsloth/Llama-3.3-70B-Instruct-GGUF:Q6_K_XL
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "110Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "1"
+                memory: "90Gi"
+          - name: llama-4
+            enabled: true
+            pvc:
+              storage: "90Gi"
+            args:
+              - llama-server
+              - --no-mmap
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "2048"
+              - -b
+              - "2048"
+              - -c
+              - "0"
+              - -v
+              - -hf
+              - unsloth/Llama-4-Scout-17B-16E-Instruct-GGUF:Q5_K_XL
             resources:
               limits:
                 amd.com/gpu: 1
