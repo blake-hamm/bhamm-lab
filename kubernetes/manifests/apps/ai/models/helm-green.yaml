@@ -311,7 +311,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "32768"
+              - "131072"
               - -v
               - -hf
               - unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF:BF16
