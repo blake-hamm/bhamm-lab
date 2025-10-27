@@ -15,7 +15,7 @@ global:
     cooldownPeriod: 900
     trigger:
       query: >-
-        llamacpp:requests_processing{container="{{ .name }}"} or vector(0)
+        sum(llamacpp:requests_processing{container="{{ .name }}"}) or vector(0)
       threshold: "1"
   resources:
     limits:
