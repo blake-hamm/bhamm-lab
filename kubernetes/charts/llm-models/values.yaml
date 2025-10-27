@@ -33,19 +33,8 @@ global:
   litellm:
     manage_config: true
     config:
-      general_settings:
-        max_parallel_requests: 1
-        global_max_parallel_requests: 2
-      router_settings:
-        routing_strategy: simple-shuffle
-        redis_host: os.environ/REDIS_HOST
-        redis_port: os.environ/REDIS_PORT
-        redis_password: os.environ/REDIS_PASSWORD
       litellm_settings:
-        request_timeout: 6000
-        allowed_fails: 5
-        cooldown_time: 60
-        disable_cooldowns: False
+        request_timeout: 300
         callbacks: ["prometheus"]
         cache: True
         cache_params:
@@ -54,6 +43,35 @@ global:
           port: os.environ/REDIS_PORT
           password: os.environ/REDIS_PASSWORD
           supported_call_types: [] # Disabled llm caching (use qdrant instead)
+      general_settings:
+        max_parallel_requests: 10
+        global_max_parallel_requests: 20
+      router_settings:
+        enable_pre_call_check: true
+        cooldown_time: 30
+        disable_cooldowns: False
+        allowed_fails: 2
+        default_max_parallel_requests: 20
+        timeout: 300
+        retry_after: 90
+        num_retries: 1
+        retry_policy:
+          TimeoutErrorRetries: 1
+          AuthenticationErrorRetries: 0
+          RateLimitErrorRetries: 1
+          ContentPolicyViolationErrorRetries: 0
+          InternalServerErrorRetries: 0
+        allowed_fails_policy:
+          BadRequestErrorAllowedFails: 5
+          AuthenticationErrorAllowedFails: 2
+          TimeoutErrorAllowedFails: 2
+          RateLimitErrorAllowedFails: 3
+          ContentPolicyViolationErrorAllowedFails: 2
+          InternalServerErrorAllowedFails: 2
+        routing_strategy: simple-shuffle
+        redis_host: os.environ/REDIS_HOST
+        redis_port: os.environ/REDIS_PORT
+        redis_password: os.environ/REDIS_PASSWORD
 models: []
 # - name: gpt-oss-120b
 #   enabled: true
