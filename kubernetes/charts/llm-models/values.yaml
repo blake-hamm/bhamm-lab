@@ -33,12 +33,19 @@ global:
   litellm:
     manage_config: true
     config:
+      general_settings:
+        max_parallel_requests: 1
+        global_max_parallel_requests: 2
       router_settings:
         routing_strategy: simple-shuffle
         redis_host: os.environ/REDIS_HOST
         redis_port: os.environ/REDIS_PORT
         redis_password: os.environ/REDIS_PASSWORD
       litellm_settings:
+        request_timeout: 6000
+        allowed_fails: 5
+        cooldown_time: 60
+        disable_cooldowns: False
         callbacks: ["prometheus"]
         cache: True
         cache_params:
