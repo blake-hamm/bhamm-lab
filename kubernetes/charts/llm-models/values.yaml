@@ -47,6 +47,7 @@ global:
         max_parallel_requests: 10
         global_max_parallel_requests: 20
       router_settings:
+        debug_level: "DEBUG"
         enable_pre_call_check: true
         cooldown_time: 30
         disable_cooldowns: False

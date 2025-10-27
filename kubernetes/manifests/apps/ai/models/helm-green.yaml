@@ -45,7 +45,7 @@ spec:
               - -hf
               - Qwen/Qwen3-Embedding-8B-GGUF:F16
               - --parallel
-              - "2"
+              - "16"
               - --cont-batching
             resources:
               limits:
@@ -84,7 +84,7 @@ spec:
               - -hf
               - nomic-ai/nomic-embed-code-GGUF
               - --parallel
-              - "2"
+              - "16"
               - --cont-batching
             resources:
               limits:
@@ -123,7 +123,7 @@ spec:
               - -hf
               - second-state/E5-Mistral-7B-Instruct-Embedding-GGUF
               - --parallel
-              - "2"
+              - "16"
               - --cont-batching
             resources:
               limits:
