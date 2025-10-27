@@ -653,7 +653,7 @@ spec:
               - "32768"
               - -v
               - -hf
-              - unsloth/DeepSeek-R1-Distill-Llama-70B-GGUF:Q8_K_XL
+              - bartowski/DeepSeek-R1-Distill-Llama-70B-GGUF
             resources:
               limits:
                 amd.com/gpu: 1
