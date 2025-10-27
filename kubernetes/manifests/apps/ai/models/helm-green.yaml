@@ -293,7 +293,7 @@ spec:
           - name: qwen-coder
             enabled: true
             pvc:
-              storage: "70Gi"
+              storage: "40Gi"
             args:
               - llama-server
               - --no-mmap
@@ -314,19 +314,29 @@ spec:
               - "131072"
               - -v
               - -hf
-              - unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF:BF16
+              - unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF:Q8_K_XL
               - --parallel
               - "2"
               - --cont-batching
+              - --temp
+              - "0.7"
+              - --min-p
+              - "0.0"
+              - --top-p
+              - "0.80"
+              - --top-k
+              - "20"
+              - --repeat-penalty
+              - "1.05"
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "100Gi"
+                memory: "80Gi"
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
                 cpu: "2"
-                memory: "70Gi"
+                memory: "40Gi"
             zeroscaling:
               cooldownPeriod: 1800
           - name: gemma
