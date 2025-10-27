@@ -223,7 +223,7 @@ spec:
               - "32768"
               - -v
               - -hf
-              - unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF
+              - unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:BF16
             resources:
               limits:
                 amd.com/gpu: 1
