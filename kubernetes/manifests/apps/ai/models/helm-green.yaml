@@ -162,7 +162,7 @@ spec:
               - -hf
               - ggml-org/gpt-oss-120b-GGUF
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -201,7 +201,7 @@ spec:
               - -hf
               - ggml-org/gpt-oss-20b-GGUF
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -238,7 +238,7 @@ spec:
               - -hf
               - unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:BF16
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -277,7 +277,7 @@ spec:
               - -hf
               - unsloth/Qwen3-30B-A3B-Thinking-2507-GGUF
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -314,9 +314,9 @@ spec:
               - "32768"
               - -v
               - -hf
-              - unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF
+              - unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF:BF16
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -357,7 +357,7 @@ spec:
               - -hf
               - unsloth/gemma-3-27b-it-GGUF
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -396,7 +396,7 @@ spec:
               - -hf
               - bartowski/cerebras_GLM-4.5-Air-REAP-82B-A12B-GGUF
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -435,7 +435,7 @@ spec:
               - -hf
               - bartowski/zai-org_GLM-4.5-Air-GGUF:Q5_K_M
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -474,7 +474,7 @@ spec:
               - -hf
               - unsloth/Devstral-Small-2507-GGUF
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -513,7 +513,7 @@ spec:
               - -hf
               - unsloth/Llama-3.3-70B-Instruct-GGUF:Q8_K_XL
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -552,7 +552,7 @@ spec:
               - -hf
               - unsloth/Llama-4-Scout-17B-16E-Instruct-GGUF:Q5_K_XL
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -591,7 +591,7 @@ spec:
               - -hf
               - TheBloke/Phind-CodeLlama-34B-v2-GGUF
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -628,7 +628,7 @@ spec:
               - -hf
               - TheBloke/CodeLlama-34B-Python-GGUF
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -665,7 +665,7 @@ spec:
               - -hf
               - unsloth/DeepSeek-R1-Distill-Qwen-32B-GGUF
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -704,7 +704,7 @@ spec:
               - -hf
               - bartowski/DeepSeek-R1-Distill-Llama-70B-GGUF:Q6_K
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
