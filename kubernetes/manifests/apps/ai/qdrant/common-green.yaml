@@ -24,12 +24,18 @@ spec:
             routes:
               - match: Host(`qdrant.bhamm-lab.com`)
                 kind: Rule
-                middlewares:
-                  - name: default-headers
+                priority: 10
                 services:
                   - name: qdrant
                     scheme: http
                     port: http
+              - kind: Rule
+                match: Host(`qdrant.bhamm-lab.com`) && Header(`Content-Type`, `application/grpc`)
+                priority: 11
+                services:
+                  - name: qdrant
+                    port: grpc
+                    scheme: h2c
         externalSecrets:
           enabled: true
           secrets:
