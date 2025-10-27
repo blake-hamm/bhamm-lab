@@ -11,9 +11,9 @@ spec:
     server: https://kubernetes.default.svc
     namespace: qdrant
   source:
-    repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/enhance-openwebui
-    path: kubernetes/charts/llm-models
+    repoURL: https://qdrant.github.io/qdrant-helm
+    targetRevision: v1.15.5
+    chart: qdrant
     helm:
       valuesObject:
         resources:
