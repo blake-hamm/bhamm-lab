@@ -51,7 +51,7 @@ spec:
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
-                cpu: "1"
+                cpu: "2"
                 memory: "15Gi"
             zeroscaling:
               cooldownPeriod: 300
@@ -89,7 +89,7 @@ spec:
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
-                cpu: "1"
+                cpu: "2"
                 memory: "35Gi"
             zeroscaling:
               cooldownPeriod: 300
@@ -125,7 +125,7 @@ spec:
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
-                cpu: "1"
+                cpu: "2"
                 memory: "20Gi"
             zeroscaling:
               cooldownPeriod: 300
@@ -161,7 +161,7 @@ spec:
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
-                cpu: "1"
+                cpu: "2"
                 memory: "70Gi"
             zeroscaling:
               cooldownPeriod: 1800
@@ -197,7 +197,7 @@ spec:
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
-                cpu: "1"
+                cpu: "2"
                 memory: "15Gi"
           - name: qwen-instruct
             enabled: true
@@ -231,7 +231,7 @@ spec:
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
-                cpu: "1"
+                cpu: "2"
                 memory: "70Gi"
             zeroscaling:
               cooldownPeriod: 1800
@@ -267,7 +267,7 @@ spec:
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
-                cpu: "1"
+                cpu: "2"
                 memory: "70Gi"
             zeroscaling:
               cooldownPeriod: 1800
@@ -303,7 +303,7 @@ spec:
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
-                cpu: "1"
+                cpu: "2"
                 memory: "70Gi"
             zeroscaling:
               cooldownPeriod: 1800
@@ -341,7 +341,7 @@ spec:
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
-                cpu: "1"
+                cpu: "2"
                 memory: "80Gi"
             zeroscaling:
               cooldownPeriod: 1800
@@ -377,7 +377,7 @@ spec:
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
-                cpu: "1"
+                cpu: "2"
                 memory: "90Gi"
             zeroscaling:
               cooldownPeriod: 1800
@@ -413,7 +413,7 @@ spec:
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
-                cpu: "1"
+                cpu: "2"
                 memory: "90Gi"
             zeroscaling:
               cooldownPeriod: 1800
@@ -449,7 +449,7 @@ spec:
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
-                cpu: "1"
+                cpu: "2"
                 memory: "55Gi"
             zeroscaling:
               cooldownPeriod: 1800
@@ -485,7 +485,7 @@ spec:
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
-                cpu: "1"
+                cpu: "2"
                 memory: "90Gi"
             zeroscaling:
               cooldownPeriod: 1800
@@ -521,7 +521,7 @@ spec:
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
-                cpu: "1"
+                cpu: "2"
                 memory: "90Gi"
             zeroscaling:
               cooldownPeriod: 1800
@@ -557,7 +557,7 @@ spec:
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
-                cpu: "1"
+                cpu: "2"
                 memory: "40Gi"
           - name: code-llama-python
             enabled: true
@@ -591,7 +591,7 @@ spec:
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
-                cpu: "1"
+                cpu: "2"
                 memory: "40Gi"
           - name: deepseek-qwen-distill
             enabled: true
@@ -625,7 +625,7 @@ spec:
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
-                cpu: "1"
+                cpu: "2"
                 memory: "70Gi"
             zeroscaling:
               cooldownPeriod: 1800
@@ -661,7 +661,7 @@ spec:
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
-                cpu: "1"
+                cpu: "2"
                 memory: "90Gi"
             zeroscaling:
               cooldownPeriod: 1800
