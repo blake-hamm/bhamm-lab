@@ -43,7 +43,7 @@ spec:
               - --pooling
               - last
               - -hf
-              - Qwen/Qwen3-Embedding-8B-GGUF
+              - Qwen/Qwen3-Embedding-8B-GGUF:F16
             resources:
               limits:
                 amd.com/gpu: 1
