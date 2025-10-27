@@ -53,8 +53,6 @@ spec:
                 amd.com/gpu: 1
                 cpu: "2"
                 memory: "15Gi"
-            zeroscaling:
-              cooldownPeriod: 300
           - name: nomic-embed
             enabled: true
             pvc:
