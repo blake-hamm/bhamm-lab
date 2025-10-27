@@ -18,6 +18,14 @@ spec:
       valuesObject:
         global:
           enableMonitoring: true
+        elastiController:
+          resources:
+            limits:
+              cpu: 200m
+              memory: 200Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
