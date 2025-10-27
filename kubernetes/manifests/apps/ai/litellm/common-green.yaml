@@ -49,6 +49,10 @@ spec:
               remoteRef:
                 key: /default/litellm
                 property: LITELLM_SALT_KEY
+            - secretKey: QDRANT_API_KEY
+              remoteRef:
+                key: /default/qdrant
+                property: API_KEY
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

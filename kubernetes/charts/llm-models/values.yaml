@@ -38,11 +38,9 @@ global:
         callbacks: ["prometheus"]
         cache: True
         cache_params:
-          type: redis
-          host: os.environ/REDIS_HOST
-          port: os.environ/REDIS_PORT
-          password: os.environ/REDIS_PASSWORD
-          supported_call_types: [] # Disabled llm caching (use qdrant instead)
+          type: qdrant-semantic
+          qdrant_semantic_cache_embedding_model: qwen-embed
+          qdrant_collection_name: litellm
       general_settings:
         max_parallel_requests: 10
         global_max_parallel_requests: 20

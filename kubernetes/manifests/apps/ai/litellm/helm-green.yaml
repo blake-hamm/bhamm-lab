@@ -55,6 +55,8 @@ spec:
           REDIS_HOST: "litellm-dragonfly"
           REDIS_PORT: "6379"
           REDIS_PASSWORD: ""
+          QDRANT_VECTOR_SIZE: 4096
+          QDRANT_API_BASE: http://qdrant.qdrant.svc.cluster.local:6333
         migrationJob:
           hooks:
             argocd:
@@ -70,6 +72,11 @@ spec:
               secretKeyRef:
                 name: litellm-external-secret
                 key: LITELLM_SALT_KEY
+          - name: QDRANT_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: litellm-external-secret
+                key: QDRANT_API_KEY
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
