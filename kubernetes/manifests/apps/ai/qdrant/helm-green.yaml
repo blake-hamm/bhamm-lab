@@ -1,0 +1,63 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qdrant
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "18"
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: qdrant
+  source:
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    targetRevision: feature/enhance-openwebui
+    path: kubernetes/charts/llm-models
+    helm:
+      valuesObject:
+        resources:
+          limits:
+            cpu: 800m
+            memory: 1024Mi
+          requests:
+            cpu: 400m
+            memory: 512Mi
+        persistence:
+          accessModes: ["ReadWriteOnce"]
+          size: 10Gi
+          annotations:
+            k8up.io/backup: "true"
+        # modification example for configuration to overwrite defaults
+        # https://qdrant.tech/documentation/guides/configuration/
+        config:
+          storage:
+          # snapshots_config:
+          #   snapshots_storage: s3
+          #   s3_config:
+          #     bucket: ""
+          #     region: ""
+          #     access_key: ""
+          #     secret_key: ""
+          cluster:
+            enabled: false
+            p2p:
+              port: 6335
+              enable_tls: false
+            consensus:
+              tick_period_ms: 100
+        metrics:
+          serviceMonitor:
+            enabled: true
+        apiKey:
+          valueFrom:
+            secretKeyRef:
+              name: qdrant-external-secret
+              key: API_KEY
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true
