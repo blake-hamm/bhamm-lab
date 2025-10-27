@@ -60,7 +60,7 @@ spec:
               port: 8080
             initialDelaySeconds: 0
             periodSeconds: 30
-            timeoutSeconds: 15
+            timeoutSeconds: 300
             failureThreshold: 10
           livenessProbe:
             httpGet:
@@ -68,7 +68,7 @@ spec:
               port: 8080
             initialDelaySeconds: 0
             periodSeconds: 300
-            timeoutSeconds: 30
+            timeoutSeconds: 300
             failureThreshold: 5
       volumes:
         - name: model-cache
