@@ -23,7 +23,7 @@ spec:
   triggers:
     - type: prometheus
       metadata:
-        query: {{ tpl $merged.zeroscaling.trigger.query $ }}
+        query: {{ tpl $merged.zeroscaling.trigger.query . }}
         serverAddress: http://monitor-prometheus.monitor.svc.cluster.local:9090
         threshold: "{{ $merged.zeroscaling.trigger.threshold }}"
 {{- end }}
