@@ -705,11 +705,11 @@ spec:
               - --no-webui
               - --jinja
               - -ub
-              - "4096"
+              - "2048"
               - -b
-              - "4096"
+              - "2048"
               - -c
-              - "65536"
+              - "131072"
               - -v
               - -hf
               - bartowski/DeepSeek-R1-Distill-Llama-70B-GGUF:Q5_K_M
