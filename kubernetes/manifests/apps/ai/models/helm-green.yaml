@@ -61,6 +61,7 @@ spec:
             enabled: true
             pvc:
               storage: "35Gi"
+              storageClassName: csi-rbd-sc
             args:
               - llama-server
               - -ngl
