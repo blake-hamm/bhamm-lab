@@ -709,7 +709,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "131072"
+              - "32768"
               - -v
               - -hf
               - bartowski/DeepSeek-R1-Distill-Llama-70B-GGUF:Q4_K_M
