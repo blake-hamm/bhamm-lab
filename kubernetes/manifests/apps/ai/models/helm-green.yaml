@@ -74,10 +74,9 @@ spec:
               - --no-webui
               - --embeddings
               - -ub
-              - "32"
+              - "64"
               - -b
-              - "32"
-              - -c
+              - "64
               - "32768"
               - -v
               - --pooling
@@ -85,7 +84,7 @@ spec:
               - -hf
               - nomic-ai/nomic-embed-code-GGUF:F16
               - --parallel
-              - "48"
+              - "24"
               - --cont-batching
             resources:
               limits:
