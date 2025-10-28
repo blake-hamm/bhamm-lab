@@ -548,9 +548,9 @@ spec:
               - "131072"
               - -v
               - -hf
-              - unsloth/Llama-4-Scout-17B-16E-Instruct-GGUF:Q5_K_XL
+              - ggml-org/Llama-4-Scout-17B-16E-Instruct-GGUF:Q4_K_M
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
