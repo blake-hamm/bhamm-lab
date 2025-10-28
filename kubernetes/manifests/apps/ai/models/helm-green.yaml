@@ -83,7 +83,7 @@ spec:
               - --pooling
               - last
               - -hf
-              - nomic-ai/nomic-embed-code-GGUF
+              - nomic-ai/nomic-embed-code-GGUF:F32
               - --parallel
               - "24"
               - --cont-batching
