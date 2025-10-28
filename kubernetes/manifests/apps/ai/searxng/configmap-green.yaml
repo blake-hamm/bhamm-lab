@@ -16,10 +16,8 @@ data:
       limiter: false
       public_instance: false
       image_proxy: true
-
     valkey:
       url: valkey://searxng-dragonfly.searxng.svc.cluster.local:6379
-
     search:
       safe_search: 0
       autocomplete: ""
@@ -27,3 +25,6 @@ data:
       formats:
         - html
         - json
+    ui:
+      theme_args:
+        simple_style: dark

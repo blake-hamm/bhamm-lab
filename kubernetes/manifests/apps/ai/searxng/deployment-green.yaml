@@ -26,8 +26,8 @@ spec:
               name: http
           volumeMounts:
             - name: config
-              mountPath: /etc/searxng
-              readOnly: true
+              mountPath: /etc/searxng/settings.yml
+              subPath: settings.yml
             - name: data
               mountPath: /var/lib/searxng
           resources:
