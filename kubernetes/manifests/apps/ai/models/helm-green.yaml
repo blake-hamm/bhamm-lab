@@ -24,7 +24,7 @@ spec:
               storageClassName: csi-rbd-sc
             args:
               - llama-server
-              - --no-mmap
+              # - --no-mmap # Might be needed for smaller vram
               - -ngl
               - "999"
               - -fa
@@ -63,7 +63,6 @@ spec:
               storage: "35Gi"
             args:
               - llama-server
-              - --no-mmap
               - -ngl
               - "999"
               - -fa
@@ -104,7 +103,6 @@ spec:
               storage: "20Gi"
             args:
               - llama-server
-              - --no-mmap
               - -ngl
               - "999"
               - -fa
@@ -143,7 +141,6 @@ spec:
               storage: "80Gi"
             args:
               - llama-server
-              - --no-mmap
               - -ngl
               - "999"
               - -fa
@@ -182,7 +179,6 @@ spec:
               storage: "20Gi"
             args:
               - llama-server
-              - --no-mmap
               - -ngl
               - "999"
               - -fa
@@ -219,7 +215,6 @@ spec:
               storage: "40Gi"
             args:
               - llama-server
-              - --no-mmap
               - -ngl
               - "999"
               - -fa
@@ -258,7 +253,6 @@ spec:
               storage: "70Gi"
             args:
               - llama-server
-              - --no-mmap
               - -ngl
               - "999"
               - -fa
@@ -297,7 +291,6 @@ spec:
               storage: "40Gi"
             args:
               - llama-server
-              - --no-mmap
               - -ngl
               - "999"
               - -fa
@@ -348,7 +341,6 @@ spec:
               storage: "60Gi"
             args:
               - llama-server
-              - --no-mmap
               - -ngl
               - "999"
               - -fa
@@ -387,7 +379,6 @@ spec:
               storage: "90Gi"
             args:
               - llama-server
-              - --no-mmap
               - -ngl
               - "999"
               - -fa
@@ -426,7 +417,6 @@ spec:
               storage: "90Gi"
             args:
               - llama-server
-              - --no-mmap
               - -ngl
               - "999"
               - -fa
@@ -465,7 +455,6 @@ spec:
               storage: "55Gi"
             args:
               - llama-server
-              - --no-mmap
               - -ngl
               - "999"
               - -fa
@@ -504,7 +493,6 @@ spec:
               storage: "90Gi"
             args:
               - llama-server
-              - --no-mmap
               - -ngl
               - "999"
               - -fa
@@ -543,7 +531,6 @@ spec:
               storage: "90Gi"
             args:
               - llama-server
-              - --no-mmap
               - -ngl
               - "999"
               - -fa
@@ -582,7 +569,6 @@ spec:
               storage: "40Gi"
             args:
               - llama-server
-              - --no-mmap
               - -ngl
               - "999"
               - -fa
@@ -619,7 +605,6 @@ spec:
               storage: "40Gi"
             args:
               - llama-server
-              - --no-mmap
               - -ngl
               - "999"
               - -fa
@@ -656,7 +641,6 @@ spec:
               storage: "70Gi"
             args:
               - llama-server
-              - --no-mmap
               - -ngl
               - "999"
               - -fa
