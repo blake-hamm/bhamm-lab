@@ -35,14 +35,14 @@ spec:
               - --no-webui
               - --embeddings
               - -ub
-              - "1024"
+              - "64"
               - -b
-              - "1024"
+              - "64"
               - -c
-              - "131072"
+              - "32768"
               - -v
               - --pooling
-              - last
+              - mean
               - -hf
               - Qwen/Qwen3-Embedding-8B-GGUF:F16
               - --parallel
@@ -81,7 +81,7 @@ spec:
               - "32768"
               - -v
               - --pooling
-              - last
+              - mean
               - -hf
               - bartowski/nomic-ai_nomic-embed-code-GGUF:Q8_0
               - --parallel
