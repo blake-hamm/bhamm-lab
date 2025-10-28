@@ -691,8 +691,6 @@ spec:
               cooldownPeriod: 1800
           - name: deepseek-llama-distill
             enabled: true
-            image:
-              tag: rocm-6.4.4-rocwmma
             pvc:
               storage: "90Gi"
             args:
@@ -714,7 +712,7 @@ spec:
               - "65536"
               - -v
               - -hf
-              - bartowski/DeepSeek-R1-Distill-Llama-70B-GGUF:Q6_K
+              - bartowski/DeepSeek-R1-Distill-Llama-70B-GGUF:Q5_K_M
               - --parallel
               - "1"
               - --cont-batching
