@@ -80,8 +80,6 @@ spec:
               - -c
               - "32768"
               - -v
-              - --pooling
-              - mean
               - -hf
               - bartowski/nomic-ai_nomic-embed-code-GGUF:Q8_0
               - --parallel
