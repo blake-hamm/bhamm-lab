@@ -712,7 +712,7 @@ spec:
               - "131072"
               - -v
               - -hf
-              - bartowski/DeepSeek-R1-Distill-Llama-70B-GGUF:Q5_K_M
+              - bartowski/DeepSeek-R1-Distill-Llama-70B-GGUF:Q4_K_M
               - --parallel
               - "1"
               - --cont-batching
