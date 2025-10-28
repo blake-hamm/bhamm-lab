@@ -39,14 +39,14 @@ spec:
               - -b
               - "2048"
               - -c
-              - "12800"
+              - "131072"
               - -v
               - --pooling
               - last
               - -hf
               - Qwen/Qwen3-Embedding-8B-GGUF:F16
               - --parallel
-              - "25"
+              - "24"
               - --cont-batching
             resources:
               limits:
@@ -78,7 +78,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "12800"
+              - "131072"
               - -v
               - --pooling
               - last
@@ -118,7 +118,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "12800"
+              - "131072"
               - -v
               - -hf
               - second-state/E5-Mistral-7B-Instruct-Embedding-GGUF
@@ -156,7 +156,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "12800"
+              - "131072"
               - -v
               - -hf
               - ggml-org/gpt-oss-120b-GGUF
@@ -194,7 +194,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "12800"
+              - "131072"
               - -v
               - -hf
               - ggml-org/gpt-oss-20b-GGUF
@@ -230,7 +230,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "12800"
+              - "131072"
               - -v
               - -hf
               - unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:Q8_K_XL
@@ -268,7 +268,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "12800"
+              - "131072"
               - -v
               - -hf
               - unsloth/Qwen3-30B-A3B-Thinking-2507-GGUF
@@ -306,7 +306,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "12800"
+              - "131072"
               - -v
               - -hf
               - unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF:Q8_K_XL
@@ -356,7 +356,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "12800"
+              - "131072"
               - -v
               - -hf
               - unsloth/gemma-3-27b-it-GGUF
@@ -394,7 +394,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "12800"
+              - "131072"
               - -v
               - -hf
               - bartowski/cerebras_GLM-4.5-Air-REAP-82B-A12B-GGUF
@@ -432,7 +432,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "12800"
+              - "131072"
               - -v
               - -hf
               - bartowski/zai-org_GLM-4.5-Air-GGUF:Q5_K_M
@@ -470,7 +470,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "12800"
+              - "131072"
               - -v
               - -hf
               - unsloth/Devstral-Small-2507-GGUF
@@ -508,7 +508,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "12800"
+              - "131072"
               - -v
               - -hf
               - unsloth/Llama-3.3-70B-Instruct-GGUF:Q8_K_XL
@@ -546,7 +546,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "12800"
+              - "131072"
               - -v
               - -hf
               - ggml-org/Llama-4-Scout-17B-16E-Instruct-GGUF:Q4_K_M
@@ -584,7 +584,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "12800"
+              - "131072"
               - -v
               - -hf
               - TheBloke/Phind-CodeLlama-34B-v2-GGUF
@@ -620,7 +620,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "12800"
+              - "131072"
               - -v
               - -hf
               - TheBloke/CodeLlama-34B-Python-GGUF
@@ -656,7 +656,7 @@ spec:
               - -b
               - "2048"
               - -c
-              - "12800"
+              - "131072"
               - -v
               - -hf
               - unsloth/DeepSeek-R1-Distill-Qwen-32B-GGUF
