@@ -691,6 +691,8 @@ spec:
               cooldownPeriod: 1800
           - name: deepseek-llama-distill
             enabled: true
+            image:
+              tag: rocm-6.4.4-rocwmma
             pvc:
               storage: "90Gi"
             args:
