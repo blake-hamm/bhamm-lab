@@ -60,7 +60,7 @@ spec:
           - name: nomic-embed
             enabled: true
             pvc:
-              storage: "35Gi"
+              storage: "10Gi"
               storageClassName: csi-rbd-sc
             args:
               - llama-server
@@ -83,19 +83,19 @@ spec:
               - --pooling
               - last
               - -hf
-              - nomic-ai/nomic-embed-code-GGUF:F16
+              - bartowski/nomic-ai_nomic-embed-code-GGUF:Q8_0
               - --parallel
               - "24"
               - --cont-batching
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "50Gi"
+                memory: "20Gi"
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
                 cpu: "2"
-                memory: "35Gi"
+                memory: "10Gi"
             zeroscaling:
               cooldownPeriod: 300
           - name: mistral-embed
