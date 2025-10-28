@@ -695,7 +695,6 @@ spec:
               storage: "90Gi"
             args:
               - llama-server
-              - --no-mmap
               - -ngl
               - "999"
               - -fa
@@ -706,16 +705,16 @@ spec:
               - --no-webui
               - --jinja
               - -ub
-              - "1024"
+              - "4096"
               - -b
-              - "2048"
+              - "4096"
               - -c
-              - "131072"
+              - "65536"
               - -v
               - -hf
               - bartowski/DeepSeek-R1-Distill-Llama-70B-GGUF:Q6_K
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
