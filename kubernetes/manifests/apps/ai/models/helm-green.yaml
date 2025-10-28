@@ -216,7 +216,7 @@ spec:
           - name: qwen-instruct
             enabled: true
             pvc:
-              storage: "70Gi"
+              storage: "40Gi"
             args:
               - llama-server
               - --no-mmap
@@ -237,19 +237,19 @@ spec:
               - "131072"
               - -v
               - -hf
-              - unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:BF16
+              - unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:Q8_K_XL
               - --parallel
               - "2"
               - --cont-batching
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "100Gi"
+                memory: "80Gi"
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
                 cpu: "2"
-                memory: "70Gi"
+                memory: "40Gi"
             zeroscaling:
               cooldownPeriod: 1800
           - name: qwen-thinking
