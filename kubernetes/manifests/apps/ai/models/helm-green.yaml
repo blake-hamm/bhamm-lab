@@ -21,6 +21,7 @@ spec:
             enabled: true
             pvc:
               storage: "20Gi"
+              storageClassName: csi-rbd-sc
             args:
               - llama-server
               - --no-mmap
