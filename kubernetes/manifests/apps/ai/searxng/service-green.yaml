@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: searxng
+  namespace: searxng
+  annotations:
+    argocd.argoproj.io/sync-wave: "21"
+spec:
+  selector:
+    app: searxng
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
+  type: ClusterIP

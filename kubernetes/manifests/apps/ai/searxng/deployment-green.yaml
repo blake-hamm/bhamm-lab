@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: searxng
+  namespace: searxng
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+    reloader.stakater.com/auto: "true"
+  labels:
+    app.kubernetes.io/name: "searxng"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: searxng
+  template:
+    metadata:
+      labels:
+        app: searxng
+    spec:
+      containers:
+        - name: searxng
+          image: ghcr.io/searxng/searxng:2025.10.28-43065c502
+          ports:
+            - containerPort: 8080
+              name: http
+          volumeMounts:
+            - name: config
+              mountPath: /etc/searxng
+              readOnly: true
+            - name: data
+              mountPath: /var/lib/searxng
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            env:
+              - name: TZ
+                value: "America/Denver"
+              - name: SEARXNG_SECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: searxng-external-secret
+                    key: SEARXNG_SECRET
+              - name: SEARXNG_OPEN_METRICS
+                valueFrom:
+                  secretKeyRef:
+                    name: searxng-external-secret
+                    key: SEARXNG_OPEN_METRICS
+      volumes:
+        - name: config
+          configMap:
+            name: searxng-config
+        - name: data
+          emptyDir: {}
+      nodeSelector:
+        feature.node.kubernetes.io/amd-gpu: "true"
+      tolerations:
+        - key: "amd.com/gpu"
+          operator: "Exists"
+          effect: "NoSchedule"

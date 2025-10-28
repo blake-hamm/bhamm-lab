@@ -1,0 +1,23 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: searxng
+  namespace: searxng
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  selector:
+    matchLabels:
+      app: searxng
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      basicAuth:
+        username:
+          name: searxng-external-secret
+          key: smon_username
+        password:
+          name: searxng-external-secret
+          key: SEARXNG_OPEN_METRICS
