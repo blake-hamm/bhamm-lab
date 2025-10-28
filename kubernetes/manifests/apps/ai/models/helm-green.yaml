@@ -512,7 +512,7 @@ spec:
               - -hf
               - unsloth/Llama-3.3-70B-Instruct-GGUF:Q8_K_XL
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
