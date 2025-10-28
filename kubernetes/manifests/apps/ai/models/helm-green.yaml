@@ -85,7 +85,7 @@ spec:
               - -hf
               - nomic-ai/nomic-embed-code-GGUF:F16
               - --parallel
-              - "24"
+              - "40"
               - --cont-batching
             resources:
               limits:
