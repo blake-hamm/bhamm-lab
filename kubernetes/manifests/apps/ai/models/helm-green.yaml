@@ -291,7 +291,7 @@ spec:
             args:
               - llama-server
               - -hf
-              - unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF:Q8_K_XL
+              - ggml-org/Qwen3-Coder-30B-A3B-Instruct-Q8_0-GGUF
               - --host
               - 0.0.0.0
               - --metrics
