@@ -29,7 +29,7 @@ spec:
             - secretKey: SEARXNG_OPEN_METRICS
               remoteRef:
                 key: /default/searxng
-                property: SEARXNG_OPEN_METRICS
+                property: smon_username
             - secretKey: smon_username
               remoteRef:
                 key: /default/searxng
