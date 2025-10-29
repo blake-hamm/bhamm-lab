@@ -250,26 +250,34 @@ spec:
               storage: "70Gi"
             args:
               - llama-server
-              - -ngl
-              - "999"
-              - -fa
-              - "on"
+              - -hf
+              - unsloth/Qwen3-30B-A3B-Thinking-2507-GGUF:Q8_K_XL
               - --host
               - 0.0.0.0
               - --metrics
               - --no-webui
               - --jinja
-              - -ub
-              - "1024"
-              - -b
-              - "2048"
-              - -c
-              - "131072"
               - -v
-              - -hf
-              - unsloth/Qwen3-30B-A3B-Thinking-2507-GGUF
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ctk
+              - q8_0
+              - -ctv
+              - q8_0
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "3072"
+              - -b
+              - "49152"
+              - -c
+              - "65536"
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
