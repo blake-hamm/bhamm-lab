@@ -299,6 +299,8 @@ spec:
               - --metrics
               - --no-webui
               - --jinja
+              - -t
+              - '8'
               - -ub
               - "4096"
               - -b
@@ -324,12 +326,12 @@ spec:
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "80Gi"
-                cpu: "4"
+                memory: "110Gi"
+                cpu: "8"
               requests:
                 amd.com/gpu: 1
-                cpu: "2"
-                memory: "40Gi"
+                cpu: "4"
+                memory: "80Gi"
             zeroscaling:
               cooldownPeriod: 1800
           - name: gemma
