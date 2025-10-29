@@ -40,19 +40,19 @@ spec:
             limits:
               cpu: 500m
               memory: 1Gi
-            env:
-              - name: TZ
-                value: "America/Denver"
-              - name: SEARXNG_SECRET
-                valueFrom:
-                  secretKeyRef:
-                    name: searxng-external-secret
-                    key: SEARXNG_SECRET
-              - name: SEARXNG_OPEN_METRICS
-                valueFrom:
-                  secretKeyRef:
-                    name: searxng-external-secret
-                    key: SEARXNG_OPEN_METRICS
+          env:
+            - name: TZ
+              value: "America/Denver"
+            - name: SEARXNG_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: searxng-external-secret
+                  key: SEARXNG_SECRET
+            - name: SEARXNG_OPEN_METRICS
+              valueFrom:
+                secretKeyRef:
+                  name: searxng-external-secret
+                  key: SEARXNG_OPEN_METRICS
       volumes:
         - name: config
           configMap:

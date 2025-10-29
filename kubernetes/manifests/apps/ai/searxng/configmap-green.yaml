@@ -8,8 +8,6 @@ metadata:
 data:
   settings.yml: |
     use_default_settings: true
-    general:
-      open_metrics: ${SEARXNG_OPEN_METRICS}
     server:
       port: 8080
       bind_address: 0.0.0.0
@@ -17,7 +15,6 @@ data:
       limiter: false
       public_instance: false
       image_proxy: true
-      secret_key: ${SEARXNG_SECRET}
     valkey:
       url: valkey://searxng-dragonfly.searxng.svc.cluster.local:6379
     search:
