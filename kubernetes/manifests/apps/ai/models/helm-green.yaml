@@ -306,7 +306,7 @@ spec:
               - -b
               - "8192"
               - -c
-              - "131072"
+              - "262144"
               - -v
               - -hf
               - unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF:Q8_K_XL
