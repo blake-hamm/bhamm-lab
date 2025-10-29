@@ -648,6 +648,10 @@ spec:
               - --no-webui
               - --jinja
               - -v
+              - -ctk
+              - q8_0
+              - -ctv
+              - q8_0
               - -ngl
               - "999"
               - -fa
