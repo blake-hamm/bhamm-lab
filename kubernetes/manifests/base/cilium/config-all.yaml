@@ -7,6 +7,9 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   nodeSelector:
+    matchLabels:
+      machine_tier: standard
+      machine_type: vm
     matchExpressions:
       - key: node-role.kubernetes.io/control-plane
         operator: DoesNotExist
