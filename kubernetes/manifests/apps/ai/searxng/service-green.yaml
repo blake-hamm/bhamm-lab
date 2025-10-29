@@ -5,6 +5,8 @@ metadata:
   namespace: searxng
   annotations:
     argocd.argoproj.io/sync-wave: "21"
+  labels:
+    app: searxng
 spec:
   selector:
     app: searxng

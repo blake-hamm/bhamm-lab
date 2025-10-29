@@ -6,8 +6,6 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "20"
     reloader.stakater.com/auto: "true"
-  labels:
-    app.kubernetes.io/name: "searxng"
 spec:
   replicas: 1
   selector:
