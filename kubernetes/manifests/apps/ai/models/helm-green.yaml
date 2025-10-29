@@ -286,8 +286,6 @@ spec:
               cooldownPeriod: 1800
           - name: qwen-coder
             enabled: true
-            image:
-              tag: vulkan-radv
             pvc:
               storage: "40Gi"
             args:
