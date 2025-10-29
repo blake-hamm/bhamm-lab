@@ -299,19 +299,17 @@ spec:
               - --metrics
               - --no-webui
               - --jinja
-              - -t
-              - '8'
               - -ub
               - "3072"
               - -b
-              - "8192"
+              - "12288"
               - -c
               - "131072"
+              - --parallel
+              - "1"
               - -v
               - -hf
               - unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF:Q8_K_XL
-              - --parallel
-              - "1"
               - --cont-batching
               - --temp
               - "0.7"
