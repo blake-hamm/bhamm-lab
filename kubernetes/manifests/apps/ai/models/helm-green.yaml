@@ -24,27 +24,25 @@ spec:
               storageClassName: csi-rbd-sc
             args:
               - llama-server
-              # - --no-mmap # Might be needed for smaller vram
-              - -ngl
-              - "999"
-              - -fa
-              - "on"
+              - -hf
+              - Qwen/Qwen3-Embedding-8B-GGUF:F16
               - --host
               - 0.0.0.0
               - --metrics
               - --no-webui
               - --embeddings
+              - -v
+              # - --no-mmap # Might be needed for smaller vram
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
               - -ub
               - "64"
               - -b
               - "64"
               - -c
               - "32768"
-              - -v
-              - --pooling
-              - mean
-              - -hf
-              - Qwen/Qwen3-Embedding-8B-GGUF:F16
               - --parallel
               - "24"
               - --cont-batching
