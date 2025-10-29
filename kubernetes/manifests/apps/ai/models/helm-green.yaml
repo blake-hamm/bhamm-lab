@@ -290,26 +290,26 @@ spec:
               storage: "40Gi"
             args:
               - llama-server
-              - -ngl
-              - "999"
-              - -fa
-              - "on"
+              - -hf
+              - unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF:Q8_K_XL
               - --host
               - 0.0.0.0
               - --metrics
               - --no-webui
               - --jinja
+              - -v
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
               - -ub
               - "3072"
               - -b
-              - "24576"
+              - "49152"
               - -c
               - "65536"
               - --parallel
               - "1"
-              - -v
-              - -hf
-              - unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF:Q8_K_XL
               - --cont-batching
               - --temp
               - "0.7"
