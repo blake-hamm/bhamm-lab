@@ -29,7 +29,7 @@ spec:
               mountPath: /etc/searxng/settings.yml
               subPath: settings.yml
             - name: data
-              mountPath: /var/lib/searxng
+              mountPath: /var/cache/searxng
           resources:
             requests:
               cpu: 200m
