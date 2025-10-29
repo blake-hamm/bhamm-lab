@@ -641,7 +641,7 @@ spec:
             args:
               - llama-server
               - -hf
-              - unsloth/DeepSeek-R1-Distill-Qwen-32B-GGUF
+              - unsloth/DeepSeek-R1-Distill-Qwen-32B-GGUF:F16
               - --host
               - 0.0.0.0
               - --metrics
