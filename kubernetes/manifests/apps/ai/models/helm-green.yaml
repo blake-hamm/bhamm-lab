@@ -167,7 +167,7 @@ spec:
               requests:
                 amd.com/gpu: 1
                 cpu: "4"
-                memory: "90Gi"
+                memory: "110Gi"
             zeroscaling:
               cooldownPeriod: 1800
           - name: gpt-oss-20b
