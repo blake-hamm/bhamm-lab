@@ -138,36 +138,36 @@ spec:
               storage: "80Gi"
             args:
               - llama-server
-              - -ngl
-              - "999"
-              - -fa
-              - "on"
+              - -hf
+              - ggml-org/gpt-oss-120b-GGUF
               - --host
               - 0.0.0.0
               - --metrics
               - --no-webui
               - --jinja
-              - -ub
-              - "1024"
-              - -b
-              - "2048"
-              - -c
-              - "131072"
               - -v
-              - -hf
-              - ggml-org/gpt-oss-120b-GGUF
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "3072"
+              - -b
+              - "49152"
+              - -c
+              - "65536"
               - --parallel
               - "2"
               - --cont-batching
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "100Gi"
-                cpu: "4"
+                memory: "120Gi"
+                cpu: "8"
               requests:
                 amd.com/gpu: 1
-                cpu: "2"
-                memory: "70Gi"
+                cpu: "4"
+                memory: "90Gi"
             zeroscaling:
               cooldownPeriod: 1800
           - name: gpt-oss-20b
