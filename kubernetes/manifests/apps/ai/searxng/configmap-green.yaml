@@ -8,6 +8,8 @@ metadata:
 data:
   settings.yml: |
     use_default_settings: true
+    general:
+      open_metrics: 'default'
     server:
       port: 8080
       bind_address: 0.0.0.0
