@@ -376,6 +376,8 @@ spec:
               cooldownPeriod: 1800
           - name: glm-air-reap
             enabled: true
+            image:
+              tag: vulkan-radv
             pvc:
               storage: "90Gi"
             args:
