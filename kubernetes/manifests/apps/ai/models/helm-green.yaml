@@ -380,26 +380,26 @@ spec:
               storage: "90Gi"
             args:
               - llama-server
-              - -ngl
-              - "999"
-              - -fa
-              - "on"
+              - -hf
+              - bartowski/cerebras_GLM-4.5-Air-REAP-82B-A12B-GGUF:Q6_K
               - --host
               - 0.0.0.0
               - --metrics
               - --no-webui
               - --jinja
-              - -ub
-              - "1024"
-              - -b
-              - "2048"
-              - -c
-              - "131072"
               - -v
-              - -hf
-              - bartowski/cerebras_GLM-4.5-Air-REAP-82B-A12B-GGUF
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "3072"
+              - -b
+              - "24576"
+              - -c
+              - "65536"
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
