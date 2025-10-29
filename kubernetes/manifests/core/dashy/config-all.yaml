@@ -95,6 +95,11 @@ data:
         icon: hl-supermicro
         url: https://10.0.10.23/
         statusCheck: false
+      - title: PiKVM
+        description: Visit PiKVM connected to talos nose/tail (framework mainboards)
+        icon: hl-pikvm
+        url: https://10.0.10.24/
+        statusCheck: false
       - title: Exporter
         description: Visit node exporter grafana dashboard
         icon: hl-grafana
@@ -203,11 +208,10 @@ data:
         description: Visit Open Webui
         icon: hl-open-webui
         url: https://open-webui.bhamm-lab.com/
-      - title: Llama Swap
-        description: Visit Llama Swap
-        icon: ':llama:'
-        url: https://llama-swap.bhamm-lab.com/ui/
-        statusCheckAcceptCodes: '401'
+      - title: LiteLLM
+        description: Visit Lite LLM
+        icon: generative
+        url: https://litellm.bhamm-lab.com/
       - title: AMD GPU
         description: Visit AMD gpu grafana dashboard
         icon: hl-grafana

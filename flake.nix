@@ -20,17 +20,6 @@
     # Themes
     catppuccin.url = "github:catppuccin/nix";
 
-    # MicroVM
-    microvm.url = "github:astro/microvm.nix";
-    microvm.inputs.nixpkgs.follows = "nixpkgs";
-
-    # laptop-charger (in packages dir)
-    # TODO: Change to monorepo
-    manage_charger = {
-      url = "github:blake-hamm/nix-config?dir=packages/laptop-charger";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # Sops nix
     sops-nix.url = "github:Mic92/sops-nix";
 

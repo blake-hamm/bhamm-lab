@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: llama-swap-common
+  name: litellm-common
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-wave: "18"
 spec:
   destination:
-    namespace: llama-swap
+    namespace: litellm
     server: https://kubernetes.default.svc
   project: default
   source:
@@ -16,29 +16,43 @@ spec:
     path: kubernetes/charts/common
     helm:
       valuesObject:
-        name: llama-swap
+        name: litellm
         ingressRoutes:
-          - name: llama-swap
+          - name: litellm
             ingressClass: traefik-external
             websocket: true
             routes:
-              - match: Host(`llama-swap.bhamm-lab.com`)
+              - match: Host(`litellm.bhamm-lab.com`)
                 kind: Rule
                 middlewares:
                   - name: default-headers
-                  - name: forwardauth-authelia
                 services:
-                  - name: llama-swap
+                  - name: litellm
                     scheme: http
                     port: http
-        pvc:
-          - name: llama-swap-models
-            storageSize: 500Gi
-        k8up:
+        postgresql:
+          enabled: true
           backup:
             enabled: true
           restore:
             enabled: false
+        dragonfly:
+          enabled: true
+        externalSecrets:
+          enabled: true
+          secrets:
+            - secretKey: LITELLM_MASTER_KEY
+              remoteRef:
+                key: /default/litellm
+                property: LITELLM_MASTER_KEY
+            - secretKey: LITELLM_SALT_KEY
+              remoteRef:
+                key: /default/litellm
+                property: LITELLM_SALT_KEY
+            - secretKey: QDRANT_API_KEY
+              remoteRef:
+                key: /default/qdrant
+                property: API_KEY
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

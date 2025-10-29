@@ -11,12 +11,8 @@ cgroup:
   hostRoot: /sys/fs/cgroup
 ipam:
   mode: kubernetes
-envoy:
-  enabled: true
-  securityContext:
-    capabilities:
-      keepCapNetBindService: true
-      envoy: [NET_ADMIN, PERFMON, BPF]
+socketLB:
+  hostNamespaceOnly: true
 k8sClientRateLimit:
   qps: 20
   burst: 100
@@ -24,11 +20,44 @@ l2announcements:
   enabled: true
 externalIPs:
   enabled: true
+prometheus:
+  metricsService: true
+  enabled: true
+dashboards:
+  enabled: true
 hubble:
   enabled: true
+  metrics:
+    enabled:
+      - dns
+      - drop
+      - tcp
+      - flow
+      - port-distribution
+      - icmp
+      - httpV2:exemplars=true;labelsContext=source_ip,source_namespace,source_workload,destination_ip,destination_namespace,destination_workload,traffic_direction
+    enableOpenMetrics: true
+    serviceMonitor:
+      enabled: false # Not present on cluster startup
+    dashboards:
+      enabled: true
   relay:
     enabled: true
     rollOutPods: true
+    prometheus:
+      enabled: true
   ui:
     enabled: true
     rollOutPods: true
+envoy:
+  enabled: true
+  securityContext:
+    capabilities:
+      keepCapNetBindService: true
+      envoy: [NET_ADMIN, PERFMON, BPF]
+operator:
+  enabled: true
+  prometheus:
+    metricsService: true
+  dashboards:
+    enabled: true

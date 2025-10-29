@@ -1,0 +1,78 @@
+{{- range .Values.models }}
+{{- if .enabled }}
+---
+{{- $merged := mergeOverwrite (deepCopy $.Values.global) . -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .name }}
+  namespace: {{ $merged.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+  labels:
+    app: {{ .name }}
+    release: {{ $.Release.Name }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: {{ .name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .name }}
+        release: {{ $.Release.Name }}
+    spec:
+      tolerations:
+{{- toYaml $merged.tolerations | nindent 8 }}
+      containers:
+        - name: {{ .name }}
+          image: "{{ $merged.image.repository }}:{{ $merged.image.tag }}"
+          imagePullPolicy: {{ $merged.image.pullPolicy }}
+          args:
+{{- toYaml $merged.args | nindent 12 }}
+          env:
+            - name: LLAMA_CACHE
+              value: "/models/cache"
+            - name: HF_HOME
+              value: "/models/cache/huggingface"
+          resources:
+{{- toYaml $merged.resources | nindent 12 }}
+          volumeMounts:
+            - name: model-cache
+              mountPath: /models/cache
+          ports:
+            - containerPort: 8080
+              name: http
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 90
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 2
+      volumes:
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName: "{{ .name }}-cache"
+{{- end }}
+{{- end }}

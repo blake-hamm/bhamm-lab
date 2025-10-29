@@ -27,42 +27,39 @@ spec:
           httpGet:
             path: /health
             port: http
-          failureThreshold: 1
+          failureThreshold: 2
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /health/db
             port: http
-          failureThreshold: 1
+          failureThreshold: 2
           periodSeconds: 10
         startupProbe:
           httpGet:
             path: /health
             port: http
-          initialDelaySeconds: 30
+          initialDelaySeconds: 5
           periodSeconds: 5
           failureThreshold: 20
         persistence:
           enabled: true
           existingClaim: "open-webui-data"
           provider: local
+        nodeSelector:
+          feature.node.kubernetes.io/amd-gpu: "true"
         tolerations:
           - key: "amd.com/gpu"
             operator: "Exists"
             effect: "NoSchedule"
-        affinity:
-          podAffinity:
-            requiredDuringSchedulingIgnoredDuringExecution:
-              - labelSelector:
-                  matchExpressions:
-                    - key: app
-                      operator: In
-                      values:
-                        - llama-swap
-                namespaces:
-                  - llama-swap
-                topologyKey: "kubernetes.io/hostname"
         extraEnvVars:
+          - name: OPENAI_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: open-webui-external-secret
+                key: OPENAI_API_KEY
+          - name: OPENAI_API_BASE_URL
+            value: "http://litellm.litellm.svc.cluster.local:4000/v1"
           - name: DATABASE_URL
             valueFrom:
               secretKeyRef:
@@ -70,11 +67,17 @@ spec:
                 key: uri
           - name: ENABLE_LOGIN_FORM
             value: "False"
+          - name: ENABLE_RAG_WEB_SEARCH
+            value: "True"
+          - name: RAG_WEB_SEARCH_ENGINE
+            value: "searxng"
+          - name: RAG_WEB_SEARCH_RESULT_COUNT
+            value: "3"
+          - name: RAG_WEB_SEARCH_CONCURRENT_REQUESTS
+            value: "10"
+          - name: SEARXNG_QUERY_URL
+            value: "http://searxng.searxng.svc.cluster.local:8080/search?q=<query>"
         enableOpenaiApi: true
-        openaiBaseApiUrl: "http://llama-swap.llama-swap.svc.cluster.local:8080/v1"
-        openaiBaseApiUrls: []
-        openaiApiKey: ""
-        openaiApiKeys: []
         sso:
           enabled: true
           enableSignup: true

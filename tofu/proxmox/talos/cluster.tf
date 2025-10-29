@@ -53,6 +53,9 @@ data "talos_machine_configuration" "this" {
       interface     = each.value.interface
       taint         = try(each.value.taint, "")
       vlan_id       = var.vlan_id
+      nameservers   = var.dns_servers
+      machine_tier  = each.value.machine_tier
+      type          = each.value.is_vm ? "vm" : "metal"
     }), each.value.machine_type == "controlplane" ?
     templatefile("${path.module}/config/master.yaml.tftpl", {
       # kubelet = var.cluster.kubelet
@@ -88,9 +91,17 @@ resource "talos_machine_configuration_apply" "bare_metal" {
       machine = {
         install = {
           disk = "/dev/nvme0n1"
+          extraKernelArgs = [
+            "amd_iommu=off",
+            "amdgpu.gttsize=122800",
+            "amdgpu.vm_fragment_size=8",
+            "ttm.pages_limit=31457280",
+            "ttm.page_pool_size=15728640"
+          ]
         }
       }
-    })
+    }),
+    file("${path.module}/config/volumes-amd-framework.yaml")
   ]
 }
 

@@ -1,0 +1,726 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: llm-models
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "18"
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: models
+  source:
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    targetRevision: feature/enhance-openwebui
+    path: kubernetes/charts/llm-models
+    helm:
+      valuesObject:
+        models:
+          - name: qwen-embed
+            enabled: true
+            pvc:
+              storage: "20Gi"
+              storageClassName: csi-rbd-sc
+            args:
+              - llama-server
+              - -hf
+              - Qwen/Qwen3-Embedding-8B-GGUF:F16
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --embeddings
+              - -v
+              # - --no-mmap # Might be needed for smaller vram
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "64"
+              - -b
+              - "64"
+              - -c
+              - "32768"
+              - --parallel
+              - "24"
+              - --cont-batching
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "25Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "2"
+                memory: "15Gi"
+          - name: nomic-embed
+            enabled: true
+            pvc:
+              storage: "10Gi"
+              storageClassName: csi-rbd-sc
+            args:
+              - llama-server
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --embeddings
+              - -ub
+              - "64"
+              - -b
+              - "64"
+              - -c
+              - "32768"
+              - -v
+              - -hf
+              - bartowski/nomic-ai_nomic-embed-code-GGUF:Q8_0
+              - --parallel
+              - "24"
+              - --cont-batching
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "20Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "2"
+                memory: "10Gi"
+            zeroscaling:
+              cooldownPeriod: 300
+          - name: mistral-embed
+            enabled: true
+            pvc:
+              storage: "20Gi"
+            args:
+              - llama-server
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --embeddings
+              - -ub
+              - "1024"
+              - -b
+              - "2048"
+              - -c
+              - "131072"
+              - -v
+              - -hf
+              - second-state/E5-Mistral-7B-Instruct-Embedding-GGUF
+              - --parallel
+              - "24"
+              - --cont-batching
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "30Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "2"
+                memory: "20Gi"
+            zeroscaling:
+              cooldownPeriod: 300
+          - name: gpt-oss-120b
+            enabled: true
+            pvc:
+              storage: "80Gi"
+            args:
+              - llama-server
+              - -hf
+              - ggml-org/gpt-oss-120b-GGUF
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -v
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "2048"
+              - -b
+              - "49152"
+              - -c
+              - "65536"
+              - --parallel
+              - "2"
+              - --cont-batching
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "120Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
+          - name: gpt-oss-20b
+            enabled: true
+            pvc:
+              storage: "20Gi"
+            args:
+              - llama-server
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "1024"
+              - -b
+              - "2048"
+              - -c
+              - "131072"
+              - -v
+              - -hf
+              - ggml-org/gpt-oss-20b-GGUF
+              - --parallel
+              - "2"
+              - --cont-batching
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "25Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "2"
+                memory: "15Gi"
+          - name: qwen-instruct
+            enabled: true
+            pvc:
+              storage: "40Gi"
+            args:
+              - llama-server
+              - -hf
+              - unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:Q8_K_XL
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -v
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "3072"
+              - -b
+              - "49152"
+              - -c
+              - "65536"
+              - --parallel
+              - "2"
+              - --cont-batching
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "80Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "2"
+                memory: "40Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
+          - name: qwen-thinking
+            enabled: true
+            pvc:
+              storage: "70Gi"
+            args:
+              - llama-server
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "1024"
+              - -b
+              - "2048"
+              - -c
+              - "131072"
+              - -v
+              - -hf
+              - unsloth/Qwen3-30B-A3B-Thinking-2507-GGUF
+              - --parallel
+              - "2"
+              - --cont-batching
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "100Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "2"
+                memory: "70Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
+          - name: qwen-coder
+            enabled: true
+            pvc:
+              storage: "40Gi"
+            args:
+              - llama-server
+              - -hf
+              - ggml-org/Qwen3-Coder-30B-A3B-Instruct-Q8_0-GGUF
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -v
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "3072"
+              - -b
+              - "49152"
+              - -c
+              - "65536"
+              - --parallel
+              - "1"
+              - --cont-batching
+              - --temp
+              - "0.7"
+              - --min-p
+              - "0.0"
+              - --top-p
+              - "0.80"
+              - --top-k
+              - "20"
+              - --repeat-penalty
+              - "1.05"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "120Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
+          - name: gemma
+            enabled: true
+            image:
+              tag: rocm-6.4.4-rocwmma
+            pvc:
+              storage: "60Gi"
+            args:
+              - llama-server
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "1024"
+              - -b
+              - "2048"
+              - -c
+              - "131072"
+              - -v
+              - -hf
+              - unsloth/gemma-3-27b-it-GGUF
+              - --parallel
+              - "2"
+              - --cont-batching
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "100Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "2"
+                memory: "80Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
+          - name: glm-air-reap
+            enabled: true
+            pvc:
+              storage: "90Gi"
+            args:
+              - llama-server
+              - -hf
+              - bartowski/cerebras_GLM-4.5-Air-REAP-82B-A12B-GGUF
+              - -hff
+              - cerebras_GLM-4.5-Air-REAP-82B-A12B-Q4_K_L/cerebras_GLM-4.5-Air-REAP-82B-A12B-Q4_K_L-00001-of-00002.gguf
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -v
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "3072"
+              - -b
+              - "49152"
+              - -c
+              - "65536"
+              - --parallel
+              - "1"
+              - --cont-batching
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "120Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
+          - name: glm-air
+            enabled: true
+            pvc:
+              storage: "90Gi"
+            args:
+              - llama-server
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "1024"
+              - -b
+              - "2048"
+              - -c
+              - "131072"
+              - -v
+              - -hf
+              - bartowski/zai-org_GLM-4.5-Air-GGUF:Q5_K_M
+              - --parallel
+              - "2"
+              - --cont-batching
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "110Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "2"
+                memory: "90Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
+          - name: devstral
+            enabled: true
+            pvc:
+              storage: "55Gi"
+            args:
+              - llama-server
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "1024"
+              - -b
+              - "2048"
+              - -c
+              - "131072"
+              - -v
+              - -hf
+              - unsloth/Devstral-Small-2507-GGUF
+              - --parallel
+              - "2"
+              - --cont-batching
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "75Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "2"
+                memory: "55Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
+          - name: llama-3
+            enabled: true
+            pvc:
+              storage: "90Gi"
+            args:
+              - llama-server
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "1024"
+              - -b
+              - "2048"
+              - -c
+              - "131072"
+              - -v
+              - -hf
+              - unsloth/Llama-3.3-70B-Instruct-GGUF:Q8_K_XL
+              - --parallel
+              - "1"
+              - --cont-batching
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "110Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "2"
+                memory: "90Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
+          - name: llama-4
+            enabled: true
+            pvc:
+              storage: "90Gi"
+            args:
+              - llama-server
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "1024"
+              - -b
+              - "2048"
+              - -c
+              - "131072"
+              - -v
+              - -hf
+              - ggml-org/Llama-4-Scout-17B-16E-Instruct-GGUF:Q4_K_M
+              - --parallel
+              - "1"
+              - --cont-batching
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "110Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "2"
+                memory: "90Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
+          - name: code-llama
+            enabled: true
+            pvc:
+              storage: "40Gi"
+            args:
+              - llama-server
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "1024"
+              - -b
+              - "2048"
+              - -c
+              - "131072"
+              - -v
+              - -hf
+              - TheBloke/Phind-CodeLlama-34B-v2-GGUF
+              - --parallel
+              - "2"
+              - --cont-batching
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "60Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "2"
+                memory: "40Gi"
+          - name: code-llama-python
+            enabled: true
+            pvc:
+              storage: "40Gi"
+            args:
+              - llama-server
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "1024"
+              - -b
+              - "2048"
+              - -c
+              - "131072"
+              - -v
+              - -hf
+              - TheBloke/CodeLlama-34B-Python-GGUF
+              - --parallel
+              - "2"
+              - --cont-batching
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "60Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "2"
+                memory: "40Gi"
+          - name: deepseek-qwen-distill
+            enabled: true
+            pvc:
+              storage: "70Gi"
+            args:
+              - llama-server
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -ub
+              - "1024"
+              - -b
+              - "2048"
+              - -c
+              - "131072"
+              - -v
+              - -hf
+              - unsloth/DeepSeek-R1-Distill-Qwen-32B-GGUF
+              - --parallel
+              - "2"
+              - --cont-batching
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "90Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "2"
+                memory: "70Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
+              # - name: deepseek-llama-distill
+              #   enabled: true
+              #   pvc:
+              #     storage: "90Gi"
+              #   args:
+              #     - llama-server
+              #     - -ngl
+              #     - "999"
+              #     - -fa
+              #     - "on"
+              #     - --host
+              #     - 0.0.0.0
+              #     - --metrics
+              #     - --no-webui
+              #     - --jinja
+              #     - -ub
+              #     - "2048"
+              #     - -b
+              #     - "2048"
+              #     - -c
+              #     - "32768"
+              #     - -v
+              #     - -hf
+              #     - bartowski/DeepSeek-R1-Distill-Llama-70B-GGUF:Q4_K_M
+              #     - --parallel
+              #     - "1"
+              #     - --cont-batching
+              #   resources:
+              #     limits:
+              #       amd.com/gpu: 1
+              #       memory: "110Gi"
+              #       cpu: "4"
+              #     requests:
+              #       amd.com/gpu: 1
+              #       cpu: "2"
+              #       memory: "90Gi"
+              #   zeroscaling:
+              #     cooldownPeriod: 1800
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      namespace: models
+      jsonPointers:
+        - /spec/replicas
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - RespectIgnoreDifferences=true
+    automated:
+      prune: true
+      selfHeal: true

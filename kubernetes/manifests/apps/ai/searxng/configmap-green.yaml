@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: searxng-config
+  namespace: searxng
+  annotations:
+    argocd.argoproj.io/sync-wave: "19"
+data:
+  settings.yml: |
+    use_default_settings: true
+    general:
+      open_metrics: "default"
+    server:
+      port: 8080
+      bind_address: 0.0.0.0
+      base_url: https://searxng.bhamm-lab.com
+      limiter: false
+      public_instance: false
+      image_proxy: true
+    valkey:
+      url: valkey://searxng-dragonfly.searxng.svc.cluster.local:6379
+    search:
+      safe_search: 0
+      autocomplete: ""
+      default_language: en
+      formats:
+        - html
+        - json
+    ui:
+      static_use_hash: true
+      theme_args:
+        simple_style: dark
+  limiter.toml: |
+    [botdetection.ip_limit]
+    # activate link_token method in the ip_limit method
+    link_token = true

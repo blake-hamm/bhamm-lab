@@ -1,0 +1,140 @@
+global:
+  namespace: models
+  image:
+    repository: kyuz0/amd-strix-halo-toolboxes
+    tag: vulkan-amdvlk
+    pullPolicy: IfNotPresent
+  pvc:
+    storageClassName: local-path
+    storage: "10Gi"
+  service:
+    port: 8080
+  zeroscaling:
+    enabled: true
+    minReplicas: 1
+    cooldownPeriod: 900
+    trigger:
+      query: >-
+        sum(llamacpp:requests_processing{container="{{ .name }}"}) or vector(0)
+      threshold: "1"
+  resources:
+    limits:
+      amd.com/gpu: 1
+      memory: "50Gi"
+      cpu: "4"
+    requests:
+      amd.com/gpu: 1
+      cpu: "1"
+      memory: "30Gi"
+  tolerations:
+    - key: "amd.com/gpu"
+      operator: "Exists"
+      effect: "NoSchedule"
+  litellm:
+    manage_config: true
+    config:
+      litellm_settings:
+        request_timeout: 300
+        callbacks: ["prometheus"]
+        cache: True
+        cache_params:
+          type: qdrant-semantic
+          qdrant_semantic_cache_embedding_model: qwen-embed
+          qdrant_collection_name: litellm
+          similarity_threshold: 0.9
+      general_settings:
+        max_parallel_requests: 10
+        global_max_parallel_requests: 20
+      router_settings:
+        debug_level: "DEBUG"
+        enable_pre_call_check: true
+        cooldown_time: 30
+        disable_cooldowns: False
+        allowed_fails: 2
+        default_max_parallel_requests: 20
+        timeout: 300
+        retry_after: 90
+        num_retries: 1
+        retry_policy:
+          TimeoutErrorRetries: 1
+          AuthenticationErrorRetries: 0
+          RateLimitErrorRetries: 1
+          ContentPolicyViolationErrorRetries: 0
+          InternalServerErrorRetries: 0
+        allowed_fails_policy:
+          BadRequestErrorAllowedFails: 5
+          AuthenticationErrorAllowedFails: 2
+          TimeoutErrorAllowedFails: 2
+          RateLimitErrorAllowedFails: 3
+          ContentPolicyViolationErrorAllowedFails: 2
+          InternalServerErrorAllowedFails: 2
+        routing_strategy: simple-shuffle
+        redis_host: os.environ/REDIS_HOST
+        redis_port: os.environ/REDIS_PORT
+        redis_password: os.environ/REDIS_PASSWORD
+models: []
+# - name: gpt-oss-120b
+#   enabled: true
+#   image:
+#     repository: kyuz0/amd-strix-halo-toolboxes
+#     tag: vulkan-amdvlk
+#   pvc:
+#     storage: "100Gi"
+#     storageClassName: local-path
+#   args:
+#     - llama-server
+#     - --no-mmap
+#     - -ngl
+#     - "999"
+#     - -fa
+#     - "on"
+#     - --host
+#     - 0.0.0.0
+#     - --metrics
+#     - --no-webui
+#     - --jinja
+#     - -ub
+#     - "2048"
+#     - -b
+#     - "2048"
+#     - -c
+#     - "0"
+#     - -v
+#     - -hf
+#     - ggml-org/gpt-oss-120b-GGUF
+#   service:
+#     port: 8080
+#   resources:
+#     limits:
+#       amd.com/gpu: 1
+#       memory: "100Gi"
+#       cpu: "8"
+#     requests:
+#       amd.com/gpu: 1
+#       cpu: "2"
+#       memory: "70Gi"
+#   zeroscaling:
+#     enabled: true
+#     minReplicas: 1
+#     cooldownPeriod: 1800
+#     trigger:
+#       query: max(llamacpp:requests_processing{app="gpt-oss-120b"}) or vector(0)
+#       threshold: "1"
+
+# - name: another-model
+#   enabled: true
+#   image:
+#     repository: another/repo
+#     tag: latest
+#   pvc:
+#     name: another-model-cache
+#     storage: "50Gi"
+#     storageClassName: local-path
+#   args:
+#     - some-other-command
+#     - --model-path
+#     - /models/another-model
+#   service:
+#     port: 8081
+#   zeroscaling:
+#     enabled: false

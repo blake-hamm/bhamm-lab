@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: searxng
+  namespace: searxng
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: searxng
+  template:
+    metadata:
+      labels:
+        app: searxng
+    spec:
+      containers:
+        - name: searxng
+          image: ghcr.io/searxng/searxng:2025.10.28-43065c502
+          ports:
+            - containerPort: 8080
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 1
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            failureThreshold: 30
+            periodSeconds: 10
+          volumeMounts:
+            - name: config
+              mountPath: /etc/searxng/settings.yml
+              subPath: settings.yml
+            - name: config
+              mountPath: /etc/searxng/limiter.toml
+              subPath: limiter.toml
+            - name: data
+              mountPath: /var/cache/searxng
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          env:
+            - name: TZ
+              value: "America/Denver"
+            - name: SEARXNG_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: searxng-external-secret
+                  key: SEARXNG_SECRET
+            - name: SEARXNG_OPEN_METRICS
+              valueFrom:
+                secretKeyRef:
+                  name: searxng-external-secret
+                  key: SEARXNG_OPEN_METRICS
+      volumes:
+        - name: config
+          configMap:
+            name: searxng-config
+        - name: data
+          emptyDir: {}
+      nodeSelector:
+        feature.node.kubernetes.io/amd-gpu: "true"
+      tolerations:
+        - key: "amd.com/gpu"
+          operator: "Exists"
+          effect: "NoSchedule"

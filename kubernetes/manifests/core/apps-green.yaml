@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: main
+    targetRevision: feature/enhance-openwebui
     path: kubernetes/manifests/apps
     directory:
       recurse: true
@@ -17,9 +17,16 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: argo
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      namespace: models
+      jsonPointers:
+        - /spec/replicas
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
+      - RespectIgnoreDifferences=true
     automated:
       prune: true
       selfHeal: true

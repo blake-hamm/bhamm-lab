@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: open-webui-common
+  name: qdrant-common
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "22"
+    argocd.argoproj.io/sync-wave: "17"
 spec:
   destination:
-    namespace: open-webui
+    namespace: qdrant
     server: https://kubernetes.default.svc
   project: default
   source:
@@ -16,40 +16,33 @@ spec:
     path: kubernetes/charts/common
     helm:
       valuesObject:
-        name: open-webui
+        name: qdrant
         ingressRoutes:
-          - name: open-webui
+          - name: qdrant
             ingressClass: traefik-external
             websocket: true
             routes:
-              - match: Host(`open-webui.bhamm-lab.com`)
+              - match: Host(`qdrant.bhamm-lab.com`)
                 kind: Rule
-                middlewares:
-                  - name: default-headers
+                priority: 10
                 services:
-                  - name: open-webui
+                  - name: qdrant
                     scheme: http
                     port: http
+              - kind: Rule
+                match: Host(`qdrant.bhamm-lab.com`) && Header(`Content-Type`, `application/grpc`)
+                priority: 11
+                services:
+                  - name: qdrant
+                    port: grpc
+                    scheme: h2c
         externalSecrets:
           enabled: true
           secrets:
-            - secretKey: OPENAI_API_KEY
+            - secretKey: API_KEY
               remoteRef:
-                key: /default/litellm
-                property: LITELLM_MASTER_KEY
-            - secretKey: OAUTH_CLIENT_SECRET
-              remoteRef:
-                key: /default/open-webui
-                property: oidc
-        postgresql:
-          enabled: true
-          backup:
-            enabled: true
-          restore:
-            enabled: false
-        pvc:
-          - name: open-webui-data
-            storageSize: 10Gi
+                key: /default/qdrant
+                property: API_KEY
         k8up:
           backup:
             enabled: true

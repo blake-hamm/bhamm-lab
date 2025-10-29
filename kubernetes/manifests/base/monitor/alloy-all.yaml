@@ -79,10 +79,10 @@ spec:
               // loki.process receives log entries from other Loki components, applies one or more processing stages,
               // and forwards the results to the list of receivers in the component's arguments.
               loki.process "pod_logs" {
-                stage.static_labels {
-                    values = {
-                      cluster = "default",
-                    }
+                stage.labels {
+                  values = {
+                    hostname = sys.env("HOSTNAME"),
+                  }
                 }
 
                 forward_to = [loki.write.loki.receiver]
@@ -106,8 +106,38 @@ spec:
                 stage.labels {
                   values = {
                     kubernetes_cluster_events = "job",
+                    hostname = sys.env("HOSTNAME"),
                   }
                 }
+              }
+
+              // Discover all .log files and specific non-.log files under /var/log
+              local.file_match "host_log_files" {
+                path_targets = [
+                  { __path__ = "/var/log/syslog" },
+                  { __path__ = "/var/log/messages" },
+                ]
+              }
+
+              // Tail discovered files
+              loki.source.file "host_logs" {
+                targets    = local.file_match.host_log_files.targets
+                forward_to = [loki.process.host_logs.receiver]
+                tail_from_end = true
+              }
+
+              loki.process "host_logs" {
+                stage.static_labels {
+                  values = {
+                    job      = "host-logs",
+                  }
+                }
+                stage.labels {
+                  values = {
+                    hostname = sys.env("HOSTNAME"),
+                  }
+                }
+                forward_to = [loki.write.loki.receiver]
               }
           mounts:
             varlog: true

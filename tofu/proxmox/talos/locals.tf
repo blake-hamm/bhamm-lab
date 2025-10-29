@@ -12,6 +12,7 @@ locals {
       hostname     = "${var.environment}-talos-master-${idx}"
       ip           = format(var.master_ip_format, idx)
       machine_type = "controlplane"
+      machine_tier = "standard"
       host_node    = var.proxmox_nodes[idx].name
       vm_id        = var.master_vm_id_start + idx
       cpu          = var.cpu_cores_master
@@ -31,6 +32,7 @@ locals {
     hostname     = "${var.environment}-talos-worker-intel-gpu"
     ip           = format(var.worker_ip_format, var.count_worker)
     machine_type = "worker"
+    machine_tier = "accelerated"
     host_node    = "method"
     vm_id        = var.worker_vm_id_start + var.count_worker
     cpu          = var.cpu_cores_worker
@@ -50,6 +52,7 @@ locals {
       hostname     = "${var.environment}-talos-worker-${name}"
       ip           = config.ip
       machine_type = "worker"
+      machine_tier = "accelerated"
       host_node    = "bare-metal"
       taint        = { key = config.taint.key, effect = config.taint.effect }
       is_vm        = false
@@ -71,6 +74,7 @@ locals {
         hostname     = "${var.environment}-talos-worker-${idx}"
         ip           = format(var.worker_ip_format, idx)
         machine_type = "worker"
+        machine_tier = "standard"
         host_node    = var.proxmox_nodes[idx].name
         vm_id        = var.worker_vm_id_start + idx
         cpu          = var.cpu_cores_worker

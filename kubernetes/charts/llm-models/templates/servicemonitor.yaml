@@ -1,0 +1,23 @@
+{{- range .Values.models }}
+{{- if .enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.global.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "24"
+  labels:
+    app: {{ .name }}
+    release: {{ $.Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .name }}
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+{{- end }}
+{{- end }}

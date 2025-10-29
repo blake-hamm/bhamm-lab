@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: elasti
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  destination:
+    namespace: elasti
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/truefoundry/KubeElasti.git
+    targetRevision: v0.1.17
+    path: charts/elasti
+    helm:
+      valuesObject:
+        global:
+          enableMonitoring: true
+        elastiController:
+          manager:
+            resources:
+              limits:
+                cpu: 200m
+                memory: 200Mi
+              requests:
+                cpu: 100m
+                memory: 100Mi
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

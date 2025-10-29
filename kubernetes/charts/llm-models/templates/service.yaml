@@ -1,0 +1,24 @@
+{{- range .Values.models }}
+{{- if .enabled }}
+---
+{{- $merged := mergeOverwrite (deepCopy $.Values.global) . -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name }}
+  namespace: {{ $merged.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "23"
+  labels:
+    app: {{ .name }}
+    release: {{ $.Release.Name }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .name }}
+  ports:
+    - name: http
+      port: {{ $merged.service.port }}
+      targetPort: http
+{{- end }}
+{{- end }}

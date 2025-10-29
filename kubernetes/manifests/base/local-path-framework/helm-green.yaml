@@ -1,0 +1,64 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: local-path-provisioner
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  destination:
+    namespace: local-path-storage
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: deploy
+    repoURL: https://github.com/rancher/local-path-provisioner.git
+    targetRevision: v0.0.31
+    kustomize:
+      patches:
+        - patch: |-
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: local-path-provisioner
+              namespace: local-path-storage
+            spec:
+              template:
+                spec:
+                  tolerations:
+                    - key: "amd.com/gpu"
+                      operator: "Exists"
+                      effect: "NoSchedule"
+                  nodeSelector:
+                    topology.kubernetes.io/zone: bare-metal
+                    feature.node.kubernetes.io/amd-gpu: "true"
+        - patch: |-
+            kind: ConfigMap
+            apiVersion: v1
+            metadata:
+              name: local-path-config
+              namespace: local-path-storage
+            data:
+              config.json: |-
+                {
+                        "nodePathMap":[
+                        {
+                                "node":"DEFAULT_PATH_FOR_NON_LISTED_NODES",
+                                "paths":["/var/mnt/local-path-provisioner"]
+                        }
+                        ]
+                }
+        - patch: |-
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: local-path-storage
+              labels:
+                pod-security.kubernetes.io/enforce: privileged
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
