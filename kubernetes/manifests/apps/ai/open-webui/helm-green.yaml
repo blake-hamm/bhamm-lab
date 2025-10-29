@@ -67,6 +67,16 @@ spec:
                 key: uri
           - name: ENABLE_LOGIN_FORM
             value: "False"
+          - name: ENABLE_RAG_WEB_SEARCH
+            value: "True"
+          - name: RAG_WEB_SEARCH_ENGINE
+            value: "searxng"
+          - name: RAG_WEB_SEARCH_RESULT_COUNT
+            value: "3"
+          - name: RAG_WEB_SEARCH_CONCURRENT_REQUESTS
+            value: "10"
+          - name: SEARXNG_QUERY_URL
+            value: "http://searxng.searxng.svc.cluster.local:8080/search?q=<query>"
         enableOpenaiApi: true
         sso:
           enabled: true

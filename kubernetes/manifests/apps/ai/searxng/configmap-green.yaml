@@ -27,6 +27,7 @@ data:
         - html
         - json
     ui:
+      static_use_hash: true
       theme_args:
         simple_style: dark
   limiter.toml: |
