@@ -4,6 +4,8 @@ machine:
   nodeLabels:
     topology.kubernetes.io/region: ${cluster_name}
     topology.kubernetes.io/zone: ${node_name}
+    machine_tier: ${machine_tier}
+    machine_type: ${type}
 %{ if taint != null }
   kubelet:
     extraConfig:
