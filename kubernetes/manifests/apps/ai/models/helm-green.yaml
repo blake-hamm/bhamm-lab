@@ -374,8 +374,6 @@ spec:
               cooldownPeriod: 1800
           - name: glm-air-reap
             enabled: true
-            image:
-              tag: vulkan-radv
             pvc:
               storage: "90Gi"
             args:
@@ -406,12 +404,12 @@ spec:
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "110Gi"
-                cpu: "4"
+                memory: "120Gi"
+                cpu: "8"
               requests:
                 amd.com/gpu: 1
-                cpu: "2"
-                memory: "90Gi"
+                cpu: "4"
+                memory: "110Gi"
             zeroscaling:
               cooldownPeriod: 1800
           - name: glm-air
