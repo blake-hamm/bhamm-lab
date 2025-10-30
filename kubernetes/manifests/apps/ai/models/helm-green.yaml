@@ -228,6 +228,10 @@ spec:
               - "999"
               - -fa
               - "on"
+              - -ctk
+              - q8_0
+              - -ctv
+              - q8_0
               - -ub
               - "3072"
               - -b
@@ -240,12 +244,12 @@ spec:
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "80Gi"
-                cpu: "4"
+                memory: "120Gi"
+                cpu: "8"
               requests:
                 amd.com/gpu: 1
-                cpu: "2"
-                memory: "40Gi"
+                cpu: "4"
+                memory: "110Gi"
             zeroscaling:
               cooldownPeriod: 1800
           - name: qwen-thinking
