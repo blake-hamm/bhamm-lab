@@ -283,15 +283,25 @@ spec:
               - --parallel
               - "1"
               - --cont-batching
+              - --temp
+              - "0.6"
+              - --min-p
+              - "0.0"
+              - --top-p
+              - "0.95"
+              - --top-k
+              - "20"
+              - --repeat-penalty
+              - "1.05"
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "100Gi"
-                cpu: "4"
+                memory: "120Gi"
+                cpu: "8"
               requests:
                 amd.com/gpu: 1
-                cpu: "2"
-                memory: "70Gi"
+                cpu: "4"
+                memory: "110Gi"
             zeroscaling:
               cooldownPeriod: 1800
           - name: qwen-coder
@@ -646,86 +656,86 @@ spec:
                 amd.com/gpu: 1
                 cpu: "2"
                 memory: "40Gi"
-          - name: deepseek-qwen-distill
-            enabled: true
-            pvc:
-              storage: "70Gi"
-            args:
-              - llama-server
-              - -hf
-              - unsloth/DeepSeek-R1-Distill-Qwen-32B-GGUF:Q8_0
-              - --host
-              - 0.0.0.0
-              - --metrics
-              - --no-webui
-              - --jinja
-              - -v
-              - -ctk
-              - q8_0
-              - -ctv
-              - q8_0
-              - -ngl
-              - "999"
-              - -fa
-              - "on"
-              - -ub
-              - "3072"
-              - -b
-              - "49152"
-              - -c
-              - "65536"
-              - --parallel
-              - "1"
-              - --cont-batching
-            resources:
-              limits:
-                amd.com/gpu: 1
-                memory: "120Gi"
-                cpu: "8"
-              requests:
-                amd.com/gpu: 1
-                cpu: "4"
-                memory: "110Gi"
-            zeroscaling:
-              cooldownPeriod: 1800
-              # - name: deepseek-llama-distill
-              #   enabled: true
-              #   pvc:
-              #     storage: "90Gi"
-              #   args:
-              #     - llama-server
-              #     - -ngl
-              #     - "999"
-              #     - -fa
-              #     - "on"
-              #     - --host
-              #     - 0.0.0.0
-              #     - --metrics
-              #     - --no-webui
-              #     - --jinja
-              #     - -ub
-              #     - "2048"
-              #     - -b
-              #     - "2048"
-              #     - -c
-              #     - "32768"
-              #     - -v
-              #     - -hf
-              #     - bartowski/DeepSeek-R1-Distill-Llama-70B-GGUF:Q4_K_M
-              #     - --parallel
-              #     - "1"
-              #     - --cont-batching
-              #   resources:
-              #     limits:
-              #       amd.com/gpu: 1
-              #       memory: "110Gi"
-              #       cpu: "4"
-              #     requests:
-              #       amd.com/gpu: 1
-              #       cpu: "2"
-              #       memory: "90Gi"
-              #   zeroscaling:
-              #     cooldownPeriod: 1800
+                # - name: deepseek-qwen-distill
+                #   enabled: true
+                #   pvc:
+                #     storage: "70Gi"
+                #   args:
+                #     - llama-server
+                #     - -hf
+                #     - unsloth/DeepSeek-R1-Distill-Qwen-32B-GGUF:Q8_0
+                #     - --host
+                #     - 0.0.0.0
+                #     - --metrics
+                #     - --no-webui
+                #     - --jinja
+                #     - -v
+                #     - -ctk
+                #     - q8_0
+                #     - -ctv
+                #     - q8_0
+                #     - -ngl
+                #     - "999"
+                #     - -fa
+                #     - "on"
+                #     - -ub
+                #     - "3072"
+                #     - -b
+                #     - "49152"
+                #     - -c
+                #     - "65536"
+                #     - --parallel
+                #     - "1"
+                #     - --cont-batching
+                #   resources:
+                #     limits:
+                #       amd.com/gpu: 1
+                #       memory: "120Gi"
+                #       cpu: "8"
+                #     requests:
+                #       amd.com/gpu: 1
+                #       cpu: "4"
+                #       memory: "110Gi"
+                #   zeroscaling:
+                #     cooldownPeriod: 1800
+                # - name: deepseek-llama-distill
+                #   enabled: true
+                #   pvc:
+                #     storage: "90Gi"
+                #   args:
+                #     - llama-server
+                #     - -ngl
+                #     - "999"
+                #     - -fa
+                #     - "on"
+                #     - --host
+                #     - 0.0.0.0
+                #     - --metrics
+                #     - --no-webui
+                #     - --jinja
+                #     - -ub
+                #     - "2048"
+                #     - -b
+                #     - "2048"
+                #     - -c
+                #     - "32768"
+                #     - -v
+                #     - -hf
+                #     - bartowski/DeepSeek-R1-Distill-Llama-70B-GGUF:Q4_K_M
+                #     - --parallel
+                #     - "1"
+                #     - --cont-batching
+                #   resources:
+                #     limits:
+                #       amd.com/gpu: 1
+                #       memory: "110Gi"
+                #       cpu: "4"
+                #     requests:
+                #       amd.com/gpu: 1
+                #       cpu: "2"
+                #       memory: "90Gi"
+                #   zeroscaling:
+                #     cooldownPeriod: 1800
   ignoreDifferences:
     - group: apps
       kind: Deployment
