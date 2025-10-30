@@ -257,6 +257,14 @@ spec:
               - --parallel
               - "1"
               - --cont-batching
+              - --temp
+              - "0.6"
+              - --min-p
+              - "0.0"
+              - --top-p
+              - "0.95"
+              - --top-k
+              - "40"
             template: |
               {%- if tools %}
                   {{- '<|im_start|>system\n' }}
