@@ -68,17 +68,17 @@ spec:
               path: /health
               port: 8080
             initialDelaySeconds: 0
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
+            periodSeconds: 30
+            timeoutSeconds: 15
+            failureThreshold: 30
           livenessProbe:
             httpGet:
               path: /health
               port: 8080
-            initialDelaySeconds: 60
-            periodSeconds: 30
-            timeoutSeconds: 5
-            failureThreshold: 2
+            initialDelaySeconds: 120
+            periodSeconds: 60
+            timeoutSeconds: 20
+            failureThreshold: 15
       volumes:
         - name: model-cache
           persistentVolumeClaim:

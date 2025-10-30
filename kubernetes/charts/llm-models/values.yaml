@@ -34,7 +34,7 @@ global:
     manage_config: true
     config:
       litellm_settings:
-        request_timeout: 300
+        request_timeout: 900
         callbacks: ["prometheus"]
         cache: True
         cache_params:
@@ -48,23 +48,23 @@ global:
       router_settings:
         debug_level: "DEBUG"
         enable_pre_call_check: true
-        cooldown_time: 30
+        cooldown_time: 600
         disable_cooldowns: False
-        allowed_fails: 2
+        allowed_fails: 10
         default_max_parallel_requests: 20
-        timeout: 300
-        retry_after: 90
+        timeout: 900
         num_retries: 1
+        retry_after: 600
         retry_policy:
           TimeoutErrorRetries: 1
           AuthenticationErrorRetries: 0
-          RateLimitErrorRetries: 1
+          RateLimitErrorRetries: 0
           ContentPolicyViolationErrorRetries: 0
           InternalServerErrorRetries: 0
         allowed_fails_policy:
           BadRequestErrorAllowedFails: 5
           AuthenticationErrorAllowedFails: 2
-          TimeoutErrorAllowedFails: 2
+          TimeoutErrorAllowedFails: 10
           RateLimitErrorAllowedFails: 3
           ContentPolicyViolationErrorAllowedFails: 2
           InternalServerErrorAllowedFails: 2
