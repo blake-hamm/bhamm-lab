@@ -231,7 +231,9 @@ spec:
             args:
               - llama-server
               - -hf
-              - bartowski/Kwaipilot_KAT-Dev-72B-Exp-GGUF:Q5_K_M
+              - bartowski/Kwaipilot_KAT-Dev-72B-Exp-GGUF
+              - -hff
+              - Kwaipilot_KAT-Dev-72B-Exp-Q4_K_L.gguf
               - --host
               - 0.0.0.0
               - --metrics
