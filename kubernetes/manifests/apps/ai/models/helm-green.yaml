@@ -643,8 +643,6 @@ spec:
               - --parallel
               - "1"
               - --cont-batching
-              - --seed
-              - "3407"
               - --prio
               - "2"
               - --temp
