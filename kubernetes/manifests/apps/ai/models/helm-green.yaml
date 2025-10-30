@@ -18,6 +18,7 @@ spec:
       valuesObject:
         models:
           - name: qwen-embed
+            description: Great all around embedding model
             enabled: true
             pvc:
               storage: "20Gi"
@@ -56,6 +57,7 @@ spec:
                 cpu: "2"
                 memory: "15Gi"
           - name: nomic-embed
+            description: Specialized embedding model for code
             enabled: true
             pvc:
               storage: "10Gi"
@@ -95,6 +97,7 @@ spec:
             zeroscaling:
               cooldownPeriod: 300
           - name: mistral-embed
+            description: Lightweight embedding model
             enabled: true
             pvc:
               storage: "20Gi"
@@ -133,6 +136,7 @@ spec:
             zeroscaling:
               cooldownPeriod: 300
           - name: gpt-oss-120b
+            description: Great reasoning MoE model for general chat queries
             enabled: true
             pvc:
               storage: "80Gi"
@@ -183,6 +187,7 @@ spec:
             zeroscaling:
               cooldownPeriod: 1800
           - name: gpt-oss-20b
+            description: Smaller MoE model with decent quality
             enabled: true
             pvc:
               storage: "20Gi"
@@ -218,7 +223,61 @@ spec:
                 amd.com/gpu: 1
                 cpu: "2"
                 memory: "15Gi"
+          - name: kat-dev
+            description: Very new MoE coding model
+            enabled: true
+            pvc:
+              storage: "40Gi"
+            args:
+              - llama-server
+              - -hf
+              - bartowski/Kwaipilot_KAT-Dev-72B-Exp-GGUF:Q6_K
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -v
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ctk
+              - q8_0
+              - -ctv
+              - q8_0
+              - -ub
+              - "3072"
+              - -b
+              - "49152"
+              - -c
+              - "65536"
+              - --parallel
+              - "2"
+              - --cont-batching
+              - --temp
+              - "0.7"
+              - --min-p
+              - "0.0"
+              - --top-p
+              - "0.80"
+              - --top-k
+              - "20"
+              - --presence-penalty
+              - "1.0"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "120Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
           - name: qwen
+            description: High quality dense model
             enabled: true
             pvc:
               storage: "40Gi"
@@ -271,6 +330,7 @@ spec:
             zeroscaling:
               cooldownPeriod: 1800
           - name: qwen-instruct
+            description: High quality MoE model for general chat
             enabled: true
             pvc:
               storage: "40Gi"
@@ -323,6 +383,7 @@ spec:
             zeroscaling:
               cooldownPeriod: 1800
           - name: qwen-thinking
+            description: High quality, reasoning MoE model for general chat
             enabled: true
             pvc:
               storage: "70Gi"
@@ -379,6 +440,7 @@ spec:
             zeroscaling:
               cooldownPeriod: 1800
           - name: qwen-coder
+            description: High quality MoE model for coding
             enabled: true
             pvc:
               storage: "40Gi"
@@ -431,6 +493,7 @@ spec:
             zeroscaling:
               cooldownPeriod: 1800
           - name: gemma
+            description: Mid model with multimodal support
             enabled: true
             image:
               tag: rocm-6.4.4-rocwmma
@@ -471,6 +534,7 @@ spec:
             zeroscaling:
               cooldownPeriod: 1800
           - name: glm-air-reap
+            description: High quality (con)dense model for agents, coding or complex chat
             enabled: true
             pvc:
               storage: "90Gi"
@@ -513,6 +577,7 @@ spec:
             zeroscaling:
               cooldownPeriod: 1800
           - name: glm-air
+            description: High quality dense model for agents, coding or complex chat
             enabled: true
             pvc:
               storage: "90Gi"
@@ -551,6 +616,7 @@ spec:
             zeroscaling:
               cooldownPeriod: 1800
           - name: devstral
+            description: Decent model for coding
             enabled: true
             pvc:
               storage: "55Gi"
@@ -627,6 +693,7 @@ spec:
             zeroscaling:
               cooldownPeriod: 1800
           - name: llama-4
+            description: High quality multimodal model
             enabled: true
             pvc:
               storage: "90Gi"
@@ -665,6 +732,7 @@ spec:
             zeroscaling:
               cooldownPeriod: 1800
           - name: code-llama
+            description: Mid model for coding
             enabled: true
             pvc:
               storage: "40Gi"
@@ -701,6 +769,7 @@ spec:
                 cpu: "2"
                 memory: "40Gi"
           - name: code-llama-python
+            description: Mid model for python coding
             enabled: true
             pvc:
               storage: "40Gi"
