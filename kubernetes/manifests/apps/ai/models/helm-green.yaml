@@ -163,6 +163,14 @@ spec:
               - --parallel
               - "2"
               - --cont-batching
+              - --temp
+              - "1.0"
+              - --min-p
+              - "0.0"
+              - --top-p
+              - "1.0"
+              - --top-k
+              - "0.0"
             resources:
               limits:
                 amd.com/gpu: 1
