@@ -613,7 +613,7 @@ spec:
             args:
               - llama-server
               - -hf
-              - unsloth/Devstral-Small-2507-GGUF
+              - unsloth/Devstral-Small-2507-GGUF:Q8_0
               - --host
               - 0.0.0.0
               - --metrics
