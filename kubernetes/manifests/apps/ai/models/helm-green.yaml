@@ -227,7 +227,7 @@ spec:
             description: Very new MoE coding model
             enabled: true
             pvc:
-              storage: "40Gi"
+              storage: "80Gi"
             args:
               - llama-server
               - -hf
