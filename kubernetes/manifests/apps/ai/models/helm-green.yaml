@@ -608,12 +608,14 @@ spec:
           - name: devstral
             description: Decent model for coding
             enabled: true
+            image:
+              tag: rocm-6.4.4-rocwmma
             pvc:
               storage: "55Gi"
             args:
               - llama-server
               - -hf
-              - unsloth/Devstral-Small-2507-GGUF:Q8_0
+              - unsloth/Devstral-Small-2507-GGUF:BF16
               - --host
               - 0.0.0.0
               - --metrics
