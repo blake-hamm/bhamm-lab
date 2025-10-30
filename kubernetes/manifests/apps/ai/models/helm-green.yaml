@@ -654,12 +654,12 @@ spec:
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "75Gi"
-                cpu: "4"
+                memory: "120Gi"
+                cpu: "8"
               requests:
                 amd.com/gpu: 1
-                cpu: "2"
-                memory: "55Gi"
+                cpu: "4"
+                memory: "110Gi"
             zeroscaling:
               cooldownPeriod: 1800
           - name: llama-3
