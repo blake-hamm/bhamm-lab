@@ -210,6 +210,58 @@ spec:
                 amd.com/gpu: 1
                 cpu: "2"
                 memory: "15Gi"
+          - name: qwen
+            enabled: true
+            pvc:
+              storage: "40Gi"
+            args:
+              - llama-server
+              - -hf
+              - ggml-org/Qwen3-32B-GGUF:Q8_0
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -v
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ctk
+              - q8_0
+              - -ctv
+              - q8_0
+              - -ub
+              - "3072"
+              - -b
+              - "49152"
+              - -c
+              - "65536"
+              - --parallel
+              - "2"
+              - --cont-batching
+              - --temp
+              - "0.7"
+              - --min-p
+              - "0.0"
+              - --top-p
+              - "0.80"
+              - --top-k
+              - "20"
+              - --presence-penalty
+              - "1.0"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "120Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
           - name: qwen-instruct
             enabled: true
             pvc:
