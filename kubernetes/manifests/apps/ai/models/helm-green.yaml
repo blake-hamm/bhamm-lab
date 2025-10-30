@@ -524,7 +524,7 @@ spec:
             zeroscaling:
               cooldownPeriod: 1800
           - name: glm-air-reap
-            description: High quality (con)dense model for agents, coding or complex chat
+            description: High quality MoE model for agents, coding or complex chat
             enabled: true
             pvc:
               storage: "90Gi"
