@@ -32,6 +32,10 @@
         "workbench.colorTheme" = "Catppuccin Mocha";
         "workbench.iconTheme" = "catppuccin-mocha";
         "catppuccin.accentColor" = "sapphire";
+
+        # Roo
+        "roo-cline.apiRequestTimeout" = 1200;
+        "roo-cline.codeIndex.embeddingBatchSize" = 200;
       };
     };
   };
