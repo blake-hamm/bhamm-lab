@@ -33,15 +33,14 @@ spec:
               - --no-webui
               - --embeddings
               - -v
-              # - --no-mmap # Might be needed for smaller vram
               - -ngl
               - "999"
               - -fa
               - "on"
               - -ub
-              - "64"
+              - "128"
               - -b
-              - "64"
+              - "128"
               - -c
               - "32768"
               - --parallel
