@@ -38,11 +38,20 @@ spec:
               value: "/models/cache"
             - name: HF_HOME
               value: "/models/cache/huggingface"
+{{- if .template }}
+            - name: TEMPLATE_PATH
+              value: "/prompt/templates"
+{{- end }}
           resources:
 {{- toYaml $merged.resources | nindent 12 }}
           volumeMounts:
             - name: model-cache
               mountPath: /models/cache
+{{- if .template }}
+            - name: template-volume
+              mountPath: /prompt/templates
+              readOnly: true
+{{- end }}
           ports:
             - containerPort: 8080
               name: http
@@ -74,5 +83,10 @@ spec:
         - name: model-cache
           persistentVolumeClaim:
             claimName: "{{ .name }}-cache"
+{{- if .template }}
+        - name: template-volume
+          configMap:
+            name: "{{ .name }}-template"
+{{- end }}
 {{- end }}
 {{- end }}
