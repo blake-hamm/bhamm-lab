@@ -255,16 +255,6 @@ spec:
               - --parallel
               - "1"
               - --cont-batching
-              - --temp
-              - "0.7"
-              - --min-p
-              - "0.0"
-              - --top-p
-              - "0.80"
-              - --top-k
-              - "20"
-              - --presence-penalty
-              - "1.0"
             resources:
               limits:
                 amd.com/gpu: 1
