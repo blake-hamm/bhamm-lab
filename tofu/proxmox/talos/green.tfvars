@@ -26,6 +26,7 @@ metal_amd_framework_workers = {
     }
   }
 }
-# amd_gpu_worker_id = [
-#   "0000:c1:00.0"
-# ]
+amd_gpu_worker_id = [
+  "0000:83:00.0",
+  "0000:83:00.1"
+]
