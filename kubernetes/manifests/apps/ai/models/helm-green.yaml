@@ -49,11 +49,11 @@ spec:
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "25Gi"
-                cpu: "4"
+                memory: "18Gi"
+                cpu: "6"
               requests:
                 amd.com/gpu: 1
-                cpu: "2"
+                cpu: "4"
                 memory: "15Gi"
             nodeSelector:
               kubernetes.io/hostname: green-talos-worker-amd-gpu
