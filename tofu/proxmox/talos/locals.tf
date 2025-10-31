@@ -63,7 +63,7 @@ locals {
       vip          = null
       vm_tag       = null
       hostpci      = null
-      interface    = "enp191s0"
+      interface    = var.metal_amd_framework_interface
       schematic_id = local.schematic_id_amd_framework
     }
   ]

@@ -13,7 +13,7 @@ resource "proxmox_virtual_environment_vm" "this" {
   ], each.value.vm_tag != null ? [each.value.vm_tag] : []))
   machine       = "q35"
   scsi_hardware = "virtio-scsi-single"
-  bios          = "seabios"
+  bios          = var.bios_type
 
   started         = true
   on_boot         = true

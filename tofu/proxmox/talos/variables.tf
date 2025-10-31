@@ -192,3 +192,21 @@ variable "metal_amd_framework_workers" {
   }))
   default = {}
 }
+
+variable "metal_amd_framework_disk_path" {
+  description = "Disk path for bare metal installations"
+  type        = string
+  default     = "/dev/nvme0n1"
+}
+
+variable "metal_amd_framework_interface" {
+  description = "Network interface for bare metal installations"
+  type        = string
+  default     = "enp191s0"
+}
+
+variable "bios_type" {
+  description = "BIOS type for VMs"
+  type        = string
+  default     = "seabios"
+}
