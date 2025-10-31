@@ -55,6 +55,8 @@ spec:
                 amd.com/gpu: 1
                 cpu: "2"
                 memory: "15Gi"
+            nodeSelector:
+              kubernetes.io/hostname: green-talos-worker-amd-gpu
           - name: gpt-oss-120b
             description: Great reasoning MoE model for general chat queries
             enabled: true
