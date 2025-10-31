@@ -84,15 +84,13 @@ spec:
               - "2"
               - --cont-batching
               - --temp
-              - "0.9"
+              - "1.0"
               - --min-p
               - "0.0"
               - --top-p
               - "1.0"
               - --top-k
-              - "100"
-              - --chat-template
-              - "gpt-oss"
+              - "0.0"
             resources:
               limits:
                 amd.com/gpu: 1
