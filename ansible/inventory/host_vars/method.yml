@@ -34,6 +34,8 @@ pve_iommu_unsafe_interrupts: false
 pve_mediated_devices_enabled: false
 pve_pcie_ovmf_enabled: false
 pve_pci_device_ids:
+  - id: "1002:7551" # AMD R9700
+  - id: "1eae:9801" # AMD R9700 audio
   - id: "8086:56a6" # Intel arc
   - id: "8086:4f92" # Intel arc audio
   - id: "1b21:1064" # Sata device
@@ -42,5 +44,6 @@ pve_vfio_blacklist_drivers:
   - name: "snd_hda_intel"
   - name: "i915"
   - name: "xe"
+  - name: "amdgpu"
 pve_pcie_ignore_msrs: false
 pve_pcie_report_msrs: true
