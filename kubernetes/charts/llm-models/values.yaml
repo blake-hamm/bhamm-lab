@@ -30,6 +30,7 @@ global:
     - key: "amd.com/gpu"
       operator: "Exists"
       effect: "NoSchedule"
+  nodeSelector: {}
   litellm:
     manage_config: true
     config:
