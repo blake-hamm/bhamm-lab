@@ -12,12 +12,13 @@ spec:
     namespace: models
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/enhance-openwebui
+    targetRevision: feature/update-readme
     path: kubernetes/charts/llm-models
     helm:
       valuesObject:
         models:
           - name: qwen-embed
+            description: Great all around embedding model
             enabled: true
             pvc:
               storage: "20Gi"
@@ -32,15 +33,14 @@ spec:
               - --no-webui
               - --embeddings
               - -v
-              # - --no-mmap # Might be needed for smaller vram
               - -ngl
               - "999"
               - -fa
               - "on"
               - -ub
-              - "64"
+              - "3072"
               - -b
-              - "64"
+              - "3072"
               - -c
               - "32768"
               - --parallel
@@ -55,84 +55,8 @@ spec:
                 amd.com/gpu: 1
                 cpu: "2"
                 memory: "15Gi"
-          - name: nomic-embed
-            enabled: true
-            pvc:
-              storage: "10Gi"
-              storageClassName: csi-rbd-sc
-            args:
-              - llama-server
-              - -ngl
-              - "999"
-              - -fa
-              - "on"
-              - --host
-              - 0.0.0.0
-              - --metrics
-              - --no-webui
-              - --embeddings
-              - -ub
-              - "64"
-              - -b
-              - "64"
-              - -c
-              - "32768"
-              - -v
-              - -hf
-              - bartowski/nomic-ai_nomic-embed-code-GGUF:Q8_0
-              - --parallel
-              - "24"
-              - --cont-batching
-            resources:
-              limits:
-                amd.com/gpu: 1
-                memory: "20Gi"
-                cpu: "4"
-              requests:
-                amd.com/gpu: 1
-                cpu: "2"
-                memory: "10Gi"
-            zeroscaling:
-              cooldownPeriod: 300
-          - name: mistral-embed
-            enabled: true
-            pvc:
-              storage: "20Gi"
-            args:
-              - llama-server
-              - -ngl
-              - "999"
-              - -fa
-              - "on"
-              - --host
-              - 0.0.0.0
-              - --metrics
-              - --no-webui
-              - --embeddings
-              - -ub
-              - "1024"
-              - -b
-              - "2048"
-              - -c
-              - "131072"
-              - -v
-              - -hf
-              - second-state/E5-Mistral-7B-Instruct-Embedding-GGUF
-              - --parallel
-              - "24"
-              - --cont-batching
-            resources:
-              limits:
-                amd.com/gpu: 1
-                memory: "30Gi"
-                cpu: "4"
-              requests:
-                amd.com/gpu: 1
-                cpu: "2"
-                memory: "20Gi"
-            zeroscaling:
-              cooldownPeriod: 300
           - name: gpt-oss-120b
+            description: Great reasoning MoE model for general chat queries
             enabled: true
             pvc:
               storage: "80Gi"
@@ -153,12 +77,20 @@ spec:
               - -ub
               - "2048"
               - -b
-              - "49152"
+              - "6144"
               - -c
               - "65536"
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
+              - --temp
+              - "1.0"
+              - --min-p
+              - "0.0"
+              - --top-p
+              - "1.0"
+              - --top-k
+              - "0.0"
             resources:
               limits:
                 amd.com/gpu: 1
@@ -171,6 +103,7 @@ spec:
             zeroscaling:
               cooldownPeriod: 1800
           - name: gpt-oss-20b
+            description: Smaller MoE model with decent quality
             enabled: true
             pvc:
               storage: "20Gi"
@@ -195,7 +128,7 @@ spec:
               - -hf
               - ggml-org/gpt-oss-20b-GGUF
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -206,7 +139,171 @@ spec:
                 amd.com/gpu: 1
                 cpu: "2"
                 memory: "15Gi"
+          - name: kat-dev
+            description: Very new MoE coding model
+            enabled: true
+            pvc:
+              storage: "80Gi"
+            args:
+              - llama-server
+              - -hf
+              - bartowski/Kwaipilot_KAT-Dev-72B-Exp-GGUF
+              - -hff
+              - Kwaipilot_KAT-Dev-72B-Exp-Q4_K_L.gguf
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - --chat-template-file
+              - /prompt/templates/template.jinja
+              - -v
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ctk
+              - q8_0
+              - -ctv
+              - q8_0
+              - -ub
+              - "3072"
+              - -b
+              - "49152"
+              - -c
+              - "65536"
+              - --parallel
+              - "1"
+              - --cont-batching
+              - --temp
+              - "0.6"
+              - --min-p
+              - "0.0"
+              - --top-p
+              - "0.95"
+              - --top-k
+              - "40"
+            template: |
+              {%- if tools %}
+                  {{- '<|im_start|>system\n' }}
+                  {%- if messages[0]['role'] == 'system' %}
+                      {{- messages[0]['content'] }}
+                  {%- else %}
+                      {{- 'You are Qwen, created by Alibaba Cloud. You are a helpful assistant.' }}
+                  {%- endif %}
+                  {{- "\n\n# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>" }}
+                  {%- for tool in tools %}
+                      {{- "\n" }}
+                      {{- tool | tojson }}
+                  {%- endfor %}
+                  {{- "\n</tools>\n\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\n<tool_call>\n{\"name\": <function-name>, \"arguments\": <args-json-object>}\n</tool_call><|im_end|>\n" }}
+              {%- else %}
+                  {%- if messages[0]['role'] == 'system' %}
+                      {{- '<|im_start|>system\n' + messages[0]['content'] + '<|im_end|>\n' }}
+                  {%- else %}
+                      {{- '<|im_start|>system\nYou are Qwen, created by Alibaba Cloud. You are a helpful assistant.<|im_end|>\n' }}
+                  {%- endif %}
+              {%- endif %}
+              {%- for message in messages %}
+                  {%- if (message.role == "user") or (message.role == "system" and not loop.first) or (message.role == "assistant" and not message.tool_calls) %}
+                      {{- '<|im_start|>' + message.role + '\n' + message.content + '<|im_end|>' + '\n' }}
+                  {%- elif message.role == "assistant" %}
+                      {{- '<|im_start|>' + message.role }}
+                      {%- if message.content %}
+                          {{- '\n' + message.content }}
+                      {%- endif %}
+                      {%- for tool_call in message.tool_calls %}
+                          {%- if tool_call.function is defined %}
+                              {%- set tool_call = tool_call.function %}
+                          {%- endif %}
+                          {{- '\n<tool_call>\n{"name": "' }}
+                          {{- tool_call.name }}
+                          {{- '", "arguments": ' }}
+                          {{- tool_call.arguments | tojson }}
+                          {{- '}\n</tool_call>' }}
+                      {%- endfor %}
+                      {{- '<|im_end|>\n' }}
+                  {%- elif message.role == "tool" %}
+                      {%- if (loop.index0 == 0) or (messages[loop.index0 - 1].role != "tool") %}
+                          {{- '<|im_start|>user' }}
+                      {%- endif %}
+                      {{- '\n<tool_response>\n' }}
+                      {{- message.content }}
+                      {{- '\n</tool_response>' }}
+                      {%- if loop.last or (messages[loop.index0 + 1].role != "tool") %}
+                          {{- '<|im_end|>\n' }}
+                      {%- endif %}
+                  {%- endif %}
+              {%- endfor %}
+              {%- if add_generation_prompt %}
+                  {{- '<|im_start|>assistant\n' }}
+              {%- endif %}
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "120Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
+          - name: qwen
+            description: High quality dense model
+            enabled: true
+            pvc:
+              storage: "40Gi"
+            args:
+              - llama-server
+              - -hf
+              - ggml-org/Qwen3-32B-GGUF:Q8_0
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - -v
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ctk
+              - q8_0
+              - -ctv
+              - q8_0
+              - -ub
+              - "3072"
+              - -b
+              - "49152"
+              - -c
+              - "65536"
+              - --parallel
+              - "1"
+              - --cont-batching
+              - --temp
+              - "0.7"
+              - --min-p
+              - "0.0"
+              - --top-p
+              - "0.80"
+              - --top-k
+              - "20"
+              - --presence-penalty
+              - "1.0"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "120Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
           - name: qwen-instruct
+            description: High quality MoE model for general chat
             enabled: true
             pvc:
               storage: "40Gi"
@@ -227,62 +324,92 @@ spec:
               - -ub
               - "3072"
               - -b
-              - "49152"
+              - "9216"
               - -c
               - "65536"
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
+              - --temp
+              - "0.7"
+              - --min-p
+              - "0.0"
+              - --top-p
+              - "0.80"
+              - --top-k
+              - "20"
+              - --presence-penalty
+              - "1.0"
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "80Gi"
-                cpu: "4"
+                memory: "120Gi"
+                cpu: "8"
               requests:
                 amd.com/gpu: 1
-                cpu: "2"
-                memory: "40Gi"
+                cpu: "4"
+                memory: "110Gi"
             zeroscaling:
               cooldownPeriod: 1800
           - name: qwen-thinking
+            description: High quality, reasoning MoE model for general chat
             enabled: true
             pvc:
               storage: "70Gi"
             args:
               - llama-server
-              - -ngl
-              - "999"
-              - -fa
-              - "on"
+              - -hf
+              - unsloth/Qwen3-30B-A3B-Thinking-2507-GGUF:Q8_K_XL
               - --host
               - 0.0.0.0
               - --metrics
               - --no-webui
               - --jinja
-              - -ub
-              - "1024"
-              - -b
-              - "2048"
-              - -c
-              - "131072"
               - -v
-              - -hf
-              - unsloth/Qwen3-30B-A3B-Thinking-2507-GGUF
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ctk
+              - q8_0
+              - -ctv
+              - q8_0
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "3072"
+              - -b
+              - "49152"
+              - -c
+              - "65536"
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
+              - --temp
+              - "0.6"
+              - --min-p
+              - "0.0"
+              - --top-p
+              - "0.95"
+              - --top-k
+              - "20"
+              - --presence-penalty
+              - "1.0"
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "100Gi"
-                cpu: "4"
+                memory: "120Gi"
+                cpu: "8"
               requests:
                 amd.com/gpu: 1
-                cpu: "2"
-                memory: "70Gi"
+                cpu: "4"
+                memory: "110Gi"
             zeroscaling:
               cooldownPeriod: 1800
           - name: qwen-coder
+            description: High quality MoE model for coding
             enabled: true
             pvc:
               storage: "40Gi"
@@ -300,6 +427,10 @@ spec:
               - "999"
               - -fa
               - "on"
+              - -ctk
+              - q8_0
+              - -ctv
+              - q8_0
               - -ub
               - "3072"
               - -b
@@ -317,8 +448,8 @@ spec:
               - "0.80"
               - --top-k
               - "20"
-              - --repeat-penalty
-              - "1.05"
+              - --presence-penalty
+              - "1.0"
             resources:
               limits:
                 amd.com/gpu: 1
@@ -331,6 +462,7 @@ spec:
             zeroscaling:
               cooldownPeriod: 1800
           - name: gemma
+            description: Mid model with multimodal support
             enabled: true
             image:
               tag: rocm-6.4.4-rocwmma
@@ -357,7 +489,7 @@ spec:
               - -hf
               - unsloth/gemma-3-27b-it-GGUF
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -371,6 +503,7 @@ spec:
             zeroscaling:
               cooldownPeriod: 1800
           - name: glm-air-reap
+            description: High quality MoE model for agents, coding or complex chat
             enabled: true
             pvc:
               storage: "90Gi"
@@ -393,12 +526,18 @@ spec:
               - -ub
               - "3072"
               - -b
-              - "49152"
+              - "9216"
               - -c
               - "65536"
               - --parallel
               - "1"
               - --cont-batching
+              - --temp
+              - "0.6"
+              - --top-p
+              - "0.95"
+              - --top-k
+              - "40"
             resources:
               limits:
                 amd.com/gpu: 1
@@ -411,6 +550,7 @@ spec:
             zeroscaling:
               cooldownPeriod: 1800
           - name: glm-air
+            description: High quality dense model for agents, coding or complex chat
             enabled: true
             pvc:
               storage: "90Gi"
@@ -435,7 +575,7 @@ spec:
               - -hf
               - bartowski/zai-org_GLM-4.5-Air-GGUF:Q5_K_M
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -449,41 +589,58 @@ spec:
             zeroscaling:
               cooldownPeriod: 1800
           - name: devstral
+            description: Decent model for coding
             enabled: true
             pvc:
               storage: "55Gi"
             args:
               - llama-server
-              - -ngl
-              - "999"
-              - -fa
-              - "on"
+              - -hf
+              - unsloth/Devstral-Small-2507-GGUF:Q8_K_XL
               - --host
               - 0.0.0.0
               - --metrics
               - --no-webui
               - --jinja
-              - -ub
-              - "1024"
-              - -b
-              - "2048"
-              - -c
-              - "131072"
               - -v
-              - -hf
-              - unsloth/Devstral-Small-2507-GGUF
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ctk
+              - q8_0
+              - -ctv
+              - q8_0
+              - -ub
+              - "3072"
+              - -b
+              - "49152"
+              - -c
+              - "65536"
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
+              - --prio
+              - "1"
+              - --temp
+              - "0.15"
+              - --repeat-penalty
+              - "1.0"
+              - --min-p
+              - "0.01"
+              - --top-k
+              - "64"
+              - --top-p
+              - "0.95"
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "75Gi"
-                cpu: "4"
+                memory: "120Gi"
+                cpu: "8"
               requests:
                 amd.com/gpu: 1
-                cpu: "2"
-                memory: "55Gi"
+                cpu: "4"
+                memory: "110Gi"
             zeroscaling:
               cooldownPeriod: 1800
           - name: llama-3
@@ -525,6 +682,7 @@ spec:
             zeroscaling:
               cooldownPeriod: 1800
           - name: llama-4
+            description: High quality multimodal model
             enabled: true
             pvc:
               storage: "90Gi"
@@ -563,6 +721,7 @@ spec:
             zeroscaling:
               cooldownPeriod: 1800
           - name: code-llama
+            description: Mid model for coding
             enabled: true
             pvc:
               storage: "40Gi"
@@ -587,7 +746,7 @@ spec:
               - -hf
               - TheBloke/Phind-CodeLlama-34B-v2-GGUF
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -599,6 +758,7 @@ spec:
                 cpu: "2"
                 memory: "40Gi"
           - name: code-llama-python
+            description: Mid model for python coding
             enabled: true
             pvc:
               storage: "40Gi"
@@ -623,7 +783,7 @@ spec:
               - -hf
               - TheBloke/CodeLlama-34B-Python-GGUF
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -634,82 +794,86 @@ spec:
                 amd.com/gpu: 1
                 cpu: "2"
                 memory: "40Gi"
-          - name: deepseek-qwen-distill
-            enabled: true
-            pvc:
-              storage: "70Gi"
-            args:
-              - llama-server
-              - -ngl
-              - "999"
-              - -fa
-              - "on"
-              - --host
-              - 0.0.0.0
-              - --metrics
-              - --no-webui
-              - --jinja
-              - -ub
-              - "1024"
-              - -b
-              - "2048"
-              - -c
-              - "131072"
-              - -v
-              - -hf
-              - unsloth/DeepSeek-R1-Distill-Qwen-32B-GGUF
-              - --parallel
-              - "2"
-              - --cont-batching
-            resources:
-              limits:
-                amd.com/gpu: 1
-                memory: "90Gi"
-                cpu: "4"
-              requests:
-                amd.com/gpu: 1
-                cpu: "2"
-                memory: "70Gi"
-            zeroscaling:
-              cooldownPeriod: 1800
-              # - name: deepseek-llama-distill
-              #   enabled: true
-              #   pvc:
-              #     storage: "90Gi"
-              #   args:
-              #     - llama-server
-              #     - -ngl
-              #     - "999"
-              #     - -fa
-              #     - "on"
-              #     - --host
-              #     - 0.0.0.0
-              #     - --metrics
-              #     - --no-webui
-              #     - --jinja
-              #     - -ub
-              #     - "2048"
-              #     - -b
-              #     - "2048"
-              #     - -c
-              #     - "32768"
-              #     - -v
-              #     - -hf
-              #     - bartowski/DeepSeek-R1-Distill-Llama-70B-GGUF:Q4_K_M
-              #     - --parallel
-              #     - "1"
-              #     - --cont-batching
-              #   resources:
-              #     limits:
-              #       amd.com/gpu: 1
-              #       memory: "110Gi"
-              #       cpu: "4"
-              #     requests:
-              #       amd.com/gpu: 1
-              #       cpu: "2"
-              #       memory: "90Gi"
-              #   zeroscaling:
-              #     cooldownPeriod: 1800
+                # - name: deepseek-qwen-distill
+                #   enabled: true
+                #   pvc:
+                #     storage: "70Gi"
+                #   args:
+                #     - llama-server
+                #     - -hf
+                #     - unsloth/DeepSeek-R1-Distill-Qwen-32B-GGUF:Q8_0
+                #     - --host
+                #     - 0.0.0.0
+                #     - --metrics
+                #     - --no-webui
+                #     - --jinja
+                #     - -v
+                #     - -ctk
+                #     - q8_0
+                #     - -ctv
+                #     - q8_0
+                #     - -ngl
+                #     - "999"
+                #     - -fa
+                #     - "on"
+                #     - -ub
+                #     - "3072"
+                #     - -b
+                #     - "49152"
+                #     - -c
+                #     - "65536"
+                #     - --parallel
+                #     - "1"
+                #     - --cont-batching
+                #   resources:
+                #     limits:
+                #       amd.com/gpu: 1
+                #       memory: "120Gi"
+                #       cpu: "8"
+                #     requests:
+                #       amd.com/gpu: 1
+                #       cpu: "4"
+                #       memory: "110Gi"
+                #   zeroscaling:
+                #     cooldownPeriod: 1800
+                # - name: deepseek-llama-distill
+                #   enabled: true
+                #   pvc:
+                #     storage: "90Gi"
+                #   args:
+                #     - llama-server
+                #     - -ngl
+                #     - "999"
+                #     - -fa
+                #     - "on"
+                #     - --host
+                #     - 0.0.0.0
+                #     - --metrics
+                #     - --no-webui
+                #     - --jinja
+                #     - -ub
+                #     - "2048"
+                #     - -b
+                #     - "2048"
+                #     - -c
+                #     - "32768"
+                #     - -v
+                #     - -hf
+                #     - bartowski/DeepSeek-R1-Distill-Llama-70B-GGUF:Q4_K_M
+                #     - --parallel
+                #     - "1"
+                #     - --cont-batching
+                #   resources:
+                #     limits:
+                #       amd.com/gpu: 1
+                #       memory: "110Gi"
+                #       cpu: "4"
+                #     requests:
+                #       amd.com/gpu: 1
+                #       cpu: "2"
+                #       memory: "90Gi"
+                #   zeroscaling:
+                #     cooldownPeriod: 1800
   ignoreDifferences:
     - group: apps
       kind: Deployment

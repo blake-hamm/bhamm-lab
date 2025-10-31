@@ -38,11 +38,20 @@ spec:
               value: "/models/cache"
             - name: HF_HOME
               value: "/models/cache/huggingface"
+{{- if .template }}
+            - name: TEMPLATE_PATH
+              value: "/prompt/templates"
+{{- end }}
           resources:
 {{- toYaml $merged.resources | nindent 12 }}
           volumeMounts:
             - name: model-cache
               mountPath: /models/cache
+{{- if .template }}
+            - name: template-volume
+              mountPath: /prompt/templates
+              readOnly: true
+{{- end }}
           ports:
             - containerPort: 8080
               name: http
@@ -59,20 +68,25 @@ spec:
               path: /health
               port: 8080
             initialDelaySeconds: 0
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
+            periodSeconds: 30
+            timeoutSeconds: 15
+            failureThreshold: 30
           livenessProbe:
             httpGet:
               path: /health
               port: 8080
-            initialDelaySeconds: 60
-            periodSeconds: 30
-            timeoutSeconds: 5
-            failureThreshold: 2
+            initialDelaySeconds: 120
+            periodSeconds: 60
+            timeoutSeconds: 20
+            failureThreshold: 15
       volumes:
         - name: model-cache
           persistentVolumeClaim:
             claimName: "{{ .name }}-cache"
+{{- if .template }}
+        - name: template-volume
+          configMap:
+            name: "{{ .name }}-template"
+{{- end }}
 {{- end }}
 {{- end }}

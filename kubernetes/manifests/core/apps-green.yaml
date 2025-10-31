@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/enhance-openwebui
+    targetRevision: feature/update-readme
     path: kubernetes/manifests/apps
     directory:
       recurse: true

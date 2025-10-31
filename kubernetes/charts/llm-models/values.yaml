@@ -34,7 +34,7 @@ global:
     manage_config: true
     config:
       litellm_settings:
-        request_timeout: 300
+        request_timeout: 1800
         callbacks: ["prometheus"]
         cache: True
         cache_params:
@@ -48,23 +48,23 @@ global:
       router_settings:
         debug_level: "DEBUG"
         enable_pre_call_check: true
-        cooldown_time: 30
+        cooldown_time: 600
         disable_cooldowns: False
-        allowed_fails: 2
+        allowed_fails: 10
         default_max_parallel_requests: 20
-        timeout: 300
-        retry_after: 90
+        timeout: 1800
         num_retries: 1
+        retry_after: 600
         retry_policy:
           TimeoutErrorRetries: 1
           AuthenticationErrorRetries: 0
-          RateLimitErrorRetries: 1
+          RateLimitErrorRetries: 0
           ContentPolicyViolationErrorRetries: 0
           InternalServerErrorRetries: 0
         allowed_fails_policy:
           BadRequestErrorAllowedFails: 5
           AuthenticationErrorAllowedFails: 2
-          TimeoutErrorAllowedFails: 2
+          TimeoutErrorAllowedFails: 10
           RateLimitErrorAllowedFails: 3
           ContentPolicyViolationErrorAllowedFails: 2
           InternalServerErrorAllowedFails: 2
@@ -73,6 +73,49 @@ global:
         redis_port: os.environ/REDIS_PORT
         redis_password: os.environ/REDIS_PASSWORD
 models: []
+# - name: example-model
+#   enabled: true
+#   description: Example model with template
+#   pvc:
+#     storage: "20Gi"
+#     storageClassName: local-path
+#   args:
+#     - llama-server
+#     - -hf
+#     - example/model
+#     - --host
+#     - 0.0.0.0
+#     - --metrics
+#     - --no-webui
+#   template: |
+#     {%- if tools %}
+#         {{- '<|im_start|>system\n' }}
+#         {%- if messages[0]['role'] == 'system' %}
+#             {{- messages[0]['content'] }}
+#         {%- else %}
+#             {{- 'You are a helpful assistant.' }}
+#         {%- endif %}
+#         {{- "\n\n# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>" }}
+#         {%- for tool in tools %}
+#             {{- "\n" }}
+#             {{- tool | tojson }}
+#         {%- endfor %}
+#         {{- "\n</tools>\n\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\n<tool_call>\n{\"name\": <function-name>, \"arguments\": <args-json-object>}\n</tool_call>\n" }}
+#     {%- else %}
+#         {%- if messages[0]['role'] == 'system' %}
+#             {{- '<|im_start|>system\n' + messages[0]['content'] + '<|im_end|>\n' }}
+#         {%- else %}
+#             {{- '<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n' }}
+#         {%- endif %}
+#     {%- endif %}
+#     {%- for message in messages %}
+#         {%- if (message.role == "user") or (message.role == "system" and not loop.first) or (message.role == "assistant" and not message.tool_calls) %}
+#             {{- '<|im_start|>' + message.role + '\n' + message.content + '<|im_end|>\n' }}
+#         {%- endif %}
+#     {%- endfor %}
+#     {%- if messages[-1]['role'] == "user" %}
+#         {{- '<|im_start|>assistant\n' }}
+#     {%- endif %}
 # - name: gpt-oss-120b
 #   enabled: true
 #   image:
