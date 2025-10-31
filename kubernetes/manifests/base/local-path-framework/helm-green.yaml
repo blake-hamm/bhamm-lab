@@ -30,7 +30,6 @@ spec:
                       operator: "Exists"
                       effect: "NoSchedule"
                   nodeSelector:
-                    topology.kubernetes.io/zone: bare-metal
                     feature.node.kubernetes.io/amd-gpu: "true"
         - patch: |-
             kind: ConfigMap
