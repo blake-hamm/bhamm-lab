@@ -53,7 +53,7 @@ locals {
       ip           = config.ip
       machine_type = "worker"
       machine_tier = "accelerated"
-      host_node    = "bare-metal"
+      host_node    = name
       taint        = { key = config.taint.key, effect = config.taint.effect }
       is_vm        = false
       vm_id        = null

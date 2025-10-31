@@ -28,7 +28,7 @@ machine:
         vip:
           ip: ${vip}
 %{ endif }
-        interface: ${interface}
+        interface: eth0 # Always this regardless of underlying name; idk why
   sysctls:
     fs.inotify.max_user_watches: 1048576   # Watchdog
     fs.inotify.max_user_instances: 8192    # Watchdog
