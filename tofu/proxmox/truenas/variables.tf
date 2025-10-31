@@ -78,5 +78,5 @@ variable "datastore_boot" {
 variable "sata_pcie_ids" {
   description = "A list of PCI IDs for the sata devices for passthrough."
   type        = list(string)
-  default     = ["0000:01:00.0"]
+  default     = ["0000:c1:00.0"]
 }
