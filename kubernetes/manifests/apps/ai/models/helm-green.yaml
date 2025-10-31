@@ -84,13 +84,13 @@ spec:
               - "2"
               - --cont-batching
               - --temp
-              - "1.0"
+              - "0.9"
               - --min-p
               - "0.0"
               - --top-p
               - "1.0"
               - --top-k
-              - "0.0"
+              - "100"
               - --chat-template
               - "gpt-oss"
             resources:
