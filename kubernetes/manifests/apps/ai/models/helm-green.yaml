@@ -81,7 +81,7 @@ spec:
               - -c
               - "65536"
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
               - --temp
               - "1.0"
@@ -128,7 +128,7 @@ spec:
               - -hf
               - ggml-org/gpt-oss-20b-GGUF
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -321,18 +321,14 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ctk
-              - q8_0
-              - -ctv
-              - q8_0
               - -ub
               - "3072"
               - -b
-              - "49152"
+              - "9216"
               - -c
               - "65536"
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
               - --temp
               - "0.7"
@@ -493,7 +489,7 @@ spec:
               - -hf
               - unsloth/gemma-3-27b-it-GGUF
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -579,7 +575,7 @@ spec:
               - -hf
               - bartowski/zai-org_GLM-4.5-Air-GGUF:Q5_K_M
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -625,7 +621,7 @@ spec:
               - "1"
               - --cont-batching
               - --prio
-              - "2"
+              - "1"
               - --temp
               - "0.15"
               - --repeat-penalty
@@ -750,7 +746,7 @@ spec:
               - -hf
               - TheBloke/Phind-CodeLlama-34B-v2-GGUF
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
@@ -787,7 +783,7 @@ spec:
               - -hf
               - TheBloke/CodeLlama-34B-Python-GGUF
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
             resources:
               limits:
