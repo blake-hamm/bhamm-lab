@@ -7,8 +7,8 @@ master_ip_format   = "10.0.30.6%d"
 worker_ip_format   = "10.0.30.7%d"
 vip                = "10.0.30.30"
 intel_gpu_worker_id = [
-  "0000:83:00.0",
-  "0000:84:00.0"
+  "0000:86:00.0",
+  "0000:87:00.0"
 ]
 metal_amd_framework_workers = {
   nose = {
@@ -26,3 +26,6 @@ metal_amd_framework_workers = {
     }
   }
 }
+# amd_gpu_worker_id = [
+#   "0000:c1:00.0"
+# ]

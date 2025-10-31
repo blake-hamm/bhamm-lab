@@ -62,6 +62,10 @@ data "talos_machine_configuration" "this" {
       extra_manifests = jsonencode(var.extra_manifests)
       # api_server = var.cluster.api_server
       inline_manifests = jsonencode(terraform_data.cilium_bootstrap_inline_manifests.output)
+    }) : "",
+    each.value.disk_size_user != null ?
+    templatefile("${path.module}/config/user-volume-config-amd-gpu.yaml.tftpl", {
+      disk_size_user = each.value.disk_size_user
     }) : ""
   ]
 }

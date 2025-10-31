@@ -62,7 +62,21 @@ resource "proxmox_virtual_environment_vm" "this" {
     ssd          = true
     file_format  = "raw"
     size         = each.value.disk_size
-    file_id      = each.value.vm_tag == "intel-gpu" ? proxmox_virtual_environment_download_file.intel_gpu[0].id : proxmox_virtual_environment_download_file.this.id
+    file_id      = each.value.vm_tag == "intel-gpu" ? proxmox_virtual_environment_download_file.intel_gpu[0].id : (each.value.vm_tag == "amd-gpu" ? proxmox_virtual_environment_download_file.amd_gpu[0].id : proxmox_virtual_environment_download_file.this.id)
+  }
+
+  dynamic "disk" {
+    for_each = each.value.disk_size_user != null ? [each.value.disk_size_user] : []
+    content {
+      datastore_id = var.vm_datastore_id
+      interface    = "scsi1"
+      iothread     = true
+      cache        = "writethrough"
+      discard      = "on"
+      ssd          = true
+      file_format  = "raw"
+      size         = disk.value
+    }
   }
 
   boot_order = ["scsi0"]

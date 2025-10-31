@@ -152,6 +152,12 @@ variable "memory_base_worker" {
   default     = 14336
 }
 
+variable "disk_size_amd_gpu_worker" {
+  description = "Disk size in GB for the AMD GPU worker user disk"
+  type        = number
+  default     = 50
+}
+
 variable "disk_size_master" {
   description = "Boot disk for master in gb"
   type        = number
@@ -177,6 +183,12 @@ variable "extra_manifests" {
 
 variable "intel_gpu_worker_id" {
   description = "A list of PCI IDs for the Intel GPU and related devices for passthrough."
+  type        = list(string)
+  default     = []
+}
+
+variable "amd_gpu_worker_id" {
+  description = "List of AMD GPU worker IDs"
   type        = list(string)
   default     = []
 }
