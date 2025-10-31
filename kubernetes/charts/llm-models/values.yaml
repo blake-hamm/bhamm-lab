@@ -12,7 +12,7 @@ global:
   zeroscaling:
     enabled: true
     minReplicas: 1
-    cooldownPeriod: 900
+    cooldownPeriod: 1800
     trigger:
       query: >-
         sum(llamacpp:requests_processing{container="{{ .name }}"}) or vector(0)
