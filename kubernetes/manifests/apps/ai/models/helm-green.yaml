@@ -26,7 +26,6 @@ spec:
               repository: ghcr.io/ggml-org/llama.cpp
               tag: server-vulkan
             args:
-              - llama-server
               - -hf
               - Qwen/Qwen3-Embedding-8B-GGUF:F16
               - --host
