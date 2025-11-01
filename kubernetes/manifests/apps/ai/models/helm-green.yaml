@@ -26,7 +26,6 @@ spec:
               repository: rocm/llama.cpp
               tag: llama.cpp-b6356_rocm7.0.0_ubuntu24.04_server
             args:
-              - llama-server
               - -hf
               - Qwen/Qwen3-Embedding-8B-GGUF:F16
               - --host
