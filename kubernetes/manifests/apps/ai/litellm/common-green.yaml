@@ -35,7 +35,7 @@ spec:
           backup:
             enabled: true
           restore:
-            enabled: false
+            enabled: true
         dragonfly:
           enabled: true
         externalSecrets:

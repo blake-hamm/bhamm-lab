@@ -46,7 +46,7 @@ spec:
           backup:
             enabled: true
           restore:
-            enabled: false
+            enabled: true
         pvc:
           - name: open-webui-data
             storageSize: 10Gi
@@ -54,7 +54,7 @@ spec:
           backup:
             enabled: true
           restore:
-            enabled: false
+            enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
