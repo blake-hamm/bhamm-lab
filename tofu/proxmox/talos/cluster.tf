@@ -56,6 +56,7 @@ data "talos_machine_configuration" "this" {
       nameservers   = var.dns_servers
       machine_tier  = each.value.machine_tier
       type          = each.value.is_vm ? "vm" : "metal"
+      is_amd_gpu    = each.value.vm_tag == "amd-gpu"
     }), each.value.machine_type == "controlplane" ?
     templatefile("${path.module}/config/master.yaml.tftpl", {
       # kubelet = var.cluster.kubelet

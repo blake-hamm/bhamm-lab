@@ -10,3 +10,4 @@ customization:
       - siderolabs/fuse3
       - siderolabs/amd-ucode
       - siderolabs/amdgpu
+      - siderolabs/thunderbolt

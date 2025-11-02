@@ -1,7 +1,7 @@
 variable "talos_version" {
   description = "Talos version to use"
   type        = string
-  default     = "v1.11.2"
+  default     = "v1.11.3"
 }
 
 variable "talos_factory_url" {
@@ -220,5 +220,5 @@ variable "metal_amd_framework_interface" {
 variable "bios_type" {
   description = "BIOS type for VMs"
   type        = string
-  default     = "seabios"
+  default     = "ovmf"
 }

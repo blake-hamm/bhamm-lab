@@ -4,14 +4,14 @@ name: EPHEMERAL
 provisioning:
   diskSelector:
     match: disk.transport == 'nvme'
-  minSize: 80GB
-  maxSize: 100GB
+  minSize: 100GB
+  maxSize: 500GB
 ---
 apiVersion: v1alpha1
 kind: UserVolumeConfig
 name: local-path-provisioner
 provisioning:
   diskSelector:
-    match: disk.transport == 'nvme'
-  minSize: 300GB
-  maxSize: 400GB
+    match: "!system_disk"
+  minSize: 1500GB
+  maxSize: 2000GB

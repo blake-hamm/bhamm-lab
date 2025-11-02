@@ -13,7 +13,7 @@ resource "proxmox_virtual_environment_vm" "this" {
   ], each.value.vm_tag != null ? [each.value.vm_tag] : []))
   machine       = "q35"
   scsi_hardware = "virtio-scsi-single"
-  bios          = var.bios_type
+  bios          = each.value.vm_tag == "intel-gpu" ? "seabios" : var.bios_type
 
   started         = true
   on_boot         = true
@@ -23,6 +23,14 @@ resource "proxmox_virtual_environment_vm" "this" {
   agent {
     enabled = true
     trim    = true
+  }
+
+  dynamic "efi_disk" {
+    for_each = each.value.vm_tag != "intel-gpu" ? [1] : []
+    content {
+      datastore_id = var.vm_datastore_id
+      type         = "4m"
+    }
   }
 
   dynamic "hostpci" {
