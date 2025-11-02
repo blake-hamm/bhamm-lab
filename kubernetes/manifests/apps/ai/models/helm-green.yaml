@@ -50,12 +50,12 @@ spec:
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "14Gi"
+                memory: "12Gi"
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
                 cpu: "2"
-                memory: "12Gi"
+                memory: "8Gi"
             nodeSelector:
               kubernetes.io/hostname: green-talos-worker-amd-gpu
           - name: gpt-oss-120b
