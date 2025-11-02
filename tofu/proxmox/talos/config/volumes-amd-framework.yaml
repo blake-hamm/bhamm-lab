@@ -5,7 +5,7 @@ provisioning:
   diskSelector:
     match: disk.transport == 'nvme'
   minSize: 100GB
-  maxSize: 500GB
+  maxSize: 450GB
 ---
 apiVersion: v1alpha1
 kind: UserVolumeConfig

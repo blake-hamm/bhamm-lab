@@ -61,7 +61,7 @@ locals {
     cpu            = var.cpu_cores_worker
     disk_size      = var.disk_size_worker
     disk_size_user = var.disk_size_amd_gpu_worker
-    memory         = floor(var.memory_base_worker * var.proxmox_nodes[1].multiplier)
+    memory         = 30518
     vip            = null
     taint          = { key = "amd.com/gpu", effect = "NoSchedule" }
     vm_tag         = "amd-gpu"
