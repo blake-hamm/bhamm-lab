@@ -23,8 +23,8 @@ spec:
             pvc:
               storage: "20Gi"
             image:
-              repository: rocm/llama.cpp
-              tag: llama.cpp-b6356_rocm6.4.3_ubuntu24.04_server
+              repository: ghcr.io/ggml-org/llama.cpp
+              tag: server-vulkan
             args:
               - -hf
               - Qwen/Qwen3-Embedding-8B-GGUF:F16
@@ -39,13 +39,13 @@ spec:
               - -fa
               - "on"
               - -ub
-              - "3072"
+              - "512"
               - -b
-              - "3072"
+              - "512"
               - -c
-              - "32768"
+              - "8192"
               - --parallel
-              - "24"
+              - "4"
               - --cont-batching
             resources:
               limits:
