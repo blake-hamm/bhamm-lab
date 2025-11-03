@@ -42,7 +42,7 @@ global:
           type: qdrant-semantic
           qdrant_semantic_cache_embedding_model: qwen-embed
           qdrant_collection_name: litellm
-          similarity_threshold: 0.9
+          similarity_threshold: 0.75
       general_settings:
         max_parallel_requests: 10
         global_max_parallel_requests: 20
