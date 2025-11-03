@@ -34,6 +34,7 @@ spec:
               - --no-webui
               - --embeddings
               - -v
+              - --no-warmup
               - -ngl
               - "999"
               - -fa
@@ -73,6 +74,7 @@ spec:
               - --no-webui
               - --jinja
               - -v
+              - --no-warmup
               - -ngl
               - "999"
               - -fa
@@ -161,6 +163,7 @@ spec:
               - --chat-template-file
               - /prompt/templates/template.jinja
               - -v
+              - --no-warmup
               - -ngl
               - "999"
               - -fa
@@ -263,6 +266,7 @@ spec:
               - --no-webui
               - --jinja
               - -v
+              - --no-warmup
               - -ngl
               - "999"
               - -fa
@@ -316,6 +320,7 @@ spec:
               - --no-webui
               - --jinja
               - -v
+              - --no-warmup
               - -ngl
               - "999"
               - -fa
@@ -365,6 +370,7 @@ spec:
               - --no-webui
               - --jinja
               - -v
+              - --no-warmup
               - -ngl
               - "999"
               - -fa
@@ -418,6 +424,7 @@ spec:
               - --no-webui
               - --jinja
               - -v
+              - --no-warmup
               - -ngl
               - "999"
               - -fa
@@ -514,6 +521,7 @@ spec:
               - --no-webui
               - --jinja
               - -v
+              - --no-warmup
               - -ngl
               - "999"
               - -fa
@@ -598,6 +606,7 @@ spec:
               - --no-webui
               - --jinja
               - -v
+              - --no-warmup
               - -ngl
               - "999"
               - -fa
@@ -692,6 +701,7 @@ spec:
               - --metrics
               - --no-webui
               - --jinja
+              - --no-warmup
               - -ub
               - "1024"
               - -b
