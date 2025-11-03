@@ -58,17 +58,9 @@ spec:
             - containerPort: 8080
               name: http
           startupProbe:
-            exec:
-              command:
-              - /bin/sh
-              - -c
-              - |
-                # Wait for health endpoint
-                curl -f http://localhost:8080/health || exit 1
-                # Make a dummy request to ensure warmup completed
-                curl -f -X POST http://localhost:8080/completion \
-                  -H "Content-Type: application/json" \
-                  -d '{"prompt":"test","n_predict":1}' || exit 1
+            httpGet:
+              path: /health
+              port: 8080
             initialDelaySeconds: 5
             periodSeconds: 20
             timeoutSeconds: 5
