@@ -36,7 +36,7 @@ CEPH_CONF = "./result/ceph.conf"
 CEPH_KEYRING="./result/ceph.client.k8s-cleaner.keyring"
 CEPH_USER="k8s-cleaner"
 GRACE_PERIOD_DAYS = 7
-DRY_RUN = False
+DRY_RUN = True
 
 
 
@@ -72,25 +72,32 @@ def run_ceph_command(command: List[str], json_output: bool = True, rbd: bool = F
         return None
 
 
-def get_k8s_volumes() -> Set[str]:
-    """Get all volume IDs currently used by Kubernetes PVs."""
+def get_k8s_volumes(rbd_pool: str, cephfs_pool: str) -> Dict[str, Set[str]]:
+    """Get all volume IDs currently used by Kubernetes PVs for both RBD and CephFS."""
     try:
         load_kube_config()
         api = kubernetes.client.CoreV1Api()
         pvs = api.list_persistent_volume()
 
-        volume_ids = set()
+        rbd_volumes = set()
+        cephfs_volumes = set()
+
         for pv in pvs.items:
-            if pv.spec.csi and 'rbd.csi.ceph.com' in pv.spec.csi.driver:
-                # Extract just the image name from the volume handle
-                volume_attributes = pv.spec.csi.volume_attributes
-                if volume_attributes["pool"] == CEPH_POOL:
-                    volume_ids.add(volume_attributes['imageName'])
-        logger.info(f"Found {len(volume_ids)} active PVs in Kubernetes")
-        return volume_ids
+            if pv.spec.csi:
+                if 'rbd.csi.ceph.com' in pv.spec.csi.driver:
+                    volume_attributes = pv.spec.csi.volume_attributes
+                    if volume_attributes.get("pool") == rbd_pool:
+                        rbd_volumes.add(volume_attributes['imageName'])
+                elif 'cephfs.csi.ceph.com' in pv.spec.csi.driver and cephfs_pool:
+                    volume_attributes = pv.spec.csi.volume_attributes
+                    volume_id = volume_attributes.get('subvolumeName')
+                    cephfs_volumes.add(volume_id)
+
+        logger.info(f"Found {len(rbd_volumes)} active RBD PVs and {len(cephfs_volumes)} active CephFS PVs in Kubernetes")
+        return {"rbd": rbd_volumes, "cephfs": cephfs_volumes}
     except ApiException as e:
         logger.error(f"Error fetching Kubernetes volumes: {e}")
-        return set()
+        return {"rbd": set(), "cephfs": set()}
 
 
 def get_k8s_snapshots() -> Set[str]:
@@ -146,15 +153,23 @@ def get_pool_usage() -> Dict:
     return pool_stats
 
 
-def get_ceph_images() -> List[str]:
-    """Get all RBD images in the specified Ceph pool."""
-    result = run_ceph_command(["ls", "-p", CEPH_POOL], rbd=True)
-    if result is None:
-        logger.error(f"Failed to get RBD images from pool {CEPH_POOL}")
-        return []
-
-    logger.info(f"Found {len(result)} total RBD images in Ceph pool {CEPH_POOL}")
-    return result
+def get_ceph_images(pool: str, rbd: bool = True) -> List[str]:
+    """Get all RBD images or CephFS volumes in the specified Ceph pool."""
+    if rbd:
+        result = run_ceph_command(["ls", "-p", pool], rbd=True)
+        if result is None:
+            logger.error(f"Failed to get RBD images from pool {pool}")
+            return []
+        logger.info(f"Found {len(result)} total RBD images in Ceph pool {pool}")
+        return result
+    else:
+        # For CephFS, get the subvolumes
+        result = run_ceph_command(["fs", "subvolume", "ls", pool, "--group_name", "csi"], rbd=False)
+        if result is None:
+            logger.error(f"Failed to get CephFS volumes from pool {pool}")
+            return []
+        logger.info(f"Found {len(result)} total CephFS volumes in filesystem {pool}")
+        return [vol['name'] for vol in result]
 
 
 def check_and_cleanup_snapshots(image: str, k8s_snapshots: Set[str]):
@@ -187,19 +202,32 @@ def check_and_cleanup_snapshots(image: str, k8s_snapshots: Set[str]):
                     logger.error(f"Failed to remove snapshot: {image}@{snap_name}")
 
 
-def move_to_trash(image: str) -> bool:
-    """Move a Ceph RBD image to trash."""
+def move_to_trash(image: str, pool: str, rbd: bool = True) -> bool:
+    """Move a Ceph RBD image to trash or remove a CephFS volume."""
     if DRY_RUN:
-        logger.info(f"[DRY RUN] Would move image {image} to trash")
+        if rbd:
+            logger.info(f"[DRY RUN] Would move RBD image {image} to trash in pool {pool}")
+        else:
+            logger.info(f"[DRY RUN] Would remove CephFS volume {image} from pool {pool}")
         return True
 
-    result = run_ceph_command(["trash", "mv", "-p", CEPH_POOL, image], json_output=False, rbd=True)
-    if result is not None:
-        logger.info(f"Successfully moved {image} to trash")
-        return True
+    if rbd:
+        result = run_ceph_command(["trash", "mv", "-p", pool, image], json_output=False, rbd=True)
+        if result is not None:
+            logger.info(f"Successfully moved RBD image {image} to trash")
+            return True
+        else:
+            logger.error(f"Failed to move RBD image {image} to trash")
+            return False
     else:
-        logger.error(f"Failed to move {image} to trash")
-        return False
+        # For CephFS, remove the subvolume
+        result = run_ceph_command(["fs", "subvolume", "rm", pool, image, "--group_name", "csi"], json_output=False, rbd=False)
+        if result is not None:
+            logger.info(f"Successfully removed CephFS volume {image}")
+            return True
+        else:
+            logger.error(f"Failed to remove CephFS volume {image}")
+            return False
 
 
 def get_trash_images() -> List[Dict]:
@@ -280,44 +308,58 @@ def purge_from_trash(trash_id: str) -> bool:
 
 
 
-def main():
-    """Main function to manage Ceph resources."""
+def main(rbd_pool: str, cephfs_pool: str):
+    """Main function to manage Ceph resources for both RBD and CephFS."""
     logger.info("=== Ceph Maintenance Script Started ===")
 
     # Get initial pool usage
     usage_before = get_pool_usage()
 
     # Get active resources
-    k8s_volumes = get_k8s_volumes()
+    k8s_volumes = get_k8s_volumes(rbd_pool, cephfs_pool)
     k8s_snapshots = get_k8s_snapshots()
 
-    # Protect current snapshots
+    # Protect current snapshots (RBD only)
     for snap_id in k8s_snapshots:
       results = run_ceph_command(
-        ["snap", "protect", f"{CEPH_POOL}/{snap_id}@{snap_id}"],
+        ["snap", "protect", f"{rbd_pool}/{snap_id}@{snap_id}"],
         json_output=False,
         rbd=True
       )
 
-    # Get all Ceph images
-    ceph_images = get_ceph_images()
+    # Get all Ceph images and volumes
+    ceph_images = get_ceph_images(rbd_pool, rbd=True)
+    cephfs_volumes = get_ceph_images(cephfs_pool, rbd=False) if cephfs_pool else []
 
-    # Find orphaned images
-    orphaned_images = []
+    # Find orphaned RBD images
+    orphaned_rbd_images = []
     for image in ceph_images:
-        if image not in k8s_volumes and image not in k8s_snapshots:
-            logger.info(f"Found orphaned image: {image}")
-            orphaned_images.append(image)
+        if image not in k8s_volumes["rbd"] and image not in k8s_snapshots:
+            logger.info(f"Found orphaned RBD image: {image}")
+            orphaned_rbd_images.append(image)
         else:
             # For active images, check for orphaned snapshots
-            logger.debug(f"Found active image: {image}")
+            logger.debug(f"Found active RBD image: {image}")
             check_and_cleanup_snapshots(image, k8s_snapshots)
 
-    # Move orphaned images to trash
-    for image in orphaned_images:
-        move_to_trash(image)
+    # Move orphaned RBD images to trash
+    for image in orphaned_rbd_images:
+        move_to_trash(image, rbd_pool, rbd=True)
 
-    # Process trash
+    # Find orphaned CephFS volumes
+    orphaned_cephfs_volumes = []
+    for volume in cephfs_volumes:
+        if volume not in k8s_volumes["cephfs"]:
+            logger.info(f"Found orphaned CephFS volume: {volume}")
+            orphaned_cephfs_volumes.append(volume)
+        else:
+            logger.debug(f"Found active CephFS volume: {volume}")
+
+    # Remove orphaned CephFS volumes
+    for volume in orphaned_cephfs_volumes:
+        move_to_trash(volume, cephfs_pool, rbd=False)
+
+    # Process trash (RBD only)
     trash_images = get_trash_images()
     cutoff_time = int(time.time()) - (GRACE_PERIOD_DAYS * 86400)
 
@@ -350,4 +392,17 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Ceph Kubernetes Resource Manager')
+    parser.add_argument('--rbd-pool', required=True, help='Ceph RBD pool name')
+    parser.add_argument('--cephfs-pool', help='CephFS pool/filesystem name (optional)')
+    parser.add_argument('--dry-run', action='store_true', help='Dry run mode - no actual changes')
+
+    args = parser.parse_args()
+
+    # Update configuration
+    DRY_RUN = args.dry_run
+
+    # Run main function
+    main(args.rbd_pool, args.cephfs_pool)
