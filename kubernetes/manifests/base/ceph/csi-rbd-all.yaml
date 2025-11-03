@@ -30,9 +30,6 @@ spec:
             - key: "intel.com/gpu"
               operator: "Exists"
               effect: "NoSchedule"
-            - key: "amd.com/gpu"
-              operator: "Exists"
-              effect: "NoSchedule"
         provisioner:
           replicaCount: 3
         csiConfig:
