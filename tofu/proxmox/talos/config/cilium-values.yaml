@@ -61,3 +61,5 @@ operator:
     metricsService: true
   dashboards:
     enabled: true
+bandwidthManager:
+  enabled: true
