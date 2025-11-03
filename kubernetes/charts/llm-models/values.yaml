@@ -42,31 +42,31 @@ global:
           qdrant_collection_name: litellm
           similarity_threshold: 0.6
       general_settings:
-        max_parallel_requests: 5
-        global_max_parallel_requests: 10
+        max_parallel_requests: 1
+        global_max_parallel_requests: 3
       router_settings:
         debug_level: "DEBUG"
         enable_pre_call_check: false
-        cooldown_time: 600
+        cooldown_time: 120
         disable_cooldowns: False
-        allowed_fails: 5
-        default_max_parallel_requests: 5
+        allowed_fails: 999
+        default_max_parallel_requests: 1
         timeout: 1800
         num_retries: 0
-        retry_after: 600
+        retry_after: 999
         retry_policy:
-          TimeoutErrorRetries: 1
+          TimeoutErrorRetries: 0
           AuthenticationErrorRetries: 0
           RateLimitErrorRetries: 0
           ContentPolicyViolationErrorRetries: 0
           InternalServerErrorRetries: 0
         allowed_fails_policy:
-          BadRequestErrorAllowedFails: 5
-          AuthenticationErrorAllowedFails: 2
-          TimeoutErrorAllowedFails: 10
-          RateLimitErrorAllowedFails: 3
-          ContentPolicyViolationErrorAllowedFails: 2
-          InternalServerErrorAllowedFails: 2
+          BadRequestErrorAllowedFails: 999
+          AuthenticationErrorAllowedFails: 999
+          TimeoutErrorAllowedFails: 999
+          RateLimitErrorAllowedFails: 999
+          ContentPolicyViolationErrorAllowedFails: 999
+          InternalServerErrorAllowedFails: 999
         routing_strategy: simple-shuffle
         redis_host: os.environ/REDIS_HOST
         redis_port: os.environ/REDIS_PORT
