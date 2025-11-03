@@ -100,37 +100,6 @@ def get_k8s_volumes(rbd_pool: str, cephfs_pool: str) -> Dict[str, Set[str]]:
         return {"rbd": set(), "cephfs": set()}
 
 
-def get_k8s_snapshots() -> Set[str]:
-    """Get all snapshot IDs currently used by Kubernetes VolumeSnapshots."""
-    try:
-        load_kube_config()
-        api = kubernetes.client.CustomObjectsApi()
-
-        # Get VolumeSnapshotContents
-        snapshot_contents = api.list_cluster_custom_object(
-            group="snapshot.storage.k8s.io",
-            version="v1",
-            plural="volumesnapshotcontents"
-        )
-
-        snapshot_ids = set()
-        for content in snapshot_contents['items']:
-            if 'snapshotHandle' in (snapshot_status := content['status']):
-                snapshot_handle = snapshot_status['snapshotHandle']
-                m = re.search(r'([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$', snapshot_handle)
-                if not m:
-                    raise ValueError("No trailing UUID found in snapshot_handle")
-                uuid = m.group(1)
-                snap_id = f'csi-snap-{uuid}'
-                snapshot_ids.add(snap_id)
-
-        logger.info(f"Found {len(snapshot_ids)} active snapshots in Kubernetes")
-        return snapshot_ids
-    except ApiException as e:
-        logger.error(f"Error fetching Kubernetes snapshots: {e}")
-        return set()
-
-
 def get_pool_usage() -> Dict:
     """Get usage statistics for the pool."""
     result = run_ceph_command(["df", "detail"])
@@ -170,36 +139,6 @@ def get_ceph_images(pool: str, rbd: bool = True) -> List[str]:
             return []
         logger.info(f"Found {len(result)} total CephFS volumes in filesystem {pool}")
         return [vol['name'] for vol in result]
-
-
-def check_and_cleanup_snapshots(image: str, k8s_snapshots: Set[str]):
-    """Check for orphaned snapshots within an image and clean them up."""
-    # Get all snapshots for this image
-    result = run_ceph_command(["snap", "ls", f"{CEPH_POOL}/{image}"], rbd=True)
-    if result is None:
-        logger.error(f"Failed to get snapshots for image {image}")
-        return
-
-    for snap in result:
-        snap_name = snap['name']
-        # Check if this snapshot is referenced by k8s
-        is_referenced = any(snap_name in k_snap for k_snap in k8s_snapshots)
-
-        if not is_referenced:
-            logger.info(f"Found orphaned snapshot: {image}@{snap_name}")
-
-            if not DRY_RUN:
-                # Unprotect snapshot if protected
-                if 'snap' in image:
-                  snap_cmd = ["snap", "unprotect", f"{CEPH_POOL}/{image}@{snap_name}"]
-                  run_ceph_command(snap_cmd, json_output=False, rbd=True)
-
-                # Remove the snapshot
-                snap_cmd = ["snap", "rm", f"{CEPH_POOL}/{image}@{snap_name}"]
-                if run_ceph_command(snap_cmd, json_output=False, rbd=True) is not None:
-                    logger.info(f"Removed orphaned snapshot: {image}@{snap_name}")
-                else:
-                    logger.error(f"Failed to remove snapshot: {image}@{snap_name}")
 
 
 def move_to_trash(image: str, pool: str, rbd: bool = True) -> bool:
@@ -242,55 +181,12 @@ def get_trash_images() -> List[Dict]:
 
 
 def purge_from_trash(trash_id: str) -> bool:
-    """Enhanced version that handles protected snapshots properly."""
+    """Remove a Ceph RBD image from trash."""
     if DRY_RUN:
-        logger.info(f"[DRY RUN] Would purge all snapshots and trash image {trash_id}")
+        logger.info(f"[DRY RUN] Would remove trash image {trash_id}")
         return True
 
     try:
-        # Step 1: Get all snapshots for this trash image
-        snap_list_cmd = ["snap", "ls", "-p", CEPH_POOL, "--image-id", trash_id, "--all"]
-        snapshots = run_ceph_command(snap_list_cmd, rbd=True)
-
-        if snapshots is None:
-            logger.error(f"Failed to list snapshots for trash image {trash_id}")
-            return False
-
-        if not snapshots:
-            logger.info(f"No snapshots found for trash image {trash_id}")
-        else:
-            logger.info(f"Found {len(snapshots)} snapshots for trash image {trash_id}")
-
-            # Step 2: Unprotect all snapshots first
-            for snap in snapshots:
-                snap_name = snap['name']
-                protected = snap.get('protected', False)
-
-                if protected == 'yes' or protected is True:
-                    logger.info(f"Unprotecting snapshot {snap_name}")
-                    unprotect_cmd = ["snap", "unprotect", "-p", CEPH_POOL, "--image-id", trash_id, "--snap", snap_name]
-                    run_ceph_command(unprotect_cmd, json_output=False, rbd=True)  # Don't fail if already unprotected
-
-            # Step 3: Now purge all snapshots
-            logger.info(f"Purging all snapshots for trash image {trash_id}")
-            purge_cmd = ["snap", "purge", "-p", CEPH_POOL, "--image-id", trash_id]
-
-            purge_result = run_ceph_command(purge_cmd, json_output=False, rbd=True)
-            if purge_result is None:
-                logger.error(f"Failed to purge snapshots for trash image {trash_id}")
-                return False
-
-            # Step 4: Verify snapshots are gone
-            verification_cmd = ["snap", "ls", "-p", CEPH_POOL, "--image-id", trash_id]
-            remaining_snaps = run_ceph_command(verification_cmd, rbd=True)
-
-            if remaining_snaps and len(remaining_snaps) > 0:
-                logger.error(f"Still found {len(remaining_snaps)} snapshots after purge - manual cleanup required")
-                return False
-            else:
-                logger.info(f"Verified: All snapshots successfully removed")
-
-        # Step 5: Remove the image from trash
         logger.info(f"Removing trash image {trash_id}")
         trash_rm_cmd = ["trash", "rm", "-p", CEPH_POOL, trash_id]
 
@@ -317,15 +213,6 @@ def main(rbd_pool: str, cephfs_pool: str):
 
     # Get active resources
     k8s_volumes = get_k8s_volumes(rbd_pool, cephfs_pool)
-    k8s_snapshots = get_k8s_snapshots()
-
-    # Protect current snapshots (RBD only)
-    for snap_id in k8s_snapshots:
-      results = run_ceph_command(
-        ["snap", "protect", f"{rbd_pool}/{snap_id}@{snap_id}"],
-        json_output=False,
-        rbd=True
-      )
 
     # Get all Ceph images and volumes
     ceph_images = get_ceph_images(rbd_pool, rbd=True)
@@ -334,13 +221,11 @@ def main(rbd_pool: str, cephfs_pool: str):
     # Find orphaned RBD images
     orphaned_rbd_images = []
     for image in ceph_images:
-        if image not in k8s_volumes["rbd"] and image not in k8s_snapshots:
+        if image not in k8s_volumes["rbd"]:
             logger.info(f"Found orphaned RBD image: {image}")
             orphaned_rbd_images.append(image)
         else:
-            # For active images, check for orphaned snapshots
             logger.debug(f"Found active RBD image: {image}")
-            check_and_cleanup_snapshots(image, k8s_snapshots)
 
     # Move orphaned RBD images to trash
     for image in orphaned_rbd_images:
