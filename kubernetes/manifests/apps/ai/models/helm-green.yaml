@@ -701,7 +701,6 @@ spec:
               - --metrics
               - --no-webui
               - --jinja
-              - --no-warmup
               - -ub
               - "1024"
               - -b
