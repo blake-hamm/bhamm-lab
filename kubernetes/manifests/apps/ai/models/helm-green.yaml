@@ -509,6 +509,8 @@ spec:
             enabled: true
             pvc:
               storage: "90Gi"
+            image:
+              tag: rocm-6.4.4-rocwmma
             args:
               - llama-server
               - -hf
@@ -527,9 +529,9 @@ spec:
               - -fa
               - "on"
               - -ub
-              - "3072"
+              - "2048"
               - -b
-              - "9216"
+              - "4096"
               - -c
               - "65536"
               - --parallel
