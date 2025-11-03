@@ -523,6 +523,7 @@ spec:
               - --no-webui
               - --jinja
               - -v
+              - --no-mmap
               - --no-warmup
               - -ngl
               - "999"
