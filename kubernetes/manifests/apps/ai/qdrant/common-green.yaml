@@ -43,11 +43,14 @@ spec:
               remoteRef:
                 key: /default/qdrant
                 property: API_KEY
+        pvc:
+          - name: qdrant-storage-qdrant-0
+            storageSize: 10Gi
         k8up:
           backup:
             enabled: true
           restore:
-            enabled: false
+            enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

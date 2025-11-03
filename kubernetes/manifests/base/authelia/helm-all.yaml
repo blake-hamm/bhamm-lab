@@ -120,6 +120,9 @@ spec:
                   - bhamm-lab.com
                 policy: two_factor
           session:
+            same_site: 'lax'
+            expiration: '8 hours'
+            inactivity: '30 minutes'
             cookies:
               - subdomain: 'auth'
                 domain: 'bhamm-lab.com'

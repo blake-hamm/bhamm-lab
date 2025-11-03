@@ -73,7 +73,7 @@ spec:
               subPath: values.yaml
           command:
             - cilium
-            - upgrade
+            - install
             - --version=v1.18.2
             - --set
             - kubeProxyReplacement=true

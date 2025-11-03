@@ -27,6 +27,8 @@ spec:
     spec:
       tolerations:
 {{- toYaml $merged.tolerations | nindent 8 }}
+      nodeSelector:
+{{- toYaml $merged.nodeSelector | nindent 8 }}
       containers:
         - name: {{ .name }}
           image: "{{ $merged.image.repository }}:{{ $merged.image.tag }}"

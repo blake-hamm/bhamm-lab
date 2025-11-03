@@ -47,7 +47,7 @@ data "talos_machine_configuration" "this" {
       cluster_name  = var.environment
       hostname      = each.key
       ip            = each.value.ip
-      mtu           = var.mtu
+      mtu           = var.mtu - 50
       gateway       = var.network_gateway
       vip           = each.value.vip
       interface     = each.value.interface
@@ -56,12 +56,17 @@ data "talos_machine_configuration" "this" {
       nameservers   = var.dns_servers
       machine_tier  = each.value.machine_tier
       type          = each.value.is_vm ? "vm" : "metal"
+      is_amd_gpu    = each.value.vm_tag == "amd-gpu"
     }), each.value.machine_type == "controlplane" ?
     templatefile("${path.module}/config/master.yaml.tftpl", {
       # kubelet = var.cluster.kubelet
       extra_manifests = jsonencode(var.extra_manifests)
       # api_server = var.cluster.api_server
       inline_manifests = jsonencode(terraform_data.cilium_bootstrap_inline_manifests.output)
+    }) : "",
+    each.value.disk_size_user != null ?
+    templatefile("${path.module}/config/user-volume-config-amd-gpu.yaml.tftpl", {
+      disk_size_user = each.value.disk_size_user
     }) : ""
   ]
 }
@@ -90,7 +95,7 @@ resource "talos_machine_configuration_apply" "bare_metal" {
     yamlencode({
       machine = {
         install = {
-          disk = "/dev/nvme0n1"
+          disk = var.metal_amd_framework_disk_path
           extraKernelArgs = [
             "amd_iommu=off",
             "amdgpu.gttsize=122800",

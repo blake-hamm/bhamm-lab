@@ -12,7 +12,7 @@ spec:
     namespace: models
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/update-readme
+    targetRevision: feature/amd-r9700
     path: kubernetes/charts/llm-models
     helm:
       valuesObject:
@@ -22,9 +22,10 @@ spec:
             enabled: true
             pvc:
               storage: "20Gi"
-              storageClassName: csi-rbd-sc
+            image:
+              repository: ghcr.io/ggml-org/llama.cpp
+              tag: server-vulkan
             args:
-              - llama-server
               - -hf
               - Qwen/Qwen3-Embedding-8B-GGUF:F16
               - --host
@@ -33,28 +34,31 @@ spec:
               - --no-webui
               - --embeddings
               - -v
+              - --no-warmup
               - -ngl
               - "999"
               - -fa
               - "on"
               - -ub
-              - "3072"
+              - "512"
               - -b
-              - "3072"
+              - "512"
               - -c
-              - "32768"
+              - "8192"
               - --parallel
-              - "24"
+              - "4"
               - --cont-batching
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "25Gi"
+                memory: "26Gi"
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
                 cpu: "2"
-                memory: "15Gi"
+                memory: "20Gi"
+            nodeSelector:
+              kubernetes.io/hostname: green-talos-worker-amd-gpu
           - name: gpt-oss-120b
             description: Great reasoning MoE model for general chat queries
             enabled: true
@@ -70,6 +74,7 @@ spec:
               - --no-webui
               - --jinja
               - -v
+              - --no-warmup
               - -ngl
               - "999"
               - -fa
@@ -158,18 +163,15 @@ spec:
               - --chat-template-file
               - /prompt/templates/template.jinja
               - -v
+              - --no-warmup
               - -ngl
               - "999"
               - -fa
               - "on"
-              - -ctk
-              - q8_0
-              - -ctv
-              - q8_0
               - -ub
               - "3072"
               - -b
-              - "49152"
+              - "9216"
               - -c
               - "65536"
               - --parallel
@@ -264,6 +266,7 @@ spec:
               - --no-webui
               - --jinja
               - -v
+              - --no-warmup
               - -ngl
               - "999"
               - -fa
@@ -275,7 +278,7 @@ spec:
               - -ub
               - "3072"
               - -b
-              - "49152"
+              - "9216"
               - -c
               - "65536"
               - --parallel
@@ -317,6 +320,7 @@ spec:
               - --no-webui
               - --jinja
               - -v
+              - --no-warmup
               - -ngl
               - "999"
               - -fa
@@ -366,14 +370,11 @@ spec:
               - --no-webui
               - --jinja
               - -v
+              - --no-warmup
               - -ngl
               - "999"
               - -fa
               - "on"
-              - -ctk
-              - q8_0
-              - -ctv
-              - q8_0
               - -ngl
               - "999"
               - -fa
@@ -381,7 +382,7 @@ spec:
               - -ub
               - "3072"
               - -b
-              - "49152"
+              - "9216"
               - -c
               - "65536"
               - --parallel
@@ -423,6 +424,7 @@ spec:
               - --no-webui
               - --jinja
               - -v
+              - --no-warmup
               - -ngl
               - "999"
               - -fa
@@ -507,6 +509,8 @@ spec:
             enabled: true
             pvc:
               storage: "90Gi"
+            image:
+              tag: rocm-6.4.4-rocwmma
             args:
               - llama-server
               - -hf
@@ -519,14 +523,16 @@ spec:
               - --no-webui
               - --jinja
               - -v
+              - --no-mmap
+              - --no-warmup
               - -ngl
               - "999"
               - -fa
               - "on"
               - -ub
-              - "3072"
+              - "2048"
               - -b
-              - "9216"
+              - "4096"
               - -c
               - "65536"
               - --parallel
@@ -603,6 +609,7 @@ spec:
               - --no-webui
               - --jinja
               - -v
+              - --no-warmup
               - -ngl
               - "999"
               - -fa

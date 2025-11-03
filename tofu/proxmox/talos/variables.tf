@@ -1,7 +1,7 @@
 variable "talos_version" {
   description = "Talos version to use"
   type        = string
-  default     = "v1.11.2"
+  default     = "v1.11.3"
 }
 
 variable "talos_factory_url" {
@@ -152,6 +152,12 @@ variable "memory_base_worker" {
   default     = 14336
 }
 
+variable "disk_size_amd_gpu_worker" {
+  description = "Disk size in GB for the AMD GPU worker user disk"
+  type        = number
+  default     = 50
+}
+
 variable "disk_size_master" {
   description = "Boot disk for master in gb"
   type        = number
@@ -181,6 +187,12 @@ variable "intel_gpu_worker_id" {
   default     = []
 }
 
+variable "amd_gpu_worker_id" {
+  description = "List of AMD GPU worker IDs"
+  type        = list(string)
+  default     = []
+}
+
 variable "metal_amd_framework_workers" {
   description = "A map of framework amd metal workers to add to the cluster."
   type = map(object({
@@ -191,4 +203,22 @@ variable "metal_amd_framework_workers" {
     })
   }))
   default = {}
+}
+
+variable "metal_amd_framework_disk_path" {
+  description = "Disk path for bare metal installations"
+  type        = string
+  default     = "/dev/nvme0n1"
+}
+
+variable "metal_amd_framework_interface" {
+  description = "Network interface for bare metal installations"
+  type        = string
+  default     = "enp191s0"
+}
+
+variable "bios_type" {
+  description = "BIOS type for VMs"
+  type        = string
+  default     = "ovmf"
 }

@@ -1,16 +1,16 @@
 apiVersion: nfd.k8s-sigs.io/v1alpha1
 kind: NodeFeatureRule
 metadata:
-  name: amd-gpu-label-framework
+  name: amdgpu-rules
   annotations:
     argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   rules:
-    - name: "Amd gpu for framework mainboard"
+    - name: "amdgpu kernel module"
       labels:
         feature.node.kubernetes.io/amd-gpu: "true"
       matchFeatures:
-        - feature: "pci.device"
+        - feature: "kernel.loadedmodule"
           matchExpressions:
-            class: {op: In, value: ["0380"]}
-            vendor: {op: In, value: ["1002"]}
+            amdgpu: {op: Exists}

@@ -13,6 +13,14 @@ machine:
         - key: ${taint.key}
           effect: ${taint.effect}
 %{ endif }
+%{ if is_amd_gpu }
+  kernel:
+    modules:
+      - name: amdgpu
+        parameters:
+          - ppfeaturemask=0xffffffff
+          - dpm=1
+%{ endif }
   network:
     hostname: ${hostname}
     nameservers: ${jsonencode(nameservers)}
@@ -28,7 +36,7 @@ machine:
         vip:
           ip: ${vip}
 %{ endif }
-        interface: eth0
+        interface: eth0 # Always this regardless of underlying name; idk why
   sysctls:
     fs.inotify.max_user_watches: 1048576   # Watchdog
     fs.inotify.max_user_instances: 8192    # Watchdog

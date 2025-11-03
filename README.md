@@ -3,17 +3,25 @@
 <!--![Architecture Diagram](docker/docs-site/docs/assets/diagram.png)-->
 [![GitHub stars](https://img.shields.io/github/stars/blake-hamm/bhamm-lab?style=social)](https://github.com/blake-hamm/bhamm-lab/stargazers) [![License](https://img.shields.io/github/license/blake-hamm/bhamm-lab)](LICENSE.md)
 
-A comprehensive self‑hosted homelab environment designed for AI/ML workloads, DevOps experimentation and security research.
+Welcome to my personal lab for exploring AI/ML, DevOps, and security. I've built a resilient, open-source platform by combining bare-metal servers, virtualization, and container orchestration. It's a place for learning, tinkering, and maybe over-engineer a solution or two.
 
-- [Overview](#overview)
+- [Guiding Principles](#guiding-principles)
 - [Core Infrastructure](#core-infrastructure)
 - [Key Features](#key-features)
 - [Documentation](#documentation)
 - [Roadmap](#roadmap)
 
-## Overview
 
-This homelab combines bare-metal servers, virtualization, and container orchestration to create an open source, resilient platform with hybrid cloud integration. It's focused on AMD and Intel GPU solutions for AI/ML workloads.
+
+## Guiding Principles
+
+This project is, first and foremost, a platform for learning and exploration. The core philosophy is to maintain a resilient and reproducible test environment where experimentation is encouraged. While this approach can sometimes lead to over-engineering (here's [the counter-argument](https://frenck.dev/the-enterprise-smart-home-syndrome/)), the primary goal is to guarantee that any component can be rebuilt from code.
+
+This philosophy is supported by several key principles:
+*   **Everything as Code:** All infrastructure, from bare-metal provisioning to application deployment, is defined declaratively and managed through version control. This ensures consistency and enables rapid disaster recovery.
+*   **Monorepo Simplicity:** The entire homelab is managed within a single repository, providing a unified view of all services, configurations, and documentation.
+*   **Open Source First:** I prioritize the use of open-source software to maintain flexibility and support the community.
+*   **Accelerated AI/ML:** The environment is specifically tailored for AI/ML workloads, with a focus on leveraging AMD and Intel GPU acceleration for inference.
 
 ## Core Infrastructure
 
@@ -34,11 +42,11 @@ This homelab combines bare-metal servers, virtualization, and container orchestr
 ## Key Features
 
 **AI/ML Capabilities:**
-- 🤖 Managing device through Intel GPU plugin and AMD ROCm operator
-- 🖼️ Immich machine learning & Jellyfin transcoding with Intel Arc A310
-- 📦 `llm-models` [Helm chart](kubernetes/charts/llm-models) – scale‑to‑zero [Llama.cpp](https://github.com/ggml-org/llama.cpp) inference via [LiteLLM](https://github.com/BerriAI/litellm)
+- 🤖 Managing device through [Intel GPU plugin](https://intel.github.io/intel-device-plugins-for-kubernetes/cmd/gpu_plugin/README.html) and [AMD ROCm operator](https://github.com/ROCm/gpu-operator)
+- 🖼️ [Immich](https://immich.app/) machine learning & [Jellyfin](https://jellyfin.org/) transcoding with Intel Arc A310
+- 📦 `llm-models` [Helm chart](kubernetes/charts/llm-models) – [KubeElasti](https://kubeelasti.dev/) scale‑to‑zero [Llama.cpp](https://github.com/ggml-org/llama.cpp) inference routed through [LiteLLM](https://github.com/BerriAI/litellm)
 - 🧠 Embedding model inference with AMD Radeon AI Pro R9700
-- ⚡ Dense & MoE inference on AMD Ryzen AI MAX+ 395
+- ⚡ Dense & MoE inference on two AMD Ryzen AI MAX+ 395
 - ☁️ GCP Vertex AI for larger ML inference
 
 **Automation:**
@@ -46,10 +54,10 @@ This homelab combines bare-metal servers, virtualization, and container orchestr
 - [Debian](https://www.debian.org/), [Proxmox](https://www.proxmox.com/) and [Opnsense](https://opnsense.org/) management with [Ansible](https://www.ansible.com/)
 - GitOps deployment with [ArgoCD](https://argo-cd.readthedocs.io/en/stable/)
 - Blue/green deployment strategies
-- Container registry and proxy with Harbor
+- Container registry and proxy with [Harbor](https://goharbor.io/)
 - [Argo Events](https://argoproj.github.io/argo-events/) and [Argo Workflows](https://argoproj.github.io/argo-workflows/) for backups, secret management and CI/CD pipelines
 - [NixOS](https://nixos.org/) for Framework 13 laptop and Aorus gaming desktop
-- Common helm chart
+- [Common helm chart](kubernetes/charts/common)
 
 **Storage & Backups:**
 - [Ceph](https://ceph.io/) backbone
@@ -59,11 +67,11 @@ This homelab combines bare-metal servers, virtualization, and container orchestr
 - Automated backups with [Argo Workflows](https://argoproj.github.io/argo-workflows/), [k8up](https://github.com/k8up-io/k8up) and [CloudNative PG](https://cloudnative-pg.io/)
 
 **Security:**
-- Network segmentation with OPNsense and intervlan routing with TP Link Omada
+- Network segmentation with [OPNsense](https://opnsense.org/) and intervlan routing with TP Link Omada
 - Secrets management with [SOPS](https://github.com/mozilla/sops) and [Vault](https://www.vaultproject.io/)
 - Automated TLS certificates with [Cert Manager](https://cert-manager.io/) and [Cloudflare](https://www.cloudflare.com/)
-- OIDC/MFA authentication with Authelia
-- Middleware and encrypted ingress with Traefik
+- OIDC/MFA authentication with [Authelia](https://www.authelia.com/)
+- Middleware and encrypted ingress with [Traefik](https://traefik.io/traefik)
 
 **Disaster Recovery:**
 - Infrastructure-as-Code for rapid rebuilding
@@ -76,8 +84,8 @@ This homelab combines bare-metal servers, virtualization, and container orchestr
 Comprehensive documentation is available in the **[Docker Docs Site](docker/docs-site/docs)** directory, covering architecture, deployments, operations, security, and AI/ML implementations.
 
 ## Roadmap
-- **Short‑term:** Wireguard VPN & Cloudflare tunnels to publish docs site
-- **Mid‑term:** Personal website & publishing project **[lighthearted](https://github.com/blake-hamm/lighthearted)**
+- **Short‑term:** [Wireguard VPN](https://www.wireguard.com/) & [Cloudflare tunnels](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/) to publish docs site
+- **Mid‑term:** Personal website & publish project **[lighthearted](https://github.com/blake-hamm/lighthearted)**
 - **Long‑term:** Fine‑tuning & building generative models, Home Assistant
 
 *Github issues are more up to date.*

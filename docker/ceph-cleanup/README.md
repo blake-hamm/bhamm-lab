@@ -3,13 +3,12 @@ This python script will cleanup ceph orphaned data in the kubernetes pool. AKA: 
 
 ## Running
 ```bash
-# Create ceph credentials
+# Create ceph credentials (or run 'caps' if key already exists)
 ceph auth get-or-create client.k8s-cleaner \
   mon 'profile rbd' \
   osd 'profile rbd pool=osd' \
   osd 'profile rbd pool=cephfs_data' \
-  mgr 'profile rbd pool=osd' \
-  mgr 'profile rbd pool=cephfs_data'
+  mgr 'allow *'
 
 # Build docker image
 docker build -t ceph-cleaner docker/ceph-cleanup

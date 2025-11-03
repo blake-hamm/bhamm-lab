@@ -25,6 +25,9 @@ spec:
         additionalArguments:
           - "--serversTransport.insecureSkipVerify=true"
           - "--log.level=DEBUG"
+          - "--entryPoints.websecure.transport.respondingTimeouts.readTimeout=0"
+          - "--entryPoints.websecure.transport.respondingTimeouts.writeTimeout=0"
+          - "--entryPoints.websecure.transport.respondingTimeouts.idleTimeout=0"
         deployment:
           enabled: true
           shareProcessNamespace: true
