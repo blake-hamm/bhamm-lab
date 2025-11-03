@@ -47,7 +47,7 @@ data "talos_machine_configuration" "this" {
       cluster_name  = var.environment
       hostname      = each.key
       ip            = each.value.ip
-      mtu           = var.mtu
+      mtu           = var.mtu - 50
       gateway       = var.network_gateway
       vip           = each.value.vip
       interface     = each.value.interface
