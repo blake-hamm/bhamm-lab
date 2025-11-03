@@ -35,8 +35,6 @@ global:
     manage_config: true
     config:
       litellm_settings:
-        request_timeout: 1800
-        callbacks: ["prometheus"]
         cache: False
         cache_params:
           type: qdrant-semantic
@@ -51,10 +49,10 @@ global:
         enable_pre_call_check: true
         cooldown_time: 600
         disable_cooldowns: False
-        allowed_fails: 10
+        allowed_fails: 5
         default_max_parallel_requests: 20
         timeout: 1800
-        num_retries: 1
+        num_retries: 0
         retry_after: 600
         retry_policy:
           TimeoutErrorRetries: 1
