@@ -37,7 +37,7 @@ global:
       litellm_settings:
         request_timeout: 1800
         callbacks: ["prometheus"]
-        cache: True
+        cache: False
         cache_params:
           type: qdrant-semantic
           qdrant_semantic_cache_embedding_model: qwen-embed
