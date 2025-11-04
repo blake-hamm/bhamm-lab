@@ -1,9 +1,8 @@
 {
   imports = [
-    ./minimal.nix
+    ../core
     ../home
-    ../hardware/sound.nix
-    ../hardware/framework.nix
+    ../hardware
     ../extras
   ];
 }

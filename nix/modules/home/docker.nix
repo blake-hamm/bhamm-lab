@@ -1,10 +1,13 @@
-{ username, ... }:
-{
-  virtualisation.docker.enable = true;
-  users.users.${username}.extraGroups = [ "docker" ];
+{ config, lib, username, ... }:
 
-  virtualisation.docker.rootless = {
-    enable = true;
-    setSocketVariable = true;
+{
+  config = lib.mkIf config.cfg.docker.enable {
+    virtualisation.docker.enable = true;
+    users.users.${username}.extraGroups = [ "docker" ];
+
+    virtualisation.docker.rootless = {
+      enable = true;
+      setSocketVariable = true;
+    };
   };
 }

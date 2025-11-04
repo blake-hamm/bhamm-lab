@@ -1,33 +1,36 @@
-{ inputs, username, pkgs, ... }:
+{ config, lib, inputs, username, pkgs, ... }:
+
 {
-  # Enable the X11 windowing system.
-  services.xserver.enable = true;
+  config = lib.mkIf config.cfg.gnome.enable {
+    # Enable the X11 windowing system.
+    services.xserver.enable = true;
 
-  # Enable and configure the GNOME Desktop Environment.
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
-  environment.gnome.excludePackages = [ pkgs.gnome-tour ];
+    # Enable and configure the GNOME Desktop Environment.
+    services.xserver.displayManager.gdm.enable = true;
+    services.xserver.desktopManager.gnome.enable = true;
+    environment.gnome.excludePackages = [ pkgs.gnome-tour ];
 
-  # Disable services
-  services.xserver.excludePackages = [ pkgs.xterm ];
+    # Disable services
+    services.xserver.excludePackages = [ pkgs.xterm ];
 
-  # Configure keymap in X11
-  services.xserver.xkb = {
-    layout = "us";
-    variant = "";
-  };
-
-  # Home manager config
-  home-manager.users.${username} = {
-    # imports = [ inputs.catppuccin.homeManagerModules.catppuccin ];
-    gtk = {
-      enable = true;
-      # catppuccin.enable = true;
-      # catppuccin.cursor.enable = true;
+    # Configure keymap in X11
+    services.xserver.xkb = {
+      layout = "us";
+      variant = "";
     };
-    dconf = {
-      enable = true;
-      settings."org/gnome/desktop/interface".color-scheme = "prefer-dark";
+
+    # Home manager config
+    home-manager.users.${username} = {
+      # imports = [ inputs.catppuccin.homeManagerModules.catppuccin ];
+      gtk = {
+        enable = true;
+        # catppuccin.enable = true;
+        # catppuccin.cursor.enable = true;
+      };
+      dconf = {
+        enable = true;
+        settings."org/gnome/desktop/interface".color-scheme = "prefer-dark";
+      };
     };
   };
 }

@@ -1,35 +1,24 @@
+{ lib, ... }:
+
 {
-  # Nix settings
-  nix.settings = {
-    experimental-features = [ "nix-command" "flakes" ];
-    auto-optimise-store = true;
-  };
-  nixpkgs.config.allowUnfree = true;
+  options.cfg = {
+    # Profiles
+    gnome.enable = lib.mkEnableOption "Enable GNOME desktop environment";
 
-  # Set your time zone.
-  time.timeZone = "America/Denver";
-  i18n.defaultLocale = "en_US.UTF-8";
-  i18n.extraLocaleSettings = {
-    LC_ADDRESS = "en_US.UTF-8";
-    LC_IDENTIFICATION = "en_US.UTF-8";
-    LC_MEASUREMENT = "en_US.UTF-8";
-    LC_MONETARY = "en_US.UTF-8";
-    LC_NAME = "en_US.UTF-8";
-    LC_NUMERIC = "en_US.UTF-8";
-    LC_PAPER = "en_US.UTF-8";
-    LC_TELEPHONE = "en_US.UTF-8";
-    LC_TIME = "en_US.UTF-8";
-  };
+    # Features
+    docker.enable = lib.mkEnableOption "Enable Docker support";
+    virtualization.enable = lib.mkEnableOption "Enable virtualization tools";
+    steam.enable = lib.mkEnableOption "Enable Steam";
+    signal.enable = lib.mkEnableOption "Enable Signal";
 
-  # Nix store/gc cleanup
-  nix.optimise.automatic = true;
-  nix.gc = {
-    automatic = true;
-    options = "--delete-older-than 10d";
-  };
+    # Hardware
+    framework.enable = lib.mkEnableOption "Enable Framework laptop specific settings";
 
-  # Other system config
-  services.printing.enable = true;
-  security.sudo.wheelNeedsPassword = false;
-  system.stateVersion = "24.05";
+    # Networking
+    networking.externalInterface = lib.mkOption {
+      type = lib.types.str;
+      default = "eth0";
+      description = "The primary external network interface.";
+    };
+  };
 }
