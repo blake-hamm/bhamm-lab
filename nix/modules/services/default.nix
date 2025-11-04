@@ -1,5 +1,6 @@
 {
   imports = [
+    ./options.nix
     ./backups.nix
     ./docker.nix
     ./pre-commit.nix

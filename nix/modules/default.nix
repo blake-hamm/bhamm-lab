@@ -5,6 +5,5 @@
     ./hardware
     ./network
     ./services
-    ./options.nix
   ];
 }
