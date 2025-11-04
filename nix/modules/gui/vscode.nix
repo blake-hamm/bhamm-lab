@@ -12,8 +12,6 @@
             ms-python.isort
             ms-python.black-formatter
             jnoortheen.nix-ide
-            catppuccin.catppuccin-vsc
-            catppuccin.catppuccin-vsc-icons
             hashicorp.terraform
             rooveterinaryinc.roo-cline
             # dracula-theme.theme-dracula
@@ -29,9 +27,6 @@
 
             # Theme
             "window.zoomLevel" = -3;
-            "workbench.colorTheme" = "Catppuccin Mocha";
-            "workbench.iconTheme" = "catppuccin-mocha";
-            "catppuccin.accentColor" = "sapphire";
 
             # Roo
             "roo-cline.apiRequestTimeout" = 1800;

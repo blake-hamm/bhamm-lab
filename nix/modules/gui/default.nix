@@ -1,5 +1,6 @@
 {
   imports = [
+    ./catppuccin.nix
     ./extras.nix
     ./gnome.nix
     ./kitty.nix

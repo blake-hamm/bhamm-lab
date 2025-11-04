@@ -21,11 +21,8 @@
 
     # Home manager config
     home-manager.users.${shared.username} = {
-      # imports = [ inputs.catppuccin.homeManagerModules.catppuccin ];
       gtk = {
         enable = true;
-        # catppuccin.enable = true;
-        # catppuccin.cursor.enable = true;
       };
       dconf = {
         enable = true;
