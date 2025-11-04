@@ -14,7 +14,7 @@
       obs-studio
       shotcut
       brave
-      # signal-desktop
+      signal-desktop
       # gnome-network-displays
       # steam
       # etcher
