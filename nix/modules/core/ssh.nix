@@ -31,7 +31,7 @@
   };
   programs.ssh = {
     extraConfig = ''
-      Host 192.168.69.*
+      Host 10.0.*
         Port 4185
     '';
   };

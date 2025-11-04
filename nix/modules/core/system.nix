@@ -1,3 +1,4 @@
+{ shared, ... }:
 {
   # Nix settings
   nix.settings = {
@@ -31,5 +32,5 @@
   # Other system config
   services.printing.enable = true;
   security.sudo.wheelNeedsPassword = false;
-  system.stateVersion = "24.05";
+  system.stateVersion = shared.nixVersion;
 }

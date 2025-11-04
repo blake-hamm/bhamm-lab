@@ -14,7 +14,7 @@
       home.homeDirectory = "/home/${shared.username}";
       programs.home-manager.enable = true;
       systemd.user.startServices = "sd-switch";
-      home.stateVersion = "23.11";
+      home.stateVersion = "${shared.nixVersion}";
     };
   };
 }
