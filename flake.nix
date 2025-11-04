@@ -20,7 +20,7 @@
 
   };
 
-  outputs = { nixpkgs, self, ... } @ inputs: #inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+  outputs = { nixpkgs, self, ... } @ inputs:
     let
       shared = import ./nix/lib;
       pkgs = import inputs.nixpkgs {
