@@ -1,13 +1,12 @@
 {
   imports = [
     ./boot.nix
-    ./system.nix
-    ./user.nix
-    ./network.nix
-    ./ssh.nix
-    # ./backups.nix # TODO: backup zpools
-    ./terminal.nix
     ./git.nix
+    ./home.nix
     ./sops.nix
+    ./ssh.nix
+    ./system.nix
+    ./terminal.nix
+    ./user.nix
   ];
 }

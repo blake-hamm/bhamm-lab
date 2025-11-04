@@ -1,8 +1,8 @@
-{ config, lib, inputs, username, pkgs, ... }:
+{ config, lib, inputs, shared, pkgs, ... }:
 
 {
   config = lib.mkIf config.cfg.vscode.enable {
-    home-manager.users.${username} = {
+    home-manager.users.${shared.username} = {
       programs.vscode = {
         enable = true;
         package = pkgs.vscodium;

@@ -1,6 +1,7 @@
 {
   imports = [
-    ./sound.nix
     ./framework.nix
+    ./sound.nix
+    ./uhk.nix
   ];
 }

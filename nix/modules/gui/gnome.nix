@@ -1,4 +1,4 @@
-{ config, lib, inputs, username, pkgs, ... }:
+{ config, lib, inputs, shared, pkgs, ... }:
 
 {
   config = lib.mkIf config.cfg.gnome.enable {
@@ -20,7 +20,7 @@
     };
 
     # Home manager config
-    home-manager.users.${username} = {
+    home-manager.users.${shared.username} = {
       # imports = [ inputs.catppuccin.homeManagerModules.catppuccin ];
       gtk = {
         enable = true;

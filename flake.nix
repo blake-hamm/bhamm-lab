@@ -22,11 +22,9 @@
 
   outputs = { nixpkgs, self, ... } @ inputs: #inputs.flake-parts.lib.mkFlake { inherit inputs; } {
     let
-      username = "bhamm";
-      system = "x86_64-linux";
-      sshPort = 4185;
+      shared = import ./nix/lib;
       pkgs = import inputs.nixpkgs {
-        inherit system;
+        system = shared.system;
         config.allowUnfree = true;
       };
     in
@@ -35,10 +33,10 @@
       colmena = {
         meta = {
           nixpkgs = import nixpkgs {
-            inherit system;
+            system = shared.system;
           };
           specialArgs = {
-            inherit self inputs username system;
+            inherit self inputs shared;
           };
           nodeSpecialArgs.framework = {
             host = "framework";
@@ -49,9 +47,9 @@
           deployment = {
             allowLocalDeployment = true;
             tags = [ "framework" "local" "desktop" ];
-            targetUser = "${username}";
+            targetUser = shared.username;
             targetHost = "localhost";
-            targetPort = sshPort;
+            targetPort = shared.sshPort;
           };
           imports = [ ./nix/hosts/framework ];
         };
@@ -61,7 +59,7 @@
       nixosConfigurations = {
         # ISO image
         minimal-iso = nixpkgs.lib.nixosSystem {
-          inherit system;
+          system = shared.system;
           modules = [
             "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
             (import ./nix/hosts/iso)
@@ -71,7 +69,7 @@
           ];
           specialArgs = {
             host = "minimal-iso";
-            inherit self inputs username;
+            inherit self inputs shared;
           };
         };
       };

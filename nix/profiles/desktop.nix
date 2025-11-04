@@ -1,10 +1,6 @@
 {
   imports = [
-    ../options.nix
-    ../core
-    ../home
-    ../hardware
-    ../extras
+    ../modules
   ];
 
   # Default settings for a desktop machine

@@ -2,7 +2,7 @@
   imports = [
     ./disko.nix
     ./hardware-configuration.nix
-    ./../../modules/profiles/desktop.nix
+    ./../../profiles/desktop.nix
   ];
 
   cfg = {

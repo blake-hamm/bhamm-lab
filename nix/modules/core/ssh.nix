@@ -1,6 +1,6 @@
-{ pkgs, username, lib, ... }:
+{ pkgs, shared, lib, ... }:
 {
-  users.users.${username} = {
+  users.users.${shared.username} = {
     openssh.authorizedKeys.keys = [
       # bhamm framework
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKsS2H4frdi7AvzkGMPMRaQ+B46Af5oaRFtNJY3uCHt blake.j.hamm@gmail.com"
@@ -15,7 +15,7 @@
       PermitRootLogin = lib.mkDefault "no";
       UseDns = true;
       X11Forwarding = false;
-      AllowUsers = [ "${username}" ];
+      AllowUsers = [ "${shared.username}" ];
     };
   };
   services.fail2ban = {

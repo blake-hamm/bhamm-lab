@@ -1,9 +1,9 @@
-{ config, lib, username, ... }:
+{ config, lib, shared, ... }:
 
 {
   config = lib.mkIf config.cfg.docker.enable {
     virtualisation.docker.enable = true;
-    users.users.${username}.extraGroups = [ "docker" ];
+    users.users.${shared.username}.extraGroups = [ "docker" ];
 
     virtualisation.docker.rootless = {
       enable = true;

@@ -1,8 +1,8 @@
-{ config, lib, inputs, username, ... }:
+{ config, lib, inputs, shared, ... }:
 
 {
   config = lib.mkIf config.cfg.kitty.enable {
-    home-manager.users.${username} = {
+    home-manager.users.${shared.username} = {
       programs.kitty = {
         enable = true;
         # catppuccin.enable = true;

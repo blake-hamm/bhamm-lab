@@ -1,4 +1,4 @@
-{ inputs, username, ... }:
+{ inputs, shared, ... }:
 {
   imports = [
     inputs.home-manager.nixosModules.home-manager
@@ -8,10 +8,10 @@
   home-manager = {
     useUserPackages = true;
     useGlobalPkgs = true;
-    extraSpecialArgs = { inherit inputs username; };
-    users.${username} = {
-      home.username = "${username}";
-      home.homeDirectory = "/home/${username}";
+    extraSpecialArgs = { inherit inputs shared; };
+    users.${shared.username} = {
+      home.username = "${shared.username}";
+      home.homeDirectory = "/home/${shared.username}";
       programs.home-manager.enable = true;
       systemd.user.startServices = "sd-switch";
       home.stateVersion = "23.11";

@@ -1,29 +1,29 @@
-{ config, lib, inputs, username, pkgs, ... }:
+{ config, lib, inputs, shared, pkgs, ... }:
 
 {
   config = lib.mkIf config.cfg.backups.enable {
-    home-manager.users.${username} = {
+    home-manager.users.${shared.username} = {
       programs.borgmatic = {
         enable = true;
         backups = {
           userdata = {
             location = {
               sourceDirectories = [
-                "/home/${username}/"
+                "/home/${shared.username}/"
               ];
               repositories = [{
-                "path" = "/home/${username}/backups/borgmatic/userdata";
+                "path" = "/home/${shared.username}/backups/borgmatic/userdata";
                 "label" = "local";
               }];
               extraConfig = {
                 "patterns" = [
-                  "- home/${username}/backups"
-                  "- home/${username}/Downloads"
+                  "- home/${shared.username}/backups"
+                  "- home/${shared.username}/Downloads"
                 ];
               };
               # Below us available in unstable branch
               # patterns = [
-              #     "- home/${username}/backups"
+              #     "- home/${shared.username}/backups"
               # ];
             };
             retention = {
@@ -65,7 +65,7 @@
         '';
         serviceConfig = {
           Type = "oneshot";
-          User = "${username}";
+          User = "${shared.username}";
         };
       };
     };

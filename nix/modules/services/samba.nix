@@ -1,4 +1,4 @@
-{ config, lib, username, pkgs, ... }:
+{ config, lib, shared, pkgs, ... }:
 
 {
   config = lib.mkIf config.cfg.samba.enable {
@@ -19,7 +19,7 @@
       };
 
       # Mount the bhamm Samba share
-      "/home/${username}/smb" = {
+      "/home/${shared.username}/smb" = {
         device = "//10.0.20.11/bhamm";
         fsType = "cifs";
         options =
