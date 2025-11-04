@@ -2,25 +2,20 @@
   description = "Nix config";
 
   inputs = {
-    # Nixpkgs
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
 
-    # Disko
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Home manager
     home-manager = {
       url = "github:nix-community/home-manager/release-25.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Themes
     catppuccin.url = "github:catppuccin/nix";
 
-    # Sops nix
     sops-nix.url = "github:Mic92/sops-nix";
 
   };
@@ -36,15 +31,7 @@
       };
     in
     {
-      # perSystem = { system, pkgs, ... }:
-      #   let
-      #   in
-      #   {
       devShells.x86_64-linux.default = import ./nix/shell.nix { inherit pkgs; };
-      #   };
-      # flake = { };
-      # systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
-      # Bare metal
       colmena = {
         meta = {
           nixpkgs = import nixpkgs {
@@ -55,18 +42,6 @@
           };
           nodeSpecialArgs.framework = {
             host = "framework";
-          };
-          # nodeSpecialArgs.aorus = {
-          #   host = "aorus";
-          # };
-          nodeSpecialArgs.precision = {
-            host = "precision";
-          };
-          nodeSpecialArgs.thinkpad = {
-            host = "thinkpad";
-          };
-          nodeSpecialArgs.elitebook = {
-            host = "elitebook";
           };
         };
 
@@ -79,46 +54,6 @@
             targetPort = sshPort;
           };
           imports = [ ./nix/hosts/framework ];
-        };
-
-        # aorus = { name, nodes, pkgs, ... }: {
-        #   deployment = {
-        #     tags = [ "aorus" "server" ];
-        #     targetUser = "${username}";
-        #     targetHost = "192.168.69.12";
-        #     targetPort = sshPort;
-        #   };
-        #   imports = [ ./nix/hosts/aorus ];
-        # };
-
-        precision = { name, nodes, pkgs, ... }: {
-          deployment = {
-            tags = [ "precision" "server" ];
-            targetUser = "${username}";
-            targetHost = "192.168.69.13";
-            targetPort = sshPort;
-          };
-          imports = [ ./nix/hosts/precision ];
-        };
-
-        thinkpad = { name, nodes, pkgs, ... }: {
-          deployment = {
-            tags = [ "thinkpad" "server" "k3s" ];
-            targetUser = "${username}";
-            targetHost = "192.168.69.14";
-            targetPort = sshPort;
-          };
-          imports = [ ./nix/hosts/thinkpad ];
-        };
-
-        elitebook = { name, nodes, pkgs, ... }: {
-          deployment = {
-            tags = [ "elitebook" "server" ];
-            targetUser = "${username}";
-            targetHost = "192.168.69.15";
-            targetPort = sshPort;
-          };
-          imports = [ ./nix/hosts/elitebook ];
         };
       };
 
@@ -139,18 +74,6 @@
             inherit self inputs username;
           };
         };
-
-        # example = nixpkgs.lib.nixosSystem {
-        #   inherit system;
-        #   modules = [
-        #     (import ./nix/hosts/example)
-        #   ];
-        #   specialArgs = {
-        #     host = "example";
-        #     inherit self inputs username system;
-        #   };
-        # };
-
       };
     };
 }
