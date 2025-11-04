@@ -1,42 +1,42 @@
-{ inputs, username, pkgs, ... }:
+{ config, lib, inputs, username, pkgs, ... }:
+
 {
-  imports = [
-    inputs.home-manager.nixosModules.home-manager
-  ];
-  home-manager.users.${username} = {
-    programs.vscode = {
-      enable = true;
-      package = pkgs.vscodium;
-      profiles.default = {
-        extensions = with pkgs.vscode-extensions; [
-          ms-python.python
-          ms-python.isort
-          ms-python.black-formatter
-          jnoortheen.nix-ide
-          catppuccin.catppuccin-vsc
-          catppuccin.catppuccin-vsc-icons
-          hashicorp.terraform
-          rooveterinaryinc.roo-cline
-          # dracula-theme.theme-dracula
-          # vscodevim.vim
-          # yzhang.markdown-all-in-one
-        ];
-        userSettings = {
-          # Settings
-          "explorer.confirmDelete" = false;
-          "editor.tabSize" = 2;
-          "editor.insertSpaces" = true;
-          "editor.detectIndentation" = false;
+  config = lib.mkIf config.cfg.vscode.enable {
+    home-manager.users.${username} = {
+      programs.vscode = {
+        enable = true;
+        package = pkgs.vscodium;
+        profiles.default = {
+          extensions = with pkgs.vscode-extensions; [
+            ms-python.python
+            ms-python.isort
+            ms-python.black-formatter
+            jnoortheen.nix-ide
+            catppuccin.catppuccin-vsc
+            catppuccin.catppuccin-vsc-icons
+            hashicorp.terraform
+            rooveterinaryinc.roo-cline
+            # dracula-theme.theme-dracula
+            # vscodevim.vim
+            # yzhang.markdown-all-in-one
+          ];
+          userSettings = {
+            # Settings
+            "explorer.confirmDelete" = false;
+            "editor.tabSize" = 2;
+            "editor.insertSpaces" = true;
+            "editor.detectIndentation" = false;
 
-          # Theme
-          "window.zoomLevel" = -3;
-          "workbench.colorTheme" = "Catppuccin Mocha";
-          "workbench.iconTheme" = "catppuccin-mocha";
-          "catppuccin.accentColor" = "sapphire";
+            # Theme
+            "window.zoomLevel" = -3;
+            "workbench.colorTheme" = "Catppuccin Mocha";
+            "workbench.iconTheme" = "catppuccin-mocha";
+            "catppuccin.accentColor" = "sapphire";
 
-          # Roo
-          "roo-cline.apiRequestTimeout" = 1800;
-          "roo-cline.codeIndex.embeddingBatchSize" = 200;
+            # Roo
+            "roo-cline.apiRequestTimeout" = 1800;
+            "roo-cline.codeIndex.embeddingBatchSize" = 200;
+          };
         };
       };
     };

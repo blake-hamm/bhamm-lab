@@ -6,10 +6,7 @@
   ];
 
   cfg = {
-    gnome.enable = true;
-    docker.enable = true;
-    virtualization.enable = true;
-    steam.enable = true;
+    # Machine-specific settings
     framework.enable = true;
     networking.externalInterface = "wlp1s0";
   };

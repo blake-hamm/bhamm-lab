@@ -1,6 +1,6 @@
 {
   imports = [
-    ./config.nix
+    ./home.nix
     ./git.nix
     ./backups.nix
     ./pre-commit.nix

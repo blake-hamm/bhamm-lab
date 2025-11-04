@@ -1,13 +1,13 @@
-{ inputs, username, pkgs, ... }:
+{ config, lib, inputs, username, pkgs, ... }:
+
 {
-  imports = [
-    inputs.home-manager.nixosModules.home-manager
-  ];
-  home-manager.users.${username} = {
-    home.packages = with pkgs; [
-      pre-commit
-      rustup
-      gcc
-    ];
+  config = lib.mkIf config.cfg.precommit.enable {
+    home-manager.users.${username} = {
+      home.packages = with pkgs; [
+        pre-commit
+        rustup
+        gcc
+      ];
+    };
   };
 }
