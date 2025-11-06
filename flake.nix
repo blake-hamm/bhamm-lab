@@ -32,72 +32,41 @@
         system = shared.system;
         config.allowUnfree = true;
       };
+      gen = shared.generators { lib = nixpkgs.lib; inherit shared self inputs; hosts = shared.hosts; };
     in
     {
       devShells.x86_64-linux.default = import ./nix/shell.nix { inherit pkgs inputs; };
-      colmena = {
-        meta = {
-          nixpkgs = import nixpkgs {
-            system = shared.system;
-          };
-          specialArgs = {
-            inherit self inputs shared;
-          };
-          nodeSpecialArgs = {
-            framework = {
-              host = "framework";
+      colmena =
+        {
+          meta = {
+            nixpkgs = import nixpkgs {
+              system = shared.system;
             };
-            tail = {
-              host = "tail";
+            specialArgs = {
+              inherit self inputs shared;
             };
+            nodeSpecialArgs = gen.generateNodeSpecialArgs;
           };
-        };
-
-        framework = { name, nodes, pkgs, ... }: {
-          deployment = {
-            allowLocalDeployment = true;
-            tags = [ "framework" "local" "desktop" ];
-            targetUser = shared.username;
-            targetHost = "localhost";
-            targetPort = shared.sshPort;
-          };
-          imports = [ ./nix/hosts/framework ];
-        };
-
-        tail = { name, nodes, pkgs, ... }: {
-          deployment = {
-            tags = [ "tail" "server" ];
-            targetUser = shared.username;
-            targetHost = "10.0.30.79";
-            targetPort = shared.sshPort;
-          };
-          imports = [ ./nix/hosts/tail ];
-        };
-      };
+        } // gen.generateColmena;
 
       # VM and iso configs without colmena
-      nixosConfigurations = {
-        tail = nixpkgs.lib.nixosSystem {
-          system = shared.system;
-          specialArgs = { inherit self inputs shared; host = "tail"; };
-          modules = [ ./nix/hosts/tail ];
-        };
-
-        # ISO image
-        minimal-iso = nixpkgs.lib.nixosSystem {
-          system = shared.system;
-          modules = [
-            "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
-            (import ./nix/hosts/iso)
-            {
-              nixpkgs.config.allowBroken = true;
-            }
-          ];
-          specialArgs = {
-            host = "minimal-iso";
-            inherit self inputs shared;
+      nixosConfigurations =
+        {
+          # ISO image
+          minimal-iso = nixpkgs.lib.nixosSystem {
+            system = shared.system;
+            modules = [
+              "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+              (import ./nix/hosts/iso)
+              {
+                nixpkgs.config.allowBroken = true;
+              }
+            ];
+            specialArgs = {
+              host = "minimal-iso";
+              inherit self inputs shared;
+            };
           };
-        };
-      };
+        } // gen.generateNixosConfigurations;
     };
 }

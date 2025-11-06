@@ -3,4 +3,10 @@
   system = "x86_64-linux";
   sshPort = 4185;
   nixVersion = "25.05";
+
+  # Centralized host definitions
+  hosts = import ../hosts/_meta.nix;
+
+  # Generator functions
+  generators = import ./generators.nix;
 }
