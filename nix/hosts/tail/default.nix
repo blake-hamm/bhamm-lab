@@ -21,6 +21,7 @@
       };
     };
     strix-halo.enable = true;
+    ai.llama-cpp.enable = true;
   };
 
 }

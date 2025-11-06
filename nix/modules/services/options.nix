@@ -7,6 +7,11 @@
       default = false;
       description = "Enable Docker support";
     };
+    docker.rootless.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Enable rootless Docker support";
+    };
     virtualization.enable = lib.mkOption {
       type = lib.types.bool;
       default = false;

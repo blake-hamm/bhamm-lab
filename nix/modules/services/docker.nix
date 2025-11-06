@@ -5,7 +5,7 @@
     virtualisation.docker.enable = true;
     users.users.${shared.username}.extraGroups = [ "docker" ];
 
-    virtualisation.docker.rootless = {
+    virtualisation.docker.rootless = lib.mkIf config.cfg.docker.rootless.enable {
       enable = true;
       setSocketVariable = true;
     };

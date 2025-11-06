@@ -1,5 +1,6 @@
 {
   imports = [
+    ./ai
     ./core
     ./gui
     ./hardware
