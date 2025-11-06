@@ -4,5 +4,6 @@
     ./framework.nix
     ./sound.nix
     ./uhk.nix
+    ./strix-halo.nix
   ];
 }

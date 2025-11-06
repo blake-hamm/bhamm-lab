@@ -20,6 +20,7 @@
         nameservers = [ "10.0.30.1" "9.9.9.9" ];
       };
     };
+    strix-halo.enable = true;
   };
 
 }
