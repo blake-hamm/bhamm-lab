@@ -11,5 +11,6 @@
     vscode.enable = true;
     uhk.enable = true;
     precommit.enable = true;
+    networking.backend = "networkmanager";
   };
 }

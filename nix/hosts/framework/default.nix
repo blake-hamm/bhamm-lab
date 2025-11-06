@@ -8,6 +8,5 @@
   cfg = {
     # Machine-specific settings
     framework.enable = true;
-    networking.externalInterface = "wlp1s0";
   };
 }

@@ -18,6 +18,11 @@
 
     sops-nix.url = "github:Mic92/sops-nix";
 
+    nixos-anywhere = {
+      url = "github:nix-community/nixos-anywhere";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
   outputs = { nixpkgs, self, ... } @ inputs:
@@ -29,7 +34,7 @@
       };
     in
     {
-      devShells.x86_64-linux.default = import ./nix/shell.nix { inherit pkgs; };
+      devShells.x86_64-linux.default = import ./nix/shell.nix { inherit pkgs inputs; };
       colmena = {
         meta = {
           nixpkgs = import nixpkgs {
@@ -38,8 +43,13 @@
           specialArgs = {
             inherit self inputs shared;
           };
-          nodeSpecialArgs.framework = {
-            host = "framework";
+          nodeSpecialArgs = {
+            framework = {
+              host = "framework";
+            };
+            tail = {
+              host = "tail";
+            };
           };
         };
 
@@ -53,10 +63,26 @@
           };
           imports = [ ./nix/hosts/framework ];
         };
+
+        tail = { name, nodes, pkgs, ... }: {
+          deployment = {
+            tags = [ "tail" "server" ];
+            targetUser = shared.username;
+            targetHost = "10.0.30.79";
+            targetPort = shared.sshPort;
+          };
+          imports = [ ./nix/hosts/tail ];
+        };
       };
 
       # VM and iso configs without colmena
       nixosConfigurations = {
+        tail = nixpkgs.lib.nixosSystem {
+          system = shared.system;
+          specialArgs = { inherit self inputs shared; host = "tail"; };
+          modules = [ ./nix/hosts/tail ];
+        };
+
         # ISO image
         minimal-iso = nixpkgs.lib.nixosSystem {
           system = shared.system;

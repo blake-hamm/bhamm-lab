@@ -1,4 +1,4 @@
-{ inputs, shared, ... }:
+{ config, lib, inputs, shared, ... }:
 
 let
   catppuccinFlavor = "mocha";
@@ -8,25 +8,28 @@ in
     inputs.catppuccin.nixosModules.catppuccin
   ];
 
-  # NixOS-level Catppuccin configuration
-  catppuccin = {
-    enable = true;
-    flavor = catppuccinFlavor;
-  };
+  config = lib.mkIf config.cfg.gnome.enable {
 
-  home-manager.sharedModules = [
-    inputs.catppuccin.homeModules.catppuccin
-  ];
-
-  home-manager.users.${shared.username} = {
+    # NixOS-level Catppuccin configuration
     catppuccin = {
       enable = true;
-      vscode.profiles.default.accent = "sapphire";
+      flavor = catppuccinFlavor;
     };
-  };
 
-  # Optional: Export catppuccin colors for use in other modules
-  environment.variables = {
-    CATPPUCCIN_FLAVOR = catppuccinFlavor;
+    home-manager.sharedModules = [
+      inputs.catppuccin.homeModules.catppuccin
+    ];
+
+    home-manager.users.${shared.username} = {
+      catppuccin = {
+        enable = true;
+        vscode.profiles.default.accent = "sapphire";
+      };
+    };
+
+    # Optional: Export catppuccin colors for use in other modules
+    environment.variables = {
+      CATPPUCCIN_FLAVOR = catppuccinFlavor;
+    };
   };
 }
