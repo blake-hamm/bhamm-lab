@@ -1,4 +1,9 @@
 {
+  deploy = {
+    tags = [ "tail" "server" ];
+    targetHost = "10.0.30.79";
+  };
+
   imports = [
     ./disko.nix
     ./hardware-configuration.nix

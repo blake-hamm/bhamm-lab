@@ -32,7 +32,7 @@
         system = shared.system;
         config.allowUnfree = true;
       };
-      gen = shared.generators { lib = nixpkgs.lib; inherit shared self inputs; hosts = shared.hosts; };
+      gen = shared.generators { lib = nixpkgs.lib; inherit shared self inputs; };
     in
     {
       devShells.x86_64-linux.default = import ./nix/shell.nix { inherit pkgs inputs; };

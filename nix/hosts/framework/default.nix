@@ -1,4 +1,10 @@
 {
+  deploy = {
+    tags = [ "framework" "local" "desktop" ];
+    targetHost = "localhost";
+    allowLocalDeployment = true;
+  };
+
   imports = [
     ./disko.nix
     ./hardware-configuration.nix

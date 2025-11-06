@@ -1,29 +1,50 @@
-{ lib, shared, self, inputs, hosts }:
+{ lib, shared, self, inputs }:
 let
-  mkDeployment = hostName: hostAttrs: {
+  # Discover all potential host directories
+  hostEntries = builtins.readDir ../hosts;
+
+  # Filter for actual host directories that have a `deploy` attribute
+  deployableHosts =
+    lib.filterAttrs (name: value: value != null) (
+      lib.mapAttrs
+        (hostName: hostType:
+          if hostType == "directory" then
+            let
+              hostModule = import ../hosts/${hostName};
+            in
+            if hostModule ? "deploy" then hostModule else null
+          else
+            null
+        )
+        hostEntries
+    );
+
+  # --- Generator Functions ---
+
+  mkDeployment = hostName: hostModule: {
     deployment = {
-      inherit (hostAttrs) tags targetHost;
-      allowLocalDeployment = hostAttrs.allowLocalDeployment or false;
+      inherit (hostModule.deploy) tags targetHost;
+      allowLocalDeployment = hostModule._deploy.allowLocalDeployment or false;
       targetUser = shared.username;
       targetPort = shared.sshPort;
     };
-    imports = hostAttrs.imports;
+    imports = [ (lib.removeAttrs hostModule [ "deploy" ]) ];
   };
 
-  generateColmena = lib.mapAttrs mkDeployment hosts;
+  generateColmena = lib.mapAttrs mkDeployment deployableHosts;
 
-  mkNixosConfig = hostName: hostAttrs:
+  mkNixosConfig = hostName: hostModule:
     lib.nixosSystem {
       system = shared.system;
       specialArgs = { inherit self inputs shared; host = hostName; };
-      modules = hostAttrs.imports;
+      modules = [ (lib.removeAttrs hostModule [ "deploy" ]) ];
     };
 
-  generateNixosConfigurations = lib.mapAttrs mkNixosConfig hosts;
+  generateNixosConfigurations = lib.mapAttrs mkNixosConfig deployableHosts;
 
-  mkNodeSpecialArgs = hostName: hostAttrs: { host = hostName; };
+  mkNodeSpecialArgs = hostName: hostModule: { host = hostName; };
 
-  generateNodeSpecialArgs = lib.mapAttrs mkNodeSpecialArgs hosts;
+  generateNodeSpecialArgs = lib.mapAttrs mkNodeSpecialArgs deployableHosts;
 in
 {
   inherit
