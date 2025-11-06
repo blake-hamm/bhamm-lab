@@ -43,7 +43,11 @@
             "40"
           ];
           ports = [ "8080:8080" ];
-          volumes = [ "/var/lib/llama-cpp/models:/root/.cache/huggingface" ];
+          volumes = [ "/var/lib/llama-cpp/models:/models" ];
+          environment = {
+            "LLAMA_CACHE" = "/models/cache";
+            "HF_HOME" = "/models/cache/huggingface";
+          };
           extraOptions = [
             "--device=/dev/kfd"
             "--device=/dev/dri"
