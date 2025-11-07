@@ -49,7 +49,7 @@ global:
       router_settings:
         debug_level: "DEBUG"
         enable_pre_call_check: false
-        cooldown_time: 120
+        cooldown_time: 600
         disable_cooldowns: False
         allowed_fails: 999
         default_max_parallel_requests: 3
