@@ -581,7 +581,7 @@ spec:
               - "131072"
               - -v
               - -hf
-              - bartowski/zai-org_GLM-4.5-Air-GGUF:Q5_K_M
+              - bartowski/zai-org_GLM-4.5-Air-GGUF:Q4_K_M
               - --parallel
               - "1"
               - --cont-batching
