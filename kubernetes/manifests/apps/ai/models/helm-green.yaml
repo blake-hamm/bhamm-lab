@@ -343,7 +343,7 @@ spec:
               - "0.8"
               - --top-k
               - "20"
-              - --repetition-penalty
+              - --repeat-penalty
               - "1.0"
               - --presence-penalty
               - "1.5"
@@ -401,7 +401,7 @@ spec:
               - "0.95"
               - --top-k
               - "20"
-              - --repitation-penalty
+              - --repeat-penalty
               - "1.0"
               - --presence-penalty
               - "0"
