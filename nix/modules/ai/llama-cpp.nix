@@ -36,6 +36,7 @@
             "65536"
             "--parallel"
             "1"
+            "--cont-batching"
             "--temp"
             "0.6"
             "--top-p"
