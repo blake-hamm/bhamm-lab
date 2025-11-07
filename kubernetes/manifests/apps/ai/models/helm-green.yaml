@@ -12,7 +12,7 @@ spec:
     namespace: models
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/amd-r9700
+    targetRevision: feature/nixos-kubernetes
     path: kubernetes/charts/llm-models
     helm:
       valuesObject:
@@ -522,6 +522,8 @@ spec:
               - --metrics
               - --no-webui
               - --jinja
+              - --timeout
+              - "1800"
               - -v
               - --no-mmap
               - --no-warmup

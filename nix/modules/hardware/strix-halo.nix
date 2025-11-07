@@ -27,11 +27,20 @@
       rocmPackages.rocm-smi
       rocmPackages.rocminfo
       rocmPackages.clr
-      lact
     ];
 
     environment.variables = {
       ROC_ENABLE_PRE_VEGA = "1";
+    };
+
+    boot = {
+      kernelParams = [
+        "amd_iommu=off"
+        "amdgpu.gttsize=122800"
+        "amdgpu.vm_fragment_size=8"
+        "ttm.pages_limit=31457280" # 120 gb
+        "ttm.page_pool_size=25165824" # 96 gb
+      ];
     };
 
     users.groups.video = { };
