@@ -309,7 +309,7 @@ spec:
             description: High quality MoE model for general chat
             enabled: true
             pvc:
-              storage: "70Gi"
+              storage: "40Gi"
             args:
               - llama-server
               - -hf
