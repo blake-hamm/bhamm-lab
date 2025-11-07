@@ -335,16 +335,16 @@ spec:
               - -c
               - "65536"
               - --parallel
-              - "1"
+              - "2"
               - --cont-batching
               - --temp
               - "0.7"
-              - --min-p
-              - "0.0"
               - --top-p
-              - "0.80"
+              - "0.8"
               - --top-k
               - "20"
+              - --repetition-penalty
+              - "1.0"
               - --presence-penalty
               - "1.5"
             resources:
@@ -366,12 +366,14 @@ spec:
             args:
               - llama-server
               - -hf
-              - unsloth/Qwen3-30B-A3B-Thinking-2507-GGUF:Q8_K_XL
+              - unsloth/Qwen3-VL-30B-A3B-Thinking-GGUF:BF16
               - --host
               - 0.0.0.0
               - --metrics
               - --no-webui
               - --jinja
+              - --timeout
+              - "1800"
               - -v
               - --no-warmup
               - -ngl
@@ -383,24 +385,26 @@ spec:
               - -fa
               - "on"
               - -ub
-              - "3072"
+              - "512"
               - -b
-              - "9216"
+              - "4096"
               - -c
               - "65536"
               - --parallel
-              - "1"
+              - "2"
               - --cont-batching
               - --temp
-              - "0.6"
+              - "1"
               - --min-p
               - "0.0"
               - --top-p
               - "0.95"
               - --top-k
               - "20"
-              - --presence-penalty
+              - --repitation-penalty
               - "1.0"
+              - --presence-penalty
+              - "0"
             resources:
               limits:
                 amd.com/gpu: 1
@@ -740,160 +744,6 @@ spec:
                 memory: "90Gi"
             zeroscaling:
               cooldownPeriod: 1800
-          - name: code-llama
-            description: Mid model for coding
-            enabled: true
-            pvc:
-              storage: "40Gi"
-            args:
-              - llama-server
-              - -ngl
-              - "999"
-              - -fa
-              - "on"
-              - --host
-              - 0.0.0.0
-              - --metrics
-              - --no-webui
-              - --jinja
-              - -ub
-              - "1024"
-              - -b
-              - "2048"
-              - -c
-              - "131072"
-              - -v
-              - -hf
-              - TheBloke/Phind-CodeLlama-34B-v2-GGUF
-              - --parallel
-              - "1"
-              - --cont-batching
-            resources:
-              limits:
-                amd.com/gpu: 1
-                memory: "60Gi"
-                cpu: "4"
-              requests:
-                amd.com/gpu: 1
-                cpu: "2"
-                memory: "40Gi"
-          - name: code-llama-python
-            description: Mid model for python coding
-            enabled: true
-            pvc:
-              storage: "40Gi"
-            args:
-              - llama-server
-              - -ngl
-              - "999"
-              - -fa
-              - "on"
-              - --host
-              - 0.0.0.0
-              - --metrics
-              - --no-webui
-              - --jinja
-              - -ub
-              - "1024"
-              - -b
-              - "2048"
-              - -c
-              - "131072"
-              - -v
-              - -hf
-              - TheBloke/CodeLlama-34B-Python-GGUF
-              - --parallel
-              - "1"
-              - --cont-batching
-            resources:
-              limits:
-                amd.com/gpu: 1
-                memory: "60Gi"
-                cpu: "4"
-              requests:
-                amd.com/gpu: 1
-                cpu: "2"
-                memory: "40Gi"
-                # - name: deepseek-qwen-distill
-                #   enabled: true
-                #   pvc:
-                #     storage: "70Gi"
-                #   args:
-                #     - llama-server
-                #     - -hf
-                #     - unsloth/DeepSeek-R1-Distill-Qwen-32B-GGUF:Q8_0
-                #     - --host
-                #     - 0.0.0.0
-                #     - --metrics
-                #     - --no-webui
-                #     - --jinja
-                #     - -v
-                #     - -ctk
-                #     - q8_0
-                #     - -ctv
-                #     - q8_0
-                #     - -ngl
-                #     - "999"
-                #     - -fa
-                #     - "on"
-                #     - -ub
-                #     - "3072"
-                #     - -b
-                #     - "49152"
-                #     - -c
-                #     - "65536"
-                #     - --parallel
-                #     - "1"
-                #     - --cont-batching
-                #   resources:
-                #     limits:
-                #       amd.com/gpu: 1
-                #       memory: "120Gi"
-                #       cpu: "8"
-                #     requests:
-                #       amd.com/gpu: 1
-                #       cpu: "4"
-                #       memory: "110Gi"
-                #   zeroscaling:
-                #     cooldownPeriod: 1800
-                # - name: deepseek-llama-distill
-                #   enabled: true
-                #   pvc:
-                #     storage: "90Gi"
-                #   args:
-                #     - llama-server
-                #     - -ngl
-                #     - "999"
-                #     - -fa
-                #     - "on"
-                #     - --host
-                #     - 0.0.0.0
-                #     - --metrics
-                #     - --no-webui
-                #     - --jinja
-                #     - -ub
-                #     - "2048"
-                #     - -b
-                #     - "2048"
-                #     - -c
-                #     - "32768"
-                #     - -v
-                #     - -hf
-                #     - bartowski/DeepSeek-R1-Distill-Llama-70B-GGUF:Q4_K_M
-                #     - --parallel
-                #     - "1"
-                #     - --cont-batching
-                #   resources:
-                #     limits:
-                #       amd.com/gpu: 1
-                #       memory: "110Gi"
-                #       cpu: "4"
-                #     requests:
-                #       amd.com/gpu: 1
-                #       cpu: "2"
-                #       memory: "90Gi"
-                #   zeroscaling:
-                #     cooldownPeriod: 1800
   ignoreDifferences:
     - group: apps
       kind: Deployment
