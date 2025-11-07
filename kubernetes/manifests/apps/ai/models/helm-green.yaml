@@ -598,12 +598,12 @@ spec:
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "110Gi"
+                memory: "120Gi"
                 cpu: "4"
               requests:
                 amd.com/gpu: 1
                 cpu: "2"
-                memory: "90Gi"
+                memory: "110Gi"
             zeroscaling:
               cooldownPeriod: 1800
           - name: devstral
