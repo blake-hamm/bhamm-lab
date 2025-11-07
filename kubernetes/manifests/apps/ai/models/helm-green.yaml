@@ -319,16 +319,19 @@ spec:
               - --metrics
               - --no-webui
               - --jinja
+              - --timeout
+              - "1800"
               - -v
+              - --no-mmap
               - --no-warmup
               - -ngl
               - "999"
               - -fa
               - "on"
               - -ub
-              - "3072"
+              - "512"
               - -b
-              - "9216"
+              - "4096"
               - -c
               - "65536"
               - --parallel
@@ -343,7 +346,7 @@ spec:
               - --top-k
               - "20"
               - --presence-penalty
-              - "1.0"
+              - "1.5"
             resources:
               limits:
                 amd.com/gpu: 1
