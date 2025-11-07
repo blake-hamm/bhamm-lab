@@ -7,7 +7,7 @@
       backend = "docker";
       containers = {
         llama-cpp = {
-          image = "kyuz0/amd-strix-halo-toolboxes:vulkan-amdvlk";
+          image = "kyuz0/amd-strix-halo-toolboxes:vulkan-radv";
           cmd = [
             "llama-server"
             "-hf"
@@ -19,9 +19,9 @@
             "--metrics"
             "--no-webui"
             "--jinja"
+            "-v"
             "--timeout"
             "1800"
-            "-v"
             "--no-mmap"
             "--no-warmup"
             "-ngl"
@@ -29,14 +29,13 @@
             "-fa"
             "on"
             "-ub"
-            "1024"
+            "512"
             "-b"
             "4096"
             "-c"
             "65536"
             "--parallel"
             "1"
-            "--cont-batching"
             "--temp"
             "0.6"
             "--top-p"
