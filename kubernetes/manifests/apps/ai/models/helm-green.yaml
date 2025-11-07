@@ -619,26 +619,25 @@ spec:
             args:
               - llama-server
               - -hf
-              - unsloth/Devstral-Small-2507-GGUF:Q8_K_XL
+              - unsloth/Devstral-Small-2507-GGUF:BF16
               - --host
               - 0.0.0.0
               - --metrics
               - --no-webui
               - --jinja
+              - --timeout
+              - "1800"
               - -v
+              - --no-mmap
               - --no-warmup
               - -ngl
               - "999"
               - -fa
               - "on"
-              - -ctk
-              - q8_0
-              - -ctv
-              - q8_0
               - -ub
-              - "3072"
+              - "512"
               - -b
-              - "49152"
+              - "4096"
               - -c
               - "65536"
               - --parallel
