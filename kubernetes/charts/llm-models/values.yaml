@@ -2,7 +2,7 @@ global:
   namespace: models
   image:
     repository: kyuz0/amd-strix-halo-toolboxes
-    tag: vulkan-amdvlk
+    tag: vulkan-radv
     pullPolicy: IfNotPresent
   pvc:
     storageClassName: local-path
