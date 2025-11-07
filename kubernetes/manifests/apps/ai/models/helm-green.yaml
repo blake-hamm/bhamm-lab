@@ -565,7 +565,7 @@ spec:
             args:
               - llama-server
               - -hf
-              - bartowski/zai-org_GLM-4.5-Air-GGUF:Q4_K_M
+              - bartowski/zai-org_GLM-4.5-Air-GGUF:Q5_K_M
               - --host
               - 0.0.0.0
               - --metrics
