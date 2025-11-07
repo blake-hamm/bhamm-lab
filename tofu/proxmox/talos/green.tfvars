@@ -18,13 +18,13 @@ metal_amd_framework_workers = {
       effect = "NoSchedule"
     }
   }
-  # tail = {
-  #   ip = "10.0.30.79"
-  #   taint = {
-  #     key    = "amd.com/gpu"
-  #     effect = "NoSchedule"
-  #   }
-  # }
+  tail = {
+    ip = "10.0.30.79"
+    taint = {
+      key    = "amd.com/gpu"
+      effect = "NoSchedule"
+    }
+  }
 }
 amd_gpu_worker_id = [
   "0000:83:00"
