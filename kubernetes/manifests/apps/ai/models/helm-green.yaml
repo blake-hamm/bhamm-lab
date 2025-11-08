@@ -155,7 +155,7 @@ spec:
             args:
               - llama-server
               - -hf
-              - bartowski/Kwaipilot_KAT-Dev-72B-Exp-GGUF:Q8_0
+              - bartowski/Kwaipilot_KAT-Dev-72B-Exp-GGUF:Q6_K
               - --chat-template-file
               - /prompt/templates/template.jinja
               - --host
