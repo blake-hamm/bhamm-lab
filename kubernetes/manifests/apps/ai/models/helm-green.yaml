@@ -89,7 +89,7 @@ spec:
               - -c
               - "65536"
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
               - --temp
               - "1.0"
