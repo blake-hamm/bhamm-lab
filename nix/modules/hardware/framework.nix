@@ -1,3 +1,7 @@
+{ config, lib, ... }:
+
 {
-  services.fwupd.enable = true;
+  config = lib.mkIf config.cfg.framework.enable {
+    services.fwupd.enable = true;
+  };
 }

@@ -62,15 +62,15 @@ spec:
               path: /health
               port: 8080
             initialDelaySeconds: 5
-            periodSeconds: 20
-            timeoutSeconds: 5
-            failureThreshold: 90
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 240
           readinessProbe:
             httpGet:
               path: /health
               port: 8080
             initialDelaySeconds: 0
-            periodSeconds: 30
+            periodSeconds: 60
             timeoutSeconds: 15
             failureThreshold: 30
           livenessProbe:
@@ -78,7 +78,7 @@ spec:
               path: /health
               port: 8080
             initialDelaySeconds: 120
-            periodSeconds: 60
+            periodSeconds: 120
             timeoutSeconds: 20
             failureThreshold: 15
       volumes:

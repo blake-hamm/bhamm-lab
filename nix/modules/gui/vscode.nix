@@ -1,0 +1,39 @@
+{ config, lib, inputs, shared, pkgs, ... }:
+
+{
+  config = lib.mkIf config.cfg.vscode.enable {
+    home-manager.users.${shared.username} = {
+      programs.vscode = {
+        enable = true;
+        package = pkgs.vscodium;
+        profiles.default = {
+          extensions = with pkgs.vscode-extensions; [
+            ms-python.python
+            ms-python.isort
+            ms-python.black-formatter
+            jnoortheen.nix-ide
+            hashicorp.terraform
+            rooveterinaryinc.roo-cline
+            # dracula-theme.theme-dracula
+            # vscodevim.vim
+            # yzhang.markdown-all-in-one
+          ];
+          userSettings = {
+            # Settings
+            "explorer.confirmDelete" = false;
+            "editor.tabSize" = 2;
+            "editor.insertSpaces" = true;
+            "editor.detectIndentation" = false;
+
+            # Theme
+            "window.zoomLevel" = -3;
+
+            # Roo
+            "roo-cline.apiRequestTimeout" = 1800;
+            "roo-cline.codeIndex.embeddingBatchSize" = 200;
+          };
+        };
+      };
+    };
+  };
+}

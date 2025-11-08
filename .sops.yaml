@@ -1,4 +1,12 @@
+keys:
+  # This age key needed for NixOS deployments; it is derrived from my framework laptop ssh key
+  - &framework_laptop age1l37eugsfaaetyr7l9zqj6usmg0xkvfnywvll73ml6jyy85u5ffjq85mg3g
 creation_rules:
-  - gcp_kms: projects/deep-contact-445917-i9/locations/us-central1/keyRings/sops-key-ring/cryptoKeys/sops-key
-    unencrypted_suffix: _unencrypted
-    mac: true
+  - key_groups:
+      - age:
+          - *framework_laptop
+        gcp_kms:
+          # This resource is used to decrypt secrets in applications using a gcp service account
+          - resource_id: projects/deep-contact-445917-i9/locations/us-central1/keyRings/sops-key-ring/cryptoKeys/sops-key
+unencrypted_suffix: _unencrypted
+mac: true

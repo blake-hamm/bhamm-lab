@@ -9,7 +9,7 @@ opnsense_interface_map:
     address: "10.0.10.1"
     subnet: "10.0.10.0/24"
     vlan: 10
-    priority: 6
+    priority: 5
   - name: metal
     interface: opt3
     address: "10.0.20.1"
@@ -45,19 +45,19 @@ opnsense_interface_map:
     address: "10.0.70.1"
     subnet: "10.0.70.0/24"
     vlan: 70
-    priority: 5 # voice
+    priority: 7 # voice
   - name: trusted
     interface: opt1
     address: "10.0.80.1"
     subnet: "10.0.80.0/24"
     vlan: 80
-    priority: 5 # voice
+    priority: 6 # voice
   - name: dmz
     interface: opt9
     address: "10.0.90.1"
     subnet: "10.0.90.0/24"
     vlan: 90
-    priority: 2 # excellent
+    priority: 4 # excellent
 opnsense_extra_aliases:
   Framework:
     type: 'host'

@@ -1,4 +1,4 @@
-{ pkgs }:
+{ pkgs, inputs }:
 pkgs.mkShell {
   buildInputs = with pkgs; [
     pre-commit
@@ -34,6 +34,7 @@ pkgs.mkShell {
     smartmontools
     rclone
     wl-clipboard
+    inputs.nixos-anywhere.packages.${pkgs.system}.default
   ];
 
   packages = [

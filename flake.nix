@@ -2,155 +2,78 @@
   description = "Nix config";
 
   inputs = {
-    # Nixpkgs
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    # Disko
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Home manager
     home-manager = {
       url = "github:nix-community/home-manager/release-25.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Themes
-    catppuccin.url = "github:catppuccin/nix";
+    catppuccin.url = "github:catppuccin/nix/release-25.05";
 
-    # Sops nix
     sops-nix.url = "github:Mic92/sops-nix";
+
+    nixos-anywhere = {
+      url = "github:nix-community/nixos-anywhere";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
   };
 
-  outputs = { nixpkgs, self, ... } @ inputs: #inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+  outputs = { nixpkgs, self, ... } @ inputs:
     let
-      username = "bhamm";
-      system = "x86_64-linux";
-      sshPort = 4185;
+      shared = import ./nix/lib;
       pkgs = import inputs.nixpkgs {
-        inherit system;
+        system = shared.system;
         config.allowUnfree = true;
       };
+      pkgs-unstable = import inputs.nixpkgs-unstable {
+        system = shared.system;
+        config.allowUnfree = true;
+      };
+      gen = shared.generators { lib = nixpkgs.lib; inherit shared self inputs; };
     in
     {
-      # perSystem = { system, pkgs, ... }:
-      #   let
-      #   in
-      #   {
-      devShells.x86_64-linux.default = import ./nix/shell.nix { inherit pkgs; };
-      #   };
-      # flake = { };
-      # systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
-      # Bare metal
-      colmena = {
-        meta = {
-          nixpkgs = import nixpkgs {
-            inherit system;
+      devShells.x86_64-linux.default = import ./nix/shell.nix { inherit pkgs inputs; };
+      colmena =
+        {
+          meta = {
+            nixpkgs = import nixpkgs {
+              system = shared.system;
+            };
+            specialArgs = {
+              inherit self inputs shared;
+              inherit pkgs-unstable;
+            };
+            nodeSpecialArgs = gen.generateNodeSpecialArgs;
           };
-          specialArgs = {
-            inherit self inputs username system;
-          };
-          nodeSpecialArgs.framework = {
-            host = "framework";
-          };
-          # nodeSpecialArgs.aorus = {
-          #   host = "aorus";
-          # };
-          nodeSpecialArgs.precision = {
-            host = "precision";
-          };
-          nodeSpecialArgs.thinkpad = {
-            host = "thinkpad";
-          };
-          nodeSpecialArgs.elitebook = {
-            host = "elitebook";
-          };
-        };
-
-        framework = { name, nodes, pkgs, ... }: {
-          deployment = {
-            allowLocalDeployment = true;
-            tags = [ "framework" "local" "desktop" ];
-            targetUser = "${username}";
-            targetHost = "localhost";
-            targetPort = sshPort;
-          };
-          imports = [ ./nix/hosts/framework ];
-        };
-
-        # aorus = { name, nodes, pkgs, ... }: {
-        #   deployment = {
-        #     tags = [ "aorus" "server" ];
-        #     targetUser = "${username}";
-        #     targetHost = "192.168.69.12";
-        #     targetPort = sshPort;
-        #   };
-        #   imports = [ ./nix/hosts/aorus ];
-        # };
-
-        precision = { name, nodes, pkgs, ... }: {
-          deployment = {
-            tags = [ "precision" "server" ];
-            targetUser = "${username}";
-            targetHost = "192.168.69.13";
-            targetPort = sshPort;
-          };
-          imports = [ ./nix/hosts/precision ];
-        };
-
-        thinkpad = { name, nodes, pkgs, ... }: {
-          deployment = {
-            tags = [ "thinkpad" "server" "k3s" ];
-            targetUser = "${username}";
-            targetHost = "192.168.69.14";
-            targetPort = sshPort;
-          };
-          imports = [ ./nix/hosts/thinkpad ];
-        };
-
-        elitebook = { name, nodes, pkgs, ... }: {
-          deployment = {
-            tags = [ "elitebook" "server" ];
-            targetUser = "${username}";
-            targetHost = "192.168.69.15";
-            targetPort = sshPort;
-          };
-          imports = [ ./nix/hosts/elitebook ];
-        };
-      };
+        } // gen.generateColmena;
 
       # VM and iso configs without colmena
-      nixosConfigurations = {
-        # ISO image
-        minimal-iso = nixpkgs.lib.nixosSystem {
-          inherit system;
-          modules = [
-            "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
-            (import ./nix/hosts/iso)
-            {
-              nixpkgs.config.allowBroken = true;
-            }
-          ];
-          specialArgs = {
-            host = "minimal-iso";
-            inherit self inputs username;
+      nixosConfigurations =
+        {
+          # ISO image
+          minimal-iso = nixpkgs.lib.nixosSystem {
+            system = shared.system;
+            modules = [
+              "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+              (import ./nix/hosts/iso)
+              {
+                nixpkgs.config.allowBroken = true;
+              }
+            ];
+            specialArgs = {
+              host = "minimal-iso";
+              inherit self inputs shared;
+              inherit pkgs-unstable;
+            };
           };
-        };
-
-        # example = nixpkgs.lib.nixosSystem {
-        #   inherit system;
-        #   modules = [
-        #     (import ./nix/hosts/example)
-        #   ];
-        #   specialArgs = {
-        #     host = "example";
-        #     inherit self inputs username system;
-        #   };
-        # };
-
-      };
+        } // gen.generateNixosConfigurations;
     };
 }
