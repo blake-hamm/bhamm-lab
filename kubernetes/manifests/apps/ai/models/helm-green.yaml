@@ -152,26 +152,27 @@ spec:
             args:
               - llama-server
               - -hf
-              - bartowski/Kwaipilot_KAT-Dev-72B-Exp-GGUF
-              - -hff
-              - Kwaipilot_KAT-Dev-72B-Exp-Q4_K_L.gguf
+              - bartowski/Kwaipilot_KAT-Dev-72B-Exp-GGUF:Q8_0
+              - --chat-template-file
+              - /prompt/templates/template.jinja
               - --host
               - 0.0.0.0
               - --metrics
               - --no-webui
               - --jinja
-              - --chat-template-file
-              - /prompt/templates/template.jinja
+              - --timeout
+              - "1800"
               - -v
+              - --no-mmap
               - --no-warmup
               - -ngl
               - "999"
               - -fa
               - "on"
               - -ub
-              - "3072"
+              - "512"
               - -b
-              - "9216"
+              - "4096"
               - -c
               - "65536"
               - --parallel
