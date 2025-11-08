@@ -76,19 +76,20 @@ spec:
               - --no-webui
               - --jinja
               - -v
+              - --no-mmap
               - --no-warmup
               - -ngl
               - "999"
               - -fa
               - "on"
               - -ub
-              - "2048"
+              - "512"
               - -b
-              - "6144"
+              - "4096"
               - -c
               - "65536"
               - --parallel
-              - "1"
+              - "2"
               - --cont-batching
               - --temp
               - "1.0"
