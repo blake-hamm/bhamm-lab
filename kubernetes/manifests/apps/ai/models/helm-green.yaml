@@ -64,6 +64,8 @@ spec:
             enabled: true
             pvc:
               storage: "80Gi"
+            image:
+              tag: vulkan-amdvlk
             args:
               - llama-server
               - -hf
