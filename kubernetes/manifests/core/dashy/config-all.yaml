@@ -46,6 +46,11 @@ data:
         icon: hl-grafana
         url: https://grafana.bhamm-lab.com/d/Kczn-jPZz/node-exporter-freebsd?orgId=1&from=now-24h&to=now&timezone=browser&var-DS_PROMETHEUS=default&var-job=opnsense&var-node=10.0.9.1:9100&refresh=1m
         statusCheck: false
+      - title: Access Point
+        description: Visit tp link eap650 access point
+        icon: hl-tp-link
+        url: http://10.0.80.4/
+        statusCheck: false
       - title: Main Switch
         description: Visit 2.5gb poe main tp link switch
         icon: hl-tp-link
