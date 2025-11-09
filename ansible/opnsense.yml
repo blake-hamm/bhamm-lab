@@ -13,10 +13,6 @@
       # else you COULD (but SHOULD NOT) use:
       ssl_verify: false
       api_retries: 1
-    oxlorg.opnsense.rule:
-      match_fields: ['description']
-    oxlorg.opnsense.rule_multi:
-      match_fields: ['description']
   roles:
     - opnsense
   tags: [opnsense]

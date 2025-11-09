@@ -39,9 +39,9 @@
           "interface": item.interface
         }) -%}
       {%- endfor -%} {{ rules }}
-- name: Common firewall rules
+- name: Apply firewall rules
   oxlorg.opnsense.rule_multi:
-    rules: "{{ common_firewall_rules }}"
-- name: Extra firewall rules
-  oxlorg.opnsense.rule_multi:
-    rules: "{{ opnsense_extra_rules }}"
+    rules: "{{ common_firewall_rules + opnsense_extra_rules }}"
+    match_fields: ['description']
+    multi_control:
+      purge_unconfigured: true

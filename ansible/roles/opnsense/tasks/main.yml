@@ -2,7 +2,7 @@
 - name: Extract interfaces from opnsense_interface_map
   ansible.builtin.set_fact:
     all_interfaces: "{{ opnsense_interface_map | map(attribute='interface') | list }}"
-    private_networks: "{{ opnsense_interface_map | map(attribute='interface') | map('regex_replace', '^(.*)$', '__\\1_network') | list }}"
+    private_networks: "{{ opnsense_interface_map | map(attribute='subnet') | list }}"
 - name: Configure vlans
   ansible.builtin.include_tasks:
     file: vlans.yml

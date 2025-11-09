@@ -21,9 +21,8 @@
           'content': private_networks
         }) -%}
       {{ aliases }}
-- name: Common Aliases
+- name: Apply aliases
   oxlorg.opnsense.alias_multi:
-    aliases: "{{ common_aliases }}"
-- name: Extra aliases
-  oxlorg.opnsense.alias_multi:
-    aliases: "{{ opnsense_extra_aliases }}"
+    aliases: "{{ common_aliases + opnsense_extra_aliases }}"
+    multi_control:
+      purge_unconfigured: true

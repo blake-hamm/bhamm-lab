@@ -70,40 +70,35 @@ opnsense_extra_aliases:
     content:
       - 10.0.60.2-10.0.60.50
 opnsense_extra_rules:
-  - name: TrustedLANAccess
-    description: Allow trusted access to lan
+  - description: Allow trusted access to lan
     interface: opt1 # trusted
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: trustedNetwork
     destination_net: LANNetwork
-  - name: TrustedManagementAccess
-    description: Allow trusted access to management
+  - description: Allow trusted access to management
     interface: opt1 # trusted
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: trustedNetwork
     destination_net: managementNetwork
-  - name: TrustedMetalAccess
-    description: Allow trusted access to metal
+  - description: Allow trusted access to metal
     interface: opt1 # trusted
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: trustedNetwork
     destination_net: metalNetwork
-  - name: TrustedK8sAccess
-    description: Allow trusted access to k8s
+  - description: Allow trusted access to k8s
     interface: opt1 # trusted
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: trustedNetwork
     destination_net: k8sNetwork
-  - name: LanMetalAccess
-    description: Allow LAN to access Metal
+  - description: Allow LAN to access Metal
     interface: lan
     sequence: 3
     ip_protocol: inet
@@ -111,16 +106,14 @@ opnsense_extra_rules:
     source_net: metalNetwork
     destination_net: "PrivateNetworks"
     destination_invert: true
-  - name: MetalK8sAccess
-    description: Allow metal access to k8s
+  - description: Allow metal access to k8s
     interface: opt3 # metal
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: metalNetwork
     destination_net: k8sNetwork
-  - name: LanK8sAccess
-    description: Allow LAN to access k8s
+  - description: Allow LAN to access k8s
     interface: lan
     sequence: 3
     ip_protocol: inet
@@ -128,48 +121,42 @@ opnsense_extra_rules:
     source_net: k8sNetwork
     destination_net: "PrivateNetworks"
     destination_invert: true
-  - name: K8sMetalAccess
-    description: Allow k8s access to metal (fork8sNetwork)
+  - description: Allow k8s access to metal (fork8sNetwork)
     interface: opt4 # k8s
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: k8sNetwork
     destination_net: metalNetwork
-  - name: K8sTrustedAccess
-    description: Allow k8s access to trusted
+  - description: Allow k8s access to trusted
     interface: opt4 # k8s
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: k8sNetwork
     destination_net: trustedNetwork
-  - name: TrustedDMZAccess
-    description: Allow trusted access to dmz
+  - description: Allow trusted access to dmz
     interface: opt1 # trusted
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: trustedNetwork
     destination_net: dmzNetwork
-  - name: TrustedGuestAccess
-    description: Allow trusted access to guest
+  - description: Allow trusted access to guest
     interface: opt1 # trusted
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: trustedNetwork
     destination_net: guestNetwork
-  - name: TrustedIOTAccess
-    description: Allow trusted access to iot
+  - description: Allow trusted access to iot
     interface: opt1 # trusted
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: trustedNetwork
     destination_net: iotNetwork
-  - name: GuestIOTAccess
-    description: Allow guested access to iot
+  - description: Allow guested access to iot
     interface: opt8 # guest
     sequence: 3
     ip_protocol: inet
