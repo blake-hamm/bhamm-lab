@@ -38,10 +38,10 @@
       };
     };
 
-    vpn.enable = lib.mkOption {
+    wireguard.enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "Enable VPN";
+      description = "Enable WireGuard VPN";
     };
   };
 }

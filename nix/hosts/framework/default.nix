@@ -14,5 +14,6 @@
   cfg = {
     # Machine-specific settings
     framework.enable = true;
+    wireguard.enable = true;
   };
 }
