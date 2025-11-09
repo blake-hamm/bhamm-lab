@@ -15,159 +15,192 @@ opnsense_interface_map:
     address: "10.0.20.1"
     subnet: "10.0.20.0/24"
     vlan: 20
-    priority: 3 # critical
+    priority: 3
   - name: k8s
     interface: opt4
     address: "10.0.30.1"
     subnet: "10.0.30.0/24"
     vlan: 30
-    priority: 3 # critical
+    priority: 3
   - name: vms
     interface: opt5
     address: "10.0.40.1"
     subnet: "10.0.40.0/24"
     vlan: 40
-    priority: 3 # critical
+    priority: 3
   - name: ceph
     interface: opt6
     address: "10.0.50.1"
     subnet: "10.0.50.0/24"
     vlan: 50
-    priority: 5 # voice
+    priority: 5
   - name: iot
     interface: opt7
     address: "10.0.60.1"
     subnet: "10.0.60.0/24"
     vlan: 60
-    priority: 1 # background
+    priority: 1
   - name: guest
     interface: opt8
     address: "10.0.70.1"
     subnet: "10.0.70.0/24"
     vlan: 70
-    priority: 7 # voice
+    priority: 7
   - name: trusted
     interface: opt1
     address: "10.0.80.1"
     subnet: "10.0.80.0/24"
     vlan: 80
-    priority: 6 # voice
+    priority: 6
   - name: dmz
     interface: opt9
     address: "10.0.90.1"
     subnet: "10.0.90.0/24"
     vlan: 90
-    priority: 4 # excellent
+    priority: 4
+  - name: WireguardVPNLAB
+    interface: opt11
+    address: "10.10.0.1"
+    subnet: "10.10.0.0/24"
+    priority: 7
 opnsense_extra_aliases:
-  Framework:
+  - name: "Framework"
     type: 'host'
     description: 'Framework laptop'
-    content: 10.0.80.2
-  TrustedIOT:
+    content:
+      - 10.0.80.2
+  - name: "TrustedIOT"
     type: 'host'
     description: 'Trusted IOT devices'
-    content: 10.0.60.2-10.0.60.50
+    content:
+      - 10.0.60.2-10.0.60.50
 opnsense_extra_rules:
-  TrustedLANAccess:
-    description: Allow trusted access to lan
+  - description: Allow trusted access to lan
     interface: opt1 # trusted
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: trustedNetwork
     destination_net: LANNetwork
-  TrustedManagementAccess:
-    description: Allow trusted access to management
+  - description: Allow trusted access to management
     interface: opt1 # trusted
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: trustedNetwork
     destination_net: managementNetwork
-  TrustedMetalAccess:
-    description: Allow trusted access to metal
+  - description: Allow trusted access to metal
     interface: opt1 # trusted
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: trustedNetwork
     destination_net: metalNetwork
-  TrustedK8sAccess:
-    description: Allow trusted access to k8s
+  - description: Allow trusted access to k8s
     interface: opt1 # trusted
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: trustedNetwork
     destination_net: k8sNetwork
-  LanMetalAccess:
-    description: Allow LAN to access Metal
+  - description: Allow LAN to access Metal
     interface: lan
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: metalNetwork
-  MetalK8sAccess:
-    description: Allow metal access to k8s
+    destination_net: "PrivateNetworks"
+    destination_invert: true
+  - description: Allow metal access to k8s
     interface: opt3 # metal
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: metalNetwork
     destination_net: k8sNetwork
-  LanK8sAccess:
-    description: Allow LAN to access k8s
+  - description: Allow LAN to access k8s
     interface: lan
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: k8sNetwork
-  K8sMetalAccess:
-    description: Allow k8s access to metal (fork8sNetwork)
+    destination_net: "PrivateNetworks"
+    destination_invert: true
+  - description: Allow k8s access to metal (fork8sNetwork)
     interface: opt4 # k8s
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: k8sNetwork
     destination_net: metalNetwork
-    # Manually set state policy to none
-  K8sTrustedAccess:
-    description: Allow k8s access to trusted
+  - description: Allow k8s access to trusted
     interface: opt4 # k8s
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: k8sNetwork
     destination_net: trustedNetwork
-  TrustedDMZAccess:
-    description: Allow trusted access to dmz
+  - description: Allow trusted access to dmz
     interface: opt1 # trusted
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: trustedNetwork
     destination_net: dmzNetwork
-  TrustedGuestAccess:
-    description: Allow trusted access to guest
+  - description: Allow trusted access to guest
     interface: opt1 # trusted
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: trustedNetwork
     destination_net: guestNetwork
-  TrustedIOTAccess:
-    description: Allow trusted access to iot
+  - description: Allow trusted access to iot
     interface: opt1 # trusted
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: trustedNetwork
     destination_net: iotNetwork
-  GuestIOTAccess:
-    description: Allow guested access to iot
+  - description: Allow guested access to iot
     interface: opt8 # guest
     sequence: 3
     ip_protocol: inet
     protocol: any
     source_net: guestNetwork
     destination_net: iotNetwork
+  - description: Allow WAN to access wireguard
+    interface: opt10
+    sequence: 3
+    ip_protocol: inet46
+    protocol: UDP
+    source_net: any
+    destination_net: __opt10_network
+    destination_port: 51823
+  - description: Allow wireguard lab access to lan
+    interface: opt11
+    sequence: 3
+    ip_protocol: inet
+    protocol: any
+    source_net: WireguardVPNLABNetwork
+    destination_net: LANNetwork
+  - description: Allow wireguard lab access to management
+    interface: opt11
+    sequence: 3
+    ip_protocol: inet
+    protocol: any
+    source_net: WireguardVPNLABNetwork
+    destination_net: managementNetwork
+  - description: Allow wireguard lab access to metal
+    interface: opt11
+    sequence: 3
+    ip_protocol: inet
+    protocol: any
+    source_net: WireguardVPNLABNetwork
+    destination_net: metalNetwork
+  - description: Allow wireguard lab access to k8s
+    interface: opt11
+    sequence: 3
+    ip_protocol: inet
+    protocol: any
+    source_net: WireguardVPNLABNetwork
+    destination_net: k8sNetwork

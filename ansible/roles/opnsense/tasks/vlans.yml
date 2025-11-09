@@ -1,5 +1,5 @@
 - name: Configure VLANs dynamically
-  ansibleguy.opnsense.interface_vlan:
+  oxlorg.opnsense.interface_vlan:
     description: "{{ item.name }}"
     interface: "{{ opnsense_vlan_interface }}"
     vlan: "{{ item.vlan }}"

@@ -24,7 +24,7 @@ let
   mkDeployment = hostName: hostModule: {
     deployment = {
       inherit (hostModule.deploy) tags targetHost;
-      allowLocalDeployment = hostModule._deploy.allowLocalDeployment or false;
+      allowLocalDeployment = hostModule.deploy.allowLocalDeployment or false;
       targetUser = shared.username;
       targetPort = shared.sshPort;
     };

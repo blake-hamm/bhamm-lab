@@ -4,7 +4,7 @@
   vars_files:
     - inventory/group_vars/opnsense.yml
   module_defaults:
-    group/ansibleguy.opnsense.all:
+    group/oxlorg.opnsense.all:
       firewall: "{{ hostvars.opnsense.ansible_host }}"
       api_key: "{{ lookup('env', 'OPNSENSE_API_KEY') }}"
       api_secret: "{{ lookup('env', 'OPNSENSE_API_SECRET') }}"
@@ -13,11 +13,6 @@
       # else you COULD (but SHOULD NOT) use:
       ssl_verify: false
       api_retries: 1
-    ansibleguy.opnsense.rule:
-      match_fields: ['description']
-    ansibleguy.opnsense.rule_multi:
-      match_fields: ['description']
-      key_field: 'description'
   roles:
     - opnsense
   tags: [opnsense]
