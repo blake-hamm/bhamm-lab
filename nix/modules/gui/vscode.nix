@@ -32,6 +32,9 @@
             # Roo
             "roo-cline.apiRequestTimeout" = 1800;
             "roo-cline.codeIndex.embeddingBatchSize" = 200;
+
+            # Kilo
+            "kilo-code.apiRequestTimeout" = 1800;
           };
         };
       };
