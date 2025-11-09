@@ -5,8 +5,8 @@ collections:
   - name: devsec.hardening
     version: "10.0.0"
     source: https://galaxy.ansible.com
-  - name: ansibleguy.opnsense
-    version: "1.2.10"
+  - name: oxlorg.opnsense
+    version: "25.7.7"
     source: https://galaxy.ansible.com
   - name: community.sops
     version: "2.0.1"

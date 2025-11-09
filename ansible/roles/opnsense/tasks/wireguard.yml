@@ -1,0 +1,8 @@
+- name: Configure WireGuard server interface
+  oxlorg.opnsense.wireguard_server:
+    name: "wg0"
+    port: 51820
+    enabled: true
+    allowed_ips: ["0.0.0.0/0", "::/0"]
+    mtu: 1420
+    dns_servers: ["10.8.0.1"]
