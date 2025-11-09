@@ -1,4 +1,4 @@
-{ config, lib, inputs, shared, pkgs, ... }:
+{ config, lib, inputs, shared, pkgs, pkgs-unstable, ... }:
 
 {
   config = lib.mkIf config.cfg.vscode.enable {
@@ -7,13 +7,14 @@
         enable = true;
         package = pkgs.vscodium;
         profiles.default = {
-          extensions = with pkgs.vscode-extensions; [
+          extensions = with pkgs-unstable.vscode-extensions; [
             ms-python.python
             ms-python.isort
             ms-python.black-formatter
             jnoortheen.nix-ide
             hashicorp.terraform
             rooveterinaryinc.roo-cline
+            kilocode.kilo-code
             # dracula-theme.theme-dracula
             # vscodevim.vim
             # yzhang.markdown-all-in-one
