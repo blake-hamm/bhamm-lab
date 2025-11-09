@@ -19,3 +19,8 @@
     file: rules.yml
     apply:
       tags: [rules]
+- name: Configure wireguard
+  ansible.builtin.include_tasks:
+    file: wireguard.yml
+    apply:
+      tags: [wireguard]
