@@ -59,7 +59,7 @@ spec:
             - name: gluetun-config
               mountPath: /gluetun
         - name: nzbget
-          image: nzbgetcom/nzbget:latest
+          image: lscr.io/linuxserver/nzbget:latest
           ports:
             - containerPort: 6789
               name: web-ui
