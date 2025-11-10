@@ -259,7 +259,7 @@ spec:
             description: High quality dense model
             enabled: true
             pvc:
-              storage: "70Gi"
+              storage: "40Gi"
             args:
               - llama-server
               - -hf
