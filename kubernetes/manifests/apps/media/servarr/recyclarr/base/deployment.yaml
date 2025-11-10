@@ -35,6 +35,8 @@ spec:
           env:
             - name: TZ
               value: America/Denver
+            - name: CRON_SCHEDULE
+              value: "*/15 * * * *"
             - name: UN_SONARR_0_API_KEY
               valueFrom:
                 secretKeyRef:
