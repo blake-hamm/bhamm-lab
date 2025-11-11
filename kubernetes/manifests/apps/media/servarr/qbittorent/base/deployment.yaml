@@ -26,7 +26,7 @@ spec:
         fsGroupChangePolicy: "OnRootMismatch"
       containers:
         - name: gluetun
-          image: ghcr.io/qdm12/gluetun:v3.39.0
+          image: ghcr.io/qdm12/gluetun:v3.40.0
           env:
             - name: VPN_SERVICE_PROVIDER
               value: protonvpn
@@ -78,26 +78,20 @@ spec:
               value: "8080"
           securityContext:
             runAsUser: 1000
-        - name: port-sync
-          image: ghcr.io/bjw-s-labs/gluetun-qb-port-sync:latest
+        - name: port-manager
+          image: snoringdragon/gluetun-qbittorrent-port-manager:latest
           env:
-            - name: GLUETUN_CONTROL_SERVER_HOST
+            - name: QBITTORRENT_SERVER
               value: "localhost"
-            - name: GLUETUN_CONTROL_SERVER_PORT
-              value: "8000"
-            - name: QBITTORRENT_HOST
-              value: "localhost"
-            - name: QBITTORRENT_WEBUI_PORT
+            - name: QBITTORRENT_PORT
               value: "8080"
-            - name: CRON_ENABLED
-              value: "true"
-            - name: CRON_SCHEDULE
-              value: "*/5 * * * *"
-            - name: LOG_TIMESTAMP
-              value: "false"
+            - name: PORT_FORWARDED
+              value: "/tmp/gluetun/forwarded_port"
+            - name: HTTP_S
+              value: "http"
           volumeMounts:
-            - name: port-forward-config
-              mountPath: /config
+            - name: gluetun-config
+              mountPath: /tmp/gluetun
           securityContext:
             runAsUser: 1000
       volumes:
@@ -110,5 +104,3 @@ spec:
         - name: downloads
           persistentVolumeClaim:
             claimName: downloads
-        - name: port-forward-config
-          emptyDir: {}
