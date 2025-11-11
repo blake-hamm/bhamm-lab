@@ -76,25 +76,17 @@ spec:
               value: "America/Denver"
             - name: WEBUI_PORT
               value: "8080"
+            - name: DOCKER_MODS
+              value: "ghcr.io/t-anc/gsp-qbittorent-gluetun-sync-port-mod:main"
+            - name: GSP_GTN_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: servarr-external-secret
+                  key: GLUETUN_API_KEY
+            - name: GSP_SLEEP
+              value: "60"
           securityContext:
             runAsUser: 1000
-        - name: port-manager
-          image: snoringdragon/gluetun-qbittorrent-port-manager:latest
-          env:
-            - name: QBITTORRENT_SERVER
-              value: "localhost"
-            - name: QBITTORRENT_PORT
-              value: "8080"
-            - name: PORT_FORWARDED
-              value: "/tmp/gluetun/forwarded_port"
-            - name: HTTP_S
-              value: "http"
-          volumeMounts:
-            - name: gluetun-config
-              mountPath: /tmp/gluetun
-          securityContext:
-            runAsUser: 0
-            runAsNonRoot: false
       volumes:
         - name: gluetun-config
           persistentVolumeClaim:
