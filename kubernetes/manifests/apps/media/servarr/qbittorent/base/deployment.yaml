@@ -53,6 +53,7 @@ spec:
                   key: WIREGUARD_PRIVATE_KEY
           securityContext:
             runAsUser: 0
+            runAsNonRoot: false
             capabilities:
               add:
                 - NET_ADMIN
@@ -86,7 +87,8 @@ spec:
             - name: GSP_SLEEP
               value: "60"
           securityContext:
-            runAsUser: 1000
+            runAsUser: 0
+            runAsNonRoot: false
       volumes:
         - name: gluetun-config
           persistentVolumeClaim:
