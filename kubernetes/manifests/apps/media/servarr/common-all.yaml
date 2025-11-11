@@ -32,6 +32,10 @@ spec:
               remoteRef:
                 key: /default/servarr
                 property: UN_RADARR_0_API_KEY
+            - secretKey: GLUETUN_API_KEY
+              remoteRef:
+                key: /default/servarr
+                property: GLUETUN_API_KEY
             - secretKey: NZBGET_USER
               remoteRef:
                 key: /core/lldap
