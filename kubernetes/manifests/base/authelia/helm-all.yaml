@@ -133,6 +133,7 @@ spec:
               host: 'authelia-dragonfly'
           identity_providers:
             oidc:
+              consent_mode: implicit
               claims_policies:
                 grafana:
                   id_token: ['email', 'name', 'groups', 'preferred_username']
