@@ -27,6 +27,8 @@ spec:
           - "--entryPoints.websecure.transport.respondingTimeouts.readTimeout=0"
           - "--entryPoints.websecure.transport.respondingTimeouts.writeTimeout=0"
           - "--entryPoints.websecure.transport.respondingTimeouts.idleTimeout=0"
+          - "--serversTransport.forwardingTimeouts.responseHeaderTimeout=0"
+          - "--serversTransport.forwardingTimeouts.idleConnTimeout=0"
         deployment:
           enabled: true
           shareProcessNamespace: true
