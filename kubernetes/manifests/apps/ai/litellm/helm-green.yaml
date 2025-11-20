@@ -56,6 +56,8 @@ spec:
             argocd:
               enabled: true
         extraEnvVars:
+          - name: DISABLE_AIOHTTP_TRANSPORT
+            value: "True"
           - name: LITELLM_MASTER_KEY
             valueFrom:
               secretKeyRef:
