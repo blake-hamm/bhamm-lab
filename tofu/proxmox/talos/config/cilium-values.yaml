@@ -11,7 +11,10 @@ cgroup:
   hostRoot: /sys/fs/cgroup
 ipam:
   mode: kubernetes
+loadBalancer:
+  serviceTimeout: 1800
 socketLB:
+  requestTimeout: 1800
   hostNamespaceOnly: true
 k8sClientRateLimit:
   qps: 20
