@@ -35,6 +35,7 @@ global:
     manage_config: true
     config:
       litellm_settings:
+        request_timeout: 1800
         cache: False
         cache_params:
           type: qdrant-semantic
