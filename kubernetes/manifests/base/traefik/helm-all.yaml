@@ -32,7 +32,7 @@ spec:
         deployment:
           enabled: true
           shareProcessNamespace: true
-          replicas: 3
+          replicas: 2
           annotations: {}
           podAnnotations: {}
           additionalContainers: []
