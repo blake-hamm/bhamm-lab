@@ -51,8 +51,6 @@ spec:
           REDIS_PASSWORD: ""
           QDRANT_VECTOR_SIZE: 4096
           QDRANT_API_BASE: http://qdrant.qdrant.svc.cluster.local:6333
-          LITELLM_LOG: "DEBUG"
-          DISABLE_AIOHTTP_TRANSPORT: "True"
         migrationJob:
           hooks:
             argocd:
