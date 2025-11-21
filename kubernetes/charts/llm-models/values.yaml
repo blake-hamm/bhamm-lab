@@ -49,6 +49,7 @@ global:
         global_max_parallel_requests: 3
         store_model_in_db: true
         store_prompts_in_spend_logs: true
+        health_check_interval: 1800
       router_settings:
         debug_level: "DEBUG"
         cooldown_time: 30
