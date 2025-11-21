@@ -38,6 +38,7 @@ global:
         timeout: 1800
         stream_timeout: 1800
         request_timeout: 1800
+        set_verbose: true
         cache: False
         cache_params:
           type: qdrant-semantic
