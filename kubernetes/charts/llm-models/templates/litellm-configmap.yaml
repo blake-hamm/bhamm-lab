@@ -12,7 +12,9 @@ data:
     {{- $models := list }}
     {{- range .Values.models }}
     {{- if .enabled }}
-    {{- $model := dict "model_name" .name "litellm_params" (dict "model" (printf "openai/%s" .name) "api_base" (printf "http://%s.models.svc.cluster.local:8080/v1" .name) "api_key" "dummy") }}
+    {{- $default_params := dict "timeout" 1800 "stream_timeout" 1800 }}
+    {{- $litellm_params := merge .litellm_params $default_params }}
+    {{- $model := dict "model_name" .name "litellm_params" (merge (dict "model" (printf "openai/%s" .name) "api_base" (printf "http://%s.models.svc.cluster.local:8080/v1" .name) "api_key" "dummy") $litellm_params) }}
     {{- $models = append $models $model }}
     {{- end }}
     {{- end }}
