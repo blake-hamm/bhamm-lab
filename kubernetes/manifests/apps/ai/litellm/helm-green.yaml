@@ -20,7 +20,7 @@ spec:
         image:
           repository: ghcr.io/berriai/litellm
           pullPolicy: Always
-          tag: "v1.80.0.dev6"
+          tag: "main-v1.80.0.dev6"
         deploymentAnnotations:
           reloader.stakater.com/auto: "true"
         masterkeySecretName: "litellm-external-secret"
