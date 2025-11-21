@@ -4,3 +4,9 @@ resource "cloudflare_r2_bucket" "truenas_bucket" {
   location      = var.truenas_bucket_location
   storage_class = var.truenas_bucket_storage_class
 }
+
+resource "cloudflare_zero_trust_tunnel_cloudflared" "static_site" {
+  account_id    = var.cloudflare_account_id
+  name          = var.tunnel_name
+  tunnel_secret = local.tunnel_secret
+}
