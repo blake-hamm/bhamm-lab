@@ -28,7 +28,7 @@ spec:
                   - name: default-headers
                 services:
                   - name: glm-air
-                    scheme: http
+                    scheme: https
                     port: http
   syncPolicy:
     syncOptions:
