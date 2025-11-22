@@ -18,11 +18,10 @@ spec:
       valuesObject:
         name: models
         ingressRoutes:
-          - name: models
+          - name: glm-air
             ingressClass: traefik-external
-            websocket: true
             routes:
-              - match: Host(`models.bhamm-lab.com`)
+              - match: Host(`glm-air.bhamm-lab.com`)
                 kind: Rule
                 middlewares:
                   - name: default-headers
