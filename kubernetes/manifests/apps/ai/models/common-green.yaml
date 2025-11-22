@@ -28,8 +28,8 @@ spec:
                   - name: default-headers
                 services:
                   - name: glm-air
-                    scheme: https
-                    port: http
+                    scheme: http
+                    port: 8080
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
