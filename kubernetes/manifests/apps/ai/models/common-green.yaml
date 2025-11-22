@@ -29,7 +29,7 @@ spec:
                 services:
                   - name: glm-air
                     scheme: http
-                    port: 8080
+                    port: http
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
