@@ -30,7 +30,7 @@ data:
         {{- else }}
         timeout: 1800
         stream_timeout: 1800
-        max_retries: 0
+        max_retries: 1
         {{- end }}
     {{- end }}
     {{- end }}
