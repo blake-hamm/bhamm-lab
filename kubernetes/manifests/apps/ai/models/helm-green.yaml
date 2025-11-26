@@ -677,6 +677,53 @@ spec:
                 memory: "90Gi"
             zeroscaling:
               cooldownPeriod: 1800
+          - name: seed-oss
+            description: Mid model specialized in agentic and coding
+            enabled: true
+            pvc:
+              storage: "90Gi"
+            args:
+              - llama-server
+              - -hf
+              - unsloth/Seed-OSS-36B-Instruct-GGUF:BF16
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - --timeout
+              - "1800"
+              - -v
+              - --no-mmap
+              - --no-warmup
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "512"
+              - -b
+              - "4096"
+              - -c
+              - "65536"
+              - --parallel
+              - "1"
+              - --cont-batching
+              - --temp
+              - "1.1"
+              - --top-p
+              - "0.95"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "110Gi"
+                cpu: "4"
+              requests:
+                amd.com/gpu: 1
+                cpu: "2"
+                memory: "90Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
   ignoreDifferences:
     - group: apps
       kind: Deployment
