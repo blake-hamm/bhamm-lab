@@ -614,44 +614,6 @@ spec:
                 memory: "110Gi"
             zeroscaling:
               cooldownPeriod: 1800
-          - name: llama-3
-            enabled: true
-            pvc:
-              storage: "90Gi"
-            args:
-              - llama-server
-              - -ngl
-              - "999"
-              - -fa
-              - "on"
-              - --host
-              - 0.0.0.0
-              - --metrics
-              - --no-webui
-              - --jinja
-              - -ub
-              - "1024"
-              - -b
-              - "2048"
-              - -c
-              - "131072"
-              - -v
-              - -hf
-              - unsloth/Llama-3.3-70B-Instruct-GGUF:Q8_K_XL
-              - --parallel
-              - "1"
-              - --cont-batching
-            resources:
-              limits:
-                amd.com/gpu: 1
-                memory: "110Gi"
-                cpu: "4"
-              requests:
-                amd.com/gpu: 1
-                cpu: "2"
-                memory: "90Gi"
-            zeroscaling:
-              cooldownPeriod: 1800
           - name: llama-4
             description: High quality multimodal model
             enabled: true
@@ -659,27 +621,37 @@ spec:
               storage: "90Gi"
             args:
               - llama-server
-              - -ngl
-              - "999"
-              - -fa
-              - "on"
+              - -hf
+              - ggml-org/Llama-4-Scout-17B-16E-Instruct-GGUF:Q4_K_M
               - --host
               - 0.0.0.0
               - --metrics
               - --no-webui
               - --jinja
-              - -ub
-              - "1024"
-              - -b
-              - "2048"
-              - -c
-              - "131072"
+              - --timeout
+              - "1800"
               - -v
-              - -hf
-              - ggml-org/Llama-4-Scout-17B-16E-Instruct-GGUF:Q4_K_M
+              - --no-mmap
+              - --no-warmup
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "512"
+              - -b
+              - "4096"
+              - -c
+              - "65536"
               - --parallel
               - "1"
               - --cont-batching
+              - --temp
+              - "0.6"
+              - --min-p
+              - "0.01"
+              - --top-p
+              - "0.9"
             resources:
               limits:
                 amd.com/gpu: 1
