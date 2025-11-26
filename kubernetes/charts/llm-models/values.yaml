@@ -55,7 +55,7 @@ global:
         cooldown_time: 30
         allowed_fails: 999
         timeout: 1800
-        num_retries: 1
+        num_retries: 3
         retry_after: 15
         routing_strategy: simple-shuffle
 models: []
