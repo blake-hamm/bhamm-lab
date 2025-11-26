@@ -473,7 +473,7 @@ spec:
                 memory: "110Gi"
             zeroscaling:
               cooldownPeriod: 1800
-          - name: gemma
+          - name: gemma-3
             description: Mid model with multimodal support
             enabled: true
             image:
