@@ -507,11 +507,16 @@ spec:
               - --parallel
               - "1"
               - --cont-batching
-              - --temp 1.0
-              - --repeat-penalty 1.0
-              - --min-p 0.01
-              - --top-k 64
-              - --top-p 0.95
+              - --temp
+              - "1.0"
+              - --repeat-penalty
+              - "1.0"
+              - --min-p
+              - "0.01"
+              - --top-k
+              - "64"
+              - --top-p
+              - "0.95"
             resources:
               limits:
                 amd.com/gpu: 1
