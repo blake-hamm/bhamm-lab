@@ -1,0 +1,13 @@
+apiVersion: networking.cfargotunnel.com/v1alpha1
+kind: TunnelBinding
+namespace: docs
+metadata:
+  name: docs-tunnel-binding
+  namespace: docs
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+subjects:
+  - name: docs-site
+tunnelRef:
+  kind: ClusterTunnel
+  name: external-tunnel
