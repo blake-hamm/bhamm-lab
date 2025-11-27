@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudflare
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    path: kubernetes/manifests/apps/media/servarr
+    targetRevision: feature/expose-lab
+  destination:
+    namespace: cloudflare
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true
