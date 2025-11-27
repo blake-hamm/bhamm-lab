@@ -16,7 +16,7 @@ spec:
     path: kubernetes/charts/common
     helm:
       valuesObject:
-        name: cloudflare
+        name: cloudflare-operator-system
         externalSecrets:
           enabled: true
           secrets:
