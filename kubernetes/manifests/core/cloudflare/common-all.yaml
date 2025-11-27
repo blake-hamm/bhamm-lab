@@ -7,7 +7,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "20"
 spec:
   destination:
-    namespace: cloudflare
+    namespace: cloudflare-operator-system
     server: https://kubernetes.default.svc
   project: default
   source:

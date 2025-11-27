@@ -7,7 +7,7 @@ patches:
   - patch: |-
       - op: replace
         path: /metadata/namespace
-        value: cloudflare
+        value: cloudflare-operator-system
     target:
       kind: ServiceMonitor
       name: controller-manager-metrics-monitor
