@@ -3,3 +3,11 @@ kind: Kustomization
 resources:
   - https://github.com/adyanth/cloudflare-operator.git/config/default?ref=v0.13.1
   - https://github.com/adyanth/cloudflare-operator.git/config/prometheus?ref=v0.13.1
+patches:
+  - patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: cloudflare
+    target:
+      kind: ServiceMonitor
+      name: controller-manager-metrics-monitor
