@@ -6,7 +6,9 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "22"
 subjects:
-  - name: http://docs-site.docs.svc.cluster.local:80
+  - name: docs-site
+    target: http://docs-site.docs.svc.cluster.local:80
+    fqdn: docs.bhamm-lab.com
 tunnelRef:
   kind: ClusterTunnel
   name: external-tunnel
