@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    path: kubernetes/manifests/apps/media/servarr
+    path: kubernetes/manifests/core/cloudflare
     targetRevision: feature/expose-lab
   destination:
     namespace: cloudflare
