@@ -183,7 +183,7 @@ data:
       - title: Docs
         description: Visit docs site
         icon: mdi-file-document
-        url: https://bhamm-lab.com/docs/
+        url: https://docs.bhamm-lab.com/
       - title: kubernetes
         description: Visit kubernetes dashboard in grafana
         icon: hl-kubernetes
