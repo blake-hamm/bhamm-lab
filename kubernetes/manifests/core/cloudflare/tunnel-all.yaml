@@ -1,0 +1,18 @@
+apiVersion: networking.cfargotunnel.com/v1alpha2
+kind: ClusterTunnel
+metadata:
+  name: external-tunnel
+  namespace: cloudflare-operator-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "21"
+spec:
+  cloudflare:
+    accountId: 334b75e7892d552ad3ec86277e987ca4
+    accountName: bhamm-lab
+    domain: bhamm-lab.com
+    email: bhamm.lab@gmail.com
+    secret: cloudflare-operator-system-external-secret
+    CLOUDFLARE_API_TOKEN: cloudflare-token
+  newTunnel:
+    name: external-tunnel
+  noTlsVerify: false
