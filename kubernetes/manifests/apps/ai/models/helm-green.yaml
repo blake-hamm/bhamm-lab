@@ -199,12 +199,12 @@ spec:
               - --cont-batching
               - --temp
               - "0.7"
+              - --min-p
+              - "0.00"
               - --top-p
               - "0.8"
               - --top-k
               - "20"
-              - --repeat-penalty
-              - "1.0"
               - --presence-penalty
               - "1.5"
             resources:
@@ -256,17 +256,15 @@ spec:
               - "2"
               - --cont-batching
               - --temp
-              - "1"
+              - "0.6"
               - --min-p
-              - "0.0"
+              - "0.00"
               - --top-p
               - "0.95"
               - --top-k
               - "20"
-              - --repeat-penalty
-              - "1.0"
               - --presence-penalty
-              - "0"
+              - "1"
             resources:
               limits:
                 amd.com/gpu: 1
