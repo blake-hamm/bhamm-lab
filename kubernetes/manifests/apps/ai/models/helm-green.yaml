@@ -478,10 +478,10 @@ spec:
               limits:
                 amd.com/gpu: 1
                 memory: "120Gi"
-                cpu: "4"
+                cpu: "8"
               requests:
                 amd.com/gpu: 1
-                cpu: "2"
+                cpu: "4"
                 memory: "110Gi"
             zeroscaling:
               cooldownPeriod: 1800
