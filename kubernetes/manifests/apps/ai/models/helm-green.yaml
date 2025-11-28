@@ -118,7 +118,7 @@ spec:
             args:
               - llama-server
               - -hf
-              - unsloth/Qwen3-VL-32B-Instruct-GGUF:BF16
+              - ggml-org/Qwen3-32B-GGUF:F16
               - --host
               - 0.0.0.0
               - --metrics
@@ -171,7 +171,7 @@ spec:
             args:
               - llama-server
               - -hf
-              - unsloth/Qwen3-VL-30B-A3B-Instruct-GGUF:BF16
+              - unsloth/Qwen3-Next-80B-A3B-Instruct-GGUF:Q6_K_XL
               - --host
               - 0.0.0.0
               - --metrics
@@ -224,7 +224,7 @@ spec:
             args:
               - llama-server
               - -hf
-              - unsloth/Qwen3-VL-30B-A3B-Thinking-GGUF:BF16
+              - unsloth/Qwen3-Next-80B-A3B-Thinking-GGUF:Q6_K_XL
               - --host
               - 0.0.0.0
               - --metrics
