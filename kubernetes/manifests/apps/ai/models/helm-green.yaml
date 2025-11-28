@@ -393,7 +393,7 @@ spec:
             args:
               - llama-server
               - -hf
-              - bartowski/cerebras_GLM-4.5-Air-REAP-82B-A12B-GGUF:Q5_K_M
+              - bartowski/cerebras_GLM-4.5-Air-REAP-82B-A12B-GGUF:Q4_K_L
               - --host
               - 0.0.0.0
               - --metrics
@@ -442,7 +442,7 @@ spec:
             args:
               - llama-server
               - -hf
-              - bartowski/zai-org_GLM-4.5-Air-GGUF:Q5_K_M
+              - unsloth/GLM-4.5-Air-GGUF:Q4_K_XL
               - --host
               - 0.0.0.0
               - --metrics
