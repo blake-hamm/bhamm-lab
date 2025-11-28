@@ -376,10 +376,10 @@ spec:
               limits:
                 amd.com/gpu: 1
                 memory: "100Gi"
-                cpu: "4"
+                cpu: "8"
               requests:
                 amd.com/gpu: 1
-                cpu: "2"
+                cpu: "4"
                 memory: "80Gi"
             zeroscaling:
               cooldownPeriod: 1800
@@ -527,10 +527,10 @@ spec:
               limits:
                 amd.com/gpu: 1
                 memory: "110Gi"
-                cpu: "4"
+                cpu: "8"
               requests:
                 amd.com/gpu: 1
-                cpu: "2"
+                cpu: "4"
                 memory: "90Gi"
             zeroscaling:
               cooldownPeriod: 1800
@@ -574,10 +574,10 @@ spec:
               limits:
                 amd.com/gpu: 1
                 memory: "110Gi"
-                cpu: "4"
+                cpu: "8"
               requests:
                 amd.com/gpu: 1
-                cpu: "2"
+                cpu: "4"
                 memory: "90Gi"
             zeroscaling:
               cooldownPeriod: 1800
