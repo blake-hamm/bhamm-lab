@@ -56,6 +56,8 @@ spec:
         env:
           - name: FREE_TIER
             value: "false"
+          - name: CF_ZONES
+            value: "1a9568e5d48fee4c5a1348ec2aeb4475"
         serviceMonitor:
           enabled: true
   syncPolicy:
