@@ -1,32 +1,23 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: green-apps
+  name: cloudflare
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "30"
+    argocd.argoproj.io/sync-wave: "20"
 spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    path: kubernetes/manifests/core/cloudflare
     targetRevision: feature/expose-lab
-    path: kubernetes/manifests/apps
-    directory:
-      recurse: true
-      include: "{**all.yaml,**green.yaml}"
   destination:
+    namespace: cloudflare-operator-system
     server: https://kubernetes.default.svc
-    namespace: argo
-  ignoreDifferences:
-    - group: apps
-      kind: Deployment
-      namespace: models
-      jsonPointers:
-        - /spec/replicas
   syncPolicy:
     syncOptions:
+      - CreateNamespace=true
       - ApplyOutOfSyncOnly=true
-      - RespectIgnoreDifferences=true
     automated:
       prune: true
       selfHeal: true

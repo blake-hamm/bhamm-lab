@@ -53,16 +53,3 @@ spec:
       targetPort: 80
   selector:
     app: docs-site
----
-apiVersion: traefik.io/v1alpha1
-kind: Middleware
-metadata:
-  name: strip-docs-prefix
-  namespace: traefik
-  annotations:
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "23"
-spec:
-  stripPrefix:
-    prefixes:
-      - /docs

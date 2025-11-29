@@ -9,8 +9,6 @@ metadata:
     argocd.argoproj.io/sync-wave: "22"
 spec:
   replicas: 1
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
       app: qbittorrent
@@ -20,10 +18,13 @@ spec:
         app: qbittorrent
     spec:
       securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
         fsGroup: 1000
+        fsGroupChangePolicy: "OnRootMismatch"
       containers:
         - name: gluetun
-          image: ghcr.io/qdm12/gluetun:v3.39.0
+          image: ghcr.io/qdm12/gluetun:v3.40.0
           env:
             - name: VPN_SERVICE_PROVIDER
               value: protonvpn
@@ -50,6 +51,7 @@ spec:
                   key: WIREGUARD_PRIVATE_KEY
           securityContext:
             runAsUser: 0
+            runAsNonRoot: false
             capabilities:
               add:
                 - NET_ADMIN
@@ -73,30 +75,18 @@ spec:
               value: "America/Denver"
             - name: WEBUI_PORT
               value: "8080"
+            - name: DOCKER_MODS
+              value: "ghcr.io/t-anc/gsp-qbittorent-gluetun-sync-port-mod:main"
+            - name: GSP_GTN_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: servarr-external-secret
+                  key: GLUETUN_API_KEY
+            - name: GSP_SLEEP
+              value: "60"
           securityContext:
-            runAsUser: 1000
-        - name: port-sync
-          image: ghcr.io/bjw-s-labs/gluetun-qb-port-sync:latest
-          env:
-            - name: GLUETUN_CONTROL_SERVER_HOST
-              value: "localhost"
-            - name: GLUETUN_CONTROL_SERVER_PORT
-              value: "8000"
-            - name: QBITTORRENT_HOST
-              value: "localhost"
-            - name: QBITTORRENT_WEBUI_PORT
-              value: "8080"
-            - name: CRON_ENABLED
-              value: "true"
-            - name: CRON_SCHEDULE
-              value: "*/5 * * * *"
-            - name: LOG_TIMESTAMP
-              value: "false"
-          volumeMounts:
-            - name: port-forward-config
-              mountPath: /config
-          securityContext:
-            runAsUser: 1000
+            runAsUser: 0
+            runAsNonRoot: false
       volumes:
         - name: gluetun-config
           persistentVolumeClaim:
@@ -107,5 +97,3 @@ spec:
         - name: downloads
           persistentVolumeClaim:
             claimName: downloads
-        - name: port-forward-config
-          emptyDir: {}

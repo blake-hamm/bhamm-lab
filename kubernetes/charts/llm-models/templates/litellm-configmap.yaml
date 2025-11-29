@@ -8,14 +8,30 @@ metadata:
     argocd.argoproj.io/sync-wave: "22"
 data:
   config.yaml: |
-    {{- $litellmConfig := deepCopy .Values.global.litellm.config | toYaml | fromYaml }}
-    {{- $models := list }}
+    {{- with .Values.global.litellm.config }}
+    {{- toYaml (omit . "model_list") | nindent 4 }}
+    {{- end }}
+    model_list:
     {{- range .Values.models }}
     {{- if .enabled }}
-    {{- $model := dict "model_name" .name "litellm_params" (dict "model" (printf "openai/%s" .name) "api_base" (printf "http://%s.models.svc.cluster.local:8080/v1" .name) "api_key" "dummy") }}
-    {{- $models = append $models $model }}
+    - model_name: {{ .name | quote }}
+      litellm_params:
+        model: {{ printf "openai/%s" .name | quote }}
+        api_base: {{ printf "http://%s.models.svc.cluster.local:8080/v1" .name | quote }}
+        api_key: "dummy"
+        {{- if .litellm_params }}
+        timeout: {{ .litellm_params.timeout | default 1800 }}
+        stream_timeout: {{ .litellm_params.stream_timeout | default 1800 }}
+        max_retries: {{ .litellm_params.max_retries | default 3 }}
+        {{- $customParams := omit .litellm_params "timeout" "stream_timeout" }}
+        {{- with $customParams }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- else }}
+        timeout: 1800
+        stream_timeout: 1800
+        max_retries: 3
+        {{- end }}
     {{- end }}
     {{- end }}
-    {{- $_ := set $litellmConfig "model_list" $models }}
-    {{- toYaml $litellmConfig | nindent 4 }}
 {{- end }}

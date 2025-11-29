@@ -1,0 +1,4 @@
+- name: Forward vpn queries
+  oxlorg.opnsense.unbound_forward:
+    domain: 'vpn.bhamm-lab.com'
+    target: '1.1.1.1'

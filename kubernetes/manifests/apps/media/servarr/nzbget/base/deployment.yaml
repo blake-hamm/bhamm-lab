@@ -9,8 +9,6 @@ metadata:
     argocd.argoproj.io/sync-wave: "22"
 spec:
   replicas: 1
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
       app: nzbget
@@ -20,7 +18,10 @@ spec:
         app: nzbget
     spec:
       securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
         fsGroup: 1000
+        fsGroupChangePolicy: "OnRootMismatch"
       containers:
         - name: gluetun
           image: ghcr.io/qdm12/gluetun:v3.39.0
@@ -56,7 +57,7 @@ spec:
             - name: gluetun-config
               mountPath: /gluetun
         - name: nzbget
-          image: nzbgetcom/nzbget:latest
+          image: lscr.io/linuxserver/nzbget:latest
           ports:
             - containerPort: 6789
               name: web-ui

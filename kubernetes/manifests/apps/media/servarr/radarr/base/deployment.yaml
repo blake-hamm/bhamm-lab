@@ -9,8 +9,6 @@ metadata:
     argocd.argoproj.io/sync-wave: "22"
 spec:
   replicas: 1
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
       app: radarr
@@ -23,6 +21,7 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
+        fsGroupChangePolicy: "OnRootMismatch"
       containers:
         - name: radarr
           image: lscr.io/linuxserver/radarr:latest

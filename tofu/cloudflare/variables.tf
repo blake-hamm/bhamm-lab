@@ -26,3 +26,9 @@ variable "truenas_bucket_storage_class" {
   type        = string
   default     = "Standard"
 }
+
+variable "tunnel_name" {
+  description = "The name of the Cloudflare Zero Trust tunnel."
+  type        = string
+  default     = "bhamm-lab-site"
+}

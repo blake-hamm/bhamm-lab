@@ -9,8 +9,6 @@ metadata:
     argocd.argoproj.io/sync-wave: "22"
 spec:
   replicas: 1
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
       app: unpackerr
@@ -21,7 +19,9 @@ spec:
     spec:
       securityContext:
         runAsUser: 1000
+        runAsGroup: 1000
         fsGroup: 1000
+        fsGroupChangePolicy: "OnRootMismatch"
       containers:
         - name: unpackerr
           image: golift/unpackerr

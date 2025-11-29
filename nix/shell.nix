@@ -13,7 +13,7 @@ pkgs.mkShell {
     sops
     mkdocs
     ansible
-    ansible-lint
+    # ansible-lint
     sshpass
     opentofu
     terraform

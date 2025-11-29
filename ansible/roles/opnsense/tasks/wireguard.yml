@@ -5,4 +5,4 @@
     allowed_ips: ["10.10.0.1/24"]
     public_key: rx52YF2tEYaoCTBEqH9FlY5MMTWWFD+17MVvx7I05Bk=
     private_key: "{{ lookup('env', 'OPNSENSE_WIREGUARD_SERVER_PK') }}"
-    peers: ["Phone"]
+    peers: ["Phone", "Laptop"]

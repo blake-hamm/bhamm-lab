@@ -23,10 +23,9 @@ spec:
             ingressClass: traefik-external
             routes:
               - kind: Rule
-                match: Host(`bhamm-lab.com`) && PathPrefix(`/docs/`)
+                match: Host(`docs.bhamm-lab.com`)
                 middlewares:
                   - name: default-headers
-                  - name: strip-docs-prefix
                 services:
                   - name: docs-site
                     scheme: http

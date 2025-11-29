@@ -74,7 +74,7 @@ spec:
           command:
             - cilium
             - install
-            - --version=v1.18.2
+            - --version=v1.18.4
             - --set
             - kubeProxyReplacement=true
             - --values

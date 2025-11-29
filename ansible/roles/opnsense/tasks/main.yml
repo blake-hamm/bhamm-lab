@@ -24,3 +24,8 @@
     file: wireguard.yml
     apply:
       tags: [wireguard]
+- name: Configure unbound
+  ansible.builtin.include_tasks:
+    file: unbound.yml
+    apply:
+      tags: [unbound]

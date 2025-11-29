@@ -17,7 +17,7 @@ spec:
     helm:
       valuesObject:
         nodeplugin:
-          updateStrategy: OnDelete
+          updateStrategy: RollingUpdate
           tolerations:
             - key: "intel.com/gpu"
               operator: "Exists"
@@ -39,8 +39,8 @@ spec:
           clusterID: "25afe9dc-2a59-4135-b1fc-6728b065c2a9"
           fsName: cephfs
           pool: cephfs_data
-          mounter: fuse
-          fuseMountOptions: debug
+          mounter: kernel
+          kernelMountOptions: "recover_session=clean"
           provisionerSecret: csi-cephfs-secret
           controllerExpandSecret: csi-cephfs-secret
           nodeStageSecret: csi-cephfs-secret
