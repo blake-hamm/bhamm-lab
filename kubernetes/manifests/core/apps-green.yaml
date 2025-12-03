@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/expose-lab
+    targetRevision: feature/update-docs
     path: kubernetes/manifests/apps
     directory:
       recurse: true
