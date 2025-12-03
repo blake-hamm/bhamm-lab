@@ -30,5 +30,10 @@
       default = false;
       description = "Enable VS Codium";
     };
+    vesktop.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable Vesktop";
+    };
   };
 }
