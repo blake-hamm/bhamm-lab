@@ -9,11 +9,11 @@ This page provides a view of the lab's physical infrastructure. It covers the ha
 
 | Name     | Model                          | CPU                          | RAM       | Storage                                      | Features                               | Role                           |
 |----------|--------------------------------|------------------------------|-----------|----------------------------------------------|----------------------------------------|--------------------------------|
-| Method   | Supermicro H12SSL-i            | AMD EPYC 7502    | 128 GB     | 250 GB SSD (boot), 2x4 TB NVME, 2x2 TB NVME, 1 TB NVME (ceph) | Dual 10 GB NIC SFP+, AMD Radeon AI Pro R9700 | Proxmox, ceph, AMD GPU VM |
-| Indy     | Supermicro D-2146NT            | Intel Xeon D-2146NT 8-Core   | 128 GB ECC| 250 GB SSD (boot), 1 TB NVME (ceph), 2x1TB SSD (zfs) | 2x10GB NIC SFP+, 2x10GB NIC, 2x1GB NIC, ipmi, Intel Arc A310 | Proxmox, ceph and Arc GPU VM |
-| Stale    | X10SDV-4C-TLN4F                | Intel Xeon CPU D-1518 8-Core | 64 GB     | 120 GB SSD (boot), 1 TB NVME (ceph), 2x1TB SSD (zfs) | 2x10GB NIC, 2x1GB NIC, ipmi           | Proxmox and ceph               |
-| Nose     | Framework Laptop 13            | AMD Ryzen AI MAX+ 395        | 32 GB     | 1 TB NVME (boot), 1 TB NVME (ceph)           | 2x10GB NIC, 2x1GB NIC, ipmi, AMD Strix Halo GPU | Proxmox, ceph and Strix Halo GPU VM |
-| Tail     | Framework Laptop 13            | AMD Ryzen AI MAX+ 395        | 32 GB     | 1 TB NVME (boot), 1 TB NVME (ceph)           | 2x10GB NIC, 2x1GB NIC, ipmi, AMD Strix Halo GPU | Proxmox, ceph and Strix Halo GPU VM |
+| Method   | Supermicro H12SSL-i            | AMD EPYC 7502    | 128 GB ECC     | 1TB NVME (boot and vm storage), 1 TB NVME (ceph db/wal), 1TB SSD (ceph osd), 3.84 TB SSD (ceph osd), 2x2TB and 1TB SSD (TrueNas pcie passthrough) | Dual 10 GB NIC SFP+, ipmi, AMD Radeon AI Pro R9700 (Talos llama.cpp VM), Intel Arc A310e (Talos immich/jellyfin VM), SATA pcie | Proxmox and ceph |
+| Indy     | Supermicro D-2146NT            | Intel Xeon D-2146NT 8-Core   | 128 GB ECC| 1TB NVME (boot and vm storage), 1 TB NVME (ceph db/wal), 1TB SSD (ceph osd), 3.84 TB SSD (ceph osd) | 2x10GB NIC SFP+, 2x10GB NIC, 2x1GB NIC, ipmi | Proxmox and ceph |
+| Stale    | X10SDV-4C-TLN4F                | Intel Xeon CPU D-1518 8-Core | 64 GB ECC     | 1TB NVME (boot and vm storage), 1 TB NVME (ceph db/wal), 1TB SSD (ceph osd), 3.84 TB SSD (ceph osd) | 2x10GB NIC, 2x1GB NIC, ipmi           | Proxmox and ceph               |
+| Nose     | Framework Mainboard            | AMD Ryzen AI MAX+ 395        | 128 GB (120 dedicated vram)     | 500GB NVME (boot drive), 1 TB NVME (model local path storage)           | 5GB NIC, Thunderbolt | Talos bare metal |
+| Tail     | Framework Mainboard            | AMD Ryzen AI MAX+ 395        | 128 GB (120 dedicated vram)     | 500GB NVME (boot drive), 1 TB NVME (model local path storage)           | 5GB NIC, Thunderbolt | Talos bare metal |
 
 ### Networking Equipment
 
