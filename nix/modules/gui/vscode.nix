@@ -14,6 +14,7 @@
             jnoortheen.nix-ide
             hashicorp.terraform
             rooveterinaryinc.roo-cline
+            bierner.markdown-mermaid
             # kilocode.kilo-code
             # dracula-theme.theme-dracula
             # vscodevim.vim
