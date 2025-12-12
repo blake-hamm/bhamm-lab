@@ -27,5 +27,5 @@ This page provides a view of the lab's physical infrastructure. It covers the ha
 - **UPS:** CyberPower OR500LCDRM1U Smart App LCD UPS
 - **PiKVM:** KVM for managing physical devices
 
-## Future plans
-- **Replace Antsle:** The antsle server is the weakest link in my setup. At some point, I'd like to replace it with something that has more pcie expandability. Then, I would move my Antsle server to my parents for an offsite backup and site-to-site vpn.
+## Future Plans
+- **Replace Antsle:** The antsle server is the weakest link in my setup. At some point, I'd like to replace it with something that has more PCIe expandability. Then, I would move my Antsle server to my parents for an offsite backup and site-to-site VPN.
