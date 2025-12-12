@@ -1,21 +1,17 @@
 # Cloudnative pg
 ## WAL archive to seaweedfs
-I have refactore cnpg backups so that I don't need to deal with volume snapshots when backing up/restoring. Instead, backups are now orchestrated using seaweedfs and the WAL archiving pattern.
-
-There are some manual steps involved with restoring backups:
-- Confirm the current version number in seaweedfs `cnpg-backups/v1`
-- Based on the version, adjust gitops accordingly:
+Backups are now orchestrated using seaweedfs and the WAL archiving pattern. This is all handled in the cnpg capability in my 'common' helm chart. It can be enabled.
 ```yaml
 postgresql:
   enabled: true
   backup:
     enabled: true
-    pathVersion: "v1.1" # New target backup version
+    pathVersion: "v1.1" # Optional backup version
   restore:
     enabled: true
-    pathVersion: "v1" # Current version with latest backup in seaweedfs
+    pathVersion: "v1" # Optional new version (swfs bucket path)
 ```
-Everything else will be automagically handled!
+The `pathVersion` used to be required, but it is now optional. Keep in mind, this is no longer required because cnpg by default uses the annotation `cnpg.io/skipEmptyWalArchiveCheck: "enabled"`. This is 'destructive' in the sense that when it creates a cnpg cluster from a backup, it will then replace the existing backup with the current state. This is desired behavior for me because I have robust backups of swfs (2 copies, 1 offsite). Without the `pathVersion` (which is default) everything else will be automagically handled!
 
 *Note: Depending on the timing of cnpg backups/wals and seaweedfs backups, you may fail to restore postgres clusters. It's imparitive the seaweedfs backup ran after cnpg backups fully completed* \
 **I highly recommend you only restore in the morning after a seaweedfs nightly backup occured and no other data was altered.**
