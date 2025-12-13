@@ -69,7 +69,8 @@ spec:
             args:
               - llama-server
               - -hf
-              - bartowski/openai_gpt-oss-120b-GGUF:BF16
+              - gghfez/gpt-oss-120b-Derestricted.MXFP4_MOE-gguf
+              # - bartowski/openai_gpt-oss-120b-GGUF:BF16
               - --host
               - 0.0.0.0
               - --metrics
