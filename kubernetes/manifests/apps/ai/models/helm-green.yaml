@@ -174,7 +174,9 @@ spec:
             args:
               - llama-server
               - -hf
-              - unsloth/Qwen3-Next-80B-A3B-Instruct-GGUF:Q6_K_XL
+              - unsloth/Qwen3-Next-80B-A3B-Instruct-GGUF
+              - -hff
+              - UD-Q6_K_XL/Qwen3-Next-80B-A3B-Instruct-UD-Q6_K_XL-00001-of-00002.gguf
               - --host
               - 0.0.0.0
               - --metrics
@@ -229,7 +231,9 @@ spec:
             args:
               - llama-server
               - -hf
-              - unsloth/Qwen3-Next-80B-A3B-Thinking-GGUF:Q6_K_XL
+              - unsloth/Qwen3-Next-80B-A3B-Thinking-GGUF
+              - -hff
+              - UD-Q6_K_XL/Qwen3-Next-80B-A3B-Thinking-UD-Q6_K_XL-00001-of-00002.gguf
               - --host
               - 0.0.0.0
               - --metrics
@@ -338,7 +342,9 @@ spec:
             args:
               - llama-server
               - -hf
-              - unsloth/Devstral-2-123B-Instruct-2512-GGUF:Q4_K_XL
+              - unsloth/Devstral-2-123B-Instruct-2512-GGUF
+              - -hff
+              - UD-Q4_K_XL/Devstral-2-123B-Instruct-2512-UD-Q4_K_XL-00001-of-00002.gguf
               - --host
               - 0.0.0.0
               - --metrics
@@ -493,7 +499,9 @@ spec:
             args:
               - llama-server
               - -hf
-              - unsloth/GLM-4.5-Air-GGUF:Q4_K_XL
+              - unsloth/GLM-4.5-Air-GGUF
+              - -hff
+              - UD-Q4_K_XL/GLM-4.5-Air-UD-Q4_K_XL-00001-of-00002.gguf
               - --host
               - 0.0.0.0
               - --metrics
