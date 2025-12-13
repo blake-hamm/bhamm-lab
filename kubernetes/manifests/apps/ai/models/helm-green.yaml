@@ -291,20 +291,19 @@ spec:
               - --metrics
               - --no-webui
               - --jinja
+              - --timeout
+              - "1800"
               - -v
+              - --no-mmap
               - --no-warmup
               - -ngl
               - "999"
               - -fa
               - "on"
-              - -ctk
-              - q8_0
-              - -ctv
-              - q8_0
               - -ub
-              - "3072"
+              - "512"
               - -b
-              - "49152"
+              - "4096"
               - -c
               - "65536"
               - --parallel
@@ -320,6 +319,53 @@ spec:
               - "20"
               - --presence-penalty
               - "1.0"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "120Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
+          - name: devstral
+            description: Mistral development model
+            enabled: true
+            pvc:
+              storage: "80Gi"
+            args:
+              - llama-server
+              - -hf
+              - unsloth/Devstral-2-123B-Instruct-2512-GGUF:Q4_K_XL
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - --timeout
+              - "1800"
+              - -v
+              - --no-mmap
+              - --no-warmup
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "512"
+              - -b
+              - "4096"
+              - -c
+              - "65536"
+              - --parallel
+              - "1"
+              - --cont-batching
+              - --temp
+              - "0.15"
+              - --min-p
+              - "0.01"
             resources:
               limits:
                 amd.com/gpu: 1
