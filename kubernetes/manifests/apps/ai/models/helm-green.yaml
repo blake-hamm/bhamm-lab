@@ -337,8 +337,6 @@ spec:
           - name: devstral
             description: Mistral development model
             enabled: true
-            image:
-              pullPolicy: Always
             pvc:
               storage: "80Gi"
             args:
