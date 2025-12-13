@@ -342,9 +342,10 @@ spec:
             args:
               - llama-server
               - -hf
-              - unsloth/Devstral-2-123B-Instruct-2512-GGUF
-              - -hff
-              - UD-Q4_K_XL/Devstral-2-123B-Instruct-2512-UD-Q4_K_XL-00001-of-00002.gguf
+              - unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF:BF16
+              # - unsloth/Devstral-2-123B-Instruct-2512-GGUF
+              # - -hff
+              # - UD-Q4_K_XL/Devstral-2-123B-Instruct-2512-UD-Q4_K_XL-00001-of-00002.gguf
               - --host
               - 0.0.0.0
               - --metrics
