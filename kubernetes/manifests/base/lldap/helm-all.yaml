@@ -16,7 +16,8 @@ spec:
     targetRevision: lldap-chart-0.3.5
     helm:
       valuesObject:
-        replicaCount: 3
+        fullnameOverride: "lldap"
+        replicaCount: 2
         persistence:
           enabled: false
         secret:
