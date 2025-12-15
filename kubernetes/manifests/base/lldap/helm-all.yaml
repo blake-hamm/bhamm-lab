@@ -33,7 +33,7 @@ spec:
                 key: uri
         image:
           repository: "lldap/lldap"
-          tag: "v0.6.1"
+          tag: "v0.6.2"
         hpa:
           enabled: false
         ingress:
