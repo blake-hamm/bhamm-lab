@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
         - name: lldap-bootstrap
-          image: lldap/lldap:v0.6.1
+          image: lldap/lldap:v0.6.2
           command: ["/app/bootstrap.sh"]
           env:
             - name: LLDAP_URL
