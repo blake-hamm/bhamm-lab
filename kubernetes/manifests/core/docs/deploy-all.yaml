@@ -15,7 +15,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "21"
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: docs-site
@@ -27,6 +27,7 @@ spec:
       containers:
         - name: docs-server
           image: harbor.bhamm-lab.com/library/docs-site:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
           resources:
