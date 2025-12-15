@@ -14,7 +14,7 @@ spec:
           command: ["/app/bootstrap.sh"]
           env:
             - name: LLDAP_URL
-              value: "http://lldap.lldap.svc.cluster.local:17170"
+              value: "http://lldap-service.lldap.svc.cluster.local:17170"
             - name: LLDAP_ADMIN_USERNAME
               valueFrom:
                 secretKeyRef:
