@@ -13,7 +13,7 @@ spec:
   source:
     path: lldap-chart
     repoURL: https://github.com/Evantage-WS/lldap-kubernetes.git
-    targetRevision: main
+    targetRevision: lldap-chart-0.3.5
     helm:
       valuesObject:
         replicaCount: 3
