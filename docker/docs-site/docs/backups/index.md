@@ -31,6 +31,10 @@ D -->|Daily| E[Cloudflare R2]
 
 2. **Data Recovery**:
 ```mermaid
+---
+config:
+  theme: 'dark'
+---
 sequenceDiagram
     participant r2 as Cloudflare R2 (Mirror)
     participant minio as Minio (TrueNAS VM)
