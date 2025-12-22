@@ -46,6 +46,7 @@ spec:
                 property: lldap-ldap-user-pass
         pvc:
           - name: radarr-config
+          - name: cleanuparr-config
           - name: unpackerr-config
           - name: jellyfin-config
             storageSize: 3Gi
@@ -147,6 +148,18 @@ spec:
                   - name: default-headers
                 services:
                   - name: radarr
+                    scheme: http
+                    port: ui
+          - enabled: true
+            name: cleanuparr
+            ingressClass: traefik-external
+            routes:
+              - kind: Rule
+                match: Host(`cleanuparr.bhamm-lab.com`)
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: cleanuparr
                     scheme: http
                     port: ui
   syncPolicy:

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cleanuparr
+  namespace: servarr
+  annotations:
+    argocd.argoproj.io/sync-wave: "23"
+spec:
+  selector:
+    app: cleanuparr
+  ports:
+    - name: ui
+      targetPort: 11011
+      port: 11011
