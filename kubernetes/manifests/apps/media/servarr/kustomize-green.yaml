@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
     path: kubernetes/manifests/apps/media/servarr
-    targetRevision: feature/update-docs
+    targetRevision: feature/servarr-refresh
     kustomize:
       patches:
         - target:
