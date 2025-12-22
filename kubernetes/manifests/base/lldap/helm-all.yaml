@@ -13,10 +13,11 @@ spec:
   source:
     path: lldap-chart
     repoURL: https://github.com/Evantage-WS/lldap-kubernetes.git
-    targetRevision: main
+    targetRevision: lldap-chart-0.3.5
     helm:
       valuesObject:
-        replicaCount: 3
+        fullnameOverride: "lldap"
+        replicaCount: 2
         persistence:
           enabled: false
         secret:
@@ -33,7 +34,7 @@ spec:
                 key: uri
         image:
           repository: "lldap/lldap"
-          tag: "v0.6.1"
+          tag: "v0.6.2"
         hpa:
           enabled: false
         ingress:

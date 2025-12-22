@@ -1,11 +1,10 @@
 # Overview
 
-*Central hub for infrastructure and application deployment procedures*
+*Central hub for infrastructure and application deployment procedures; mainly for my reference.*
 
 ## Core Workflows
 - **Automated CI/CD**: Primary deployment path for routine changes using Argo Events and Workflows triggered from Forgejo webhook
-- **Manual Operations**: For newer capabilities
-- **Hybrid**: Automated pipelines with manual approval gates
+- **Manual Operations**: For newer capabilities or configuring bare metal
 
 ## Key References
 - 🔧 [Ansible Playbooks](ansible.md) - Debian and Opnsense configuration management
@@ -15,6 +14,8 @@
 - 📦 [NixOS Configs](nixos.md) - Declarative OS configurations for Framework 13 laptop
 - 🤖 [Talos](talos.md) - Kubernetes OS deployment and management with Open Tofu
 - 📘 [Docs (MkDocs)](mkdocs.md) - Documentation deployment
+- 🌊 [ArgoCD](argocd.md) - GitOps continuous delivery tool
+- ☁️ [Cloudflare](cloudflare.md) - Cloudflare resources management
 - ⚠️ Deprecated: [k3s](k3s.md) - Use Talos instead
 
 ## Recovery Procedures

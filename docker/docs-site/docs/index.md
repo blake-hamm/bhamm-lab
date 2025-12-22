@@ -1,26 +1,27 @@
-# Overview
+# Welcome to bhamm-lab
 
-***Welcome to the docs site for bhamm-lab.com!***
+<!--![Architecture Diagram](assets/diagram.png)-->
+[![GitHub stars](https://img.shields.io/github/stars/blake-hamm/bhamm-lab?style=social)](https://github.com/blake-hamm/bhamm-lab/stargazers) [![License](https://img.shields.io/github/license/blake-hamm/bhamm-lab)](LICENSE.md)
+
+Welcome to my personal lab for exploring AI/ML, DevOps, and security. I've built a resilient, open-source platform by combining bare-metal servers, virtualization, and container orchestration. It's a place for learning, tinkering, and maybe over-engineer a solution or two.
 
 ![bhamm-lab-rack](./assets/rack.jpg)
 
+## Documentation Structure
 
-These docs provide a comprehensive guide to the bhamm-lab.com infrastructure, processes, and best practices. Primarily, this is used for my own sanity and reference, but I hope it will inspires others as well. The documentation is organized into five main sections:
+The documentation is organized into six main sections:
 
-- **[Architecture](architecture/index.md):**
-  Detailed documentation of my lab's design and structure as well as my design principles.
+- **[Architecture](architecture/index.md):** Detailed design, hardware, software stack, and guiding principles
+- **[AI/ML](ai/index.md):** AI/ML workloads, GPU acceleration, and inference capabilities
+- **[Backups](backups/index.md):** Disaster recovery, 3-2-1 backup strategy, and cloud integration
+- **[Deployments](deployments/index.md):** CI/CD pipelines, GitOps, and infrastructure provisioning
+- **[Operations](operations/index.md):** Day-to-day practices, monitoring, and troubleshooting
+- **[Security](security/index.md):** Network security, secrets management, and access controls
 
-- **[AI](ai/index.md):**
-  AI/ML workloads in my lab and future plans.
+## Roadmap
 
-- **[Backups](backups/index.md):**
-  Disaster recovery processes and strategies.
+- **Short-term:** Build personal website for blogs and project showcase
+- **Mid-term:** Run MiniMax with llama.cpp grpc accross two Strix Halo system
+- **Long-term:** Fine-tuning generative models, Home Assistant integration
 
-- **[Deployments](deployments/index.md):**
-  Procedures for provisioning new resources and deploying changes, using CI/CD, Ansible, Terraform, and Argo CD.
-
-- **[Operations](operations/index.md):**
-  Day-to-day operational practices, monitoring, and troubleshooting guides.
-
-- **[Security](security/index.md):**
-  Policies, practices, and tools that secure our environment and ensure adherence to industry standards.
+*Github issues are more up to date with detailed task tracking.*

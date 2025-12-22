@@ -32,6 +32,7 @@ spec:
                     port: http
         postgresql:
           enabled: true
+          storageSize: 5Gi
           backup:
             enabled: true
           restore:

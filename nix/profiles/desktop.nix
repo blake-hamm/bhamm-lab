@@ -12,5 +12,6 @@
     uhk.enable = true;
     precommit.enable = true;
     networking.backend = "networkmanager";
+    vesktop.enable = true;
   };
 }

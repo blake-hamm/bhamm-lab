@@ -7,5 +7,6 @@
     ./kitty.nix
     ./steam.nix
     ./vscode.nix
+    ./vesktop.nix
   ];
 }

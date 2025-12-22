@@ -10,3 +10,8 @@ resource "cloudflare_zero_trust_tunnel_cloudflared" "static_site" {
   name          = var.tunnel_name
   tunnel_secret = local.tunnel_secret
 }
+
+resource "cloudflare_tiered_cache" "tiered_cache" {
+  zone_id = data.cloudflare_zones.bhamm_lab.result[0].id
+  value   = "on"
+}

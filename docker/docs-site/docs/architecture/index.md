@@ -2,123 +2,86 @@
 
 ![bhamm-lab-diagram](../assets/diagram.png)
 
-This lab is a self-hosted and experimental environment designed to support research and professional development in AI/ML, DevOps, Kubernetes and security. It serves as both a playground for innovation and a production-grade platform built for high availability, scalability, and resilience. By integrating container orchestration, automation, and hybrid cloud capabilities, bhamm-lab.com is engineered to support self-hosted applications and grow my skillset as an AI/ML Engineer and Consultant.
+Welcome to my personal lab for exploring AI/ML, DevOps, and security. I've built a resilient, open-source platform by combining bare-metal servers, virtualization, and container orchestration. It's a place for learning, tinkering, and maybe over-engineer a solution or two.
 
-## Key Objectives
+## Guiding Principles
 
-- **Learning & Experimentation:**
-Research in AI/ML, DevOps, and security.
+This project is, first and foremost, a platform for learning and exploration. The core philosophy is to maintain a resilient and reproducible test environment where experimentation is encouraged. While this approach can sometimes lead to over-engineering (here's [the counter-argument](https://frenck.dev/the-enterprise-smart-home-syndrome/)), the primary goal is to guarantee that any component can be rebuilt from code.
 
-- **AI/ML Services:**
-Build an environment that supports AI/ML workloads with an anti-Nvidia mindset.
+This philosophy is supported by several key principles:
 
-- **Robust Self-Hosting:**
-Create a resilient infrastructure for self-hosting with scalability, high availability, security and disaster recovery.
+-   **Everything as Code:** All infrastructure, from bare-metal provisioning to application deployment, is defined declaratively and managed through version control. This ensures consistency and enables rapid disaster recovery.
+-   **Monorepo Simplicity:** The entire homelab is managed within a single repository, providing a unified view of all services, configurations, and documentation.
+-   **Open Source First:** I prioritize the use of open-source software to maintain flexibility and support the community.
+-   **Accelerated AI/ML:** The environment is specifically tailored for AI/ML workloads, with a focus on leveraging AMD and Intel GPU acceleration for inference.
 
-- **Hybrid Cloud Integration:**
-Integrate on-premises infrastructure with cloud resources (e.g., GCP) for backups, failover and AI/ML workloads.
+## Core Infrastructure
 
-## Lab at a Glance
+**Hardware:**
 
-- **Core Infrastructure:**
-A blend of bare-metal servers (Debian), virtualized environments (Proxmox), and container orchestration (Talos).
+- **Servers:** 5 servers – 'Method' (SuperMicro H12SSL‑i), 'Indy' (SuperMicro D‑2146NT), 'Stale' (X10SDV‑4C‑TLN4F), 'Nose' & 'Tail' (Framework Mainboard)
+- **Networking:** TP‑Link Omada switches & Protectli Opnsense firewall
+- **Accelerated compute:** Intel Arc A310, AMD Radeon AI Pro R9700, AMD Ryzen AI MAX+ 395 "Strix Halo"
+- **Management:** UPS, PiKVM
 
-- **GPU Workloads:**
-Leverage AMD and Intel gpu opperators to power AI/ML and encoding applications with a Raedon 7900xtx and Arc A310 (and pre-ordered Framwork motherboard).
+**Software Stack:**
 
-- **Automation Tools:**
-A suite of tools such as Terraform, Ansible, and Argo CD automates provisioning, configuration, and deployment processes.
+- **Operating Systems**: [Debian](https://www.debian.org/), [Proxmox](https://www.proxmox.com/), [Talos](https://www.talos.dev/), [NixOS](https://nixos.org/), [Truenas](https://www.truenas.com/)
+- **Storage:** [Ceph](https://ceph.io/) cluster (hot storage) and [Truenas](https://www.truenas.com/) (cold storage)
+- **Container Orchestration:** Ephemeral [Talos](https://www.talos.dev/) [Kubernetes](https://kubernetes.io/) clusters and [Harbor](https://goharbor.io/) proxy/registry
+- **Automation:** [OpenTofu](https://opentofu.org/), [Ansible](https://www.ansible.com/), [ArgoCD](https://argo-cd.readthedocs.io/en/stable/), [NixOS](https://nixos.org/), [Argo Events](https://argoproj.github.io/argo-events/) and [Argo Workflows](https://argoproj.github.io/argo-workflows/)
+- **Security:** [SOPS](https://github.com/mozilla/sops), [HashiCorp Vault](https://www.vaultproject.io/), [Authelia](https://www.authelia.com/), [Traefik](https://traefik.io/traefik/), VLANs
+- **Observability:** [Kube Prometheus Stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack), [Alloy](https://github.com/grafana/alloy), [LangSmith](https://www.langsmith.com/)
 
-- **Cloud Integration:**
-Strategic use of Google Cloud Platform (GCP) for hybrid backup strategies, disaster recovery, high availability and access to Vertex AI Platform.
+## Key Features
 
-- **Security Measures:**
-Implement best practices in security, including network segmentation, access controls, and secrets management using SOPS and Vault.
+**AI/ML Capabilities:**
 
-- **Storage & Data Management:**
-Distributed storage solutions including Ceph, Snapraid/mergerfs and GCP storage ensuring cloud-native, 3-2-1 backups with data redundancy and high availability.
+- 🤖 Managing device through [Intel GPU plugin](https://intel.github.io/intel-device-plugins-for-kubernetes/cmd/gpu_plugin/README.html) and [AMD ROCm operator](https://github.com/ROCm/gpu-operator)
+- 🖼️ [Immich](https://immich.app/) machine learning & [Jellyfin](https://jellyfin.org/) transcoding with Intel Arc A310
+- 📦 `llm-models` [Helm chart](kubernetes/charts/llm-models) – [KubeElasti](https://kubeelasti.dev/) scale‑to‑zero [Llama.cpp](https://github.com/ggml-org/llama.cpp) inference routed through [LiteLLM](https://github.com/BerriAI/litellm)
+- 🧠 Embedding model inference with AMD Radeon AI Pro R9700
+- ⚡ Dense & MoE inference on two AMD Ryzen AI MAX+ 395
+- ☁️ GCP Vertex AI for larger ML inference
 
-- **Networking:**
-Advanced network designs featuring Opnsense firewall, TP Link Omada equipment, robust VLANs and secure connectivity.
+**Automation:**
 
-## Design Principles
+- Infrastructure as Code with [OpenTofu](https://opentofu.org/)
+- [Debian](https://www.debian.org/), [Proxmox](https://www.proxmox.com/) and [Opnsense](https://opnsense.org/) management with [Ansible](https://www.ansible.com/)
+- GitOps deployment with [ArgoCD](https://argo-cd.readthedocs.io/en/stable/)
+- Blue/green deployment strategies
+- Container registry and proxy with [Harbor](https://goharbor.io/)
+- [Argo Events](https://argoproj.github.io/argo-events/) and [Argo Workflows](https://argoproj.github.io/argo-workflows/) for backups, secret management and CI/CD pipelines
+- [NixOS](https://nixos.org/) for Framework 13 laptop and Aorus gaming desktop
+- [Common helm chart](kubernetes/charts/common)
 
-### Scalable and Robust Design
+**Storage & Backups:**
 
-- **Robust Infrastructure:**
-Doing things 'the hard way' to mimic enterprise-like hybrid cloud environments. Carefully choosing open source tooling which is commonly seen in enterprise environments. Ensuring services are HA and alerts are configured for downtime.
+- [Ceph](https://ceph.io/) backbone
+- [SeaweedFS](https://github.com/chrislusf/seaweedfs) PVC hot storage
+- [Truenas](https://www.truenas.com/) / [MinIO](https://min.io/) cold storage
+- Offsite replication to [Cloudflare R2](https://www.cloudflare.com/products/cloudflare-r2/)
+- Automated backups with [Argo Workflows](https://argoproj.github.io/argo-workflows/), [k8up](https://github.com/k8up-io/k8up) and [CloudNative PG](https://cloudnative-pg.io/)
 
-- **Monorepo:**
-Preferring a 'monorepo' approach with infrastructure defined as code when possible. Tightly coupled architecture with many dependencies and automation to address 'chicken and egg' as much as possible.
+**Security:**
 
-- **Overengineered?**
-Most likely over-engineered for a homelab; prioritizing learning over simplicity. Hoping to inspire homelabbers who want an enterprise approach, while recognizing this isn't the setup for most.
+- Network segmentation with [OPNsense](https://opnsense.org/) and intervlan routing with TP Link Omada
+- Secrets management with [SOPS](https://github.com/mozilla/sops) and [Vault](https://www.vaultproject.io/)
+- Automated TLS certificates with [Cert Manager](https://cert-manager.io/) and [Cloudflare](https://www.cloudflare.com/)
+- OIDC/MFA authentication with [Authelia](https://www.authelia.com/)
+- Middleware and encrypted ingress with [Traefik](https://traefik.io/traefik)
 
-### Container First
+**Disaster Recovery:**
 
-- **Kubernetes-Centric:**
-Core services and applications are containerized and deployed on Kubernetes (talos), preferring cloud native tooling over a Linux admin approach.
-
-- **Portability:**
-Containerized applications can be easily migrated or replicated across different environments, including on-premises and cloud setups.
-
-### Automation and Infrastructure as Code
-
-- **CI/CD Pipelines:**
-Emphasis on continuous integration and continuous deployment ensuring rapid, reliable updates and consistent environments. Leveraging argo events and workflows to create a blue/green deployment strategy.
-
-- **Declarative Configurations:**
-Tools like Terraform, Ansible, and Argo CD allow the infrastructure to be defined as code, enhancing reproducibility, version control, and disaster recovery.
-
-- **Self-Healing Systems:**
-Automation enables the detection and remediation of issues quickly, reducing downtime and manual intervention. Ensures a thoughtful approach to enable spinning up/down environments as needed.
-
-### Disaster Recovery and Resilience
-
-- **Redundancy & Backup:**
-Multiple layers of backup and replication (using Ceph, ZFS, SnapRAID, MergerFS, etc.) ensure data integrity and continuity in the event of failure (while accepting NFS as a single point of failure for long term/larger storage).
-
-- **Regular DR Drills:**
-Routine testing of disaster recovery to ensure procedures are effective and up-to-date. Careful documentation to ensure data is recoverable.
-
-- **Resilience:**
-The design incorporates failover mechanisms and high-availability configurations to minimize downtime and ensure service continuity.
-
-### Hybrid Cloud
-
-- **Cloud-Integrated Backups:**
-Utilizes cloud resources (notably GCP) to augment on-premises backups, providing additional layers of redundancy and scalability. Planned work to failover VM's from bare metal to GCP.
-
-- **AI and Compute Offloading:**
-The hybrid approach allows for leveraging GCP Vertex AI APIs and additional compute power, enhancing the lab’s capabilities for machine learning tasks.
-
-### Security and Compliance
-
-- **Best Practices:**
-Implements stringent security measures including network segmentation, role-based access controls, and encrypted communications.
-
-- **Secrets Management:**
-Uses tools like SOPS and Vault to manage sensitive information securely and ensure that credentials and keys are safeguarded.
-
-- **Compliance and Auditing:**
-Regular reviews and audits ensure that the infrastructure adheres to industry standards and regulatory requirements.
+- Infrastructure-as-Code for rapid rebuilding
+- Automated backup restoration workflows and gitops
+- Regular disaster recovery testing with blue/green cluster
+- 3-2-1 backup strategy
 
 ## Roadmap
 
-- **Short Term:**
-  - Publicly expose static docs and professional hugo website.
-  - Leverage Intel kuberentes operator and Arc A310 with Immich ML and Jellyfin transcoding.
-  - Leverage AMD kuberentes operator and Raedon 7900xtx for OpenwebUI and ollama (or vllm) as a self-hosted ChatGPT replacement.
-  - Enhance CI/CD pipelines and migrate from dev/prod to blue/green deployment approach
-  - Expose wireguard vpn for offsite access.
+- **Short‑term:** Build personal website for blogs and project showcase
+- **Mid‑term:** Run MiniMax with llama.cpp grpc accross two Strix Halo system
+- **Long‑term:** Fine-tuning generative models, Home Assistant
 
-- **Mid Term:**
-  - Enhance security with auditing tools and packet inspection.
-  - Improve alerting capabilities to improve uptime and identify root cause quickly.
-  - Deepen integration with GCP for hybrid cloud functionalities and AI API access.
-  - Explore agentic frameworks like PydanticAI, LangGraph, DSPy and n8n to automate docs site updates
-
-- **Long Term:**
-  - Enable HA and failover from bare metal to GCP in case of cable internet issues or other hardware failures.
-  - Evolve the lab into a fully modular, scalable environment capable of supporting large-scale AI and ML projects (with 2x framework motherboards).
-  - Collaborate and add more users to build out hackathon-style projects with.
+*Github issues are more up to date.*

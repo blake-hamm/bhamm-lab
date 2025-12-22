@@ -12,7 +12,7 @@ spec:
     namespace: models
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/expose-lab
+    targetRevision: feature/update-docs
     path: kubernetes/charts/llm-models
     helm:
       valuesObject:
@@ -69,7 +69,8 @@ spec:
             args:
               - llama-server
               - -hf
-              - bartowski/openai_gpt-oss-120b-GGUF:BF16
+              - gghfez/gpt-oss-120b-Derestricted.MXFP4_MOE-gguf
+              # - bartowski/openai_gpt-oss-120b-GGUF:BF16
               - --host
               - 0.0.0.0
               - --metrics
@@ -173,7 +174,9 @@ spec:
             args:
               - llama-server
               - -hf
-              - unsloth/Qwen3-Next-80B-A3B-Instruct-GGUF:Q6_K_XL
+              - unsloth/Qwen3-Next-80B-A3B-Instruct-GGUF
+              - -hff
+              - UD-Q6_K_XL/Qwen3-Next-80B-A3B-Instruct-UD-Q6_K_XL-00001-of-00002.gguf
               - --host
               - 0.0.0.0
               - --metrics
@@ -228,7 +231,9 @@ spec:
             args:
               - llama-server
               - -hf
-              - unsloth/Qwen3-Next-80B-A3B-Thinking-GGUF:Q6_K_XL
+              - unsloth/Qwen3-Next-80B-A3B-Thinking-GGUF
+              - -hff
+              - UD-Q6_K_XL/Qwen3-Next-80B-A3B-Thinking-UD-Q6_K_XL-00001-of-00002.gguf
               - --host
               - 0.0.0.0
               - --metrics
@@ -290,20 +295,19 @@ spec:
               - --metrics
               - --no-webui
               - --jinja
+              - --timeout
+              - "1800"
               - -v
+              - --no-mmap
               - --no-warmup
               - -ngl
               - "999"
               - -fa
               - "on"
-              - -ctk
-              - q8_0
-              - -ctv
-              - q8_0
               - -ub
-              - "3072"
+              - "512"
               - -b
-              - "49152"
+              - "4096"
               - -c
               - "65536"
               - --parallel
@@ -319,6 +323,56 @@ spec:
               - "20"
               - --presence-penalty
               - "1.0"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "120Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
+          - name: devstral
+            description: Mistral development model
+            enabled: true
+            pvc:
+              storage: "80Gi"
+            args:
+              - llama-server
+              - -hf
+              - unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF:BF16
+              # - unsloth/Devstral-2-123B-Instruct-2512-GGUF
+              # - -hff
+              # - UD-Q4_K_XL/Devstral-2-123B-Instruct-2512-UD-Q4_K_XL-00001-of-00002.gguf
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - --timeout
+              - "1800"
+              - -v
+              - --no-mmap
+              - --no-warmup
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "512"
+              - -b
+              - "4096"
+              - -c
+              - "65536"
+              - --parallel
+              - "1"
+              - --cont-batching
+              - --temp
+              - "0.15"
+              - --min-p
+              - "0.01"
             resources:
               limits:
                 amd.com/gpu: 1
@@ -446,7 +500,9 @@ spec:
             args:
               - llama-server
               - -hf
-              - unsloth/GLM-4.5-Air-GGUF:Q4_K_XL
+              - unsloth/GLM-4.5-Air-GGUF
+              - -hff
+              - UD-Q4_K_XL/GLM-4.5-Air-UD-Q4_K_XL-00001-of-00002.gguf
               - --host
               - 0.0.0.0
               - --metrics
