@@ -47,6 +47,7 @@ spec:
         pvc:
           - name: radarr-config
           - name: cleanuparr-config
+          - name: huntarr-config
           - name: unpackerr-config
           - name: jellyfin-config
             storageSize: 3Gi
@@ -160,6 +161,18 @@ spec:
                   - name: default-headers
                 services:
                   - name: cleanuparr
+                    scheme: http
+                    port: ui
+          - enabled: true
+            name: huntarr
+            ingressClass: traefik-external
+            routes:
+              - kind: Rule
+                match: Host(`huntarr.bhamm-lab.com`)
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: huntarr
                     scheme: http
                     port: ui
   syncPolicy:

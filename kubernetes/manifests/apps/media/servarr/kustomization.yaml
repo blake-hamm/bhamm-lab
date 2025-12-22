@@ -12,3 +12,4 @@ resources:
   - ./nzbget/base
   - ./recyclarr/base
   - ./cleanuparr/base
+  - ./huntarr/base

@@ -1,0 +1,39 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: huntarr
+  namespace: servarr
+  labels:
+    app: huntarr
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: huntarr
+  template:
+    metadata:
+      labels:
+        app: huntarr
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: "OnRootMismatch"
+      containers:
+        - name: huntarr
+          image: ghcr.io/plexguide/huntarr:latest
+          ports:
+            - containerPort: 9705
+          volumeMounts:
+            - name: huntarr-config
+              mountPath: /config
+          env:
+            - name: TZ
+              value: "America/Denver"
+      volumes:
+        - name: huntarr-config
+          persistentVolumeClaim:
+            claimName: huntarr-config
