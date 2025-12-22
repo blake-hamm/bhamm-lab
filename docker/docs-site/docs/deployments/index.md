@@ -1,4 +1,4 @@
-# Deployments
+# Overview
 
 *Central hub for infrastructure and application deployment procedures; mainly for my reference.*
 
@@ -14,6 +14,8 @@
 - 📦 [NixOS Configs](nixos.md) - Declarative OS configurations for Framework 13 laptop
 - 🤖 [Talos](talos.md) - Kubernetes OS deployment and management with Open Tofu
 - 📘 [Docs (MkDocs)](mkdocs.md) - Documentation deployment
+- 🌊 [ArgoCD](argocd.md) - GitOps continuous delivery tool
+- ☁️ [Cloudflare](cloudflare.md) - Cloudflare resources management
 - ⚠️ Deprecated: [k3s](k3s.md) - Use Talos instead
 
 ## Recovery Procedures

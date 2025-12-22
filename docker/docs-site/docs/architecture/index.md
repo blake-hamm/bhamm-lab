@@ -1,4 +1,4 @@
-# Architecture
+# Overview
 
 ![bhamm-lab-diagram](../assets/diagram.png)
 

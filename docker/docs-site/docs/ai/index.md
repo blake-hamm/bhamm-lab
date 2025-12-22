@@ -1,4 +1,4 @@
-# AI Infrastructure
+# Overview
 
 This document outlines the architecture of the homelab's AI infrastructure, which is designed to be a flexible and powerful platform for experimenting with and running various AI models.
 
