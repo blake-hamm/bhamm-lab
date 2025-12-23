@@ -79,8 +79,6 @@ spec:
             enabled: true
           restore:
             enabled: false
-          postInitSQL:
-            - "CREATE DATABASE jellyseerr OWNER servarr;"
         ingressRoutes:
           - enabled: true
             name: nzbget
