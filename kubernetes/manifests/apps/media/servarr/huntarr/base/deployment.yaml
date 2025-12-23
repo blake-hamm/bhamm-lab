@@ -33,6 +33,8 @@ spec:
           env:
             - name: TZ
               value: "America/Denver"
+            - name: HUNTARR_PORT
+              value: "9705"
       volumes:
         - name: huntarr-config
           persistentVolumeClaim:
