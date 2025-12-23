@@ -72,6 +72,12 @@ spec:
             enabled: true
             config:
               fsGroup: 1000
+        postgresql:
+          enabled: true
+          backup:
+            enabled: true
+          restore:
+            enabled: false
         ingressRoutes:
           - enabled: true
             name: nzbget
