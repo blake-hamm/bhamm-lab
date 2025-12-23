@@ -148,6 +148,14 @@ data:
         description: Visit qbittorrent
         icon: hl-qbittorrent
         url: https://qbittorrent.bhamm-lab.com/
+      - title: Cleanuparr
+        description: Visit cleanuparr
+        icon: hl-cleanuperr
+        url: https://cleanuparr.bhamm-lab.com/
+      - title: Huntarr
+        description: Visit huntarr
+        icon: hl-huntarr
+        url: https://huntarr.bhamm-lab.com/
       - title: Intel GPU
         description: Visit Intel gpu exporter grafana dashboard
         icon: hl-grafana
