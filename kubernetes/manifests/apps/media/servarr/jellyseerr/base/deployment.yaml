@@ -25,7 +25,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: jellyseerr
-          image: ghcr.io/fallenbagel/jellyseerr:preview-OIDC
+          image: ghcr.io/fallenbagel/jellyseerr:latest
           ports:
             - containerPort: 5055
           volumeMounts:
