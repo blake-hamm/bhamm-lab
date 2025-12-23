@@ -79,6 +79,9 @@ spec:
             enabled: true
           restore:
             enabled: false
+          postInitSQL:
+            - "CREATE DATABASE jellyseerr;"
+            - "GRANT ALL PRIVILEGES ON DATABASE jellyseerr TO servarr;"
         ingressRoutes:
           - enabled: true
             name: nzbget
