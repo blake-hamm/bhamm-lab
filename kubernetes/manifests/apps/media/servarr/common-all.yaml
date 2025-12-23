@@ -57,6 +57,7 @@ spec:
           - name: gluetun-config
           - name: nzbget-gluetun-config
           - name: nzbget-config
+          - name: jellyseerr-config
           - name: downloads
             storageSize: 1Ti
             storageClassName: csi-cephfs-sc
@@ -181,6 +182,18 @@ spec:
                   - name: huntarr
                     scheme: http
                     port: ui
+          - enabled: true
+            name: jellyseerr
+            ingressClass: traefik-external
+            routes:
+              - kind: Rule
+                match: Host(`jellyseerr.bhamm-lab.com`)
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: jellyseerr
+                    scheme: http
+                    port: 5055
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

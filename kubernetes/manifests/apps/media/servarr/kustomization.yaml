@@ -13,3 +13,4 @@ resources:
   - ./recyclarr/base
   - ./cleanuparr/base
   - ./huntarr/base
+  - ./jellyseerr/base
