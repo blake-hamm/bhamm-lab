@@ -127,6 +127,10 @@ data:
         description: Visit jellyfin
         icon: hl-jellyfin
         url: https://jellyfin.bhamm-lab.com/
+      - title: Jellyseerr
+        description: Visit jellyseerr
+        icon: hl-jellyseerr
+        url: https://jellyseerr.bhamm-lab.com/
       - title: Sonarr
         description: Visit sonarr
         icon: hl-sonarr
