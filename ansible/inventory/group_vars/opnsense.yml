@@ -75,6 +75,14 @@ opnsense_extra_aliases:
     content:
       - 10.0.60.2-10.0.60.50
 opnsense_extra_rules:
+  - description: Allow k8s to access opnsense node exporter
+    interface: lan
+    sequence: 3
+    ip_protocol: inet
+    protocol: TCP
+    source_net: k8sNetwork
+    destination_net: LANGateway
+    destination_port: 9100
   - description: Allow trusted access to lan
     interface: opt1 # trusted
     sequence: 3
