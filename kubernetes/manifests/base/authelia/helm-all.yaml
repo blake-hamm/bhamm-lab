@@ -367,7 +367,7 @@ spec:
                     - 'authorization_code'
                   access_token_signed_response_alg: 'none'
                   userinfo_signed_response_alg: 'none'
-                  token_endpoint_auth_method: 'client_secret_post'
+                  token_endpoint_auth_method: 'client_secret_basic'
                 - client_id: 'jellyseerr'
                   client_name: 'Jellyseerr'
                   client_secret: '$pbkdf2-sha512$310000$lbwDajs96abzp8PzI8Nqnw$tIz0H9QUUReiyPzF9XpS.PaW1gaHO21q9jrYE7tJHmt5vKeTfNZX5FIwaPnito39qsCHKQvsD3udsfyS5rlUQQ'
