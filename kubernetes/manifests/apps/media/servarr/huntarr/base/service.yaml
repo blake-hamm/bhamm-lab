@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: huntarr
+  namespace: servarr
+  annotations:
+    argocd.argoproj.io/sync-wave: "23"
+spec:
+  selector:
+    app: huntarr
+  ports:
+    - name: ui
+      targetPort: 9705
+      port: 9705

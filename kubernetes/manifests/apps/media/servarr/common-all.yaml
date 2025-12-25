@@ -46,6 +46,8 @@ spec:
                 property: lldap-ldap-user-pass
         pvc:
           - name: radarr-config
+          - name: cleanuparr-config
+          - name: huntarr-config
           - name: unpackerr-config
           - name: jellyfin-config
             storageSize: 3Gi
@@ -55,6 +57,7 @@ spec:
           - name: gluetun-config
           - name: nzbget-gluetun-config
           - name: nzbget-config
+          - name: jellyseerr-config
           - name: downloads
             storageSize: 1Ti
             storageClassName: csi-cephfs-sc
@@ -70,6 +73,12 @@ spec:
             enabled: true
             config:
               fsGroup: 1000
+        postgresql:
+          enabled: true
+          backup:
+            enabled: true
+          restore:
+            enabled: false
         ingressRoutes:
           - enabled: true
             name: nzbget
@@ -149,6 +158,42 @@ spec:
                   - name: radarr
                     scheme: http
                     port: ui
+          - enabled: true
+            name: cleanuparr
+            ingressClass: traefik-external
+            routes:
+              - kind: Rule
+                match: Host(`cleanuparr.bhamm-lab.com`)
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: cleanuparr
+                    scheme: http
+                    port: ui
+          - enabled: true
+            name: huntarr
+            ingressClass: traefik-external
+            routes:
+              - kind: Rule
+                match: Host(`huntarr.bhamm-lab.com`)
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: huntarr
+                    scheme: http
+                    port: ui
+          - enabled: true
+            name: jellyseerr
+            ingressClass: traefik-external
+            routes:
+              - kind: Rule
+                match: Host(`jellyseerr.bhamm-lab.com`)
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: jellyseerr
+                    scheme: http
+                    port: 5055
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

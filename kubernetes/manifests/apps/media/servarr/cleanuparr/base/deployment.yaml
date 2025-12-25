@@ -1,0 +1,55 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: cleanuparr
+  namespace: servarr
+  labels:
+    app: cleanuparr
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cleanuparr
+  template:
+    metadata:
+      labels:
+        app: cleanuparr
+    spec:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: "OnRootMismatch"
+      containers:
+        - name: cleanuparr
+          image: ghcr.io/cleanuparr/cleanuparr:latest
+          ports:
+            - containerPort: 11011
+          volumeMounts:
+            - name: cleanuparr-config
+              mountPath: /config
+            - name: downloads
+              mountPath: /downloads
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "America/Denver"
+            - name: PORT
+              value: "11011"
+            - name: BASE_PATH
+              value: ""
+            - name: UMASK
+              value: "022"
+      volumes:
+        - name: cleanuparr-config
+          persistentVolumeClaim:
+            claimName: cleanuparr-config
+        - name: downloads
+          persistentVolumeClaim:
+            claimName: downloads
+        - name: media
+          persistentVolumeClaim:
+            claimName: media
