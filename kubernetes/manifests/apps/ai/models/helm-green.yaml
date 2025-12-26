@@ -339,6 +339,8 @@ spec:
             enabled: true
             pvc:
               storage: "80Gi"
+            image:
+              tag: rocm-6.4.4
             args:
               - llama-server
               - -hf
@@ -388,7 +390,7 @@ spec:
             description: Mid model with multimodal support
             enabled: true
             image:
-              tag: rocm-6.4.4-rocwmma
+              tag: rocm-6.4.4
             pvc:
               storage: "60Gi"
             args:
@@ -597,6 +599,8 @@ spec:
             enabled: true
             pvc:
               storage: "90Gi"
+            image:
+              tag: rocm-6.4.4
             args:
               - llama-server
               - -hf
