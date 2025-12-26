@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/servarr-refresh
+    targetRevision: feature/cleanup-todo
     path: kubernetes/manifests/core
     directory:
       recurse: true
