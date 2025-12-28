@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sabnzbd
+  namespace: servarr
+  labels:
+    app: sabnzbd
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sabnzbd
+  template:
+    metadata:
+      labels:
+        app: sabnzbd
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: "OnRootMismatch"
+      containers:
+        - name: gluetun
+          image: ghcr.io/qdm12/gluetun:v3.39.0
+          env:
+            - name: VPN_SERVICE_PROVIDER
+              value: protonvpn
+            - name: VPN_TYPE
+              value: wireguard
+            - name: VPN_PORT_FORWARDING
+              value: "off"
+            - name: VPN_PORT_FORWARDING_PROVIDER
+              value: protonvpn
+            - name: SERVER_COUNTRIES
+              value: "United States"
+            - name: TZ
+              value: "America/Denver"
+            - name: FIREWALL_INPUT_PORTS
+              value: "8080"
+            - name: FIREWALL_OUTBOUND_SUBNETS
+              value: "10.96.0.0/12,10.244.0.0/16,10.42.0.0/16"
+            - name: WIREGUARD_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: servarr-external-secret
+                  key: WIREGUARD_PRIVATE_KEY
+          securityContext:
+            runAsUser: 0
+            capabilities:
+              add:
+                - NET_ADMIN
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: gluetun-config
+              mountPath: /gluetun
+        - name: sabnzbd
+          image: lscr.io/linuxserver/sabnzbd:latest
+          ports:
+            - containerPort: 8080
+              name: web-ui
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "America/Denver"
+          volumeMounts:
+            - name: sabnzbd-config
+              mountPath: /config
+            - name: downloads
+              mountPath: /downloads
+      volumes:
+        - name: gluetun-config
+          persistentVolumeClaim:
+            claimName: sabnzbd-gluetun-config
+        - name: sabnzbd-config
+          persistentVolumeClaim:
+            claimName: sabnzbd-config
+        - name: downloads
+          persistentVolumeClaim:
+            claimName: downloads

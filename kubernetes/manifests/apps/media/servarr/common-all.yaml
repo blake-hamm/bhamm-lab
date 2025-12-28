@@ -57,6 +57,8 @@ spec:
           - name: gluetun-config
           - name: nzbget-gluetun-config
           - name: nzbget-config
+          - name: sabnzbd-gluetun-config
+          - name: sabnzbd-config
           - name: jellyseerr-config
           - name: downloads
             storageSize: 1Ti
@@ -91,6 +93,19 @@ spec:
                   - name: default-headers
                 services:
                   - name: nzbget
+                    scheme: http
+                    port: webui
+          - enabled: true
+            name: sabnzbd
+            ingressClass: traefik-external
+            # websocket: true
+            routes:
+              - kind: Rule
+                match: Host(`sabnzbd.bhamm-lab.com`)
+                middlewares:
+                  - name: default-headers
+                services:
+                  - name: sabnzbd
                     scheme: http
                     port: webui
           - enabled: true
