@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
     path: kubernetes/manifests/core/cloudflare
-    targetRevision: feature/cleanup-todo
+    targetRevision: feature/sabnzbd
   destination:
     namespace: cloudflare-operator-system
     server: https://kubernetes.default.svc
