@@ -16,6 +16,7 @@
         shotcut
         brave
         signal-desktop
+        zoom-us
         # gnome-network-displays
         # steam
         # etcher
