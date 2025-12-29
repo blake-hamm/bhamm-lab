@@ -1,6 +1,8 @@
 customization:
   extraKernelArgs:
-    - amd_iommu=off
+    - amd_iommu=on
+    - mitigations=off
+    - net.ifnames=0
     - amdgpu.gttsize=122800
     - amdgpu.vm_fragment_size=8
     - ttm.pages_limit=31457280
