@@ -1,3 +1,6 @@
 [submodule "docker/intel-gpu-exporter"]
 	path = docker/intel-gpu-exporter
 	url = https://github.com/blake-hamm/intel-gpu-exporter.git
+[submodule "docker/site/themes/PaperMod"]
+	path = docker/site/themes/PaperMod
+	url = https://github.com/adityatelange/hugo-PaperMod.git
