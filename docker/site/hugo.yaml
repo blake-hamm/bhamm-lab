@@ -15,12 +15,12 @@ params:
     imageWidth: 120
     imageHeight: 120
     buttons:
-      - name: Blogs
-        url: /blogs
-      - name: Portfolio
-        url: /portfolio
       - name: About
         url: /about
+      - name: Portfolio
+        url: /portfolio
+      - name: Blogs
+        url: /blogs
       - name: Contact
         url: /contact
   # PaperMod options
@@ -33,17 +33,17 @@ params:
       url: "https://www.linkedin.com/in/blakejhamm/"
 menu:
   main:
-    - identifier: blogs
-      name: Blogs
-      url: /blogs/
+    - identifier: about
+      name: About
+      url: /about/
       weight: 10
     - identifier: portfolio
       name: Portfolio
       url: /portfolio/
       weight: 20
-    - identifier: about
-      name: About
-      url: /about/
+    - identifier: blogs
+      name: Blogs
+      url: /blogs/
       weight: 30
     - identifier: contact
       name: Contact
