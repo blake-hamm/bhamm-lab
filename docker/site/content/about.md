@@ -27,19 +27,19 @@ My work is defined by a "full-stack" approach to AI and data. I have led high-st
 
 I believe the best way to master a technology is to break it in a controlled environment. My "passion projects" are a testing ground for the latest in open-source tech, from bare-metal Kubernetes clusters to self-hosted AI apps.
 
-You can explore my documentation at [docs.bhamm-lab.com](https://docs.bhamm-lab.com) or view the code on my [GitHub](https://github.com/blake-hamm).
+You can explore my documentation at [docs.bhamm-lab.com](https://docs.bhamm-lab.com) or view the code on my [GitHub](https://github.com/blake-hamm/bhamm-lab).
 
 #### Current Lab Highlights
 *   **Infrastructure:** A hybrid setup running **NixOS** and **Talos Linux** on bare metal, orchestrated with Kubernetes and managed with ArgoCD, Terraform and Ansible.
 *   **Local AI:** Experimenting with local LLM inference (llama.cpp), search (searnxg), vector db (qdrant) and hardware acceleration (ROCm/Vulkan) to run models like Qwen and GLM Air independent of the cloud.
-*   **Disaster Recover:** Keep the wife happy with 3-2-1 backups for media (Immich and Jellyfin) to local seaweedfs and minio and offsite cloudflare R2
+*   **Disaster Recover:** Keep the wife happy with 3-2-1 backups for media (Immich and Jellyfin) to local seaweedfs and minio and offsite cloudflare R2 bucket orchestrated with k8up and argo workflows.
 
-*PS: You're viewing this website from my talos cluster!*
+*PS: You're viewing this website from my homelab!*
 
 #### Featured Projects
-*   **`rpi-truck`**: An IoT project streaming OBD2 vehicle data to a Plotly/Flask app via Airflow.
-*   **`lighthearted`**: A GenAI-powered mental health application.
-*   **`Air_Quality_Analysis`**: Forecasting Salt Lake City air quality using LSTM neural networks.
+*   **[`rpi-truck`](https://github.com/blake-hamm/rpi-truck)**: An IoT project streaming OBD2 vehicle data to a Plotly/Flask app via Airflow.
+*   **[`lighthearted`](https://github.com/blake-hamm/lighthearted)**: A GenAI-powered mental health application.
+*   **[`Air_Quality_Analysis`](https://github.com/blake-hamm/Air_Quality_Analysis)**: Forecasting Salt Lake City air quality using LSTM neural networks.
 
 ---
 
