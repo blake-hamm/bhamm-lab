@@ -1,4 +1,43 @@
 baseURL: https://example.org/
 languageCode: en-us
-title: My New Hugo Site
-theme: ["PaperMod"]
+title: Blake Hamm
+theme: PaperMod
+params:
+  description: "My personal website"
+  author: "Blake Hamm"
+  assets:
+    favicon: "/favicon.jpg"
+  profileMode:
+    enabled: true
+    title: "Blake Hamm"
+    subtitle: "Welcome to my corner of the internet!"
+    imageUrl: "/favicon.jpg"
+    imageWidth: 120
+    imageHeight: 120
+    buttons:
+      - name: Posts
+        url: posts
+      - name: Tags
+        url: tags
+  # PaperMod options
+  ShowReadingTime: true
+  ShowShareButtons: true
+  ShowPostNavLinks: true
+  ShowBreadCrumbs: true
+  ShowCodeCopyButtons: true
+  ShowWordCount: true
+  socialIcons:
+    - name: "github"
+      url: "https://github.com/blake-hamm"
+    - name: "linkedin"
+      url: "https://www.linkedin.com/in/blakejhamm/"
+menu:
+  main:
+    - identifier: posts
+      name: posts
+      url: /posts/
+      weight: 10
+    - identifier: tags
+      name: tags
+      url: /tags/
+      weight: 20
