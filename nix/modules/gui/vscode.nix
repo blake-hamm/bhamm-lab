@@ -15,6 +15,7 @@
             hashicorp.terraform
             rooveterinaryinc.roo-cline
             bierner.markdown-mermaid
+            budparr.language-hugo-vscode
             # kilocode.kilo-code
             # dracula-theme.theme-dracula
             # vscodevim.vim

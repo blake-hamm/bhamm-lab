@@ -35,6 +35,7 @@ pkgs.mkShell {
     rclone
     wl-clipboard
     inputs.nixos-anywhere.packages.${pkgs.system}.default
+    hugo
   ];
 
   packages = [
