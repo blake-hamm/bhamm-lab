@@ -1,4 +1,4 @@
-baseURL: https://example.org/
+baseURL: https://bhamm-lab.com/
 languageCode: en-us
 title: Blake Hamm
 theme: PaperMod
@@ -15,17 +15,17 @@ params:
     imageWidth: 120
     imageHeight: 120
     buttons:
-      - name: Posts
-        url: posts
-      - name: Tags
-        url: tags
+      - name: Blogs
+        url: /blogs
+      - name: Portfolio
+        url: /portfolio
+      - name: About
+        url: /about
+      - name: Contact
+        url: /contact
   # PaperMod options
-  ShowReadingTime: true
   ShowShareButtons: true
   ShowPostNavLinks: true
-  ShowBreadCrumbs: true
-  ShowCodeCopyButtons: true
-  ShowWordCount: true
   socialIcons:
     - name: "github"
       url: "https://github.com/blake-hamm"
@@ -33,11 +33,19 @@ params:
       url: "https://www.linkedin.com/in/blakejhamm/"
 menu:
   main:
-    - identifier: posts
-      name: posts
-      url: /posts/
+    - identifier: blogs
+      name: Blogs
+      url: /blogs/
       weight: 10
-    - identifier: tags
-      name: tags
-      url: /tags/
+    - identifier: portfolio
+      name: Portfolio
+      url: /portfolio/
       weight: 20
+    - identifier: about
+      name: About
+      url: /about/
+      weight: 30
+    - identifier: contact
+      name: Contact
+      url: /contact/
+      weight: 40
