@@ -1,5 +1,5 @@
 # Stage 1: Build the Hugo site
-FROM klakegg/hugo:latest AS build
+FROM hugomods/hugo:base-non-root AS build
 
 # Set the working directory
 WORKDIR /src
