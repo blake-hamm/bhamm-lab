@@ -4,8 +4,11 @@ FROM hugomods/hugo:base-non-root AS build
 # Set the working directory
 WORKDIR /src
 
+# Switch to the non-root user
+USER hugo
+
 # Copy the entire site content
-COPY . .
+COPY --chown=hugo:hugo . .
 
 # Build the site
 RUN hugo --minify
