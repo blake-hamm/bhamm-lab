@@ -1,4 +1,4 @@
-baseURL: https://bhamm-lab.com/
+baseURL: https://hugo.bhamm-lab.com/
 languageCode: en-us
 title: Blake Hamm
 theme: PaperMod
@@ -10,7 +10,7 @@ params:
   profileMode:
     enabled: true
     title: "Blake Hamm"
-    subtitle: "Welcome to my corner of the internet!"
+    subtitle: "Tech things I'm up to"
     imageUrl: "/favicon.jpg"
     imageWidth: 120
     imageHeight: 120
@@ -21,8 +21,11 @@ params:
         url: /portfolio
       - name: Blogs
         url: /blogs
-      - name: Contact
-        url: /contact
+      - name: Homelab Docs
+        url: https://docs.bhamm-lab.com
+  homeInfoParams:
+    Title: "Hi there 👋"
+    Content: "Senior ML Engineer, Homelabber, and Former Pro Snowboarder"
   # PaperMod options
   ShowShareButtons: true
   ShowPostNavLinks: true
@@ -36,16 +39,18 @@ menu:
     - identifier: about
       name: About
       url: /about/
-      weight: 10
+      weight: 1
     - identifier: portfolio
       name: Portfolio
       url: /portfolio/
-      weight: 20
+      weight: 2
     - identifier: blogs
       name: Blogs
       url: /blogs/
-      weight: 30
-    - identifier: contact
-      name: Contact
-      url: /contact/
-      weight: 40
+      weight: 3
+    - identifier: lab
+      name: Homelab Docs
+      url: https://docs.bhamm-lab.com
+      weight: 4
+      params:
+        newTab: true

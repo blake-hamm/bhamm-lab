@@ -6,20 +6,23 @@ hidemeta: true
 disableShare: true
 ---
 
-I am a data-driven professional motivated by learning, creativity, and sustainable practices. With over 8 years of experience in **full-stack data science**, I bridge the gap between complex algorithms and production-grade infrastructure.
+I am a data-driven professional motivated by learning, creativity, and sustainable practices. With over 8 years of experience in **data science and machine learning**, I bridge the gap between complex algorithms and production-grade infrastructure.
 
-Currently, I work as a **Senior Machine Learning Engineer** at [phData](https://www.phdata.io/), specializing in Generative AI, MLOps, and scalable data systems. My expertise spans the entire ml lifecycle—from data engineering and statistics to building actionable visualization tools, deploying infrastructure as code, and building production GenAI applications with FastAPI endpoints and evaluations. I don't just build models; I build the pipelines, APIs, and CI/CD workflows that make them robust and valuable.
+Currently, I work as a **Senior Machine Learning Engineer** at [phData](https://www.phdata.io/), specializing in Generative AI, MLOps, and scalable data systems. My expertise spans the entire ml lifecycle—from data engineering and statistics to building actionable visualization tools, deploying infrastructure as code, and building production GenAI applications with FastAPI endpoints and evaluations. I don't just build models; I build the pipelines, APIs, CI/CD and monitoring that make them robust and valuable.
 
 ---
 
 ### Technical Expertise
 
-My work is defined by a "full-stack" approach to AI and data. I have led high-stakes initiatives for companies like **MetLife**, **Fidelity Investments**, and **Capital One**, and optimized demand planning and supply chain for global brands like **Salomon** and **Smith Optics**.
+My work is defined by a "full-stack" approach to AI and data. I have led high-stakes AI initiatives for companies like **MetLife**, **Fidelity Investments**, and **Capital One**, and optimized demand planning and supply chain for global brands like **Salomon** and **Smith Optics**.
 
-*   **Generative AI & LLMs:** Architecting RAG agents, optimizing vector stores (Redis), fine-tuning foundation models and evaluating real-world performance with DSPy.
-*   **Infrastructure as Code (IaC):** Managing scalable deployments using Terraform, Ansible, and GitOps (ArgoCD) on Kubernetes (EKS/GKE).
-*   **Engineering & Analytics:** Reducing compute costs, latency and improving data reliability using dbt, Prefect, Argo Workflows, and modern data warehousing techniques.
-*   **Observability & Logging**: Deploying robust monitoring with LangGraph, LangSmith, MLflow, Grafana and NewRelic
+*   **Generative AI & LLMs:** Architecting RAG agents, optimizing vector stores (Redis), fine-tuning foundation models, evaluating real-world performance with DSPy and reducing latency with semantic model routing.
+*   **Infrastructure as Code (IaC):** Managing scalable deployments using Terraform, Ansible, and GitOps (ArgoCD) on Kubernetes in multiple cloud environments including AWS, GCP, MS Azure and Cloudflare; holder of two AWS certifications (Associate Architect and Machine Learning Specialty).
+*   **Data Science:** Supply chain optimization (raw materials, assembly), time series forecasting, anomaly detection, and text classification.
+*   **Data Engineering & Analytics:** Reducing compute costs and improving data reliability using dbt, Prefect, Argo Workflows, and modern data warehousing techniques; built business analytics dashboards in Tableu, PowerBI and python Dash application.
+*   **Observability & Logging**: Deploying production monitoring systems with LangGraph, LangSmith, MLflow, Grafana and NewRelic
+
+*More info in the [portfolio page](/portfolio/).*
 
 ---
 
@@ -36,7 +39,7 @@ You can explore my documentation at [docs.bhamm-lab.com](https://docs.bhamm-lab.
 
 *PS: You're viewing this website from my homelab!*
 
-#### Featured Projects
+#### Other Passion Projects
 *   **[`rpi-truck`](https://github.com/blake-hamm/rpi-truck)**: An IoT project streaming OBD2 vehicle data to a Plotly/Flask app via Airflow.
 *   **[`lighthearted`](https://github.com/blake-hamm/lighthearted)**: A GenAI-powered mental health application.
 *   **[`Air_Quality_Analysis`](https://github.com/blake-hamm/Air_Quality_Analysis)**: Forecasting Salt Lake City air quality using LSTM neural networks.
