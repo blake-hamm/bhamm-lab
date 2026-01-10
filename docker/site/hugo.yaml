@@ -27,7 +27,7 @@ params:
     Title: "Hi there 👋"
     Content: "Senior ML Engineer, Homelabber, and Former Pro Snowboarder"
   # PaperMod options
-  ShowShareButtons: true
+  ShowShareButtons: false
   ShowPostNavLinks: true
   socialIcons:
     - name: "github"
