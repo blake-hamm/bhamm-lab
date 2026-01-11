@@ -13,11 +13,11 @@ COPY --chown=hugo:hugo . .
 # Build the site
 RUN hugo --minify
 
-# Stage 2: Serve the built site with Caddy
+# Stage 2: Serve the built site with Nginx
 FROM hugomods/hugo:nginx
 
-# Copy the generated files to keep the image as small as possible.
-COPY --from=builder /src/public /site
+# Copy the built site from the build stage
+COPY --from=build /src/public /usr/share/nginx/html
 
 # Expose port 80
 EXPOSE 80
