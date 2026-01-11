@@ -3,7 +3,7 @@ global:
   image:
     repository: kyuz0/amd-strix-halo-toolboxes
     tag: vulkan-radv
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   pvc:
     storageClassName: local-path
     storage: "10Gi"
