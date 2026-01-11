@@ -1,4 +1,4 @@
-# Welcome to bhamm-lab
+# Welcome to my homelab
 
 <!--![Architecture Diagram](assets/diagram.png)-->
 [![GitHub stars](https://img.shields.io/github/stars/blake-hamm/bhamm-lab?style=social)](https://github.com/blake-hamm/bhamm-lab/stargazers) [![License](https://img.shields.io/github/license/blake-hamm/bhamm-lab)](LICENSE.md)
