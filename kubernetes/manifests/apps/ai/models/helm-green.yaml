@@ -59,6 +59,10 @@ spec:
                 memory: "20Gi"
             nodeSelector:
               kubernetes.io/hostname: green-talos-worker-amd-gpu
+            hfToken:
+              enabled: true
+              secretName: models-external-secret
+              secretKey: hf_token
           - name: gpt-oss-120b
             description: Great reasoning MoE model for general chat queries
             enabled: true
