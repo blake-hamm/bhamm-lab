@@ -1,17 +1,21 @@
-# Stage 1: Build the Hugo site
-FROM hugomods/hugo:exts AS builder
-
-# Copy the entire site content
+#####################################################################
+#                            Build Stage                            #
+#####################################################################
+FROM hugomods/hugo:exts as builder
+# Base URL
+ARG HUGO_BASEURL=site.bhamm-lab.com
+ENV HUGO_BASEURL=${HUGO_BASEURL}
+# Build site
 COPY . /src
+# Replace below build command at will.
+RUN hugo --minify --enableGitInfo
+# Set the fallback 404 page if defaultContentLanguageInSubdir is enabled,
+# please replace the `en` with your default language code.
+# RUN cp ./public/en/404.html ./public/404.html
 
-# Build the site
-RUN hugo --minify
-
-# Stage 2: Serve the built site with Nginx
+#####################################################################
+#                            Final Stage                            #
+#####################################################################
 FROM hugomods/hugo:nginx
-
-# Copy the built site from the build stage
-USER root
+# Copy the generated files to keep the image as small as possible.
 COPY --from=builder /src/public /site
-RUN chown -R hugo:hugo /site
-USER hugo
