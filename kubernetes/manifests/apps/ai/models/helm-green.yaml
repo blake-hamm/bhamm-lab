@@ -24,7 +24,7 @@ spec:
               storage: "20Gi"
             image:
               repository: ghcr.io/ggml-org/llama.cpp
-              tag: server-vulkan
+              tag: server-vulkan-b7681
             args:
               - -hf
               - Qwen/Qwen3-Embedding-8B-GGUF
