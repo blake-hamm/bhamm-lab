@@ -27,7 +27,9 @@ spec:
               tag: server-vulkan
             args:
               - -hf
-              - Qwen/Qwen3-Embedding-8B-GGUF:F16
+              - Qwen/Qwen3-Embedding-8B-GGUF
+              - -hff
+              - Qwen3-Embedding-8B-f16.gguf
               - --host
               - 0.0.0.0
               - --metrics
