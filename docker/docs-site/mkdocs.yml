@@ -1,8 +1,7 @@
 site_name: bhamm-lab docs
 site_url: https://bhamm-lab.com/docs
 use_directory_urls: true
-repo_url: https://github.com/blake-hamm/bhamm-lab
-repo_name: bhamm-lab
+repo_url: https://github.com/blake-hamm/bhamm-lab/
 theme:
   name: material
   features:
