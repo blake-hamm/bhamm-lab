@@ -1,0 +1,15 @@
+apiVersion: networking.cfargotunnel.com/v1alpha1
+kind: TunnelBinding
+metadata:
+  name: site-tunnel-binding
+  namespace: site
+  annotations:
+    argocd.argoproj.io/sync-wave: "25"
+subjects:
+  - name: main-site
+    spec:
+      target: http://main-site.site.svc.cluster.local:80
+      fqdn: site.bhamm-lab.com
+tunnelRef:
+  kind: ClusterTunnel
+  name: external-tunnel

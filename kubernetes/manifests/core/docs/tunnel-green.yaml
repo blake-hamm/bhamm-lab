@@ -4,7 +4,7 @@ metadata:
   name: docs-tunnel-binding
   namespace: docs
   annotations:
-    argocd.argoproj.io/sync-wave: "22"
+    argocd.argoproj.io/sync-wave: "25"
 subjects:
   - name: docs-site
     spec:
