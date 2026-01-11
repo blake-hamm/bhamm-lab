@@ -11,4 +11,7 @@ RUN hugo --minify
 FROM hugomods/hugo:nginx
 
 # Copy the built site from the build stage
+USER root
 COPY --from=builder /src/public /site
+RUN chown -R hugo:hugo /site
+USER hugo
