@@ -16,3 +16,5 @@ RUN hugo --minify
 FROM hugomods/hugo:nginx
 # Copy the generated files to keep the image as small as possible.
 COPY --from=builder /src/public /site
+# Fix permissions for nginx user
+RUN chmod -R a+r /site
