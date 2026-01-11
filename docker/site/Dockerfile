@@ -18,6 +18,3 @@ FROM hugomods/hugo:nginx
 
 # Copy the built site from the build stage
 COPY --from=builder /src/public /site
-
-# Expose port 80
-EXPOSE 80
