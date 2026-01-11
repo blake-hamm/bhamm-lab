@@ -1,14 +1,8 @@
 # Stage 1: Build the Hugo site
-FROM hugomods/hugo:base-non-root AS builder
-
-# Set the working directory
-WORKDIR /src
-
-# Switch to the non-root user
-USER hugo
+FROM hugomods/hugo:exts AS builder
 
 # Copy the entire site content
-COPY --chown=hugo:hugo . .
+COPY . /src
 
 # Build the site
 RUN hugo --minify
