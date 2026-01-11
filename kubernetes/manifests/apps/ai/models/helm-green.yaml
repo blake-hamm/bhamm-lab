@@ -21,10 +21,10 @@ spec:
             description: Great all around embedding model
             enabled: true
             pvc:
-              storage: "20Gi"
+              storage: "30Gi"
             image:
               repository: ghcr.io/ggml-org/llama.cpp
-              tag: server-vulkan-b7681
+              tag: server-vulkan
             args:
               - -hf
               - Qwen/Qwen3-Embedding-8B-GGUF
