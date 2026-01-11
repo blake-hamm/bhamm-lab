@@ -1,5 +1,5 @@
 # Stage 1: Build the Hugo site
-FROM hugomods/hugo:base-non-root AS build
+FROM hugomods/hugo:base-non-root AS builder
 
 # Set the working directory
 WORKDIR /src
@@ -17,7 +17,7 @@ RUN hugo --minify
 FROM hugomods/hugo:nginx
 
 # Copy the built site from the build stage
-COPY --from=build /src/public /usr/share/nginx/html
+COPY --from=builder /src/public /site
 
 # Expose port 80
 EXPOSE 80
