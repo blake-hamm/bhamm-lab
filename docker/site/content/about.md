@@ -8,7 +8,7 @@ disableShare: true
 
 I am a data-driven professional motivated by learning, creativity, and sustainable practices. With over 8 years of experience in **data science and machine learning**, I bridge the gap between complex algorithms and production-grade infrastructure.
 
-Currently, I work as a **Senior Machine Learning Engineer** at [phData](https://www.phdata.io/), specializing in Generative AI, MLOps, and scalable data systems. My expertise spans the entire ml lifecycle—from data engineering and statistics to building actionable visualization tools, deploying infrastructure as code, and building production GenAI applications with FastAPI endpoints and evaluations. I don't just build models; I build the pipelines, APIs, CI/CD and monitoring that make them robust and valuable.
+Currently, I work as a **Senior Machine Learning Engineer** at [phData](https://www.phdata.io/), where I specialize in building production-ready Generative AI applications and LLMOps infrastructure. I don't just build models; I build robust eval pipelines, APIs, and CI/CD systems that bring them to life.
 
 ---
 
@@ -18,11 +18,11 @@ My work is defined by a "full-stack" approach to AI and data. I have led high-st
 
 *   **Generative AI & LLMs:** Architecting RAG agents, optimizing vector stores (Redis), fine-tuning foundation models, evaluating real-world performance with DSPy and reducing latency with semantic model routing.
 *   **Infrastructure as Code (IaC):** Managing scalable deployments using Terraform, Ansible, and GitOps (ArgoCD) on Kubernetes in multiple cloud environments including AWS, GCP, MS Azure and Cloudflare; holder of two AWS certifications (Associate Architect and Machine Learning Specialty).
-*   **Data Science:** Supply chain optimization (raw materials, assembly), time series forecasting, anomaly detection, and text classification.
-*   **Data Engineering & Analytics:** Reducing compute costs and improving data reliability using dbt, Prefect, Argo Workflows, and modern data warehousing techniques; built business analytics dashboards in Tableu, PowerBI and python Dash application.
-*   **Observability & Logging**: Deploying production monitoring systems with LangGraph, LangSmith, MLflow, Grafana and NewRelic
+*   **Data Science:** Supply chain optimization (raw materials purchasing, manufacturing scheduling), time series forecasting, anomaly detection, and text classification.
+*   **Data Engineering & Analytics:** Reducing compute costs and improving data reliability using dbt, Prefect, Argo Workflows, and modern data warehousing techniques; building business analytics dashboards in Tableau, PowerBI, and Python.
+*   **Observability & Evals**: Establish GenAI and ML eval pipelines as part of CI/CD process; deploy production monitoring systems to identify data and model drift with LangGraph, LangSmith, MLflow, Grafana and NewRelic
 
-*More info in the [portfolio page](/portfolio/).*
+*More examples on the [portfolio page](/portfolio/).*
 
 ---
 
@@ -30,12 +30,12 @@ My work is defined by a "full-stack" approach to AI and data. I have led high-st
 
 I believe the best way to master a technology is to break it in a controlled environment. My "passion projects" are a testing ground for the latest in open-source tech, from bare-metal Kubernetes clusters to self-hosted AI apps.
 
-You can explore my documentation at [docs.bhamm-lab.com](https://docs.bhamm-lab.com) or view the code on my [GitHub](https://github.com/blake-hamm/bhamm-lab).
+You find more info in my [documentation](https://docs.bhamm-lab.com).
 
 #### Current Lab Highlights
-*   **Infrastructure:** A hybrid setup running **NixOS** and **Talos Linux** on bare metal, orchestrated with Kubernetes and managed with ArgoCD, Terraform and Ansible.
+*   **Infrastructure:** A hybrid setup running **Proxmox** and **Talos Linux** on bare metal, orchestrated with Kubernetes and managed with ArgoCD, Terraform and Ansible.
 *   **Local AI:** Experimenting with local LLM inference (llama.cpp), search (searnxg), vector db (qdrant) and hardware acceleration (ROCm/Vulkan) to run models like Qwen and GLM Air independent of the cloud.
-*   **Disaster Recover:** Keep the wife happy with 3-2-1 backups for media (Immich and Jellyfin) to local seaweedfs and minio and offsite cloudflare R2 bucket orchestrated with k8up and argo workflows.
+*   **Disaster Recovery:** Ensuring data integrity with a 3-2-1 backup strategy for media servers (Immich, Jellyfin) using local object storage (Minio) and offsite cloud backups (Cloudflare R2), orchestrated with K8up and Argo Workflows.
 
 *PS: You're viewing this website from my homelab!*
 
@@ -62,7 +62,7 @@ This background taught me how to perform under immense pressure and assess dynam
 
 ### Personal Life
 
-When I'm not in the cloud or on the mountain, I am grounded in my community in **Ogden, Utah**. I am happily married and the proud "dad" to three pups who keep me active and outdoors.
+When I'm not on a terminal or the mountain, I am grounded in my community in **Ogden, Utah**. I am happily married and the proud "dad" to three pups who keep me active and outdoors.
 
 I am deeply passionate about my local community and believe in using technology to drive sustainable, positive change.
 
@@ -70,4 +70,4 @@ I am deeply passionate about my local community and believe in using technology 
 
 ### Let's Collaborate
 
-I am currently open to projects, particularly those involving non-profits, GenAI strategy, MLOps implementation, or complex machine learning engineering challenges.
+I am currently open to projects, particularly those involving non-profits, AI strategy, MLOps development, or complex machine learning engineering challenges.
