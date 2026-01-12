@@ -12,7 +12,7 @@ spec:
     namespace: models
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/sabnzbd
+    targetRevision: feature/hugo
     path: kubernetes/charts/llm-models
     helm:
       valuesObject:
@@ -21,13 +21,13 @@ spec:
             description: Great all around embedding model
             enabled: true
             pvc:
-              storage: "20Gi"
+              storage: "30Gi"
             image:
               repository: ghcr.io/ggml-org/llama.cpp
-              tag: server-vulkan
+              tag: server-rocm
             args:
               - -hf
-              - Qwen/Qwen3-Embedding-8B-GGUF:F16
+              - JonathanMiddleton/Qwen3-Embedding-8B-GGUF:BF16
               - --host
               - 0.0.0.0
               - --metrics
@@ -59,6 +59,10 @@ spec:
                 memory: "20Gi"
             nodeSelector:
               kubernetes.io/hostname: green-talos-worker-amd-gpu
+            hfToken:
+              enabled: true
+              secretName: models-external-secret
+              secretKey: hf_token
           - name: gpt-oss-120b
             description: Great reasoning MoE model for general chat queries
             enabled: true

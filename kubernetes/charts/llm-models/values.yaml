@@ -3,7 +3,7 @@ global:
   image:
     repository: kyuz0/amd-strix-halo-toolboxes
     tag: vulkan-radv
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   pvc:
     storageClassName: local-path
     storage: "10Gi"
@@ -31,6 +31,10 @@ global:
       operator: "Exists"
       effect: "NoSchedule"
   nodeSelector: {}
+  hfToken:
+    enabled: false
+    secretName: ""
+    secretKey: ""
   litellm:
     manage_config: true
     config:

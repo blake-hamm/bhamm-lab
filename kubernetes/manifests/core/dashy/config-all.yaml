@@ -217,6 +217,10 @@ data:
         description: Visit harbor
         icon: hl-harbor
         url: https://harbor.bhamm-lab.com/
+      - title: Main Site
+        description: Visit personal/professional website
+        icon: mdi-web
+        url: https://site.bhamm-lab.com/
 
     - name: AI
       icon: mdi-brain

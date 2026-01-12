@@ -95,3 +95,12 @@ metadata:
 spec:
   defaultCertificate:
     secretName: bhamm-lab-tls
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: selfsigned-issuer
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  selfSigned: {}

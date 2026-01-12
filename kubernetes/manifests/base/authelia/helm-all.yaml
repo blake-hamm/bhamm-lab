@@ -17,6 +17,8 @@ spec:
     helm:
       valuesObject:
         pod:
+          annotations:
+            reloader.stakater.com/secret: authelia-oidc-key
           kind: 'DaemonSet'
           extraVolumeMounts:
             - mountPath: '/app/custom-secrets'
@@ -27,16 +29,19 @@ spec:
               projected:
                 sources:
                   - secret:
+                      name: authelia-oidc-key
+                      items:
+                        - key: tls.crt
+                          path: oidc.jwk.RS256.crt
+                        - key: tls.key
+                          path: oidc.jwk.RS256.pem
+                  - secret:
                       name: authelia-external-secret
                       items:
                         - key: lldap_password
                           path: lldap_password
                         - key: storage_encryption_key
                           path: storage_encryption_key
-                        - key: oidc_jwks_pem
-                          path: oidc.jwk.RS256.pem
-                        - key: oidc_jwks_crt
-                          path: oidc.jwk.RS256.crt
                   - secret:
                       name: authelia-postgresql-app
                       items:

@@ -1,0 +1,48 @@
+baseURL: https://site.bhamm-lab.com/
+languageCode: en-us
+title: Blake Hamm
+theme: PaperMod
+params:
+  description: "My personal website"
+  author: "Blake Hamm"
+  assets:
+    favicon: "/favicon.jpg"
+  profileMode:
+    enabled: true
+    title: "Blake Hamm"
+    subtitle: "Tech things I'm up to"
+    imageUrl: "/favicon.jpg"
+    imageWidth: 120
+    imageHeight: 120
+    buttons:
+      - name: About
+        url: /about
+      - name: Portfolio
+        url: /portfolio
+      - name: Blogs
+        url: /blogs
+  homeInfoParams:
+    Title: "Hi there 👋"
+    Content: "Senior ML Engineer, Homelabber, and Former Pro Snowboarder"
+  # PaperMod options
+  ShowShareButtons: false
+  ShowPostNavLinks: true
+  socialIcons:
+    - name: "github"
+      url: "https://github.com/blake-hamm"
+    - name: "linkedin"
+      url: "https://www.linkedin.com/in/blakejhamm/"
+menu:
+  main:
+    - identifier: about
+      name: About
+      url: /about/
+      weight: 1
+    - identifier: portfolio
+      name: Portfolio
+      url: /portfolio/
+      weight: 2
+    - identifier: blogs
+      name: Blogs
+      url: /blogs/
+      weight: 3

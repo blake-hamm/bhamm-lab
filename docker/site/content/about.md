@@ -1,0 +1,73 @@
+---
+title: "About"
+layout: "about"
+summary: "Senior ML Engineer, Homelabber, and Former Pro Snowboarder"
+hidemeta: true
+disableShare: true
+---
+
+I am a data-driven professional motivated by learning, creativity, and sustainable practices. With over 8 years of experience in **data science and machine learning**, I bridge the gap between complex algorithms and production-grade infrastructure.
+
+Currently, I work as a **Senior Machine Learning Engineer** at [phData](https://www.phdata.io/), where I specialize in building production-ready Generative AI applications and LLMOps infrastructure. I don't just build models; I build robust eval pipelines, APIs, and CI/CD systems that bring them to life.
+
+---
+
+### Technical Expertise
+
+My work is defined by a "full-stack" approach to AI and data. I have led high-stakes AI initiatives for companies like **MetLife**, **Fidelity Investments**, and **Capital One**, and optimized demand planning and supply chain for global brands like **Salomon** and **Smith Optics**.
+
+*   **Generative AI & LLMs:** Architecting RAG agents, optimizing vector stores (Redis), fine-tuning foundation models, evaluating real-world performance with DSPy and reducing latency with semantic model routing.
+*   **Infrastructure as Code (IaC):** Managing scalable deployments using Terraform, Ansible, and GitOps (ArgoCD) on Kubernetes in multiple cloud environments including AWS, GCP, MS Azure and Cloudflare; holder of two AWS certifications (Associate Architect and Machine Learning Specialty).
+*   **Data Science:** Supply chain optimization (raw materials purchasing, manufacturing scheduling), time series forecasting, anomaly detection, and text classification.
+*   **Data Engineering & Analytics:** Reducing compute costs and improving data reliability using dbt, Prefect, Argo Workflows, and modern data warehousing techniques; building business analytics dashboards in Tableau, PowerBI, and Python.
+*   **Observability & Evals**: Establish GenAI and ML eval pipelines as part of CI/CD process; deploy production monitoring systems to identify data and model drift with LangGraph, LangSmith, MLflow, Grafana and NewRelic
+
+*More examples on the [portfolio page](/portfolio/).*
+
+---
+
+### The Homelab & Passion Projects
+
+I believe the best way to master a technology is to break it in a controlled environment. My "passion projects" are a testing ground for the latest in open-source tech, from bare-metal Kubernetes clusters to self-hosted AI apps.
+
+You find more info in my [documentation](https://docs.bhamm-lab.com).
+
+#### Current Lab Highlights
+*   **Infrastructure:** A hybrid setup running **Proxmox** and **Talos Linux** on bare metal, orchestrated with Kubernetes and managed with ArgoCD, Terraform and Ansible.
+*   **Local AI:** Experimenting with local LLM inference (llama.cpp), search (searnxg), vector db (qdrant) and hardware acceleration (ROCm/Vulkan) to run models like Qwen and GLM Air independent of the cloud.
+*   **Disaster Recovery:** Ensuring data integrity with a 3-2-1 backup strategy for media servers (Immich, Jellyfin) using local object storage (Minio) and offsite cloud backups (Cloudflare R2), orchestrated with K8up and Argo Workflows.
+
+*PS: You're viewing this website from my homelab!*
+
+#### Other Passion Projects
+*   **[`rpi-truck`](https://github.com/blake-hamm/rpi-truck)**: An IoT project streaming OBD2 vehicle data to a Plotly/Flask app via Airflow.
+*   **[`lighthearted`](https://github.com/blake-hamm/lighthearted)**: A GenAI-powered mental health application.
+*   **[`Air_Quality_Analysis`](https://github.com/blake-hamm/Air_Quality_Analysis)**: Forecasting Salt Lake City air quality using LSTM neural networks.
+
+---
+
+### The Snowboarder
+
+Before I was optimizing neural networks, I was optimizing competition lines.
+
+For several years, I pursued a professional snowboarding career, culminating in a spot on the **Freeride World Tour (FWT)**—the premier big mountain competition series in the world.
+
+*   **World Rank #3 (2019):** Finished the 2019 season ranked 3rd globally in Men’s Snowboard.
+*   **1st Place, Ordino Arcalís (2019):** Took the top spot on the podium in Andorra with a run that combined technical big mountain riding with freestyle elements.
+*   **FWQ Champion (2017):** Won the Freeride World Qualifier Region 2 title to secure my spot on the main tour.
+
+This background taught me how to perform under immense pressure and assess dynamic risks—skills that translate directly to navigating complex engineering roadmaps.
+
+---
+
+### Personal Life
+
+When I'm not on a terminal or the mountain, I am grounded in my community in **Ogden, Utah**. I am happily married and the proud "dad" to three pups who keep me active and outdoors.
+
+I am deeply passionate about my local community and believe in using technology to drive sustainable, positive change.
+
+---
+
+### Let's Collaborate
+
+I am currently open to projects, particularly those involving non-profits, AI strategy, MLOps development, or complex machine learning engineering challenges.

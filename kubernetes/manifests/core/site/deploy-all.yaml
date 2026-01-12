@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: site
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main-site
+  namespace: site
+  labels:
+    app: main-site
+  annotations:
+    argocd.argoproj.io/sync-wave: "21"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: main-site
+  template:
+    metadata:
+      labels:
+        app: main-site
+    spec:
+      containers:
+        - name: site-server
+          image: harbor.bhamm-lab.com/library/site:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: "0.5"
+              memory: "256Mi"
+            requests:
+              cpu: "0.2"
+              memory: "128Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: main-site
+  namespace: site
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+  selector:
+    app: main-site
