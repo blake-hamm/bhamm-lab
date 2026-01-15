@@ -212,3 +212,10 @@ opnsense_extra_rules:
     protocol: any
     source_net: WireguardVPNLABNetwork
     destination_net: k8sNetwork
+  - description: Allow 'guest' network access to k8s (wife)
+    interface: opt8
+    sequence: 3
+    ip_protocol: inet
+    protocol: any
+    source_net: guestNetwork
+    destination_net: k8sNetwork
