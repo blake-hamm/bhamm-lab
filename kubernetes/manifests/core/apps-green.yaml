@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/hugo
+    targetRevision: feature/wife-access
     path: kubernetes/manifests/apps
     directory:
       recurse: true
