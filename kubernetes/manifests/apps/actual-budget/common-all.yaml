@@ -37,7 +37,7 @@ spec:
                 property: ACTUAL_OPENID_CLIENT_SECRET
         pvc:
           - name: actual-budget-data
-          - size: 5Gi
+            size: 5Gi
         k8up:
           backup:
             enabled: true
