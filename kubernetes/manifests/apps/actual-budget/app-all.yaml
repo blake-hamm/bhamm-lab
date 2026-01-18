@@ -41,7 +41,7 @@ spec:
             - name: ACTUAL_LOGIN_METHOD
               value: openid
             - name: ACTUAL_ALLOWED_LOGIN_METHODS
-              value: ['openid']
+              value: 'openid'
           volumeMounts:
             - name: actual-budget-data
               mountPath: /data
