@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: actual-budget
+  namespace: actual-budget
+  labels:
+    app.kubernetes.io/name: actual-budget
+  annotations:
+    argocd.argoproj.io/sync-wave: "21"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: actual-budget
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: actual-budget
+    spec:
+      containers:
+        - name: actual-budget
+          image: docker.io/actualbudget/actual-server:latest
+          ports:
+            - name: http
+              containerPort: 5006
+              protocol: TCP
+          env:
+            - name: ACTUAL_OPENID_DISCOVERY_URL
+              value: https://auth.bhamm-lab.com
+            - name: ACTUAL_OPENID_CLIENT_ID
+              value: actual-budget
+            - name: ACTUAL_OPENID_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: actual-budget-external-secret
+                  key: ACTUAL_OPENID_CLIENT_SECRET
+            - name: ACTUAL_OPENID_SERVER_HOSTNAME
+              value: https://actual-budget.bhamm-lab.com
+            - name: ACTUAL_OPENID_AUTH_METHOD
+              value: oauth2
+            - name: ACTUAL_LOGIN_METHOD
+              value: openid
+            - name: ACTUAL_ALLOWED_LOGIN_METHODS
+              value: ['openid']
+          volumeMounts:
+            - name: actual-budget-data
+              mountPath: /data
+      volumes:
+        - name: actual-budget-data
+          persistentVolumeClaim:
+            claimName: actual-budget-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: actual-budget
+  namespace: actual-budget
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  ports:
+    - name: http
+      port: 5006
+      protocol: TCP
+      targetPort: http
+  selector:
+    app.kubernetes.io/name: actual-budget
