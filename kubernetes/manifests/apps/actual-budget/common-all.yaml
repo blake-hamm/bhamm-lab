@@ -19,7 +19,7 @@ spec:
         name: actual-budget
         ingressRoutes:
           - enabled: true
-            name: immich
+            name: actual-budget
             ingressClass: traefik-external
             routes:
               - match: Host(`actual-budget.bhamm-lab.com`)
