@@ -91,6 +91,7 @@ spec:
                 match: Host(`nzbget.bhamm-lab.com`)
                 middlewares:
                   - name: default-headers
+                  - name: forwardauth-authelia
                 services:
                   - name: nzbget
                     scheme: http
@@ -104,6 +105,7 @@ spec:
                 match: Host(`sabnzbd.bhamm-lab.com`)
                 middlewares:
                   - name: default-headers
+                  - name: forwardauth-authelia
                 services:
                   - name: sabnzbd
                     scheme: http
@@ -117,6 +119,7 @@ spec:
                 match: Host(`qbittorrent.bhamm-lab.com`)
                 middlewares:
                   - name: default-headers
+                  - name: forwardauth-authelia
                 services:
                   - name: qbittorrent
                     scheme: http
@@ -130,6 +133,7 @@ spec:
                 match: Host(`prowlarr.bhamm-lab.com`)
                 middlewares:
                   - name: default-headers
+                  - name: forwardauth-authelia
                 services:
                   - name: prowlarr
                     scheme: http
@@ -143,6 +147,7 @@ spec:
                 match: Host(`sonarr.bhamm-lab.com`)
                 middlewares:
                   - name: default-headers
+                  - name: forwardauth-authelia
                 services:
                   - name: sonarr
                     scheme: http
@@ -169,6 +174,7 @@ spec:
                 match: Host(`radarr.bhamm-lab.com`)
                 middlewares:
                   - name: default-headers
+                  - name: forwardauth-authelia
                 services:
                   - name: radarr
                     scheme: http
@@ -181,6 +187,7 @@ spec:
                 match: Host(`cleanuparr.bhamm-lab.com`)
                 middlewares:
                   - name: default-headers
+                  - name: forwardauth-authelia
                 services:
                   - name: cleanuparr
                     scheme: http
@@ -193,6 +200,7 @@ spec:
                 match: Host(`huntarr.bhamm-lab.com`)
                 middlewares:
                   - name: default-headers
+                  - name: forwardauth-authelia
                 services:
                   - name: huntarr
                     scheme: http
