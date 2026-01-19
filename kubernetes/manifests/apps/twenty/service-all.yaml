@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: twenty-server
+  namespace: twenty
+  annotations:
+    argocd.argoproj.io/sync-wave: "24"
+spec:
+  internalTrafficPolicy: Cluster
+  ports:
+    - name: http-tcp
+      port: 3000
+      protocol: TCP
+      targetPort: 3000
+  selector:
+    app: twenty-server
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  type: ClusterIP
