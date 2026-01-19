@@ -354,3 +354,7 @@ data:
         description: Visit actual budget
         icon: hl-actual-budget
         url: https://actual-budget.bhamm-lab.com/
+      - title: Twenty
+        description: Visit twenty crm
+        icon: mdi-currency-usd
+        url: https://crm.bhamm-lab.com/
