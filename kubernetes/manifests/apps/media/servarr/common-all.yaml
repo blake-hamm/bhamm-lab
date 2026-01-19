@@ -36,14 +36,6 @@ spec:
               remoteRef:
                 key: /default/servarr
                 property: GLUETUN_API_KEY
-            - secretKey: NZBGET_USER
-              remoteRef:
-                key: /core/lldap
-                property: lldap-ldap-user-name
-            - secretKey: NZBGET_PASS
-              remoteRef:
-                key: /core/lldap
-                property: lldap-ldap-user-pass
         pvc:
           - name: radarr-config
           - name: cleanuparr-config
@@ -55,8 +47,6 @@ spec:
           - name: prowlarr-config
           - name: qbittorrent-config
           - name: gluetun-config
-          - name: nzbget-gluetun-config
-          - name: nzbget-config
           - name: sabnzbd-gluetun-config
           - name: sabnzbd-config
           - name: jellyseerr-config
@@ -82,20 +72,6 @@ spec:
           restore:
             enabled: false
         ingressRoutes:
-          - enabled: true
-            name: nzbget
-            ingressClass: traefik-external
-            # websocket: true
-            routes:
-              - kind: Rule
-                match: Host(`nzbget.bhamm-lab.com`)
-                middlewares:
-                  - name: default-headers
-                  - name: forwardauth-authelia
-                services:
-                  - name: nzbget
-                    scheme: http
-                    port: webui
           - enabled: true
             name: sabnzbd
             ingressClass: traefik-external
