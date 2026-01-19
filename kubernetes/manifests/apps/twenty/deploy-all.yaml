@@ -33,7 +33,7 @@ spec:
           imagePullPolicy: Always
           env:
             - name: NODE_PORT
-              value: 3000
+              value: "3000"
             - name: SERVER_URL
               value: "https://crm.bhamm-lab.com"
             - name: "PG_DATABASE_URL"
