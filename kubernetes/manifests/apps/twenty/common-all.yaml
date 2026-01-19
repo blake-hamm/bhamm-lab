@@ -50,9 +50,9 @@ spec:
                 middlewares:
                   - name: default-headers
                 services:
-                  - name: twenty
+                  - name: twenty-server
                     scheme: http
-                    port: 80
+                    port: 3000
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
