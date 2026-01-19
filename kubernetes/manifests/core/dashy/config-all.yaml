@@ -146,10 +146,10 @@ data:
         icon: hl-prowlarr
         url: https://prowlarr.bhamm-lab.com/
         statusCheckAcceptCodes: '401'
-      - title: nzbget
-        description: Visit nzbget
-        icon: hl-nzbget
-        url: https://nzbget.bhamm-lab.com/
+      - title: Sabnzbd
+        description: Visit sabnzbd
+        icon: hl-sabnzbd
+        url: https://sabnzbd.bhamm-lab.com/
         statusCheckAcceptCodes: '401'
       - title: Qbittorrent
         description: Visit qbittorrent
@@ -223,10 +223,6 @@ data:
         description: Visit harbor
         icon: hl-harbor
         url: https://harbor.bhamm-lab.com/
-      - title: Main Site
-        description: Visit personal/professional website
-        icon: mdi-web
-        url: https://site.bhamm-lab.com/
 
     - name: AI
       icon: mdi-brain
@@ -350,7 +346,15 @@ data:
     - name: Other
       icon: mdi-shape
       items:
+      - title: Main Site
+        description: Visit personal/professional website
+        icon: mdi-web
+        url: https://site.bhamm-lab.com/
       - title: Actual Budget
         description: Visit actual budget
         icon: hl-actual-budget
         url: https://actual-budget.bhamm-lab.com/
+      - title: Twenty
+        description: Visit twenty crm
+        icon: mdi-currency-usd
+        url: https://crm.bhamm-lab.com/

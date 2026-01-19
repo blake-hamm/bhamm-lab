@@ -9,7 +9,6 @@ resources:
   - ./qbittorent/base
   - ./sonarr/base
   - ./jellyfin/base
-  - ./nzbget/base
   - ./recyclarr/base
   - ./cleanuparr/base
   - ./huntarr/base
