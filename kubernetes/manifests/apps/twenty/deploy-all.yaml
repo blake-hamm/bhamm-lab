@@ -83,7 +83,7 @@ metadata:
   name: twenty-worker
   namespace: twenty
   annotations:
-    argocd.argoproj.io/sync-wave: "22"
+    argocd.argoproj.io/sync-wave: "23"
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
