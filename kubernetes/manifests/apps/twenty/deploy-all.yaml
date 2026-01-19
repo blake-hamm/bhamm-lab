@@ -1,0 +1,139 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: twenty-server
+  name: twenty-server
+  namespace: twenty
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: twenty-server
+  template:
+    metadata:
+      labels:
+        app: twenty-server
+    spec:
+      volumes:
+        - name: twenty-local-data
+          persistentVolumeClaim:
+            claimName: twenty-local-pvc
+      containers:
+        - name: twenty
+          image: twentycrm/twenty:latest
+          imagePullPolicy: Always
+          env:
+            - name: NODE_PORT
+              value: 3000
+            - name: SERVER_URL
+              value: "https://crm.bhamm-lab.com"
+            - name: "PG_DATABASE_URL"
+              valueFrom:
+                secretKeyRef:
+                  name: twenty-postgresql-app
+                  key: fqdn-uri
+            - name: "REDIS_URL"
+              value: "redis://twenty-dragonfly.twenty.svc.cluster.local:6379"
+            - name: SIGN_IN_PREFILLED
+              value: "false"
+            - name: STORAGE_TYPE
+              value: "local"
+            - name: "ACCESS_TOKEN_EXPIRES_IN"
+              value: "7d"
+            - name: "LOGIN_TOKEN_EXPIRES_IN"
+              value: "24h"
+            - name: APP_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: twenty-external-secret
+                  key: APP_SECRET
+          ports:
+            - containerPort: 3000
+              name: http-tcp
+              protocol: TCP
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "1024Mi"
+              cpu: "1000m"
+          stdin: true
+          tty: true
+          volumeMounts:
+            - mountPath: /app/packages/twenty-server/.local-storage
+              name: twenty-local-data
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: twenty-worker
+  name: twenty-worker
+  namespace: twenty
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: twenty-worker
+  template:
+    metadata:
+      labels:
+        app: twenty-worker
+    spec:
+      containers:
+        - name: twenty
+          image: twentycrm/twenty:latest
+          imagePullPolicy: Always
+          env:
+            - name: SERVER_URL
+              value: "https://crm.bhamm-lab.com"
+            - name: "PG_DATABASE_URL"
+              valueFrom:
+                secretKeyRef:
+                  name: twenty-postgresql-app
+                  key: fqdn-uri
+            - name: "REDIS_URL"
+              value: "redis://twenty-dragonfly.twenty.svc.cluster.local:6379"
+            - name: DISABLE_DB_MIGRATIONS
+              value: "false" # it already runs on the server
+            - name: STORAGE_TYPE
+              value: "local"
+            - name: APP_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: twenty-external-secret
+                  key: APP_SECRET
+          command:
+            - yarn
+            - worker:prod
+          resources:
+            requests:
+              memory: "1024Mi"
+              cpu: "250m"
+            limits:
+              memory: "2048Mi"
+              cpu: "1000m"
+          stdin: true
+          tty: true
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
