@@ -45,7 +45,7 @@ spec:
             ingressClass: traefik-external
             websocket: true
             routes:
-              - match: Host(`twenty.bhamm-lab.com`)
+              - match: Host(`crm.bhamm-lab.com`)
                 kind: Rule
                 middlewares:
                   - name: default-headers

@@ -106,7 +106,7 @@ spec:
           imagePullPolicy: Always
           env:
             - name: SERVER_URL
-              value: "https://crm.bhamm-lab.com"
+              value: "https://crm.bhamm-lab.com:443"
             - name: "PG_DATABASE_URL"
               valueFrom:
                 secretKeyRef:
