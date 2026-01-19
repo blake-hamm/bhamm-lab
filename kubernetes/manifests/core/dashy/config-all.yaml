@@ -223,10 +223,6 @@ data:
         description: Visit harbor
         icon: hl-harbor
         url: https://harbor.bhamm-lab.com/
-      - title: Main Site
-        description: Visit personal/professional website
-        icon: mdi-web
-        url: https://site.bhamm-lab.com/
 
     - name: AI
       icon: mdi-brain
@@ -350,6 +346,10 @@ data:
     - name: Other
       icon: mdi-shape
       items:
+      - title: Main Site
+        description: Visit personal/professional website
+        icon: mdi-web
+        url: https://site.bhamm-lab.com/
       - title: Actual Budget
         description: Visit actual budget
         icon: hl-actual-budget
