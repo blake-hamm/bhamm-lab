@@ -346,3 +346,11 @@ data:
         icon: https://raw.githubusercontent.com/kubernetes/community/b51e2a3bce5d115b138df9d49c1ba8017cffdd45/icons/svg/resources/labeled/pvc.svg
         url: https://grafana.bhamm-lab.com/d/919b92a8e8041bd567af9edab12c840c/kubernetes-persistent-volumes?orgId=1&from=now-2d&to=now&timezone=America%2FDenver&var-datasource=default&var-cluster=&var-namespace=git&var-volume=gitea-shared-storage&refresh=10s
         statusCheck: false
+
+    - name: Other
+      icon: mdi-shape
+      items:
+      - title: Actual Budget
+        description: Visit actual budget
+        icon: hl-actual-budget
+        url: https://actual-budget.bhamm-lab.com/
