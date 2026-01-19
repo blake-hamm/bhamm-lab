@@ -146,10 +146,10 @@ data:
         icon: hl-prowlarr
         url: https://prowlarr.bhamm-lab.com/
         statusCheckAcceptCodes: '401'
-      - title: nzbget
-        description: Visit nzbget
-        icon: hl-nzbget
-        url: https://nzbget.bhamm-lab.com/
+      - title: Sabnzbd
+        description: Visit sabnzbd
+        icon: hl-sabnzbd
+        url: https://sabnzbd.bhamm-lab.com/
         statusCheckAcceptCodes: '401'
       - title: Qbittorrent
         description: Visit qbittorrent
