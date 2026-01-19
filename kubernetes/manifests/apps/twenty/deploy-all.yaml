@@ -35,7 +35,7 @@ spec:
             - name: NODE_PORT
               value: "3000"
             - name: SERVER_URL
-              value: "https://crm.bhamm-lab.com"
+              value: "https://crm.bhamm-lab.com:443"
             - name: "PG_DATABASE_URL"
               valueFrom:
                 secretKeyRef:
