@@ -26,7 +26,7 @@ spec:
       volumes:
         - name: twenty-local-data
           persistentVolumeClaim:
-            claimName: twenty-local-pvc
+            claimName: twenty-local-data
       containers:
         - name: twenty
           image: twentycrm/twenty:latest
