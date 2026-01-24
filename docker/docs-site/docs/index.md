@@ -1,6 +1,6 @@
 # Welcome to my homelab
 
-These docs cover my personal lab which I use for exploring AI/ML, DevOps, and security. I've built a robust platform powering self hosted apps (like this docs site). It's a place for learning, tinkering, and maybe over-engineer a solution or two.
+These docs cover my personal lab which I use for exploring AI/ML, DevOps, and security. I've built a robust platform to power self hosted apps (like this docs site). It's a place for learning, tinkering, and maybe over-engineer a solution or two.
 
 ![bhamm-lab-rack](./assets/rack.jpg)
 
