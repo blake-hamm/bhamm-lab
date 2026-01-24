@@ -9,11 +9,11 @@ params:
     favicon: "/favicon.jpg"
   profileMode:
     enabled: true
-    title: "Blake Hamm"
-    subtitle: "Tech things I'm up to"
-    imageUrl: "/favicon.jpg"
-    imageWidth: 120
-    imageHeight: 120
+    title: "Hi! I'm Blake."
+    subtitle: "This is my digital record of open source projects, opinions on AI/ML engineering and the occasional adventure story."
+    imageUrl: "/headshot.jpg"
+    imageWidth: 40%
+    imageHeight: 40%
     buttons:
       - name: About
         url: /about
@@ -21,9 +21,8 @@ params:
         url: /portfolio
       - name: Blogs
         url: /blogs
-  homeInfoParams:
-    Title: "Hi there 👋"
-    Content: "Senior ML Engineer, Homelabber, and Former Pro Snowboarder"
+      - name: Docs
+        url: https://docs.bhamm-lab.com/
   # PaperMod options
   ShowShareButtons: false
   ShowPostNavLinks: true
@@ -46,3 +45,7 @@ menu:
       name: Blogs
       url: /blogs/
       weight: 3
+    - identifier: docs
+      name: Docs
+      url: https://docs.bhamm-lab.com/
+      weight: 4

@@ -2,7 +2,6 @@
 
 ![bhamm-lab-diagram](../assets/diagram.png)
 
-Welcome to my personal lab for exploring AI/ML, DevOps, and security. I've built a resilient, open-source platform by combining bare-metal servers, virtualization, and container orchestration. It's a place for learning, tinkering, and maybe over-engineer a solution or two.
 
 ## Guiding Principles
 
@@ -21,7 +20,7 @@ This philosophy is supported by several key principles:
 
 - **Servers:** 5 servers – 'Method' (SuperMicro H12SSL‑i), 'Indy' (SuperMicro D‑2146NT), 'Stale' (X10SDV‑4C‑TLN4F), 'Nose' & 'Tail' (Framework Mainboard)
 - **Networking:** TP‑Link Omada switches & Protectli Opnsense firewall
-- **Accelerated compute:** Intel Arc A310, AMD Radeon AI Pro R9700, AMD Ryzen AI MAX+ 395 "Strix Halo"
+- **Accelerated compute:** Intel Arc A310, AMD Radeon AI Pro R9700, AMD Ryzen AI MAX+ 395 (Strix Halo)
 - **Management:** UPS, PiKVM
 
 **Software Stack:**
@@ -77,11 +76,3 @@ This philosophy is supported by several key principles:
 - Automated backup restoration workflows and gitops
 - Regular disaster recovery testing with blue/green cluster
 - 3-2-1 backup strategy
-
-## Roadmap
-
-- **Short‑term:** Build personal website for blogs and project showcase
-- **Mid‑term:** Run MiniMax with llama.cpp grpc accross two Strix Halo system
-- **Long‑term:** Fine-tuning generative models, Home Assistant
-
-*Github issues are more up to date.*

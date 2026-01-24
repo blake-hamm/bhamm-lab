@@ -3,14 +3,17 @@
 <!--![Architecture Diagram](docker/docs-site/docs/assets/diagram.png)-->
 [![GitHub stars](https://img.shields.io/github/stars/blake-hamm/bhamm-lab?style=social)](https://github.com/blake-hamm/bhamm-lab/stargazers) [![License](https://img.shields.io/github/license/blake-hamm/bhamm-lab)](LICENSE.md)
 
-Welcome to my personal lab for exploring AI/ML, DevOps, and security. I've built a resilient, open-source platform by combining bare-metal servers, virtualization, and container orchestration. It's a place for learning, tinkering, and maybe over-engineer a solution or two.
+Welcome to my personal lab for exploring AI/ML, DevOps, and security. I've built a robust platform to power self hosted apps. It's a place for learning, tinkering, and maybe over-engineer a solution or two.
 
+- [Documentation](#documentation)
 - [Guiding Principles](#guiding-principles)
 - [Core Infrastructure](#core-infrastructure)
 - [Key Features](#key-features)
-- [Documentation](#documentation)
 - [Roadmap](#roadmap)
 
+## Documentation
+
+Comprehensive documentation is available in my **[docs site](https://docs.bhamm-lab.com/)**, covering architecture, deployments, operations, security, and AI/ML implementations.
 
 
 ## Guiding Principles
@@ -79,13 +82,10 @@ This philosophy is supported by several key principles:
 - Regular disaster recovery testing with blue/green cluster
 - 3-2-1 backup strategy
 
-## Documentation
-
-Comprehensive documentation is available in the **[Docker Docs Site](docker/docs-site/docs)** directory, covering architecture, deployments, operations, security, and AI/ML implementations.
-
 ## Roadmap
-- **Short‑term:** [Wireguard VPN](https://www.wireguard.com/) & [Cloudflare tunnels](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/) to publish docs site
-- **Mid‑term:** Personal website & publish project **[lighthearted](https://github.com/blake-hamm/lighthearted)**
-- **Long‑term:** Fine‑tuning & building generative models, Home Assistant
 
-*Github issues are more up to date.*
+- **Short-term:** Run MiniMax with llama.cpp grpc accross two Strix Halo system
+- **Mid-term:** Setup renovate and automate maintenance processes
+- **Long-term:** Fine-tuning generative models, Home Assistant integration
+
+*Github issues are more up to date with detailed task tracking.*
