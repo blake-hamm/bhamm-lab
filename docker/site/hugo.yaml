@@ -10,7 +10,7 @@ params:
   profileMode:
     enabled: true
     title: "Hi! I'm Blake."
-    subtitle: "This is my digital record of my open source projects, opinions on software engineering and the occasional adventure story."
+    subtitle: "This is a digital record of my open source projects, opinions on software engineering and the occasional adventure story."
     imageUrl: "/headshot.jpg"
     imageWidth: 120
     imageHeight: 120
