@@ -43,7 +43,14 @@ let
     in
     lib.nixosSystem {
       system = hostModule.nixpkgs.system;
-      specialArgs = { inherit self inputs shared; host = hostName; };
+      specialArgs = {
+        inherit self inputs shared;
+        host = hostName;
+        pkgs-unstable = import inputs.nixpkgs-unstable {
+          system = hostModule.nixpkgs.system;
+          config.allowUnfree = true;
+        };
+      };
       modules = [ (lib.removeAttrs hostModule [ "deploy" "image" ]) imageModule ];
     };
 
