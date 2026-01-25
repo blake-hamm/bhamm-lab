@@ -10,6 +10,8 @@
     ./../../profiles/server.nix
   ];
 
+  nixpkgs.system = "x86_64-linux";
+
   cfg = {
     framework.enable = true;
     networking = {

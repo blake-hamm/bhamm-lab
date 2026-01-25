@@ -11,6 +11,8 @@
     ./../../profiles/desktop.nix
   ];
 
+  nixpkgs.system = "x86_64-linux";
+
   cfg = {
     # Machine-specific settings
     framework.enable = true;
