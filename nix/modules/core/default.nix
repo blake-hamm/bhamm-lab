@@ -1,5 +1,6 @@
 {
   imports = [
+    ./options.nix
     ./boot.nix
     ./git.nix
     ./home.nix

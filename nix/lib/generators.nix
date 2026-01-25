@@ -34,10 +34,17 @@ let
   generateColmena = lib.mapAttrs mkDeployment deployableHosts;
 
   mkNixosConfig = hostName: hostModule:
+    let
+      imageModule =
+        if hostModule ? "image" && hostModule.image.type == "sd-image" && hostModule.nixpkgs.system == "aarch64-linux" then
+          inputs.nixpkgs + "/nixos/modules/installer/sd-card/sd-image-aarch64-installer.nix"
+        else
+          { };
+    in
     lib.nixosSystem {
       system = hostModule.nixpkgs.system;
       specialArgs = { inherit self inputs shared; host = hostName; };
-      modules = [ (lib.removeAttrs hostModule [ "deploy" ]) ];
+      modules = [ (lib.removeAttrs hostModule [ "deploy" "image" ]) imageModule ];
     };
 
   generateNixosConfigurations = lib.mapAttrs mkNixosConfig deployableHosts;

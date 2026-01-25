@@ -26,54 +26,65 @@
 
   };
 
-  outputs = { nixpkgs, self, ... } @ inputs:
+  outputs = { self, nixpkgs, ... } @ inputs:
     let
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
+      forAllSystems = nixpkgs.lib.genAttrs systems;
+
       shared = import ./nix/lib;
-      pkgs = import inputs.nixpkgs {
-        system = shared.system;
-        config.allowUnfree = true;
-      };
-      pkgs-unstable = import inputs.nixpkgs-unstable {
-        system = shared.system;
-        config.allowUnfree = true;
-      };
       gen = shared.generators { lib = nixpkgs.lib; inherit shared self inputs; };
+      allNixosConfigurations = gen.generateNixosConfigurations // {
+        minimal-iso = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+            (import ./nix/hosts/iso)
+            { nixpkgs.config.allowBroken = true; }
+          ];
+          specialArgs = {
+            host = "minimal-iso";
+            inherit self inputs shared;
+            pkgs-unstable = import inputs.nixpkgs-unstable {
+              system = "x86_64-linux";
+              config.allowUnfree = true;
+            };
+          };
+        };
+      };
     in
     {
-      devShells.x86_64-linux.default = import ./nix/shell.nix { inherit pkgs inputs; };
+      nixosConfigurations = allNixosConfigurations;
+      legacyPackages = forAllSystems (system: {
+        nixosConfigurations = nixpkgs.lib.filterAttrs (n: v: v.pkgs.system == system) allNixosConfigurations;
+      });
+
+      nixpkgs.config.allowBroken = true;
+      devShells.x86_64-linux.default = import ./nix/shell.nix {
+        pkgs = import nixpkgs {
+          system = "x86_64-linux";
+          config.allowUnfree = true;
+        };
+        inherit inputs;
+      };
       colmena =
         {
           meta = {
             nixpkgs = import nixpkgs {
-              system = shared.system;
+              system = "x86_64-linux";
+              config.allowUnfree = true;
             };
             specialArgs = {
               inherit self inputs shared;
-              inherit pkgs-unstable;
+              pkgs-unstable = import inputs.nixpkgs-unstable {
+                system = "x86_64-linux";
+                config.allowUnfree = true;
+              };
             };
             nodeSpecialArgs = gen.generateNodeSpecialArgs;
           };
         } // gen.generateColmena;
-
-      # VM and iso configs without colmena
-      nixosConfigurations =
-        {
-          # ISO image
-          minimal-iso = nixpkgs.lib.nixosSystem {
-            system = shared.system;
-            modules = [
-              "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
-              (import ./nix/hosts/iso)
-              {
-                nixpkgs.config.allowBroken = true;
-              }
-            ];
-            specialArgs = {
-              host = "minimal-iso";
-              inherit self inputs shared;
-              inherit pkgs-unstable;
-            };
-          };
-        } // gen.generateNixosConfigurations;
     };
 }

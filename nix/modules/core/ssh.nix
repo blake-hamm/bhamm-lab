@@ -12,7 +12,7 @@
     settings = {
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;
-      PermitRootLogin = lib.mkDefault "no";
+      PermitRootLogin = lib.mkForce "no";
       UseDns = true;
       X11Forwarding = false;
       AllowUsers = [ "${shared.username}" ];

@@ -1,7 +1,7 @@
 { pkgs, lib, ... }:
 {
   imports = [
-    ./../../modules/profiles/minimal.nix
+    ./../../profiles/server.nix
   ];
 
   # use the latest Linux kernel"${out}
