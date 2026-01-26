@@ -18,5 +18,10 @@
       default = false;
       description = "Enable Strix Halo specific settings";
     };
+    cross-compilation.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable cross-compilation support";
+    };
   };
 }

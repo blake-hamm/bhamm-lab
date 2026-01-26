@@ -15,5 +15,6 @@
     # Machine-specific settings
     framework.enable = true;
     wireguard.enable = true;
+    cross-compilation.enable = true;
   };
 }

@@ -35,7 +35,7 @@ let
 
   mkNixosConfig = hostName: hostModule:
     lib.nixosSystem {
-      system = shared.system;
+      system = shared.getSystemForHost hostModule;
       specialArgs = { inherit self inputs shared; host = hostName; };
       modules = [ (lib.removeAttrs hostModule [ "deploy" ]) ];
     };
