@@ -7,6 +7,7 @@
   imports = [
     ./hardware-configuration.nix
     ./../../profiles/server.nix
+    ./../../modules/hardware/orangepi-zero-3.nix
   ];
 
   cfg = {

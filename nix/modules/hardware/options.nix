@@ -23,5 +23,10 @@
       default = false;
       description = "Enable cross-compilation support";
     };
+    aarch64.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable aarch64 support";
+    };
   };
 }

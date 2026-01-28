@@ -75,5 +75,9 @@
             };
           };
         } // gen.generateNixosConfigurations;
+
+      images = {
+        orangePiZero3 = self.nixosConfigurations.orangepi.config.system.build.sdImage;
+      };
     };
 }

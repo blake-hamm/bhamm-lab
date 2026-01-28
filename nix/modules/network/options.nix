@@ -9,6 +9,11 @@
         default = "networkmanager";
         description = "The networking backend to use.";
       };
+      mode = lib.mkOption {
+        type = lib.types.enum [ "dhcp" "static" ];
+        default = "dhcp";
+        description = "The networking mode to use.";
+      };
       static = {
         interface = lib.mkOption {
           type = lib.types.str;
