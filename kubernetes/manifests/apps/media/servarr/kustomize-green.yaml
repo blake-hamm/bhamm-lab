@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
     path: kubernetes/manifests/apps/media/servarr
-    targetRevision: feature/crm
+    targetRevision: hotfix/litellm-cnpg
     kustomize:
       patches:
         - target:
