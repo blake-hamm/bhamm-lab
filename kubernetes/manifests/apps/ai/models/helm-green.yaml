@@ -24,10 +24,10 @@ spec:
               storage: "30Gi"
             image:
               repository: ghcr.io/ggml-org/llama.cpp
-              tag: server-rocm
+              tag: server-rocm-b7850
             args:
               - -hf
-              - JonathanMiddleton/Qwen3-Embedding-8B-GGUF:BF16
+              - Qwen/Qwen3-Embedding-8B-GGUF:BF16
               - --host
               - 0.0.0.0
               - --metrics
