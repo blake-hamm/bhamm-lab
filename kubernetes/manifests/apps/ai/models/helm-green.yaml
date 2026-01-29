@@ -27,7 +27,7 @@ spec:
               tag: server-rocm-b7850
             args:
               - -hf
-              - Qwen/Qwen3-Embedding-8B-GGUF:BF16
+              - Qwen/Qwen3-Embedding-8B-GGUF:F16
               - --host
               - 0.0.0.0
               - --metrics
