@@ -604,7 +604,7 @@ spec:
             pvc:
               storage: "90Gi"
             image:
-              tag: rocm-7.2_20260127T084111
+              tag: vulkan-amdvlk_20260124T125303
             args:
               - llama-server
               - -hf
