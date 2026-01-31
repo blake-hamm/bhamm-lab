@@ -1,4 +1,6 @@
 {
+  system = "x86_64-linux";
+
   deploy = {
     tags = [ "framework" "local" "desktop" ];
     targetHost = "localhost";

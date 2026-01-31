@@ -41,6 +41,13 @@
     in
     {
       devShells.x86_64-linux.default = import ./nix/shell.nix { inherit pkgs inputs; };
+      devShells.aarch64-linux.default = import ./nix/shell.nix {
+        pkgs = import inputs.nixpkgs {
+          system = "aarch64-linux";
+          config.allowUnfree = true;
+        };
+        inherit inputs;
+      };
       colmena =
         {
           meta = {

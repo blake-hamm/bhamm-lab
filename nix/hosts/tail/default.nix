@@ -1,4 +1,6 @@
 {
+  system = "x86_64-linux";
+
   deploy = {
     tags = [ "tail" "server" ];
     targetHost = "10.0.30.79";
