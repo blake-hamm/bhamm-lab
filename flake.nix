@@ -81,6 +81,18 @@
               inherit pkgs-unstable;
             };
           };
+
+          orangepi-zero3-image = nixpkgs.lib.nixosSystem {
+            system = "aarch64-linux";
+            modules = [
+              "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
+              (import ./nix/hosts/orangepi-zero3/sd-image.nix)
+            ];
+            specialArgs = {
+              host = "orangepi-zero3";
+              inherit self inputs shared;
+            };
+          };
         } // gen.generateNixosConfigurations;
     };
 }
