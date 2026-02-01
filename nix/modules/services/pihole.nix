@@ -13,6 +13,7 @@
       enable = true;
       openFirewallDNS = true;
       openFirewallWebserver = true;
+      queryLogDeleter.enable = true;
       settings = {
         dns = {
           upstreams = [ "10.0.9.1" ];
