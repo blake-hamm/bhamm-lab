@@ -15,7 +15,7 @@
       openFirewallWebserver = true;
       settings = {
         dns = {
-          upstreams = [ "10.0.9.1" "9.9.9.9" "1.1.1.1" ];
+          upstreams = [ "10.0.9.1" ];
           listeningMode = "ALL";
         };
         dhcp = {
