@@ -83,7 +83,7 @@ variable "network_gateway" {
 variable "dns_servers" {
   description = "List of DNS servers"
   type        = list(string)
-  default     = ["10.0.30.1"]
+  default     = ["10.0.9.2"]
 }
 
 variable "vlan_id" {
