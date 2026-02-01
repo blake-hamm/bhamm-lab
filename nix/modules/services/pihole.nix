@@ -2,6 +2,13 @@
 
 {
   config = lib.mkIf config.cfg.pihole.enable {
+    services.resolved = {
+      enable = true;
+      extraConfig = ''
+        DNSStubListener=no
+        MulticastDNS=off
+      '';
+    };
     services.pihole-ftl = {
       enable = true;
       openFirewallDNS = true;
@@ -10,7 +17,6 @@
         dns = {
           upstreams = [ "10.0.9.1" "9.9.9.9" "1.1.1.1" ];
           listeningMode = "ALL";
-          hosts = [ "127.0.0.1 localhost" ];
         };
         dhcp = {
           active = false;
@@ -35,5 +41,10 @@
       enable = true;
       ports = [ "80r" "443s" ];
     };
+    # The following silences a benign FTL.log warning:
+    # WARNING API: Failed to read /etc/pihole/versions (key: internal_error)
+    systemd.tmpfiles.rules = [
+      "f /etc/pihole/versions 0644 pihole pihole - -"
+    ];
   };
 }
