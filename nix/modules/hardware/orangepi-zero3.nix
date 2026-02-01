@@ -13,8 +13,15 @@
     # Use latest kernel for H618 support
     boot.kernelPackages = lib.mkForce pkgs.linuxPackages_latest;
 
-    # Disable ZFS
+    # Disable ZFS (causes build issues on aarch64)
     boot.supportedFilesystems = lib.mkForce [
+      "btrfs"
+      "vfat"
+      "f2fs"
+      "xfs"
+      "ext4"
+    ];
+    boot.initrd.supportedFilesystems = lib.mkForce [
       "btrfs"
       "vfat"
       "f2fs"
