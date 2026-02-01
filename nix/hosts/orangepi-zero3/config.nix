@@ -3,6 +3,7 @@
 {
   cfg = {
     orangepi-zero3.enable = true;
+    pihole.enable = true;
     networking = {
       backend = "networkd";
       static = {

@@ -32,5 +32,10 @@
       default = false;
       description = "Enable backups";
     };
+    pihole.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable Pi-hole DNS server";
+    };
   };
 }
