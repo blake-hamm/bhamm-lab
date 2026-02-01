@@ -12,7 +12,7 @@ collections:
     version: "2.0.1"
     source: https://galaxy.ansible.com
   - name: prometheus.prometheus
-    version: "0.25.0"
+    version: "0.27.5"
     source: https://galaxy.ansible.com
   - name: grafana.grafana
     version: "5.7.0"
