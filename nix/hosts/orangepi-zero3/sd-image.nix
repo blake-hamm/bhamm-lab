@@ -1,21 +1,40 @@
-{ lib, pkgs, ... }:
+{ lib, pkgs, shared, ... }:
 let
   # Use Orange Pi Zero 3 u-boot as base
   bootloaderPackage = pkgs.ubootOrangePiZero3;
 in
 {
-  # Basic system settings
-  system.stateVersion = "25.11";
+  imports = [
+    ../../modules/core
+  ];
+
   nixpkgs.hostPlatform = "aarch64-linux";
 
   # Hostname
   networking.hostName = "orangepi-zero3";
 
-  # Use DHCP for initial network discovery
-  networking.useDHCP = true;
+  # Static IP configuration for colmena deployment
+  networking.useDHCP = false;
+  networking.useNetworkd = true;
+  networking.nameservers = [ "10.0.9.1" "9.9.9.9" ];
+  networking.interfaces.end0 = {
+    useDHCP = false;
+    ipv4.addresses = [{
+      address = "10.0.9.2";
+      prefixLength = 24;
+    }];
+  };
+  networking.defaultGateway = {
+    address = "10.0.9.1";
+    interface = "end0";
+  };
 
-  # Minimal kernel - use mainline for H618 support
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # Override boot.nix settings - ARM uses U-Boot, not systemd-boot
+  boot.loader.systemd-boot.enable = lib.mkForce false;
+  boot.loader.efi.canTouchEfiVariables = lib.mkForce false;
+
+  # Use latest kernel for H618 support (overrides boot.nix)
+  boot.kernelPackages = lib.mkForce pkgs.linuxPackages_latest;
 
   # Disable ZFS to avoid build issues
   boot.supportedFilesystems = lib.mkForce [
@@ -42,36 +61,4 @@ in
         bs=1024 seek=8 conv=notrunc
     '';
   };
-
-  # User configuration - matches existing setup
-  users.users.bhamm = {
-    isNormalUser = true;
-    extraGroups = [ "wheel" ];
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKsS2H4frdi7AvzkGMPMRaQ+B46Af5oaRFtNJY3uCHt blake.j.hamm@gmail.com"
-    ];
-  };
-
-  # SSH access - use standard port 22 initially for easier debugging
-  # Will switch to 4185 in Phase 2
-  services.openssh = {
-    enable = true;
-    settings = {
-      PasswordAuthentication = false;
-      PermitRootLogin = "no";
-    };
-  };
-
-  # Allow passwordless sudo
-  security.sudo.wheelNeedsPassword = false;
-
-  # Nix settings
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
-  # Minimal packages for debugging
-  environment.systemPackages = with pkgs; [
-    vim
-    htop
-    git
-  ];
 }

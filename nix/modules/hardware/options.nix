@@ -18,5 +18,10 @@
       default = false;
       description = "Enable Strix Halo specific settings";
     };
+    orangepi-zero3.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable Orange Pi Zero 3 specific settings";
+    };
   };
 }
