@@ -39,6 +39,8 @@ spec:
                 name: monitor-external-secret
                 key: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
           grafana.ini:
+            analytics:
+              check_for_updates: true
             server:
               root_url: https://grafana.bhamm-lab.com
             auth.basic:
