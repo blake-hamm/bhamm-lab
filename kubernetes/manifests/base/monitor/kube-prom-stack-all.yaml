@@ -40,7 +40,10 @@ spec:
                 key: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
           grafana.ini:
             analytics:
-              check_for_updates: true
+              enabled: false
+              reporting_enabled: false
+              check_for_updates: false
+              check_for_plugin_updates: false
             server:
               root_url: https://grafana.bhamm-lab.com
             auth.basic:
