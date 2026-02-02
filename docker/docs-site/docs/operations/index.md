@@ -9,6 +9,7 @@
 - 🐧 [Linux](linux.md) - Common linux commands
 - 🛡️ [Ceph](ceph.md) - Ceph management
 - 🐝 [Cilium](cilium.md) - Cilium management
+- 🕳️ [Pi-hole](pihole.md) - DNS ad-blocking server
 - 🐳 [Restic](restic.md) - Restic commands
 - 🔒 [Wireguard](wireguard.md) - Wireguard commands
 

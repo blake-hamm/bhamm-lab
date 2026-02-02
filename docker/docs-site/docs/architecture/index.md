@@ -19,8 +19,9 @@ This philosophy is supported by several key principles:
 **Hardware:**
 
 - **Servers:** 5 servers – 'Method' (SuperMicro H12SSL‑i), 'Indy' (SuperMicro D‑2146NT), 'Stale' (X10SDV‑4C‑TLN4F), 'Nose' & 'Tail' (Framework Mainboard)
+- **Single Board Computers:** Orange Pi Zero3 (Pi-hole DNS server), Raspberry pi 4 (PiKVM)
 - **Networking:** TP‑Link Omada switches & Protectli Opnsense firewall
-- **Accelerated compute:** Intel Arc A310, AMD Radeon AI Pro R9700, AMD Ryzen AI MAX+ 395 (Strix Halo)
+- **Accelerated compute:** Intel Arc A310, AMD Radeon AI Pro R9700, AMD Ryzen AI MAX+ 395 (Strix Halo)
 - **Management:** UPS, PiKVM
 
 **Software Stack:**
@@ -65,6 +66,7 @@ This philosophy is supported by several key principles:
 **Security:**
 
 - Network segmentation with [OPNsense](https://opnsense.org/) and intervlan routing with TP Link Omada
+- Network-wide DNS ad-blocking, filtering and monitoring with [Pi-hole](https://pi-hole.net/) on Orange Pi Zero3
 - Secrets management with [SOPS](https://github.com/mozilla/sops) and [Vault](https://www.vaultproject.io/)
 - Automated TLS certificates with [Cert Manager](https://cert-manager.io/) and [Cloudflare](https://www.cloudflare.com/)
 - OIDC/MFA authentication with [Authelia](https://www.authelia.com/)
