@@ -1,4 +1,6 @@
 {
+  system = "x86_64-linux";
+
   deploy = {
     tags = [ "framework" "local" "desktop" ];
     targetHost = "localhost";
@@ -16,4 +18,6 @@
     framework.enable = true;
     wireguard.enable = true;
   };
+
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 }

@@ -1,5 +1,7 @@
 { pkgs, lib, ... }:
 {
+  system = "x86_64-linux";
+
   imports = [
     ./../../modules/profiles/minimal.nix
   ];

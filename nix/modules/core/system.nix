@@ -30,7 +30,6 @@
   };
 
   # Other system config
-  services.printing.enable = true;
   security.sudo.wheelNeedsPassword = false;
   system.stateVersion = shared.nixVersion;
 }

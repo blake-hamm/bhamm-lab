@@ -14,4 +14,7 @@
     networking.backend = "networkmanager";
     vesktop.enable = true;
   };
+
+  # Desktop-specific services
+  services.printing.enable = true;
 }

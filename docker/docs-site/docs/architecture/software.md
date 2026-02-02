@@ -170,6 +170,13 @@ This document outlines the software components that form the digital backbone of
 - **OPNsense:**
   - *Role:* Primary firewall/router
   - *Usage:* VLAN segmentation, WireGuard VPN, and DoH/DoT filtering
+- **Pi-hole:**
+  - *Role:* Primary DNS server for main VLANs, Proxmox hosts, and Talos Kubernetes nodes
+  - *Platform:* Orange Pi Zero3 (aarch64/ARM) running NixOS
+  - *IP:* 10.0.9.2 (gateway: 10.0.9.1 OPNsense)
+  - *Usage:* Network-wide DNS ad-blocking and filtering
+  - *Components:* Pi-hole FTL (DNS filtering) and Pi-hole Web (admin interface on ports 80/443)
+  - *Deployment:* Managed via Colmena from `nix/hosts/orangepi-zero3/`
 - **Cilium:**
   - *Role:* Kubernetes CNI + Service Mesh
   - *Usage:* L7 network policies, Hubble observability, and encrypted pod traffic

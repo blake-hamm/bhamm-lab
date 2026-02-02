@@ -28,21 +28,31 @@ let
       targetUser = shared.username;
       targetPort = shared.sshPort;
     };
-    imports = [ (lib.removeAttrs hostModule [ "deploy" ]) ];
+    imports = [ (lib.removeAttrs hostModule [ "deploy" "system" ]) ];
   };
 
   generateColmena = lib.mapAttrs mkDeployment deployableHosts;
 
   mkNixosConfig = hostName: hostModule:
+    let
+      hostSystem = hostModule.system or shared.system;
+      hostPkgs = import inputs.nixpkgs {
+        system = hostSystem;
+        config.allowUnfree = true;
+      };
+    in
     lib.nixosSystem {
-      system = shared.system;
+      pkgs = hostPkgs;
       specialArgs = { inherit self inputs shared; host = hostName; };
-      modules = [ (lib.removeAttrs hostModule [ "deploy" ]) ];
+      modules = [ (lib.removeAttrs hostModule [ "deploy" "system" ]) ];
     };
 
   generateNixosConfigurations = lib.mapAttrs mkNixosConfig deployableHosts;
 
-  mkNodeSpecialArgs = hostName: hostModule: { host = hostName; };
+  mkNodeSpecialArgs = hostName: hostModule: {
+    host = hostName;
+    system = hostModule.system or shared.system;
+  };
 
   generateNodeSpecialArgs = lib.mapAttrs mkNodeSpecialArgs deployableHosts;
 in

@@ -5,7 +5,7 @@ pkgs.mkShell {
     vault
     kubectl
     kubernetes-helm
-    argo
+    argo-workflows
     argocd
     k9s
     colmena
@@ -34,7 +34,7 @@ pkgs.mkShell {
     smartmontools
     rclone
     wl-clipboard
-    inputs.nixos-anywhere.packages.${pkgs.system}.default
+    inputs.nixos-anywhere.packages.${pkgs.stdenv.hostPlatform.system}.default
     hugo
   ];
 

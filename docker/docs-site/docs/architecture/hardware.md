@@ -23,6 +23,12 @@ This page provides a view of the lab's physical infrastructure. It covers the ha
 | Server Switch  | TL-SX3008F      | JetStream 8-Port 10G SFP+ L2+ Managed Switch        | Ceph and core server switch |
 | Access Point       | EAP650          | WiFi 6 support                                      | WiFi network                |
 
+### Single Board Computers
+
+| Name         | Model           | Architecture | IP        | Network | Role                |
+|--------------|-----------------|--------------|-----------|---------|---------------------|
+| Orange Pi    | Orange Pi Zero3 | aarch64/ARM  | 10.0.9.2  | LAN     | Pi-hole DNS Server  |
+
 ### Peripheral Devices
 - **UPS:** CyberPower OR500LCDRM1U Smart App LCD UPS
 - **PiKVM:** KVM for managing physical devices

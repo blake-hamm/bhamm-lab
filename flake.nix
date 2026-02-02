@@ -2,7 +2,7 @@
   description = "Nix config";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
     disko = {
@@ -11,11 +11,11 @@
     };
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.05";
+      url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    catppuccin.url = "github:catppuccin/nix/release-25.05";
+    catppuccin.url = "github:catppuccin/nix/release-25.11";
 
     sops-nix.url = "github:Mic92/sops-nix";
 
@@ -41,6 +41,13 @@
     in
     {
       devShells.x86_64-linux.default = import ./nix/shell.nix { inherit pkgs inputs; };
+      devShells.aarch64-linux.default = import ./nix/shell.nix {
+        pkgs = import inputs.nixpkgs {
+          system = "aarch64-linux";
+          config.allowUnfree = true;
+        };
+        inherit inputs;
+      };
       colmena =
         {
           meta = {
@@ -72,6 +79,18 @@
               host = "minimal-iso";
               inherit self inputs shared;
               inherit pkgs-unstable;
+            };
+          };
+
+          orangepi-zero3-image = nixpkgs.lib.nixosSystem {
+            system = "aarch64-linux";
+            modules = [
+              "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
+              (import ./nix/hosts/orangepi-zero3/sd-image.nix)
+            ];
+            specialArgs = {
+              host = "orangepi-zero3";
+              inherit self inputs shared;
             };
           };
         } // gen.generateNixosConfigurations;

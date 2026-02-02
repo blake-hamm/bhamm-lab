@@ -8,7 +8,7 @@ ssh_authorized_keys:
     - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKsS2H4frdi7AvzkGMPMRaQ+B46Af5oaRFtNJY3uCHt blake.j.hamm@gmail.com
     - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEn6e5VeOkY4WcW0wPmz8uWj+yd+kulj7Ls7upTdKFUO gitea@bhamm-lab.com
 network_nameservers:
-  - 10.0.20.1
+  - 10.0.9.2
 # vars for ansible/roles/proxmox
 ntp_enabled: true
 ntp_manage_config: true
