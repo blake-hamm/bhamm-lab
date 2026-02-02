@@ -46,6 +46,11 @@ data:
         icon: hl-grafana
         url: https://grafana.bhamm-lab.com/d/Kczn-jPZz/node-exporter-freebsd?orgId=1&from=now-24h&to=now&timezone=browser&var-DS_PROMETHEUS=default&var-job=opnsense&var-node=10.0.9.1:9100&refresh=1m
         statusCheck: false
+      - title: Pi-hole
+        description: Visit Pi-hole Dashboard
+        icon: hl-pi-hole
+        url: https://10.0.9.2/
+        statusCheckAllowInsecure: true
       - title: Access Point
         description: Visit tp link eap650 access point
         icon: hl-tp-link
