@@ -11,8 +11,8 @@ spec:
     server: https://kubernetes.default.svc
     namespace: models
   source:
-    repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: main
+    repoURL: https://github.com/blake-hamm/kube-ai-stack.git
+    targetRevision: feature/intial-commit
     path: kubernetes/charts/llm-models
     helm:
       valuesObject:
