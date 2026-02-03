@@ -17,6 +17,7 @@ spec:
     helm:
       valuesObject:
         alloy:
+          enableReporting: false
           configMap:
             create: true
             content: |
