@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: hotfix/models
+    targetRevision: feature/kube-ai-stack
     path: kubernetes/manifests/core
     directory:
       recurse: true
