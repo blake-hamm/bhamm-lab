@@ -16,6 +16,8 @@ spec:
     path: charts/kube-ai-stack
     helm:
       valuesObject:
+        global:
+          prometheusUrl: "http://monitor-prometheus.monitor.svc.cluster.local:9090"
         models:
           - name: qwen-embed
             description: Great all around embedding model
