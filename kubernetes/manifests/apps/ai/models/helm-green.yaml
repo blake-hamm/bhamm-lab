@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: https://github.com/blake-hamm/kube-ai-stack.git
     targetRevision: feature/intial-commit
-    path: kubernetes/charts/llm-models
+    path: charts/kube-ai-stack
     helm:
       valuesObject:
         models:
