@@ -50,7 +50,7 @@ data:
         description: Visit Pi-hole Dashboard
         icon: hl-pi-hole
         url: https://10.0.9.2/
-        statusCheck: true
+        statusCheck: false
       - title: Access Point
         description: Visit tp link eap650 access point
         icon: hl-tp-link
