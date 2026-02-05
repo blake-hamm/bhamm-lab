@@ -71,7 +71,7 @@ spec:
             pvc:
               storage: "80Gi"
             image:
-              tag: rocm-7.2_20260205T023613
+              tag: rocm-6.4.4_20260205T023617
             args:
               - llama-server
               - -hf
