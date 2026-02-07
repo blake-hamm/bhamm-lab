@@ -12,7 +12,7 @@ spec:
     namespace: models
   source:
     repoURL: https://github.com/blake-hamm/kube-ai-stack.git
-    targetRevision: feature/intial-commit
+    targetRevision: feature/phase-1
     path: charts/kube-ai-stack
     helm:
       valuesObject:
@@ -606,7 +606,7 @@ spec:
             pvc:
               storage: "90Gi"
             image:
-              tag: vulkan-amdvlk_20260124T125303
+              tag: vulkan-amdvlk
             args:
               - llama-server
               - -hf
