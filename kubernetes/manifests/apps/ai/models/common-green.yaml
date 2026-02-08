@@ -24,15 +24,6 @@ spec:
               remoteRef:
                 key: /default/llm-models
                 property: hf_token
-        postgresql:
-          enabled: true
-          backup:
-            enabled: true
-          restore:
-            enabled: false
-        externalSecrets:
-          enabled: true
-          secrets:
             - secretKey: access_key_id
               remoteRef:
                 key: /core/seaweedfs
@@ -41,6 +32,26 @@ spec:
               remoteRef:
                 key: /core/seaweedfs
                 property: admin_secret_access_key
+        postgresql:
+          enabled: true
+          backup:
+            enabled: true
+          restore:
+            enabled: false
+        ingressRoutes:
+          - name: mlflow
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - match: Host(`mlflow.bhamm-lab.com`)
+                kind: Rule
+                middlewares:
+                  - name: default-headers
+                  - name: forwardauth-authelia
+                services:
+                  - name: llm-models-mlflow
+                    scheme: http
+                    port: http
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
