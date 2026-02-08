@@ -54,7 +54,7 @@ spec:
           MLFLOW_TRACKING_URI: "http://llm-models-mlflow.models.svc.cluster.local:80"
           MLFLOW_REGISTRY_URI: "http://llm-models-mlflow.models.svc.cluster.local:80"
           MLFLOW_SERVER_DISABLE_SECURITY_MIDDLEWARE: "true"
-          MLFLOW_EXPERIMENT_ID: "litellm"
+          MLFLOW_EXPERIMENT_NAME: "litellm"
         migrationJob:
           hooks:
             argocd:
