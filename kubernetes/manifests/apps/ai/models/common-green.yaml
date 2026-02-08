@@ -30,6 +30,17 @@ spec:
             enabled: true
           restore:
             enabled: false
+        externalSecrets:
+          enabled: true
+          secrets:
+            - secretKey: access_key_id
+              remoteRef:
+                key: /core/seaweedfs
+                property: admin_access_key_id
+            - secretKey: secret_access_key
+              remoteRef:
+                key: /core/seaweedfs
+                property: admin_secret_access_key
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
