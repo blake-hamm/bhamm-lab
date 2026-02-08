@@ -555,7 +555,7 @@ spec:
             pvc:
               storage: "90Gi"
             image:
-              tag: vulkan-radv
+              tag: vulkan-amdvlk
             args:
               - llama-server
               - -hf
