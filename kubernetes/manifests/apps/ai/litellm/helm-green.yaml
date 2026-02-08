@@ -55,6 +55,9 @@ spec:
           MLFLOW_REGISTRY_URI: "http://llm-models-mlflow.models.svc.cluster.local:80"
           MLFLOW_SERVER_DISABLE_SECURITY_MIDDLEWARE: "true"
           MLFLOW_EXPERIMENT_NAME: "litellm"
+          PHOENIX_COLLECTOR_ENDPOINT: "http://llm-models-phoenix-svc.models.svc.cluster.local:4317/v1/traces"
+          PHOENIX_COLLECTOR_HTTP_ENDPOINT: "http://llm-models-phoenix-svc.models.svc.cluster.local:6006/v1/traces"
+          PHOENIX_API_KEY: "no-auth"
         migrationJob:
           hooks:
             argocd:

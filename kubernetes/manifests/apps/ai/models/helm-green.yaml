@@ -80,9 +80,6 @@ spec:
             MLFLOW_S3_ENDPOINT_URL: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
             MLFLOW_S3_IGNORE_TLS: "true"
             MLFLOW_SERVER_DISABLE_SECURITY_MIDDLEWARE: "true"
-            PHOENIX_COLLECTOR_ENDPOINT: "http://llm-models-phoenix-svc.models.svc.cluster.local:4317/v1/traces"
-            PHOENIX_COLLECTOR_HTTP_ENDPOINT: "http://llm-models-phoenix-svc.models.svc.cluster.local:6006/v1/traces"
-            PHOENIX_API_KEY: "no-auth"
           serviceMonitor:
             enabled: true
             namespace: models
