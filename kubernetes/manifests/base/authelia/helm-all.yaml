@@ -120,6 +120,8 @@ spec:
           access_control:
             default_policy: deny
             rules:
+              - domain: 'mlflow.bhamm-lab.com'
+                policy: one_factor
               - domain:
                   - '*.bhamm-lab.com'
                   - bhamm-lab.com
