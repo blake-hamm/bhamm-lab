@@ -55,6 +55,19 @@ spec:
                   - name: llm-models-mlflow
                     scheme: http
                     port: http
+          - name: phoenix
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - match: Host(`phoenix.bhamm-lab.com`)
+                kind: Rule
+                middlewares:
+                  - name: default-headers
+                  - name: forwardauth-authelia
+                services:
+                  - name: llm-models-phoenix-svc
+                    scheme: http
+                    port: llm-models-phoenix-app
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
