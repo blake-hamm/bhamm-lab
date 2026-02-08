@@ -51,6 +51,21 @@ postgresql:
     enabled: false
     pathVersion: "v1"
     retention: "30d"
+  # -- Additional databases to create using CNPG Database resource
+  additionalDatabases: []
+    # - name: analytics
+    #   owner: app
+    #   template: template0
+    #   encoding: UTF8
+    #   locale: en_US.UTF-8
+    #   tablespace: pg_default
+    #   allowConnections: true
+    #   connectionLimit: -1
+    #   isTemplate: false
+    # - name: reporting
+    #   owner: app
+    #   encoding: UTF8
+    #   locale: en_US.UTF-8
 pvc: []
 # - name: my-pvc-1
 #   storageSize: 10Gi

@@ -1,0 +1,39 @@
+{{- if and .Values.postgresql.enabled .Values.postgresql.additionalDatabases }}
+{{- range .Values.postgresql.additionalDatabases }}
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: {{ $.Values.name }}-postgresql-{{ .name }}
+  namespace: {{ $.Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "18"
+spec:
+  name: {{ .name }}
+  owner: {{ .owner | default $.Values.name }}
+  cluster:
+    name: {{ $.Values.name }}-postgresql
+  {{- if .template }}
+  template: {{ .template }}
+  {{- end }}
+  {{- if .encoding }}
+  encoding: {{ .encoding }}
+  {{- end }}
+  {{- if .locale }}
+  locale: {{ .locale }}
+  {{- end }}
+  {{- if .tablespace }}
+  tablespace: {{ .tablespace }}
+  {{- end }}
+  {{- if .allowConnections }}
+  allowConnections: {{ .allowConnections }}
+  {{- end }}
+  {{- if .connectionLimit }}
+  connectionLimit: {{ .connectionLimit }}
+  {{- end }}
+  {{- if .isTemplate }}
+  isTemplate: {{ .isTemplate }}
+  {{- end }}
+{{- end }}
+{{- end }}
