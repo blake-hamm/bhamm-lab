@@ -62,7 +62,7 @@ spec:
               enabled: true
               host: "models-postgresql-rw"
               port: 5432
-              database: "models"
+              database: "mlflow"
             existingDatabaseSecret:
               name: "models-postgresql-app"
               usernameKey: "username"
