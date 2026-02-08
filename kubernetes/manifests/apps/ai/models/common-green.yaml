@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: main
+    targetRevision: feature/kube-ai-stack
     path: kubernetes/charts/common
     helm:
       valuesObject:
@@ -38,6 +38,9 @@ spec:
             enabled: true
           restore:
             enabled: false
+          additionalDatabases:
+            - name: mlflow
+            - name: phoenix
         ingressRoutes:
           - name: mlflow
             ingressClass: traefik-external
