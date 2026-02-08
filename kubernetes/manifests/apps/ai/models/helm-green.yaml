@@ -99,6 +99,7 @@ spec:
             type: "ClusterIP"
           auth:
             enableAuth: false
+            createSecret: false
           additionalEnv:
             - name: PHOENIX_POSTGRES_HOST
               valueFrom:
