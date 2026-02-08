@@ -20,6 +20,8 @@ spec:
           prometheusUrl: "http://monitor-prometheus.monitor.svc.cluster.local:9090"
           mlflow:
             enabled: true
+          phoenix:
+            enabled: true
           litellm:
             manage_config: true
             config:
@@ -80,6 +82,25 @@ spec:
           serviceMonitor:
             enabled: true
             namespace: models
+        phoenix-helm:
+          ingress:
+            enabled: false
+          postgresql:
+            enabled: false
+          persistence:
+            enabled: false
+          server:
+            telemetryEnabled: false
+          service:
+            type: "ClusterIP"
+          auth:
+            enableAuth: false
+          additionalEnv:
+            - name: PHOENIX_SQL_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: models-postgresql-app
+                  key: fqdn-uri
         models:
           - name: qwen-embed
             description: Great all around embedding model
