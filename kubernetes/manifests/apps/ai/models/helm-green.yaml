@@ -18,8 +18,34 @@ spec:
       valuesObject:
         global:
           prometheusUrl: "http://monitor-prometheus.monitor.svc.cluster.local:9090"
-          mlflow.enabled: false
-        mlflow: {}
+          mlflow.enabled: true
+        mlflow:
+          backendStore:
+            databaseMigration: true
+            databaseConnectionCheck: true
+            postgres:
+              enabled: true
+              host: "models-postgresql-rw"
+              port: 5432
+              database: "models"
+            existingDatabaseSecret:
+              name: "models-postgresql-app"
+              usernameKey: "username"
+              passwordKey: "password"
+          artifactRoot:
+            s3:
+              enabled: true
+              bucket: mlflow
+              existingSecret:
+                name: "models-external-secret"
+                keyOfAccessKeyId: "access_key_id"
+                keyOfSecretAccessKey: "secret_access_key"
+          extraEnvVars:
+            MLFLOW_S3_ENDPOINT_URL: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
+            MLFLOW_S3_IGNORE_TLS: "true"
+          serviceMonitor:
+            enabled: true
+            namespace: models
         models:
           - name: qwen-embed
             description: Great all around embedding model
