@@ -18,6 +18,8 @@ spec:
       valuesObject:
         global:
           prometheusUrl: "http://monitor-prometheus.monitor.svc.cluster.local:9090"
+          mlflow.enabled: false
+        mlflow: {}
         models:
           - name: qwen-embed
             description: Great all around embedding model

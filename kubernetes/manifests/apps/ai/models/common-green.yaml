@@ -24,6 +24,12 @@ spec:
               remoteRef:
                 key: /default/llm-models
                 property: hf_token
+        postgresql:
+          enabled: true
+          backup:
+            enabled: true
+          restore:
+            enabled: false
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
