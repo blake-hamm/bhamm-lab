@@ -18,7 +18,8 @@ spec:
       valuesObject:
         global:
           prometheusUrl: "http://monitor-prometheus.monitor.svc.cluster.local:9090"
-          mlflow.enabled: true
+          mlflow:
+            enabled: true
         mlflow:
           backendStore:
             databaseMigration: true
