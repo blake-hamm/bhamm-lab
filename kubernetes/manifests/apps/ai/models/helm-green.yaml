@@ -96,11 +96,28 @@ spec:
           auth:
             enableAuth: false
           additionalEnv:
-            - name: PHOENIX_SQL_DATABASE_URL
+            - name: PHOENIX_POSTGRES_HOST
               valueFrom:
                 secretKeyRef:
                   name: models-postgresql-app
-                  key: fqdn-uri
+                  key: host
+            - name: PHOENIX_POSTGRES_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: models-postgresql-app
+                  key: port
+            - name: PHOENIX_POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: models-postgresql-app
+                  key: user
+            - name: PHOENIX_POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: models-postgresql-app
+                  key: password
+            - name: PHOENIX_POSTGRES_DB
+              value: "phoenix"
         models:
           - name: qwen-embed
             description: Great all around embedding model
