@@ -245,6 +245,11 @@ data:
         icon: hl-grafana
         url: https://grafana.bhamm-lab.com/d/98f69bf1-720b-4690-933d-36e6ceb799e0/amd-gpu-v2?orgId=1&from=now-6h&to=now&timezone=browser&var-hostname=green-talos-worker-nose&var-gpu_id=0
         statusCheck: false
+      - title: MLflow
+        description: Visit MLflow
+        icon: generative
+        url: https://mlflow.bhamm-lab.com/
+        statusCheckAcceptCodes: '401'
 
     - name: Security
       icon: mdi-security
