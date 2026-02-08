@@ -53,6 +53,7 @@ spec:
           QDRANT_API_BASE: http://qdrant.qdrant.svc.cluster.local:6333
           MLFLOW_TRACKING_URI: "http://llm-models-mlflow.models.svc.cluster.local:80"
           MLFLOW_REGISTRY_URI: "http://llm-models-mlflow.models.svc.cluster.local:80"
+          MLFLOW_SERVER_DISABLE_SECURITY_MIDDLEWARE: "true"
         migrationJob:
           hooks:
             argocd:
