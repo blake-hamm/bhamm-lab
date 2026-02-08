@@ -12,15 +12,15 @@ spec:
   project: default
   source:
     repoURL: https://github.com/BerriAI/litellm.git
-    targetRevision: v1.79.3-stable
+    targetRevision: v1.81.3-stable
     path: deploy/charts/litellm-helm
     helm:
       valuesObject:
         replicaCount: 1
         image:
-          repository: ghcr.io/berriai/litellm
-          pullPolicy: Always
-          tag: "v1.79.3-stable"
+          repository: harbor.bhamm-lab.com/library/litellm-custom
+          pullPolicy: IfNotPresent
+          tag: "latest"
         deploymentAnnotations:
           reloader.stakater.com/auto: "true"
         masterkeySecretName: "litellm-external-secret"
