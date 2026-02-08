@@ -250,6 +250,11 @@ data:
         icon: generative
         url: https://mlflow.bhamm-lab.com/
         statusCheckAcceptCodes: '401'
+      - title: Phoenix
+        description: Visit Phoenix
+        icon: generative
+        url: https://phoenix.bhamm-lab.com/
+        statusCheckAcceptCodes: '401'
 
     - name: Security
       icon: mdi-security
