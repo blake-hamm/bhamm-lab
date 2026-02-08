@@ -20,6 +20,38 @@ spec:
           prometheusUrl: "http://monitor-prometheus.monitor.svc.cluster.local:9090"
           mlflow:
             enabled: true
+          litellm:
+            manage_config: true
+            config:
+              litellm_settings:
+                timeout: 1800
+                stream_timeout: 1800
+                request_timeout: 1800
+                cache: False
+                cache_params:
+                  type: qdrant-semantic
+                  qdrant_semantic_cache_embedding_model: qwen-embed
+                  qdrant_collection_name: litellm
+                  similarity_threshold: 0.6
+                success_callback: ["mlflow"]
+                failure_callback: ["mlflow"]
+              general_settings:
+                max_parallel_requests: 5
+                global_max_parallel_requests: 5
+                store_model_in_db: true
+                store_prompts_in_spend_logs: true
+                health_check_interval: 1800
+              router_settings:
+                debug_level: "INFO"
+                cooldown_time: 30
+                allowed_fails: 999
+                timeout: 1800
+                num_retries: 1
+                retry_after: 15
+                routing_strategy: simple-shuffle
+                redis_host: os.environ/REDIS_HOST
+                redis_port: os.environ/REDIS_PORT
+                redis_password: os.environ/REDIS_PASSWORD
         mlflow:
           backendStore:
             databaseMigration: true
