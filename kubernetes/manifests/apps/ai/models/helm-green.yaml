@@ -12,7 +12,7 @@ spec:
     namespace: models
   source:
     repoURL: https://github.com/blake-hamm/kube-ai-stack.git
-    targetRevision: feature/monitoring
+    targetRevision: main
     path: charts/kube-ai-stack
     helm:
       valuesObject:
