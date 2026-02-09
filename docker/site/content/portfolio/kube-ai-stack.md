@@ -1,5 +1,6 @@
 ---
 title: "Kube-AI-Stack"
+weight: 10
 ---
 
 #### [kube-ai-stack](https://github.com/blake-hamm/kube-ai-stack)
