@@ -653,6 +653,59 @@ spec:
                 memory: "110Gi"
             zeroscaling:
               cooldownPeriod: 1800
+          - name: glm-flash
+            description: High quality moe model for agents, coding or complex chat
+            enabled: true
+            pvc:
+              storage: "70Gi"
+            image:
+              tag: rocm7-nightlies
+            args:
+              - llama-server
+              - -hf
+              - unsloth/GLM-4.7-Flash-GGUF:BF16
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - --timeout
+              - "1800"
+              - -v
+              - --no-mmap
+              - --no-warmup
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "512"
+              - -b
+              - "4096"
+              - -c
+              - "65536"
+              - --parallel
+              - "1"
+              - --cont-batching
+              - --temp
+              - "0.8"
+              - --top-p
+              - "0.99"
+              - --min-p
+              - "0.01"
+              - --repeat-penalty
+              - "1.0"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "120Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
           - name: llama-4
             description: High quality multimodal model
             enabled: true
