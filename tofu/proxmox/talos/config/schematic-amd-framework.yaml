@@ -1,9 +1,9 @@
 customization:
   extraKernelArgs:
     - amd_iommu=off
-    - amdgpu.gttsize=122800
+    - amdgpu.gttsize=126976
     - amdgpu.vm_fragment_size=8
-    - ttm.pages_limit=31457280
+    - ttm.pages_limit=32505856
     - ttm.page_pool_size=25165824
   systemExtensions:
     officialExtensions:

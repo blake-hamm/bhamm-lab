@@ -12,14 +12,14 @@ From a young age, I've been fascinated with technology. Here's a quick timeline:
 - 2005: borrowed my mom's Palm Pilot for mobile games
 - 2010: built my first desktop gaming pc
 - 2015: introduced to data science with Rstudio in Econometrics
-- 2020: first iteration of my homelab with pihole
-- 2025: self-host my first website
+- 2020: deployed pihole for v1 of my homelab
+- 2025: self-hosted my first website
 
 Most of all, **I am a curious person and enjoy learning**. Often, this evolves into an obsession and I go dark to learn about some unique technology. Most recently, this was self hosting open source LLM's on AMD hardware. After my knowledge appetite is full, I move on to something new, but with the skillset to revisit and iterate on previous learnings.
 
 Currently, I work as a **Senior AI/ML Engineer and Consultant** at [phData](https://www.phdata.io/), where I specialize in production-ready, Generative AI applications, LLMOps infrastructure and AI/ML strategy. My day to day consists of building agents and agentic workflows, eval pipelines, adjusting API endpoints, and iterating on CI/CD systems. I also work with business stakeholders to triage product feature requests and translate to architecture and execution roadmaps.
 
-Dating back to 2017, I've worked on traditional ML systems like text classification, time series forecasting and anomoly detection. I enjoy both traditional ML and GenAI development and have worked on both green-field poc's and well-established, patented models. However, **I am most fullfilled when managing production AI/ML platforms and modernizing MLOps/LLMOps accross teams**.
+Dating back to 2017, I've worked on traditional ML systems like text classification, time series forecasting and anomaly detection. I enjoy both traditional ML and GenAI development and have worked on both green-field poc's and well-established, patented models. However, **I am most fullfilled when managing production AI/ML platforms and modernizing MLOps/LLMOps across teams**.
 
 ---
 

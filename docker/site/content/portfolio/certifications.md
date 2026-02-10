@@ -1,5 +1,6 @@
 ---
 title: "Certifications"
+weight: 30
 ---
 
 - [AWS Certified Machine Learning – Specialty](https://www.credly.com/badges/fcf21f70-9715-469b-ab92-572179d42c5a)

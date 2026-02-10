@@ -15,7 +15,7 @@ collections:
     version: "0.27.5"
     source: https://galaxy.ansible.com
   - name: grafana.grafana
-    version: "5.7.0"
+    version: "6.0.6"
     source: https://galaxy.ansible.com
 roles:
   - name: geerlingguy.ntp

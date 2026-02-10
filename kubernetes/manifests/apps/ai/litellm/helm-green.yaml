@@ -12,15 +12,15 @@ spec:
   project: default
   source:
     repoURL: https://github.com/BerriAI/litellm.git
-    targetRevision: v1.79.3-stable
+    targetRevision: v1.81.3-stable
     path: deploy/charts/litellm-helm
     helm:
       valuesObject:
         replicaCount: 1
         image:
-          repository: ghcr.io/berriai/litellm
-          pullPolicy: Always
-          tag: "v1.79.3-stable"
+          repository: harbor.bhamm-lab.com/library/litellm-custom
+          pullPolicy: IfNotPresent
+          tag: "latest"
         deploymentAnnotations:
           reloader.stakater.com/auto: "true"
         masterkeySecretName: "litellm-external-secret"
@@ -51,6 +51,14 @@ spec:
           REDIS_PASSWORD: ""
           QDRANT_VECTOR_SIZE: 4096
           QDRANT_API_BASE: http://qdrant.qdrant.svc.cluster.local:6333
+          MLFLOW_EXPERIMENT_NAME: "litellm"
+          MLFLOW_TRACKING_URI: "http://llm-models-mlflow.models.svc.cluster.local:80"
+          MLFLOW_REGISTRY_URI: "http://llm-models-mlflow.models.svc.cluster.local:80"
+          MLFLOW_SERVER_DISABLE_SECURITY_MIDDLEWARE: "true"
+          PHOENIX_PROJECT_NAME: "litellm"
+          PHOENIX_COLLECTOR_ENDPOINT: "http://llm-models-phoenix-svc.models.svc.cluster.local:4317/v1/traces"
+          PHOENIX_COLLECTOR_HTTP_ENDPOINT: "http://llm-models-phoenix-svc.models.svc.cluster.local:6006/v1/traces"
+          PHOENIX_API_KEY: "no-auth"
         migrationJob:
           hooks:
             argocd:

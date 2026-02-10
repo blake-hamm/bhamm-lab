@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: main
+    targetRevision: feature/kube-ai-stack
     path: kubernetes/charts/common
     helm:
       valuesObject:
@@ -24,6 +24,50 @@ spec:
               remoteRef:
                 key: /default/llm-models
                 property: hf_token
+            - secretKey: access_key_id
+              remoteRef:
+                key: /core/seaweedfs
+                property: admin_access_key_id
+            - secretKey: secret_access_key
+              remoteRef:
+                key: /core/seaweedfs
+                property: admin_secret_access_key
+        postgresql:
+          enabled: true
+          backup:
+            enabled: true
+          restore:
+            enabled: false
+          additionalDatabases:
+            - name: mlflow
+            - name: phoenix
+        ingressRoutes:
+          - name: mlflow
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - match: Host(`mlflow.bhamm-lab.com`)
+                kind: Rule
+                middlewares:
+                  - name: default-headers
+                  - name: forwardauth-authelia
+                services:
+                  - name: llm-models-mlflow
+                    scheme: http
+                    port: http
+          - name: phoenix
+            ingressClass: traefik-external
+            websocket: true
+            routes:
+              - match: Host(`phoenix.bhamm-lab.com`)
+                kind: Rule
+                middlewares:
+                  - name: default-headers
+                  - name: forwardauth-authelia
+                services:
+                  - name: llm-models-phoenix-svc
+                    scheme: http
+                    port: llm-models-phoenix-app
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
