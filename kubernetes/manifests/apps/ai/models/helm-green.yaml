@@ -761,7 +761,7 @@ spec:
             pvc:
               storage: "90Gi"
             image:
-              tag: vulkan-amdvlk
+              tag: rocm7-nightlies
             args:
               - llama-server
               - -hf
