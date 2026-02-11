@@ -29,6 +29,7 @@ spec:
                 timeout: 1800
                 stream_timeout: 1800
                 request_timeout: 1800
+                modify_params: True
                 cache: False
                 cache_params:
                   type: qdrant-semantic
