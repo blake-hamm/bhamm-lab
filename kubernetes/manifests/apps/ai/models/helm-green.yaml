@@ -464,18 +464,19 @@ spec:
               - --timeout
               - "1800"
               - -v
-              - --no-mmap
-              - --no-warmup
               - -ngl
               - "999"
               - -fa
-              - "on"
               - -ub
-              - "512"
+              - "1024"
               - -b
-              - "4096"
+              - "1024"
               - -c
               - "65536"
+              - -ctk
+              - q8_0
+              - -ctv
+              - q8_0
               - --parallel
               - "1"
               - --cont-batching
