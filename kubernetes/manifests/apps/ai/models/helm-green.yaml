@@ -1114,6 +1114,7 @@ spec:
       - CreateNamespace=true
       - ApplyOutOfSyncOnly=true
       - RespectIgnoreDifferences=true
+      - ServerSideApply=true
     automated:
       prune: true
       selfHeal: true
