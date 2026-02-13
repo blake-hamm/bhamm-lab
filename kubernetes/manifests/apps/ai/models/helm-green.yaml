@@ -757,6 +757,44 @@ spec:
                 memory: "110Gi"
             zeroscaling:
               cooldownPeriod: 1800
+          - name: nemotron
+            description: Reasoning model from nvidia
+            enabled: true
+            image:
+              tag:
+            pvc:
+              storage: "70Gi"
+            args:
+              - llama-server
+              - -hf
+              - unsloth/Nemotron-3-Nano-30B-A3B-GGUF:BF16
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - --timeout
+              - "1800"
+              - -v
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "1024"
+              - -b
+              - "1024"
+              - -c
+              - "65536"
+              - --parallel
+              - "1"
+              - --cont-batching
+              - --temp
+              - "0.8"
+              - --top-p
+              - "0.98"
+              - --min_p
+              - "0.01"
           - name: gemma-3
             description: Mid model with multimodal support
             enabled: true
