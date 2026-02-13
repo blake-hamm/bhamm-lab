@@ -761,7 +761,7 @@ spec:
             description: Reasoning model from nvidia
             enabled: true
             image:
-              tag:
+              tag: vulkan-radv_20260211T025037
             pvc:
               storage: "70Gi"
             args:
