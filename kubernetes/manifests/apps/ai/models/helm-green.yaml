@@ -40,8 +40,8 @@ spec:
                 success_callback: ["mlflow"]
                 failure_callback: ["mlflow"]
               general_settings:
-                max_parallel_requests: 5
-                global_max_parallel_requests: 5
+                max_parallel_requests: 20
+                global_max_parallel_requests: 20
                 store_model_in_db: true
                 store_prompts_in_spend_logs: true
                 health_check_interval: 1800
@@ -787,7 +787,7 @@ spec:
               - -c
               - "65536"
               - --parallel
-              - "1"
+              - "2"
               - --cont-batching
               - --temp
               - "0.8"
@@ -984,7 +984,7 @@ spec:
               - -c
               - "65536"
               - --parallel
-              - "1"
+              - "2"
               - --cont-batching
               - --temp
               - "0.8"
