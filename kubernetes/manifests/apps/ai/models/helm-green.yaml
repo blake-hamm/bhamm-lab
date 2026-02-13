@@ -960,7 +960,7 @@ spec:
             pvc:
               storage: "70Gi"
             image:
-              tag: rocm7-nightlies
+              tag: vulkan-radv_20260211T025037
             args:
               - llama-server
               - -hf
@@ -973,16 +973,14 @@ spec:
               - --timeout
               - "1800"
               - -v
-              - --no-mmap
-              - --no-warmup
               - -ngl
               - "999"
               - -fa
               - "on"
               - -ub
-              - "512"
+              - "1024"
               - -b
-              - "4096"
+              - "1024"
               - -c
               - "65536"
               - --parallel
