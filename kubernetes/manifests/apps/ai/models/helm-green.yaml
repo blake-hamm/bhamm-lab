@@ -476,12 +476,8 @@ spec:
               - "1024"
               - -c
               - "65536"
-              - -ctk
-              - q8_0
-              - -ctv
-              - q8_0
               - --parallel
-              - "1"
+              - "2"
               - --cont-batching
               - --temp
               - "0.15"
