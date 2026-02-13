@@ -98,6 +98,7 @@ spec:
           auth:
             enableAuth: false
             createSecret: false
+            secret: []
           additionalEnv:
             - name: PHOENIX_POSTGRES_HOST
               valueFrom:
