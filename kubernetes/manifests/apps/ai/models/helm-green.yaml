@@ -1105,7 +1105,7 @@ spec:
             zeroscaling:
               cooldownPeriod: 1800
           - name: step-flash
-            description: High quality moe model for agents, coding or complex chat (REAP)
+            description: desc
             enabled: true
             pvc:
               storage: "100Gi"
@@ -1251,6 +1251,108 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "90Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
+          - name: kimi
+            description: desc
+            enabled: true
+            pvc:
+              storage: "100Gi"
+            image:
+              tag: rocm7-nightlies_20260213T024720 #vulkan-radv_20260211T025037
+            args:
+              - llama-server
+              - -hf
+              - bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF:BF16
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - --timeout
+              - "1800"
+              - -v
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "1024"
+              - -b
+              - "1024"
+              - -c
+              - "65536"
+              - --parallel
+              - "1"
+              - --cont-batching
+              - --temp
+              - "0.8"
+              - --top-p
+              - "0.95"
+              - --min-p
+              - "0.01"
+              - --repeat-penalty
+              - "1.0"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "120Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
+          - name: kimi-dev
+            description: '...'
+            enabled: true
+            pvc:
+              storage: "100Gi"
+            image:
+              tag: vulkan-radv_20260211T025037
+            args:
+              - llama-server
+              - -hf
+              - unsloth/Kimi-Dev-72B-GGUF:Q8_K_XL
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - --timeout
+              - "1800"
+              - -v
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "1024"
+              - -b
+              - "1024"
+              - -c
+              - "65536"
+              - --parallel
+              - "1"
+              - --cont-batching
+              - --temp
+              - "0.8"
+              - --top-p
+              - "0.95"
+              - --min-p
+              - "0.01"
+              - --repeat-penalty
+              - "1.0"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "120Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
             zeroscaling:
               cooldownPeriod: 1800
   ignoreDifferences:
