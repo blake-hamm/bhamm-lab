@@ -1263,7 +1263,7 @@ spec:
             args:
               - llama-server
               - -hf
-              - bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF:BF16
+              - bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF:Q8_0
               - --host
               - 0.0.0.0
               - --metrics
