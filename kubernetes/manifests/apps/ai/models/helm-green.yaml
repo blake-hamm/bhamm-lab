@@ -1053,6 +1053,57 @@ spec:
                 memory: "110Gi"
             zeroscaling:
               cooldownPeriod: 1800
+          - name: glm-47-reap
+            description: High quality moe model for agents, coding or complex chat (REAP)
+            enabled: true
+            pvc:
+              storage: "90Gi"
+            image:
+              tag: vulkan-radv_20260211T025037
+            args:
+              - llama-server
+              - -hf
+              - unsloth/GLM-4.7-REAP-218B-A32B-GGUF:Q2_K_XL
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - --timeout
+              - "1800"
+              - -v
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "1024"
+              - -b
+              - "1024"
+              - -c
+              - "65536"
+              - --parallel
+              - "2"
+              - --cont-batching
+              - --temp
+              - "0.8"
+              - --top-p
+              - "0.99"
+              - --min-p
+              - "0.01"
+              - --repeat-penalty
+              - "1.0"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "120Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
+            zeroscaling:
+              cooldownPeriod: 1800
           - name: llama-4
             description: High quality multimodal model
             enabled: true
