@@ -791,6 +791,42 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
+          - name: devstral-instruct
+            description: Mistral development model
+            enabled: true
+            pvc:
+              storage: "100Gi"
+            image:
+              tag: vulkan-radv_20260211T025037
+            args:
+              - llama-server
+              - -hf
+              - unsloth/Devstral-2-123B-Instruct-2512-GGUF:Q5_K_XL
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - --timeout
+              - "1800"
+              - -v
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "1024"
+              - -b
+              - "1024"
+              - -c
+              - "65536"
+              - --parallel
+              - "1"
+              - --cont-batching
+              - --temp
+              - "0.15"
+              - --min-p
+              - "0.01"
           - name: nemotron
             description: Reasoning model from nvidia
             enabled: true
