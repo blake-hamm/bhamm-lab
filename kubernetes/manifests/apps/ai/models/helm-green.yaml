@@ -219,8 +219,6 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
-            zeroscaling:
-              cooldownPeriod: 1800
           - name: qwen
             description: High quality dense model
             enabled: true
@@ -272,8 +270,6 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
-            zeroscaling:
-              cooldownPeriod: 1800
           - name: qwen-instruct
             description: High quality MoE model for general chat
             enabled: true
@@ -329,8 +325,6 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
-            zeroscaling:
-              cooldownPeriod: 1800
           - name: qwen-thinking
             description: High quality, reasoning MoE model for general chat
             enabled: true
@@ -389,8 +383,6 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
-            zeroscaling:
-              cooldownPeriod: 1800
           - name: qwen-coder
             description: High quality MoE model for coding
             enabled: true
@@ -442,8 +434,55 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
-            zeroscaling:
-              cooldownPeriod: 1800
+          - name: qwen-coder-next
+            description: '...'
+            enabled: true
+            pvc:
+              storage: "100Gi"
+            image:
+              tag: vulkan-radv_20260211T025037
+            args:
+              - llama-server
+              - -hf
+              - unsloth/Qwen3-Coder-Next-GGUF:Q6_K_XL
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - --timeout
+              - "1800"
+              - -v
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "1024"
+              - -b
+              - "1024"
+              - -c
+              - "65536"
+              - --parallel
+              - "1"
+              - --cont-batching
+              - --temp
+              - "0.8"
+              - --top-p
+              - "0.95"
+              - --min-p
+              - "0.01"
+              - --repeat-penalty
+              - "1.0"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "120Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
           - name: devstral
             description: Mistral development model
             enabled: true
@@ -752,8 +791,6 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
-            zeroscaling:
-              cooldownPeriod: 1800
           - name: nemotron
             description: Reasoning model from nvidia
             enabled: true
@@ -845,8 +882,6 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "80Gi"
-            zeroscaling:
-              cooldownPeriod: 1800
           - name: glm-air-reap
             description: High quality MoE model for agents, coding or complex chat
             enabled: true
@@ -898,8 +933,6 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
-            zeroscaling:
-              cooldownPeriod: 1800
           - name: glm-air
             description: High quality dense model for agents, coding or complex chat
             enabled: true
@@ -949,8 +982,6 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
-            zeroscaling:
-              cooldownPeriod: 1800
           - name: glm-flash
             description: High quality moe model for agents, coding or complex chat
             enabled: true
@@ -1000,8 +1031,6 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
-            zeroscaling:
-              cooldownPeriod: 1800
           - name: glm-flash-reap
             description: High quality moe model for agents, coding or complex chat (REAP)
             enabled: true
@@ -1051,8 +1080,6 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
-            zeroscaling:
-              cooldownPeriod: 1800
           - name: glm-47-reap
             description: High quality moe model for agents, coding or complex chat (REAP)
             enabled: true
@@ -1102,8 +1129,6 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
-            zeroscaling:
-              cooldownPeriod: 1800
           - name: step-flash
             description: desc
             enabled: true
@@ -1153,8 +1178,6 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
-            zeroscaling:
-              cooldownPeriod: 1800
           - name: llama-4
             description: High quality multimodal model
             enabled: true
@@ -1202,8 +1225,6 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "90Gi"
-            zeroscaling:
-              cooldownPeriod: 1800
           - name: seed-oss
             description: Mid model specialized in agentic and coding
             enabled: true
@@ -1251,8 +1272,6 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "90Gi"
-            zeroscaling:
-              cooldownPeriod: 1800
           - name: kimi
             description: desc
             enabled: true
@@ -1302,8 +1321,6 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
-            zeroscaling:
-              cooldownPeriod: 1800
           - name: kimi-dev
             description: '...'
             enabled: true
@@ -1353,8 +1370,6 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
-            zeroscaling:
-              cooldownPeriod: 1800
   ignoreDifferences:
     - group: apps
       kind: Deployment
