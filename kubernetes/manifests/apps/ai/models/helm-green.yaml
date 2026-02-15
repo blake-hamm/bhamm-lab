@@ -878,12 +878,12 @@ spec:
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "100Gi"
+                memory: "120Gi"
                 cpu: "8"
               requests:
                 amd.com/gpu: 1
                 cpu: "4"
-                memory: "80Gi"
+                memory: "110Gi"
           - name: glm-air-reap
             description: High quality MoE model for agents, coding or complex chat
             enabled: true
