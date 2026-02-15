@@ -8,5 +8,6 @@
     ./steam.nix
     ./vscode.nix
     ./vesktop.nix
+    ./opencode.nix
   ];
 }
