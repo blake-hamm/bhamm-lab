@@ -34,17 +34,13 @@ Given all these limitations and my daily reliance on cloud APIs, you might wonde
 
 ### Ultimate goal
 
-So, why the upgrade?
-
 Well, I have faith that eventually, I will find an open source model that I can run locally and consistently use with Roo Code and OpenCode. I started using Open Router for my personal projects and found that Kimi K2.5 fits that bill; I would consider this the best open source model for my use case and almost on par with SOTA closed-source models (while being a fraction of the cost). Unfortunately, I can't fit this model on 128gb of vram...
 
 In addition to replacing paid models, I want to see the benefits of the latest model architecture research in latency. Through the process of self hosting AI models, I learned about the impact of mixture of experts (MoE) architecture and attention mechanisms and was shocked to see the benefits when using GPT-OSS. Testing out new models will help me better understand the benefits of different model families and architectures, generally impacting resource usage and latency.
 
 In production AI applications, models become deprecated and you will be required to upgrade. One of the great things with local AI is you don't have to worry about models being removed. However, in my experience, newer models tend to have better evaluations scores and it's good practice to continuously check as you may find a faster model with higher quality output.
 
-I'm hopeful that this new round of open source models will be more intelligent and faster; only one way to find out...
-
-Before testing the new batch, let me show you what I'm currently running.
+I'm hopeful that this new round of open source models will be more intelligent and faster; only one way to find out... Before testing the new batch, let me show you what I'm currently running.
 
 
 ## Baseline Vibe
@@ -53,7 +49,7 @@ Unfortunately, I don't have a formal eval process comparing models so the review
 
 First off, let's review the fully arbitrary 'Vibe Score' which is my personal account and feeling towards the model. Basically, I will send the same prompt in Roo Code and OpenWebUI and record the latency along with a 1-5 Vibe Score on quality. I'll base it off of how well it solves the problem, any failures it might encounter and overall how I like the response.
 
-So, let's dive right into my review of the current models I have available:
+To put it simply, a 5 means the model has either incredibly high quality results OR it runs quick and has sufficient results, but may need some direction and hand holding. So, let's dive right into my review of the current models I have available:
 
 | Model | Family | Primary use case | Features | Notes | Latency |Vibe Score |
 |-|-|-|-|-|-|-|
