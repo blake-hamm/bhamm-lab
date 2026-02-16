@@ -977,7 +977,7 @@ spec:
             pvc:
               storage: "90Gi"
             image:
-              tag: vulkan-amdvlk
+              tag: vulkan-radv_20260215T130438
             args:
               - llama-server
               - -hf
@@ -1027,6 +1027,8 @@ spec:
             enabled: true
             pvc:
               storage: "90Gi"
+            image:
+              tag: vulkan-radv_20260215T130438
             args:
               - llama-server
               - -hf
