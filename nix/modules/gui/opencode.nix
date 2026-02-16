@@ -13,7 +13,7 @@
       programs.opencode = {
         enable = true;
         settings = {
-          theme = "opencode";
+          theme = "catppuccin";
         };
       };
     };
