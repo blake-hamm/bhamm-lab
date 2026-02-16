@@ -18,7 +18,6 @@
             budparr.language-hugo-vscode
             ms-toolsai.jupyter
             streetsidesoftware.code-spell-checker
-            sst-dev.opencode
             # kilocode.kilo-code
             # dracula-theme.theme-dracula
             # vscodevim.vim
