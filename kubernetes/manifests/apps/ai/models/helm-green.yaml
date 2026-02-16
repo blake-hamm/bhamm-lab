@@ -180,23 +180,22 @@ spec:
               - llama-server
               - -hf
               - gghfez/gpt-oss-120b-Derestricted.MXFP4_MOE-gguf
-              # - bartowski/openai_gpt-oss-120b-GGUF:BF16
               - --host
               - 0.0.0.0
               - --metrics
               - --no-webui
               - --jinja
+              - --timeout
+              - "1800"
               - -v
-              - --no-mmap
-              - --no-warmup
               - -ngl
               - "999"
               - -fa
               - "on"
               - -ub
-              - "512"
+              - "1024"
               - -b
-              - "4096"
+              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -236,16 +235,14 @@ spec:
               - --timeout
               - "1800"
               - -v
-              - --no-mmap
-              - --no-warmup
               - -ngl
               - "999"
               - -fa
               - "on"
               - -ub
-              - "512"
+              - "1024"
               - -b
-              - "4096"
+              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -291,16 +288,14 @@ spec:
               - --timeout
               - "1800"
               - -v
-              - --no-mmap
-              - --no-warmup
               - -ngl
               - "999"
               - -fa
               - "on"
               - -ub
-              - "512"
+              - "1024"
               - -b
-              - "4096"
+              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -346,19 +341,14 @@ spec:
               - --timeout
               - "1800"
               - -v
-              - --no-warmup
-              - -ngl
-              - "999"
-              - -fa
-              - "on"
               - -ngl
               - "999"
               - -fa
               - "on"
               - -ub
-              - "512"
+              - "1024"
               - -b
-              - "4096"
+              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -400,20 +390,18 @@ spec:
               - --timeout
               - "1800"
               - -v
-              - --no-mmap
-              - --no-warmup
               - -ngl
               - "999"
               - -fa
               - "on"
               - -ub
-              - "512"
+              - "1024"
               - -b
-              - "4096"
+              - "1024"
               - -c
               - "65536"
               - --parallel
-              - "1"
+              - "2"
               - --cont-batching
               - --temp
               - "0.7"
@@ -937,20 +925,18 @@ spec:
               - --timeout
               - "1800"
               - -v
-              - --no-mmap
-              - --no-warmup
               - -ngl
               - "999"
               - -fa
               - "on"
               - -ub
-              - "512"
+              - "1024"
               - -b
-              - "4096"
+              - "1024"
               - -c
               - "65536"
               - --parallel
-              - "1"
+              - "2"
               - --cont-batching
               - --temp
               - "1.0"
@@ -992,20 +978,18 @@ spec:
               - --timeout
               - "1800"
               - -v
-              - --no-mmap
-              - --no-warmup
               - -ngl
               - "999"
               - -fa
               - "on"
               - -ub
-              - "512"
+              - "1024"
               - -b
-              - "4096"
+              - "1024"
               - -c
               - "65536"
               - --parallel
-              - "1"
+              - "2"
               - --cont-batching
               - --temp
               - "0.6"
@@ -1043,20 +1027,18 @@ spec:
               - --timeout
               - "1800"
               - -v
-              - --no-mmap
-              - --no-warmup
               - -ngl
               - "999"
               - -fa
               - "on"
               - -ub
-              - "512"
+              - "1024"
               - -b
-              - "4096"
+              - "1024"
               - -c
               - "65536"
               - --parallel
-              - "1"
+              - "2"
               - --cont-batching
               - --temp
               - "0.6"
@@ -1286,20 +1268,18 @@ spec:
               - --timeout
               - "1800"
               - -v
-              - --no-mmap
-              - --no-warmup
               - -ngl
               - "999"
               - -fa
               - "on"
               - -ub
-              - "512"
+              - "1024"
               - -b
-              - "4096"
+              - "1024"
               - -c
               - "65536"
               - --parallel
-              - "1"
+              - "2"
               - --cont-batching
               - --temp
               - "0.6"
@@ -1335,20 +1315,18 @@ spec:
               - --timeout
               - "1800"
               - -v
-              - --no-mmap
-              - --no-warmup
               - -ngl
               - "999"
               - -fa
               - "on"
               - -ub
-              - "512"
+              - "1024"
               - -b
-              - "4096"
+              - "1024"
               - -c
               - "65536"
               - --parallel
-              - "1"
+              - "2"
               - --cont-batching
               - --temp
               - "1.1"
