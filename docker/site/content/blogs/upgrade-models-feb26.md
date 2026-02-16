@@ -23,7 +23,7 @@ The models I test are dictated by my hardware. I've made an effort to avoid Nvid
 
 In my day-to-day as an AI/ML Engineer, I use the latest models from OpenAI, Anthropic, AWS and Google. Models like GPT 5.3 codex, Claude Opus 4.6, Nova Premiere and Gemini 3 are state of the art (SOTA) and they can service just about any use case with the right prompt and context.
 
-In contrast, even with decent hardware and incredible research coming out, the use cases for running local models has it's limitations.. At the moment, I have tested local models in [Open WebUI](https://openwebui.com/) and [Roo Code](https://roocode.com/). I've had success with Open WebUI and would recommend it for local models. Roo Code is a bit picky and local models on my hardware runa t a snails pace when context exceeds 20k. I believe this can be solved with better and smarter context management and prompting, but I didn't make much progress with my [camber](https://github.com/blake-hamm/camber) project... I plan to try out [OpenCode](https://opencode.ai/docs/) at some point which might be better with context management in code projects.
+In contrast, even with decent hardware and incredible research coming out, the use cases for running local models have their limitations... At the moment, I have tested local models in [Open WebUI](https://openwebui.com/), [Roo Code](https://roocode.com/) and [OpenCode](https://opencode.ai/docs/). I've had success with Open WebUI and would recommend it for local models. Roo Code and OpenCode are a bit picky and local models on my hardware run at a snail's pace when context exceeds 20k. I believe this can be solved with better and smarter context management and prompting, but I didn't make much progress with my [camber](https://github.com/blake-hamm/camber) project...
 
 I relate with the cliche 'This is the worst you will ever see AI'. Initially, this statement felt like a marketing jingle to sell you on artificial general intelligence (AGI). In reality, this is more true than ever with smaller models and local AI.
 
@@ -32,18 +32,18 @@ I relate with the cliche 'This is the worst you will ever see AI'. Initially, th
 
 So, why the upgrade?
 
-Well, I have faith that eventually, I will find an open source model that I can run locally and consistently use with Roo Code. I started using Open Router for my personal projects and found that Kimi K2.5 fits that bill; I would consider this the best open source model for my use case and almost on par with SOTO, closed-source models (while being a fraction of the cost). Unfortunately, I can't fit this model on 128gb of vram...
+Well, I have faith that eventually, I will find an open source model that I can run locally and consistently use with Roo Code and OpenCode. I started using Open Router for my personal projects and found that Kimi K2.5 fits that bill; I would consider this the best open source model for my use case and almost on par with SOTA closed-source models (while being a fraction of the cost). Unfortunately, I can't fit this model on 128gb of vram...
 
 In addition to replacing paid models, I want to see the benefits of the latest model architecture research in latency. Through the process of self hosting AI models, I learned about the impact of mixture of experts (MoE) architecture and attention mechanisms and was shocked to see the benefits when using GPT-OSS. Testing out new models will help me better understand the benefits of different model families and architectures, generally impacting resource usage and latency.
 
 In production AI applications, models become deprecated and you will be required to upgrade. One of the great things with local AI is you don't have to worry about models being removed. However, in my experience, newer models tend to have better evaluations scores and it's good practice to continuously check as you may find a faster model with higher quality output.
 
-I'm hopefully that this new round of open source models will be more intelligent and faster; only one way to find out...
+I'm hopeful that this new round of open source models will be more intelligent and faster; only one way to find out...
 
 
 ## Baseline Vibe
 
-Unfortunately, I don't have a formal eval process comparing models so the review is more of a 'vibe'. I just started on a project for a better and automated eval process. Also, I have Arise Pheonix configured with LiteLLM in my [kube-ai-stack](https://github.com/blake-hamm/kube-ai-stack) AI gateway, so I will be collecting data for a post-deployment evaluation.
+Unfortunately, I don't have a formal eval process comparing models so the review is more of a 'vibe'. I just started on a project for a better, automated eval process. Also, I have Arize Phoenix configured with LiteLLM in my [kube-ai-stack](https://github.com/blake-hamm/kube-ai-stack) AI gateway, so I will be collecting data for a post-deployment evaluation.
 
 First off, let's review the fully arbitrary 'Vibe Score' which is my personal account and feeling towards the model. Basically, I will send the same prompt in Roo Code and OpenWebUI and record the latency along with a 1-5 Vibe Score on quality. I'll base it off of how well it solves the problem, any failures it might encounter and overall how I like the response.
 
@@ -51,12 +51,12 @@ So, let's dive right into my review of the current models I have available:
 
 | Model | Family | Primary use case | Features | Notes | Latency |Vibe Score |
 |-|-|-|-|-|-|-|
-| [Qwen/Qwen3-Embedding-8B-GGUF:F16](https://huggingface.co/Qwen/Qwen3-Embedding-8B-GGUF) | Qwen | Embeddings (Roo Code and LiteLLM similarity with [Qdrant](https://qdrant.tech/)) | Embedding Only, Text | At one point I tried a few embedding models like [Nomic Embed Code](https://huggingface.co/nomic-ai/nomic-embed-code) and [Mistral Instruct Embed](https://huggingface.co/intfloat/e5-mistral-7b-instruct), but I decided qwen embed can do it all | | 5 |
-|[ggml-org/Qwen3-32B-GGUF:F16](https://huggingface.co/Qwen/Qwen3-32B-GGUF) | Qwen | Rarely used in practice; in theory, a good base model for fine tuning which was my original purpose | Dense, Base Model | Being a dense model, this was a little to slow on my hardware | | 3 |
+| [Qwen/Qwen3-Embedding-8B-GGUF:F16](https://huggingface.co/Qwen/Qwen3-Embedding-8B-GGUF) | Qwen | Embeddings (Roo Code and LiteLLM similarity with [Qdrant](https://qdrant.tech/)) | Embedding Only, Text | At one point I tried a few embedding models like [Nomic Embed Code](https://huggingface.co/nomic-ai/nomic-embed-code) and [Mistral Instruct Embed](https://huggingface.co/intfloat/e5-mistral-7b-instruct), but I decided Qwen embed can do it all | | 5 |
+|[ggml-org/Qwen3-32B-GGUF:F16](https://huggingface.co/Qwen/Qwen3-32B-GGUF) | Qwen | Rarely used in practice; in theory, a good base model for fine tuning which was my original purpose | Dense, Base Model | Being a dense model, this was a little too slow on my hardware | | 3 |
 | [unsloth/Qwen3-Next-80B-A3B-Instruct-GGUF:Q6_K_XL](https://huggingface.co/unsloth/Qwen3-Next-80B-A3B-Instruct-GGUF) | Qwen | Quick chat queries; likely a good model for custom agent, but didn't test | MoE, Hybrid Attention, Instruct | Recently replaced [qwen3-vl-30b-a3b](https://huggingface.co/unsloth/Qwen3-VL-30B-A3B-Instruct-GGUF); there wasn't a noticeable difference, but it appeared higher on benchmarks | | 5 |
 | [unsloth/Qwen3-Next-80B-A3B-Thinking-GGUF:Q6_K_XL](https://huggingface.co/unsloth/Qwen3-Next-80B-A3B-Thinking-GGUF) | Qwen | More complex chat and search queries | MoE, Hybrid Attention, Reasoning | Similar to above, it replaced the 30b thinking version; however, I noticed it would excessively think | | 3 |
 | [ggml-org/Qwen3-Coder-30B-A3B-Instruct-Q8_0-GGUF](https://huggingface.co/ggml-org/Qwen3-Coder-30B-A3B-Instruct-Q8_0-GGUF) | Qwen | Great with Roo Code for coding-specific tasks, less reliable for tool calls/agents | MoE, Coding, Instruct | Might've worked better with OpenCode, but struggled with the complexity of Roo Code | | 4 |
-| [unsloth/Seed-OSS-36B-Instruct-GGUF:BF16](https://huggingface.co/unsloth/Seed-OSS-36B-Instruct-GGUF) | ByteDance | Best for it's size with Roo Code; good balance of speed and quality | Dense, Reasoning, Instruct | Very impressed with this model; one of my top picks | | 5 |
+| [unsloth/Seed-OSS-36B-Instruct-GGUF:BF16](https://huggingface.co/unsloth/Seed-OSS-36B-Instruct-GGUF) | ByteDance | Best for its size with Roo Code; good balance of speed and quality | Dense, Reasoning, Instruct | Very impressed with this model; one of my top picks | | 5 |
 | [gghfez/gpt-oss-120b-Derestricted.MXFP4_MOE-gguf](https://huggingface.co/gghfez/gpt-oss-120b-Derestricted.MXFP4_MOE-gguf) | GPT | Excellent for chat and search tools | MoE, Reasoning, Instruct, Derestricted | This is the jailbroke version of gpt oss; TBH I didn't notice much of a difference | | 5 |
 | [unsloth/gemma-3-27b-it-GGUF:BF16](https://huggingface.co/unsloth/gemma-3-27b-it-GGUF) | Google | I've tested it with images, seemed okay; I really don't have a good use case | Vision, Reasoning, Instruct, Multimodal | | | 3 |
 | [bartowski/cerebras_GLM-4.5-Air-REAP-82B-A12B-GGUF:Q4_K_L](https://huggingface.co/bartowski/cerebras_GLM-4.5-Air-REAP-82B-A12B-GGUF) | GLM | Excellent for agentic tasks, coding and more difficult problems; top tier with Roo Code | Reasoning, MoE, Instruct | Can be a bit slow with significant context | | 5 |
@@ -86,7 +86,7 @@ Now, here are the results:
 
 ## Conclusion
 
-First off, I have to admit, my 'Vibe Check' is terrible and must be improved.. Moving forward, evals need to be automated; I'd like to test different llama.cpp backends (Vulkan vs. Rocm) as well as different quants. I've made it a number one priority to build a more robust eval process and will plan on re-evaluating these models as well as providing more 'vibe-based' feedback after using them more in practice.
+First off, I have to admit, my 'Vibe Check' is terrible and must be improved... Moving forward, evals need to be automated; I'd like to test different llama.cpp backends (Vulkan vs. Rocm) as well as different quants. I've made it a number one priority to build a more robust eval process and will plan on re-evaluating these models as well as providing more 'vibe-based' feedback after using them more in practice.
 
 Next, I've always stayed away from highly quantized versions of larger models. That was a big mistake as proven by MiniMax and GLM 4.7. I need to make sure I consider larger models moving forward.
 
