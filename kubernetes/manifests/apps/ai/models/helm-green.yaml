@@ -1300,7 +1300,7 @@ spec:
             pvc:
               storage: "90Gi"
             image:
-              tag: rocm7-nightlies
+              tag: rocm7-nightlies_20260213T024720
             args:
               - llama-server
               - -hf
