@@ -18,6 +18,8 @@ The AI Max provides 128gb of vram so I can run two decent sized models (~30b-120
 
 The models I test are dictated by my hardware. I've made an effort to avoid Nvidia because I believe in the underdog (and suffering apparently).
 
+Given these constraints, what am I actually trying to accomplish with local AI?
+
 
 ### Use Cases
 
@@ -26,6 +28,8 @@ In my day-to-day as an AI/ML Engineer, I use the latest models from OpenAI, Anth
 In contrast, even with decent hardware and incredible research coming out, the use cases for running local models have their limitations... At the moment, I have tested local models in [Open WebUI](https://openwebui.com/), [Roo Code](https://roocode.com/) and [OpenCode](https://opencode.ai/docs/). I've had success with Open WebUI and would recommend it for local models. Roo Code and OpenCode are a bit picky and local models on my hardware run at a snail's pace when context exceeds 20k. I believe this can be solved with better and smarter context management and prompting, but I didn't make much progress with my [camber](https://github.com/blake-hamm/camber) project...
 
 I relate with the cliche 'This is the worst you will ever see AI'. Initially, this statement felt like a marketing jingle to sell you on artificial general intelligence (AGI). In reality, this is more true than ever with smaller models and local AI.
+
+Given all these limitations and my daily reliance on cloud APIs, you might wonder why I bother with local models at all.
 
 
 ### Ultimate goal
@@ -39,6 +43,8 @@ In addition to replacing paid models, I want to see the benefits of the latest m
 In production AI applications, models become deprecated and you will be required to upgrade. One of the great things with local AI is you don't have to worry about models being removed. However, in my experience, newer models tend to have better evaluations scores and it's good practice to continuously check as you may find a faster model with higher quality output.
 
 I'm hopeful that this new round of open source models will be more intelligent and faster; only one way to find out...
+
+Before testing the new batch, let me show you what I'm currently running.
 
 
 ## Baseline Vibe
@@ -66,6 +72,9 @@ So, let's dive right into my review of the current models I have available:
 Looking back at this, there are only a few five star models for my use cases. These include Qwen embed, Qwen instruct, Seed OSS, GPT-OSS and GLM-Air-REAP. In all reality, I could probably cover all my use cases with just Qwen embed, Seed OSS and GPT-OSS. Many of the other models are complementary and serve different purposes. Gemma and Llama are multimodal so they stand out slightly in that sense, but when playing around with them, I didn't notice a significant difference. Qwen 32b is a dense, base model which would be ideal for fine-tuning which I haven't gotten around to.
 
 That's the joy of self hosting! No worries if I have model parameters sitting around on my hard drive. Better to have them accessible and in my possession than not at all!
+
+With that baseline established, here's what I'm testing next.
+
 
 ## New model Vibe
 
