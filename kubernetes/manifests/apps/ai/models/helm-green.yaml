@@ -1254,6 +1254,8 @@ spec:
             enabled: true
             pvc:
               storage: "90Gi"
+            image:
+              tag: vulkan-radv_20260211T025037
             args:
               - llama-server
               - -hf
@@ -1300,7 +1302,7 @@ spec:
             pvc:
               storage: "90Gi"
             image:
-              tag: rocm7-nightlies_20260213T024720
+              tag: vulkan-radv_20260211T025037
             args:
               - llama-server
               - -hf
