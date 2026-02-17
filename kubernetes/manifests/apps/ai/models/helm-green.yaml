@@ -1302,7 +1302,7 @@ spec:
             pvc:
               storage: "90Gi"
             image:
-              tag: vulkan-radv_20260211T025037
+              tag: rocm7-nightlies_20260213T024720
             args:
               - llama-server
               - -hf
@@ -1326,7 +1326,7 @@ spec:
               - -c
               - "65536"
               - --parallel
-              - "2"
+              - "1"
               - --cont-batching
               - --temp
               - "1.1"
