@@ -26,8 +26,6 @@ spec:
             manage_config: true
             config:
               litellm_settings:
-                timeout: 1800
-                stream_timeout: 1800
                 request_timeout: 1800
                 modify_params: True
                 cache: False
@@ -40,18 +38,15 @@ spec:
                 success_callback: ["mlflow"]
                 failure_callback: ["mlflow"]
               general_settings:
-                max_parallel_requests: 20
-                global_max_parallel_requests: 20
-                store_model_in_db: true
-                store_prompts_in_spend_logs: true
+                enforce_user_param: False
+                store_model_in_db: True
+                store_prompts_in_spend_logs: True
                 health_check_interval: 1800
               router_settings:
                 debug_level: "INFO"
-                cooldown_time: 30
                 allowed_fails: 999
                 timeout: 1800
-                num_retries: 1
-                retry_after: 15
+                num_retries: 0
                 routing_strategy: simple-shuffle
                 redis_host: os.environ/REDIS_HOST
                 redis_port: os.environ/REDIS_PORT
