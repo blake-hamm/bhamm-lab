@@ -82,23 +82,29 @@ Now, here are the results:
 | Model | Family | Use Case | Features| Replacement Model | Latency | Vibe Score |
 |-|-|-|-|-|-|-|
 | [unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF:BF16](https://huggingface.co/unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF) | Mistral | Agentic coding (Roo Code) | Vision, Reasoning, Code | GLM Air 4.5, Seed OSS or Qwen Coder | 1m 27s | 3 |
-| [unsloth/Devstral-2-123B-Instruct-2512-GGUF:Q5_K_XL](https://huggingface.co/unsloth/Devstral-2-123B-Instruct-2512-GGUF) | Mistral | Same as above, but will have to use a heavily quantized version | Vision, Reasoning, Code | GLM Air 4.5, Seed OSS or Qwen Coder | 10m 15s | 3 |
+| [unsloth/Devstral-2-123B-Instruct-2512-GGUF:Q5_K_XL](https://huggingface.co/unsloth/Devstral-2-123B-Instruct-2512-GGUF) | Mistral | Same as above, but will have to use a heavily quantized version | Vision, Reasoning, Code | GLM Air 4.5, Seed OSS or Qwen Coder | 10m 15s | 2 |
 | [unsloth/GLM-4.7-Flash-REAP-23B-A3B-GGUF:Q2_K_XL](https://huggingface.co/unsloth/GLM-4.7-Flash-REAP-23B-A3B-GGUF) | GLM | | MoE, Reasoning, Lightweight | GLM Air 4.5, Seed OSS or Qwen Coder | 40s | 5 |
 | [unsloth/GLM-4.7-Flash-GGUF:BF16](https://huggingface.co/unsloth/GLM-4.7-Flash-GGUF) | GLM | | MoE, Fast Inference | GLM Air 4.5, Seed OSS or Qwen Coder | 1m 41s | 4 |
 | [unsloth/GLM-4.7-REAP-218B-A32B-GGUF:BF16](https://huggingface.co/unsloth/GLM-4.7-REAP-218B-A32B-GGUF) | GLM | | MoE, Reasoning, Large Scale | GLM Air 4.5, Seed OSS or Qwen Coder | 3m 58s | 2 |
 | [bartowski/stepfun-ai_Step-3.5-Flash-GGUF:Q3_K_XL](https://huggingface.co/bartowski/stepfun-ai_Step-3.5-Flash-GGUF) | Stepfun | | MoE, Reasoning, Long Context | GLM Air 4.5, Seed OSS or Qwen Coder | 2m 47s | 2 |
 | [unsloth/Qwen3-Coder-Next-GGUF:Q6_K_XL](https://huggingface.co/unsloth/Qwen3-Coder-Next-GGUF) | Qwen | | MoE, Coding, Tool Use | GLM Air 4.5, Seed OSS or Qwen Coder | 1m 31s | 5 |
-| [unsloth/Nemotron-3-Nano-30B-A3B-GGUF:BF16](https://huggingface.co/unsloth/Nemotron-3-Nano-30B-A3B-GGUF) | NVIDIA | | MoE, Efficient, Function Calling | LM Air 4.5, Seed OSS or Qwen Coder | 1m 22s | 3 |
+| [unsloth/Nemotron-3-Nano-30B-A3B-GGUF:BF16](https://huggingface.co/unsloth/Nemotron-3-Nano-30B-A3B-GGUF) | NVIDIA | | MoE, Efficient, Function Calling | GLM Air 4.5, Seed OSS or Qwen Coder | 1m 22s | 3 |
 | [unsloth/Kimi-Dev-72B-GGUF:Q8_K_XL](https://huggingface.co/unsloth/Kimi-Dev-72B-GGUF) | Moonshot | | Coding, Long Context | | 11m 55s | 2 |
 | [bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF:Q8_0](https://huggingface.co/bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF) | Moonshot | | MoE, Linear Attention, Efficient | | 1m 25s | 5 |
 | [unsloth/MiniMax-M2.5-GGUF:Q2_K_XL](https://huggingface.co/unsloth/MiniMax-M2.5-GGUF) | MiniMax |  | MoE, Long Context | GLM Air 4.5, Seed OSS | 3m 24s | 3 |
 
+A few models emerged as standouts. Kimi Linear proved to be a fantastic all-purpose model; it was fast, capable, and consistent across different tasks. Qwen Coder Next was incredible which is echoed by communities online; its coding capabilities and speed are exceptional and it has immediately become my go-to for development work. GLM 4.7 Flash also impressed with its speed and solid general performance, Vibing similar to GPT OSS 120b. On the other hand, MiniMax and GLM 4.7 REAP showed promise as all-rounders but their high latency made them unusuable in practice, likely due to their larger size. Devstral has some [known](https://huggingface.co/unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF/discussions/2) [issues](https://github.com/ggml-org/llama.cpp/issues/19647) with its chat template and proved inconsistent.
+
+Moving forward, Kimi Linear, Qwen Coder Next and GLM Flash REAP are going to be my daily drivers moving forward, replacing Qwen Coder A3B, Seed OSS and GLM Air REAP.
+
 ## Conclusion
 
-Next, I've always stayed away from highly quantized versions of larger models. That was a big mistake as proven by MiniMax and GLM 4.7. I need to make sure I consider larger models moving forward.
+This round of testing has significantly reshaped my model lineup. The standout performers—Kimi Linear for general tasks and Qwen Coder Next for coding—demonstrate that open source models are rapidly closing the gap with proprietary alternatives. I was particularly surprised by how well highly quantized versions of larger models performed; MiniMax and GLM 4.7 Flash both proved that aggressive quantization doesn't necessarily mean unacceptable quality loss. This insight alone will change how I approach model selection moving forward.
 
-Finally, the pace is insane for these open source models, different architectures and vendor families; I cannot wait to continue testing out the latest open source models. There's no better way to pop a bubble than to prove a small team of dedicated researchers with limited hardware can release models better than billion-dollar valued companies...
+The pace of innovation in open source AI is staggering. Research labs with modest resources are consistently releasing models that challenge—and sometimes surpass—the offerings from billion-dollar companies. While the industry buzzes with valuation bubbles and AGI promises, the reality on the ground is that small teams of dedicated researchers are democratizing access to powerful AI. Self-hosting isn't just about privacy or avoiding vendor lock-in anymore; it's becoming a genuinely competitive alternative.
 
-### What's next
+## The Road Ahead
 
-First off, I have to admit, my 'Vibe Check' is terrible and must be improved... Moving forward, evals need to be automated; I'd like to test different llama.cpp backends (Vulkan vs. Rocm) as well as different model quants. I've made it a number one priority to build a more robust eval process and will plan on re-evaluating these models as well as providing more 'vibe-based' feedback after using them more in practice.
+My current evaluation process is unsustainable. I'm manually downloading models, usually testing one or two quantization levels, then spinning up different llama.cpp container images to compare Vulkan versus ROCm backends. It's tedious, time-consuming, and frankly, a bottleneck to actually using these models productively.
+
+Moving forward, I need a systematic way to test different quantization strategies, container images, and llama.cpp CLI arguments to find the optimal balance of quality and speed for each model family. Robust evals will provide more meaningful, data-driven feedback in addition to real-world use. Building this evaluation pipeline is now my top priority—because there's no better time to be self-hosting AI than right now.
