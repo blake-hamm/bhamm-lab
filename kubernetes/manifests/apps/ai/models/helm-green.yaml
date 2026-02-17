@@ -1302,11 +1302,11 @@ spec:
             pvc:
               storage: "90Gi"
             image:
-              tag: vulkan-radv_20260216T165412
+              tag: rocm7-nightlies_20260213T024720 #vulkan-radv_20260211T025037
             args:
               - llama-server
               - -hf
-              - unsloth/Seed-OSS-36B-Instruct-GGUF:BF16
+              - unsloth/Seed-OSS-36B-Instruct-GGUF:Q8_K_XL
               - --host
               - 0.0.0.0
               - --metrics
