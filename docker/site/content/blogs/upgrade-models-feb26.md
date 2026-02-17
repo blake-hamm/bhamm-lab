@@ -1,6 +1,18 @@
 ---
 title: "Self-hosted LLM Upgrade and Vibe Check"
+date: 2026-02-17
+tags: ["llm", "ai", "homelab", "amd", "self-hosting", "rocm", "vulkan", "qwen", "kimi", "glm", "minimax", "open-source"]
+categories: ["ai"]
+description: "Testing the latest open-source LLMs on AMD Strix Halo hardware—Qwen, GLM, Kimi, MiniMax, and more."
 ---
+
+
+## TL;DR
+
+- **Best Overall**: [Kimi Linear 48B](https://huggingface.co/bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF) — fast, capable, and consistent across different tasks
+- **Best for Coding**: [Qwen3 Coder Next](https://huggingface.co/unsloth/Qwen3-Coder-Next-GGUF) — immediate replacement for my previous coding model; exceptional speed and quality
+- **Surprise Discovery**: Heavy quantization (Q2_K_XL) is viable for long running background tasks—MiniMax and GLM 4.7 REAP proved me wrong
+- **Hardware**: 2× AMD AI Max+ 395 (128GB unified memory each) + 1× AMD AI R9700 (32GB)
 
 
 ## Why the upgrade?
@@ -12,9 +24,9 @@ I stay up to date on the latest models from Discord and Reddit communities like 
 
 ### Homelab Review
 
-I run a homelab that supports AI workloads; you can find more info [here](https://docs.bhamm-lab.com/ai/). Basically, I have two AMD AI Max 395+ (strix halo) and one AMD AI R9700.
+I run a homelab that supports AI workloads; you can find more info [here](https://docs.bhamm-lab.com/ai/). Basically, I have two AMD AI Max+ 395 (strix halo) and one AMD AI R9700.
 
-The AI Max provides 128gb of vram so I can run two decent sized models (~30b-120b models). I have an [open ticket](https://github.com/blake-hamm/bhamm-lab/issues/82) to enable lamma.cpp rpc so that I can run larger models, but it's still a WIP... The R9700 is another solid system with 32gb of vram and I use it for smaller, embedding models. So, as of now, I have capacity to run three models at a time.
+The AI Max provides 128gb of vram so I can run two decent sized models (~30b-120b models). I have an [open ticket](https://github.com/blake-hamm/bhamm-lab/issues/82) to enable llama.cpp rpc so that I can run larger models, but it's still a WIP... The R9700 is another solid system with 32gb of vram and I use it for smaller, embedding models. So, as of now, I have capacity to run three models at a time.
 
 The models I test are dictated by my hardware. I've made an effort to avoid Nvidia because I believe in the underdog (and suffering apparently). Given these constraints, what am I actually trying to accomplish with local AI?
 
@@ -57,10 +69,10 @@ Write unit tests for this project. Use pytest.
 
 So, let's dive right into my review of the current models I have available:
 
-| Model | Family | Primary use case | Features | Notes | Latency |Vibe Score |
+| Model | Family | Primary use case | Features | Notes | Latency | Vibe Score |
 |-|-|-|-|-|-|-|
 | [Qwen/Qwen3-Embedding-8B-GGUF:F16](https://huggingface.co/Qwen/Qwen3-Embedding-8B-GGUF) | Qwen | Embeddings (Roo Code and LiteLLM similarity with [Qdrant](https://qdrant.tech/)) | Embedding Only, Text | At one point I tried a few embedding models like [Nomic Embed Code](https://huggingface.co/nomic-ai/nomic-embed-code) and [Mistral Instruct Embed](https://huggingface.co/intfloat/e5-mistral-7b-instruct), but I decided Qwen embed can do it all | NA | 5 |
-|[ggml-org/Qwen3-32B-GGUF:F16](https://huggingface.co/Qwen/Qwen3-32B-GGUF) | Qwen | Rarely used in practice; in theory, a good base model for fine tuning which was my original purpose | Dense, Base Model | Being a dense model, this was a little too slow on my hardware | 4m 29s | 3 |
+| [ggml-org/Qwen3-32B-GGUF:F16](https://huggingface.co/Qwen/Qwen3-32B-GGUF) | Qwen | Rarely used in practice; in theory, a good base model for fine tuning which was my original purpose | Dense, Base Model | Being a dense model, this was a little too slow on my hardware | 4m 29s | 3 |
 | [unsloth/Qwen3-Next-80B-A3B-Instruct-GGUF:Q6_K_XL](https://huggingface.co/unsloth/Qwen3-Next-80B-A3B-Instruct-GGUF) | Qwen | Quick chat queries; likely a good model for custom agent, but didn't test | MoE, Hybrid Attention, Instruct | Recently replaced [qwen3-vl-30b-a3b](https://huggingface.co/unsloth/Qwen3-VL-30B-A3B-Instruct-GGUF); there wasn't a noticeable difference, but it appeared higher on benchmarks | 38.3s | 5 |
 | [unsloth/Qwen3-Next-80B-A3B-Thinking-GGUF:Q6_K_XL](https://huggingface.co/unsloth/Qwen3-Next-80B-A3B-Thinking-GGUF) | Qwen | More complex chat and search queries | MoE, Hybrid Attention, Reasoning | Similar to above, it replaced the 30b thinking version; however, I noticed it would excessively think | 2m 46s | 3 |
 | [ggml-org/Qwen3-Coder-30B-A3B-Instruct-Q8_0-GGUF](https://huggingface.co/ggml-org/Qwen3-Coder-30B-A3B-Instruct-Q8_0-GGUF) | Qwen | Great with Roo Code for coding-specific tasks, less reliable for tool calls/agents | MoE, Coding, Instruct | Might've worked better with OpenCode, but struggled with the complexity of Roo Code | 49.8s | 4 |
@@ -79,32 +91,33 @@ That's the joy of self hosting! No worries if I have model parameters sitting ar
 ## New model Vibe
 
 Now, here are the results:
-| Model | Family | Use Case | Features| Replacement Model | Latency | Vibe Score |
+
+| Model | Family | Use Case | Features | Replacement Model | Latency | Vibe Score |
 |-|-|-|-|-|-|-|
 | [unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF:BF16](https://huggingface.co/unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF) | Mistral | Agentic coding (Roo Code) | Vision, Reasoning, Code | GLM Air 4.5, Seed OSS or Qwen Coder | 1m 27s | 3 |
-| [unsloth/Devstral-2-123B-Instruct-2512-GGUF:Q5_K_XL](https://huggingface.co/unsloth/Devstral-2-123B-Instruct-2512-GGUF) | Mistral | Same as above, but will have to use a heavily quantized version | Vision, Reasoning, Code | GLM Air 4.5, Seed OSS or Qwen Coder | 10m 15s | 2 |
-| [unsloth/GLM-4.7-Flash-REAP-23B-A3B-GGUF:Q2_K_XL](https://huggingface.co/unsloth/GLM-4.7-Flash-REAP-23B-A3B-GGUF) | GLM | | MoE, Reasoning, Lightweight | GLM Air 4.5, Seed OSS or Qwen Coder | 40s | 5 |
-| [unsloth/GLM-4.7-Flash-GGUF:BF16](https://huggingface.co/unsloth/GLM-4.7-Flash-GGUF) | GLM | | MoE, Fast Inference | GLM Air 4.5, Seed OSS or Qwen Coder | 1m 41s | 4 |
-| [unsloth/GLM-4.7-REAP-218B-A32B-GGUF:BF16](https://huggingface.co/unsloth/GLM-4.7-REAP-218B-A32B-GGUF) | GLM | | MoE, Reasoning, Large Scale | GLM Air 4.5, Seed OSS or Qwen Coder | 3m 58s | 2 |
-| [bartowski/stepfun-ai_Step-3.5-Flash-GGUF:Q3_K_XL](https://huggingface.co/bartowski/stepfun-ai_Step-3.5-Flash-GGUF) | Stepfun | | MoE, Reasoning, Long Context | GLM Air 4.5, Seed OSS or Qwen Coder | 2m 47s | 2 |
-| [unsloth/Qwen3-Coder-Next-GGUF:Q6_K_XL](https://huggingface.co/unsloth/Qwen3-Coder-Next-GGUF) | Qwen | | MoE, Coding, Tool Use | GLM Air 4.5, Seed OSS or Qwen Coder | 1m 31s | 5 |
-| [unsloth/Nemotron-3-Nano-30B-A3B-GGUF:BF16](https://huggingface.co/unsloth/Nemotron-3-Nano-30B-A3B-GGUF) | NVIDIA | | MoE, Efficient, Function Calling | GLM Air 4.5, Seed OSS or Qwen Coder | 1m 22s | 3 |
-| [unsloth/Kimi-Dev-72B-GGUF:Q8_K_XL](https://huggingface.co/unsloth/Kimi-Dev-72B-GGUF) | Moonshot | | Coding, Long Context | | 11m 55s | 2 |
-| [bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF:Q8_0](https://huggingface.co/bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF) | Moonshot | | MoE, Linear Attention, Efficient | | 1m 25s | 5 |
-| [unsloth/MiniMax-M2.5-GGUF:Q2_K_XL](https://huggingface.co/unsloth/MiniMax-M2.5-GGUF) | MiniMax |  | MoE, Long Context | GLM Air 4.5, Seed OSS | 3m 24s | 3 |
+| [unsloth/Devstral-2-123B-Instruct-2512-GGUF:Q5_K_XL](https://huggingface.co/unsloth/Devstral-2-123B-Instruct-2512-GGUF) | Mistral | Agentic coding (heavily quantized) | Vision, Reasoning, Code | GLM Air 4.5, Seed OSS or Qwen Coder | 10m 15s | 2 |
+| [unsloth/GLM-4.7-Flash-REAP-23B-A3B-GGUF:BF16](https://huggingface.co/unsloth/GLM-4.7-Flash-REAP-23B-A3B-GGUF) | GLM | General purpose, quick queries | MoE, Reasoning, Lightweight | GLM Air 4.5, Seed OSS or Qwen Coder | 40s | 5 |
+| [unsloth/GLM-4.7-Flash-GGUF:BF16](https://huggingface.co/unsloth/GLM-4.7-Flash-GGUF) | GLM | General purpose | MoE, Fast Inference | GLM Air 4.5, Seed OSS or Qwen Coder | 1m 41s | 4 |
+| [unsloth/GLM-4.7-REAP-218B-A32B-GGUF:Q2_K_XL](https://huggingface.co/unsloth/GLM-4.7-REAP-218B-A32B-GGUF) | GLM | Complex reasoning tasks | MoE, Reasoning, Large Scale | GLM Air 4.5, Seed OSS or Qwen Coder | 3m 58s | 2 |
+| [bartowski/stepfun-ai_Step-3.5-Flash-GGUF:Q3_K_XL](https://huggingface.co/bartowski/stepfun-ai_Step-3.5-Flash-GGUF) | Stepfun | Long context tasks | MoE, Reasoning, Long Context | GLM Air 4.5, Seed OSS or Qwen Coder | 2m 47s | 2 |
+| [unsloth/Qwen3-Coder-Next-GGUF:Q6_K_XL](https://huggingface.co/unsloth/Qwen3-Coder-Next-GGUF) | Qwen | Coding tasks, tool use | MoE, Coding, Tool Use | GLM Air 4.5, Seed OSS or Qwen Coder | 1m 31s | 5 |
+| [unsloth/Nemotron-3-Nano-30B-A3B-GGUF:BF16](https://huggingface.co/unsloth/Nemotron-3-Nano-30B-A3B-GGUF) | NVIDIA | Function calling, general purpose | MoE, Efficient, Function Calling | GLM Air 4.5, Seed OSS or Qwen Coder | 1m 22s | 3 |
+| [unsloth/Kimi-Dev-72B-GGUF:Q8_K_XL](https://huggingface.co/unsloth/Kimi-Dev-72B-GGUF) | Moonshot | Coding, long context | Coding, Long Context | — | 11m 55s | 2 |
+| [bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF:Q8_0](https://huggingface.co/bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF) | Moonshot | General purpose, daily driver | MoE, Linear Attention, Efficient | — | 1m 25s | 5 |
+| [unsloth/MiniMax-M2.5-GGUF:Q2_K_XL](https://huggingface.co/unsloth/MiniMax-M2.5-GGUF) | MiniMax | Long context, research tasks | MoE, Long Context | GLM Air 4.5, Seed OSS | 3m 24s | 3 |
 
 A few models emerged as standouts. Kimi Linear proved to be a fantastic all-purpose model; it was fast, capable, and consistent across different tasks. Qwen Coder Next was incredible which is echoed by communities online; its coding capabilities and speed are exceptional and it has immediately become my go-to for development work. GLM 4.7 Flash also impressed with its speed and solid general performance, Vibing similar to GPT OSS 120b. On the other hand, MiniMax and GLM 4.7 REAP showed promise as all-rounders but their high latency made them unusuable in practice, likely due to their larger size. Devstral has some [known](https://huggingface.co/unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF/discussions/2) [issues](https://github.com/ggml-org/llama.cpp/issues/19647) with its chat template and proved inconsistent.
 
-Moving forward, Kimi Linear, Qwen Coder Next and GLM Flash REAP are going to be my daily drivers moving forward, replacing Qwen Coder A3B, Seed OSS and GLM Air REAP.
-
 ## Conclusion
 
-This round of testing has significantly reshaped my model lineup. The standout performers—Kimi Linear for general tasks and Qwen Coder Next for coding—demonstrate that open source models are rapidly closing the gap with proprietary alternatives. I was particularly surprised by how well highly quantized versions of larger models performed; MiniMax and GLM 4.7 Flash both proved that aggressive quantization doesn't necessarily mean unacceptable quality loss. This insight alone will change how I approach model selection moving forward.
+This round of testing completely revamped my model lineup. Kimi Linear has become my daily driver for general tasks, and Qwen Coder Next is hands-down my new coding model. It's wild how good these open source models are getting; they're approaching the quality of the big proprietary ones.
 
-The pace of innovation in open source AI is staggering. Research labs with modest resources are consistently releasing models that challenge—and sometimes surpass—the offerings from billion-dollar companies. While the industry buzzes with valuation bubbles and AGI promises, the reality on the ground is that small teams of dedicated researchers are democratizing access to powerful AI. Self-hosting isn't just about privacy or avoiding vendor lock-in anymore; it's becoming a genuinely competitive alternative.
+The biggest surprise? Heavy quantization actually works. I used to avoid Q2_K and Q3_K quants, thinking they'd be garbage, but MiniMax and GLM 4.7 REAP at Q2_K_XL proved me wrong. They're very high quality, but noticeably slow. I can imagine leveraging them for background, research-focused tasks which is something [I have planned](https://github.com/blake-hamm/bhamm-lab/issues/87).
+
+The pace of open source AI is insane right now. You have these small research teams with limited hardware dropping models that compete with (and sometimes beat) what billion-dollar companies are putting out. Meanwhile the industry is frothing at the mouth about AGI and valuations, but the real story is that a handful of dedicated researchers are just... giving away powerful AI for free. Self-hosting used to be about privacy or avoiding vendor lock-in, but now? It's becoming a genuinely viable alternative to paying for APIs.
 
 ## The Road Ahead
 
-My current evaluation process is unsustainable. I'm manually downloading models, usually testing one or two quantization levels, then spinning up different llama.cpp container images to compare Vulkan versus ROCm backends. It's tedious, time-consuming, and frankly, a bottleneck to actually using these models productively.
+My current process is a mess. I'm manually downloading models, testing maybe one or two quants if I'm feeling ambitious and patient enough, juggling different llama.cpp containers to compare Vulkan vs ROCm backends, checking Arize Phoenix for latency and giving an arbitrary 'vibe check'. It's tedious and gets in the way of actually *using* these models.
 
-Moving forward, I need a systematic way to test different quantization strategies, container images, and llama.cpp CLI arguments to find the optimal balance of quality and speed for each model family. Robust evals will provide more meaningful, data-driven feedback in addition to real-world use. Building this evaluation pipeline is now my top priority—because there's no better time to be self-hosting AI than right now.
+I need to automate this properly; I want to systematically test different quantization levels, container images, and llama.cpp CLI args to figure out the sweet spot of quality vs speed for each model. Real benchmarks, not just vibes. [Checkout my next project `beyond-vibes` here.](https://github.com/blake-hamm/beyond-vibes)
