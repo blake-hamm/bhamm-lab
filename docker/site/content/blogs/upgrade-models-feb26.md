@@ -89,7 +89,7 @@ Now, here are the results:
 | [bartowski/stepfun-ai_Step-3.5-Flash-GGUF:Q3_K_XL](https://huggingface.co/bartowski/stepfun-ai_Step-3.5-Flash-GGUF) | Stepfun | | MoE, Reasoning, Long Context | GLM Air 4.5, Seed OSS or Qwen Coder | 2m 47s | 2 |
 | [unsloth/Qwen3-Coder-Next-GGUF:Q6_K_XL](https://huggingface.co/unsloth/Qwen3-Coder-Next-GGUF) | Qwen | | MoE, Coding, Tool Use | GLM Air 4.5, Seed OSS or Qwen Coder | 1m 31s | 5 |
 | [unsloth/Nemotron-3-Nano-30B-A3B-GGUF:BF16](https://huggingface.co/unsloth/Nemotron-3-Nano-30B-A3B-GGUF) | NVIDIA | | MoE, Efficient, Function Calling | LM Air 4.5, Seed OSS or Qwen Coder | 1m 22s | 3 |
-| [unsloth/Kimi-Dev-72B-GGUF:Q8_K_XL](https://huggingface.co/unsloth/Kimi-Dev-72B-GGUF) | Moonshot | | Coding, Long Context | | | |
+| [unsloth/Kimi-Dev-72B-GGUF:Q8_K_XL](https://huggingface.co/unsloth/Kimi-Dev-72B-GGUF) | Moonshot | | Coding, Long Context | | 11m 55s | 2 |
 | [bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF:Q8_0](https://huggingface.co/bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF) | Moonshot | | MoE, Linear Attention, Efficient | | 1m 25s | 5 |
 | [unsloth/MiniMax-M2.5-GGUF:Q2_K_XL](https://huggingface.co/unsloth/MiniMax-M2.5-GGUF) | MiniMax |  | MoE, Long Context | GLM Air 4.5, Seed OSS | 3m 24s | 3 |
 
