@@ -20,7 +20,7 @@ In this blog, I test the latest, open source models that fit on my [homelab](htt
 
 ### Homelab Review
 
-First, let me explain you how I run a homelab that supports AI workloads; you can find detailed info [here](https://docs.bhamm-lab.com/ai/). Basically, I have two AMD AI Max+ 395 (strix halo) and one AMD AI R9700.
+First, let me explain how I run a homelab that supports AI workloads; you can find detailed info [here](https://docs.bhamm-lab.com/ai/). Basically, I have two AMD AI Max+ 395 (strix halo) and one AMD AI R9700.
 
 The AI Max+ provides 128GB of unified memory (allocatable as VRAM) so I can run two decent sized models (~30b-120b models). I have an [open ticket](https://github.com/blake-hamm/bhamm-lab/issues/82) to enable [llama.cpp rpc](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md) which will support larger models, but it's still a WIP... The R9700 is another solid system with 32GB of VRAM and I use it for smaller, embedding models. So, as of now, I have capacity to run three models at a time.
 
