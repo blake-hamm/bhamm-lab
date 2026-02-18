@@ -26,7 +26,7 @@ The AI Max+ provides 128GB of unified memory (allocatable as VRAM) so I can run 
 
 The models I test are dictated by my hardware. I've made an effort to avoid Nvidia because I believe in the underdog (and suffering apparently). Given these constraints, what am I actually trying to accomplish with local AI?
 
-{{< figure src="/strix-halo-server.jpg" caption="Dual Framework Mainboards (AMD AI Max+ 395 - Strix Halo) in a 2u server rack case."  width="100%" >}}
+{{< figure src="/strix-halo-server.jpg" caption="Dual Framework Mainboards (AMD AI Max+ 395 - Strix Halo) in a 2u server rack case. 256GB of unified memory; LFG!"  width="100%" >}}
 
 
 ### Why the upgrade?
