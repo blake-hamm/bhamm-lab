@@ -1,6 +1,6 @@
 ---
 title: "Self-hosted AI Model Upgrade"
-tags: ["llm", "ai", "homelab", "amd", "self-hosting", "rocm", "vulkan", "qwen", "kimi", "glm", "minimax", "open-source"]
+tags: ["llm", "ai", "homelab", "self-hosted", "open-source", "amd"]
 categories: ["ai"]
 date: 2026-02-17
 description: "Testing the latest open-source LLMs on AMD hardware is a vibe."
@@ -72,7 +72,7 @@ Also, I collected a one-time 'latency' metric. This is not a scientific average 
 >
 > Write unit tests for this project. Use pytest.
 
-I chose this prompt because I found LLMs do a great job writing unit tests. Also, this 'project' is one simple python script that cleans up orphaned [ceph](https://ceph.io/en/) data. Furthermore, it's part of a monorepo and because of how Roo sends prompts, the context starts out at 10k+, stressing the models a bit.
+I chose this prompt because I found LLMs do a great job writing unit tests. This 'project' is one simple python script and I intentionally left it vague. Also, this file is part of a monorepo and because of how Roo sends prompts, the context starts out at 10k+, stressing the models a bit.
 
 So, let's dive right into my review of the current models I have available:
 
@@ -111,7 +111,7 @@ That's the joy of self hosting! No worries if I have model parameters sitting ar
 | [bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF:Q8_0](https://huggingface.co/bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF) | Moonshot | General purpose, daily driver | MoE, Linear Attention, Efficient | 1m 25s | 5 |
 | [unsloth/MiniMax-M2.5-GGUF:Q2_K_XL](https://huggingface.co/unsloth/MiniMax-M2.5-GGUF) | MiniMax | Long context, research tasks | MoE, Long Context | 3m 24s | 3 |
 
-A few models emerged as standouts. Kimi Linear proved to be a fantastic all-purpose model; it was fast, capable, and consistent across different tasks. Qwen Coder Next was incredible which is echoed by communities online; its coding capabilities and speed are exceptional and it has immediately become my go-to for AI-Assisted Development. GLM 4.7 Flash REAP also impressed with its speed and solid general performance, vibing similar to GPT OSS 120b, but faster. Nemotron also caught my attention with its impressive speed; I'm curious to see how it performs in more targeted agentic workflows. On the other hand, MiniMax and GLM 4.7 REAP were very high quality all-rounders but their high latency made them unusable in practice, likely due to their larger size. Devstral has some [known](https://huggingface.co/unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF/discussions/2) [issues](https://github.com/ggml-org/llama.cpp/issues/19647) with its chat template and proved inconsistent.
+A few models emerged as standouts. Kimi Linear proved to be a fantastic all-purpose model; it was fast, capable, and consistent across different tasks. Qwen Coder Next was incredible which is echoed by communities online; its coding capabilities and speed are exceptional and it has immediately become my go-to for AI-assisted development. GLM 4.7 Flash REAP also impressed with its speed and solid general performance, vibing similar to GPT OSS 120b, but faster. Nemotron also caught my attention with its impressive speed; I'm curious to see how it performs in more targeted agentic workflows. On the other hand, MiniMax and GLM 4.7 REAP were high quality all-rounders but their latency made them unusable in practice, likely due to their larger size. Unfortunately, Devstral has some [known](https://huggingface.co/unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF/discussions/2) [issues](https://github.com/ggml-org/llama.cpp/issues/19647) with its chat template and proved unusable.
 
 ### Conclusion
 
