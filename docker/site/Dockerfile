@@ -16,19 +16,10 @@ RUN hugo --minify
 #####################################################################
 #                            Final Stage                            #
 #####################################################################
-FROM docker.io/caddy:2-alpine
-
-# Create non-root user for running caddy
-RUN adduser -D -H -s /sbin/nologin -u 1000 caddyuser
+FROM cgr.dev/chainguard/caddy:latest
 
 # Copy the generated files
 COPY --from=builder /src/public /usr/share/caddy
-
-# Set proper ownership for the non-root user
-RUN chown -R caddyuser:caddyuser /usr/share/caddy
-
-# Use non-root user
-USER caddyuser
 
 # Caddy defaults to port 80, but non-root users can't bind to it
 # The caddy:alpine image is configured to handle this automatically
