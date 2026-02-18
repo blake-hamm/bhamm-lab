@@ -119,11 +119,11 @@ The biggest surprise? Heavy quantization actually works. I used to avoid Q2_K an
 
 The pace of open source AI is insane right now. You have these small research teams with limited hardware dropping models that compete with (and sometimes beat) what billion-dollar companies are putting out. Meanwhile the industry is frothing at the mouth about AGI and valuations, but the real story is that a handful of dedicated researchers are just... giving away powerful AI for free!
 
-While Wall Street chases the next AI unicorn and snake oil salesmen promise AGI is just around the corner, these labs are actually democratizing access. Self-hosting used to be about privacy or avoiding vendor lock-in, but now? It's becoming a real alternative to feeding the cloud monopoly. My hope is that soon, anyone can afford a little box under their desk running models that rival the APIs. No subscriptions, no rate limits, no data harvesting. Just you and your AI.
+While [Dario keeps promising SWEs will be obsolete in 6 months](https://www.reddit.com/r/singularity/comments/1j8q3qi/anthropic_ceo_dario_amodei_in_the_next_3_to_6/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button) and my dad reads the WSJ convinced there's no bubble, these labs are actually democratizing access. Self-hosting used to be about privacy or avoiding vendor lock-in, but now? It's becoming a real alternative to feeding the cloud monopoly. My dream is that soon, anyone can afford a little box under their desk running models that rival the APIs. No subscriptions, no rate limits, no data harvesting. Just you and your AI.
 
 ### What's next
 
-Regardless of my strong opinons on democratizing AI, my process for evaluating models is a mess. I'm manually downloading models, testing maybe one or two quants if I'm feeling ambitious and patient, juggling different llama.cpp containers to compare Vulkan vs ROCm backends, checking Arize Phoenix for latency and giving an arbitrary 'vibe check'. It's tedious and gets in the way of actually *using* these models.
+Regardless of my strong opinons on local AI, my process for evaluating models is a mess. I'm manually downloading models, testing one or two quants if I'm feeling ambitious and patient enough, juggling different llama.cpp containers to compare Vulkan vs ROCm backends, checking Arize Phoenix for latency and giving an arbitrary 'vibe check'. It's tedious and gets in the way of actually *using* these models.
 
 I'd love to test [all the different versions of kimi linear](https://huggingface.co/models?library=gguf&sort=downloads&search=kimi+linear), but it would take me another 3 days and would still be just a vibe (not the good kind).
 
