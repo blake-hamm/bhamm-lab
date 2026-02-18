@@ -26,7 +26,7 @@ While I'm no AI researcher, as an AI/ML engineer and self-hoster, I need to unde
 
 I run a homelab that supports AI workloads; you can find more info [here](https://docs.bhamm-lab.com/ai/). Basically, I have two AMD AI Max+ 395 (strix halo) and one AMD AI R9700.
 
-The AI Max provides 128gb of vram so I can run two decent sized models (~30b-120b models). I have an [open ticket](https://github.com/blake-hamm/bhamm-lab/issues/82) to enable [llama.cpp rpc](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md) so that I can run larger models, but it's still a WIP... The R9700 is another solid system with 32gb of vram and I use it for smaller, embedding models. So, as of now, I have capacity to run three models at a time.
+The AI Max provides 128GB of unified memory (allocatable as VRAM) so I can run two decent sized models (~30b-120b models). I have an [open ticket](https://github.com/blake-hamm/bhamm-lab/issues/82) to enable [llama.cpp rpc](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md) so that I can run larger models, but it's still a WIP... The R9700 is another solid system with 32GB of VRAM and I use it for smaller, embedding models. So, as of now, I have capacity to run three models at a time.
 
 The models I test are dictated by my hardware. I've made an effort to avoid Nvidia because I believe in the underdog (and suffering apparently). Given these constraints, what am I actually trying to accomplish with local AI?
 
@@ -42,7 +42,7 @@ I used to dismiss "this is the worst AI will ever be" as marketing fluff for AGI
 
 #### Ultimate goal
 
-Well, I have faith that eventually, I will find an open source model that I can run locally and consistently use with Roo Code and OpenCode. I started using Open Router for my personal projects and found that Kimi K2.5 fits that bill; I would consider this the best open source model for my use case and almost on par with SOTA closed-source models (while being a fraction of the cost). Unfortunately, I can't fit this model on 128gb of vram...
+Well, I have faith that eventually, I will find an open source model that I can run locally and consistently use with Roo Code and OpenCode. I started using Open Router for my personal projects and found that Kimi K2.5 fits that bill; I would consider this the best open source model for my use case and almost on par with SOTA closed-source models (while being a fraction of the cost). Unfortunately, I can't fit this model on 128GB of VRAM...
 
 In addition to replacing paid models, I want to see the benefits of the latest model architecture research in latency. Through self-hosting AI models, I learned how MoE architectures, attention mechanisms and quantization techniques impact performance. GPT-OSS 120b drove this home; its speed and capability made these architectural trade-offs tangible. Testing new models helps me understand how different LLM families and architectures affect resource usage and latency.
 
@@ -57,15 +57,12 @@ Unfortunately, I don't have a formal eval process comparing models so the review
 
 First off, let's review the fully arbitrary 'Vibe Score' which is my personal account and feeling towards the model. Basically, I will send the same prompt in Roo Code and OpenWebUI and record the latency along with a 1-5 Vibe Score on quality. I'll base it off of how well it solves the problem, any failures it might encounter and overall how I like the response. To put it simply, a 5 means the model has either incredibly high quality results OR it runs quick and has sufficient results, but may need some direction and hand holding.
 
-Also, I collected a one time 'latency' metric. This is not a scientific average or anything of that nature. It is simply a record of the latency for the first response in my test query in Roo Code. This includes the coldstart time when scaling from zero which is highly correlated with model size. Here is the prompt provided in Roo Code regarding [my homelab project](https://github.com/blake-hamm/bhamm-lab).
+Also, I collected a one time 'latency' metric. This is not a scientific average or anything of that nature. It is simply a record of the latency for the first response in my test query in Roo Code. This includes the coldstart time when scaling from zero which is highly correlated with model size. Here is the prompt provided in Roo Code regarding [my homelab project](https://github.com/blake-hamm/bhamm-lab):
 
-```md
-docker/ceph-cleanup/README.md:1-3
-# Ceph cleanup
-This python script will cleanup ceph orphaned data in the kubernetes pool. AKA: it deletes data that is not in the prod kubernetes cluster as pv or volume snapshots
-
-Write unit tests for this project. Use pytest.
-```
+> docker/ceph-cleanup/README.md:1-3
+> # Ceph cleanup
+> This python script will cleanup ceph orphaned data in the kubernetes pool. AKA: it deletes data that is not in the prod kubernetes cluster as pv or volume snapshots
+> Write unit tests for this project. Use pytest.
 
 So, let's dive right into my review of the current models I have available:
 
@@ -104,11 +101,11 @@ That's the joy of self hosting! No worries if I have model parameters sitting ar
 | [bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF:Q8_0](https://huggingface.co/bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF) | Moonshot | General purpose, daily driver | MoE, Linear Attention, Efficient | 1m 25s | 5 |
 | [unsloth/MiniMax-M2.5-GGUF:Q2_K_XL](https://huggingface.co/unsloth/MiniMax-M2.5-GGUF) | MiniMax | Long context, research tasks | MoE, Long Context | 3m 24s | 3 |
 
-A few models emerged as standouts. Kimi Linear proved to be a fantastic all-purpose model; it was fast, capable, and consistent across different tasks. Qwen Coder Next was incredible which is echoed by communities online; its coding capabilities and speed are exceptional and it has immediately become my go-to for AI-Assisted Development. GLM 4.7 Flash also impressed with its speed and solid general performance, vibing similar to GPT OSS 120b, but faster. On the other hand, MiniMax and GLM 4.7 REAP showed promise as all-rounders but their high latency made them unusuable in practice, likely due to their larger size. Devstral has some [known](https://huggingface.co/unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF/discussions/2) [issues](https://github.com/ggml-org/llama.cpp/issues/19647) with its chat template and proved inconsistent.
+A few models emerged as standouts. Kimi Linear proved to be a fantastic all-purpose model; it was fast, capable, and consistent across different tasks. Qwen Coder Next was incredible which is echoed by communities online; its coding capabilities and speed are exceptional and it has immediately become my go-to for AI-Assisted Development. GLM 4.7 Flash also impressed with its speed and solid general performance, vibing similar to GPT OSS 120b, but faster. Nemotron also caught my attention with its impressive speed; I'm curious to see how it performs in more targeted agentic workflows. On the other hand, MiniMax and GLM 4.7 REAP were very high quality all-rounders but their high latency made them unusable in practice, likely due to their larger size. Devstral has some [known](https://huggingface.co/unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF/discussions/2) [issues](https://github.com/ggml-org/llama.cpp/issues/19647) with its chat template and proved inconsistent.
 
 ### Conclusion
 
-This round of testing completely transformed my model lineup. Kimi Linear has become my daily driver for general tasks and Qwen Coder Next is hands-down my new coding model. It's wild how good these open source models are getting; they're approaching the quality of the big proprietary ones.
+This round of testing completely transformed my model lineup, retiring my previous go-tos: Qwen Coder Instruct, Seed OSS and GLM Air in favor of these newer drops. Kimi Linear has become my daily driver for general tasks and Qwen Coder Next is hands-down my new coding model. It's wild how good these open source models are getting; they're approaching the quality of the big proprietary ones.
 
 The biggest surprise? Heavy quantization actually works. I used to avoid Q2_K and Q3_K quants, thinking they'd be garbage, but MiniMax and GLM 4.7 REAP at Q2_K_XL proved me wrong. They're very high quality, but noticeably slow. I can imagine leveraging them for background, research-focused tasks which is something [I have planned](https://github.com/blake-hamm/bhamm-lab/issues/87).
 
