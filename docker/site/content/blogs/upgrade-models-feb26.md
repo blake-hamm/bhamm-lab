@@ -18,6 +18,17 @@ In this blog, I test the latest, open source models that fit on my [homelab](htt
 - **What's Next**: [`beyond-vibes`](https://github.com/blake-hamm/beyond-vibes) — AI evaluation pipeline for llama.cpp models
 
 
+### Homelab Review
+
+I run a homelab that supports AI workloads; you can find more info [here](https://docs.bhamm-lab.com/ai/). Basically, I have two AMD AI Max+ 395 (strix halo) and one AMD AI R9700.
+
+The AI Max+ provides 128GB of unified memory (allocatable as VRAM) so I can run two decent sized models (~30b-120b models). I have an [open ticket](https://github.com/blake-hamm/bhamm-lab/issues/82) to enable [llama.cpp rpc](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md) so that I can run larger models, but it's still a WIP... The R9700 is another solid system with 32GB of VRAM and I use it for smaller, embedding models. So, as of now, I have capacity to run three models at a time.
+
+The models I test are dictated by my hardware. I've made an effort to avoid Nvidia because I believe in the underdog (and suffering apparently). Given these constraints, what am I actually trying to accomplish with local AI?
+
+{{< figure src="/strix-halo-server.jpg" caption="Dual Framework Mainboards (AMD AI Max+ 395 - Strix Halo) in a 2u server rack case."  width="100%" >}}
+
+
 ### Why the upgrade?
 
 Open source research on foundational models is rapidly evolving, with AI labs like [DeepSeek](https://www.deepseek.com/en/), [MiniMax](https://www.minimax.io/), [Z.AI](https://www.zhipuai.cn/en) and [Moonshot AI](https://www.moonshot.ai/) dropping some heat right before Chinese New Year. I stay up to date on these developments through communities like `LocalLLama` and `bycloud` on Discord and Reddit.
@@ -25,28 +36,16 @@ Open source research on foundational models is rapidly evolving, with AI labs li
 While I'm no AI researcher, as an AI/ML engineer and self-hoster, I need to understand model architectures at a high level, specifically their impact on quality, latency, and context length. This matters both for my homelab and production AI applications.
 
 
-#### Homelab Review
+### Use Cases
 
-{{< figure src="/strix-halo-server.jpg" caption="Dual Framework Mainboards (AMD AI Max+ 395 - Strix Halo) in a 2u server rack case."  width="100%" >}}
-
-
-I run a homelab that supports AI workloads; you can find more info [here](https://docs.bhamm-lab.com/ai/). Basically, I have two AMD AI Max+ 395 (strix halo) and one AMD AI R9700.
-
-The AI Max provides 128GB of unified memory (allocatable as VRAM) so I can run two decent sized models (~30b-120b models). I have an [open ticket](https://github.com/blake-hamm/bhamm-lab/issues/82) to enable [llama.cpp rpc](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md) so that I can run larger models, but it's still a WIP... The R9700 is another solid system with 32GB of VRAM and I use it for smaller, embedding models. So, as of now, I have capacity to run three models at a time.
-
-The models I test are dictated by my hardware. I've made an effort to avoid Nvidia because I believe in the underdog (and suffering apparently). Given these constraints, what am I actually trying to accomplish with local AI?
-
-
-#### Use Cases
-
-In my day-to-day as an AI/ML Engineer, I use the latest models from OpenAI, Anthropic, AWS and Google. These proprietary models are state of the art (SOTA), no cap. They can service almost any use case given the right prompt and context.
+In my day-to-day, I use the latest models from OpenAI, Anthropic, AWS and Google. These proprietary models are state of the art (SOTA), no cap. They can service almost any use case given the right prompt and context.
 
 In contrast, even with decent hardware and incredible research published, the use cases for running local models have their limitations... At the moment, I have tested local models in [Open WebUI](https://openwebui.com/), [Roo Code](https://roocode.com/) and [OpenCode](https://opencode.ai/docs/). I've had success with Open WebUI and would recommend it for local models. Roo Code and OpenCode are a bit picky and depending on the codebase and task, local models struggle. Specifically, when context exceeds 20k, these models run at a snail's pace on my AMD hardware. I believe this can be solved with better context management and prompting, but I didn't make much progress with my first JavaScript project and VSCode plugin - [camber](https://github.com/blake-hamm/camber)...
 
 I used to dismiss "this is the worst AI will ever be" as marketing fluff for AGI. But with local models, that cliché has never felt more accurate. So given these limitations and my daily dependence on cloud APIs, you might wonder why I bother with self-hosted AI at all.
 
 
-#### Ultimate goal
+### Ultimate goal
 
 Well, I have faith that eventually, I will find an open source model that I can run locally and consistently use with Roo Code and OpenCode. I started using Open Router for my personal projects and found that Kimi K2.5 fits that bill; I would consider this the best open source model for my use case and almost on par with SOTA closed-source models (while being a fraction of the cost). Unfortunately, I can't fit this model on 128GB of VRAM...
 
@@ -117,7 +116,7 @@ The biggest surprise? Heavy quantization actually works. I used to avoid Q2_K an
 
 The pace of open source AI is insane right now. You have these small research teams with limited hardware dropping models that compete with (and sometimes beat) what billion-dollar companies are putting out. Meanwhile the industry is frothing at the mouth about AGI and valuations, but the real story is that a handful of dedicated researchers are just... giving away powerful AI for free! Self-hosting used to be about privacy or avoiding vendor lock-in, but now? It's legit competition for paid APIs which we love to see.
 
-### The Road Ahead
+### What's next
 
 My current process is a mess. I'm manually downloading models, testing maybe one or two quants if I'm feeling ambitious and patient enough, juggling different llama.cpp containers to compare Vulkan vs ROCm backends, checking Arize Phoenix for latency and giving an arbitrary 'vibe check'. It's tedious and gets in the way of actually *using* these models.
 
