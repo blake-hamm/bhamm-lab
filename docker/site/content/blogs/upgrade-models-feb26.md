@@ -7,7 +7,7 @@ description: "Testing the latest open-source LLMs on AMD hardware is a vibe."
 author: ["Blake Hamm"]
 ---
 
-In this blog, I test the latest, open source models that fit on my [homelab](https://docs.bhamm-lab.com/). I record the latency and provide a 'Vibe Score' to see if they replace existing models.
+In this blog, I test the latest open source models that fit on my [homelab](https://docs.bhamm-lab.com/). I record the latency and provide a 'Vibe Score' to see if they replace existing models.
 
 ### TL;DR
 
@@ -20,7 +20,7 @@ In this blog, I test the latest, open source models that fit on my [homelab](htt
 
 ### Homelab Review
 
-First, let me explain how I run a homelab that supports AI workloads; you can find detailed info [here](https://docs.bhamm-lab.com/ai/). Basically, I have two AMD AI Max+ 395 (strix halo) and one AMD AI R9700.
+First, let me explain how I run a homelab that supports AI workloads; you can find more details [here](https://docs.bhamm-lab.com/ai/). Basically, I have two AMD AI Max+ 395 (strix halo) and one AMD AI R9700.
 
 The AI Max+ provides 128GB of unified memory (allocatable as VRAM) so I can run two decent sized models (~30b-120b models). I have an [open ticket](https://github.com/blake-hamm/bhamm-lab/issues/82) to enable [llama.cpp rpc](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md) which will support larger models, but it's still a WIP... The R9700 is another solid system with 32GB of VRAM and I use it for smaller, embedding models. So, as of now, I have capacity to run three models at a time.
 
@@ -40,7 +40,7 @@ While I'm no AI researcher, as an AI/ML engineer and self-hoster, I need to unde
 
 In my day-to-day, I use the latest models from OpenAI, Anthropic, AWS and Google. These proprietary models are state of the art (SOTA), no cap. They can service almost any use case, given the right prompt and context.
 
-In contrast, even with decent hardware and incredible research published, the use cases for running local models have their limitations... At the moment, I have tested local models in [Open WebUI](https://openwebui.com/), [Roo Code](https://roocode.com/) and [OpenCode](https://opencode.ai/docs/). I've had success with Open WebUI and would recommend it for local models. Roo Code and OpenCode are a more tricky and depending on the codebase and task, local models will struggle. Specifically, when context exceeds 20k, these models run at a snail's pace on my AMD hardware. I believe this can be solved with better context management and prompting, but I didn't make much progress with my first JavaScript project and VSCode plugin - [camber](https://github.com/blake-hamm/camber)...
+In contrast, even with decent hardware and incredible research published, the use cases for running local models have their limitations... At the moment, I have tested local models in [Open WebUI](https://openwebui.com/), [Roo Code](https://roocode.com/) and [OpenCode](https://opencode.ai/docs/). I've had success with Open WebUI and would recommend it for local models. Roo Code and OpenCode are trickier and depending on the codebase and task, local models will struggle. Specifically, when context exceeds 20k, these models run at a snail's pace on my AMD hardware. I believe this can be solved with better context management and prompting, but I didn't make much progress with my first JavaScript project and VSCode plugin - [camber](https://github.com/blake-hamm/camber)...
 
 I used to dismiss "this is the worst AI will ever be" as marketing fluff for AGI. But with local models, that cliché has never felt more accurate. So given these limitations and my daily dependence on cloud APIs, you might wonder why I bother with self-hosted AI at all.
 
@@ -60,9 +60,9 @@ I'm hopeful that this new round of open source models will be more intelligent a
 
 Unfortunately, I don't have a formal eval process comparing models so the review is more of a 'vibe'. Also, I have monitoring and tracing configured on my AI gateway ([kube-ai-stack](https://github.com/blake-hamm/kube-ai-stack)), so I will be collecting data for a post-deployment evaluation.
 
-First off, let's review the fully arbitrary 'Vibe Score' which is my personal account and feeling towards the model. Basically, I will send the same prompt in Roo Code and OpenWebUI and record the latency along with a 1-5 Vibe Score on quality. I'll base it off of how well it solves the problem, any failures it might encounter and overall how I like the response. To put it simply, a 5 means the model has either incredibly high quality results OR it runs quick and has sufficient results, but may need some direction and hand holding.
+First off, let's review the fully arbitrary 'Vibe Score' which is my personal feeling towards the model. Basically, I will send the same prompt in Roo Code and OpenWebUI and record the latency along with a 1-5 Vibe Score on quality. I'll base it off of how well it solves the problem, any failures it might encounter and overall how I like the response. To put it simply, a 5 means the model has either incredibly high quality results OR it runs quick and has sufficient results, but may need some direction and hand holding.
 
-Also, I collected a one time 'latency' metric. This is not a scientific average or anything of that nature. It is simply a record of the latency for the first response in my test query in Roo Code. This includes the coldstart time when scaling from zero which is highly correlated with model size. Here is the prompt provided in Roo Code for [my homelab project](https://github.com/blake-hamm/bhamm-lab):
+Also, I collected a one-time 'latency' metric. This is not a scientific average or anything of that nature. It is simply a record of the latency for the first response in my test query in Roo Code. This includes the coldstart time when scaling from zero which is highly correlated with model size. Here is the prompt provided in Roo Code for [my homelab project](https://github.com/blake-hamm/bhamm-lab):
 
 > docker/ceph-cleanup/README.md:1-3
 > ##### Ceph cleanup
@@ -123,7 +123,7 @@ While [Dario keeps promising SWEs will be obsolete in 6 months](https://www.redd
 
 ### What's next
 
-Regardless of my strong opinons on local AI, my process for evaluating models is a mess. I'm manually downloading models, testing one or two quants if I'm feeling ambitious and patient enough, juggling different llama.cpp containers to compare Vulkan vs ROCm backends, checking Arize Phoenix for latency and giving an arbitrary 'vibe check'. It's tedious and gets in the way of actually *using* these models.
+Regardless of my strong opinions on local AI, my process for evaluating models is a mess. I'm manually downloading models, testing one or two quants if I'm feeling ambitious and patient enough, juggling different llama.cpp containers to compare Vulkan vs ROCm backends, checking Arize Phoenix for latency and giving an arbitrary 'vibe check'. It's tedious and gets in the way of actually *using* these models.
 
 I'd love to test [all the different versions of kimi linear](https://huggingface.co/models?library=gguf&sort=downloads&search=kimi+linear), but it would take me another 3 days and would still be just a vibe (not the good kind).
 
