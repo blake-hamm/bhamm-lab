@@ -1,7 +1,7 @@
 #####################################################################
 #                            Build Stage                            #
 #####################################################################
-FROM docker.io/hugomods/hugo:nightly AS builder
+FROM docker.io/hugomods/hugo:0.145.0-exts AS builder
 
 WORKDIR /src
 COPY . .
@@ -16,16 +16,25 @@ RUN hugo --minify
 #####################################################################
 #                            Final Stage                            #
 #####################################################################
-FROM cgr.dev/chainguard/static:latest
+FROM docker.io/busybox:1.37.0
+
+# Create non-root user
+RUN adduser -D -H -s /sbin/nologin -u 1000 staticuser
 
 # Copy the generated files
-COPY --from=builder /src/public /usr/share/caddy
+COPY --from=builder /src/public /var/www
 
-# Caddy defaults to port 80, but non-root users can't bind to it
-# The caddy:alpine image is configured to handle this automatically
-# or you can override with environment variable if needed
-EXPOSE 80
+# Set proper ownership
+RUN chown -R staticuser:staticuser /var/www
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD ["wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+# Switch to non-root user
+USER staticuser
+
+# Expose port 8080 (non-root can't bind to 80)
+EXPOSE 8080
+
+# Start busybox httpd
+# -f: run in foreground
+# -p: port to listen on
+# -h: home directory for files
+ENTRYPOINT ["httpd", "-f", "-p", "8080", "-h", "/var/www"]
