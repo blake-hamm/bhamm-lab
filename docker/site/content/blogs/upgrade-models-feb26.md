@@ -1,8 +1,10 @@
 ---
-title: "Self-hosted LLM Upgrade"
+title: "Self-hosted AI Model Upgrade"
 tags: ["llm", "ai", "homelab", "amd", "self-hosting", "rocm", "vulkan", "qwen", "kimi", "glm", "minimax", "open-source"]
 categories: ["ai"]
+date: 2026-02-17
 description: "Testing the latest open-source LLMs on AMD hardware is a vibe."
+author: ["Blake Hamm"]
 ---
 
 
