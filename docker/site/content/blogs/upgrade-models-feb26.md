@@ -7,6 +7,7 @@ description: "Testing the latest open-source LLMs on AMD hardware is a vibe."
 author: ["Blake Hamm"]
 ---
 
+In this blog, I test the latest, open source models that fit on my [homelab](https://docs.bhamm-lab.com/). I record the latency and provide a 'Vibe Score' to see if any replace my existing models. Stay tuned...
 
 ### TL;DR
 
@@ -25,6 +26,9 @@ While I'm no AI researcher, as an AI/ML engineer and self-hoster, I need to unde
 
 
 #### Homelab Review
+
+{{< figure src="/strix-halo-server.jpg" caption="Dual Framework Mainboards (AMD AI Max+ 395 - Strix Halo) in a 2u server rack case."  width="100%" >}}
+
 
 I run a homelab that supports AI workloads; you can find more info [here](https://docs.bhamm-lab.com/ai/). Basically, I have two AMD AI Max+ 395 (strix halo) and one AMD AI R9700.
 
@@ -59,7 +63,7 @@ Unfortunately, I don't have a formal eval process comparing models so the review
 
 First off, let's review the fully arbitrary 'Vibe Score' which is my personal account and feeling towards the model. Basically, I will send the same prompt in Roo Code and OpenWebUI and record the latency along with a 1-5 Vibe Score on quality. I'll base it off of how well it solves the problem, any failures it might encounter and overall how I like the response. To put it simply, a 5 means the model has either incredibly high quality results OR it runs quick and has sufficient results, but may need some direction and hand holding.
 
-Also, I collected a one time 'latency' metric. This is not a scientific average or anything of that nature. It is simply a record of the latency for the first response in my test query in Roo Code. This includes the coldstart time when scaling from zero which is highly correlated with model size. Here is the prompt provided in Roo Code regarding [my homelab project](https://github.com/blake-hamm/bhamm-lab):
+Also, I collected a one time 'latency' metric. This is not a scientific average or anything of that nature. It is simply a record of the latency for the first response in my test query in Roo Code. This includes the coldstart time when scaling from zero which is highly correlated with model size. Here is the prompt provided in Roo Code for [my homelab project](https://github.com/blake-hamm/bhamm-lab):
 
 > docker/ceph-cleanup/README.md:1-3
 > ##### Ceph cleanup
