@@ -7,7 +7,7 @@ description: "Testing the latest open-source LLMs on AMD hardware is a vibe."
 author: ["Blake Hamm"]
 ---
 
-In this blog, I test the latest, open source models that fit on my [homelab](https://docs.bhamm-lab.com/). I record the latency and provide a 'Vibe Score' to see if they replace existing models. Stay tuned...
+In this blog, I test the latest, open source models that fit on my [homelab](https://docs.bhamm-lab.com/). I record the latency and provide a 'Vibe Score' to see if they replace existing models.
 
 ### TL;DR
 
