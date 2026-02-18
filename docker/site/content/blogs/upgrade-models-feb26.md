@@ -13,7 +13,7 @@ In this blog, I test the latest, open source models that fit on my [homelab](htt
 
 - **Best Generalist**: [Kimi Linear 48B Instruct](https://huggingface.co/bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF) — fast, capable, and consistent across different tasks; [GLM 4.7 Flash REAP](https://huggingface.co/unsloth/GLM-4.7-Flash-REAP-23B-A3B-GGUF) was the runner up
 - **Best Coder**: [Qwen3 Coder Next](https://huggingface.co/unsloth/Qwen3-Coder-Next-GGUF) — immediate replacement for my previous coding model; exceptional speed and quality
-- **Unexpected Result**: Heavy quantization (Q2_K_XL) is viable for long running, background workflows; MiniMax and GLM 4.7 REAP surprised me, but are too slow for human-in-the-loop tasks
+- **Unexpected Result**: Heavy quantization (Q2_K_XL) is viable for long running, background workflows; [MiniMax 2.5](https://huggingface.co/unsloth/MiniMax-M2.5-GGUF) and [GLM 4.7 REAP](https://huggingface.co/unsloth/GLM-4.7-REAP-218B-A32B-GGUF) surprised me, but are too slow for human-in-the-loop tasks
 - **Hardware**: [2× AMD AI Max+ 395 (128GB unified memory each) + 1× AMD AI R9700 (32GB)](https://docs.bhamm-lab.com/ai/#hardware)
 - **What's Next**: [`beyond-vibes`](https://github.com/blake-hamm/beyond-vibes) — AI evaluation pipeline for llama.cpp models
 
