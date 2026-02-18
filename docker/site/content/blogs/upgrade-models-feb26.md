@@ -62,7 +62,7 @@ First off, let's review the fully arbitrary 'Vibe Score' which is my personal ac
 Also, I collected a one time 'latency' metric. This is not a scientific average or anything of that nature. It is simply a record of the latency for the first response in my test query in Roo Code. This includes the coldstart time when scaling from zero which is highly correlated with model size. Here is the prompt provided in Roo Code regarding [my homelab project](https://github.com/blake-hamm/bhamm-lab):
 
 > docker/ceph-cleanup/README.md:1-3
-> # Ceph cleanup
+> ##### Ceph cleanup
 > This python script will cleanup ceph orphaned data in the kubernetes pool. AKA: it deletes data that is not in the prod kubernetes cluster as pv or volume snapshots
 > Write unit tests for this project. Use pytest.
 
