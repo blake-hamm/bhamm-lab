@@ -7,7 +7,7 @@ description: "Testing the latest open-source LLMs on AMD hardware is a vibe."
 author: ["Blake Hamm"]
 ---
 
-In this blog, I test the latest open source models that fit on my [homelab](https://docs.bhamm-lab.com/). I record the latency and provide a 'Vibe Score' to see if they replace existing models.
+In this blog, I test some new-to-me AI models that fit on my [homelab](https://docs.bhamm-lab.com/). I record the latency and provide a 'Vibe Score' to see if they replace existing models for my use cases.
 
 ### TL;DR
 
@@ -20,38 +20,40 @@ In this blog, I test the latest open source models that fit on my [homelab](http
 
 ### Homelab Review
 
-First, let me explain how I run a homelab that supports AI workloads; you can find more details [here](https://docs.bhamm-lab.com/ai/). Basically, I have two AMD AI Max+ 395 (strix halo) and one AMD AI R9700.
+First, let's dig into how I run a homelab that supports AI workloads; you can find more details [here](https://docs.bhamm-lab.com/ai/). Essentially, I have two AMD AI Max+ 395 (strix halo) and one AMD AI R9700.
 
-The AI Max+ provides 128GB of unified memory (allocatable as VRAM) so I can run two decent sized models (~30b-120b models). I have an [open ticket](https://github.com/blake-hamm/bhamm-lab/issues/82) to enable [llama.cpp rpc](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md) which will support larger models, but it's still a WIP... The R9700 is another solid system with 32GB of VRAM and I use it for smaller, embedding models. So, as of now, I have capacity to run three models at a time.
+The AI Max+ provides 128GB of unified memory (allocatable as VRAM) and I can run two decent sized models (~30b-120b models). I have an [open ticket](https://github.com/blake-hamm/bhamm-lab/issues/82) to enable [llama.cpp rpc](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md) which will support larger models, but it's still a WIP... The R9700 is another solid system with 32GB of VRAM and I use it for smaller, embedding models. So, as of now, I have capacity to run three models at a time.
 
 The models I test are dictated by my hardware. I've made an effort to avoid Nvidia because I believe in the underdog (and suffering apparently). Given these constraints, what am I actually trying to accomplish with local AI?
 
-{{< figure src="/strix-halo-server.jpg" caption="Dual Framework Mainboards (AMD AI Max+ 395 - Strix Halo) in a 2u server rack case. 256GB of unified memory and a rats nest of cables; LFG!"  width="100%" >}}
-
-
-### Why the upgrade?
-
-Open source research on foundational models is rapidly evolving, with AI labs like [DeepSeek](https://www.deepseek.com/en/), [MiniMax](https://www.minimax.io/), [Z.AI](https://www.zhipuai.cn/en) and [Moonshot AI](https://www.moonshot.ai/) dropping some heat right before Chinese New Year. I stay up to date on these developments through communities like `LocalLLama` and `bycloud` on Discord and Reddit.
-
-While I'm no AI researcher, as an AI/ML engineer and self-hoster, I need to understand model architectures at a high level, specifically their impact on quality, latency, and context length. This matters both for my homelab and production AI applications.
+{{< figure src="/strix-halo-server.jpg" caption="Dual Framework Mainboards (AMD AI Max+ 395 - Strix Halo) in a 2u server rack case. 256GB of unified memory and a rats nest of cables; LFG!"  width="80%" >}}
 
 
 ### Use Cases
 
-In my day-to-day, I use the latest models from OpenAI, Anthropic, AWS and Google. These proprietary models are state of the art (SOTA), no cap. They can service almost any use case, given the right prompt and context.
+In my day-to-day as an AI/ML Engineer, I use the latest models from OpenAI, Anthropic, AWS and Google to build agentic applications. These proprietary models are state of the art (SOTA), no cap. They can service almost any use case, given the right prompt and context.
 
-In contrast, even with decent hardware and incredible research published, the use cases for running local models have their limitations... At the moment, I have tested local models in [Open WebUI](https://openwebui.com/), [Roo Code](https://roocode.com/) and [OpenCode](https://opencode.ai/docs/). I've had success with Open WebUI and would recommend it for local models. Roo Code and OpenCode are trickier and depending on the codebase and task, local models will struggle. Specifically, when context exceeds 20k, these models run at a snail's pace on my AMD hardware. I believe this can be solved with better context management and prompting, but I didn't make much progress with my first JavaScript project and VSCode plugin - [camber](https://github.com/blake-hamm/camber)...
+In contrast, even with decent hardware and incredible research published, the use cases for running local models have their limitations... At the moment, I have tested local models in [Open WebUI](https://openwebui.com/), [Roo Code](https://roocode.com/) and [OpenCode](https://opencode.ai/docs/). I've had success with Open WebUI and would recommend it for local models. Roo Code and OpenCode are trickier and depending on the codebase and task, local models will struggle. When context exceeds 20k, these models run at a snail's pace on my AMD hardware. I believe this can be solved with better context management and prompting, but I didn't make much progress with my first JavaScript project and VSCode plugin - [camber](https://github.com/blake-hamm/camber)...
 
-I used to dismiss "this is the worst AI will ever be" as marketing fluff for AGI. But with local models, that cliché has never felt more accurate. So given these limitations and my daily dependence on cloud APIs, you might wonder why I bother with self-hosted AI at all.
+I used to dismiss "this is the worst AI will ever be" as marketing fluff for AGI. But with local models, that cliché has never felt more accurate.
+
+
+### Why the upgrade?
+
+So why keep testing new models when the current ones have all these limitations? Because open source research is moving fast. Right before Chinese New Year, labs like [DeepSeek](https://www.deepseek.com/en/), [MiniMax](https://www.minimax.io/), [Z.AI](https://www.zhipuai.cn/en) and [Moonshot AI](https://www.moonshot.ai/) dropped some serious heat.
+
+I stay up to date on these developments through communities like `LocalLLama` and `bycloud` on Discord and Reddit. While I'm no AI researcher, as an AI/ML engineer and self-hoster, I need to understand model architectures at a high level - specifically their impact on quality, latency, and context length. This matters both for my homelab and production AI applications.
+
+Given these limitations and my daily dependence on cloud APIs, you might wonder why I bother with self-hosted AI at all.
 
 
 ### Ultimate goal
 
-Well, I have faith that eventually, I will find an open source model that I can run locally and consistently use with Roo Code and OpenCode. I started using Open Router for my personal projects and found that Kimi K2.5 fits that bill; I would consider this the best open source model for my use case and almost on par with SOTA closed-source models (while being a fraction of the cost). Unfortunately, I can't fit this model on 128GB of VRAM...
+The goal is simple: find an open source model I can run locally and actually use with Roo Code and OpenCode. I started using Open Router for my personal projects and found that Kimi K2.5 fits that bill; I would consider this the best open source model for my use case and almost on par with SOTA closed-source models (while being a fraction of the cost). Unfortunately, I can't fit this model on 128GB of VRAM...
 
 In addition to replacing paid models, I want to see the benefits of the latest model architecture research in latency. Through self-hosting AI models, I learned how MoE architectures, attention mechanisms and quantization techniques impact performance. GPT-OSS 120b drove this home; its speed and capability made these architectural trade-offs tangible. Testing new models helps me understand how different LLM families and architectures affect resource usage and latency.
 
-In production AI applications, closed-source models become deprecated and you are required to upgrade. One of the great things with local AI is you don't have to worry about models being removed. Regardless, in my experience, newer models tend to have better evaluations scores and overall better vibe. It's best practice to have a framework to validate AI quality and latency in case you find a faster, cheaper model with better outcomes.
+In production AI applications, closed-source models become deprecated and you are required to upgrade. One of the great things with local AI is you don't have to worry about models being removed. Regardless, it's best practice to have a framework to validate AI quality and latency in case you find a faster, cheaper model with better outcomes.
 
 I'm hopeful that this new round of open source models will be more intelligent and faster; only one way to find out... Before testing the new batch, let's review what I'm currently running.
 
@@ -117,14 +119,16 @@ This round of vibing transformed my model lineup, retiring my previous go-tos: Q
 
 The biggest surprise? Heavy quantization actually works. I used to avoid Q2_K and Q3_K quants, thinking they'd be garbage, but MiniMax and GLM 4.7 REAP at Q2_K_XL proved me wrong. They're very high quality, but noticeably slow. I can imagine leveraging them for background, research-focused tasks which is something [I have planned](https://github.com/blake-hamm/bhamm-lab/issues/87).
 
-The pace of open source AI is insane right now. You have these small research teams with limited hardware dropping models that compete with (and sometimes beat) what billion-dollar companies are putting out. Meanwhile the industry is frothing at the mouth about AGI and valuations, but the real story is that a handful of dedicated researchers are just... giving away powerful AI for free!
+Remember that goal of finding a model that actually works locally? This round delivered. Kimi Linear and Qwen Coder Next proved the dream is getting closer. But what's exciting isn't just my homelab win - it's what this means for everyone.
+
+The pace of open source AI is insane right now. You have small research teams with limited hardware dropping models that compete with (and sometimes beat) what billion-dollar companies are putting out. Meanwhile the industry is frothing at the mouth about AGI and valuations, but the real story is that a handful of dedicated researchers are just... giving away powerful AI for free!
 
 While [Dario keeps promising SWEs will be obsolete in 6 months](https://www.reddit.com/r/singularity/comments/1j8q3qi/anthropic_ceo_dario_amodei_in_the_next_3_to_6/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button) and my dad reads the WSJ convinced there's no bubble, these labs are actually democratizing access. Self-hosting used to be about privacy or avoiding vendor lock-in, but now? It's becoming a real alternative to feeding the cloud monopoly. My dream is that soon, anyone can afford a little box under their desk running models that rival the APIs. No subscriptions, no rate limits, no data harvesting. Just you and your AI.
 
 ### What's next
 
-Regardless of my strong opinions on local AI, my process for evaluating models is a mess. I'm manually downloading models, testing one or two quants if I'm feeling ambitious and patient enough, juggling different llama.cpp containers to compare Vulkan vs ROCm backends, checking Arize Phoenix for latency and giving an arbitrary 'vibe check'. It's tedious and gets in the way of actually *using* these models.
+Regardless of my philosophy on local AI, my process for evaluating models is a mess. I'm manually downloading models, testing one or two quants if I'm feeling ambitious and patient enough, juggling different llama.cpp containers to compare Vulkan vs ROCm backends, checking Arize Phoenix for latency and giving an arbitrary 'vibe check'. It's tedious and gets in the way of actually *using* these models.
 
 I'd love to test [all the different versions of kimi linear](https://huggingface.co/models?library=gguf&sort=downloads&search=kimi+linear), but it would take me another 3 days and would still be just a vibe (not the good kind).
 
-I need to automate this properly; I want to systematically test different quantization levels, container images, and llama.cpp CLI args to figure out the sweet spot of quality vs speed for each model. Sort of like what I do in my day-to-day for production AI applications. Real benchmarks, not just vibes. Checkout my next project `beyond-vibes` [here](https://github.com/blake-hamm/beyond-vibes) to follow along.
+I need to automate this properly. I want to systematically test different quantization levels, container images, and llama.cpp CLI args to figure out the sweet spot of quality vs speed for each model. Sort of like what I do in my day-to-day for production AI applications. Real benchmarks, not just vibes. Checkout my next project `beyond-vibes` [here](https://github.com/blake-hamm/beyond-vibes) to follow along.
