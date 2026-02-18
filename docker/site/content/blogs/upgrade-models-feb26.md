@@ -70,7 +70,7 @@ Also, I collected a one-time 'latency' metric. This is not a scientific average 
 >
 > Write unit tests for this project. Use pytest.
 
-I chose this prompt because I found LLM's do a great job at writing unit tests. Also, this 'project' is one simple python script that cleans up orphaned [ceph](https://ceph.io/en/) data. Furthermore, it's part of a monorepo and because of how Roo sends prompts, the context starts out at 10k+, stressing the models a bit.
+I chose this prompt because I found LLMs do a great job writing unit tests. Also, this 'project' is one simple python script that cleans up orphaned [ceph](https://ceph.io/en/) data. Furthermore, it's part of a monorepo and because of how Roo sends prompts, the context starts out at 10k+, stressing the models a bit.
 
 So, let's dive right into my review of the current models I have available:
 
