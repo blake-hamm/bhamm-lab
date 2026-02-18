@@ -16,7 +16,7 @@ RUN hugo --minify
 #####################################################################
 #                            Final Stage                            #
 #####################################################################
-FROM cgr.dev/chainguard/caddy:latest
+FROM cgr.dev/chainguard/static:latest
 
 # Copy the generated files
 COPY --from=builder /src/public /usr/share/caddy
