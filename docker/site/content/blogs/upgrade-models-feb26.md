@@ -13,20 +13,20 @@ In this blog, I test the latest, open source models that fit on my [homelab](htt
 
 - **Best Generalist**: [Kimi Linear 48B Instruct](https://huggingface.co/bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF) — fast, capable, and consistent across different tasks; [GLM 4.7 Flash REAP](https://huggingface.co/unsloth/GLM-4.7-Flash-REAP-23B-A3B-GGUF) was the runner up
 - **Best Coder**: [Qwen3 Coder Next](https://huggingface.co/unsloth/Qwen3-Coder-Next-GGUF) — immediate replacement for my previous coding model; exceptional speed and quality
-- **Unexpected Result**: Heavy quantization (Q2_K_XL) is viable for long running, background tasks; MiniMax and GLM 4.7 REAP surprised me, but are too slow for human-in-the-loop tasks
+- **Unexpected Result**: Heavy quantization (Q2_K_XL) is viable for long running, background workflows; MiniMax and GLM 4.7 REAP surprised me, but are too slow for human-in-the-loop tasks
 - **Hardware**: [2× AMD AI Max+ 395 (128GB unified memory each) + 1× AMD AI R9700 (32GB)](https://docs.bhamm-lab.com/ai/#hardware)
 - **What's Next**: [`beyond-vibes`](https://github.com/blake-hamm/beyond-vibes) — AI evaluation pipeline for llama.cpp models
 
 
 ### Homelab Review
 
-I run a homelab that supports AI workloads; you can find more info [here](https://docs.bhamm-lab.com/ai/). Basically, I have two AMD AI Max+ 395 (strix halo) and one AMD AI R9700.
+First, let me explain you how I run a homelab that supports AI workloads; you can find detailed info [here](https://docs.bhamm-lab.com/ai/). Basically, I have two AMD AI Max+ 395 (strix halo) and one AMD AI R9700.
 
-The AI Max+ provides 128GB of unified memory (allocatable as VRAM) so I can run two decent sized models (~30b-120b models). I have an [open ticket](https://github.com/blake-hamm/bhamm-lab/issues/82) to enable [llama.cpp rpc](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md) so that I can run larger models, but it's still a WIP... The R9700 is another solid system with 32GB of VRAM and I use it for smaller, embedding models. So, as of now, I have capacity to run three models at a time.
+The AI Max+ provides 128GB of unified memory (allocatable as VRAM) so I can run two decent sized models (~30b-120b models). I have an [open ticket](https://github.com/blake-hamm/bhamm-lab/issues/82) to enable [llama.cpp rpc](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md) which will support larger models, but it's still a WIP... The R9700 is another solid system with 32GB of VRAM and I use it for smaller, embedding models. So, as of now, I have capacity to run three models at a time.
 
 The models I test are dictated by my hardware. I've made an effort to avoid Nvidia because I believe in the underdog (and suffering apparently). Given these constraints, what am I actually trying to accomplish with local AI?
 
-{{< figure src="/strix-halo-server.jpg" caption="Dual Framework Mainboards (AMD AI Max+ 395 - Strix Halo) in a 2u server rack case. 256GB of unified memory; LFG!"  width="100%" >}}
+{{< figure src="/strix-halo-server.jpg" caption="Dual Framework Mainboards (AMD AI Max+ 395 - Strix Halo) in a 2u server rack case. 256GB of unified memory and a rats nest of cables; LFG!"  width="100%" >}}
 
 
 ### Why the upgrade?
@@ -38,9 +38,9 @@ While I'm no AI researcher, as an AI/ML engineer and self-hoster, I need to unde
 
 ### Use Cases
 
-In my day-to-day, I use the latest models from OpenAI, Anthropic, AWS and Google. These proprietary models are state of the art (SOTA), no cap. They can service almost any use case given the right prompt and context.
+In my day-to-day, I use the latest models from OpenAI, Anthropic, AWS and Google. These proprietary models are state of the art (SOTA), no cap. They can service almost any use case, given the right prompt and context.
 
-In contrast, even with decent hardware and incredible research published, the use cases for running local models have their limitations... At the moment, I have tested local models in [Open WebUI](https://openwebui.com/), [Roo Code](https://roocode.com/) and [OpenCode](https://opencode.ai/docs/). I've had success with Open WebUI and would recommend it for local models. Roo Code and OpenCode are a bit picky and depending on the codebase and task, local models struggle. Specifically, when context exceeds 20k, these models run at a snail's pace on my AMD hardware. I believe this can be solved with better context management and prompting, but I didn't make much progress with my first JavaScript project and VSCode plugin - [camber](https://github.com/blake-hamm/camber)...
+In contrast, even with decent hardware and incredible research published, the use cases for running local models have their limitations... At the moment, I have tested local models in [Open WebUI](https://openwebui.com/), [Roo Code](https://roocode.com/) and [OpenCode](https://opencode.ai/docs/). I've had success with Open WebUI and would recommend it for local models. Roo Code and OpenCode are a more tricky and depending on the codebase and task, local models will struggle. Specifically, when context exceeds 20k, these models run at a snail's pace on my AMD hardware. I believe this can be solved with better context management and prompting, but I didn't make much progress with my first JavaScript project and VSCode plugin - [camber](https://github.com/blake-hamm/camber)...
 
 I used to dismiss "this is the worst AI will ever be" as marketing fluff for AGI. But with local models, that cliché has never felt more accurate. So given these limitations and my daily dependence on cloud APIs, you might wonder why I bother with self-hosted AI at all.
 
@@ -51,7 +51,7 @@ Well, I have faith that eventually, I will find an open source model that I can 
 
 In addition to replacing paid models, I want to see the benefits of the latest model architecture research in latency. Through self-hosting AI models, I learned how MoE architectures, attention mechanisms and quantization techniques impact performance. GPT-OSS 120b drove this home; its speed and capability made these architectural trade-offs tangible. Testing new models helps me understand how different LLM families and architectures affect resource usage and latency.
 
-In production AI applications, closed-source models become deprecated and you are required to upgrade. One of the great things with local AI is you don't have to worry about models being removed. Regardless, in my experience, newer models tend to have better evaluations scores and it's best practice to have a framework to continuously check in case you find a faster, cheaper model with higher quality output.
+In production AI applications, closed-source models become deprecated and you are required to upgrade. One of the great things with local AI is you don't have to worry about models being removed. Regardless, in my experience, newer models tend to have better evaluations scores and overall better vibe. It's best practice to have a framework to validate AI quality and latency in case you find a faster, cheaper model with better outcomes.
 
 I'm hopeful that this new round of open source models will be more intelligent and faster; only one way to find out... Before testing the new batch, let's review what I'm currently running.
 
@@ -67,7 +67,10 @@ Also, I collected a one time 'latency' metric. This is not a scientific average 
 > docker/ceph-cleanup/README.md:1-3
 > ##### Ceph cleanup
 > This python script will cleanup ceph orphaned data in the kubernetes pool. AKA: it deletes data that is not in the prod kubernetes cluster as pv or volume snapshots
+>
 > Write unit tests for this project. Use pytest.
+
+I chose this prompt because I found LLM's do a great job at writing unit tests. Also, this 'project' is one simple python script that cleans up orphaned [ceph](https://ceph.io/en/) data. Furthermore, it's part of a monorepo and because of how Roo sends prompts, the context starts out at 10k+, stressing the models a bit.
 
 So, let's dive right into my review of the current models I have available:
 
@@ -101,24 +104,26 @@ That's the joy of self hosting! No worries if I have model parameters sitting ar
 | [unsloth/GLM-4.7-REAP-218B-A32B-GGUF:Q2_K_XL](https://huggingface.co/unsloth/GLM-4.7-REAP-218B-A32B-GGUF) | GLM | Complex reasoning tasks | MoE, Reasoning, Large Scale | 3m 58s | 2 |
 | [bartowski/stepfun-ai_Step-3.5-Flash-GGUF:Q3_K_XL](https://huggingface.co/bartowski/stepfun-ai_Step-3.5-Flash-GGUF) | Stepfun | Long context tasks | MoE, Reasoning, Long Context | 2m 47s | 2 |
 | [unsloth/Qwen3-Coder-Next-GGUF:Q6_K_XL](https://huggingface.co/unsloth/Qwen3-Coder-Next-GGUF) | Qwen | Coding tasks, tool use | MoE, Coding, Tool Use | 1m 31s | 5 |
-| [unsloth/Nemotron-3-Nano-30B-A3B-GGUF:BF16](https://huggingface.co/unsloth/Nemotron-3-Nano-30B-A3B-GGUF) | NVIDIA | Function calling, general purpose | MoE, Efficient, Function Calling | 1m 22s | 3 |
+| [unsloth/Nemotron-3-Nano-30B-A3B-GGUF:BF16](https://huggingface.co/unsloth/Nemotron-3-Nano-30B-A3B-GGUF) | NVIDIA | Function calling, general purpose | MoE, Efficient, Function Calling | 1m 22s | 4 |
 | [unsloth/Kimi-Dev-72B-GGUF:Q8_K_XL](https://huggingface.co/unsloth/Kimi-Dev-72B-GGUF) | Moonshot | Coding, long context | Coding, Long Context | 11m 55s | 2 |
 | [bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF:Q8_0](https://huggingface.co/bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF) | Moonshot | General purpose, daily driver | MoE, Linear Attention, Efficient | 1m 25s | 5 |
 | [unsloth/MiniMax-M2.5-GGUF:Q2_K_XL](https://huggingface.co/unsloth/MiniMax-M2.5-GGUF) | MiniMax | Long context, research tasks | MoE, Long Context | 3m 24s | 3 |
 
-A few models emerged as standouts. Kimi Linear proved to be a fantastic all-purpose model; it was fast, capable, and consistent across different tasks. Qwen Coder Next was incredible which is echoed by communities online; its coding capabilities and speed are exceptional and it has immediately become my go-to for AI-Assisted Development. GLM 4.7 Flash also impressed with its speed and solid general performance, vibing similar to GPT OSS 120b, but faster. Nemotron also caught my attention with its impressive speed; I'm curious to see how it performs in more targeted agentic workflows. On the other hand, MiniMax and GLM 4.7 REAP were very high quality all-rounders but their high latency made them unusable in practice, likely due to their larger size. Devstral has some [known](https://huggingface.co/unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF/discussions/2) [issues](https://github.com/ggml-org/llama.cpp/issues/19647) with its chat template and proved inconsistent.
+A few models emerged as standouts. Kimi Linear proved to be a fantastic all-purpose model; it was fast, capable, and consistent across different tasks. Qwen Coder Next was incredible which is echoed by communities online; its coding capabilities and speed are exceptional and it has immediately become my go-to for AI-Assisted Development. GLM 4.7 Flash REAP also impressed with its speed and solid general performance, vibing similar to GPT OSS 120b, but faster. Nemotron also caught my attention with its impressive speed; I'm curious to see how it performs in more targeted agentic workflows. On the other hand, MiniMax and GLM 4.7 REAP were very high quality all-rounders but their high latency made them unusable in practice, likely due to their larger size. Devstral has some [known](https://huggingface.co/unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF/discussions/2) [issues](https://github.com/ggml-org/llama.cpp/issues/19647) with its chat template and proved inconsistent.
 
 ### Conclusion
 
-This round of testing completely transformed my model lineup, retiring my previous go-tos: Qwen Coder Instruct, Seed OSS and GLM Air in favor of these newer drops. Kimi Linear has become my daily driver for general tasks and Qwen Coder Next is hands-down my new coding model. It's wild how good these open source models are getting; they're approaching the quality of the big proprietary ones.
+This round of vibing transformed my model lineup, retiring my previous go-tos: Qwen Coder Instruct, Seed OSS and GLM Air in favor of these newer drops. Kimi Linear has become my daily driver for general tasks and Qwen Coder Next is a game-changer for coding. It's wild how good these open source models are getting; they're approaching the quality of the big proprietary ones.
 
 The biggest surprise? Heavy quantization actually works. I used to avoid Q2_K and Q3_K quants, thinking they'd be garbage, but MiniMax and GLM 4.7 REAP at Q2_K_XL proved me wrong. They're very high quality, but noticeably slow. I can imagine leveraging them for background, research-focused tasks which is something [I have planned](https://github.com/blake-hamm/bhamm-lab/issues/87).
 
-The pace of open source AI is insane right now. You have these small research teams with limited hardware dropping models that compete with (and sometimes beat) what billion-dollar companies are putting out. Meanwhile the industry is frothing at the mouth about AGI and valuations, but the real story is that a handful of dedicated researchers are just... giving away powerful AI for free! Self-hosting used to be about privacy or avoiding vendor lock-in, but now? It's legit competition for paid APIs which we love to see.
+The pace of open source AI is insane right now. You have these small research teams with limited hardware dropping models that compete with (and sometimes beat) what billion-dollar companies are putting out. Meanwhile the industry is frothing at the mouth about AGI and valuations, but the real story is that a handful of dedicated researchers are just... giving away powerful AI for free!
+
+While Wall Street chases the next AI unicorn and snake oil salesmen promise AGI is just around the corner, these labs are actually democratizing access. Self-hosting used to be about privacy or avoiding vendor lock-in, but now? It's becoming a real alternative to feeding the cloud monopoly. My hope is that soon, anyone can afford a little box under their desk running models that rival the APIs. No subscriptions, no rate limits, no data harvesting. Just you and your AI.
 
 ### What's next
 
-My current process is a mess. I'm manually downloading models, testing maybe one or two quants if I'm feeling ambitious and patient enough, juggling different llama.cpp containers to compare Vulkan vs ROCm backends, checking Arize Phoenix for latency and giving an arbitrary 'vibe check'. It's tedious and gets in the way of actually *using* these models.
+Regardless of my strong opinons on democratizing AI, my process for evaluating models is a mess. I'm manually downloading models, testing maybe one or two quants if I'm feeling ambitious and patient, juggling different llama.cpp containers to compare Vulkan vs ROCm backends, checking Arize Phoenix for latency and giving an arbitrary 'vibe check'. It's tedious and gets in the way of actually *using* these models.
 
 I'd love to test [all the different versions of kimi linear](https://huggingface.co/models?library=gguf&sort=downloads&search=kimi+linear), but it would take me another 3 days and would still be just a vibe (not the good kind).
 
