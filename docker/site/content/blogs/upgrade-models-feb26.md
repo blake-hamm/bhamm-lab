@@ -7,12 +7,12 @@ description: "Testing the latest open-source LLMs on AMD hardware is a vibe."
 author: ["Blake Hamm"]
 ---
 
-In this blog, I test the latest, open source models that fit on my [homelab](https://docs.bhamm-lab.com/). I record the latency and provide a 'Vibe Score' to see if any replace my existing models. Stay tuned...
+In this blog, I test the latest, open source models that fit on my [homelab](https://docs.bhamm-lab.com/). I record the latency and provide a 'Vibe Score' to see if they replace existing models. Stay tuned...
 
 ### TL;DR
 
 - **Best Generalist**: [Kimi Linear 48B Instruct](https://huggingface.co/bartowski/moonshotai_Kimi-Linear-48B-A3B-Instruct-GGUF) — fast, capable, and consistent across different tasks; [GLM 4.7 Flash REAP](https://huggingface.co/unsloth/GLM-4.7-Flash-REAP-23B-A3B-GGUF) was the runner up
-- **Best Coder**: [Qwen3 Coder Next](https://huggingface.co/unsloth/Qwen3-Coder-Next-GGUF) — immediate replacement for my previous coding model ([Qwen Coder A3B Instruct](https://huggingface.co/ggml-org/Qwen3-Coder-30B-A3B-Instruct-Q8_0-GGUF)); exceptional speed and quality
+- **Best Coder**: [Qwen3 Coder Next](https://huggingface.co/unsloth/Qwen3-Coder-Next-GGUF) — immediate replacement for my previous coding model; exceptional speed and quality
 - **Unexpected Result**: Heavy quantization (Q2_K_XL) is viable for long running, background tasks; MiniMax and GLM 4.7 REAP surprised me, but are too slow for human-in-the-loop tasks
 - **Hardware**: [2× AMD AI Max+ 395 (128GB unified memory each) + 1× AMD AI R9700 (32GB)](https://docs.bhamm-lab.com/ai/#hardware)
 - **What's Next**: [`beyond-vibes`](https://github.com/blake-hamm/beyond-vibes) — AI evaluation pipeline for llama.cpp models
