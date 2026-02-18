@@ -1,7 +1,7 @@
 #####################################################################
 #                            Build Stage                            #
 #####################################################################
-FROM docker.io/hugomods/hugo:0.145.0-exts AS builder
+FROM docker.io/hugomods/hugo:nightly AS builder
 
 WORKDIR /src
 COPY . .
