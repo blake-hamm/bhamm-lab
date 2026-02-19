@@ -25,7 +25,7 @@ spec:
             enabled: true
         pvc:
           - name: harbor-registry
-            storageSize: 150Gi
+            storageSize: 300Gi
           - name: data-harbor-trivy-0
             storageSize: 5Gi
         k8up:

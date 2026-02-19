@@ -13,6 +13,7 @@
     precommit.enable = true;
     networking.backend = "networkmanager";
     vesktop.enable = true;
+    opencode.enable = true;
   };
 
   # Desktop-specific services

@@ -1,6 +1,6 @@
 ---
 title: "Resume"
-weight: 20
+weight: 40
 ---
 
 {{< pdfReader "/resume.pdf" >}}

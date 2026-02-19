@@ -31,7 +31,7 @@ This philosophy is supported by several key principles:
 - **Container Orchestration:** Ephemeral [Talos](https://www.talos.dev/) [Kubernetes](https://kubernetes.io/) clusters and [Harbor](https://goharbor.io/) proxy/registry
 - **Automation:** [OpenTofu](https://opentofu.org/), [Ansible](https://www.ansible.com/), [ArgoCD](https://argo-cd.readthedocs.io/en/stable/), [NixOS](https://nixos.org/), [Argo Events](https://argoproj.github.io/argo-events/) and [Argo Workflows](https://argoproj.github.io/argo-workflows/)
 - **Security:** [SOPS](https://github.com/mozilla/sops), [HashiCorp Vault](https://www.vaultproject.io/), [Authelia](https://www.authelia.com/), [Traefik](https://traefik.io/traefik/), VLANs
-- **Observability:** [Kube Prometheus Stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack), [Alloy](https://github.com/grafana/alloy), [LangSmith](https://www.langsmith.com/)
+- **Observability:** [Kube Prometheus Stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack), [Alloy](https://github.com/grafana/alloy), [Arise Phoenix](https://arize.com/docs/phoenix)
 
 ## Key Features
 
