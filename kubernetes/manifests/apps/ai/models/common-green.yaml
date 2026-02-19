@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/kube-ai-stack
+    targetRevision: feature/upgrade-models-feb26
     path: kubernetes/charts/common
     helm:
       valuesObject:

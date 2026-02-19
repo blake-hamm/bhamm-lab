@@ -8,7 +8,7 @@ metadata:
 subjects:
   - name: main-site
     spec:
-      target: http://main-site.site.svc.cluster.local:80
+      target: http://main-site.site.svc.cluster.local:8080
       fqdn: site.bhamm-lab.com
 tunnelRef:
   kind: ClusterTunnel
