@@ -52,6 +52,15 @@ spec:
                 redis_port: os.environ/REDIS_PORT
                 redis_password: os.environ/REDIS_PASSWORD
         mlflow:
+          image:
+            repository: ghcr.io/mlflow/mlflow
+            pullPolicy: IfNotPresent
+            tag: "v3.10.0-full"
+          initImages:
+            mlflowDbMigration:
+              repository: ghcr.io/mlflow/mlflow
+              pullPolicy: IfNotPresent
+              tag: "v3.10.0-full"
           backendStore:
             databaseMigration: true
             databaseConnectionCheck: true
