@@ -27,7 +27,6 @@ pkgs.mkShell {
     cilium-cli
     hubble
     talosctl
-    uv
     ceph-client
     minio-client
     awscli

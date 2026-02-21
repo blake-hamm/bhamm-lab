@@ -18,6 +18,7 @@
         signal-desktop
         zoom-us
         vlc
+        uv
         # gnome-network-displays
         # steam
         # etcher
