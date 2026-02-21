@@ -12,7 +12,7 @@ spec:
     namespace: models
   source:
     repoURL: https://github.com/blake-hamm/kube-ai-stack.git
-    targetRevision: main
+    targetRevision: renovate/phoenix-helm-5.x
     path: charts/kube-ai-stack
     helm:
       valuesObject:
