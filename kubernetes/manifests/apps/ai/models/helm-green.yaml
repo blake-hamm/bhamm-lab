@@ -88,6 +88,12 @@ spec:
           serviceMonitor:
             enabled: true
             namespace: models
+          extraVolumes:
+            - name: prometheus-dir
+              emptyDir: {}
+          extraVolumeMounts:
+            - name: prometheus-dir
+              mountPath: /mlflow
         phoenix-helm:
           ingress:
             enabled: false
