@@ -50,7 +50,6 @@ spec:
                 kind: Rule
                 middlewares:
                   - name: default-headers
-                  - name: forwardauth-authelia
                 services:
                   - name: llm-models-mlflow
                     scheme: http
