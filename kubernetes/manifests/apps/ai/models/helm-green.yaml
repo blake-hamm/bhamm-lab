@@ -74,7 +74,7 @@ spec:
               usernameKey: "username"
               passwordKey: "password"
           artifactRoot:
-            proxiedArtifactStorage: false
+            proxiedArtifactStorage: true
             s3:
               enabled: true
               bucket: mlflow
@@ -86,6 +86,8 @@ spec:
             MLFLOW_S3_ENDPOINT_URL: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
             MLFLOW_S3_IGNORE_TLS: "true"
             MLFLOW_SERVER_DISABLE_SECURITY_MIDDLEWARE: "true"
+          extraFlags:
+            - serveArtifacts
           serviceMonitor:
             enabled: true
             namespace: models
