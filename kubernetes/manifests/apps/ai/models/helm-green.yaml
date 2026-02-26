@@ -74,6 +74,7 @@ spec:
               usernameKey: "username"
               passwordKey: "password"
           artifactRoot:
+            proxiedArtifactStorage: true
             s3:
               enabled: true
               bucket: mlflow
