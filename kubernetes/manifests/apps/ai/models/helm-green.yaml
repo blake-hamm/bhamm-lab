@@ -55,12 +55,12 @@ spec:
           image:
             repository: ghcr.io/mlflow/mlflow
             pullPolicy: IfNotPresent
-            tag: "v3.10.0-full"
+            tag: "v3.10.1-full"
           initImages:
             mlflowDbMigration:
               repository: ghcr.io/mlflow/mlflow
               pullPolicy: IfNotPresent
-              tag: "v3.10.0-full"
+              tag: "v3.10.1-full"
           backendStore:
             databaseMigration: true
             databaseConnectionCheck: true
