@@ -17,6 +17,7 @@
             bierner.markdown-mermaid
             budparr.language-hugo-vscode
             ms-toolsai.jupyter
+            ms-toolsai.jupyter-renderers
             streetsidesoftware.code-spell-checker
             # kilocode.kilo-code
             # dracula-theme.theme-dracula
