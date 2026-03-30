@@ -8,3 +8,5 @@
 	path = docker/summit-sim
 	url = https://github.com/blake-hamm/summit-sim.git
 	branch = feature/deploy
+[submodule "summit-sim"]
+	branch = feature/action-responder-judge
