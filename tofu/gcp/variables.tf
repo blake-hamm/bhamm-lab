@@ -15,3 +15,9 @@ variable "sops_key_file_path" {
   type        = string
   default     = "./result/gcp-sops-sa.json"
 }
+
+variable "openrouter_key_file_path" {
+  description = "Path to save the OpenRouter Vertex AI service account key file."
+  type        = string
+  default     = "./result/openrouter-vertex-sa.json"
+}
