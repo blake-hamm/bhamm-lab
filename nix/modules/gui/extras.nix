@@ -13,12 +13,16 @@
         dbeaver-bin
         virt-manager
         obs-studio
-        shotcut
         brave
         signal-desktop
-        zoom-us
         vlc
         uv
+        # shotcut
+        (shotcut.overrideAttrs (oldAttrs: {
+          qtWrapperArgs = (oldAttrs.qtWrapperArgs or [ ]) ++ [
+            "--prefix XDG_DATA_DIRS : ${gtk3}/share/gsettings-schemas/${gtk3.name}"
+          ];
+        }))
         # gnome-network-displays
         # steam
         # etcher
