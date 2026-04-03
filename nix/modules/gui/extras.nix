@@ -17,7 +17,7 @@
         signal-desktop
         vlc
         uv
-        # shotcut
+        krita
         (shotcut.overrideAttrs (oldAttrs: {
           qtWrapperArgs = (oldAttrs.qtWrapperArgs or [ ]) ++ [
             "--prefix XDG_DATA_DIRS : ${gtk3}/share/gsettings-schemas/${gtk3.name}"
