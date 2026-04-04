@@ -7,4 +7,3 @@
 [submodule "docker/summit-sim"]
 	path = docker/summit-sim
 	url = https://github.com/blake-hamm/summit-sim.git
-	branch = feature/polish

@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/summit-sim.git
-    targetRevision: feature/gcp
+    targetRevision: main
     path: kubernetes
   syncPolicy:
     syncOptions:
