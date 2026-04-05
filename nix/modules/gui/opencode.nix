@@ -14,6 +14,13 @@
         enable = true;
         settings = {
           theme = "catppuccin";
+          mcp = {
+            github = {
+              enabled = false;
+              type = "remote";
+              url = "https://api.githubcopilot.com/mcp/";
+            };
+          };
         };
       };
     };

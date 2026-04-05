@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/upgrade-models-feb26
+    targetRevision: feature/beyond-vibes
     path: kubernetes/manifests/core
     directory:
       recurse: true

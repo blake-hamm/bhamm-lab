@@ -15,7 +15,4 @@
     vesktop.enable = true;
     opencode.enable = true;
   };
-
-  # Desktop-specific services
-  services.printing.enable = true;
 }

@@ -4,3 +4,6 @@
 [submodule "docker/site/themes/PaperMod"]
 	path = docker/site/themes/PaperMod
 	url = https://github.com/adityatelange/hugo-PaperMod.git
+[submodule "docker/summit-sim"]
+	path = docker/summit-sim
+	url = https://github.com/blake-hamm/summit-sim.git

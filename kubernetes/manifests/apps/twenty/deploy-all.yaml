@@ -29,7 +29,7 @@ spec:
             claimName: twenty-local-data
       containers:
         - name: twenty
-          image: twentycrm/twenty:latest
+          image: twentycrm/twenty:v1.16.7
           imagePullPolicy: Always
           env:
             - name: NODE_PORT
@@ -102,7 +102,7 @@ spec:
     spec:
       containers:
         - name: twenty
-          image: twentycrm/twenty:latest
+          image: twentycrm/twenty:v1.16.7
           imagePullPolicy: Always
           env:
             - name: SERVER_URL

@@ -39,3 +39,25 @@ resource "google_service_account_key" "sops_sa_key" {
     command = "echo '${self.private_key}' | base64 --decode > ${var.sops_key_file_path}"
   }
 }
+
+# OpenRouter Vertex AI Service Account
+resource "google_service_account" "openrouter_sa" {
+  account_id   = "openrouter-vertex"
+  display_name = "OpenRouter Vertex AI Service Account"
+}
+
+resource "google_project_iam_member" "openrouter_vertex_ai" {
+  project = var.project_id
+  role    = "roles/aiplatform.user"
+  member  = "serviceAccount:${google_service_account.openrouter_sa.email}"
+}
+
+resource "google_service_account_key" "openrouter_sa_key" {
+  service_account_id = google_service_account.openrouter_sa.name
+
+  provisioner "local-exec" {
+    command = "echo '${self.private_key}' | base64 --decode > ${var.openrouter_key_file_path}"
+  }
+
+  depends_on = [google_project_iam_member.openrouter_vertex_ai]
+}

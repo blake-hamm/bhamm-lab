@@ -31,7 +31,7 @@ spec:
               operator: "Exists"
               effect: "NoSchedule"
         provisioner:
-          replicaCount: 3
+          replicaCount: 1
         csiConfig:
           - clusterID: "25afe9dc-2a59-4135-b1fc-6728b065c2a9"
             monitors:

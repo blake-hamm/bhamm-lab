@@ -9,5 +9,6 @@
     ./vscode.nix
     ./vesktop.nix
     ./opencode.nix
+    ./printing.nix
   ];
 }
