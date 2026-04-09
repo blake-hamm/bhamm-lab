@@ -42,7 +42,7 @@ spec:
           - name: huntarr-config
           - name: unpackerr-config
           - name: jellyfin-config
-            storageSize: 3Gi
+            storageSize: 5Gi
           - name: sonarr-config
           - name: prowlarr-config
           - name: qbittorrent-config

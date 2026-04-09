@@ -1,0 +1,36 @@
+# NOTE: This LVM approach for Ceph DB/WAL devices is currently NOT functional
+# with the lae.proxmox Ansible role. The `pveceph osd create` command does not
+# support pre-existing LVM logical volumes as --db_dev or --wal_dev arguments.
+#
+# When passing an LV path like /dev/vg_ceph_db/osd1_db, pveceph resolves it to
+# the underlying device-mapper path (/dev/dm-0), and then fails with:
+#   "unable to get device info for '/dev/dm-0' for type db_dev"
+#
+# This is because Proxmox's PVE::Diskmanage::get_disks() only enumerates
+# physical disks and partitions, not device-mapper devices.
+#
+# Upstream ceph-volume lvm prepare DOES support LVM logical volumes for
+# --block.db and --block.wal. To use LVM-based DB devices, you would need to
+# bypass pveceph and call ceph-volume directly:
+#   ceph-volume lvm prepare --bluestore --data <device> --block.db vg/lv
+#
+# For now, use GPT partitions (proxmox.yml) which are fully supported by
+# pveceph osd create via the --db_dev and --wal_dev flags.
+
+- name: Ensure NVMe drive is initialized as an LVM Volume Group
+  community.general.lvg:
+    vg: "{{ ceph_vg_name }}"
+    pvs: "{{ ceph_nvme_device }}"
+    state: present
+- name: Create Ceph DB logical volumes
+  community.general.lvol:
+    vg: "{{ ceph_vg_name }}"
+    lv: "{{ item.name }}"
+    size: "{{ item.size }}"
+    state: present
+  loop: "{{ ceph_partitions }}"
+- name: Load FUSE kernel module
+  community.general.modprobe:
+    name: fuse
+    persistent: "present"
+    state: present

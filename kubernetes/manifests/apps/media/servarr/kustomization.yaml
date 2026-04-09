@@ -11,6 +11,6 @@ resources:
   - ./jellyfin/base
   - ./recyclarr/base
   - ./cleanuparr/base
-  - ./huntarr/base
+  # - ./huntarr/base
   - ./jellyseerr/base
   - ./sabnzbd/base
