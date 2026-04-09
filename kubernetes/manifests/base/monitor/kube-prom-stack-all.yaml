@@ -189,27 +189,27 @@ spec:
                   - targets:
                       - '10.0.20.11:9100' # Method
                       - '10.0.20.12:9100' # Indy
-                      - '10.0.20.13:9100' # Stale
+                      - '10.0.20.15:9100' # Japan
               - job_name: 'ceph'
                 scrape_interval: 1m
                 static_configs:
                   - targets:
                       - '10.0.20.11:9283' # Method
                       - '10.0.20.12:9283' # Indy
-                      - '10.0.20.13:9283' # Stale
+                      - '10.0.20.15:9283' # Japan
               - job_name: 'smartctl'
                 scrape_interval: 1m
                 static_configs:
                   - targets:
                       - '10.0.20.11:9633' # Method
                       - '10.0.20.12:9633' # Indy
-                      - '10.0.20.13:9633' # Stale
+                      - '10.0.20.15:9633' # Japan
               - job_name: 'systemd'
                 static_configs:
                   - targets:
                       - '10.0.20.11:9558' # Method
                       - '10.0.20.12:9558' # Indy
-                      - '10.0.20.13:9558' # Stale
+                      - '10.0.20.15:9558' # Japan
             ruleSelectorNilUsesHelmValues: false
             serviceMonitorSelectorNilUsesHelmValues: false
             podMonitorSelectorNilUsesHelmValues: false

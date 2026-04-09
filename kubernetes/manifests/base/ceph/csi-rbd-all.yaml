@@ -37,7 +37,7 @@ spec:
             monitors:
               - "10.0.20.11:3300"
               - "10.0.20.12:3300"
-              - "10.0.20.13:3300"
+              - "10.0.20.15:3300"
         storageClass:
           create: true
           name: csi-rbd-sc

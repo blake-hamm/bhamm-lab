@@ -81,14 +81,14 @@ data:
         url: https://10.0.20.11:8006/
         statusCheckAllowInsecure: true
       - title: Indy
-        description: Visit antsle proxmox server
+        description: Visit indy proxmox server
         icon: hl-proxmox
         url: https://10.0.20.12:8006/
         statusCheckAllowInsecure: true
-      - title: Stale
-        description: Visit super proxmox server
+      - title: Japan
+        description: Visit japan proxmox server
         icon: hl-proxmox
-        url: https://10.0.20.13:8006/
+        url: https://10.0.20.15:8006/
         statusCheckAllowInsecure: true
       - title: Method ipmi
         description: Visit method ipmi interface
@@ -100,10 +100,10 @@ data:
         icon: hl-supermicro
         url: https://10.0.10.22/
         statusCheck: false
-      - title: Stale ipmi
+      - title: Japan ipmi
         description: Visit super ipmi interface
         icon: hl-supermicro
-        url: https://10.0.10.23/
+        url: https://10.0.10.25/
         statusCheck: false
       - title: PiKVM
         description: Visit PiKVM connected to talos nose/tail (framework mainboards)
