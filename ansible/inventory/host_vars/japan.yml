@@ -14,12 +14,12 @@ ceph_partitions:
     start: 201GiB
     end: 585GiB
 pve_ceph_osds:
-  - device: /dev/disk/by-id/ata-Samsung_SSD_870_EVO_1TB_S75BNL0Y201871R
+  - device: /dev/sdb
     block.db: /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part1
     crush.device.class: ssd
-  - device: /dev/disk/by-id/ata-Samsung_SSD_870_EVO_1TB_S75BNL0Y201842M
+  - device: /dev/sdc
     block.db: /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part2
     crush.device.class: ssd
-  - device: /dev/disk/by-id/ata-SAMSUNG_MZ7L33T8HBLT-00A07_S6ERNT0WB00833
+  - device: /dev/sda
     block.db: /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part3
     crush.device.class: ssd

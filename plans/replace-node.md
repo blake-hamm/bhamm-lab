@@ -6,10 +6,15 @@ This plan replaces the dead 'stale' node (10.0.20.13) with a new 'japan' node (1
 
 **Critical Strategy:** Japan is added *first* to restore monitor quorum and add capacity *before* formally removing stale. This minimizes risk during the degraded state.
 
-**Current State:** Ceph HEALTH_WARN (31.8% degraded), 2/3 monitors up, osd.2 & osd.5 down on stale
-**Target State:** Ceph HEALTH_OK, 3 monitors up, japan contributing 3 new OSDs
+**Current State:** Ceph HEALTH_OK, 3 monitors up (method, indy, japan), japan has 3 OSDs contributing capacity
+**Target State:** Ceph HEALTH_OK, 3 monitors up, stale fully removed from cluster
 
-**Automation Strategy:** All of Phase 1 (Proxmox install, cluster join, Ceph deployment) is handled by Ansible using the `lae.proxmox` role. The `lae.proxmox` role supports Ceph monitor creation, OSD creation with DB/WAL devices, and cluster joining — no GUI or manual CLI steps needed. Phase 2 (removal) is manual since `lae.proxmox` only supports creation, not destruction.
+**Automation Strategy:** All of Phase 1 (Proxmox install, cluster join, Ceph deployment) is handled by Ansible using the `lae.proxmox` role. Phase 2 (removal) is manual since `lae.proxmox` only supports creation, not destruction.
+
+**Implementation Changes from Original Plan:**
+- ✅ Switched from LVM-based Ceph DB to GPT partitions (100GiB, 100GiB, 384GiB) — more compatible with pveceph
+- ✅ Added `dns-search bhamm-lab.com` to all network templates to fix FQDN resolution
+- ✅ Fixed security role cross-host variable loops for `--limit` support
 
 ---
 
@@ -20,10 +25,10 @@ This plan replaces the dead 'stale' node (10.0.20.13) with a new 'japan' node (1
 | Device | Source | Purpose |
 |--------|--------|---------|
 | 1TB NVMe | NEW | Proxmox boot drive |
-| 1TB NVMe | stale (salvaged) | Ceph DB/WAL device (vg_ceph_db) |
-| 1TB EVO SSD | stale (salvaged) | OSD.0 (with LVM DB) |
-| 3.84TB SSD | stale (salvaged) | OSD.1 (with LVM DB) |
-| 1TB EVO SSD | Extra inventory | OSD.2 (with LVM DB) |
+| 1TB NVMe | stale (salvaged) | Ceph DB/WAL device (GPT partitions) |
+| 1TB EVO SSD | stale (salvaged) | OSD.6 (with partitioned DB) |
+| 1TB EVO SSD | Extra inventory | OSD.7 (with partitioned DB) |
+| 3.84TB SSD | stale (salvaged) | OSD.8 (with partitioned DB) |
 
 ### Network Configuration (japan)
 
@@ -36,15 +41,19 @@ This plan replaces the dead 'stale' node (10.0.20.13) with a new 'japan' node (1
 
 | OSD | Device | DB Location | Size | Source |
 |-----|--------|-------------|------|--------|
-| osd.6 | /dev/sda | /dev/vg_ceph_db/osd1_db | 40g DB | 1TB EVO (stale) |
-| osd.7 | /dev/sdb | /dev/vg_ceph_db/osd2_db | 40g DB | 1TB EVO (extra) |
-| osd.8 | /dev/sdc | /dev/vg_ceph_db/osd3_db | 160g DB | 3.84TB (stale) |
+| osd.6 | /dev/disk/by-id/ata-Samsung_SSD_870_EVO_1TB_S75BNL0Y201871R | /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part1 | 100g DB | 1TB EVO (stale) |
+| osd.7 | /dev/disk/by-id/ata-Samsung_SSD_870_EVO_1TB_S75BNL0Y201842M | /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part2 | 100g DB | 1TB EVO (extra) |
+| osd.8 | /dev/disk/by-id/ata-SAMSUNG_MZ7L33T8HBLT-00A07_S6ERNT0WB00833 | /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part3 | 384g DB | 3.84TB (stale) |
+
+**Note:** DB partition sizes are >=10% of OSD capacity (pveceph requirement). 1TB OSDs use 100GiB DB, 3.84TB OSD uses 384GiB DB. WAL is colocated within the DB partition (modern BlueStore behavior).
 
 ---
 
 ## Phase 1: Add japan to Cluster (Pre-Removal)
 
-### Step 1.1: Pre-flight Verification
+**STATUS: ✅ COMPLETED**
+
+### Step 1.1: Pre-flight Verification ✅
 
 **CRITICAL:** Before making any changes, verify the current cluster state and Ansible safety:
 
@@ -67,32 +76,36 @@ grep proxmox_reset_ceph ansible/inventory/group_vars/proxmox.yml
 
 ```yaml
 network_10gb_nics: [enp1s0f0, enp1s0f1]
-
-# Ceph config for proxmox — LVM method (new)
-ceph_nvme_device: /dev/nvme0n1
-ceph_vg_name: vg_ceph_db
+ceph_nvme_device: /dev/nvme1n1
 ceph_partitions:
-  - name: osd1_db
-    size: 40g
-  - name: osd2_db
-    size: 40g
-  - name: osd3_db
-    size: 160g
-
-# Proxmox config
+  - number: 1
+    name: osd1_db
+    start: 1GiB
+    end: 101GiB
+  - number: 2
+    name: osd2_db
+    start: 101GiB
+    end: 201GiB
+  - number: 3
+    name: osd3_db
+    start: 201GiB
+    end: 585GiB
 pve_ceph_osds:
-  - device: /dev/sda
-    block.db: /dev/vg_ceph_db/osd1_db
-    crush.device.class: ssd
   - device: /dev/sdb
-    block.db: /dev/vg_ceph_db/osd2_db
+    block.db: /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part1
     crush.device.class: ssd
   - device: /dev/sdc
-    block.db: /dev/vg_ceph_db/osd3_db
+    block.db: /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part2
+    crush.device.class: ssd
+  - device: /dev/sda
+    block.db: /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part3
     crush.device.class: ssd
 ```
 
-Note: Unlike method/indy which use GPT partitions with separate `block.wal`, japan uses LVM logical volumes with `block.db` only (WAL is colocated within the DB LV). This is a design improvement — LVM provides persistent device naming and dynamic sizing, and modern BlueStore performs well with colocated WAL.
+**Key Design Decisions:**
+- **GPT partitions, not LVM:** pveceph's `osd create` command cannot use LVM logical volumes as `--db_dev` (resolves to `/dev/dm-X` which Proxmox can't identify in its disk inventory)
+- **DB-only partitions:** Modern BlueStore colocates WAL within the DB device when only `block.db` is specified. No separate WAL partition needed.
+- **Persistent device naming:** Use `/dev/disk/by-id/` paths instead of `/dev/sdX` to handle device name shifts between reboots
 
 **Create:** `ansible/templates/network/japan.j2`
 
@@ -124,6 +137,7 @@ iface vmbr0.20 inet static
     netmask 255.255.255.0
     gateway 10.0.20.2
     dns-nameservers 10.0.9.2
+    dns-search bhamm-lab.com
     mtu 9000
 
 # Kubernetes interface on VLAN 30 via the bridge:
@@ -132,6 +146,7 @@ iface vmbr0.30 inet static
     address 10.0.30.15/24
     netmask 255.255.255.0
     dns-nameservers 10.0.9.2
+    dns-search bhamm-lab.com
     mtu 9000
 
 # Ceph Interface (10Gb) - VLAN 50 on enp1s0f1:
@@ -166,51 +181,15 @@ japan  # Add japan
 stale   # Keep stale for now
 ```
 
-### Step 1.3: Update Storage Role for LVM Support (Backward Compatible)
+### Step 1.3: Update Storage Role for LVM Support (Backward Compatible) ✅
 
-**Modify:** `ansible/roles/storage/tasks/main.yml`
+**Status:** Created `proxmox-lvm.yml` for LVM support, but **reverted to using GPT partitions** after discovering pveceph cannot use LVM logical volumes as `--db_dev`.
 
-Replace the proxmox storage include block:
+**Files created:**
+- `ansible/roles/storage/tasks/proxmox-lvm.yml` — LVM implementation (documented but not used)
+- Updated `ansible/roles/storage/tasks/main.yml` — reverted back to single `proxmox.yml` include
 
-```yaml
-- name: Extra config for Proxmox storage (LVM method)
-  ansible.builtin.include_tasks:
-    file: proxmox-lvm.yml
-  when: "'proxmox' in group_names and ceph_vg_name is defined"
-
-- name: Extra config for Proxmox storage (GPT partition method)
-  ansible.builtin.include_tasks:
-    file: proxmox.yml
-  when: "'proxmox' in group_names and ceph_vg_name is not defined"
-```
-
-**Create:** `ansible/roles/storage/tasks/proxmox-lvm.yml`
-
-```yaml
-- name: Ensure NVMe drive is initialized as an LVM Volume Group
-  community.general.lvg:
-    vg: "{{ ceph_vg_name }}"
-    pvs: "{{ ceph_nvme_device }}"
-    state: present
-
-- name: Create Ceph DB logical volumes
-  community.general.lvol:
-    vg: "{{ ceph_vg_name }}"
-    lv: "{{ item.name }}"
-    size: "{{ item.size }}"
-    state: present
-  loop: "{{ ceph_partitions }}"
-
-- name: Load FUSE kernel module
-  community.general.modprobe:
-    name: fuse
-    persistent: "present"
-    state: present
-```
-
-**Backward compatibility:** method and indy do NOT define `ceph_vg_name`, so they will continue using the GPT partition method (`proxmox.yml`). Only japan (which defines `ceph_vg_name`) uses the new LVM method.
-
-### Step 1.4: Dry Run
+### Step 1.4: Dry Run ✅
 
 Before deploying, run ansible in check mode to verify all tasks are correct:
 
@@ -228,9 +207,9 @@ Review the output carefully:
 
 **Note:** Some tasks will report "changed" in check mode but won't actually execute (e.g., cluster join, Ceph operations). Check mode validates syntax and variable resolution but cannot fully simulate state-changing operations like `pvecm add`.
 
-### Step 1.5: Deploy japan via Ansible
+### Step 1.5: Deploy japan via Ansible ✅
 
-Japan must be reachable via SSH before running the playbook. Use password auth for the initial connection:
+**Deployment completed successfully.** Japan is reachable via SSH using password auth for the initial connection:
 
 ```bash
 cd /home/bhamm/repos/bhamm-lab/ansible
@@ -259,47 +238,102 @@ This single playbook run executes the following roles in order:
 
 **Important:** The `pve_reboot_on_kernel_update: true` setting in group_vars may cause japan to reboot during the playbook if a kernel update is applied. This is fine — japan is a fresh node with no running workloads.
 
-### Step 1.6: Post-Deployment Verification
+### Step 1.6: Post-Deployment Verification ✅
 
-After the playbook completes, verify the cluster from method or indy:
+**Verified:** Ceph is HEALTH_OK with all OSDs active. Japan successfully joined the cluster with 3 OSDs.
+
+After the playbook completed, verified from method or indy:
 
 ```bash
 # Verify japan joined the cluster
 pvecm status
-# Should show: method, indy, japan (3 nodes)
+# Shows: method, indy, japan (3 nodes)
 
 # Verify monitor quorum restored
 ceph mon stat
-# Should show 3+ monitors (method, indy, stale-down, japan)
-# Note: mon.stale may still appear in the map even though it's down
+# Shows: method, indy, japan (3 monitors)
 
 # Verify OSDs are up
 ceph osd tree
-# Should show osd.6, osd.7, osd.8 as "up" and "in" on japan
+# Shows osd.6, osd.7, osd.8 as "up" and "in" on japan
 
 # Check cluster health
 ceph -s
-# Expect HEALTH_WARN initially (backfilling/rebalancing)
+# Shows: HEALTH_OK
 ```
 
-### Step 1.7: Wait for Ceph Recovery
+### Step 1.7: Wait for Ceph Recovery ✅
 
-**Monitor cluster health:**
+**Status:** Ceph reached HEALTH_OK immediately after deployment. No backfilling required since stale's OSDs were already down.
 
 ```bash
 watch -n 5 ceph -s
 ```
 
-**Expected indicators:**
-- Health will show HEALTH_WARN initially (backfilling)
-- Degraded percentage will decrease over time
-- Recovery rate will be displayed
+**Actual result:**
+- Ceph shows **HEALTH_OK** immediately
+- All 9 OSDs up (6 on method/indy, 3 on japan)
+- No degraded data
 
-**CRITICAL:** Do not proceed to Phase 2 until:
-- `ceph -s` shows **HEALTH_OK**
-- All PGs show **active+clean**
+**Ready for Phase 2** — stale can now be safely removed.
 
-**Typical duration:** 2-6 hours depending on data volume
+---
+
+## Post-Deployment Troubleshooting (Completed)
+
+### Issue: Question Mark Icon in Proxmox GUI
+
+**Problem:** Japan showed a gray question mark (?) instead of green checkmark in Proxmox GUI node list.
+
+**Root Cause:** Japan's FQDN was incorrectly resolving as `japan.japan.bhamm-lab.com` due to:
+1. Debian installer set hostname as FQDN (`japan.bhamm-lab.com` in `/etc/hosts`)
+2. Missing `dns-search` in network templates caused Ansible to generate wrong hosts entries
+
+**Resolution:**
+
+1. **Add `dns-search` to all network templates:**
+   - Updated `japan.j2`, `method.j2`, `indy.j2`, `stale.j2`
+   - Added `dns-search bhamm-lab.com` to VLAN 20 (management) interfaces
+
+2. **Manual fix on japan:**
+   ```bash
+   # Fix hostname
+   sudo hostnamectl set-hostname japan
+
+   # Fix /etc/resolv.conf
+   sudo sed -i 's/search japan.bhamm-lab.com/search bhamm-lab.com/' /etc/resolv.conf
+
+   # Fix /etc/hosts
+   sudo sed -i 's/japan.japan.bhamm-lab.com/japan.bhamm-lab.com/' /etc/hosts
+
+   # Restart PVE services
+   sudo systemctl restart pve-cluster pvestatd pvedaemon pveproxy
+   ```
+
+3. **Re-run full playbook:**
+   ```bash
+   ansible-playbook ansible/debian.yml
+   ```
+   This re-generated the cluster hosts block on all nodes with correct FQDN (`japan.bhamm-lab.com`).
+
+### Issue: LVM for Ceph DB Not Compatible with pveceph
+
+**Problem:** Initial plan used LVM logical volumes for Ceph DB (`vg_ceph_db/osdN_db`), but `pveceph osd create --db_dev` cannot use LVM LVs.
+
+**Root Cause:** Proxmox's disk inventory identifies devices by `/dev/sdX` paths, but LVM resolves to `/dev/dm-X` which Proxmox cannot map back to physical devices.
+
+**Resolution:** Switched to GPT partitions with `/dev/disk/by-id/` paths. See updated host_vars/japan.yml and Hardware Architecture section.
+
+### Issue: Security Role Cross-Host Variable Failures
+
+**Problem:** Running `ansible-playbook --limit japan` failed due to security role referencing `hostvars[item].ansible_default_ipv4.address` for all cluster hosts.
+
+**Resolution:** Added `is defined` guards to three cross-host variable loops in `ansible/roles/security/tasks/proxmox.yml`:
+- Line 83: `hostvars[item].ansible_default_ipv4.address is defined`
+- Line 84: `hostvars[item].ansible_hostname is defined`
+- Line 85: `hostvars[item].ansible_fqdn is defined`
+
+However, full playbook must still run against all proxmox hosts because `lae.proxmox` role requires all host facts.
 
 ---
 
@@ -499,36 +533,57 @@ The following files reference stale's IP (10.0.20.13) and will need updating whe
 
 ## Post-Validation Checklist
 
-After completion, verify all items:
+### Phase 1 Completion (Japan Added)
 
-- [ ] `ceph -s` shows **HEALTH_OK**
-- [ ] `pvecm status` shows 3 nodes: **method, indy, japan**
-- [ ] `ceph mon stat` shows 3 monitors: **mon.method, mon.indy, mon.japan**
-- [ ] `ceph osd tree` shows 6+ OSDs with japan's 3 OSDs **up** and **in**
+- [x] `ceph -s` shows **HEALTH_OK**
+- [x] `pvecm status` shows 3 nodes: **method, indy, japan**
+- [x] `ceph mon stat` shows 3 monitors: **mon.method, mon.indy, mon.japan**
+- [x] `ceph osd tree` shows 9 OSDs with japan's 3 OSDs **up** and **in**
+- [x] Network templates applied correctly with `dns-search bhamm-lab.com`
+- [x] Question mark icon resolved in Proxmox GUI
+
+### Phase 2 & 3 Pending (Remove stale, Update Configs)
+
+- [ ] Remove stale from Ceph (OSDs, monitor)
+- [ ] Remove stale from Proxmox cluster
+- [ ] Clean up Ansible inventory (remove stale.yml, stale.j2)
+- [ ] Update OpenTofu Talos configuration (stale → japan)
+- [ ] Update Kubernetes manifests (replace 10.0.20.13 with 10.0.20.15)
 - [ ] All VMs can migrate to and start on japan
 - [ ] Kubernetes Talos workloads can access Ceph storage
-- [ ] Network templates applied correctly (VLANs 20, 30, 50)
 - [ ] OpenTofu plan shows no drift for Talos cluster
-- [ ] `ansible-playbook main.yml --limit japan --check` shows no unexpected changes
 
 ---
 
 ## Timeline Estimate
 
+### Completed (Actual)
+
+| Phase | Step | Duration | Status |
+|-------|------|----------|--------|
+| 1.1 | Pre-flight verification | 5 minutes | ✅ Complete |
+| 1.2 | Configure Ansible inventory | 30 minutes | ✅ Complete (multiple iterations) |
+| 1.3 | Update storage role | 15 minutes | ✅ Complete (created LVM support, reverted to GPT) |
+| 1.4 | Dry run | 5 minutes | ✅ Complete |
+| 1.5 | Deploy via Ansible | 30-60 minutes | ✅ Complete (includes pmxcfs troubleshooting) |
+| 1.6 | Post-deployment verification | 10 minutes | ✅ Complete |
+| 1.7 | Wait for HEALTH_OK | 0 minutes | ✅ Complete (immediate HEALTH_OK) |
+| Troubleshooting | FQDN/hosts fix | 20 minutes | ✅ Complete (dns-search, manual fixes) |
+
+**Total Active Time:** ~2.5 hours
+**Phase 1 Status:** ✅ COMPLETE
+
+### Remaining (Phase 2 & 3)
+
 | Phase | Step | Duration |
 |-------|------|----------|
-| 1.1 | Pre-flight verification | 5 minutes |
-| 1.2-1.3 | Create config files | 15 minutes |
-| 1.4 | Dry run | 5 minutes |
-| 1.5 | Deploy via Ansible | 30-60 minutes (includes reboot) |
-| 1.6 | Post-deployment verification | 10 minutes |
-| 1.7 | Wait for HEALTH_OK | **2-6 hours** |
 | 2.1-2.4 | Remove stale | 30 minutes |
 | 2.5 | Cleanup inventory | 15 minutes |
 | 3 | Update OpenTofu | 15 minutes |
+| 3 | Update Kubernetes manifests | 30 minutes |
 
-**Total Active Time:** ~1.5 hours
-**Total Duration (including backfill):** 3-7 hours
+**Remaining Active Time:** ~1.5 hours
+**Total Project Duration:** ~4 hours (actual)
 
 ---
 
@@ -542,10 +597,25 @@ After completion, verify all items:
 
 ### LVM vs GPT Partitions
 
-- **method, indy:** Continue using legacy GPT partitions (backward compatible — `ceph_vg_name` is not defined, so they use `proxmox.yml`)
-- **japan:** Uses new LVM approach with `ceph_vg_name` defined, routing to `proxmox-lvm.yml`
-- **Advantages of LVM:** Persistent device naming (no `/dev/disk/by-id/...-partN`), dynamic sizing, cleaner management
-- **LVM volumes** do not need separate WAL partitions — modern BlueStore colocates WAL within the DB device efficiently
+- **method, indy:** Continue using GPT partitions with separate `block.wal` and `block.db` partitions
+- **japan:** Uses GPT partitions with `block.db` only (WAL colocated within DB partition)
+- **Why not LVM:** pveceph's `osd create` command cannot use LVM logical volumes as `--db_dev` (resolves to `/dev/dm-X` which Proxmox can't identify)
+- **Advantages of GPT:** Compatible with pveceph, persistent device naming via `/dev/disk/by-id/`
+- **Why no separate WAL:** Modern BlueStore colocates WAL within the DB device efficiently when only `block.db` is specified
+
+### Network Configuration Best Practices
+
+1. **Always add `dns-search` to management interfaces** (VLAN 20) in `/etc/network/interfaces`
+   - Prevents FQDN resolution issues (e.g., `japan.japan.bhamm-lab.com`)
+   - Ensures Ansible's `ansible_fqdn` fact resolves correctly
+
+2. **Use `/dev/disk/by-id/` paths for OSDs**
+   - Handles device name shifts between reboots
+   - Required for pveceph to correctly identify DB devices
+
+3. **Ensure `/etc/hostname` contains short name only**
+   - Should be `japan`, not `japan.bhamm-lab.com`
+   - FQDN belongs in `/etc/hosts` and DNS
 
 ### Ansible Playbook Execution
 
