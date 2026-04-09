@@ -1,0 +1,48 @@
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# Physical NIC (10Gb) on trunk port: no IP assigned here
+auto enp1s0f0
+iface enp1s0f0 inet manual
+    mtu 9000
+
+# VLAN-aware Bridge on enp1s0f0
+auto vmbr0
+iface vmbr0 inet manual
+    bridge-ports enp1s0f0
+    bridge-stp off
+    bridge-fd 0
+    bridge-vlan-aware yes
+    bridge-vlan-filtering yes
+    bridge-vids 1 20 30
+    mtu 9000
+
+# Metal interface on VLAN 20 via the bridge:
+auto vmbr0.20
+iface vmbr0.20 inet static
+    address 10.0.20.15/24
+    netmask 255.255.255.0
+    gateway 10.0.20.2
+    dns-nameservers 10.0.9.2
+    mtu 9000
+
+# Kubernetes interface on VLAN 30 via the bridge:
+auto vmbr0.30
+iface vmbr0.30 inet static
+    address 10.0.30.15/24
+    netmask 255.255.255.0
+    dns-nameservers 10.0.9.2
+    mtu 9000
+
+# Ceph Interface (10Gb) - VLAN 50 on enp1s0f1:
+auto enp1s0f1
+iface enp1s0f1 inet manual
+    mtu 9000
+
+auto enp1s0f1.50
+iface enp1s0f1.50 inet static
+    address 10.0.50.15/24
+    netmask 255.255.255.0
+    vlan-raw-device enp1s0f1
+    mtu 9000

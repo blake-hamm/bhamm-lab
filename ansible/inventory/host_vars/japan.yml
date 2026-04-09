@@ -1,0 +1,25 @@
+network_10gb_nics: [enp1s0f0, enp1s0f1]
+ceph_nvme_device: /dev/nvme1n1
+ceph_partitions:
+  - number: 1
+    name: osd1_db
+    start: 1GiB
+    end: 101GiB
+  - number: 2
+    name: osd2_db
+    start: 101GiB
+    end: 201GiB
+  - number: 3
+    name: osd3_db
+    start: 201GiB
+    end: 585GiB
+pve_ceph_osds:
+  - device: /dev/disk/by-id/ata-Samsung_SSD_870_EVO_1TB_S75BNL0Y201871R
+    block.db: /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part1
+    crush.device.class: ssd
+  - device: /dev/disk/by-id/ata-Samsung_SSD_870_EVO_1TB_S75BNL0Y201842M
+    block.db: /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part2
+    crush.device.class: ssd
+  - device: /dev/disk/by-id/ata-SAMSUNG_MZ7L33T8HBLT-00A07_S6ERNT0WB00833
+    block.db: /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part3
+    crush.device.class: ssd

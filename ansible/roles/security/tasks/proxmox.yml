@@ -32,7 +32,9 @@
          )
        }}
   loop: "{{ groups['proxmox'] }}"
-  when: inventory_hostname != item
+  when:
+    - inventory_hostname != item
+    - hostvars[item].proxmox_host_keys is defined
 - name: Slurp ed25519 host key from each node
   ansible.builtin.slurp:
     src: /etc/ssh/ssh_host_ed25519_key.pub
@@ -47,6 +49,7 @@
         }
       ] }}
   loop: "{{ groups['proxmox'] }}"
+  when: hostvars[item].slurped_host_key is defined
 - name: Create directory for node's ssh_known_hosts
   ansible.builtin.file:
     path: "/etc/pve/nodes/{{ item.hostname }}"
@@ -86,3 +89,4 @@
         }
       ] }}
   loop: "{{ groups[pve_group] }}"
+  when: hostvars[item].ansible_default_ipv4 is defined
