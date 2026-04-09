@@ -112,7 +112,7 @@ spec:
                 replicated:
                   size: 3
               dataPools:
-                - name: data0
+                - name: data
                   failureDomain: host
                   replicated:
                     size: 3
@@ -133,7 +133,7 @@ spec:
               reclaimPolicy: Delete
               allowVolumeExpansion: true
               volumeBindingMode: Immediate
-              pool: data0
+              pool: data
               mountOptions: []
               parameters:
                 # Rook-managed CSI secrets
