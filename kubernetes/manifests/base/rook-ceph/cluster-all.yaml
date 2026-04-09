@@ -1,0 +1,71 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rook-ceph-cluster
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  destination:
+    namespace: rook-ceph
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: rook-ceph-cluster
+    repoURL: https://charts.rook.io/release
+    targetRevision: v1.16.3
+    helm:
+      valuesObject:
+        operatorNamespace: rook-ceph
+        clusterName: rook-ceph-external
+        configOverride: null
+        toolbox:
+          enabled: false
+        monitoring:
+          enabled: true
+          externalMgrEndpoints:
+            - ip: 10.0.20.11
+            - ip: 10.0.20.12
+            - ip: 10.0.20.15
+          externalMgrPrometheusPort: 9283
+        cephClusterSpec:
+          external:
+            enable: true
+          cephVersion:
+            image: quay.io/ceph/ceph:v19.2.3
+          dataDirHostPath: /var/lib/rook
+          crashCollector:
+            disable: true
+          dashboard:
+            enabled: false
+          skipUpgradeChecks: true
+          healthCheck:
+            daemonHealth:
+              mon:
+                disabled: false
+                interval: 45s
+          storage:
+            useAllNodes: false
+            useAllDevices: false
+        cephBlockPools: {}
+        cephFileSystems: {}
+        cephObjectStores: {}
+        cephFileSystemVolumeSnapshotClass:
+          enabled: false
+        cephBlockPoolsVolumeSnapshotClass:
+          enabled: false
+        csiDriverNamePrefix: ""
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
