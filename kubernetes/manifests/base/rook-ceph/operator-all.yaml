@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rook-ceph
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rook-ceph-mon-endpoints
+  namespace: rook-ceph
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+data:
+  data: "a=10.0.20.11:3300,b=10.0.20.12:3300,c=10.0.20.15:3300"
+  mapping: "{}"
+  maxMonId: "2"
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rook-ceph-operator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  destination:
+    namespace: rook-ceph
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: rook-ceph
+    repoURL: https://charts.rook.io/release
+    targetRevision: v1.16.3
+    helm:
+      valuesObject:
+        crds:
+          enabled: true
+        csi:
+          enableRbdDriver: true
+          enableCephfsDriver: true
+          enableCSIHostNetwork: true
+          enableCephfsSnapshotter: true
+          enableRBDSnapshotter: true
+          enableVolumeGroupSnapshot: true
+          provisionerReplicas: 1
+          pluginTolerations:
+            - key: "intel.com/gpu"
+              operator: "Exists"
+              effect: "NoSchedule"
+          serviceMonitor:
+            enabled: true
+        enableDiscoveryDaemon: false
+        monitoring:
+          enabled: true
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
