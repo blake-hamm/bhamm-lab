@@ -42,8 +42,8 @@ spec:
           external:
             enable: true
           # Ceph version to use
-          cephVersion:
-            image: quay.io/ceph/ceph:v19.2.3
+          # cephVersion:
+          #   image: quay.io/ceph/ceph:v19.2.3
           # Data directory on host nodes
           dataDirHostPath: /var/lib/rook
           # Disable crash collector for external cluster (no local daemons)
