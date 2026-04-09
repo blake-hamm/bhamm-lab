@@ -48,6 +48,9 @@ spec:
           storage:
             useAllNodes: false
             useAllDevices: false
+          network:
+            connections:
+              requireMsgr2: true
         cephBlockPools: {}
         cephFileSystems: {}
         cephObjectStores: {}
