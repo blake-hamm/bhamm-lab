@@ -4,6 +4,7 @@ metadata:
   name: authelia-oidc-key
   namespace: authelia
   annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "11"
 spec:
   duration: 8760h
