@@ -7,6 +7,19 @@ metadata:
   labels:
     pod-security.kubernetes.io/enforce: privileged
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rook-ceph-mon-endpoints
+  namespace: rook-ceph
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+data:
+  data: "a=10.0.20.11:3300,b=10.0.20.12:3300,c=10.0.20.15:3300"
+  mapping: "{}"
+  maxMonId: "2"
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -44,6 +57,13 @@ spec:
         enableDiscoveryDaemon: false
         monitoring:
           enabled: true
+  ignoreDifferences:
+    - group: ""
+      kind: ConfigMap
+      name: rook-ceph-mon-endpoints
+      namespace: rook-ceph
+      jsonPointers:
+        - /data
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
