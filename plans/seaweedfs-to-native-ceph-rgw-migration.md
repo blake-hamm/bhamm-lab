@@ -4,7 +4,7 @@
 
 Migrate from SeaweedFS to Ceph RGW running natively on Proxmox bare-metal nodes. This abandons the Rook Ceph approach — the standalone Ceph CSI drivers remain unchanged for block/file storage, and RGW is deployed via Ansible on the 3 Proxmox nodes, bridged into Kubernetes via a headless Service/Endpoints. S3 buckets use environment-suffixed names for blue/green isolation.
 
-**Migration Status**: `DRAFT` — This plan is not yet implemented.
+**Migration Status**: `IN PROGRESS` — Phase 0 complete, Phase 1 ready to start.
 
 ---
 
@@ -17,12 +17,13 @@ Migrate from SeaweedFS to Ceph RGW running natively on Proxmox bare-metal nodes.
 - **SeaweedFS**: Helm chart v4.0.393, S3 on port 8333, 5 buckets (~3TB on Ceph RBD PVCs)
 - **VolumeSnapshotClass**: Uses `csi-rbd-secret` in namespace `ceph`, driver `rbd.csi.ceph.com`
 - **Proxmox**: Uses Ceph pools for VM storage (separate from K8s)
+- **Ceph RGW**: Native daemon running on 3 Proxmox nodes (method/indy/japan), port 7480
 
 ### Target State
 - **Ceph CSI**: Standalone drivers **remain as-is** — no changes to `csi-rbd`, `csi-cephfs`, or their StorageClasses
 - **Ceph RGW**: Native daemon on 3 Proxmox nodes (method/indy/japan), port 7480, managed by Ansible
-- **K8s Networking**: Headless Service + Endpoints resource bridges RGW into the `storage` namespace
-- **S3 Ingress**: Traefik IngressRoute (`s3.bhamm-lab.com`) points to the headless Service
+- **K8s Networking**: Headless Service + Endpoints resource bridges RGW into the `ceph` namespace
+- **S3 Ingress**: Traefik IngressRoute (`s3.bhamm-lab.com`) — **deferred until cutover**
 - **Object Storage**: No Rook CRDs, no in-cluster RGW pods — RGW runs outside K8s lifecycle
 - **Bucket Naming**: Environment-suffixed (`loki-blue`, `loki-green`, `argo-artifacts-blue`, etc.) except `tofu-state` (shared)
 - **Bucket Management**: Argo Workflow template (`s3-bucket-management`) creates/destroys buckets via `aws` CLI
@@ -56,105 +57,88 @@ RGW buckets persist across cluster spin-downs because RGW lives outside the K8s 
 ## Prerequisites Checklist
 
 **Before starting Phase 0, ensure:**
-- [ ] Blue cluster is stable and running (HEALTH_OK)
-- [ ] Recent backup of all SeaweedFS data to MinIO/R2 exists
-- [ ] Ansible inventory is up-to-date for all 3 Proxmox nodes
-- [ ] Ceph cluster is HEALTH_OK
-- [ ] All K8s nodes can reach Proxmox nodes on port 7480 (firewall rules)
-- [ ] `secrets.enc.json` SOPS key is available
-- [ ] Argo Workflows CLI (`argo`) is installed and configured
+- [x] Blue cluster is stable and running (HEALTH_OK)
+- [x] Recent backup of all SeaweedFS data to MinIO/R2 exists
+- [x] Ansible inventory is up-to-date for all 3 Proxmox nodes
+- [x] Ceph cluster is HEALTH_OK
+- [x] All K8s nodes can reach Proxmox nodes on port 7480 (firewall rules)
+- [x] `secrets.enc.json` SOPS key is available
+- [x] Argo Workflows CLI (`argo`) is installed and configured
 
 ---
 
 ## Phase 0: Deploy Ceph RGW on Proxmox
 
-**Status**: `NOT STARTED`
+**Status**: ✅ **COMPLETE**
 
-**Location**: Ansible — extend `ansible/roles/proxmox/tasks/ceph.yml` with RGW tasks
+**Location**: Ansible — `ansible/roles/proxmox/tasks/ceph-rgw.yml`
 **Scope**: Deploy `radosgw` daemon on all 3 Proxmox nodes (method, indy, japan)
 
-### 0.1 Update Ansible Variables
+### 0.1 What Was Done
 
-Uncomment and update in `ansible/inventory/group_vars/proxmox.yml`:
+1. **Added RGW defaults** to `ansible/roles/proxmox/defaults/main.yml`:
+   - `pve_ceph_rgw_enabled: false`
+   - `pve_ceph_rgw_port: 7480`
+   - `pve_ceph_rgw_dns: "s3.bhamm-lab.com"`
+   - `pve_ceph_rgw_admin: true`
 
-```yaml
-pve_ceph_rgw_enabled: true
-pve_ceph_rgw_port: 7480
-pve_ceph_rgw_dns: "s3.bhamm-lab.com"
-pve_ceph_rgw_admin: true
-```
+2. **Enabled RGW** in `ansible/inventory/group_vars/proxmox.yml`:
+   - `pve_ceph_rgw_enabled: true`
+   - `pve_ceph_rgw_port: 7480`
+   - `pve_ceph_rgw_dns: "s3.bhamm-lab.com"`
+   - `pve_ceph_rgw_admin: true`
 
-### 0.2 Add RGW Tasks to Ansible
+3. **Created** `ansible/roles/proxmox/tasks/ceph-rgw.yml` with the core RGW deployment logic:
+   - Installs `radosgw` package
+   - Checks if keyring already exists (idempotent via `ceph auth get-or-create`)
+   - Uses `ceph auth export` + Jinja2 template to assemble keyring file
+   - Copies keyring to `/etc/pve/priv/` via `cp -p` (pmxcfs doesn't support Ansible atomic write)
+   - Configures `/etc/pve/ceph.conf` via `community.general.ini_file` with `[client.radosgw.<hostname>]` sections
+   - Copies keyring from ClusterFS to local `/etc/ceph/` with `ceph:ceph` ownership
+   - Creates systemd symlink for `ceph-radosgw@radosgw.<hostname>.service`
+   - Enables and starts the service
 
-Add to `ansible/roles/proxmox/tasks/ceph.yml`:
+4. **Created** `ansible/roles/proxmox/templates/ceph-radosgw.keyring.j2` — Jinja2 template that assembles all exported keys into a single keyring file
 
-```yaml
-- name: Install Ceph RGW package
-  apt:
-    name: ceph-radosgw
-    state: present
-  when: pve_ceph_rgw_enabled | bool
+5. **Updated** `ansible/roles/proxmox/handlers/main.yml` — Added handler to restart `ceph-radosgw@radosgw.{{ inventory_hostname }}.service`
 
-- name: Deploy Ceph RGW configuration
-  template:
-    src: ceph-radosgw.conf.j2
-    dest: /etc/ceph/ceph.conf.d/rgw.conf
-    owner: ceph
-    group: ceph
-    mode: '0644'
-  notify: restart ceph-radosgw
-  when: pve_ceph_rgw_enabled | bool
+6. **Updated** `ansible/roles/proxmox/tasks/main.yml` — Added `include_tasks: ceph-rgw.yml` after `lae.proxmox` role
 
-- name: Create Ceph RGW keyring directory
-  file:
-    path: /var/lib/ceph/radosgw/ceph-rgw.{{ inventory_hostname }}
-    state: directory
-    owner: ceph
-    group: ceph
-    mode: '0755'
-  when: pve_ceph_rgw_enabled | bool
+### 0.2 Technical Decisions
 
-- name: Ensure ceph-radosgw service is enabled and started
-  service:
-    name: ceph-radosgw@rgw.{{ inventory_hostname }}
-    state: started
-    enabled: true
-  when: pve_ceph_rgw_enabled | bool
-```
+- **Service naming**: `ceph-radosgw@radosgw.<hostname>` (following neni84 guide convention)
+- **Config section**: `[client.radosgw.<hostname>]` (not `[client.rgw.<hostname>]` as in original plan)
+- **Shared keyring**: All nodes use a single keyring file at `/etc/ceph/ceph.client.radosgw.keyring`
+- **Keyring distribution**: Via Proxmox ClusterFS `/etc/pve/priv/`, then copied locally to `/etc/ceph/`
+- **`cp -p` instead of Ansible copy**: Proxmox ClusterFS (`/etc/pve/`) rejects Ansible's atomic write pattern
+- **`ceph auth get-or-create`**: More idempotent than separate `ceph-authtool` + `auth add` steps
+- **No template for ceph.conf**: Use `community.general.ini_file` to inject sections into `/etc/pve/ceph.conf`
 
-**Manual step**: Create the RGW configuration template `ansible/roles/proxmox/templates/ceph-radosgw.conf.j2`
-
-### 0.3 Run Ansible to Deploy RGW
+### 0.3 Verification Results
 
 ```bash
-# From control machine
-ansible-playbook ansible/main.yml --tags proxmox --limit proxmox
-```
-
-### 0.4 Verification
-
-```bash
-# SSH into each Proxmox node and verify RGW is listening
-ss -tlnp | grep 7480
-# Expected: LISTEN state on 0.0.0.0:7480
-
-# Test S3 endpoint from any Proxmox node (bootstrap admin user not yet created, expect 403 or 404)
-curl -s -o /dev/null -w "%{http_code}" http://10.0.20.11:7480
-# Expected: 403 Forbidden (or 200 if auto-admin is enabled)
-
-# Verify all 3 nodes respond
+# All 3 nodes respond on port 7480
 for ip in 10.0.20.11 10.0.20.12 10.0.20.15; do
   echo -n "$ip: "
   curl -s -o /dev/null -w "%{http_code}" http://$ip:7480
 done
-# Expected: All return 403 or 200
+# Result: All return 403 Forbidden (expected, no users yet)
 
-# Check RGW service status on all nodes
-systemctl status ceph-radosgw@rgw.<hostname>
-# Expected: active (running)
+# All 3 services running
+systemctl status ceph-radosgw@radosgw.method     # active (running)
+systemctl status ceph-radosgw@radosgw.indy       # active (running)
+systemctl status ceph-radosgw@radosgw.japan      # active (running)
+
+# Test bucket creation succeeded on method
+radosgw-admin user create --uid=test --display-name="Test User"
+aws --endpoint-url http://localhost:7480 s3 mb s3://test-bucket
+aws --endpoint-url http://localhost:7480 s3 ls
+# Result: test-bucket visible
 ```
 
-**🛑 STOP: Do not proceed to Phase 1 until RGW is listening on port 7480 on all 3 nodes.**
+**Key files created:**
+- `ansible/roles/proxmox/tasks/ceph-rgw.yml`
+- `ansible/roles/proxmox/templates/ceph-radosgw.keyring.j2`
 
 ---
 
@@ -165,25 +149,16 @@ systemctl status ceph-radosgw@rgw.<hostname>
 **Manifest**: `kubernetes/manifests/base/storage/rgw-endpoints-all.yaml`
 **Sync Wave**: 7 (after namespace creation)
 
-### 1.1 Create Namespace Manifest
+### 1.1 Create Namespace and Service Manifest
 
 Create `kubernetes/manifests/base/storage/rgw-endpoints-all.yaml`:
 
 ```yaml
 apiVersion: v1
-kind: Namespace
-metadata:
-  name: storage
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"
-  labels:
-    pod-security.kubernetes.io/enforce: privileged
----
-apiVersion: v1
 kind: Service
 metadata:
   name: external-rgw
-  namespace: storage
+  namespace: ceph
   annotations:
     argocd.argoproj.io/sync-wave: "7"
 spec:
@@ -198,7 +173,7 @@ apiVersion: v1
 kind: Endpoints
 metadata:
   name: external-rgw
-  namespace: storage
+  namespace: ceph
   annotations:
     argocd.argoproj.io/sync-wave: "7"
 subsets:
@@ -212,7 +187,138 @@ subsets:
         protocol: TCP
 ```
 
-### 1.2 Create Storage Common Chart Application
+### 1.2 Commit and Sync
+
+```bash
+# Add the manifest
+git add kubernetes/manifests/base/storage/rgw-endpoints-all.yaml
+git commit -m "Add RGW Service and Endpoints for internal K8s connectivity"
+git push
+
+# Sync via ArgoCD
+argocd app sync storage
+```
+
+### 1.3 Verification
+
+```bash
+# Verify headless Service
+kubectl get svc external-rgw -n ceph
+# Expected: external-rgw   ClusterIP   None   <none>   80/TCP
+
+# Verify Endpoints
+kubectl get endpoints external-rgw -n ceph
+# Expected:
+# NAME           ENDPOINTS                                AGE
+# external-rgw   10.0.20.11:7480,10.0.20.12:7480,10.0.20.15:7480
+
+# Test DNS resolution from within K8s
+kubectl run -n ceph --image=busybox:1.36 test-dns --rm -it --restart=Never -- nslookup external-rgw.ceph.svc.cluster.local
+# Expected: Should return all 3 IPs
+
+# Test connectivity (will get 403 since no users exist yet, but proves networking works)
+kubectl run -n ceph --image=busybox:1.36 test-connect --rm -it --restart=Never -- wget -qO- http://external-rgw.ceph.svc.cluster.local:80 2>&1 | head -5
+# Expected: 403 Forbidden or connection refused (depending on RGW state)
+```
+
+**🛑 STOP: Do not proceed to Phase 2 until Endpoints show all 3 IPs and internal DNS resolves correctly.**
+
+---
+
+## Phase 2: Bootstrap RGW Admin User
+
+**Status**: `NOT STARTED`
+
+**Location**: Run on a Ceph monitor node (method, indy, or japan)
+**Scope**: Create admin S3 user (prerequisite for testing and bucket operations)
+
+### 2.1 Create Admin S3 User
+
+```bash
+# SSH to a Ceph monitor node
+ssh root@method
+
+# Create admin user for bucket management
+radosgw-admin user create --uid=admin --display-name="RGW Admin" --system
+
+# Record the Access Key and Secret Key — these go into SOPS for Phase 3
+```
+
+### 2.2 Test Internal Connectivity from Kubernetes
+
+```bash
+# Create a test secret with admin credentials (temporary, for testing only)
+kubectl create secret generic rgw-admin-test \
+  --from-literal=AWS_ACCESS_KEY_ID=<admin-access-key> \
+  --from-literal=AWS_SECRET_ACCESS_KEY=<admin-secret-key> \
+  -n ceph
+
+# Test S3 operations from within K8s
+kubectl run -n ceph --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never \
+  --env AWS_ACCESS_KEY_ID=$(kubectl get secret rgw-admin-test -n ceph -o jsonpath='{.data.AWS_ACCESS_KEY_ID}' | base64 -d) \
+  --env AWS_SECRET_ACCESS_KEY=$(kubectl get secret rgw-admin-test -n ceph -o jsonpath='{.data.AWS_SECRET_ACCESS_KEY}' | base64 -d) \
+  -- --endpoint-url http://external-rgw.ceph.svc.cluster.local:80 s3 ls
+
+# Expected: Empty bucket list (no buckets yet)
+
+# Create a test bucket
+kubectl run -n ceph --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never \
+  --env AWS_ACCESS_KEY_ID=$(kubectl get secret rgw-admin-test -n ceph -o jsonpath='{.data.AWS_ACCESS_KEY_ID}' | base64 -d) \
+  --env AWS_SECRET_ACCESS_KEY=$(kubectl get secret rgw-admin-test -n ceph -o jsonpath='{.data.AWS_SECRET_ACCESS_KEY}' | base64 -d) \
+  -- --endpoint-url http://external-rgw.ceph.svc.cluster.local:80 s3 mb s3://test-bucket-k8s
+
+# Verify bucket exists
+kubectl run -n ceph --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never \
+  --env AWS_ACCESS_KEY_ID=$(kubectl get secret rgw-admin-test -n ceph -o jsonpath='{.data.AWS_ACCESS_KEY_ID}' | base64 -d) \
+  --env AWS_SECRET_ACCESS_KEY=$(kubectl get secret rgw-admin-test -n ceph -o jsonpath='{.data.AWS_SECRET_ACCESS_KEY}' | base64 -d) \
+  -- --endpoint-url http://external-rgw.ceph.svc.cluster.local:80 s3 ls
+
+# Clean up test bucket
+kubectl run -n ceph --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never \
+  --env AWS_ACCESS_KEY_ID=$(kubectl get secret rgw-admin-test -n ceph -o jsonpath='{.data.AWS_ACCESS_KEY_ID}' | base64 -d) \
+  --env AWS_SECRET_ACCESS_KEY=$(kubectl get secret rgw-admin-test -n ceph -o jsonpath='{.data.AWS_SECRET_ACCESS_KEY}' | base64 -d) \
+  -- --endpoint-url http://external-rgw.ceph.svc.cluster.local:80 s3 rb s3://test-bucket-k8s --force
+
+# Clean up test secret
+kubectl delete secret rgw-admin-test -n ceph
+```
+
+**🛑 STOP: Do not proceed to Phase 3 until you can successfully create and delete buckets from within Kubernetes.**
+
+---
+
+## Phase 3: ExternalSecrets Setup
+
+**Status**: `NOT STARTED`
+
+**Manifest**: `kubernetes/manifests/base/storage/common-all.yaml`
+**Sync Wave**: 8
+
+### 3.1 Update SOPS Secrets
+
+Add to `secrets.enc.json` under the `ceph` namespace key:
+
+```json
+{
+  "ceph": {
+    "ceph-external-secret": {
+      "access_key_id": "<radosgw-admin-access-key>",
+      "secret_access_key": "<radosgw-admin-secret-key>",
+      "R2_ACCESS_KEY_ID": "<r2-access-key-id>",
+      "R2_SECRET_ACCESS_KEY": "<r2-secret-access-key>",
+      "R2_ENDPOINT": "<r2-endpoint>",
+      "AWS_ACCESS_KEY_ID": "<minio-access-key-id>",
+      "AWS_SECRET_ACCESS_KEY": "<minio-secret-access-key>"
+    }
+  }
+}
+```
+
+**Note**: Application-specific credentials (loki-blue, argo-artifacts-blue, etc.) will be added in Phase 5 when we create those users.
+
+Encrypt and commit the file.
+
+### 3.2 Create ExternalSecrets Manifest
 
 Create `kubernetes/manifests/base/storage/common-all.yaml`:
 
@@ -226,7 +332,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "8"
 spec:
   destination:
-    namespace: storage
+    namespace: ceph
     server: https://kubernetes.default.svc
   project: default
   source:
@@ -235,7 +341,7 @@ spec:
     path: kubernetes/charts/common
     helm:
       valuesObject:
-        name: storage
+        name: ceph
         externalSecrets:
           enabled: true
           secrets:
@@ -267,18 +373,6 @@ spec:
               remoteRef:
                 key: /core/k8up
                 property: S3_SECRET_ACCESS_KEY
-        ingressRoutes:
-          - name: s3
-            ingressClass: traefik-external
-            routes:
-              - match: Host(`s3.bhamm-lab.com`)
-                kind: Rule
-                middlewares:
-                  - name: default-headers
-                services:
-                  - name: external-rgw
-                    scheme: http
-                    port: 80
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
@@ -287,87 +381,115 @@ spec:
       selfHeal: true
 ```
 
-### 1.3 Sync ArgoCD Applications
+### 3.3 Sync Secrets
 
 ```bash
-# Sync namespace and endpoints first
+# Sync via ArgoCD
 argocd app sync storage
 
-# Verify sync succeeds before proceeding
+# Verify secret exists
+kubectl get secret ceph-external-secret -n ceph
+# Expected: ceph-external-secret   Opaque   7      30s
 ```
 
-### 1.4 Verification
-
-```bash
-# Verify namespace exists
-kubectl get namespace storage
-# Expected: Active
-
-# Verify headless Service
-kubectl get svc external-rgw -n storage
-# Expected: external-rgw   ClusterIP   None   <none>   80/TCP
-
-# Verify Endpoints
-kubectl get endpoints external-rgw -n storage
-# Expected:
-# NAME           ENDPOINTS                                AGE
-# external-rgw   10.0.20.11:7480,10.0.20.12:7480,10.0.20.15:7480
-
-# Test DNS resolution from within K8s
-kubectl run -n storage --image=busybox:1.36 test-dns --rm -it --restart=Never -- nslookup external-rgw.storage.svc.cluster.local
-# Expected: Should return all 3 IPs
-
-# Verify IngressRoute exists
-kubectl get ingressroute -n storage s3
-# Expected: s3 route created
-
-# Test external S3 endpoint (will fail auth, but should reach RGW)
-curl -s -o /dev/null -w "%{http_code}" https://s3.bhamm-lab.com
-# Expected: 403 Forbidden (auth not set up yet, but connectivity works)
-```
-
-**🛑 STOP: Do not proceed to Phase 2 until Endpoints show all 3 IPs and external S3 URL is reachable.**
+**🛑 STOP: Do not proceed to Phase 4 until ExternalSecret is synced and secret exists.**
 
 ---
 
-## Phase 2: Bootstrap RGW Users and Pools
+## Phase 4: S3 Bucket Provisioning
+
+**Status**: `NOT STARTED`
+
+**Scope**: Create environment-suffixed buckets using the existing Argo Workflow template
+
+### 4.1 Create Blue Cluster Buckets
+
+```bash
+# Create loki-blue bucket
+argo submit --from clusterworkflowtemplate/s3-bucket-management \
+  -p bucket-name=loki-blue \
+  -p endpoint-url=http://external-rgw.ceph.svc.cluster.local:80 \
+  -p aws-region=us-east-1 \
+  -p destroy-and-create=false \
+  -p aws-auth-secret=ceph-external-secret \
+  -p aws-access-key-id=access_key_id \
+  -p aws-secret-access-key=secret_access_key
+
+# Create argo-artifacts-blue bucket
+argo submit --from clusterworkflowtemplate/s3-bucket-management \
+  -p bucket-name=argo-artifacts-blue \
+  -p endpoint-url=http://external-rgw.ceph.svc.cluster.local:80 \
+  -p aws-region=us-east-1 \
+  -p destroy-and-create=false \
+  -p aws-auth-secret=ceph-external-secret \
+  -p aws-access-key-id=access_key_id \
+  -p aws-secret-access-key=secret_access_key
+
+# Create cnpg-backups-blue bucket
+argo submit --from clusterworkflowtemplate/s3-bucket-management \
+  -p bucket-name=cnpg-backups-blue \
+  -p endpoint-url=http://external-rgw.ceph.svc.cluster.local:80 \
+  -p aws-region=us-east-1 \
+  -p destroy-and-create=false \
+  -p aws-auth-secret=ceph-external-secret \
+  -p aws-access-key-id=access_key_id \
+  -p aws-secret-access-key=secret_access_key
+
+# Create k8up-backups-blue bucket
+argo submit --from clusterworkflowtemplate/s3-bucket-management \
+  -p bucket-name=k8up-backups-blue \
+  -p endpoint-url=http://external-rgw.ceph.svc.cluster.local:80 \
+  -p aws-region=us-east-1 \
+  -p destroy-and-create=false \
+  -p aws-auth-secret=ceph-external-secret \
+  -p aws-access-key-id=access_key_id \
+  -p aws-secret-access-key=secret_access_key
+
+# Create shared tofu-state bucket
+argo submit --from clusterworkflowtemplate/s3-bucket-management \
+  -p bucket-name=tofu-state \
+  -p endpoint-url=http://external-rgw.ceph.svc.cluster.local:80 \
+  -p aws-region=us-east-1 \
+  -p destroy-and-create=false \
+  -p aws-auth-secret=ceph-external-secret \
+  -p aws-access-key-id=access_key_id \
+  -p aws-secret-access-key=secret_access_key
+```
+
+### 4.2 Verification
+
+```bash
+# List all buckets via admin credentials from within K8s
+kubectl run -n ceph --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never \
+  --env AWS_ACCESS_KEY_ID=$(kubectl get secret ceph-external-secret -n ceph -o jsonpath='{.data.access_key_id}' | base64 -d) \
+  --env AWS_SECRET_ACCESS_KEY=$(kubectl get secret ceph-external-secret -n ceph -o jsonpath='{.data.secret_access_key}' | base64 -d) \
+  -- --endpoint-url http://external-rgw.ceph.svc.cluster.local:80 s3 ls
+
+# Expected output:
+# 2024-01-15 10:00:00 loki-blue
+# 2024-01-15 10:00:00 argo-artifacts-blue
+# 2024-01-15 10:00:00 cnpg-backups-blue
+# 2024-01-15 10:00:00 k8up-backups-blue
+# 2024-01-15 10:00:00 tofu-state
+```
+
+**🛑 STOP: Do not proceed to Phase 5 until all 5 buckets are created and visible.**
+
+---
+
+## Phase 5: Create Application-Specific S3 Users
 
 **Status**: `NOT STARTED`
 
 **Location**: Run on a Ceph monitor node (method, indy, or japan)
-**Scope**: Create RGW pools, admin user, and application-specific S3 users
+**Scope**: Create dedicated S3 users per application and update SOPS
 
-### 2.1 Create RGW Pools (One-Time)
+### 5.1 Create Application S3 Users (Blue Cluster)
 
 ```bash
 # SSH to a Ceph monitor node
 ssh root@method
 
-# Create the RGW pools
-ceph osd pool create .rgw.root 32 replicated
-ceph osd pool create default.rgw.control 32 replicated
-ceph osd pool create default.rgw.meta 32 replicated
-ceph osd pool create default.rgw.log 32 replicated
-ceph osd pool create default.rgw.buckets.index 32 replicated
-ceph osd pool create default.rgw.buckets.non-ec 32 replicated
-ceph osd pool create default.rgw.buckets.data 64 replicated
-
-# Verify pools created
-ceph osd pool ls | grep rgw
-```
-
-### 2.2 Create Admin S3 User
-
-```bash
-# Create admin user for bucket management
-radosgw-admin user create --uid=admin --display-name="RGW Admin" --system
-
-# Record the Access Key and Secret Key — these go into SOPS
-```
-
-### 2.3 Create Application-Specific S3 Users (Blue Cluster)
-
-```bash
 # Create dedicated S3 users per application
 radosgw-admin user create --uid=loki-blue --display-name="Loki (Blue)"
 radosgw-admin user create --uid=argo-artifacts-blue --display-name="Argo Artifacts (Blue)"
@@ -381,14 +503,14 @@ radosgw-admin user create --uid=tofu --display-name="OpenTofu State"
 # Record all Access Key / Secret Key pairs
 ```
 
-### 2.4 Update SOPS Secrets
+### 5.2 Update SOPS Secrets with Application Credentials
 
-Add to `secrets.enc.json` under new `storage` namespace key:
+Add to `secrets.enc.json` under the `ceph` namespace key:
 
 ```json
 {
-  "storage": {
-    "storage-external-secret": {
+  "ceph": {
+    "ceph-external-secret": {
       "access_key_id": "<radosgw-admin-access-key>",
       "secret_access_key": "<radosgw-admin-secret-key>",
       "loki-blue-access-key-id": "<loki-blue-access-key>",
@@ -400,7 +522,12 @@ Add to `secrets.enc.json` under new `storage` namespace key:
       "k8up-backups-blue-access-key-id": "<k8up-blue-access-key>",
       "k8up-backups-blue-secret-access-key": "<k8up-blue-secret-key>",
       "tofu-access-key-id": "<tofu-access-key>",
-      "tofu-secret-access-key": "<tofu-secret-access-key>"
+      "tofu-secret-access-key": "<tofu-secret-key>",
+      "R2_ACCESS_KEY_ID": "<r2-access-key-id>",
+      "R2_SECRET_ACCESS_KEY": "<r2-secret-access-key>",
+      "R2_ENDPOINT": "<r2-endpoint>",
+      "AWS_ACCESS_KEY_ID": "<minio-access-key-id>",
+      "AWS_SECRET_ACCESS_KEY": "<minio-secret-access-key>"
     }
   }
 }
@@ -408,146 +535,45 @@ Add to `secrets.enc.json` under new `storage` namespace key:
 
 Encrypt and commit the file.
 
-### 2.5 Sync SOPS Secrets to Cluster
+### 5.3 Update ExternalSecrets Manifest
 
-```bash
-# Re-run tofu/kubernetes to sync the new secrets
-cd tofu/kubernetes
-tofu apply -target=kubernetes_secret.this
+Update `kubernetes/manifests/base/storage/common-all.yaml` to include all application credentials:
+
+```yaml
+# Add these to the externalSecrets.secrets list:
+- secretKey: loki-blue-access-key-id
+  remoteRef:
+    key: /core/ceph-rgw
+    property: loki-blue-access-key-id
+- secretKey: loki-blue-secret-access-key
+  remoteRef:
+    key: /core/ceph-rgw
+    property: loki-blue-secret-access-key
+# ... repeat for all application credentials
 ```
 
-### 2.6 Verification
+### 5.4 Sync Updated Secrets
 
 ```bash
-# Test admin S3 credentials from within K8s
-kubectl run -n storage --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never -- \
-  --endpoint-url http://external-rgw.storage.svc.cluster.local:80 \
-  --access-key <admin-access-key> \
-  --secret-key <admin-secret-key> \
-  s3 ls
+# Sync via ArgoCD
+argocd app sync storage
 
-# Expected: Empty bucket list or existing buckets
-
-# Create a test bucket
-kubectl run -n storage --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never -- \
-  --endpoint-url http://external-rgw.storage.svc.cluster.local:80 \
-  --access-key <admin-access-key> \
-  --secret-key <admin-secret-key> \
-  s3 mb s3://test-bucket-123
-
-# List buckets to verify
-kubectl run -n storage --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never -- \
-  --endpoint-url http://external-rgw.storage.svc.cluster.local:80 \
-  --access-key <admin-access-key> \
-  --secret-key <admin-secret-key> \
-  s3 ls
-
-# Clean up test bucket
-kubectl run -n storage --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never -- \
-  --endpoint-url http://external-rgw.storage.svc.cluster.local:80 \
-  --access-key <admin-access-key> \
-  --secret-key <admin-secret-key> \
-  s3 rb s3://test-bucket-123 --force
+# Verify secret contains all keys
+kubectl get secret ceph-external-secret -n ceph -o yaml
 ```
 
-**🛑 STOP: Do not proceed to Phase 3 until admin S3 credentials work and test bucket operations succeed.**
+**🛑 STOP: Do not proceed to Phase 6 until all application credentials are in the secret.**
 
 ---
 
-## Phase 3: S3 Bucket Provisioning
-
-**Status**: `NOT STARTED`
-
-**Scope**: Create environment-suffixed buckets using the existing Argo Workflow template
-
-### 3.1 Update Bucket Management Template (Optional)
-
-The existing `kubernetes/manifests/automations/pipelines/create-or-destroy-bucket-template.yaml` already supports custom endpoints. We can optionally update it to default to RGW, or pass the endpoint as a parameter.
-
-### 3.2 Create Blue Cluster Buckets
-
-```bash
-# Create loki-blue bucket
-argo submit --from clusterworkflowtemplate/s3-bucket-management \
-  -p bucket-name=loki-blue \
-  -p endpoint-url=http://external-rgw.storage.svc.cluster.local:80 \
-  -p aws-region=us-east-1 \
-  -p destroy-and-create=false \
-  -p aws-auth-secret=storage-external-secret \
-  -p aws-access-key-id=access_key_id \
-  -p aws-secret-access-key=secret_access_key
-
-# Create argo-artifacts-blue bucket
-argo submit --from clusterworkflowtemplate/s3-bucket-management \
-  -p bucket-name=argo-artifacts-blue \
-  -p endpoint-url=http://external-rgw.storage.svc.cluster.local:80 \
-  -p aws-region=us-east-1 \
-  -p destroy-and-create=false \
-  -p aws-auth-secret=storage-external-secret \
-  -p aws-access-key-id=access_key_id \
-  -p aws-secret-access-key=secret_access_key
-
-# Create cnpg-backups-blue bucket
-argo submit --from clusterworkflowtemplate/s3-bucket-management \
-  -p bucket-name=cnpg-backups-blue \
-  -p endpoint-url=http://external-rgw.storage.svc.cluster.local:80 \
-  -p aws-region=us-east-1 \
-  -p destroy-and-create=false \
-  -p aws-auth-secret=storage-external-secret \
-  -p aws-access-key-id=access_key_id \
-  -p aws-secret-access-key=secret_access_key
-
-# Create k8up-backups-blue bucket
-argo submit --from clusterworkflowtemplate/s3-bucket-management \
-  -p bucket-name=k8up-backups-blue \
-  -p endpoint-url=http://external-rgw.storage.svc.cluster.local:80 \
-  -p aws-region=us-east-1 \
-  -p destroy-and-create=false \
-  -p aws-auth-secret=storage-external-secret \
-  -p aws-access-key-id=access_key_id \
-  -p aws-secret-access-key=secret_access_key
-
-# Create shared tofu-state bucket
-argo submit --from clusterworkflowtemplate/s3-bucket-management \
-  -p bucket-name=tofu-state \
-  -p endpoint-url=http://external-rgw.storage.svc.cluster.local:80 \
-  -p aws-region=us-east-1 \
-  -p destroy-and-create=false \
-  -p aws-auth-secret=storage-external-secret \
-  -p aws-access-key-id=access_key_id \
-  -p aws-secret-access-key=secret_access_key
-```
-
-### 3.3 Verification
-
-```bash
-# List all buckets via admin credentials from within K8s
-kubectl run -n storage --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never -- \
-  --endpoint-url http://external-rgw.storage.svc.cluster.local:80 \
-  --access-key <admin-access-key> \
-  --secret-key <admin-secret-key> \
-  s3 ls
-
-# Expected output:
-# 2024-01-15 10:00:00 loki-blue
-# 2024-01-15 10:00:00 argo-artifacts-blue
-# 2024-01-15 10:00:00 cnpg-backups-blue
-# 2024-01-15 10:00:00 k8up-backups-blue
-# 2024-01-15 10:00:00 tofu-state
-```
-
-**🛑 STOP: Do not proceed to Phase 4 until all 5 buckets are created and visible.**
-
----
-
-## Phase 4: Backup CronWorkflow (Blue)
+## Phase 6: Backup CronWorkflow (Blue)
 
 **Status**: `NOT STARTED`
 
 **Manifest**: `kubernetes/manifests/base/storage/backup-cronworkflow-blue.yaml`
 **Sync Wave**: 25
 
-### 4.1 Create Backup CronWorkflow
+### 6.1 Create Backup CronWorkflow
 
 Create `kubernetes/manifests/base/storage/backup-cronworkflow-blue.yaml`:
 
@@ -556,7 +582,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: CronWorkflow
 metadata:
   name: ceph-rgw-backup-onsite
-  namespace: storage
+  namespace: ceph
   annotations:
     argocd.argoproj.io/sync-wave: "25"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
@@ -577,7 +603,7 @@ spec:
               arguments:
                 parameters:
                   - name: source-endpoint
-                    value: "http://external-rgw.storage.svc.cluster.local:80"
+                    value: "http://external-rgw.ceph.svc.cluster.local:80"
                   - name: dest-endpoint
                     value: "http://10.0.20.199:9000"
                   - name: env-suffix
@@ -594,22 +620,22 @@ spec:
             - name: SOURCE_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: storage-external-secret
+                  name: ceph-external-secret
                   key: access_key_id
             - name: SOURCE_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: storage-external-secret
+                  name: ceph-external-secret
                   key: secret_access_key
             - name: DEST_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: storage-external-secret
+                  name: ceph-external-secret
                   key: AWS_ACCESS_KEY_ID
             - name: DEST_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: storage-external-secret
+                  name: ceph-external-secret
                   key: AWS_SECRET_ACCESS_KEY
           command: ["/bin/sh", "-c"]
           args:
@@ -645,27 +671,27 @@ spec:
             - name: MINIO_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: storage-external-secret
+                  name: ceph-external-secret
                   key: AWS_ACCESS_KEY_ID
             - name: MINIO_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: storage-external-secret
+                  name: ceph-external-secret
                   key: AWS_SECRET_ACCESS_KEY
             - name: R2_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: storage-external-secret
+                  name: ceph-external-secret
                   key: R2_ACCESS_KEY_ID
             - name: R2_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: storage-external-secret
+                  name: ceph-external-secret
                   key: R2_SECRET_ACCESS_KEY
             - name: R2_ENDPOINT
               valueFrom:
                 secretKeyRef:
-                  name: storage-external-secret
+                  name: ceph-external-secret
                   key: R2_ENDPOINT
           command: ["/bin/sh", "-c"]
           args:
@@ -683,48 +709,41 @@ spec:
               rclone sync onsite: offsite: --progress --fast-list
 ```
 
-### 4.2 Sync ArgoCD Application
+### 6.2 Sync and Test
 
 ```bash
 # Sync the storage application (includes the CronWorkflow)
 argocd app sync storage
-```
 
-### 4.3 Verification (Manual Trigger)
-
-```bash
-# Trigger backup manually
-argo submit --from cronworkflow/ceph-rgw-backup-onsite -n storage
+# Trigger backup manually for testing
+argo submit --from cronworkflow/ceph-rgw-backup-onsite -n ceph
 
 # Watch the workflow
-argo watch ceph-rgw-backup-onsite-xxxx -n storage
+argo watch ceph-rgw-backup-onsite-xxxx -n ceph
 
 # Verify MinIO after completion
 # Open MinIO console at http://10.0.20.199:9000
 # Expected buckets with -blue suffix: loki-blue, argo-artifacts-blue, etc.
-
-# Verify R2 after completion (if the workflow succeeds)
-# Check Cloudflare R2 console
 ```
 
-**🛑 STOP: Do not proceed to Phase 5 until backup workflow succeeds and data is visible in MinIO.**
+**🛑 STOP: Do not proceed to Phase 7 until backup workflow succeeds and data is visible in MinIO.**
 
 ---
 
-## Phase 5: Data Migration (SeaweedFS → Ceph RGW)
+## Phase 7: Data Migration (SeaweedFS → Ceph RGW)
 
 **Status**: `NOT STARTED`
 
-**Warning**: Both SeaweedFS and RGW will serve data simultaneously during migration. Applications continue pointing to SeaweedFS until Phase 6 cutover. Do not stop SeaweedFS until migration is verified.
+**Warning**: Both SeaweedFS and RGW will serve data simultaneously during migration. Applications continue pointing to SeaweedFS until Phase 8 cutover. Do not stop SeaweedFS until migration is verified.
 
-### 5.1 Create Migration Pod
+### 7.1 Create Migration Pod
 
 ```yaml
 apiVersion: v1
 kind: Pod
 metadata:
   name: seaweedfs-to-rgw-migration
-  namespace: storage
+  namespace: ceph
 spec:
   containers:
   - name: rclone
@@ -743,7 +762,7 @@ spec:
       rclone config create rgw s3 provider=Other \
         access_key_id $RGW_ACCESS_KEY \
         secret_access_key $RGW_SECRET_KEY \
-        endpoint=http://external-rgw.storage.svc.cluster.local:80
+        endpoint=http://external-rgw.ceph.svc.cluster.local:80
 
       # Migrate buckets to environment-suffixed names
       echo "=== Migrating loki-data → loki-blue ==="
@@ -791,98 +810,131 @@ kubectl create secret generic migration-credentials \
   --from-literal=SWFS_SECRET_KEY=<seaweedfs-secret-key> \
   --from-literal=RGW_ACCESS_KEY=<admin-access-key> \
   --from-literal=RGW_SECRET_KEY=<admin-secret-key> \
-  -n storage
+  -n ceph
 ```
 
-### 5.2 Run Migration
+### 7.2 Run Migration
 
 ```bash
 # Apply the migration pod
 kubectl apply -f migration-pod.yaml
 
 # Watch the migration
-kubectl logs -f seaweedfs-to-rgw-migration -n storage
+kubectl logs -f seaweedfs-to-rgw-migration -n ceph
 
 # Monitor progress — this could take hours for ~3TB
 # Check the final verification output
 ```
 
-### 5.3 Verification
+### 7.3 Verification
 
 ```bash
 # List RGW buckets to confirm all migrated
-kubectl run -n storage --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never -- \
-  --endpoint-url http://external-rgw.storage.svc.cluster.local:80 \
-  --access-key <admin-access-key> \
-  --secret-key <admin-secret-key> \
-  s3 ls
+kubectl run -n ceph --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never \
+  --env AWS_ACCESS_KEY_ID=$(kubectl get secret ceph-external-secret -n ceph -o jsonpath='{.data.access_key_id}' | base64 -d) \
+  --env AWS_SECRET_ACCESS_KEY=$(kubectl get secret ceph-external-secret -n ceph -o jsonpath='{.data.secret_access_key}' | base64 -d) \
+  -- --endpoint-url http://external-rgw.ceph.svc.cluster.local:80 s3 ls
 
 # Spot-check key files in loki-blue
-kubectl run -n storage --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never -- \
-  --endpoint-url http://external-rgw.storage.svc.cluster.local:80 \
-  --access-key <admin-access-key> \
-  --secret-key <admin-secret-key> \
-  s3 ls s3://loki-blue --recursive | head -20
+kubectl run -n ceph --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never \
+  --env AWS_ACCESS_KEY_ID=$(kubectl get secret ceph-external-secret -n ceph -o jsonpath='{.data.access_key_id}' | base64 -d) \
+  --env AWS_SECRET_ACCESS_KEY=$(kubectl get secret ceph-external-secret -n ceph -o jsonpath='{.data.secret_access_key}' | base64 -d) \
+  -- --endpoint-url http://external-rgw.ceph.svc.cluster.local:80 s3 ls s3://loki-blue --recursive | head -20
 
 # Verify file counts match
 # Compare: rclone ls swfs:loki-data | wc -l
 # With:    rclone ls rgw:loki-blue | wc -l
 ```
 
-**🛑 STOP: Do not proceed to Phase 6 until migration completes and file counts match between SeaweedFS and RGW.**
+**🛑 STOP: Do not proceed to Phase 8 until migration completes and file counts match between SeaweedFS and RGW.**
 
 ---
 
-## Phase 6: Cutover & Endpoint Updates
+## Phase 8: Cutover, Ingress Setup & Endpoint Updates
 
 **Status**: `NOT STARTED`
 
-**Warning**: This phase switches production S3 traffic from SeaweedFS to RGW. Perform during a maintenance window if necessary.
+**Warning**: This phase switches production S3 traffic from SeaweedFS to RGW and enables external access. Perform during a maintenance window if necessary.
 
-### 6.1 Update Application S3 Endpoints
+### 8.1 Update Storage Common Chart with IngressRoute
+
+Update `kubernetes/manifests/base/storage/common-all.yaml` to include the IngressRoute:
+
+```yaml
+# Add to the helm.valuesObject:
+ingressRoutes:
+  - name: s3
+    ingressClass: traefik-external
+    routes:
+      - match: Host(`s3.bhamm-lab.com`)
+        kind: Rule
+        middlewares:
+          - name: default-headers
+        services:
+          - name: external-rgw
+            scheme: http
+            port: 80
+```
+
+### 8.2 Sync IngressRoute
+
+```bash
+# Sync via ArgoCD
+argocd app sync storage
+
+# Verify IngressRoute exists
+kubectl get ingressroute -n ceph s3
+# Expected: s3 route created
+
+# Test external S3 endpoint
+ curl -s -o /dev/null -w "%{http_code}" https://s3.bhamm-lab.com
+# Expected: 403 Forbidden (auth check) or 200 if endpoint accessible
+```
+
+### 8.3 Update Application S3 Endpoints
 
 Update the following files to use the new RGW endpoint and suffixed bucket names:
 
 #### Loki
 **File**: `kubernetes/manifests/base/monitor/loki-all.yaml`
 - **Old**: `endpoint: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333`
-- **New**: `endpoint: http://external-rgw.storage.svc.cluster.local:80`
+- **New**: `endpoint: http://external-rgw.ceph.svc.cluster.local:80`
 - **Bucket**: Change from `loki-data` to `loki-blue`
-- **Credentials**: Reference `storage-external-secret` with `loki-blue-*` keys
+- **Credentials**: Reference `ceph-external-secret` with `loki-blue-*` keys
 
 #### Argo Workflows
 **File**: `kubernetes/manifests/base/argo/workflows-all.yaml`
 - **Old**: `endpoint: "seaweedfs-s3.seaweedfs.svc.cluster.local:8333"`
-- **New**: `endpoint: "external-rgw.storage.svc.cluster.local:80"`
+- **New**: `endpoint: "external-rgw.ceph.svc.cluster.local:80"`
 - **Bucket**: Change from `argo-artifacts` to `argo-artifacts-blue`
-- **Credentials**: Reference `storage-external-secret` with `argo-artifacts-blue-*` keys
+- **Credentials**: Reference `ceph-external-secret` with `argo-artifacts-blue-*` keys
 
 #### CNPG (Common Chart Template)
 **File**: `kubernetes/charts/common/templates/pg-objectstore.yaml`
 - **Old**: `endpointURL: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333`
-- **New**: `endpointURL: http://external-rgw.storage.svc.cluster.local:80`
+- **New**: `endpointURL: http://external-rgw.ceph.svc.cluster.local:80`
 - **Bucket**: Update to use `-blue` suffix
-- **Credentials**: Reference appropriate keys from `storage-external-secret`
+- **Credentials**: Reference appropriate keys from `ceph-external-secret`
 
 #### K8up Schedule (Common Chart Template)
 **File**: `kubernetes/charts/common/templates/k8up-schedule.yaml`
 - **Old**: `value: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333`
-- **New**: `value: http://external-rgw.storage.svc.cluster.local:80`
+- **New**: `value: http://external-rgw.ceph.svc.cluster.local:80`
 - **Bucket**: Update to use `-blue` suffix
 
 #### K8up Restore (Common Chart Template)
 **File**: `kubernetes/charts/common/templates/k8up-restore.yaml`
 - **Old**: `value: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333`
-- **New**: `value: http://external-rgw.storage.svc.cluster.local:80`
+- **New**: `value: http://external-rgw.ceph.svc.cluster.local:80`
 - **Bucket**: Update to use `-blue` suffix
 
 #### MLflow (Green Cluster)
 **File**: `kubernetes/manifests/apps/ai/models/helm-green.yaml`
 - **Old**: `MLFLOW_S3_ENDPOINT_URL: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333`
-- **New**: `MLFLOW_S3_ENDPOINT_URL: http://external-rgw.storage.svc.cluster.local:80`
+- **New**: `MLFLOW_S3_ENDPOINT_URL: http://external-rgw.ceph.svc.cluster.local:80`
 - **Bucket**: Update to use `-green` suffix for green cluster
 
-### 6.2 Sync Updated Applications
+### 8.4 Sync Updated Applications
 
 ```bash
 # Sync monitor stack (Loki)
@@ -895,7 +947,7 @@ argocd app sync argo
 argocd app sync ai-models-green  # or whichever includes MLflow
 ```
 
-### 6.3 Verification
+### 8.5 Verification
 
 ```bash
 # Verify Loki can write to new endpoint
@@ -909,22 +961,22 @@ kubectl logs -n monitor deployment/loki-distributed-distributor | grep -i s3
 # Check PostgreSQL cluster backup status
 kubectl get backups.postgresql.cnpg.io -A
 
-# Verify external S3 URL still works
+# Verify external S3 URL works
 curl -s -o /dev/null -w "%{http_code}" https://s3.bhamm-lab.com
 # Expected: 403 Forbidden (auth check) or 200 if endpoint accessible
 ```
 
-**🛑 STOP: Do not proceed to Phase 7 until all applications verify they can read/write to RGW.**
+**🛑 STOP: Do not proceed to Phase 9 until all applications verify they can read/write to RGW.**
 
 ---
 
-## Phase 7: Remove SeaweedFS
+## Phase 9: Remove SeaweedFS
 
 **Status**: `NOT STARTED`
 
-**Warning**: Only perform after Phase 6 cutover is verified and applications are stable.
+**Warning**: Only perform after Phase 8 cutover is verified and applications are stable.
 
-### 7.1 Backup Final SeaweedFS State
+### 9.1 Backup Final SeaweedFS State
 
 ```bash
 # Trigger one final backup to MinIO/R2
@@ -933,7 +985,7 @@ argo submit --from cronworkflow/seaweedfs-offsite-backup -n seaweedfs
 # Wait for completion
 ```
 
-### 7.2 Remove SeaweedFS Manifests
+### 9.2 Remove SeaweedFS Manifests
 
 ```bash
 # Delete entire SeaweedFS directory from git
@@ -945,7 +997,7 @@ git commit -m "Remove SeaweedFS — migrated to native Ceph RGW"
 # Push to trigger ArgoCD sync
 ```
 
-### 7.3 ArgoCD Will Remove
+### 9.3 ArgoCD Will Remove
 
 ArgoCD will automatically remove:
 - `helm-all.yaml` (SeaweedFS Helm chart)
@@ -957,7 +1009,7 @@ ArgoCD will automatically remove:
 - `restore-green.yaml`
 - `workflow-rbac-all.yaml`
 
-### 7.4 Verification
+### 9.4 Verification
 
 ```bash
 # Verify SeaweedFS namespace is gone
@@ -969,24 +1021,23 @@ kubectl get pods --all-namespaces | grep seaweedfs
 # Expected: No results
 
 # Verify RGW buckets still accessible
-kubectl run -n storage --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never -- \
-  --endpoint-url http://external-rgw.storage.svc.cluster.local:80 \
-  --access-key <admin-access-key> \
-  --secret-key <admin-secret-key> \
-  s3 ls
+kubectl run -n ceph --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never \
+  --env AWS_ACCESS_KEY_ID=$(kubectl get secret ceph-external-secret -n ceph -o jsonpath='{.data.access_key_id}' | base64 -d) \
+  --env AWS_SECRET_ACCESS_KEY=$(kubectl get secret ceph-external-secret -n ceph -o jsonpath='{.data.secret_access_key}' | base64 -d) \
+  -- --endpoint-url http://external-rgw.ceph.svc.cluster.local:80 s3 ls
 ```
 
-**🛑 STOP: Do not proceed to Phase 8 until SeaweedFS is fully removed and all applications continue functioning.**
+**🛑 STOP: Do not proceed to Phase 10 until SeaweedFS is fully removed and all applications continue functioning.**
 
 ---
 
-## Phase 8: Green Cluster Setup (When Needed)
+## Phase 10: Green Cluster Setup (When Needed)
 
 **Status**: `NOT STARTED`
 
 When deploying the green cluster, follow the same phases but with `-green` suffixes.
 
-### 8.1 Create Green S3 Users
+### 10.1 Create Green S3 Users
 
 ```bash
 # On a Ceph monitor node
@@ -997,56 +1048,56 @@ radosgw-admin user create --uid=k8up-backups-green --display-name="K8up Backups 
 radosgw-admin user create --uid=backup-green --display-name="Backup Service (Green)"
 ```
 
-### 8.2 Update SOPS Secrets
+### 10.2 Update SOPS Secrets
 
 Add green credentials to `secrets.enc.json`:
 
 ```json
 {
-  "storage": {
+  "ceph": {
     "loki-green-access-key-id": "<loki-green-access-key>",
     "loki-green-secret-access-key": "<loki-green-secret-key>",
     "argo-artifacts-green-access-key-id": "<argo-green-access-key>",
-    "argo-artifacts-green-secret-access-key": "<argo-green-secret-key>",
+    "argo-artifacts-green-secret-access-key": "<argo-green-secret-key>"
     // etc.
   }
 }
 ```
 
-### 8.3 Create Green Buckets
+### 10.3 Create Green Buckets
 
 ```bash
 argo submit --from clusterworkflowtemplate/s3-bucket-management \
   -p bucket-name=loki-green \
-  -p endpoint-url=http://external-rgw.storage.svc.cluster.local:80 \
+  -p endpoint-url=http://external-rgw.ceph.svc.cluster.local:80 \
   -p aws-region=us-east-1 \
   -p destroy-and-create=false \
-  -p aws-auth-secret=storage-external-secret \
+  -p aws-auth-secret=ceph-external-secret \
   -p aws-access-key-id=access_key_id \
   -p aws-secret-access-key=secret_access_key
 
 # Repeat for other green buckets
 ```
 
-### 8.4 Create Green Backup CronWorkflow
+### 10.4 Create Green Backup CronWorkflow
 
 Create `kubernetes/manifests/base/storage/backup-cronworkflow-green.yaml`:
 - Same as blue but with suffix `-green`
 - Sync wave: 25
 
-### 8.5 Deploy Green Cluster Storage
+### 10.5 Deploy Green Cluster Storage
 
-The green cluster will use the same `storage` namespace manifests. CSI drivers connect to the same external Ceph cluster with the same credentials.
+The green cluster will use the same `ceph` namespace manifests. CSI drivers connect to the same external Ceph cluster with the same credentials.
 
 ---
 
-## Phase 9: Kill-Switch Update
+## Phase 11: Kill-Switch Update
 
 **Status**: `NOT STARTED`
 
 **Manifest**: `kubernetes/manifests/automations/pipelines/kill-switch-template.yaml`
 
-### 9.1 Redesign Kill-Switch Workflow
+### 11.1 Redesign Kill-Switch Workflow
 
 The kill-switch needs fundamental changes:
 - **Remove Rook CRD logic** — no Rook in this architecture
@@ -1055,7 +1106,7 @@ The kill-switch needs fundamental changes:
 
 See the updated kill-switch template in Appendix A.
 
-### 9.2 Update and Sync
+### 11.2 Update and Sync
 
 ```bash
 # Update the kill-switch template
@@ -1070,7 +1121,7 @@ git push
 argocd app sync automations
 ```
 
-### 9.3 Verification (Test Kill-Switch on Non-Production)
+### 11.3 Verification (Test Kill-Switch on Non-Production)
 
 ⚠️ **WARNING**: Only test kill-switch on a non-production environment or during a planned teardown.
 
@@ -1088,11 +1139,11 @@ argo watch kill-switch-xxxx -n argo
 
 ---
 
-## Phase 10: Cleanup Legacy Ceph Pools
+## Phase 12: Cleanup Legacy Ceph Pools
 
 **Status**: `NOT STARTED`
 
-### 10.1 Verify SeaweedFS RBD Images Are Gone
+### 12.1 Verify SeaweedFS RBD Images Are Gone
 
 ```bash
 # SSH to a Ceph monitor node
@@ -1101,13 +1152,13 @@ ssh root@method
 # Check if any RBD images remain in osd pool
 rbd ls osd
 
-# If empty or only contains images we still need, proceed to 10.2
+# If empty or only contains images we still need, proceed to 12.2
 ```
 
-### 10.2 Remove Legacy Pools (If Safe)
+### 12.2 Remove Legacy Pools (If Safe)
 
 ```bash
-# Only run if Step 10.1 confirms no needed images exist
+# Only run if Step 12.1 confirms no needed images exist
 ceph osd pool rm osd osd --yes-i-really-really-mean-it
 
 # Review remaining pools
@@ -1115,7 +1166,7 @@ ceph osd pool ls
 # Expected: Proxmox pools, RGW pools, and new K8s CSI pools only
 ```
 
-### 10.3 Verification
+### 12.3 Verification
 
 ```bash
 # Final pool state should include:
@@ -1144,17 +1195,19 @@ If issues arise during any phase:
 
 **All phases must pass these checks:**
 
-- [ ] **Phase 0**: RGW daemon running on all 3 Proxmox nodes, port 7480 reachable
-- [ ] **Phase 1**: Headless Service + Endpoints resolve, external S3 URL reachable
-- [ ] **Phase 2**: Admin S3 credentials work, test bucket operations succeed
-- [ ] **Phase 3**: All 5 buckets created and visible via `s3 ls`
-- [ ] **Phase 4**: Backup CronWorkflow succeeds, data visible in MinIO
-- [ ] **Phase 5**: Migration completes, file counts match between SeaweedFS and RGW
-- [ ] **Phase 6**: All 6 application endpoint references updated, applications verified
-- [ ] **Phase 7**: SeaweedFS removed, applications continue functioning
-- [ ] **Phase 8**: Green cluster storage manifests ready (when needed)
-- [ ] **Phase 9**: Kill-switch updated and tested, no orphaned data
-- [ ] **Phase 10**: Legacy pools reviewed and cleaned up
+- [x] **Phase 0**: RGW daemon running on all 3 Proxmox nodes, port 7480 reachable
+- [ ] **Phase 1**: Headless Service + Endpoints resolve, internal DNS works
+- [ ] **Phase 2**: Admin S3 user created, can create/delete buckets from K8s
+- [ ] **Phase 3**: ExternalSecrets synced, secret exists with admin credentials
+- [ ] **Phase 4**: All 5 buckets created and visible via `s3 ls`
+- [ ] **Phase 5**: Application-specific S3 users created, credentials in secrets
+- [ ] **Phase 6**: Backup CronWorkflow succeeds, data visible in MinIO
+- [ ] **Phase 7**: Migration completes, file counts match between SeaweedFS and RGW
+- [ ] **Phase 8**: All 6 application endpoint references updated, IngressRoute active
+- [ ] **Phase 9**: SeaweedFS removed, applications continue functioning
+- [ ] **Phase 10**: Green cluster storage manifests ready (when needed)
+- [ ] **Phase 11**: Kill-switch updated and tested, no orphaned data
+- [ ] **Phase 12**: Legacy pools reviewed and cleaned up
 - [ ] **Final**: CSI drivers (`csi-rbd-sc`, `csi-cephfs-sc`) remain functional, no disruptions
 
 ---
@@ -1325,32 +1378,36 @@ The standalone Ceph CSI drivers (`csi-rbd` and `csi-cephfs` in namespace `ceph`)
 
 ### Bucket Management
 
-The existing `s3-bucket-management` ClusterWorkflowTemplate (`create-or-destroy-bucket-template.yaml`) creates and destroys buckets against any S3-compatible endpoint. Pass `endpoint-url=http://external-rgw.storage.svc.cluster.local:80` as a parameter.
+The existing `s3-bucket-management` ClusterWorkflowTemplate (`create-or-destroy-bucket-template.yaml`) creates and destroys buckets against any S3-compatible endpoint. Pass `endpoint-url=http://external-rgw.ceph.svc.cluster.local:80` as a parameter.
 
 ### Sync Wave Dependencies
 
 ```
-Phase 0: Ansible (RGW on Proxmox — one-time)
+Phase 0: Ansible (RGW on Proxmox — one-time) ✅
   ↓
-Phase 1: K8s Service/Endpoints/IngressRoute (wave 7-8)
+Phase 1: K8s Service/Endpoints (wave 7)
   ↓
-Phase 2: Bootstrap Users and Pools (one-time, then green variant)
+Phase 2: Bootstrap Admin User (one-time)
   ↓
-Phase 3: S3 Bucket Provisioning (Argo Workflow)
+Phase 3: ExternalSecrets (wave 8)
   ↓
-Phase 4: Backup CronWorkflow (wave 25)
+Phase 4: S3 Bucket Provisioning (Argo Workflow)
   ↓
-Phase 5: Data Migration (SeaweedFS → RGW)
+Phase 5: Application S3 Users
   ↓
-Phase 6: Cutover (update endpoints)
+Phase 6: Backup CronWorkflow (wave 25)
   ↓
-Phase 7: Remove SeaweedFS
+Phase 7: Data Migration (SeaweedFS → RGW)
   ↓
-Phase 8: Green Cluster Setup (when needed)
+Phase 8: Cutover + Ingress Setup (wave 25)
   ↓
-Phase 9: Kill-switch update
+Phase 9: Remove SeaweedFS
   ↓
-Phase 10: Cleanup legacy pools
+Phase 10: Green Cluster Setup (when needed)
+  ↓
+Phase 11: Kill-switch update
+  ↓
+Phase 12: Cleanup legacy pools
 ```
 
 ---
@@ -1361,48 +1418,57 @@ Phase 10: Cleanup legacy pools
 
 **Issue**: RGW not responding on port 7480
 **Solution**:
-- Check `/etc/ceph/ceph.conf.d/rgw.conf` exists
-- Verify `ceph-radosgw@rgw.<hostname>` service: `systemctl status ceph-radosgw@rgw.method`
+- Check service: `systemctl status ceph-radosgw@radosgw.<hostname>`
 - Check firewall: `ufw allow 7480` or `iptables -L | grep 7480`
-- Review RGW logs: `journalctl -u ceph-radosgw@rgw.<hostname>`
+- Review RGW logs: `journalctl -u ceph-radosgw@radosgw.<hostname>`
 
 **Issue**: Ceph RGW service fails to start
 **Solution**:
 - Verify Ceph cluster is HEALTH_OK: `ceph -s`
-- Check RGW keyring permissions: `ls -la /var/lib/ceph/radosgw/`
-- Ensure pools exist: `ceph osd pool ls | grep rgw`
+- Check RGW keyring: `cat /etc/ceph/ceph.client.radosgw.keyring`
+- Check permissions: `ls -la /etc/ceph/`
 
 ### Phase 1 Issues
 
 **Issue**: Headless Service not resolving
 **Solution**:
-- Verify Endpoints resource: `kubectl get endpoints external-rgw -n storage`
-- Check Service selector (should be `clusterIP: None`): `kubectl get svc external-rgw -n storage -o yaml`
-- Test DNS from pod: `kubectl run -it --rm --image=busybox test -- nslookup external-rgw.storage.svc.cluster.local`
-
-**Issue**: External S3 URL not reachable
-**Solution**:
-- Verify IngressRoute: `kubectl get ingressroute -n storage`
-- Check Traefik logs: `kubectl logs -n traefik deployment/traefik`
-- Test directly to RGW: `curl http://10.0.20.11:7480` from K8s node
+- Verify Endpoints resource: `kubectl get endpoints external-rgw -n ceph`
+- Check Service selector (should be `clusterIP: None`): `kubectl get svc external-rgw -n ceph -o yaml`
+- Test DNS from pod: `kubectl run -it --rm --image=busybox test -- nslookup external-rgw.ceph.svc.cluster.local`
 
 ### Phase 2 Issues
 
 **Issue**: S3 credentials rejected
 **Solution**:
 - Verify user exists: `radosgw-admin user info --uid=admin`
-- Check credentials in SOPS: `sops secrets.enc.json`
 - Test from Proxmox first: `aws --endpoint-url http://localhost:7480 s3 ls`
+- Check credentials passed correctly to pod
 
 ### Phase 3 Issues
 
-**Issue**: Bucket creation fails via Argo workflow
+**Issue**: ExternalSecret not syncing
 **Solution**:
-- Check workflow logs: `argo logs <workflow-name> -n storage`
-- Verify secret exists: `kubectl get secret storage-external-secret -n storage`
-- Test manually from pod: `kubectl run --rm -it --image=amazon/aws-cli test -- /bin/sh`
+- Check ExternalSecret status: `kubectl get externalsecret -n ceph`
+- Verify SOPS secret exists: `kubectl get secret -n <namespace>`
+- Check ExternalSecret operator logs
 
 ### Phase 4 Issues
+
+**Issue**: Bucket creation fails via Argo workflow
+**Solution**:
+- Check workflow logs: `argo logs <workflow-name> -n ceph`
+- Verify secret exists: `kubectl get secret ceph-external-secret -n ceph`
+- Test manually from pod: `kubectl run --rm -it --image=amazon/aws-cli test -- /bin/sh`
+
+### Phase 5 Issues
+
+**Issue**: Application credentials not working
+**Solution**:
+- Verify user exists: `radosgw-admin user info --uid=<app-name>-blue`
+- Check secret contains correct keys: `kubectl get secret ceph-external-secret -n ceph -o yaml`
+- Test with specific credentials
+
+### Phase 6 Issues
 
 **Issue**: Backup workflow fails
 **Solution**:
@@ -1411,7 +1477,7 @@ Phase 10: Cleanup legacy pools
 - Check credentials for MinIO and R2
 - Review workflow logs for specific bucket errors
 
-### Phase 5 Issues
+### Phase 7 Issues
 
 **Issue**: Migration is slow
 **Solution**:
@@ -1425,16 +1491,22 @@ Phase 10: Cleanup legacy pools
 - Check for files with special characters or permissions issues
 - Use `rclone check` for detailed comparison
 
-### Phase 6 Issues
+### Phase 8 Issues
 
 **Issue**: Application can't connect to RGW
 **Solution**:
 - Verify endpoint URL is correct in config
-- Check DNS resolution: `nslookup external-rgw.storage.svc.cluster.local`
+- Check DNS resolution: `nslookup external-rgw.ceph.svc.cluster.local`
 - Verify credentials are correctly referenced in secrets
 - Check application logs for S3 errors
 
-### Phase 9 Issues
+**Issue**: IngressRoute not working
+**Solution**:
+- Verify IngressRoute exists: `kubectl get ingressroute -n ceph`
+- Check Traefik logs: `kubectl logs -n traefik deployment/traefik`
+- Test directly to Service: `curl http://external-rgw.ceph.svc.cluster.local:80`
+
+### Phase 11 Issues
 
 **Issue**: Kill-switch leaves orphaned PVs
 **Solution**:
@@ -1446,4 +1518,4 @@ Phase 10: Cleanup legacy pools
 ---
 
 *Document generated for the bhamm-lab infrastructure migration.*
-*Last updated: $(date)*
+*Last updated: 2025-01-15*
