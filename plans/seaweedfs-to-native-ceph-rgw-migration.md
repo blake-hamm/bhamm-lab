@@ -4,7 +4,7 @@
 
 Migrate from SeaweedFS to Ceph RGW running natively on Proxmox bare-metal nodes. This abandons the Rook Ceph approach — the standalone Ceph CSI drivers remain unchanged for block/file storage, and RGW is deployed via Ansible on the 3 Proxmox nodes, bridged into Kubernetes via a headless Service/Endpoints. S3 buckets use environment-suffixed names for blue/green isolation.
 
-**Migration Status**: `IN PROGRESS` — Phase 0 complete, Phase 1 ready to start.
+**Migration Status**: `IN PROGRESS` — Phase 1 complete (Service/EndpointSlice deployed), Phase 2 ready to start.
 
 ---
 
@@ -22,7 +22,7 @@ Migrate from SeaweedFS to Ceph RGW running natively on Proxmox bare-metal nodes.
 ### Target State
 - **Ceph CSI**: Standalone drivers **remain as-is** — no changes to `csi-rbd`, `csi-cephfs`, or their StorageClasses
 - **Ceph RGW**: Native daemon on 3 Proxmox nodes (method/indy/japan), port 7480, managed by Ansible
-- **K8s Networking**: Headless Service + Endpoints resource bridges RGW into the `ceph` namespace
+- **K8s Networking**: ClusterIP Service + EndpointSlice bridges RGW into the `ceph` namespace (port 80 → 7480)
 - **S3 Ingress**: Traefik IngressRoute (`s3.bhamm-lab.com`) — **deferred until cutover**
 - **Object Storage**: No Rook CRDs, no in-cluster RGW pods — RGW runs outside K8s lifecycle
 - **Bucket Naming**: Environment-suffixed (`loki-blue`, `loki-green`, `argo-artifacts-blue`, etc.) except `tofu-state` (shared)
@@ -144,14 +144,14 @@ aws --endpoint-url http://localhost:7480 s3 ls
 
 ## Phase 1: Kubernetes Networking Bridge
 
-**Status**: `NOT STARTED`
+**Status**: ✅ **COMPLETE**
 
-**Manifest**: `kubernetes/manifests/base/storage/rgw-endpoints-all.yaml`
+**Manifest**: `kubernetes/manifests/base/ceph/rgw-endpoints-all.yaml`
 **Sync Wave**: 7 (after namespace creation)
 
 ### 1.1 Create Namespace and Service Manifest
 
-Create `kubernetes/manifests/base/storage/rgw-endpoints-all.yaml`:
+Create `kubernetes/manifests/base/ceph/rgw-endpoints-all.yaml`:
 
 ```yaml
 apiVersion: v1
@@ -162,66 +162,74 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "7"
 spec:
-  clusterIP: None  # Headless — DNS returns all endpoint IPs
+  # clusterIP: auto-assigned (not headless)
+  # This allows Cilium to perform DNAT: 80 -> 7480
   ports:
     - name: s3
       port: 80
       targetPort: 7480
       protocol: TCP
 ---
-apiVersion: v1
-kind: Endpoints
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
 metadata:
   name: external-rgw
   namespace: ceph
+  labels:
+    kubernetes.io/service-name: external-rgw
   annotations:
     argocd.argoproj.io/sync-wave: "7"
-subsets:
+addressType: IPv4
+endpoints:
   - addresses:
-      - ip: 10.0.20.11
-      - ip: 10.0.20.12
-      - ip: 10.0.20.15
-    ports:
-      - name: s3
-        port: 7480
-        protocol: TCP
+      - 10.0.20.11
+    conditions: {}
+  - addresses:
+      - 10.0.20.12
+    conditions: {}
+  - addresses:
+      - 10.0.20.15
+    conditions: {}
+ports:
+  - name: s3
+    port: 7480
+    protocol: TCP
 ```
 
 ### 1.2 Commit and Sync
 
 ```bash
 # Add the manifest
-git add kubernetes/manifests/base/storage/rgw-endpoints-all.yaml
-git commit -m "Add RGW Service and Endpoints for internal K8s connectivity"
+git add kubernetes/manifests/base/ceph/rgw-endpoints-all.yaml
+git commit -m "Add RGW Service and EndpointSlice for internal K8s connectivity"
 git push
 
-# Sync via ArgoCD
+# Sync via ArgoCD (note: resources were manually created to test, then recreated via ArgoCD)
 argocd app sync storage
 ```
 
 ### 1.3 Verification
 
 ```bash
-# Verify headless Service
+# Verify ClusterIP Service (not headless)
 kubectl get svc external-rgw -n ceph
-# Expected: external-rgw   ClusterIP   None   <none>   80/TCP
+# Expected: external-rgw   ClusterIP   10.96.x.x   <none>   80/TCP
+# Note: ClusterIP should be auto-assigned, NOT "None"
 
-# Verify Endpoints
-kubectl get endpoints external-rgw -n ceph
+# Verify EndpointSlice (replaces deprecated v1 Endpoints)
+kubectl get endpointslice external-rgw -n ceph
 # Expected:
-# NAME           ENDPOINTS                                AGE
-# external-rgw   10.0.20.11:7480,10.0.20.12:7480,10.0.20.15:7480
+# NAME           ADDRESSTYPE   PORTS   ENDPOINTS                         AGE
+# external-rgw   IPv4          7480    10.0.20.11,10.0.20.12,10.0.20.15  5m
 
-# Test DNS resolution from within K8s
-kubectl run -n ceph --image=busybox:1.36 test-dns --rm -it --restart=Never -- nslookup external-rgw.ceph.svc.cluster.local
-# Expected: Should return all 3 IPs
-
-# Test connectivity (will get 403 since no users exist yet, but proves networking works)
+# Test connectivity (expect 404 - RGW is reachable, just no route at root path)
 kubectl run -n ceph --image=busybox:1.36 test-connect --rm -it --restart=Never -- wget -qO- http://external-rgw.ceph.svc.cluster.local:80 2>&1 | head -5
-# Expected: 403 Forbidden or connection refused (depending on RGW state)
+# Expected: "HTTP/1.1 404 Not Found" (proves port 80 -> 7480 DNAT works)
 ```
 
-**🛑 STOP: Do not proceed to Phase 2 until Endpoints show all 3 IPs and internal DNS resolves correctly.**
+**Key Design Decision**: Initially attempted a headless Service (`clusterIP: None`) with raw Endpoint IPs. This failed because headless Services don't perform port translation — the pod connected directly to `10.0.20.x:80`, but RGW only listens on `:7480`. Switched to **ClusterIP Service** which allows Cilium to perform DNAT from port 80 → 7480, and **EndpointSlice** (replaces deprecated v1 Endpoints) to define the backend RGW IPs.
+
+**🛑 STOP: Do not proceed to Phase 2 until Service shows an auto-assigned ClusterIP and connectivity returns 404 (proving DNAT works).**
 
 ---
 
@@ -1196,7 +1204,7 @@ If issues arise during any phase:
 **All phases must pass these checks:**
 
 - [x] **Phase 0**: RGW daemon running on all 3 Proxmox nodes, port 7480 reachable
-- [ ] **Phase 1**: Headless Service + Endpoints resolve, internal DNS works
+- [x] **Phase 1**: ClusterIP Service + EndpointSlice deployed, port 80 → 7480 DNAT working
 - [ ] **Phase 2**: Admin S3 user created, can create/delete buckets from K8s
 - [ ] **Phase 3**: ExternalSecrets synced, secret exists with admin credentials
 - [ ] **Phase 4**: All 5 buckets created and visible via `s3 ls`
