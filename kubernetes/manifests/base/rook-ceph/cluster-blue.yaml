@@ -71,7 +71,7 @@ spec:
                 enabled: false
               compression:
                 enabled: false
-              requireMsgr2: true
+              requireMsgr2: false
         # CephBlockPool for RBD - k8s-blue-rbd
         cephBlockPools:
           - name: k8s-blue-rbd
