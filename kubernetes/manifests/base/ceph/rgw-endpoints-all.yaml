@@ -6,7 +6,6 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "7"
 spec:
-  clusterIP: None
   ports:
     - name: s3
       port: 80
