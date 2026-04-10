@@ -188,6 +188,8 @@ spec:
                   requests:
                     cpu: "1000m"
                     memory: "1Gi"
+            storageClass:
+              enabled: false
         # Disable volume snapshot classes for now
         cephFileSystemVolumeSnapshotClass:
           enabled: false
