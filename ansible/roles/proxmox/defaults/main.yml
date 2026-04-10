@@ -1,6 +1,3 @@
 proxmox_pbs: false
 proxmox_reset_ceph: false
 pve_ceph_rgw_enabled: false
-pve_ceph_rgw_port: 7480
-pve_ceph_rgw_dns: "s3.bhamm-lab.com"
-pve_ceph_rgw_admin: true

@@ -77,6 +77,26 @@
     - inventory_hostname == (groups['proxmox'] | first)
     - not rgw_keyring_in_clusterfs.stat.exists | default(true)
   run_once: true
+# RGW pool creation - runs once on first node
+- name: Check if RGW data pool exists
+  ansible.builtin.command: ceph osd pool stats default.rgw.buckets.data
+  register: rgw_data_pool_check
+  failed_when: false
+  changed_when: false
+  when:
+    - pve_ceph_rgw_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+  run_once: true
+- name: Create RGW placement pools
+  ansible.builtin.command: ceph osd pool create {{ item }} 32
+  loop:
+    - default.rgw.buckets.data
+    - default.rgw.buckets.non-ec
+  when:
+    - pve_ceph_rgw_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+    - rgw_data_pool_check.rc != 0
+  run_once: true
 # Configure ceph.conf on each node
 - name: Ensure RGW client section in ceph.conf
   community.general.ini_file:
@@ -95,10 +115,6 @@
       value: /etc/ceph/ceph.client.radosgw.keyring
     - option: log file
       value: /var/log/ceph/client.radosgw.$host.log
-    - option: rgw frontends
-      value: "beast port={{ pve_ceph_rgw_port }}"
-    - option: rgw dns name
-      value: "{{ pve_ceph_rgw_dns }}"
   when: pve_ceph_rgw_enabled | bool
   notify: Restart ceph-radosgw
 # Copy keyring from ClusterFS to local path

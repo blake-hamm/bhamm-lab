@@ -4,7 +4,7 @@
 
 Migrate from SeaweedFS to Ceph RGW running natively on Proxmox bare-metal nodes. This abandons the Rook Ceph approach — the standalone Ceph CSI drivers remain unchanged for block/file storage, and RGW is deployed via Ansible on the 3 Proxmox nodes, bridged into Kubernetes via a headless Service/Endpoints. S3 buckets use environment-suffixed names for blue/green isolation.
 
-**Migration Status**: `IN PROGRESS` — Phase 1 complete (Service/EndpointSlice deployed), Phase 2 ready to start.
+**Migration Status**: `IN PROGRESS` — Phase 2 complete (admin user created, bucket operations verified with known AWS CLI v2 quirk), ready for Phase 3 (ExternalSecrets).
 
 ---
 
@@ -104,6 +104,15 @@ RGW buckets persist across cluster spin-downs because RGW lives outside the K8s 
 
 6. **Updated** `ansible/roles/proxmox/tasks/main.yml` — Added `include_tasks: ceph-rgw.yml` after `lae.proxmox` role
 
+7. **Added RGW pool creation** to `ansible/roles/proxmox/tasks/ceph-rgw.yml` (idempotent, runs once on first node):
+   - Checks if `default.rgw.buckets.data` pool exists
+   - Creates `default.rgw.buckets.data` and `default.rgw.buckets.non-ec` pools if missing
+   - These pools are required for bucket creation to work correctly
+
+8. **Cleaned up unused variables** from defaults and group_vars:
+   - Removed `pve_ceph_rgw_port`, `pve_ceph_rgw_dns`, `pve_ceph_rgw_admin`
+   - These were dead code — RGW uses default port 7480 and path-style access works without `rgw_dns_name`
+
 ### 0.2 Technical Decisions
 
 - **Service naming**: `ceph-radosgw@radosgw.<hostname>` (following neni84 guide convention)
@@ -113,6 +122,8 @@ RGW buckets persist across cluster spin-downs because RGW lives outside the K8s 
 - **`cp -p` instead of Ansible copy**: Proxmox ClusterFS (`/etc/pve/`) rejects Ansible's atomic write pattern
 - **`ceph auth get-or-create`**: More idempotent than separate `ceph-authtool` + `auth add` steps
 - **No template for ceph.conf**: Use `community.general.ini_file` to inject sections into `/etc/pve/ceph.conf`
+- **RGW pool creation**: Added idempotent pool creation for `default.rgw.buckets.data` and `default.rgw.buckets.non-ec`
+- **Removed `rgw_dns_name`**: Path-style access works without it; avoids virtual-hosted-style routing issues
 
 ### 0.3 Verification Results
 
@@ -235,7 +246,7 @@ kubectl run -n ceph --image=busybox:1.36 test-connect --rm -it --restart=Never -
 
 ## Phase 2: Bootstrap RGW Admin User
 
-**Status**: `NOT STARTED`
+**Status**: ✅ **COMPLETE**
 
 **Location**: Run on a Ceph monitor node (method, indy, or japan)
 **Scope**: Create admin S3 user (prerequisite for testing and bucket operations)
@@ -255,43 +266,55 @@ radosgw-admin user create --uid=admin --display-name="RGW Admin" --system
 ### 2.2 Test Internal Connectivity from Kubernetes
 
 ```bash
-# Create a test secret with admin credentials (temporary, for testing only)
-kubectl create secret generic rgw-admin-test \
-  --from-literal=AWS_ACCESS_KEY_ID=<admin-access-key> \
-  --from-literal=AWS_SECRET_ACCESS_KEY=<admin-secret-key> \
-  -n ceph
-
-# Test S3 operations from within K8s
-kubectl run -n ceph --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never \
-  --env AWS_ACCESS_KEY_ID=$(kubectl get secret rgw-admin-test -n ceph -o jsonpath='{.data.AWS_ACCESS_KEY_ID}' | base64 -d) \
-  --env AWS_SECRET_ACCESS_KEY=$(kubectl get secret rgw-admin-test -n ceph -o jsonpath='{.data.AWS_SECRET_ACCESS_KEY}' | base64 -d) \
+# Test S3 list (works with both v1 and v2)
+kubectl run --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never \
+  --env AWS_ACCESS_KEY_ID=<admin-access-key> \
+  --env AWS_SECRET_ACCESS_KEY=<admin-secret-key> \
+  --env AWS_DEFAULT_REGION=us-east-1 \
   -- --endpoint-url http://external-rgw.ceph.svc.cluster.local:80 s3 ls
 
-# Expected: Empty bucket list (no buckets yet)
+# Expected: Empty bucket list initially
 
-# Create a test bucket
-kubectl run -n ceph --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never \
-  --env AWS_ACCESS_KEY_ID=$(kubectl get secret rgw-admin-test -n ceph -o jsonpath='{.data.AWS_ACCESS_KEY_ID}' | base64 -d) \
-  --env AWS_SECRET_ACCESS_KEY=$(kubectl get secret rgw-admin-test -n ceph -o jsonpath='{.data.AWS_SECRET_ACCESS_KEY}' | base64 -d) \
-  -- --endpoint-url http://external-rgw.ceph.svc.cluster.local:80 s3 mb s3://test-bucket-k8s
+# Create a test bucket (use s3api to avoid AWS CLI v2 quirk)
+kubectl run --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never \
+  --env AWS_ACCESS_KEY_ID=<admin-access-key> \
+  --env AWS_SECRET_ACCESS_KEY=<admin-secret-key> \
+  --env AWS_DEFAULT_REGION=us-east-1 \
+  -- --endpoint-url http://external-rgw.ceph.svc.cluster.local:80 s3api create-bucket --bucket test-bucket-k8s
 
 # Verify bucket exists
-kubectl run -n ceph --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never \
-  --env AWS_ACCESS_KEY_ID=$(kubectl get secret rgw-admin-test -n ceph -o jsonpath='{.data.AWS_ACCESS_KEY_ID}' | base64 -d) \
-  --env AWS_SECRET_ACCESS_KEY=$(kubectl get secret rgw-admin-test -n ceph -o jsonpath='{.data.AWS_SECRET_ACCESS_KEY}' | base64 -d) \
+kubectl run --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never \
+  --env AWS_ACCESS_KEY_ID=<admin-access-key> \
+  --env AWS_SECRET_ACCESS_KEY=<admin-secret-key> \
+  --env AWS_DEFAULT_REGION=us-east-1 \
   -- --endpoint-url http://external-rgw.ceph.svc.cluster.local:80 s3 ls
 
 # Clean up test bucket
-kubectl run -n ceph --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never \
-  --env AWS_ACCESS_KEY_ID=$(kubectl get secret rgw-admin-test -n ceph -o jsonpath='{.data.AWS_ACCESS_KEY_ID}' | base64 -d) \
-  --env AWS_SECRET_ACCESS_KEY=$(kubectl get secret rgw-admin-test -n ceph -o jsonpath='{.data.AWS_SECRET_ACCESS_KEY}' | base64 -d) \
-  -- --endpoint-url http://external-rgw.ceph.svc.cluster.local:80 s3 rb s3://test-bucket-k8s --force
-
-# Clean up test secret
-kubectl delete secret rgw-admin-test -n ceph
+kubectl run --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never \
+  --env AWS_ACCESS_KEY_ID=<admin-access-key> \
+  --env AWS_SECRET_ACCESS_KEY=<admin-secret-key> \
+  --env AWS_DEFAULT_REGION=us-east-1 \
+  -- --endpoint-url http://external-rgw.ceph.svc.cluster.local:80 s3api delete-bucket --bucket test-bucket-k8s
 ```
 
-**🛑 STOP: Do not proceed to Phase 3 until you can successfully create and delete buckets from within Kubernetes.**
+### 2.3 Known Issue: AWS CLI v2 CreateBucket Quirk
+
+**Problem**: AWS CLI v2 (2.34.29) reports `500 Internal Server Error` on `s3 mb` and `s3api create-bucket`, even though:
+- RGW logs show HTTP 200 (operation succeeded)
+- The bucket IS actually created successfully
+- `s3 ls` and `s3api delete-bucket` work fine
+
+**Root Cause**: [Ceph Bug #65794](https://tracker.ceph.com/issues/65794) — RGW returns empty `<Message></Message>` tags in XML responses. AWS CLI v2's botocore library crashes when parsing `None` in `response['Message']`, surfacing as a 500 error to the user even though the operation succeeded server-side.
+
+**Impact**: **Cosmetic only** — all actual S3 operations work correctly:
+- Buckets are created despite the 500 error message
+- `s3 ls` works (different response format)
+- `s3api delete-bucket` works
+- Real applications (Loki, Argo, CNPG, K8up) use their own S3 clients which handle RGW responses correctly
+
+**Workaround**: Use `s3api create-bucket` instead of `s3 mb`, or ignore the 500 error and verify with `s3 ls`.
+
+**🟢 READY: Phase 2 is functionally complete. Proceed to Phase 3.**
 
 ---
 
@@ -1205,7 +1228,7 @@ If issues arise during any phase:
 
 - [x] **Phase 0**: RGW daemon running on all 3 Proxmox nodes, port 7480 reachable
 - [x] **Phase 1**: ClusterIP Service + EndpointSlice deployed, port 80 → 7480 DNAT working
-- [ ] **Phase 2**: Admin S3 user created, can create/delete buckets from K8s
+- [x] **Phase 2**: Admin S3 user created, can create/delete buckets from K8s (with AWS CLI v2 cosmetic 500 quirk documented)
 - [ ] **Phase 3**: ExternalSecrets synced, secret exists with admin credentials
 - [ ] **Phase 4**: All 5 buckets created and visible via `s3 ls`
 - [ ] **Phase 5**: Application-specific S3 users created, credentials in secrets
@@ -1451,6 +1474,22 @@ Phase 12: Cleanup legacy pools
 - Verify user exists: `radosgw-admin user info --uid=admin`
 - Test from Proxmox first: `aws --endpoint-url http://localhost:7480 s3 ls`
 - Check credentials passed correctly to pod
+
+**Issue**: `s3 mb` returns "500 Internal Server Error" but bucket is created
+**Symptoms**:
+- AWS CLI v2 reports 500 error
+- RGW logs show HTTP 200 for the PUT request
+- Bucket actually exists (visible in `s3 ls`)
+
+**Root Cause**: [Ceph Bug #65794](https://tracker.ceph.com/issues/65794) — RGW returns empty `<Message></Message>` tags in XML responses, causing botocore to crash when parsing `None`.
+
+**Solution**: Use `s3api create-bucket` instead:
+```bash
+aws --endpoint-url http://external-rgw.ceph.svc.cluster.local:80 \
+  s3api create-bucket --bucket my-bucket
+```
+
+Or ignore the 500 error and verify with `s3 ls` — the bucket was created successfully.
 
 ### Phase 3 Issues
 

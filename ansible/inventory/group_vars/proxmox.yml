@@ -97,9 +97,6 @@ pve_ceph_fs:
     storage: true
 pve_ceph_crush_rules: []
 pve_ceph_rgw_enabled: true
-pve_ceph_rgw_port: 7480
-pve_ceph_rgw_dns: "s3.bhamm-lab.com"
-pve_ceph_rgw_admin: true
 # pve_cluster_ha_groups:
 #   - name: main
 #     comment: "HA group"
