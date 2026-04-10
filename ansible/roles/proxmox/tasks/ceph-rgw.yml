@@ -1,0 +1,133 @@
+# Deploy Ceph RADOS Gateway (RGW) on Proxmox nodes
+# Based on: https://github.com/neni84/pve-ceph-radosgw
+- name: Install Ceph RGW package
+  ansible.builtin.apt:
+    name: radosgw
+    state: present
+    update_cache: true
+  when: pve_ceph_rgw_enabled | bool
+- name: Ensure ceph-radosgw target wants directory exists
+  ansible.builtin.file:
+    path: /etc/systemd/system/ceph-radosgw.target.wants
+    state: directory
+    mode: '0755'
+  when: pve_ceph_rgw_enabled | bool
+# Keyring generation - runs once on the first node
+- name: Check if RGW keyring exists in ClusterFS
+  ansible.builtin.stat:
+    path: /etc/pve/priv/ceph.client.radosgw.keyring
+  register: rgw_keyring_in_clusterfs
+  when:
+    - pve_ceph_rgw_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+  run_once: true
+- name: Ensure keyring directory exists
+  ansible.builtin.file:
+    path: /etc/ceph
+    state: directory
+    mode: '0755'
+  when:
+    - pve_ceph_rgw_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+    - not rgw_keyring_in_clusterfs.stat.exists | default(true)
+  run_once: true
+- name: Generate RGW client keys in Ceph auth
+  ansible.builtin.command:
+    cmd: ceph auth get-or-create client.radosgw.{{ item }} osd 'allow rwx' mon 'allow rwx'
+  loop: "{{ groups['proxmox'] }}"
+  loop_control:
+    label: "{{ item }}"
+  when:
+    - pve_ceph_rgw_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+    - not rgw_keyring_in_clusterfs.stat.exists | default(true)
+  run_once: true
+- name: Export RGW keyring from Ceph auth
+  ansible.builtin.command:
+    cmd: ceph auth export client.radosgw.{{ item }}
+  register: rgw_keys_export
+  loop: "{{ groups['proxmox'] }}"
+  loop_control:
+    label: "{{ item }}"
+  changed_when: false
+  when:
+    - pve_ceph_rgw_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+    - not rgw_keyring_in_clusterfs.stat.exists | default(true)
+  run_once: true
+- name: Assemble RGW keyring file
+  ansible.builtin.template:
+    src: ceph-radosgw.keyring.j2
+    dest: /etc/ceph/ceph.client.radosgw.keyring
+    owner: root
+    group: www-data
+    mode: '0640'
+  vars:
+    rgw_keys: "{{ rgw_keys_export.results | map(attribute='stdout') | list }}"
+  when:
+    - pve_ceph_rgw_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+    - not rgw_keyring_in_clusterfs.stat.exists | default(true)
+  run_once: true
+- name: Copy keyring to Proxmox ClusterFS for distribution
+  ansible.builtin.command:
+    cmd: cp -p /etc/ceph/ceph.client.radosgw.keyring /etc/pve/priv/ceph.client.radosgw.keyring
+  when:
+    - pve_ceph_rgw_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+    - not rgw_keyring_in_clusterfs.stat.exists | default(true)
+  run_once: true
+# Configure ceph.conf on each node
+- name: Ensure RGW client section in ceph.conf
+  community.general.ini_file:
+    path: /etc/pve/ceph.conf
+    section: "client.radosgw.{{ inventory_hostname }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    backup: true
+    owner: root
+    group: www-data
+    mode: '0640'
+  loop:
+    - option: host
+      value: "{{ inventory_hostname }}"
+    - option: keyring
+      value: /etc/ceph/ceph.client.radosgw.keyring
+    - option: log file
+      value: /var/log/ceph/client.radosgw.$host.log
+    - option: rgw frontends
+      value: "beast port={{ pve_ceph_rgw_port }}"
+    - option: rgw dns name
+      value: "{{ pve_ceph_rgw_dns }}"
+  when: pve_ceph_rgw_enabled | bool
+  notify: Restart ceph-radosgw
+# Copy keyring from ClusterFS to local path
+- name: Wait for keyring in Proxmox ClusterFS
+  ansible.builtin.wait_for:
+    path: /etc/pve/priv/ceph.client.radosgw.keyring
+    timeout: 60
+  when: pve_ceph_rgw_enabled | bool
+- name: Copy keyring from ClusterFS to local ceph directory
+  ansible.builtin.copy:
+    src: /etc/pve/priv/ceph.client.radosgw.keyring
+    dest: /etc/ceph/ceph.client.radosgw.keyring
+    owner: ceph
+    group: ceph
+    mode: '0640'
+    remote_src: true
+  when: pve_ceph_rgw_enabled | bool
+- name: Create systemd service symlink
+  ansible.builtin.file:
+    src: /lib/systemd/system/ceph-radosgw@.service
+    dest: /etc/systemd/system/ceph-radosgw.target.wants/ceph-radosgw@radosgw.{{ inventory_hostname }}.service
+    state: link
+    force: true
+  when: pve_ceph_rgw_enabled | bool
+  notify: Restart ceph-radosgw
+- name: Enable and start RGW service
+  ansible.builtin.systemd:
+    name: ceph-radosgw@radosgw.{{ inventory_hostname }}.service
+    state: started
+    enabled: true
+    daemon_reload: true
+  when: pve_ceph_rgw_enabled | bool

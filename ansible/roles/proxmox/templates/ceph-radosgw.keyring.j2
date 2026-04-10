@@ -1,0 +1,4 @@
+{# Assemble RGW keyring from exported ceph auth entries #}
+{% for key in rgw_keys %}
+{{ key }}
+{% endfor %}
