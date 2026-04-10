@@ -83,9 +83,10 @@ spec:
               parameters:
                 size: "3"
                 min_size: "2"
+              enableRBDStats: true
             storageClass:
               enabled: true
-              name: csi-rbd-sc-blue
+              name: ceph-block
               isDefault: true
               reclaimPolicy: Delete
               allowVolumeExpansion: true
@@ -109,13 +110,20 @@ spec:
           - name: k8s-blue-cephfs
             spec:
               metadataPool:
+                failureDomain: host
                 replicated:
                   size: 3
+                parameters:
+                  size: "3"
+                  min_size: "2"
+                enableRBDStats: true
               dataPools:
                 - name: data
                   failureDomain: host
-                  replicated:
-                    size: 3
+                  erasureCoded:
+                    dataChunks: 2
+                    codingChunks: 1
+                  enableRBDStats: true
               metadataServer:
                 activeCount: 1
                 activeStandby: true
@@ -128,7 +136,7 @@ spec:
                 priorityClassName: system-cluster-critical
             storageClass:
               enabled: true
-              name: csi-cephfs-sc-blue
+              name: ceph-filesystem
               isDefault: false
               reclaimPolicy: Delete
               allowVolumeExpansion: true
@@ -146,8 +154,40 @@ spec:
                 csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
                 csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
                 csi.storage.k8s.io/fstype: ext4
-        # Disable object stores - will be created in Phase 5
-        cephObjectStores: {}
+        # CephObjectStore for RGW S3 - rgw-blue
+        cephObjectStores:
+          - name: rgw-blue
+            spec:
+              # Metadata pool for object metadata
+              metadataPool:
+                failureDomain: host
+                replicated:
+                  size: 3
+                parameters:
+                  size: "3"
+                  min_size: "2"
+                enableRBDStats: true
+              # Data pool for object data - use erasure coding for efficiency
+              dataPool:
+                failureDomain: host
+                erasureCoded:
+                  dataChunks: 2
+                  codingChunks: 1
+                enableRBDStats: true
+              # Do NOT preserve pools on delete - enables kill switch cleanup
+              preservePoolsOnDelete: false
+              # RGW gateway configuration
+              gateway:
+                port: 80
+                # securePort: 443  # Enable if using SSL
+                instances: 2
+                priorityClassName: system-cluster-critical
+                resources:
+                  limits:
+                    memory: "2Gi"
+                  requests:
+                    cpu: "1000m"
+                    memory: "1Gi"
         # Disable volume snapshot classes for now
         cephFileSystemVolumeSnapshotClass:
           enabled: false
