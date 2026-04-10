@@ -26,10 +26,13 @@ addressType: IPv4
 endpoints:
   - addresses:
       - 10.0.20.11
+    conditions: {}
   - addresses:
       - 10.0.20.12
+    conditions: {}
   - addresses:
       - 10.0.20.15
+    conditions: {}
 ports:
   - name: s3
     port: 7480
