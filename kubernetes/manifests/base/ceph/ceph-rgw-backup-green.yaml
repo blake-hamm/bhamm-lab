@@ -105,7 +105,7 @@ spec:
                   --checkers=48 \
                   --s3-chunk-size=32M \
                   --s3-upload-concurrency=24 \
-                  --s3-disable-checksum \
+                  --s3-upload-compression \
                   --disable-http2 \
                   --stats=30s
               done
@@ -175,7 +175,7 @@ spec:
                 --checkers=48 \
                 --s3-chunk-size=32M \
                 --s3-upload-concurrency=24 \
-                --s3-disable-checksum \
+                --s3-upload-compression \
                 --disable-http2 \
                 --stats=30s
 
