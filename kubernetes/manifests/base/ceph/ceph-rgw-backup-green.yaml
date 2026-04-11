@@ -52,6 +52,11 @@ spec:
             - name: buckets
         container:
           image: rclone/rclone
+          resources:
+            requests:
+              memory: 512Mi
+            limits:
+              memory: 2Gi
           env:
             - name: RGW_ACCESS_KEY
               valueFrom:
@@ -103,10 +108,10 @@ spec:
                 rclone sync "rgw:${bucket}" "compress_minio:${bucket}" \
                   --progress \
                   --fast-list \
-                  --transfers=24 \
-                  --checkers=48 \
+                  --transfers=8 \
+                  --checkers=16 \
                   --s3-chunk-size=32M \
-                  --s3-upload-concurrency=24 \
+                  --s3-upload-concurrency=4 \
                   --disable-http2 \
                   --stats=30s
               done
@@ -121,6 +126,11 @@ spec:
       - name: rclone-sync-to-r2
         container:
           image: rclone/rclone
+          resources:
+            requests:
+              memory: 512Mi
+            limits:
+              memory: 2Gi
           env:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
@@ -172,10 +182,10 @@ spec:
               rclone sync minio:ceph-rgw r2:ceph-rgw \
                 --progress \
                 --fast-list \
-                --transfers=24 \
-                --checkers=48 \
+                --transfers=8 \
+                --checkers=16 \
                 --s3-chunk-size=32M \
-                --s3-upload-concurrency=24 \
+                --s3-upload-concurrency=4 \
                 --disable-http2 \
                 --stats=30s
 

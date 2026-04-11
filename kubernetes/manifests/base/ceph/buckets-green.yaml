@@ -1,10 +1,8 @@
 apiVersion: argoproj.io/v1alpha1
-kind: Workflow
+kind: ClusterWorkflowTemplate
 metadata:
   name: create-ceph-buckets-green
-  namespace: ceph
   annotations:
-    argocd.argoproj.io/sync-wave: "9"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   serviceAccountName: argo-workflow
@@ -49,6 +47,11 @@ spec:
     - name: list-buckets
       container:
         image: rclone/rclone
+        resources:
+          requests:
+            memory: 128Mi
+          limits:
+            memory: 256Mi
         env:
           - name: AWS_ACCESS_KEY_ID
             valueFrom:
@@ -80,6 +83,11 @@ spec:
           - name: bucket
       container:
         image: rclone/rclone
+        resources:
+          requests:
+            memory: 512Mi
+          limits:
+            memory: 2Gi
         env:
           - name: RGW_ACCESS_KEY
             valueFrom:
@@ -130,13 +138,18 @@ spec:
             rclone sync "compress_minio:${BUCKET}" "rgw:${BUCKET}" \
               --progress \
               --fast-list \
-              --transfers=24 \
-              --checkers=48 \
+              --transfers=8 \
+              --checkers=16 \
               --disable-http2 \
               --stats=30s
     - name: verify-restore
       container:
         image: rclone/rclone
+        resources:
+          requests:
+            memory: 256Mi
+          limits:
+            memory: 512Mi
         env:
           - name: RGW_ACCESS_KEY
             valueFrom:
