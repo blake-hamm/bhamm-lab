@@ -644,95 +644,68 @@ rclone ls r2:ceph-rgw
 
 ## Phase 7: Data Migration (SeaweedFS → Ceph RGW)
 
-**Status**: `NOT STARTED`
+**Status**: `IN PROGRESS`
 
 **Warning**: Both SeaweedFS and RGW will serve data simultaneously during migration. Applications continue pointing to SeaweedFS until Phase 8 cutover. Do not stop SeaweedFS until migration is verified.
 
-### 7.1 Create Migration Pod
+### 7.0 Add SeaweedFS Credentials to ceph-external-secret
 
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: seaweedfs-to-rgw-migration
-  namespace: ceph
-spec:
-  containers:
-  - name: rclone
-    image: rclone/rclone
-    command: ["/bin/sh", "-c"]
-    args:
-    - |
-      set -ex
-      # Source: SeaweedFS
-      rclone config create swfs s3 provider=Other \
-        access_key_id $SWFS_ACCESS_KEY \
-        secret_access_key $SWFS_SECRET_KEY \
-        endpoint=http://seaweedfs-s3.seaweedfs:8333
+The migration workflow needs both SeaweedFS (source) and RGW (destination) credentials. Rather than creating a separate migration secret, add SeaweedFS credentials to the existing `ceph-external-secret` via `common-all.yaml`.
 
-      # Destination: Ceph RGW
-      rclone config create rgw s3 provider=Other \
-        access_key_id $RGW_ACCESS_KEY \
-        secret_access_key $RGW_SECRET_KEY \
-        endpoint=http://external-rgw.ceph.svc.cluster.local:80
+**File**: `kubernetes/manifests/base/ceph/common-all.yaml`
 
-      # Migrate buckets to RGW (1:1 name mapping, no renaming)
-      echo "=== Migrating loki-data → loki-data ==="
-      rclone copy swfs:loki-data rgw:loki-data \
-        --progress --transfers=24 --checkers=48 \
-        --s3-chunk-size=32M --fast-list
+Added 2 entries to `externalSecrets.secrets`:
 
-      echo "=== Migrating argo-artifacts → argo-artifacts ==="
-      rclone copy swfs:argo-artifacts rgw:argo-artifacts \
-        --progress --transfers=24 --checkers=48 \
-        --s3-chunk-size=32M --fast-list
+| Secret Key | Vault Path | Vault Property |
+|---|---|---|
+| `swfs_access_key` | `/core/seaweedfs` | `admin_access_key_id` |
+| `swfs_secret_key` | `/core/seaweedfs` | `admin_secret_access_key` |
 
-      echo "=== Migrating cnpg-backups → cnpg-backups ==="
-      rclone copy swfs:cnpg-backups rgw:cnpg-backups \
-        --progress --transfers=24 --checkers=48 \
-        --s3-chunk-size=32M --fast-list
-
-      echo "=== Migrating k8up-backups → k8up-backups ==="
-      rclone copy swfs:k8up-backups rgw:k8up-backups \
-        --progress --transfers=24 --checkers=48 \
-        --s3-chunk-size=32M --fast-list
-
-      echo "=== Migrating tofu-state → tofu-state ==="
-      rclone copy swfs:tofu-state rgw:tofu-state \
-        --progress --transfers=24 --checkers=48 \
-        --s3-chunk-size=32M --fast-list
-
-      echo "=== Verification ==="
-      for bucket in loki-data argo-artifacts cnpg-backups k8up-backups tofu-state; do
-        echo "Bucket: $bucket"
-        rclone size rgw:$bucket
-      done
-    envFrom:
-    - secretRef:
-        name: migration-credentials  # Combined secret with both SWFS and RGW creds
-  restartPolicy: Never
-```
-
-Create the secret:
+These can be removed after Phase 9 (SeaweedFS removal) when they're no longer needed.
 
 ```bash
-# Create combined migration credentials secret
-kubectl create secret generic migration-credentials \
-  --from-literal=SWFS_ACCESS_KEY=<seaweedfs-access-key> \
-  --from-literal=SWFS_SECRET_KEY=<seaweedfs-secret-key> \
-  --from-literal=RGW_ACCESS_KEY=<admin-access-key> \
-  --from-literal=RGW_SECRET_KEY=<admin-secret-key> \
-  -n ceph
+# Sync to update the secret
+argocd app sync ceph-common
+
+# Verify new keys exist
+kubectl get secret ceph-external-secret -n ceph -o jsonpath='{.data}' | jq -r 'keys[]'
+# Should include: s3_user, s3_access_key, s3_secret_key, swfs_access_key, swfs_secret_key, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_ENDPOINT, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_ENDPOINT
 ```
+
+### 7.1 Create Migration Workflow
+
+**File**: `kubernetes/hack/seaweedfs-to-rgw-migration.yaml`
+
+An Argo Workflow (one-time, not a CronWorkflow) in `namespace: ceph` that uses the same patterns as `ceph-rgw-backup-all.yaml`:
+
+1. **`list-buckets`** — Dynamically discovers all SeaweedFS buckets via `rclone lsd swfs:` (no hardcoded bucket list). Uses `rclone config create ... >&2` to keep config notices out of `outputs.result` (lesson from Phase 6).
+
+2. **`migrate-buckets`** — Receives the bucket list via `{{steps.list-buckets.outputs.result}}` and iterates with a `for` loop. For each bucket, runs `rclone copy swfs:<bucket> rgw:<bucket>` with the same proven flags from the backup CronWorkflow.
+
+3. **`verify-migration`** — Compares `rclone size` output for each bucket between SeaweedFS and RGW, reporting object counts and byte sizes. Flags mismatches.
+
+All credentials come from `ceph-external-secret`:
+
+| Env Var | Secret Key | Source |
+|---|---|---|
+| `SWFS_ACCESS_KEY` | `swfs_access_key` | SeaweedFS admin access key |
+| `SWFS_SECRET_KEY` | `swfs_secret_key` | SeaweedFS admin secret key |
+| `RGW_ACCESS_KEY` | `s3_access_key` | RGW admin access key |
+| `RGW_SECRET_KEY` | `s3_secret_key` | RGW admin secret key |
+
+rclone flags: `--progress --fast-list --transfers=24 --checkers=48 --s3-chunk-size=32M --s3-upload-concurrency=24 --s3-disable-checksum --disable-http2 --stats=30s` (matching the backup CronWorkflow).
 
 ### 7.2 Run Migration
 
 ```bash
-# Apply the migration pod
-kubectl apply -f migration-pod.yaml
+# Apply the workflow
+kubectl apply -f kubernetes/hack/seaweedfs-to-rgw-migration.yaml
 
-# Watch the migration
-kubectl logs -f seaweedfs-to-rgw-migration -n ceph
+# Submit the workflow
+argo submit seaweedfs-to-rgw-migration -n ceph
+
+# Watch the workflow
+argo watch <workflow-name> -n ceph
 
 # Monitor progress — this could take hours for ~3TB
 # Check the final verification output
@@ -742,21 +715,32 @@ kubectl logs -f seaweedfs-to-rgw-migration -n ceph
 
 ```bash
 # List RGW buckets to confirm all migrated
-kubectl run -n ceph --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never \
-  --env AWS_ACCESS_KEY_ID=$(kubectl get secret ceph-external-secret -n ceph -o jsonpath='{.data.access_key_id}' | base64 -d) \
-  --env AWS_SECRET_ACCESS_KEY=$(kubectl get secret ceph-external-secret -n ceph -o jsonpath='{.data.secret_access_key}' | base64 -d) \
-  -- --endpoint-url http://external-rgw.ceph.svc.cluster.local:80 s3 ls
+kubectl run -n ceph --image=minio/mc:RELEASE.2025-08-13T08-35-41Z test-s3 --rm -it --restart=Never \
+  --env ACCESS_KEY=$(kubectl get secret ceph-external-secret -n ceph -o jsonpath='{.data.s3_access_key}' | base64 -d) \
+  --env SECRET_KEY=$(kubectl get secret ceph-external-secret -n ceph -o jsonpath='{.data.s3_secret_key}' | base64 -d) \
+  -- /bin/sh -c 'mc alias set rgw http://external-rgw.ceph.svc.cluster.local:80 $ACCESS_KEY $SECRET_KEY && mc ls rgw'
 
 # Spot-check key files in loki-data
-kubectl run -n ceph --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never \
-  --env AWS_ACCESS_KEY_ID=$(kubectl get secret ceph-external-secret -n ceph -o jsonpath='{.data.access_key_id}' | base64 -d) \
-  --env AWS_SECRET_ACCESS_KEY=$(kubectl get secret ceph-external-secret -n ceph -o jsonpath='{.data.secret_access_key}' | base64 -d) \
-  -- --endpoint-url http://external-rgw.ceph.svc.cluster.local:80 s3 ls s3://loki-data --recursive | head -20
+kubectl run -n ceph --image=minio/mc:RELEASE.2025-08-13T08-35-41Z test-s3 --rm -it --restart=Never \
+  --env ACCESS_KEY=$(kubectl get secret ceph-external-secret -n ceph -o jsonpath='{.data.s3_access_key}' | base64 -d) \
+  --env SECRET_KEY=$(kubectl get secret ceph-external-secret -n ceph -o jsonpath='{.data.s3_secret_key}' | base64 -d) \
+  -- /bin/sh -c 'mc alias set rgw http://external-rgw.ceph.svc.cluster.local:80 $ACCESS_KEY $SECRET_KEY && mc ls rgw/loki-data'
 
-# Verify file counts match
-# Compare: rclone ls swfs:loki-data | wc -l
-# With:    rclone ls rgw:loki-data | wc -l
+# Verify file counts match between SeaweedFS and RGW
+# (The verify-migration step in the workflow already does this, but for manual verification:)
+# Compare: rclone size swfs:loki-data
+# With:    rclone size rgw:loki-data
 ```
+
+### 7.4 Key Design Decisions
+
+- **Argo Workflow instead of raw Pod**: Consistent with existing patterns (bucket creation, backups). Provides better logging, retry, and Argo UI visibility. Stored in `kubernetes/hack/` as a one-off script (not GitOps-managed).
+- **Credentials via ceph-external-secret**: No separate migration secret needed. SeaweedFS creds (`swfs_access_key`/`swfs_secret_key`) added to the existing ExternalSecret in `common-all.yaml`. These can be removed after Phase 9.
+- **Dynamic bucket discovery**: The `list-buckets` step uses `rclone lsd swfs:` to discover all buckets at runtime, rather than hardcoding bucket names. This catches any undocumented buckets automatically.
+- **Single copy pass**: Applications continue writing to SeaweedFS during migration. Any delta written during migration is acceptable — Phase 8 cutover will switch endpoints to RGW, and new data will go directly to RGW.
+- **Sequential bucket iteration**: Follows the `for bucket in $BUCKETS` pattern from the backup CronWorkflow rather than Argo `withParam` fan-out, keeping the migration simple and serializable.
+- **rclone config create → stderr**: All `rclone config create` commands redirect to `>&2` to prevent config notices from polluting `outputs.result` (lesson from Phase 6 hiccup 2).
+- **aws-cli avoided**: Uses `minio/mc` for manual verification instead of `aws-cli`, which has the Ceph Bug #65794 empty message tag quirk.
 
 **🛑 STOP: Do not proceed to Phase 8 until migration completes and file counts match between SeaweedFS and RGW.**
 
@@ -1108,7 +1092,7 @@ If issues arise during any phase:
 - [x] **Phase 4**: All 8 buckets created and visible via `s3 ls`
 - [x] **Phase 5**: ~~Application-specific S3 users~~ — SKIPPED, using shared admin credentials
 - [x] **Phase 6**: Backup CronWorkflow succeeds, data visible in MinIO
-- [ ] **Phase 7**: Migration completes, file counts match between SeaweedFS and RGW
+- [ ] **Phase 7**: Migration workflow runs successfully, file counts match between SeaweedFS and RGW, SeaweedFS creds added to ceph-external-secret
 - [ ] **Phase 8**: All 6 application endpoint references updated, IngressRoute active
 - [ ] **Phase 9**: SeaweedFS removed, applications continue functioning
 - [ ] **Phase 10**: Green cluster S3 configuration ready (shared users/buckets, no new provisioning needed)

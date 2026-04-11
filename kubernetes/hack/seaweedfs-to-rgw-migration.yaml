@@ -1,0 +1,172 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: seaweedfs-to-rgw-migration
+  namespace: ceph
+spec:
+  serviceAccountName: argo-workflow
+  entrypoint: main
+  templates:
+    - name: main
+      steps:
+        - - name: list-buckets
+            template: list-buckets
+        - - name: migrate-buckets
+            template: migrate-buckets
+            arguments:
+              parameters:
+                - name: buckets
+                  value: "{{steps.list-buckets.outputs.result}}"
+        - - name: verify-migration
+            template: verify-migration
+            arguments:
+              parameters:
+                - name: buckets
+                  value: "{{steps.list-buckets.outputs.result}}"
+    - name: list-buckets
+      container:
+        image: rclone/rclone
+        env:
+          - name: SWFS_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: swfs_access_key
+          - name: SWFS_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: swfs_secret_key
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            rclone config create swfs s3 provider Other access_key_id $SWFS_ACCESS_KEY secret_access_key $SWFS_SECRET_KEY endpoint http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333 >&2
+            rclone lsd swfs: | awk '{print $NF}' | tr '\n' ' '
+    - name: migrate-buckets
+      inputs:
+        parameters:
+          - name: buckets
+        container:
+          image: rclone/rclone
+          env:
+            - name: SWFS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: swfs_access_key
+            - name: SWFS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: swfs_secret_key
+            - name: RGW_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: s3_access_key
+            - name: RGW_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: s3_secret_key
+            - name: BUCKETS
+              value: "{{inputs.parameters.buckets}}"
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -ex
+              rclone config create swfs s3 \
+                provider Other \
+                access_key_id $SWFS_ACCESS_KEY \
+                secret_access_key $SWFS_SECRET_KEY \
+                endpoint http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
+
+              rclone config create rgw s3 \
+                provider Other \
+                access_key_id $RGW_ACCESS_KEY \
+                secret_access_key $RGW_SECRET_KEY \
+                endpoint http://external-rgw.ceph.svc.cluster.local:80
+
+              for bucket in $BUCKETS; do
+                echo "=== Migrating swfs:${bucket} → rgw:${bucket} ==="
+                rclone copy "swfs:${bucket}" "rgw:${bucket}" \
+                  --progress \
+                  --fast-list \
+                  --transfers=24 \
+                  --checkers=48 \
+                  --s3-chunk-size=32M \
+                  --s3-upload-concurrency=24 \
+                  --s3-disable-checksum \
+                  --disable-http2 \
+                  --stats=30s
+              done
+    - name: verify-migration
+      inputs:
+        parameters:
+          - name: buckets
+        container:
+          image: rclone/rclone
+          env:
+            - name: SWFS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: swfs_access_key
+            - name: SWFS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: swfs_secret_key
+            - name: RGW_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: s3_access_key
+            - name: RGW_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: s3_secret_key
+            - name: BUCKETS
+              value: "{{inputs.parameters.buckets}}"
+          command: ["/bin/sh", "-c"]
+          args:
+            - |-
+              set -ex
+              rclone config create swfs s3 \
+                provider Other \
+                access_key_id $SWFS_ACCESS_KEY \
+                secret_access_key $SWFS_SECRET_KEY \
+                endpoint http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333 >&2
+
+              rclone config create rgw s3 \
+                provider Other \
+                access_key_id $RGW_ACCESS_KEY \
+                secret_access_key $RGW_SECRET_KEY \
+                endpoint http://external-rgw.ceph.svc.cluster.local:80 >&2
+
+              echo "=== Verifying migration ==="
+              ALL_MATCH=true
+              for bucket in $BUCKETS; do
+                echo "--- Bucket: ${bucket} ---"
+                SWFS_SIZE=$(rclone size "swfs:${bucket}" --json 2>/dev/null)
+                RGW_SIZE=$(rclone size "rgw:${bucket}" --json 2>/dev/null)
+                SWFS_COUNT=$(echo "$SWFS_SIZE" | awk -F'"count":' '{print $2}' | awk -F',' '{print $1}')
+                SWFS_BYTES=$(echo "$SWFS_SIZE" | awk -F'"bytes":' '{print $2}' | awk -F'[},]' '{print $1}')
+                RGW_COUNT=$(echo "$RGW_SIZE" | awk -F'"count":' '{print $2}' | awk -F',' '{print $1}')
+                RGW_BYTES=$(echo "$RGW_SIZE" | awk -F'"bytes":' '{print $2}' | awk -F'[},]' '{print $1}')
+                echo "  SeaweedFS: ${SWFS_COUNT} objects, ${SWFS_BYTES} bytes"
+                echo "  RGW:        ${RGW_COUNT} objects, ${RGW_BYTES} bytes"
+                if [ "$SWFS_COUNT" != "$RGW_COUNT" ] || [ "$SWFS_BYTES" != "$RGW_BYTES" ]; then
+                  echo "  WARNING: Mismatch detected!"
+                  ALL_MATCH=false
+                else
+                  echo "  OK: Counts and sizes match"
+                fi
+              done
+
+              if [ "$ALL_MATCH" = true ]; then
+                echo "=== SUCCESS: All buckets match ==="
+              else
+                echo "=== WARNING: Some buckets have mismatches — review output above ==="
+              fi

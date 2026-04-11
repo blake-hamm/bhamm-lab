@@ -56,6 +56,14 @@ spec:
               remoteRef:
                 key: /external/cloudflare
                 property: r2-endpoint
+            - secretKey: swfs_access_key
+              remoteRef:
+                key: /core/seaweedfs
+                property: admin_access_key_id
+            - secretKey: swfs_secret_key
+              remoteRef:
+                key: /core/seaweedfs
+                property: admin_secret_access_key
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
