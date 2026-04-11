@@ -29,14 +29,14 @@ spec:
                     value: "{{steps.list-buckets.outputs.result}}"
       - name: list-buckets
         container:
-          image: minio/mc:RELEASE.2025-08-13T08-35-41Z
+          image: rclone/rclone
           env:
-            - name: ACCESS_KEY
+            - name: RGW_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
                   name: ceph-external-secret
                   key: s3_access_key
-            - name: SECRET_KEY
+            - name: RGW_SECRET_KEY
               valueFrom:
                 secretKeyRef:
                   name: ceph-external-secret
@@ -44,8 +44,8 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
-              mc alias set ceph http://external-rgw.ceph.svc.cluster.local:80 $ACCESS_KEY $SECRET_KEY
-              mc ls ceph/ | awk '{print $NF}' | sed 's:/$::' | sort | tr '\n' ' '
+              rclone config create rgw s3 provider Other access_key_id $RGW_ACCESS_KEY secret_access_key $RGW_SECRET_KEY endpoint http://external-rgw.ceph.svc.cluster.local:80 >&2
+              rclone lsd rgw: | awk '{print $NF}' | tr '\n' ' '
       - name: rclone-sync-to-minio
         inputs:
           parameters:
