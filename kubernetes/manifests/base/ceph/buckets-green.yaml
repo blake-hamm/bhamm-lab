@@ -28,7 +28,7 @@ spec:
                 - name: destroy-and-create
                   value: "true"
                 - name: aws-auth-secret
-                  value: ceph-external-secret
+                  value: argo-external-secret
                 - name: aws-access-key-id
                   value: s3_access_key
                 - name: aws-secret-access-key

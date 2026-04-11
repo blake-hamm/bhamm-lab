@@ -36,6 +36,14 @@ spec:
               remoteRef:
                 key: /core/seaweedfs
                 property: admin_secret_access_key
+            - secretKey: s3_access_key
+              remoteRef:
+                key: /core/ceph
+                property: s3_access_key
+            - secretKey: s3_secret_key
+              remoteRef:
+                key: /core/ceph
+                property: s3_secret_key
             - secretKey: robot-username
               remoteRef:
                 key: /core/harbor
