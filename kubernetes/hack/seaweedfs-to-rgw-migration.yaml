@@ -60,7 +60,7 @@ spec:
               secret_access_key $RGW_SECRET_KEY \
               endpoint http://external-rgw.ceph.svc.cluster.local:80 >&2
 
-            for bucket in cnpg-backups k8up-backups mlflow proxmox-backup-server tofu-state; do
+            for bucket in cnpg-backups k8up-backups mlflow; do
               echo "=== Migrating swfs:${bucket} → rgw:${bucket} ==="
               if ! rclone lsd "swfs:${bucket}" >/dev/null 2>&1; then
                 echo "WARNING: swfs:${bucket} does not exist or is empty, skipping"

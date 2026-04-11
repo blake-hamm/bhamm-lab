@@ -4,7 +4,7 @@
 
 Migrate from SeaweedFS to Ceph RGW running natively on Proxmox bare-metal nodes. This abandons the Rook Ceph approach — the standalone Ceph CSI drivers remain unchanged for block/file storage, and RGW is deployed via Ansible on the 3 Proxmox nodes, bridged into Kubernetes via a ClusterIP Service/EndpointSlice. S3 buckets use plain (non-suffixed) names — the active cluster (blue or green) always writes to the same canonical buckets since clusters never run simultaneously and RGW persists outside the K8s lifecycle.
 
-**Migration Status**: `IN PROGRESS` — Phase 6 complete (Backup CronWorkflow deployed and tested with dynamic bucket discovery). Phase 5 skipped — using shared admin credentials for all S3 applications.
+**Migration Status**: `IN PROGRESS` — Phase 7 data migration running. Phase 6 complete (Backup CronWorkflow deployed and tested). Phase 5 skipped — using shared admin credentials for all S3 applications. MTU mismatch resolved; now running with aggressive rclone concurrency (64 transfers) to saturate 10GbE.
 
 ---
 
@@ -678,11 +678,9 @@ kubectl get secret ceph-external-secret -n ceph -o jsonpath='{.data}' | jq -r 'k
 
 An Argo Workflow (one-time, not a CronWorkflow) in `namespace: ceph` that uses the same patterns as `ceph-rgw-backup-all.yaml`:
 
-1. **`list-buckets`** — Dynamically discovers all SeaweedFS buckets via `rclone lsd swfs:` (no hardcoded bucket list). Uses `rclone config create ... >&2` to keep config notices out of `outputs.result` (lesson from Phase 6).
+1. **`migrate-buckets`** — Iterates over a hardcoded list of 5 buckets (`cnpg-backups k8up-backups mlflow proxmox-backup-server tofu-state`). For each bucket, checks if it exists in SeaweedFS via `rclone lsd`, then runs `rclone copy swfs:<bucket> rgw:<bucket>` with aggressive concurrency flags. Buckets that don't exist in SeaweedFS (`mlflow`, `proxmox-backup-server`) are skipped. Resource limits: 2 CPU / 4Gi request, 4 CPU / 8Gi limit.
 
-2. **`migrate-buckets`** — Receives the bucket list via `{{steps.list-buckets.outputs.result}}` and iterates with a `for` loop. For each bucket, runs `rclone copy swfs:<bucket> rgw:<bucket>` with the same proven flags from the backup CronWorkflow.
-
-3. **`verify-migration`** — Compares `rclone size` output for each bucket between SeaweedFS and RGW, reporting object counts and byte sizes. Flags mismatches.
+2. **`verify-migration`** — Compares `rclone size` output for each bucket between SeaweedFS and RGW, reporting object counts and byte sizes. Flags mismatches.
 
 All credentials come from `ceph-external-secret`:
 
@@ -693,7 +691,22 @@ All credentials come from `ceph-external-secret`:
 | `RGW_ACCESS_KEY` | `s3_access_key` | RGW admin access key |
 | `RGW_SECRET_KEY` | `s3_secret_key` | RGW admin secret key |
 
-rclone flags: `--progress --fast-list --transfers=24 --checkers=48 --s3-chunk-size=32M --s3-upload-concurrency=24 --s3-disable-checksum --disable-http2 --stats=30s` (matching the backup CronWorkflow).
+rclone flags (current — aggressively tuned for 10GbE post-MTU fix):
+```
+--progress --fast-list --no-check-dest
+--transfers=64 --checkers=128 --buffer-size=32M
+--s3-chunk-size=16M --s3-disable-checksum
+--s3-no-head --s3-no-check-bucket --stats=15s
+```
+
+**rclone flag evolution** (see Section 7.5 for full details):
+
+| Iteration | Flags | Result |
+|---|---|---|
+| Initial | `--transfers=24 --checkers=48 --s3-chunk-size=32M --s3-upload-concurrency=24 --s3-disable-checksum --disable-http2 --stats=30s` | Dropped connections due to MTU mismatch |
+| Conservative | `--transfers=16 --checkers=32 --s3-chunk-size=16M --s3-upload-concurrency=8 --s3-disable-checksum --s3-no-head --s3-no-check-bucket --checksum --stats=30s` | ~180-200 MiB/s but RGW TCP drops with `--s3-upload-cutoff=0` |
+| Post-MTU fix | `--transfers=8 --checkers=8 --s3-chunk-size=16M --s3-upload-concurrency=2 --s3-disable-checksum --s3-no-head --s3-no-check-bucket --stats=15s` | ~180-200 MiB/s, stable |
+| Current (aggressive) | `--transfers=64 --checkers=128 --buffer-size=32M --s3-chunk-size=16M --s3-disable-checksum --s3-no-head --s3-no-check-bucket --stats=15s` | Testing 10GbE saturation |
 
 ### 7.2 Run Migration
 
@@ -701,14 +714,17 @@ rclone flags: `--progress --fast-list --transfers=24 --checkers=48 --s3-chunk-si
 # Apply the workflow
 kubectl apply -f kubernetes/hack/seaweedfs-to-rgw-migration.yaml
 
+# Delete any existing completed/failed workflow instance first
+kubectl delete workflow seaweedfs-to-rgw-migration -n ceph 2>/dev/null || true
+
 # Submit the workflow
 argo submit seaweedfs-to-rgw-migration -n ceph
 
 # Watch the workflow
 argo watch <workflow-name> -n ceph
 
-# Monitor progress — this could take hours for ~3TB
-# Check the final verification output
+# Monitor progress — cnpg-backups (~7,600+ 16MB WAL files, ~142-224 GB) will take the longest
+# Re-run after completion as a cleanup pass (rclone copy is idempotent — only failed/delta files transfer)
 ```
 
 ### 7.3 Verification
@@ -736,13 +752,62 @@ kubectl run -n ceph --image=minio/mc:RELEASE.2025-08-13T08-35-41Z test-s3 --rm -
 
 - **Argo Workflow instead of raw Pod**: Consistent with existing patterns (bucket creation, backups). Provides better logging, retry, and Argo UI visibility. Stored in `kubernetes/hack/` as a one-off script (not GitOps-managed).
 - **Credentials via ceph-external-secret**: No separate migration secret needed. SeaweedFS creds (`swfs_access_key`/`swfs_secret_key`) added to the existing ExternalSecret in `common-all.yaml`. These can be removed after Phase 9.
-- **Dynamic bucket discovery**: The `list-buckets` step uses `rclone lsd swfs:` to discover all buckets at runtime, rather than hardcoding bucket names. This catches any undocumented buckets automatically.
-- **Single copy pass**: Applications continue writing to SeaweedFS during migration. Any delta written during migration is acceptable — Phase 8 cutover will switch endpoints to RGW, and new data will go directly to RGW.
-- **Sequential bucket iteration**: Follows the `for bucket in $BUCKETS` pattern from the backup CronWorkflow rather than Argo `withParam` fan-out, keeping the migration simple and serializable.
+- **Hardcoded bucket list instead of dynamic discovery**: Initially used `rclone lsd swfs:` to discover all buckets at runtime, but switched to a hardcoded list of 5 buckets (`cnpg-backups k8up-backups mlflow proxmox-backup-server tofu-state`). This avoids migrating SeaweedFS-internal buckets (e.g., `loki-data`, `argo-artifacts` which are already in RGW via bucket creation, and internal SeaweedFS metadata). Buckets that don't exist in SeaweedFS (`mlflow`, `proxmox-backup-server`) are skipped via `rclone lsd` check.
+- **`rclone copy` (not `sync`)**: `copy` is idempotent and never deletes; `sync` would delete files in RGW that don't exist in SeaweedFS (dangerous for the 3 new RGW-only buckets: `beyond-vibes`, `mlflow`, `proxmox-backup-server`).
+- **Single copy pass**: Applications continue writing to SeaweedFS during migration. Any delta written during migration is acceptable — Phase 8 cutover will switch endpoints to RGW, and new data will go directly to RGW. A cleanup re-run of the workflow catches any files that failed or were written during the first pass.
+- **Sequential bucket iteration**: Follows the `for bucket in ...` pattern rather than Argo `withParam` fan-out, keeping the migration simple and serializable.
 - **rclone config create → stderr**: All `rclone config create` commands redirect to `>&2` to prevent config notices from polluting `outputs.result` (lesson from Phase 6 hiccup 2).
 - **aws-cli avoided**: Uses `minio/mc` for manual verification instead of `aws-cli`, which has the Ceph Bug #65794 empty message tag quirk.
+- **Aggressive rclone concurrency for 10GbE**: Post-MTU-fix, the bottleneck shifted from network packet loss to S3 API negotiation latency and Ceph double-penalty I/O. With 16MB WAL files, only `--transfers` scales throughput (each file is a single PUT since `--s3-chunk-size=16M`). Settings: `--transfers=64 --checkers=128 --buffer-size=32M` with pod resources of 2-4 CPU / 4-8Gi RAM to support the concurrent connections and buffers.
+- **Ceph double-penalty awareness**: SeaweedFS reads from Ceph RBD PVCs, and RGW writes to Ceph OSDs. A logical 200 MiB/s transfer generates ~600 MiB/s of physical backend I/O (3x replication factor). The aggressive `--transfers=64` pushes throughput only if the Ceph OSDs and gateway CPUs can sustain it — if speed stays flat despite higher concurrency, the cluster has reached its physical limits.
 
 **🛑 STOP: Do not proceed to Phase 8 until migration completes and file counts match between SeaweedFS and RGW.**
+
+### 7.5 Troubleshooting & rclone Tuning History
+
+The migration went through multiple rounds of rclone tuning to address network issues and optimize throughput. This section documents the evolution for future reference.
+
+#### Hiccup 1: MTU Mismatch Causing Packet Loss
+
+**Problem**: Initial migration runs suffered from severe connection drops and timeouts. rclone would lose TCP connections mid-transfer with errors like `write tcp: use of closed network connection`. The effective throughput was near zero despite the cluster running on 10GbE.
+
+**Root Cause**: MTU mismatch between the Kubernetes Cilium network (MTU 9000/jumbo frames) and Proxmox network interfaces (standard 1500 MTU). Large S3 PUT requests were being fragmented or dropped, causing persistent TCP resets.
+
+**Fix**: Corrected the MTU configuration on the Proxmox bridges/VM NICs to match the cluster network. After the MTU fix, rclone immediately stabilized at ~180-200 MiB/s with conservative settings.
+
+#### Hiccup 2: RGW TCP Connection Drops with Multipart Uploads
+
+**Problem**: With the MTU fix in place, `--s3-upload-cutoff=0` was forcing every file (even 16MB WAL files) through multipart upload (3+ API calls per file). With `--transfers=16` or higher, this overwhelmed RGW with concurrent multipart sessions, causing TCP connection drops:
+```
+write tcp 10.244.4.245:XXXXX->10.103.67.72:80: use of closed network connection
+```
+
+**Root Cause**: Each multipart upload requires InitiateMultipartUpload → UploadPart (per chunk) → CompleteMultipartUpload. With 16MB files chunked at 16MB, each file should be a single PUT, but `--s3-upload-cutoff=0` forced the multipart path unnecessarily. Combined with high concurrency, RGW's connection handling couldn't keep up.
+
+**Fix**: Removed `--s3-upload-cutoff=0` (since `--s3-chunk-size=16M` already matches the 16MB WAL files, they're uploaded as single PUTs). Also removed `--disable-http2` (HTTP/2 multiplexing helps with many concurrent small requests). Reduced `--s3-upload-concurrency` from 24 to 2 (since files are single PUTs, upload concurrency is irrelevant).
+
+#### rclone Tuning Evolution
+
+| Stage | Key Flags | Result | Reason for Change |
+|---|---|---|---|
+| **v1 — Initial** | `--transfers=24 --checkers=48 --s3-chunk-size=32M --s3-upload-concurrency=24 --s3-disable-checksum --disable-http2 --stats=30s` | Connection drops, near-zero throughput | MTU mismatch caused packet loss |
+| **v2 — Conservative** | `--transfers=16 --checkers=32 --s3-chunk-size=16M --s3-upload-concurrency=8 --s3-disable-checksum --s3-no-head --s3-no-check-bucket --checksum --stats=30s` | Stable ~180-200 MiB/s | Post-MTU fix, conservative to avoid RGW drops |
+| **v3 — Fix multipart** | `--transfers=16 --checkers=32 --s3-chunk-size=16M --s3-upload-concurrency=8 --s3-disable-checksum --s3-no-head --s3-no-check-bucket --checksum --s3-upload-cutoff=0 --stats=30s` | RGW TCP connection drops | `--s3-upload-cutoff=0` forced multipart on every file |
+| **v4 — Stable** | `--transfers=8 --checkers=8 --s3-chunk-size=16M --s3-upload-concurrency=2 --s3-disable-checksum --s3-no-head --s3-no-check-bucket --stats=15s` | Stable ~180-200 MiB/s, no drops | Removed `--s3-upload-cutoff=0`, removed `--checksum`, lowered concurrency |
+| **v5 — Aggressive (current)** | `--transfers=64 --checkers=128 --buffer-size=32M --s3-chunk-size=16M --s3-disable-checksum --s3-no-head --s3-no-check-bucket --stats=15s` | Testing 10GbE saturation | Network is healthy; push concurrency to find actual ceiling |
+
+#### Why `--transfers=64` and Not More?
+
+With 16MB files and `--s3-chunk-size=16M`, each file is a single HTTP PUT (no multipart). The bottleneck is S3 API negotiation latency — rclone must complete one PUT before starting the next. With 64 concurrent transfers, there are ~1 GiB of data in-flight at any moment (64 × 16MB). If throughput jumps to 400+ MiB/s, the bottleneck was API latency. If throughput stays at ~200 MiB/s, the Ceph cluster disks (or RGW/SeaweedFS gateway CPUs) are at their physical limits.
+
+#### Ceph Double-Penalty I/O
+
+SeaweedFS is backed by Ceph RBD PVCs, and RGW writes to Ceph OSDs. This means Ceph is both source and destination:
+1. SeaweedFS reads from Ceph RBD at 200 MiB/s
+2. RGW writes to Ceph OSDs at 200 MiB/s
+3. With 3x replication, OSDs physically write ~600 MiB/s
+
+A logical 200 MiB/s transfer generates ~4-5 Gbps of physical backend traffic on the Ceph cluster network. Enterprise NVMe OSDs can handle this, but spinning disks or SATA SSDs may become the ceiling.
 
 ---
 
