@@ -96,16 +96,17 @@ spec:
                 secret_access_key $AWS_SECRET_ACCESS_KEY \
                 endpoint $AWS_ENDPOINT
 
+              rclone config create compress_minio compress remote=minio:ceph-rgw mode=gzip
+
               for bucket in $BUCKETS; do
                 echo "=== Syncing rgw:${bucket} → minio:ceph-rgw/${bucket}/ ==="
-                rclone sync "rgw:${bucket}" "minio:ceph-rgw/${bucket}" \
+                rclone sync "rgw:${bucket}" "compress_minio:${bucket}" \
                   --progress \
                   --fast-list \
                   --transfers=24 \
                   --checkers=48 \
                   --s3-chunk-size=32M \
                   --s3-upload-concurrency=24 \
-                  --s3-upload-compression \
                   --disable-http2 \
                   --stats=30s
               done
@@ -175,7 +176,6 @@ spec:
                 --checkers=48 \
                 --s3-chunk-size=32M \
                 --s3-upload-concurrency=24 \
-                --s3-upload-compression \
                 --disable-http2 \
                 --stats=30s
 
