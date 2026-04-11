@@ -541,19 +541,76 @@ The existing `ceph-external-secret` in the `ceph` namespace (admin creds from Ph
 
 **Status**: `NOT STARTED`
 
-**Manifest**: `kubernetes/manifests/base/storage/backup-cronworkflow.yaml`
+**Manifest**: `kubernetes/manifests/base/ceph/ceph-rgw-backup-all.yaml`
 **Sync Wave**: 25
 
-### 6.1 Create Backup CronWorkflow
+**Rationale**: Reuses the successful rclone pattern from `seaweedfs-onsite-backup` but simplifies significantly since RGW runs outside K8s (no ArgoCD autosync toggling, no statefulset scaling, no K8up). Uses a single `ceph-rgw` bucket on MinIO/R2 to store all 8 RGW buckets as subdirectories, keeping backups completely independent from the existing `seaweedfs` bucket.
 
-Create `kubernetes/manifests/base/storage/backup-cronworkflow.yaml`:
+### 6.1 Prerequisites
+
+Before creating the CronWorkflow, ensure the following buckets exist:
+
+**MinIO (TrueNAS)**:
+- Bucket: `ceph-rgw` — **Already created manually**
+
+**Cloudflare R2**:
+- Bucket: `ceph-rgw` — **Must be created** via:
+  - **Option A (Terraform)**: Add to `tofu/cloudflare/main.tf`:
+    ```hcl
+    resource "cloudflare_r2_bucket" "ceph_rgw_bucket" {
+      account_id    = var.cloudflare_account_id
+      name          = "ceph-rgw"
+      location      = "wnam"
+      storage_class = "Standard"
+    }
+    ```
+  - **Option B (Manual)**: Create in Cloudflare R2 console (bucket name: `ceph-rgw`, location: ENAM or WNAM)
+
+### 6.2 Update argo-external-secret
+
+Add MinIO and R2 credentials to `kubernetes/manifests/base/argo/common-all.yaml` so the CronWorkflow can access backup destinations:
+
+```yaml
+externalSecrets:
+  enabled: true
+  secrets:
+    # ... existing secrets ...
+    - secretKey: AWS_ACCESS_KEY_ID
+      remoteRef:
+        key: /core/k8up
+        property: S3_ACCESS_KEY_ID
+    - secretKey: AWS_SECRET_ACCESS_KEY
+      remoteRef:
+        key: /core/k8up
+        property: S3_SECRET_ACCESS_KEY
+    - secretKey: AWS_ENDPOINT
+      remoteRef:
+        key: /core/k8up
+        property: S3_ENDPOINT
+    - secretKey: R2_ACCESS_KEY_ID
+      remoteRef:
+        key: /external/cloudflare
+        property: r2-access-key-id
+    - secretKey: R2_SECRET_ACCESS_KEY
+      remoteRef:
+        key: /external/cloudflare
+        property: r2-secret-access-key
+    - secretKey: R2_ENDPOINT
+      remoteRef:
+        key: /external/cloudflare
+        property: r2-endpoint
+```
+
+### 6.3 Create Backup CronWorkflow
+
+Create `kubernetes/manifests/base/ceph/ceph-rgw-backup-all.yaml`:
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: CronWorkflow
 metadata:
-  name: ceph-rgw-backup-onsite
-  namespace: ceph
+  name: ceph-rgw-backup
+  namespace: argo
   annotations:
     argocd.argoproj.io/sync-wave: "25"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
@@ -564,133 +621,188 @@ spec:
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   workflowSpec:
+    serviceAccountName: argo-workflow
     entrypoint: main
     onExit: exit-handler
     templates:
       - name: main
         steps:
-          - - name: backup-to-minio
-              template: rclone-sync
-              arguments:
-                parameters:
-                  - name: source-endpoint
-                    value: "http://external-rgw.ceph.svc.cluster.local:80"
-                  - name: dest-endpoint
-                    value: "http://10.0.20.199:9000"
-      - name: rclone-sync
-        inputs:
-          parameters:
-            - name: source-endpoint
-            - name: dest-endpoint
+          - - name: rclone-sync-to-minio
+              template: rclone-sync-to-minio
+      - name: rclone-sync-to-minio
         container:
           image: rclone/rclone
           env:
-            - name: SOURCE_ACCESS_KEY
+            - name: RGW_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: ceph-external-secret
-                  key: access_key_id
-            - name: SOURCE_SECRET_KEY
+                  name: argo-external-secret
+                  key: s3_access_key
+            - name: RGW_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: ceph-external-secret
-                  key: secret_access_key
-            - name: DEST_ACCESS_KEY
+                  name: argo-external-secret
+                  key: s3_secret_key
+            - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: ceph-external-secret
+                  name: argo-external-secret
                   key: AWS_ACCESS_KEY_ID
-            - name: DEST_SECRET_KEY
+            - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: ceph-external-secret
+                  name: argo-external-secret
                   key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: argo-external-secret
+                  key: AWS_ENDPOINT
           command: ["/bin/sh", "-c"]
           args:
             - |
               set -ex
-              rclone config create source s3 provider=Other \
-                access_key_id $SOURCE_ACCESS_KEY \
-                secret_access_key $SOURCE_SECRET_KEY \
-                endpoint={{inputs.parameters.source-endpoint}}
-              rclone config create dest s3 provider=Minio \
-                access_key_id $DEST_ACCESS_KEY \
-                secret_access_key $DEST_SECRET_KEY \
-                endpoint={{inputs.parameters.dest-endpoint}}
+              # Configure rclone for Ceph RGW source
+              rclone config create rgw s3 \
+                provider Other \
+                access_key_id $RGW_ACCESS_KEY \
+                secret_access_key $RGW_SECRET_KEY \
+                endpoint http://external-rgw.ceph.svc.cluster.local:80
 
+              # Configure rclone for MinIO destination
+              rclone config create minio s3 \
+                provider Minio \
+                access_key_id $AWS_ACCESS_KEY_ID \
+                secret_access_key $AWS_SECRET_ACCESS_KEY \
+                endpoint $AWS_ENDPOINT
+
+              # Sync all 8 RGW buckets to MinIO ceph-rgw bucket as subdirectories
               for bucket in loki-data argo-artifacts cnpg-backups k8up-backups mlflow beyond-vibes proxmox-backup-server tofu-state; do
-                rclone sync source:${bucket} dest:${bucket} \
-                  --progress --fast-list --transfers=24 --checkers=48 \
-                  --s3-chunk-size=32M --s3-upload-concurrency=24
+                echo "=== Syncing rgw:${bucket} → minio:ceph-rgw/${bucket}/ ==="
+                rclone sync rgw:${bucket} minio:ceph-rgw/${bucket} \
+                  --progress \
+                  --fast-list \
+                  --transfers=24 \
+                  --checkers=48 \
+                  --s3-chunk-size=32M \
+                  --s3-upload-concurrency=24 \
+                  --s3-disable-checksum \
+                  --disable-http2 \
+                  --stats=30s
               done
+
+              echo "=== Verification: MinIO bucket contents ==="
+              rclone ls minio:ceph-rgw
       - name: exit-handler
         steps:
-          - - name: sync-to-r2
+          - - name: rclone-sync-to-r2
               when: "{{workflow.status}} == Succeeded"
-              template: rclone-sync-r2
-      - name: rclone-sync-r2
+              template: rclone-sync-to-r2
+      - name: rclone-sync-to-r2
         container:
           image: rclone/rclone
           env:
-            - name: MINIO_ACCESS_KEY
+            - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: ceph-external-secret
+                  name: argo-external-secret
                   key: AWS_ACCESS_KEY_ID
-            - name: MINIO_SECRET_KEY
+            - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: ceph-external-secret
+                  name: argo-external-secret
                   key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: argo-external-secret
+                  key: AWS_ENDPOINT
             - name: R2_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: ceph-external-secret
+                  name: argo-external-secret
                   key: R2_ACCESS_KEY_ID
             - name: R2_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: ceph-external-secret
+                  name: argo-external-secret
                   key: R2_SECRET_ACCESS_KEY
             - name: R2_ENDPOINT
               valueFrom:
                 secretKeyRef:
-                  name: ceph-external-secret
+                  name: argo-external-secret
                   key: R2_ENDPOINT
           command: ["/bin/sh", "-c"]
           args:
             - |
               set -ex
-              rclone config create onsite s3 provider=Minio \
-                access_key_id $MINIO_ACCESS_KEY \
-                secret_access_key $MINIO_SECRET_KEY \
-                endpoint=http://10.0.20.199:9000
-              rclone config create offsite s3 provider=Cloudflare \
+              # Configure rclone for MinIO source
+              rclone config create minio s3 \
+                provider Minio \
+                access_key_id $AWS_ACCESS_KEY_ID \
+                secret_access_key $AWS_SECRET_ACCESS_KEY \
+                endpoint $AWS_ENDPOINT
+
+              # Configure rclone for Cloudflare R2 destination
+              rclone config create r2 s3 \
+                provider Cloudflare \
                 access_key_id $R2_ACCESS_KEY_ID \
                 secret_access_key $R2_SECRET_ACCESS_KEY \
-                endpoint=$R2_ENDPOINT
+                endpoint $R2_ENDPOINT
 
-              rclone sync onsite: offsite: --progress --fast-list
+              # Sync entire MinIO ceph-rgw bucket to R2
+              echo "=== Syncing minio:ceph-rgw → r2:ceph-rgw ==="
+              rclone sync minio:ceph-rgw r2:ceph-rgw \
+                --progress \
+                --fast-list \
+                --transfers=24 \
+                --checkers=48 \
+                --s3-chunk-size=32M \
+                --s3-upload-concurrency=24 \
+                --s3-disable-checksum \
+                --disable-http2 \
+                --stats=30s
+
+              # Verify sync with checksum comparison
+              echo "=== Verification: Checking sync integrity ==="
+              rclone check minio:ceph-rgw r2:ceph-rgw --one-way --checksum
 ```
 
-### 6.2 Sync and Test
+### 6.4 Sync and Test
 
 ```bash
+# Sync argo-common to update argo-external-secret with new credentials
+argocd app sync argo
+
+# Verify secret has new keys
+kubectl get secret argo-external-secret -n argo -o jsonpath='{.data}' | jq -r 'keys[]'
+# Expected: Should include AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_ENDPOINT, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_ENDPOINT
+
 # Sync the storage application (includes the CronWorkflow)
 argocd app sync storage
 
 # Trigger backup manually for testing
-argo submit --from cronworkflow/ceph-rgw-backup-onsite -n ceph
+argo submit --from cronworkflow/ceph-rgw-backup -n argo
 
 # Watch the workflow
-argo watch ceph-rgw-backup-onsite-xxxx -n ceph
+argo watch ceph-rgw-backup-xxxx -n argo
 
 # Verify MinIO after completion
 # Open MinIO console at http://10.0.20.199:9000
-# Expected buckets (matching RGW bucket names): loki-data, argo-artifacts, cnpg-backups, k8up-backups, mlflow, beyond-vibes, proxmox-backup-server, tofu-state
+# Expected: Single bucket 'ceph-rgw' with 8 subdirectories (loki-data/, argo-artifacts/, cnpg-backups/, k8up-backups/, mlflow/, beyond-vibes/, proxmox-backup-server/, tofu-state/)
+
+# Verify R2 after completion (via Cloudflare console or rclone)
+rclone ls r2:ceph-rgw
 ```
 
-**🛑 STOP: Do not proceed to Phase 7 until backup workflow succeeds and data is visible in MinIO.**
+**Key Design Decisions:**
+- **Single bucket approach**: All 8 RGW buckets sync into one MinIO/R2 bucket (`ceph-rgw`) as subdirectories. This mirrors the SeaweedFS backup pattern and keeps the backup footprint minimal.
+- **Two-stage sync**: RGW → MinIO (parallel per-bucket), then MinIO → R2 (entire bucket). This ensures the RGW backup is complete before offsite replication.
+- **Namespace**: `argo` (not `ceph`) because workflows need access to `argo-external-secret` via `secretKeyRef`.
+- **Credentials**: Uses `argo-external-secret` which contains both RGW admin creds and MinIO/R2 backup creds.
+- **Rclone flags**: Reuses proven flags from `seaweedfs-onsite-backup` for performance and reliability.
+
+**🛑 STOP: Do not proceed to Phase 7 until backup workflow succeeds and data is visible in MinIO (ceph-rgw bucket with 8 subdirectories).**
 
 ---
 
