@@ -4,7 +4,7 @@
 
 Migrate from SeaweedFS to Ceph RGW running natively on Proxmox bare-metal nodes. This abandons the Rook Ceph approach — the standalone Ceph CSI drivers remain unchanged for block/file storage, and RGW is deployed via Ansible on the 3 Proxmox nodes, bridged into Kubernetes via a ClusterIP Service/EndpointSlice. S3 buckets use plain (non-suffixed) names — the active cluster (blue or green) always writes to the same canonical buckets since clusters never run simultaneously and RGW persists outside the K8s lifecycle.
 
-**Migration Status**: `IN PROGRESS` — Phase 4 complete (S3 buckets provisioned via GitOps using minio/mc), ready for Phase 5 (Application-specific S3 users).
+**Migration Status**: `IN PROGRESS` — Phase 4 complete (S3 buckets provisioned via GitOps using minio/mc), ready for Phase 6 (Backup CronWorkflow). Phase 5 skipped — using shared admin credentials for all S3 applications.
 
 ---
 
@@ -27,7 +27,7 @@ Migrate from SeaweedFS to Ceph RGW running natively on Proxmox bare-metal nodes.
 - **Object Storage**: No Rook CRDs, no in-cluster RGW pods — RGW runs outside K8s lifecycle
 - **Bucket Naming**: Plain names without environment suffixes (`loki-data`, `argo-artifacts`, `cnpg-backups`, `k8up-backups`, `tofu-state`, `mlflow`, `beyond-vibes`, `proxmox-backup-server`) — the active cluster always writes to the same canonical buckets since clusters never run simultaneously
 - **Bucket Management**: Argo Workflow template (`s3-bucket-management`) creates/destroys buckets via `minio/mc` client
-- **S3 Credentials**: Generated via `radosgw-admin` on Proxmox, stored in K8s via SOPS/ExternalSecrets
+- **S3 Credentials**: Single admin user shared across all applications (internal VLAN + ClusterIP isolation provides sufficient security; per-app users can be added later if S3 is exposed externally)
 - **Kill Switch**: Graceful ArgoCD app pruning → graceful PVC deletion → force cleanup for stuck resources → PV verification
 
 ### Why Not Rook?
@@ -45,7 +45,7 @@ All buckets use plain names without environment suffixes. This approach was chos
 
 1. **Blue/green clusters never run simultaneously** — there is no collision risk
 2. **Backups only target one cluster** — suffixed backup buckets (e.g., `cnpg-backups-blue`) would be empty or stale when spinning up the alternate cluster, making restore impossible
-3. **Simplicity** — environment suffixes double the number of S3 users, secrets, ExternalSecrets, and application configs with no practical benefit
+3. **Simplicity** — environment suffixes would double the number of S3 users, secrets, ExternalSecrets, and application configs with no practical benefit; likewise, per-app S3 users are unnecessary on an internal-only endpoint
 4. **RGW lives outside K8s lifecycle** — buckets persist across cluster spin-downs regardless of naming
 
 | Bucket Name | Purpose | Notes |
@@ -511,112 +511,29 @@ kubectl run -n ceph --image=minio/mc:RELEASE.2025-08-13T08-35-41Z test-s3 --rm -
 
 ---
 
-## Phase 5: Create Application-Specific S3 Users
+## Phase 5: Application-Specific S3 Users — SKIPPED
 
-**Status**: `NOT STARTED`
+**Status**: ⏭️ **SKIPPED** — Using shared admin credentials for all applications instead of per-app S3 users.
 
-**Location**: Run on a Ceph monitor node (method, indy, or japan)
-**Scope**: Create dedicated S3 users per application and update SOPS
+### Rationale
 
-### 5.1 Create Application S3 Users
+Per-app S3 users were originally planned for credential isolation, but are unnecessary for this deployment:
 
-Each application gets its own S3 user with access to its corresponding bucket. Since clusters never run simultaneously, both clusters share the same users and buckets.
+1. **Internal-only access** — RGW is only reachable via ClusterIP Service (no external exposure) on a separate VLAN
+2. **Namespace isolation** — K8s RBAC controls pod access to secrets; compromising a namespace already implies broader cluster access
+3. **Admin creds already in-cluster** — The bucket management workflow (`s3-bucket-management`) already requires admin creds, so per-app creds don't meaningfully reduce the attack surface
+4. **Operational simplicity** — Avoids creating 7 radosgw users, managing 14 key pairs, and maintaining per-namespace ExternalSecrets with no tangible security benefit on an isolated network
 
-```bash
-# SSH to a Ceph monitor node
-ssh root@method
+### If Per-App Credentials Are Needed Later
 
-# Create dedicated S3 users per application
-radosgw-admin user create --uid=loki --display-name="Loki"
-radosgw-admin user create --uid=argo-artifacts --display-name="Argo Workflows"
-radosgw-admin user create --uid=cnpg-backups --display-name="CNPG Backups"
-radosgw-admin user create --uid=k8up-backups --display-name="K8up Backups"
-radosgw-admin user create --uid=mlflow --display-name="MLflow"
-radosgw-admin user create --uid=tofu --display-name="OpenTofu State"
-radosgw-admin user create --uid=proxmox-backup --display-name="Proxmox Backup Server"
+If S3 is ever exposed externally via IngressRoute, or if stricter isolation is desired:
 
-# Record all Access Key / Secret Key pairs
-```
+1. Create per-app users: `radosgw-admin user create --uid=<app> --display-name="<App>"`
+2. Apply bucket policies: `radosgw-admin policy put --uid=<app> --bucket=<bucket> --policy-file=<app>-policy.json`
+3. Add credentials to SOPS/Vault and create per-namespace ExternalSecrets
+4. Update application configs to reference app-specific secret keys
 
-Optionally, set per-user bucket permissions to restrict each user to only their bucket:
-
-```bash
-# Example: restrict loki user to loki-data bucket only
-radosgw-admin policy put --uid=loki --bucket=loki-data --policy-file=loki-policy.json
-```
-
-### 5.2 Update SOPS Secrets with Application Credentials
-
-Add to `secrets.enc.json` under the `ceph` namespace key:
-
-```json
-{
-  "ceph": {
-    "ceph-external-secret": {
-      "access_key_id": "<radosgw-admin-access-key>",
-      "secret_access_key": "<radosgw-admin-secret-key>",
-      "loki-access-key-id": "<loki-access-key>",
-      "loki-secret-access-key": "<loki-secret-key>",
-      "argo-artifacts-access-key-id": "<argo-access-key>",
-      "argo-artifacts-secret-access-key": "<argo-secret-key>",
-      "cnpg-backups-access-key-id": "<cnpg-access-key>",
-      "cnpg-backups-secret-access-key": "<cnpg-secret-key>",
-      "k8up-backups-access-key-id": "<k8up-access-key>",
-      "k8up-backups-secret-access-key": "<k8up-secret-key>",
-      "mlflow-access-key-id": "<mlflow-access-key>",
-      "mlflow-secret-access-key": "<mlflow-secret-key>",
-      "tofu-access-key-id": "<tofu-access-key>",
-      "tofu-secret-access-key": "<tofu-secret-key>",
-      "proxmox-backup-access-key-id": "<proxmox-access-key>",
-      "proxmox-backup-secret-access-key": "<proxmox-secret-key>",
-      "R2_ACCESS_KEY_ID": "<r2-access-key-id>",
-      "R2_SECRET_ACCESS_KEY": "<r2-secret-access-key>",
-      "R2_ENDPOINT": "<r2-endpoint>",
-      "AWS_ACCESS_KEY_ID": "<minio-access-key-id>",
-      "AWS_SECRET_ACCESS_KEY": "<minio-secret-access-key>"
-    }
-  }
-}
-```
-
-Encrypt and commit the file.
-
-### 5.3 Update ExternalSecrets Manifest
-
-Update `kubernetes/manifests/base/storage/common-all.yaml` to include all application credentials:
-
-```yaml
-# Add these to the externalSecrets.secrets list:
-- secretKey: loki-access-key-id
-  remoteRef:
-    key: /core/ceph-rgw
-    property: loki-access-key-id
-- secretKey: loki-secret-access-key
-  remoteRef:
-    key: /core/ceph-rgw
-    property: loki-secret-access-key
-- secretKey: argo-artifacts-access-key-id
-  remoteRef:
-    key: /core/ceph-rgw
-    property: argo-artifacts-access-key-id
-- secretKey: argo-artifacts-secret-access-key
-  remoteRef:
-    key: /core/ceph-rgw
-    property: argo-artifacts-secret-access-key
-# ... repeat for all application credentials
-```
-
-### 5.4 Sync Updated Secrets
-
-```bash
-# Sync via ArgoCD
-argocd app sync storage
-
-# Verify secret contains all keys
-kubectl get secret ceph-external-secret -n ceph -o yaml
-```
-
-**🛑 STOP: Do not proceed to Phase 6 until all application credentials are in the secret.**
+The existing `ceph-external-secret` in the `ceph` namespace (admin creds from Phase 3) is used by all applications going forward.
 
 ---
 
@@ -947,21 +864,21 @@ Update the following files to use the new RGW endpoint. Bucket names remain unch
 - **Old**: `endpoint: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333`
 - **New**: `endpoint: http://external-rgw.ceph.svc.cluster.local:80`
 - **Bucket**: No change — stays `loki-data`
-- **Credentials**: Reference `ceph-external-secret` with `loki-*` keys
+- **Credentials**: Reference `ceph-external-secret` with admin `s3_access_key` / `s3_secret_key`
 
 #### Argo Workflows
 **File**: `kubernetes/manifests/base/argo/workflows-all.yaml`
 - **Old**: `endpoint: "seaweedfs-s3.seaweedfs.svc.cluster.local:8333"`
 - **New**: `endpoint: "external-rgw.ceph.svc.cluster.local:80"`
 - **Bucket**: No change — stays `argo-artifacts`
-- **Credentials**: Reference `ceph-external-secret` with `argo-artifacts-*` keys
+- **Credentials**: Reference `ceph-external-secret` with admin `s3_access_key` / `s3_secret_key`
 
 #### CNPG (Common Chart Template)
 **File**: `kubernetes/charts/common/templates/pg-objectstore.yaml`
 - **Old**: `endpointURL: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333`
 - **New**: `endpointURL: http://external-rgw.ceph.svc.cluster.local:80`
 - **Bucket**: No change — stays `cnpg-backups`
-- **Credentials**: Reference appropriate keys from `ceph-external-secret`
+- **Credentials**: Reference admin `s3_access_key` / `s3_secret_key` from `ceph-external-secret`
 
 #### K8up Schedule (Common Chart Template)
 **File**: `kubernetes/charts/common/templates/k8up-schedule.yaml`
@@ -1082,20 +999,20 @@ kubectl run -n ceph --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Nev
 
 **Status**: `NOT STARTED`
 
-When deploying the green cluster, the RGW setup is greatly simplified because buckets and S3 users are shared (no environment suffixes). The green cluster simply points to the same RGW endpoint and the same bucket names.
+When deploying the green cluster, the RGW setup is greatly simplified because buckets are shared and a single admin user is used for all S3 access (Phase 5 skipped). The green cluster simply points to the same RGW endpoint, same bucket names, and same admin credentials.
 
 ### 10.1 Green Cluster S3 Configuration
 
-Since RGW lives outside the K8s lifecycle, the green cluster reuses the same S3 users and buckets:
+Since RGW lives outside the K8s lifecycle, the green cluster reuses the same admin credentials and buckets:
 
-1. **No new S3 users needed** — the same per-application users (loki, argo-artifacts, cnpg-backups, etc.) work for both clusters since buckets are shared
+1. **No new S3 users needed** — all applications share the admin user (Phase 5 skipped)
 2. **No new buckets needed** — the plain-named buckets (loki-data, argo-artifacts, etc.) already exist
-3. **Same ExternalSecrets** — the green cluster references the same Vault secrets for S3 credentials
+3. **Same ExternalSecrets** — the green cluster references the same Vault path (`/core/ceph-rgw`) for admin S3 credentials
 4. **Same endpoint** — both clusters use `http://external-rgw.ceph.svc.cluster.local:80`
 
 ### 10.2 Green Cluster Secrets
 
-The green cluster needs the same S3 credentials synced to its namespace. If the green cluster uses different namespaces, create matching ExternalSecrets that pull from the same Vault paths:
+The green cluster needs the same admin S3 credentials synced to its namespaces. Create ExternalSecrets that pull from the same Vault path:
 
 ```yaml
 # Example: If monitor namespace exists in green cluster
@@ -1112,14 +1029,14 @@ spec:
   target:
     name: ceph-s3-credentials
   data:
-    - secretKey: access_key_id
+    - secretKey: s3_access_key
       remoteRef:
         key: /core/ceph-rgw
-        property: loki-access-key-id
-    - secretKey: secret_access_key
+        property: admin-access-key-id
+    - secretKey: s3_secret_key
       remoteRef:
         key: /core/ceph-rgw
-        property: loki-secret-access-key
+        property: admin-secret-access-key
 ```
 
 ### 10.3 No Separate Backup CronWorkflow Needed
@@ -1241,7 +1158,7 @@ If issues arise during any phase:
 - [x] **Phase 2**: Admin S3 user created, can create/delete buckets from K8s (with AWS CLI v2 cosmetic 500 quirk documented)
 - [x] **Phase 3**: ExternalSecrets synced, secret exists with admin credentials
 - [x] **Phase 4**: All 8 buckets created and visible via `s3 ls`
-- [ ] **Phase 5**: Application-specific S3 users created, credentials in secrets
+- [x] **Phase 5**: ~~Application-specific S3 users~~ — SKIPPED, using shared admin credentials
 - [ ] **Phase 6**: Backup CronWorkflow succeeds, data visible in MinIO
 - [ ] **Phase 7**: Migration completes, file counts match between SeaweedFS and RGW
 - [ ] **Phase 8**: All 6 application endpoint references updated, IngressRoute active
@@ -1434,7 +1351,7 @@ Phase 3: ExternalSecrets (wave 8)
   ↓
 Phase 4: S3 Bucket Provisioning (Argo Workflow)
   ↓
-Phase 5: Application S3 Users
+Phase 5: ~~Application S3 Users~~ — SKIPPED (shared admin creds)
   ↓
 Phase 6: Backup CronWorkflow (wave 25)
   ↓
@@ -1519,11 +1436,19 @@ Or ignore the 500 error and verify with `s3 ls` — the bucket was created succe
 
 ### Phase 5 Issues
 
+**Note**: Phase 5 (per-app S3 users) was skipped in favor of shared admin credentials. If per-app users are added later:
+
 **Issue**: Application credentials not working
 **Solution**:
 - Verify user exists: `radosgw-admin user info --uid=<app-name>`
 - Check secret contains correct keys: `kubectl get secret ceph-external-secret -n ceph -o yaml`
 - Test with specific credentials
+
+**Issue**: Admin credentials not working for an application
+**Solution**:
+- Verify admin user exists: `radosgw-admin user info --uid=admin`
+- Check secret contains correct keys: `kubectl get secret ceph-external-secret -n <namespace> -o yaml`
+- Ensure `s3_access_key` and `s3_secret_key` are being used (not `access_key_id`/`secret_access_key`)
 
 ### Phase 6 Issues
 
