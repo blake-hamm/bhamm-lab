@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: create-ceph-buckets-green-
+  name: create-ceph-buckets-green
   namespace: argo
   annotations:
     argocd.argoproj.io/sync-wave: "9"
