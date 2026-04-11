@@ -16,6 +16,13 @@ spec:
     - name: migrate-buckets
       container:
         image: rclone/rclone
+        resources:
+          requests:
+            cpu: "2"
+            memory: "4Gi"
+          limits:
+            cpu: "4"
+            memory: "8Gi"
         env:
           - name: SWFS_ACCESS_KEY
             valueFrom:
@@ -62,16 +69,15 @@ spec:
               rclone copy "swfs:${bucket}" "rgw:${bucket}" \
                 --progress \
                 --fast-list \
-                --checksum \
-                --no-check-dest \
-                --transfers=32 \
-                --checkers=64 \
+                --size-only \
+                --transfers=64 \
+                --checkers=128 \
+                --buffer-size=32M \
                 --s3-chunk-size=16M \
-                --s3-upload-concurrency=8 \
-                --s3-upload-cutoff=0 \
+                --s3-disable-checksum \
                 --s3-no-head \
                 --s3-no-check-bucket \
-                --stats=30s
+                --stats=15s
             done
     - name: verify-migration
       container:
