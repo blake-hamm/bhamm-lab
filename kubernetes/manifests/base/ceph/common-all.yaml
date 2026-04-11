@@ -20,14 +20,18 @@ spec:
         externalSecrets:
           enabled: true
           secrets:
-            - secretKey: access_key_id
+            - secretKey: s3_user
               remoteRef:
-                key: /core/ceph-rgw
-                property: admin-access-key-id
-            - secretKey: secret_access_key
+                key: /core/ceph
+                property: s3_user
+            - secretKey: s3_access_key
               remoteRef:
-                key: /core/ceph-rgw
-                property: admin-secret-access-key
+                key: /core/ceph
+                property: s3_access_key
+            - secretKey: s3_secret_key
+              remoteRef:
+                key: /core/ceph
+                property: s3_secret_key
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
