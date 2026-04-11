@@ -30,6 +30,11 @@ spec:
           workflowDefaults:
             spec:
               serviceAccountName: argo-workflow
+              ttlStrategy:
+                secondsAfterSuccess: 86400
+                secondsAfterFailure: 604800
+              artifactGC:
+                strategy: OnWorkflowDeletion
           workflowNamespaces:
             - argo
         server:
