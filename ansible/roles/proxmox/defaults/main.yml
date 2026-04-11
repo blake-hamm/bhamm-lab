@@ -1,3 +1,13 @@
 proxmox_pbs: false
 proxmox_reset_ceph: false
 pve_ceph_rgw_enabled: false
+# Ceph RGW Erasure Coding Configuration
+pve_ceph_rgw_ec_k: 2
+pve_ceph_rgw_ec_m: 1
+pve_ceph_rgw_ec_failure_domain: host
+pve_ceph_rgw_ec_plugin: isa
+pve_ceph_rgw_ec_technique: reed_sol_van
+pve_ceph_rgw_ec_profile_name: ec-2-1-profile
+pve_ceph_rgw_ec_stripe_unit: 16384
+pve_ceph_rgw_ec_pgs: 32
+pve_ceph_rgw_non_ec_pgs: 32

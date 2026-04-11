@@ -87,21 +87,62 @@
     - pve_ceph_rgw_enabled | bool
     - inventory_hostname == (groups['proxmox'] | first)
   run_once: true
-- name: Create RGW placement pools
-  ansible.builtin.command: ceph osd pool create {{ item }} 32
-  loop:
-    - default.rgw.buckets.data
-    - default.rgw.buckets.non-ec
+- name: Ensure Erasure Code Profile Exists
+  ansible.builtin.command: >
+    ceph osd erasure-code-profile set {{ pve_ceph_rgw_ec_profile_name }} k={{ pve_ceph_rgw_ec_k }} m={{ pve_ceph_rgw_ec_m }} crush-failure-domain={{ pve_ceph_rgw_ec_failure_domain }} plugin={{ pve_ceph_rgw_ec_plugin }} technique={{ pve_ceph_rgw_ec_technique }} stripe_unit={{ pve_ceph_rgw_ec_stripe_unit }}
+
+  register: proxmox_ec_profile_creation
+  failed_when: "proxmox_ec_profile_creation.rc != 0 and 'already exists' not in proxmox_ec_profile_creation.stderr"
+  changed_when: "'already exists' not in proxmox_ec_profile_creation.stderr"
   when:
     - pve_ceph_rgw_enabled | bool
     - inventory_hostname == (groups['proxmox'] | first)
     - rgw_data_pool_check.rc != 0
+  run_once: true
+- name: Pre-create RGW data pool as Erasure Coded
+  ansible.builtin.command: ceph osd pool create default.rgw.buckets.data {{ pve_ceph_rgw_ec_pgs }} erasure {{ pve_ceph_rgw_ec_profile_name }}
+  register: proxmox_rgw_data_pool_create
+  changed_when: "'already exists' not in proxmox_rgw_data_pool_create.stderr"
+  when:
+    - pve_ceph_rgw_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+    - rgw_data_pool_check.rc != 0
+  run_once: true
+- name: Pre-create RGW non-ec pool as Replicated
+  ansible.builtin.command: ceph osd pool create default.rgw.buckets.non-ec {{ pve_ceph_rgw_non_ec_pgs }}
+  register: proxmox_rgw_non_ec_pool_create
+  changed_when: "'already exists' not in proxmox_rgw_non_ec_pool_create.stderr"
+  when:
+    - pve_ceph_rgw_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+    - rgw_data_pool_check.rc != 0
+  run_once: true
+# Note: EC optimizations (allow_ec_optimizations) is a Tentacle (v20.2.0+) feature
+# and not available in current Proxmox Ceph (Reef/v18.x). Consider enabling when upgrading.
+- name: Set min_size on RGW data pool
+  ansible.builtin.command: ceph osd pool set default.rgw.buckets.data min_size 2
+  register: proxmox_rgw_ec_minsize
+  changed_when: "'already' not in proxmox_rgw_ec_minsize.stderr"
+  when:
+    - pve_ceph_rgw_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+  run_once: true
+- name: Flag RGW data pool as bulk for autoscaler
+  ansible.builtin.command: ceph osd pool set default.rgw.buckets.data bulk true
+  register: proxmox_rgw_ec_bulk
+  changed_when: "'already' not in proxmox_rgw_ec_bulk.stderr"
+  when:
+    - pve_ceph_rgw_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
   run_once: true
 - name: Enable RGW application on placement pools
   ansible.builtin.command: ceph osd pool application enable {{ item }} rgw
   loop:
     - default.rgw.buckets.data
     - default.rgw.buckets.non-ec
+  register: proxmox_rgw_app_enable
+  failed_when: "proxmox_rgw_app_enable.rc != 0 and 'already enabled' not in proxmox_rgw_app_enable.stderr"
+  changed_when: "'already enabled' not in proxmox_rgw_app_enable.stderr"
   when:
     - pve_ceph_rgw_enabled | bool
     - inventory_hostname == (groups['proxmox'] | first)
