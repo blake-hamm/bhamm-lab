@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   name: create-ceph-buckets-green
-  namespace: argo
+  namespace: ceph
   annotations:
     argocd.argoproj.io/sync-wave: "9"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
@@ -28,7 +28,7 @@ spec:
                 - name: destroy-and-create
                   value: "true"
                 - name: aws-auth-secret
-                  value: argo-external-secret
+                  value: ceph-external-secret
                 - name: aws-access-key-id
                   value: s3_access_key
                 - name: aws-secret-access-key

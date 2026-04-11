@@ -32,6 +32,30 @@ spec:
               remoteRef:
                 key: /core/ceph
                 property: s3_secret_key
+            - secretKey: AWS_ACCESS_KEY_ID
+              remoteRef:
+                key: /core/k8up
+                property: S3_ACCESS_KEY_ID
+            - secretKey: AWS_SECRET_ACCESS_KEY
+              remoteRef:
+                key: /core/k8up
+                property: S3_SECRET_ACCESS_KEY
+            - secretKey: AWS_ENDPOINT
+              remoteRef:
+                key: /core/k8up
+                property: S3_ENDPOINT
+            - secretKey: R2_ACCESS_KEY_ID
+              remoteRef:
+                key: /external/cloudflare
+                property: r2-access-key-id
+            - secretKey: R2_SECRET_ACCESS_KEY
+              remoteRef:
+                key: /external/cloudflare
+                property: r2-secret-access-key
+            - secretKey: R2_ENDPOINT
+              remoteRef:
+                key: /external/cloudflare
+                property: r2-endpoint
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
