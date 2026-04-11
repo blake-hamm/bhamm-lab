@@ -5,6 +5,13 @@ resource "cloudflare_r2_bucket" "truenas_bucket" {
   storage_class = var.truenas_bucket_storage_class
 }
 
+resource "cloudflare_r2_bucket" "ceph_rgw_bucket" {
+  account_id    = var.cloudflare_account_id
+  name          = var.ceph_rgw_bucket_name
+  location      = var.ceph_rgw_bucket_location
+  storage_class = var.ceph_rgw_bucket_storage_class
+}
+
 resource "cloudflare_zero_trust_tunnel_cloudflared" "static_site" {
   account_id    = var.cloudflare_account_id
   name          = var.tunnel_name

@@ -27,6 +27,24 @@ variable "truenas_bucket_storage_class" {
   default     = "Standard"
 }
 
+variable "ceph_rgw_bucket_name" {
+  description = "The name of the R2 bucket for Ceph RGW backups."
+  type        = string
+  default     = "ceph-rgw"
+}
+
+variable "ceph_rgw_bucket_location" {
+  description = "The location of the R2 bucket for Ceph RGW backups."
+  type        = string
+  default     = "wnam"
+}
+
+variable "ceph_rgw_bucket_storage_class" {
+  description = "The storage class of the R2 bucket for Ceph RGW backups."
+  type        = string
+  default     = "Standard"
+}
+
 variable "tunnel_name" {
   description = "The name of the Cloudflare Zero Trust tunnel."
   type        = string
