@@ -97,6 +97,15 @@
     - inventory_hostname == (groups['proxmox'] | first)
     - rgw_data_pool_check.rc != 0
   run_once: true
+- name: Enable RGW application on placement pools
+  ansible.builtin.command: ceph osd pool application enable {{ item }} rgw
+  loop:
+    - default.rgw.buckets.data
+    - default.rgw.buckets.non-ec
+  when:
+    - pve_ceph_rgw_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+  run_once: true
 # Configure ceph.conf on each node
 - name: Ensure RGW client section in ceph.conf
   community.general.ini_file:
