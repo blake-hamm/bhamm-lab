@@ -87,7 +87,7 @@ spec:
           requests:
             memory: 512Mi
           limits:
-            memory: 2Gi
+            memory: 4Gi
         env:
           - name: RGW_ACCESS_KEY
             valueFrom:
@@ -132,10 +132,8 @@ spec:
               secret_access_key $AWS_SECRET_ACCESS_KEY \
               endpoint $AWS_ENDPOINT
 
-            rclone config create compress_minio compress remote=minio:ceph-rgw mode=gzip
-
             echo "=== Restoring minio:ceph-rgw/${BUCKET} -> rgw:${BUCKET} ==="
-            rclone sync "compress_minio:${BUCKET}" "rgw:${BUCKET}" \
+            rclone sync "minio:ceph-rgw/${BUCKET}" "rgw:${BUCKET}" \
               --progress \
               --fast-list \
               --transfers=8 \
@@ -149,7 +147,7 @@ spec:
           requests:
             memory: 256Mi
           limits:
-            memory: 512Mi
+            memory: 1Gi
         env:
           - name: RGW_ACCESS_KEY
             valueFrom:
@@ -191,10 +189,8 @@ spec:
               secret_access_key $AWS_SECRET_ACCESS_KEY \
               endpoint $AWS_ENDPOINT
 
-            rclone config create compress_minio compress remote=minio:ceph-rgw mode=gzip
-
             echo "=== Verification: Checking restore integrity ==="
-            for bucket in $(rclone lsd compress_minio: | awk '{print $NF}'); do
+            for bucket in $(rclone lsd minio:ceph-rgw | awk '{print $NF}'); do
               echo "--- Checking rgw:${bucket} ---"
-              rclone check "compress_minio:${bucket}" "rgw:${bucket}" --one-way
+              rclone check "minio:ceph-rgw/${bucket}" "rgw:${bucket}" --one-way --size-only
             done

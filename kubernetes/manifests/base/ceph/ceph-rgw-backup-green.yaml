@@ -56,7 +56,7 @@ spec:
             requests:
               memory: 512Mi
             limits:
-              memory: 2Gi
+              memory: 4Gi
           env:
             - name: RGW_ACCESS_KEY
               valueFrom:
@@ -101,11 +101,9 @@ spec:
                 secret_access_key $AWS_SECRET_ACCESS_KEY \
                 endpoint $AWS_ENDPOINT
 
-              rclone config create compress_minio compress remote=minio:ceph-rgw mode=gzip
-
               for bucket in $BUCKETS; do
                 echo "=== Syncing rgw:${bucket} → minio:ceph-rgw/${bucket}/ ==="
-                rclone sync "rgw:${bucket}" "compress_minio:${bucket}" \
+                rclone sync "rgw:${bucket}" "minio:ceph-rgw/${bucket}" \
                   --progress \
                   --fast-list \
                   --transfers=8 \
@@ -130,7 +128,7 @@ spec:
             requests:
               memory: 512Mi
             limits:
-              memory: 2Gi
+              memory: 4Gi
           env:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
