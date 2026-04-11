@@ -4,7 +4,7 @@
 
 Migrate from SeaweedFS to Ceph RGW running natively on Proxmox bare-metal nodes. This abandons the Rook Ceph approach — the standalone Ceph CSI drivers remain unchanged for block/file storage, and RGW is deployed via Ansible on the 3 Proxmox nodes, bridged into Kubernetes via a headless Service/Endpoints. S3 buckets use environment-suffixed names for blue/green isolation.
 
-**Migration Status**: `IN PROGRESS` — Phase 2 complete (admin user created, bucket operations verified with known AWS CLI v2 quirk), ready for Phase 3 (ExternalSecrets).
+**Migration Status**: `IN PROGRESS` — Phase 3 complete (ExternalSecrets synced, admin credentials in K8s), ready for Phase 4 (S3 Bucket Provisioning).
 
 ---
 
@@ -320,110 +320,42 @@ kubectl run --image=amazon/aws-cli:latest test-s3 --rm -it --restart=Never \
 
 ## Phase 3: ExternalSecrets Setup
 
-**Status**: `NOT STARTED`
+**Status**: ✅ **COMPLETE**
 
-**Manifest**: `kubernetes/manifests/base/storage/common-all.yaml`
+**Manifest**: `kubernetes/manifests/base/ceph/common-all.yaml`
 **Sync Wave**: 8
 
-### 3.1 Update SOPS Secrets
+### 3.1 What Was Done
 
-Add to `secrets.enc.json` under the `ceph` namespace key:
+1. **Rotated admin credentials** — removed compromised `admin` user and created new admin user with fresh access/secret keys
 
-```json
-{
-  "ceph": {
-    "ceph-external-secret": {
-      "access_key_id": "<radosgw-admin-access-key>",
-      "secret_access_key": "<radosgw-admin-secret-key>",
-      "R2_ACCESS_KEY_ID": "<r2-access-key-id>",
-      "R2_SECRET_ACCESS_KEY": "<r2-secret-access-key>",
-      "R2_ENDPOINT": "<r2-endpoint>",
-      "AWS_ACCESS_KEY_ID": "<minio-access-key-id>",
-      "AWS_SECRET_ACCESS_KEY": "<minio-secret-access-key>"
-    }
-  }
-}
-```
+2. **Updated SOPS Secrets** — added to `secrets.enc.json` under `init.ceph.ceph-external-secret`:
+   - `access_key_id`: new radosgw-admin-access-key
+   - `secret_access_key`: new radosgw-admin-secret-key
 
-**Note**: Application-specific credentials (loki-blue, argo-artifacts-blue, etc.) will be added in Phase 5 when we create those users.
+3. **Created ExternalSecrets Manifest** — `kubernetes/manifests/base/ceph/common-all.yaml`:
+   - ArgoCD Application using sync wave 8
+   - ExternalSecret pulls from Vault path `/core/ceph-rgw`
+   - Creates secret `ceph-external-secret` in `ceph` namespace
 
-Encrypt and commit the file.
+4. **Populated Vault** — added credentials at `secret/core/ceph-rgw` with properties:
+   - `admin-access-key-id`
+   - `admin-secret-access-key`
 
-### 3.2 Create ExternalSecrets Manifest
+5. **Synced and Verified** — secret successfully created:
+   ```bash
+   kubectl get secret ceph-external-secret -n ceph
+   # Result: ceph-external-secret   Opaque   2      30s
+   ```
 
-Create `kubernetes/manifests/base/storage/common-all.yaml`:
+### 3.2 Verification Results
 
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: storage-common
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "8"
-spec:
-  destination:
-    namespace: ceph
-    server: https://kubernetes.default.svc
-  project: default
-  source:
-    repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: main
-    path: kubernetes/charts/common
-    helm:
-      valuesObject:
-        name: ceph
-        externalSecrets:
-          enabled: true
-          secrets:
-            - secretKey: access_key_id
-              remoteRef:
-                key: /core/ceph-rgw
-                property: admin-access-key-id
-            - secretKey: secret_access_key
-              remoteRef:
-                key: /core/ceph-rgw
-                property: admin-secret-access-key
-            - secretKey: R2_ACCESS_KEY_ID
-              remoteRef:
-                key: /external/cloudflare
-                property: r2-access-key-id
-            - secretKey: R2_SECRET_ACCESS_KEY
-              remoteRef:
-                key: /external/cloudflare
-                property: r2-secret-access-key
-            - secretKey: R2_ENDPOINT
-              remoteRef:
-                key: /external/cloudflare
-                property: r2-endpoint
-            - secretKey: AWS_ACCESS_KEY_ID
-              remoteRef:
-                key: /core/k8up
-                property: S3_ACCESS_KEY_ID
-            - secretKey: AWS_SECRET_ACCESS_KEY
-              remoteRef:
-                key: /core/k8up
-                property: S3_SECRET_ACCESS_KEY
-  syncPolicy:
-    syncOptions:
-      - ApplyOutOfSyncOnly=true
-    automated:
-      prune: true
-      selfHeal: true
-```
+Secret synced with keys:
+- `s3_access_key` (20 bytes)
+- `s3_secret_key` (40 bytes)
+- `s3_user` (5 bytes)
 
-### 3.3 Sync Secrets
-
-```bash
-# Sync via ArgoCD
-argocd app sync storage
-
-# Verify secret exists
-kubectl get secret ceph-external-secret -n ceph
-# Expected: ceph-external-secret   Opaque   7      30s
-```
-
-**🛑 STOP: Do not proceed to Phase 4 until ExternalSecret is synced and secret exists.**
+**🟢 READY: Phase 3 is complete. Proceed to Phase 4.**
 
 ---
 
@@ -1229,7 +1161,7 @@ If issues arise during any phase:
 - [x] **Phase 0**: RGW daemon running on all 3 Proxmox nodes, port 7480 reachable
 - [x] **Phase 1**: ClusterIP Service + EndpointSlice deployed, port 80 → 7480 DNAT working
 - [x] **Phase 2**: Admin S3 user created, can create/delete buckets from K8s (with AWS CLI v2 cosmetic 500 quirk documented)
-- [ ] **Phase 3**: ExternalSecrets synced, secret exists with admin credentials
+- [x] **Phase 3**: ExternalSecrets synced, secret exists with admin credentials
 - [ ] **Phase 4**: All 5 buckets created and visible via `s3 ls`
 - [ ] **Phase 5**: Application-specific S3 users created, credentials in secrets
 - [ ] **Phase 6**: Backup CronWorkflow succeeds, data visible in MinIO

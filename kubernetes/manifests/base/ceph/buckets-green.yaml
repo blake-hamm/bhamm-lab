@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: create-ceph-buckets-green-
+  namespace: argo
+  annotations:
+    argocd.argoproj.io/sync-wave: "9"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  serviceAccountName: argo-workflow
+  entrypoint: main
+  templates:
+    - name: main
+      steps:
+        - - name: create-buckets
+            templateRef:
+              name: s3-bucket-management
+              template: bucket-management
+              clusterScope: true
+            arguments:
+              parameters:
+                - name: bucket-names
+                  value: '["tofu-state","loki-green","argo-artifacts-green","cnpg-backups-green","k8up-backups-green"]'
+                - name: endpoint-url
+                  value: http://external-rgw.ceph.svc.cluster.local:80
+                - name: aws-region
+                  value: us-east-1
+                - name: destroy-and-create
+                  value: "true"
+                - name: aws-auth-secret
+                  value: ceph-external-secret
+                - name: aws-access-key-id
+                  value: s3_access_key
+                - name: aws-secret-access-key
+                  value: s3_secret_key
