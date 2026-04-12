@@ -112,7 +112,6 @@ spec:
                   --checkers=32 \
                   --s3-chunk-size=16M \
                   --s3-upload-concurrency=2 \
-                  --s3-upload-cutoff=0 \
                   --s3-no-head \
                   --s3-disable-checksum \
                   --s3-no-check-bucket \
@@ -193,7 +192,6 @@ spec:
                 --checkers=32 \
                 --s3-chunk-size=16M \
                 --s3-upload-concurrency=2 \
-                --s3-upload-cutoff=0 \
                 --s3-no-head \
                 --s3-disable-checksum \
                 --s3-no-check-bucket \
