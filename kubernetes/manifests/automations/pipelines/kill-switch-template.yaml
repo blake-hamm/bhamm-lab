@@ -7,86 +7,264 @@ metadata:
     argocd.argoproj.io/sync-wave: "7"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
-  activeDeadlineSeconds: 600
+  activeDeadlineSeconds: 900
+  arguments:
+    parameters:
+      - name: skip-apps
+        value: "argocd argocd-common argo-common argo-workflows argo-events automations ceph-common ceph-csi-rbd ceph-csi-cephfs csi-snapshot-crds csi-snapshotter snapshot-controller cloudnative-pg cloudnative-pg-barman green-base green-core green-apps blue-base blue-core"
+      - name: skip-namespaces
+        value: "argocd argo ceph cnpg-system kube-system"
   templates:
     - name: cleanup
       steps:
-        - - name: pause-argocd-apps
-            template: pause-apps
-        - - name: delete-cnpg-clusters
-            template: delete-cnpg-clusters
+        - - name: pause-parents
+            template: pause-parents
+        - - name: pause-children
+            template: pause-children
+        - - name: cleanup-k8up
+            template: cleanup-k8up
+        - - name: cleanup-cnpg
+            template: cleanup-cnpg
+        - - name: delete-apps
+            template: delete-apps
+        - - name: wait-for-pods
+            template: wait-for-pods
         - - name: delete-pvcs
             template: delete-pvcs
-          - name: remove-finalizers
-            template: remove-finalizers
-        - - name: validate-pvcs
-            template: validate-pvcs
-        - - name: delete-argocd-apps
-            template: delete-apps
-    - name: pause-apps
+        - - name: verify-pvs
+            template: verify-pvs
+    - name: pause-parents
       script:
         image: alpine/kubectl
         command: ["/bin/sh", "-c"]
         source: |
-          # Pause all ArgoCD applications to stop syncing
-          kubectl get applications -n argocd -o name | xargs -I {} kubectl patch {} -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":null}}}'
-    - name: delete-cnpg-clusters
-      script:
-        image: alpine/kubectl
-        command: ["/bin/sh", "-c"]
-        source: |
-          # Delete all CNPG PostgreSQL clusters across all namespaces
-          kubectl delete clusters.postgresql.cnpg.io --all --all-namespaces --force --grace-period=0
-    - name: remove-finalizers
-      script:
-        image: alpine/kubectl
-        command: ["/bin/sh", "-c"]
-        source: |
-          # Continuously remove finalizers from all PVCs across all namespaces
-          for attempt in {1..10}; do
-            for ns in $(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}'); do
-              for pvc in $(kubectl get pvc -n $ns -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
-                kubectl patch pvc $pvc -n $ns -p '{"metadata":{"finalizers":null}}' --type=merge
-              done
-            done
-            echo "Completed finalizer removal attempt $attempt"
-            sleep 3
+          SKIP_APPS="{{workflow.parameters.skip-apps}}"
+          echo "Pausing parent apps to prevent recreation..."
+
+          # Order matters: pause base first, then core, then apps
+          # to prevent cascaded recreation
+          ORDERED_PARENTS="green-base blue-base green-core blue-core green-apps"
+
+          for app in $ORDERED_PARENTS; do
+            if kubectl get app $app -n argocd &>/dev/null; then
+              echo "Pausing parent app: $app"
+              kubectl patch app $app -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":null}}}' || true
+              # Wait for the patch to be applied
+              sleep 2
+            else
+              echo "Parent app not found: $app"
+            fi
           done
+          echo "Parent apps paused."
+    - name: pause-children
+      script:
+        image: alpine/kubectl
+        command: ["/bin/sh", "-c"]
+        source: |
+          SKIP_APPS="{{workflow.parameters.skip-apps}}"
+          echo "Pausing all non-skip child apps to prevent auto-sync..."
+
+          for app in $(kubectl get apps -n argocd -o jsonpath='{.items[*].metadata.name}'); do
+            if ! echo " $SKIP_APPS " | grep -q " $app "; then
+              echo "Pausing child app: $app"
+              kubectl patch app $app -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":null}}}' || true
+            else
+              echo "Skipping protected app: $app"
+            fi
+          done
+          echo "Child apps paused."
+    - name: cleanup-k8up
+      script:
+        image: alpine/kubectl
+        command: ["/bin/sh", "-c"]
+        source: |
+          SKIP_NS="{{workflow.parameters.skip-namespaces}}"
+          echo "Deleting K8up resources in non-skip namespaces..."
+
+          for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
+            if ! echo " $SKIP_NS " | grep -q " $ns "; then
+              RESOURCES=$(kubectl get schedule.k8up.io,backup.k8up.io,prune.k8up.io,check.k8up.io,restore.k8up.io -n $ns -o name 2>/dev/null)
+              if [ -n "$RESOURCES" ]; then
+                echo "Deleting K8up resources in: $ns"
+                kubectl delete schedule.k8up.io,backup.k8up.io,prune.k8up.io,check.k8up.io,restore.k8up.io --all -n $ns --wait=true --timeout=60s 2>/dev/null || true
+              fi
+            fi
+          done
+
+          echo "Waiting for K8up pods to terminate..."
+          for attempt in $(seq 1 12); do
+            K8UP_PODS=$(kubectl get pods --all-namespaces -l k8up.io/backup -o jsonpath='{.items[*].metadata.name}' 2>/dev/null | wc -w)
+            if [ "$K8UP_PODS" -eq 0 ]; then
+              echo "All K8up pods terminated."
+              break
+            fi
+            echo "Waiting for $K8UP_PODS K8up pods... ($attempt/12)"
+            sleep 10
+          done
+          echo "K8up cleanup complete."
+    - name: cleanup-cnpg
+      script:
+        image: alpine/kubectl
+        command: ["/bin/sh", "-c"]
+        source: |
+          SKIP_NS="{{workflow.parameters.skip-namespaces}}"
+          echo "Deleting CNPG clusters gracefully..."
+
+          for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
+            if ! echo " $SKIP_NS " | grep -q " $ns "; then
+              CLUSTERS=$(kubectl get clusters.postgresql.cnpg.io -n $ns -o name 2>/dev/null)
+              if [ -n "$CLUSTERS" ]; then
+                echo "Deleting CNPG clusters in $ns..."
+                kubectl delete clusters.postgresql.cnpg.io --all -n $ns --wait=true --timeout=300s 2>/dev/null || true
+              fi
+            fi
+          done
+
+          echo "Waiting for CNPG pods to terminate..."
+          for attempt in $(seq 1 12); do
+            CNPG_PODS=$(kubectl get pods --all-namespaces -l cnpg.io/cluster -o jsonpath='{.items[*].metadata.name}' 2>/dev/null | wc -w)
+            if [ "$CNPG_PODS" -eq 0 ]; then
+              echo "All CNPG pods terminated."
+              break
+            fi
+            echo "Waiting for $CNPG_PODS CNPG pods... ($attempt/12)"
+            sleep 10
+          done
+          echo "CNPG clusters deleted."
+    - name: delete-apps
+      script:
+        image: quay.io/argoproj/argocd
+        command: ["/bin/sh", "-c"]
+        source: |
+          SKIP_APPS="{{workflow.parameters.skip-apps}}"
+          echo "Deleting non-skip ArgoCD applications with cascade..."
+
+          # Login to ArgoCD
+          ARGOCD_PASS=$(kubectl -n argocd get secret argocd-initial-admin-secret \
+            -o jsonpath='{.data.password}' | base64 -d)
+          argocd login argocd-server.argocd.svc --plaintext --grpc-web \
+            --username admin --password "$ARGOCD_PASS" || exit 1
+
+          # Delete apps in reverse order to avoid recreation
+          echo "Collecting apps to delete..."
+          TO_DELETE=""
+          for app in $(kubectl get apps -n argocd -o jsonpath='{.items[*].metadata.name}'); do
+            if ! echo " $SKIP_APPS " | grep -q " $app "; then
+              TO_DELETE="$TO_DELETE $app"
+            else
+              echo "Skipping protected app: $app"
+            fi
+          done
+
+          if [ -n "$TO_DELETE" ]; then
+            echo "Deleting apps: $TO_DELETE"
+            for app in $TO_DELETE; do
+              echo "Deleting app: $app"
+              argocd app delete $app --cascade --yes 2>/dev/null || true
+              sleep 2
+            done
+          else
+            echo "No apps to delete."
+          fi
+
+          echo "Waiting for remaining apps to be deleted..."
+          for attempt in $(seq 1 30); do
+            REMAINING=$(kubectl get apps -n argocd -o jsonpath='{.items[*].metadata.name}' 2>/dev/null)
+            # Filter out skip-apps
+            TO_DELETE_COUNT=0
+            for app in $REMAINING; do
+              if ! echo " $SKIP_APPS " | grep -q " $app "; then
+                TO_DELETE_COUNT=$((TO_DELETE_COUNT + 1))
+              fi
+            done
+            if [ "$TO_DELETE_COUNT" -eq 0 ]; then
+              echo "All non-skip apps deleted."
+              break
+            fi
+            echo "Waiting for $TO_DELETE_COUNT apps... ($attempt/30)"
+            sleep 10
+          done
+          echo "App deletion complete."
+    - name: wait-for-pods
+      script:
+        image: alpine/kubectl
+        command: ["/bin/sh", "-c"]
+        source: |
+          SKIP_NS="{{workflow.parameters.skip-namespaces}}"
+          echo "Waiting for all pods to terminate..."
+
+          for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
+            if ! echo " $SKIP_NS " | grep -q " $ns "; then
+              POD_COUNT=$(kubectl get pod -n $ns --no-headers 2>/dev/null | wc -l)
+              if [ "$POD_COUNT" -gt 0 ]; then
+                echo "Waiting for $POD_COUNT pods in $ns..."
+                kubectl wait --for=delete pod --all -n $ns --timeout=300s 2>/dev/null || true
+              fi
+            fi
+          done
+          echo "All pods terminated."
     - name: delete-pvcs
       script:
         image: alpine/kubectl
         command: ["/bin/sh", "-c"]
         source: |
-          # Delete all PVCs in all namespaces
-          kubectl delete pvc --all --all-namespaces --force --grace-period=0
-    - name: validate-pvcs
-      script:
-        image: alpine/kubectl
-        command: ["/bin/sh", "-c"]
-        source: |
-          # Check for and clean up any stuck PVCs (retry up to 3 times)
-          for attempt in {1..3}; do
-            stuck_pvcs=false
-            for ns in $(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}'); do
-              for pvc in $(kubectl get pvc -n $ns -o jsonpath='{.items[?(@.status.phase=="Terminating")].metadata.name}' 2>/dev/null); do
-                kubectl patch pvc $pvc -n $ns -p '{"metadata":{"finalizers":null}}' --type=merge
-                stuck_pvcs=true
-              done
+          SKIP_NS="{{workflow.parameters.skip-namespaces}}"
+          echo "Deleting PVCs in non-skip namespaces..."
+
+          for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
+            if ! echo " $SKIP_NS " | grep -q " $ns "; then
+              PVC_COUNT=$(kubectl get pvc -n $ns --no-headers 2>/dev/null | wc -l)
+              if [ "$PVC_COUNT" -gt 0 ]; then
+                echo "Deleting $PVC_COUNT PVCs in: $ns"
+                kubectl delete pvc --all -n $ns --wait=true --timeout=300s 2>/dev/null || true
+              fi
+            fi
+          done
+
+          echo "Waiting for all PVCs to be deleted..."
+          for attempt in $(seq 1 30); do
+            PVC_COUNT=0
+            for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
+              if ! echo " $SKIP_NS " | grep -q " $ns "; then
+                COUNT=$(kubectl get pvc -n $ns --no-headers 2>/dev/null | wc -l)
+                PVC_COUNT=$((PVC_COUNT + COUNT))
+              fi
             done
-            if [ "$stuck_pvcs" = false ]; then
-              echo "No stuck PVCs found, cleanup complete."
+            if [ "$PVC_COUNT" -eq 0 ]; then
+              echo "All PVCs deleted."
               break
             fi
-            echo "Retrying cleanup of stuck PVCs (attempt $attempt)..."
-            sleep 5
+            echo "Waiting for $PVC_COUNT PVCs... ($attempt/30)"
+            sleep 10
           done
-    - name: delete-apps
+          echo "PVC deletion complete."
+    - name: verify-pvs
       script:
         image: alpine/kubectl
         command: ["/bin/sh", "-c"]
         source: |
-          # Delete all ArgoCD applications to remove managed resources
-          kubectl delete applications --all -n argocd --force --grace-period=0
+          SKIP_NS="{{workflow.parameters.skip-namespaces}}"
+          echo "Verifying no orphaned PVs remain..."
+
+          ORPHAN_FOUND=false
+          for pv in $(kubectl get pv -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
+            CLAIM_NS=$(kubectl get pv $pv -o jsonpath='{.spec.claimRef.namespace}' 2>/dev/null)
+            if [ -n "$CLAIM_NS" ]; then
+              if ! echo " $SKIP_NS " | grep -q " $CLAIM_NS "; then
+                echo "ORPHAN: PV $pv still bound to namespace $CLAIM_NS"
+                ORPHAN_FOUND=true
+              fi
+            fi
+          done
+
+          if [ "$ORPHAN_FOUND" = true ]; then
+            echo "ERROR: Orphaned PVs found. Check Ceph for orphaned RBD images:"
+            echo "  rbd ls osd"
+            echo "  ceph fs subvolume ls cephfs"
+            exit 1
+          fi
+
+          echo "SUCCESS: No orphaned PVs found. Ceph data successfully wiped."
 ---
 apiVersion: v1
 kind: ServiceAccount
