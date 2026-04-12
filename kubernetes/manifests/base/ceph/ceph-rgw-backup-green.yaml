@@ -106,11 +106,18 @@ spec:
                 rclone sync "rgw:${bucket}" "minio:ceph-rgw/${bucket}" \
                   --progress \
                   --fast-list \
-                  --transfers=8 \
-                  --checkers=16 \
-                  --s3-chunk-size=32M \
-                  --s3-upload-concurrency=4 \
+                  --checksum \
+                  --check-first \
+                  --transfers=16 \
+                  --checkers=32 \
+                  --s3-chunk-size=16M \
+                  --s3-upload-concurrency=2 \
+                  --s3-upload-cutoff=0 \
+                  --s3-no-head \
+                  --s3-disable-checksum \
+                  --s3-no-check-bucket \
                   --disable-http2 \
+                  --max-backlog=10000 \
                   --stats=30s
               done
 
@@ -180,11 +187,18 @@ spec:
               rclone sync minio:ceph-rgw r2:ceph-rgw \
                 --progress \
                 --fast-list \
-                --transfers=8 \
-                --checkers=16 \
-                --s3-chunk-size=32M \
-                --s3-upload-concurrency=4 \
+                --checksum \
+                --check-first \
+                --transfers=16 \
+                --checkers=32 \
+                --s3-chunk-size=16M \
+                --s3-upload-concurrency=2 \
+                --s3-upload-cutoff=0 \
+                --s3-no-head \
+                --s3-disable-checksum \
+                --s3-no-check-bucket \
                 --disable-http2 \
+                --max-backlog=10000 \
                 --stats=30s
 
               echo "=== Verification: Checking sync integrity ==="
