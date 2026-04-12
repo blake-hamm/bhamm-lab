@@ -17,7 +17,7 @@ ingressRoutes: []
 k8up:
   backup:
     enabled: false
-    schedule: "0 */12 * * *"
+    schedule: "0 0 * * *"
   restore:
     enabled: false
     config:
@@ -45,7 +45,7 @@ postgresql:
   backup:
     enabled: false
     pathVersion: "v1"
-    schedule: "0 30 */12 * * *"
+    schedule: "0 30 0 * * *"
     retention: "30d"
   restore:
     enabled: false
@@ -53,24 +53,26 @@ postgresql:
     retention: "30d"
   # -- Additional databases to create using CNPG Database resource
   additionalDatabases: []
-    # - name: analytics
-    #   owner: app
-    #   template: template0
-    #   encoding: UTF8
-    #   locale: en_US.UTF-8
-    #   tablespace: pg_default
-    #   allowConnections: true
-    #   connectionLimit: -1
-    #   isTemplate: false
-    # - name: reporting
-    #   owner: app
-    #   encoding: UTF8
-    #   locale: en_US.UTF-8
+  # - name: analytics
+  #   owner: app
+  #   template: template0
+  #   encoding: UTF8
+  #   locale: en_US.UTF-8
+  #   tablespace: pg_default
+  #   allowConnections: true
+  #   connectionLimit: -1
+  #   isTemplate: false
+  # - name: reporting
+  #   owner: app
+  #   encoding: UTF8
+  #   locale: en_US.UTF-8
 pvc: []
 # - name: my-pvc-1
 #   storageSize: 10Gi
 #   storageClassName: local-path
 #   accessMode: ReadWriteOnce
+s3:
+  endpoint: http://external-rgw.ceph.svc.cluster.local:80
 dragonfly:
   enabled: false
   replicas: 1

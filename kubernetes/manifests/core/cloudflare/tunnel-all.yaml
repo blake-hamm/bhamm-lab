@@ -5,6 +5,7 @@ metadata:
   namespace: cloudflare-operator-system
   annotations:
     argocd.argoproj.io/sync-wave: "21"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   cloudflare:
     accountId: 334b75e7892d552ad3ec86277e987ca4

@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: twenty-common
+  name: git-common
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-wave: "19"
 spec:
   destination:
-    namespace: twenty
+    namespace: git
     server: https://kubernetes.default.svc
   project: default
   source:
@@ -16,43 +16,48 @@ spec:
     path: kubernetes/charts/common
     helm:
       valuesObject:
-        name: twenty
-        postgresql:
-          enabled: true
-          backup:
-            enabled: true
-          restore:
-            enabled: false
-        dragonfly:
-          enabled: true
-        pvc:
-          - name: twenty-local-data
-            storageSize: 10Gi
-        k8up:
-          backup:
-            enabled: true
-          restore:
-            enabled: false
+        name: git
         externalSecrets:
           enabled: true
           secrets:
-            - secretKey: APP_SECRET
+            - secretKey: key
               remoteRef:
-                key: /default/twenty
-                property: APP_SECRET
+                key: /default/gitea
+                property: oidc_client_key
+            - secretKey: secret
+              remoteRef:
+                key: /default/gitea
+                property: oidc_client_secret
+        pvc:
+          - name: gitea-shared-storage
+            storageSize: 10Gi
+        k8up:
+          backup:
+            enabled: false
+          restore:
+            enabled: true
+        postgresql:
+          enabled: true
+          backup:
+            enabled: false
+          restore:
+            enabled: true
         ingressRoutes:
-          - name: twenty
+          - enabled: true
+            name: forgejo
             ingressClass: traefik-external
             websocket: true
             routes:
-              - match: Host(`crm.bhamm-lab.com`)
-                kind: Rule
+              - kind: Rule
+                match: Host(`git.bhamm-lab.com`)
                 middlewares:
                   - name: default-headers
                 services:
-                  - name: twenty-server
-                    scheme: http
+                  - name: git-forgejo-http
                     port: 3000
+                    scheme: http
+        dragonfly:
+          enabled: true
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

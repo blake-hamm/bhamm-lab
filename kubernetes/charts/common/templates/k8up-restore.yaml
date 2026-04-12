@@ -24,7 +24,7 @@ spec:
                 - name: location
                   value: onsite
                 - name: k8up-endpoint
-                  value: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
+                  value: {{ .Values.s3.endpoint }}
                 - name: k8up-bucket
                   value: k8up-backups
                 - name: k8up-secret

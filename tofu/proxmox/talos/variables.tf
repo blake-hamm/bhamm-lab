@@ -1,7 +1,7 @@
 variable "talos_version" {
   description = "Talos version to use"
   type        = string
-  default     = "v1.11.3"
+  default     = "v1.12.6"
 }
 
 variable "talos_factory_url" {
@@ -48,7 +48,7 @@ variable "proxmox_nodes" {
   }))
   default = [
     { name = "indy", multiplier = 1.5 },
-    { name = "method", multiplier = 1.4 },
+    { name = "method", multiplier = 1.2 },
     { name = "japan", multiplier = 1 },
   ]
 }

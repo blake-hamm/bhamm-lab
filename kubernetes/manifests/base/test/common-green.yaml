@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: open-webui-common
+  name: test-common
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "22"
+    argocd.argoproj.io/sync-wave: "10"
 spec:
   destination:
-    namespace: open-webui
+    namespace: test
     server: https://kubernetes.default.svc
   project: default
   source:
@@ -16,43 +16,44 @@ spec:
     path: kubernetes/charts/common
     helm:
       valuesObject:
-        name: open-webui
+        name: test
+        # externalSecrets:
+        #   enabled: true
+        #   secrets:
+        #     - secretKey: k8up-repo-password
+        #       remoteRef:
+        #         key: /core/k8up
+        #         property: repo-password
         ingressRoutes:
-          - name: open-webui
+          - enabled: true
+            name: test
             ingressClass: traefik-external
-            websocket: true
+            # websocket: true
             routes:
-              - match: Host(`open-webui.bhamm-lab.com`)
-                kind: Rule
+              - kind: Rule
+                match: Host(`test.bhamm-lab.com`)
                 middlewares:
                   - name: default-headers
+                  - name: forwardauth-authelia
                 services:
-                  - name: open-webui
+                  - name: test
                     scheme: http
-                    port: http
-        externalSecrets:
-          enabled: true
-          secrets:
-            - secretKey: OPENAI_API_KEY
-              remoteRef:
-                key: /default/litellm
-                property: LITELLM_MASTER_KEY
-            - secretKey: OAUTH_CLIENT_SECRET
-              remoteRef:
-                key: /default/open-webui
-                property: oidc
-        postgresql:
-          enabled: true
+                    port: 80
+        pvc:
+          - name: test
+            accessMode: "ReadWriteOnce"
+            storageSize: 1Gi
+            storageClassName: "csi-rbd-sc"
+        k8up:
           backup:
             enabled: true
           restore:
             enabled: true
-        pvc:
-          - name: open-webui-data
-            storageSize: 10Gi
-        k8up:
+        postgresql:
+          enabled: true
           backup:
             enabled: true
+            retention: "3d"
           restore:
             enabled: true
   syncPolicy:

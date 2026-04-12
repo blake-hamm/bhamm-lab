@@ -1,0 +1,203 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: ceph-rgw-backup
+  namespace: ceph
+  annotations:
+    argocd.argoproj.io/sync-wave: "25"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  schedule: "0 1 * * 0"
+  timezone: America/Denver
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  workflowSpec:
+    serviceAccountName: argo-workflow
+    entrypoint: main
+    onExit: exit-handler
+    templates:
+      - name: main
+        steps:
+          - - name: list-buckets
+              template: list-buckets
+          - - name: rclone-sync-to-minio
+              template: rclone-sync-to-minio
+              arguments:
+                parameters:
+                  - name: buckets
+                    value: "{{steps.list-buckets.outputs.result}}"
+      - name: list-buckets
+        container:
+          image: rclone/rclone
+          env:
+            - name: RGW_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: s3_access_key
+            - name: RGW_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: s3_secret_key
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              rclone config create rgw s3 provider Other access_key_id $RGW_ACCESS_KEY secret_access_key $RGW_SECRET_KEY endpoint http://external-rgw.ceph.svc.cluster.local:80 >&2
+              rclone lsd rgw: | awk '{print $NF}' | tr '\n' ' '
+      - name: rclone-sync-to-minio
+        inputs:
+          parameters:
+            - name: buckets
+        container:
+          image: rclone/rclone
+          resources:
+            requests:
+              memory: 512Mi
+            limits:
+              memory: 4Gi
+          env:
+            - name: RGW_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: s3_access_key
+            - name: RGW_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: s3_secret_key
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: AWS_ENDPOINT
+            - name: BUCKETS
+              value: "{{inputs.parameters.buckets}}"
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -ex
+              rclone config create rgw s3 \
+                provider Other \
+                access_key_id $RGW_ACCESS_KEY \
+                secret_access_key $RGW_SECRET_KEY \
+                endpoint http://external-rgw.ceph.svc.cluster.local:80
+
+              rclone config create minio s3 \
+                provider Minio \
+                access_key_id $AWS_ACCESS_KEY_ID \
+                secret_access_key $AWS_SECRET_ACCESS_KEY \
+                endpoint $AWS_ENDPOINT
+
+              for bucket in $BUCKETS; do
+                echo "=== Syncing rgw:${bucket} → minio:ceph-rgw/${bucket}/ ==="
+                rclone sync "rgw:${bucket}" "minio:ceph-rgw/${bucket}" \
+                  --progress \
+                  --fast-list \
+                  --checksum \
+                  --check-first \
+                  --transfers=16 \
+                  --checkers=32 \
+                  --s3-chunk-size=16M \
+                  --s3-upload-concurrency=2 \
+                  --s3-no-head \
+                  --s3-disable-checksum \
+                  --s3-no-check-bucket \
+                  --disable-http2 \
+                  --max-backlog=10000 \
+                  --stats=30s
+              done
+
+              echo "=== Verification: MinIO bucket contents ==="
+              rclone ls minio:ceph-rgw
+      - name: exit-handler
+        steps:
+          - - name: rclone-sync-to-r2
+              when: "{{workflow.status}} == Succeeded"
+              template: rclone-sync-to-r2
+      - name: rclone-sync-to-r2
+        container:
+          image: rclone/rclone
+          resources:
+            requests:
+              memory: 512Mi
+            limits:
+              memory: 4Gi
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: AWS_ENDPOINT
+            - name: R2_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: R2_ACCESS_KEY_ID
+            - name: R2_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: R2_SECRET_ACCESS_KEY
+            - name: R2_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: ceph-external-secret
+                  key: R2_ENDPOINT
+          command: ["/bin/sh", "-c"]
+          args:
+            - |-
+              set -ex
+              rclone config create minio s3 \
+                provider Minio \
+                access_key_id $AWS_ACCESS_KEY_ID \
+                secret_access_key $AWS_SECRET_ACCESS_KEY \
+                endpoint $AWS_ENDPOINT
+
+              rclone config create r2 s3 \
+                provider Cloudflare \
+                access_key_id $R2_ACCESS_KEY_ID \
+                secret_access_key $R2_SECRET_ACCESS_KEY \
+                endpoint $R2_ENDPOINT
+
+              echo "=== Syncing minio:ceph-rgw → r2:ceph-rgw ==="
+              rclone sync minio:ceph-rgw r2:ceph-rgw \
+                --progress \
+                --fast-list \
+                --checksum \
+                --check-first \
+                --transfers=16 \
+                --checkers=32 \
+                --s3-chunk-size=16M \
+                --s3-upload-concurrency=2 \
+                --s3-no-head \
+                --s3-disable-checksum \
+                --s3-no-check-bucket \
+                --disable-http2 \
+                --max-backlog=10000 \
+                --stats=30s
+
+              echo "=== Verification: Checking sync integrity ==="
+              rclone check minio:ceph-rgw r2:ceph-rgw --one-way --checksum

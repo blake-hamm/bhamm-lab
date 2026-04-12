@@ -108,7 +108,7 @@ spec:
               aws:
                 bucketnames: loki-data
                 region: us-east-1
-                endpoint: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
+                endpoint: http://external-rgw.ceph.svc.cluster.local:80
                 access_key_id: "${S3_ACCESS_KEY_ID}"
                 secret_access_key: "${S3_SECRET_ACCESS_KEY}"
                 s3forcepathstyle: true

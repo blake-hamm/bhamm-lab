@@ -19,6 +19,8 @@ spec:
       valuesObject:
         global:
           domain: argocd.bhamm-lab.com
+          certificateAnnotations:
+            argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
         controller:
           replicas: 1
         server:

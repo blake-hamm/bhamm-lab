@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: twenty-common
+  name: harbor-common
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-wave: "19"
 spec:
   destination:
-    namespace: twenty
+    namespace: harbor
     server: https://kubernetes.default.svc
   project: default
   source:
@@ -16,43 +16,51 @@ spec:
     path: kubernetes/charts/common
     helm:
       valuesObject:
-        name: twenty
+        name: harbor
         postgresql:
           enabled: true
           backup:
-            enabled: true
-          restore:
             enabled: false
-        dragonfly:
-          enabled: true
+          restore:
+            enabled: true
         pvc:
-          - name: twenty-local-data
-            storageSize: 10Gi
+          - name: harbor-registry
+            storageSize: 300Gi
+          - name: data-harbor-trivy-0
+            storageSize: 5Gi
         k8up:
           backup:
-            enabled: true
-          restore:
             enabled: false
+          restore:
+            enabled: true
         externalSecrets:
           enabled: true
           secrets:
-            - secretKey: APP_SECRET
+            - secretKey: REGISTRY_STORAGE_S3_ACCESSKEY
               remoteRef:
-                key: /default/twenty
-                property: APP_SECRET
+                key: /core/ceph
+                property: s3_access_key
+            - secretKey: REGISTRY_STORAGE_S3_SECRETKEY
+              remoteRef:
+                key: /core/ceph
+                property: s3_secret_key
+            - secretKey: HARBOR_ADMIN_PASSWORD
+              remoteRef:
+                key: /core/harbor
+                property: HARBOR_ADMIN_PASSWORD
         ingressRoutes:
-          - name: twenty
+          - name: harbor
             ingressClass: traefik-external
             websocket: true
             routes:
-              - match: Host(`crm.bhamm-lab.com`)
+              - match: Host(`harbor.bhamm-lab.com`)
                 kind: Rule
                 middlewares:
                   - name: default-headers
                 services:
-                  - name: twenty-server
+                  - name: harbor
                     scheme: http
-                    port: 3000
+                    port: 80
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

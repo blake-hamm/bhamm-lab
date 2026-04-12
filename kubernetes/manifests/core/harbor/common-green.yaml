@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: main
+    targetRevision: feature/ceph-rgw
     path: kubernetes/charts/common
     helm:
       valuesObject:
@@ -38,12 +38,12 @@ spec:
           secrets:
             - secretKey: REGISTRY_STORAGE_S3_ACCESSKEY
               remoteRef:
-                key: /core/seaweedfs
-                property: admin_access_key_id
+                key: /core/ceph
+                property: s3_access_key
             - secretKey: REGISTRY_STORAGE_S3_SECRETKEY
               remoteRef:
-                key: /core/seaweedfs
-                property: admin_secret_access_key
+                key: /core/ceph
+                property: s3_secret_key
             - secretKey: HARBOR_ADMIN_PASSWORD
               remoteRef:
                 key: /core/harbor

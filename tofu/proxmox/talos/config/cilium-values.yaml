@@ -64,3 +64,5 @@ operator:
     enabled: true
 bandwidthManager:
   enabled: true
+  bbr: true
+MTU: 8950

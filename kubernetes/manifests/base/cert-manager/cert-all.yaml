@@ -101,6 +101,7 @@ kind: ClusterIssuer
 metadata:
   name: selfsigned-issuer
   annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "10"
 spec:
   selfSigned: {}

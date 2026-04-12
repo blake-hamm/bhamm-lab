@@ -5,7 +5,7 @@ iface lo inet loopback
 # Physical NIC (10Gb) on trunk port: no IP assigned here
 auto enp1s0f0
 iface enp1s0f0 inet manual
-    mtu 9000
+    mtu 9216
 
 # VLAN-aware Bridge on enp1s0f0
 auto vmbr0
@@ -16,7 +16,7 @@ iface vmbr0 inet manual
     bridge-vlan-aware yes
     bridge-vlan-filtering yes
     bridge-vids 1 20 30
-    mtu 9000
+    mtu 9216
 
 # Metal interface on VLAN 20 via the bridge:
 auto vmbr0.20
@@ -38,7 +38,7 @@ iface vmbr0.30 inet static
 # Ceph Interface (10Gb) - VLAN 50 on enp1s0f1:
 auto enp1s0f1
 iface enp1s0f1 inet manual
-    mtu 9000
+    mtu 9216
 
 auto enp1s0f1.50
 iface enp1s0f1.50 inet static

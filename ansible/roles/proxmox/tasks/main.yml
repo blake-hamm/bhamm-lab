@@ -7,6 +7,9 @@
 - name: Run lae proxmox ansible role
   ansible.builtin.include_role:
     name: lae.proxmox
+- name: Configure Ceph RGW
+  ansible.builtin.include_tasks: ceph-rgw.yml
+  when: pve_ceph_rgw_enabled | bool
 - name: Install pbs
   ansible.builtin.include_tasks: pbs.yml
   when: proxmox_pbs

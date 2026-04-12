@@ -1,0 +1,196 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterWorkflowTemplate
+metadata:
+  name: create-ceph-buckets-green
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  serviceAccountName: argo-workflow
+  entrypoint: main
+  templates:
+    - name: main
+      steps:
+        - - name: create-buckets
+            templateRef:
+              name: s3-bucket-management
+              template: bucket-management
+              clusterScope: true
+            arguments:
+              parameters:
+                - name: bucket-names
+                  value: '["tofu-state","loki-data","argo-artifacts","cnpg-backups","k8up-backups", "beyond-vibes", "mlflow", "proxmox-backup-server"]'
+                - name: endpoint-url
+                  value: http://external-rgw.ceph.svc.cluster.local:80
+                - name: aws-region
+                  value: us-east-1
+                - name: destroy-and-create
+                  value: "true"
+                - name: aws-auth-secret
+                  value: ceph-external-secret
+                - name: aws-access-key-id
+                  value: s3_access_key
+                - name: aws-secret-access-key
+                  value: s3_secret_key
+    - name: restore-from-minio
+      steps:
+        - - name: list-buckets
+            template: list-buckets
+        - - name: restore-bucket
+            template: restore-bucket
+            arguments:
+              parameters:
+                - name: bucket
+                  value: "{{item}}"
+            withParam: "{{steps.list-buckets.outputs.result}}"
+        - - name: verify-restore
+            template: verify-restore
+    - name: list-buckets
+      container:
+        image: rclone/rclone
+        resources:
+          requests:
+            memory: 128Mi
+          limits:
+            memory: 256Mi
+        env:
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: AWS_ACCESS_KEY_ID
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: AWS_SECRET_ACCESS_KEY
+          - name: AWS_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: AWS_ENDPOINT
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            rclone config create minio s3 \
+              provider Minio \
+              access_key_id $AWS_ACCESS_KEY_ID \
+              secret_access_key $AWS_SECRET_ACCESS_KEY \
+              endpoint $AWS_ENDPOINT
+            rclone lsd minio:ceph-rgw | awk 'BEGIN{s="["; sep=""} {s=s sep"\""$NF"\""; sep=","} END{print s"]"}'
+    - name: restore-bucket
+      inputs:
+        parameters:
+          - name: bucket
+      container:
+        image: rclone/rclone
+        resources:
+          requests:
+            memory: 512Mi
+          limits:
+            memory: 4Gi
+        env:
+          - name: RGW_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: s3_access_key
+          - name: RGW_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: s3_secret_key
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: AWS_ACCESS_KEY_ID
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: AWS_SECRET_ACCESS_KEY
+          - name: AWS_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: AWS_ENDPOINT
+          - name: BUCKET
+            value: "{{inputs.parameters.bucket}}"
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            set -ex
+            rclone config create rgw s3 \
+              provider Other \
+              access_key_id $RGW_ACCESS_KEY \
+              secret_access_key $RGW_SECRET_KEY \
+              endpoint http://external-rgw.ceph.svc.cluster.local:80
+
+            rclone config create minio s3 \
+              provider Minio \
+              access_key_id $AWS_ACCESS_KEY_ID \
+              secret_access_key $AWS_SECRET_ACCESS_KEY \
+              endpoint $AWS_ENDPOINT
+
+            echo "=== Restoring minio:ceph-rgw/${BUCKET} -> rgw:${BUCKET} ==="
+            rclone sync "minio:ceph-rgw/${BUCKET}" "rgw:${BUCKET}" \
+              --progress \
+              --fast-list \
+              --transfers=8 \
+              --checkers=16 \
+              --disable-http2 \
+              --stats=30s
+    - name: verify-restore
+      container:
+        image: rclone/rclone
+        resources:
+          requests:
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+        env:
+          - name: RGW_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: s3_access_key
+          - name: RGW_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: s3_secret_key
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: AWS_ACCESS_KEY_ID
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: AWS_SECRET_ACCESS_KEY
+          - name: AWS_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: AWS_ENDPOINT
+        command: ["/bin/sh", "-c"]
+        args:
+          - |-
+            rclone config create rgw s3 \
+              provider Other \
+              access_key_id $RGW_ACCESS_KEY \
+              secret_access_key $RGW_SECRET_KEY \
+              endpoint http://external-rgw.ceph.svc.cluster.local:80
+
+            rclone config create minio s3 \
+              provider Minio \
+              access_key_id $AWS_ACCESS_KEY_ID \
+              secret_access_key $AWS_SECRET_ACCESS_KEY \
+              endpoint $AWS_ENDPOINT
+
+            echo "=== Verification: Checking restore integrity ==="
+            for bucket in $(rclone lsd minio:ceph-rgw | awk '{print $NF}'); do
+              echo "--- Checking rgw:${bucket} ---"
+              rclone check "minio:ceph-rgw/${bucket}" "rgw:${bucket}" --one-way --size-only
+            done

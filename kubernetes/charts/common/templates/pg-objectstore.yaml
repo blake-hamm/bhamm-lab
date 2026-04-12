@@ -10,7 +10,7 @@ metadata:
 spec:
   configuration:
     destinationPath: "{{ .Values.postgresql.basePath }}/{{ .Values.postgresql.backup.pathVersion }}/"
-    endpointURL: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
+    endpointURL: {{ .Values.s3.endpoint }}
     s3Credentials:
       accessKeyId:
         name: cnpg-s3-backup-creds
@@ -41,7 +41,7 @@ metadata:
 spec:
   configuration:
     destinationPath: "{{ .Values.postgresql.basePath }}/{{ .Values.postgresql.restore.pathVersion }}/"
-    endpointURL: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
+    endpointURL: {{ .Values.s3.endpoint }}
     s3Credentials:
       accessKeyId:
         name: cnpg-s3-backup-creds

@@ -1,0 +1,76 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ceph-common
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+spec:
+  destination:
+    namespace: ceph
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    targetRevision: feature/ceph-rgw
+    path: kubernetes/charts/common
+    helm:
+      valuesObject:
+        name: ceph
+        externalSecrets:
+          enabled: true
+          secrets:
+            - secretKey: s3_user
+              remoteRef:
+                key: /core/ceph
+                property: s3_user
+            - secretKey: s3_access_key
+              remoteRef:
+                key: /core/ceph
+                property: s3_access_key
+            - secretKey: s3_secret_key
+              remoteRef:
+                key: /core/ceph
+                property: s3_secret_key
+            - secretKey: AWS_ACCESS_KEY_ID
+              remoteRef:
+                key: /core/k8up
+                property: S3_ACCESS_KEY_ID
+            - secretKey: AWS_SECRET_ACCESS_KEY
+              remoteRef:
+                key: /core/k8up
+                property: S3_SECRET_ACCESS_KEY
+            - secretKey: AWS_ENDPOINT
+              remoteRef:
+                key: /core/k8up
+                property: S3_ENDPOINT
+            - secretKey: R2_ACCESS_KEY_ID
+              remoteRef:
+                key: /external/cloudflare
+                property: r2-access-key-id
+            - secretKey: R2_SECRET_ACCESS_KEY
+              remoteRef:
+                key: /external/cloudflare
+                property: r2-secret-access-key
+            - secretKey: R2_ENDPOINT
+              remoteRef:
+                key: /external/cloudflare
+                property: r2-endpoint
+        ingressRoutes:
+          - enabled: true
+            name: rgw
+            ingressClass: traefik-external
+            routes:
+              - kind: Rule
+                match: Host(`rgw.bhamm-lab.com`)
+                services:
+                  - name: external-rgw
+                    scheme: http
+                    port: 80
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

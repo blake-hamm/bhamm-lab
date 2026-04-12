@@ -16,3 +16,8 @@
     name: ceph-osd.target
     state: restarted
     enabled: true
+- name: Restart ceph-radosgw
+  ansible.builtin.systemd:
+    name: "ceph-radosgw@radosgw.{{ inventory_hostname }}.service"
+    state: restarted
+    enabled: true

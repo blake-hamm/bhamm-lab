@@ -1,0 +1,141 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: seaweedfs-to-rgw-migration
+  namespace: ceph
+spec:
+  serviceAccountName: argo-workflow
+  entrypoint: main
+  templates:
+    - name: main
+      steps:
+        - - name: migrate-buckets
+            template: migrate-buckets
+        - - name: verify-migration
+            template: verify-migration
+    - name: migrate-buckets
+      container:
+        image: rclone/rclone
+        resources:
+          requests:
+            cpu: "2"
+            memory: "4Gi"
+          limits:
+            cpu: "4"
+            memory: "8Gi"
+        env:
+          - name: SWFS_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: swfs_access_key
+          - name: SWFS_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: swfs_secret_key
+          - name: RGW_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: s3_access_key
+          - name: RGW_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: s3_secret_key
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            set -ex
+            rclone config create swfs s3 \
+              provider SeaweedFS \
+              access_key_id $SWFS_ACCESS_KEY \
+              secret_access_key $SWFS_SECRET_KEY \
+              endpoint http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333 >&2
+
+            rclone config create rgw s3 \
+              provider Ceph \
+              access_key_id $RGW_ACCESS_KEY \
+              secret_access_key $RGW_SECRET_KEY \
+              endpoint http://external-rgw.ceph.svc.cluster.local:80 >&2
+
+            for bucket in cnpg-backups k8up-backups mlflow; do
+              echo "=== Migrating swfs:${bucket} → rgw:${bucket} ==="
+              if ! rclone lsd "swfs:${bucket}" >/dev/null 2>&1; then
+                echo "WARNING: swfs:${bucket} does not exist or is empty, skipping"
+                continue
+              fi
+              rclone copy "swfs:${bucket}" "rgw:${bucket}" \
+                --progress \
+                --fast-list \
+                --size-only \
+                --transfers=64 \
+                --checkers=128 \
+                --buffer-size=32M \
+                --s3-chunk-size=16M \
+                --s3-disable-checksum \
+                --s3-no-head \
+                --s3-no-check-bucket \
+                --stats=15s
+            done
+    - name: verify-migration
+      container:
+        image: rclone/rclone
+        env:
+          - name: SWFS_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: swfs_access_key
+          - name: SWFS_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: swfs_secret_key
+          - name: RGW_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: s3_access_key
+          - name: RGW_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: s3_secret_key
+        command: ["/bin/sh", "-c"]
+        args:
+          - |-
+            rclone config create swfs s3 \
+              provider SeaweedFS \
+              access_key_id $SWFS_ACCESS_KEY \
+              secret_access_key $SWFS_SECRET_KEY \
+              endpoint http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333 >&2
+
+            rclone config create rgw s3 \
+              provider Ceph \
+              access_key_id $RGW_ACCESS_KEY \
+              secret_access_key $RGW_SECRET_KEY \
+              endpoint http://external-rgw.ceph.svc.cluster.local:80 >&2
+
+            echo "=== Verifying migration ==="
+            for bucket in cnpg-backups k8up-backups mlflow proxmox-backup-server tofu-state; do
+              echo "--- Bucket: ${bucket} ---"
+              if ! rclone lsd "swfs:${bucket}" >/dev/null 2>&1; then
+                echo "  Skipped (does not exist in SeaweedFS)"
+                continue
+              fi
+              SWFS_SIZE=$(rclone size "swfs:${bucket}" --json 2>/dev/null)
+              RGW_SIZE=$(rclone size "rgw:${bucket}" --json 2>/dev/null)
+              SWFS_COUNT=$(echo "$SWFS_SIZE" | awk -F'"count":' '{print $2}' | awk -F',' '{print $1}')
+              SWFS_BYTES=$(echo "$SWFS_SIZE" | awk -F'"bytes":' '{print $2}' | awk -F'[},]' '{print $1}')
+              RGW_COUNT=$(echo "$RGW_SIZE" | awk -F'"count":' '{print $2}' | awk -F',' '{print $1}')
+              RGW_BYTES=$(echo "$RGW_SIZE" | awk -F'"bytes":' '{print $2}' | awk -F'[},]' '{print $1}')
+              echo "  SeaweedFS: ${SWFS_COUNT} objects, ${SWFS_BYTES} bytes"
+              echo "  RGW:        ${RGW_COUNT} objects, ${RGW_BYTES} bytes"
+              if [ "$SWFS_COUNT" != "$RGW_COUNT" ] || [ "$SWFS_BYTES" != "$RGW_BYTES" ]; then
+                echo "  WARNING: Mismatch detected!"
+              else
+                echo "  OK: Counts and sizes match"
+              fi
+            done
