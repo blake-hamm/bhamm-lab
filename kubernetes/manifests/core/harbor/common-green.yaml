@@ -38,12 +38,12 @@ spec:
           secrets:
             - secretKey: REGISTRY_STORAGE_S3_ACCESSKEY
               remoteRef:
-                key: /core/seaweedfs
-                property: admin_access_key_id
+                key: /core/ceph-rgw
+                property: s3_access_key
             - secretKey: REGISTRY_STORAGE_S3_SECRETKEY
               remoteRef:
-                key: /core/seaweedfs
-                property: admin_secret_access_key
+                key: /core/ceph-rgw
+                property: s3_secret_key
             - secretKey: HARBOR_ADMIN_PASSWORD
               remoteRef:
                 key: /core/harbor
