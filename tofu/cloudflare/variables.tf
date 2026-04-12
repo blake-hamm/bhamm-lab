@@ -9,24 +9,6 @@ variable "cloudflare_account_id" {
   type        = string
 }
 
-variable "truenas_bucket_name" {
-  description = "The name of the R2 bucket for TrueNAS."
-  type        = string
-  default     = "seaweedfs"
-}
-
-variable "truenas_bucket_location" {
-  description = "The location of the R2 bucket for TrueNAS."
-  type        = string
-  default     = "wnam"
-}
-
-variable "truenas_bucket_storage_class" {
-  description = "The storage class of the R2 bucket for TrueNAS."
-  type        = string
-  default     = "Standard"
-}
-
 variable "ceph_rgw_bucket_name" {
   description = "The name of the R2 bucket for Ceph RGW backups."
   type        = string
