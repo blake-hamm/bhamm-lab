@@ -1092,11 +1092,6 @@ See the updated kill-switch template in Appendix A.
 # Update the kill-switch template
 vim kubernetes/manifests/automations/pipelines/kill-switch-template.yaml
 
-# Commit and push
-git add kubernetes/manifests/automations/pipelines/kill-switch-template.yaml
-git commit -m "Update kill-switch for native RGW architecture"
-git push
-
 # Sync ArgoCD
 argocd app sync automations
 ```
@@ -1119,45 +1114,6 @@ argo watch kill-switch-xxxx -n argo
 
 ---
 
-## Phase 12: Cleanup Legacy Ceph Pools
-
-**Status**: `NOT STARTED`
-
-### 12.1 Verify SeaweedFS RBD Images Are Gone
-
-```bash
-# SSH to a Ceph monitor node
-ssh root@method
-
-# Check if any RBD images remain in osd pool
-rbd ls osd
-
-# If empty or only contains images we still need, proceed to 12.2
-```
-
-### 12.2 Remove Legacy Pools (If Safe)
-
-```bash
-# Only run if Step 12.1 confirms no needed images exist
-ceph osd pool rm osd osd --yes-i-really-really-mean-it
-
-# Review remaining pools
-ceph osd pool ls
-# Expected: Proxmox pools, RGW pools, and new K8s CSI pools only
-```
-
-### 12.3 Verification
-
-```bash
-# Final pool state should include:
-# - default.rgw.* (RGW system pools)
-# - .rgw.root
-# - Any Proxmox VM storage pools
-# - CephFS pools (cephfs, cephfs_data) if still used
-# - Block pool (osd) if kept
-```
-
----
 
 ## Rollback Plan
 
@@ -1187,7 +1143,6 @@ If issues arise during any phase:
 - [x] **Phase 9**: SeaweedFS removed, applications continue functioning
 - [ ] **Phase 10**: Green cluster S3 configuration ready (shared users/buckets, no new provisioning needed)
 - [ ] **Phase 11**: Kill-switch updated and tested, no orphaned data
-- [ ] **Phase 12**: Legacy pools reviewed and cleaned up
 - [ ] **Final**: CSI drivers (`csi-rbd-sc`, `csi-cephfs-sc`) remain functional, no disruptions
 
 ---
