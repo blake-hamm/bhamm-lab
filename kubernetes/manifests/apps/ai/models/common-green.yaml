@@ -24,11 +24,11 @@ spec:
               remoteRef:
                 key: /default/llm-models
                 property: hf_token
-            - secretKey: access_key_id
+            - secretKey: s3_access_key
               remoteRef:
                 key: /core/ceph
                 property: s3_access_key
-            - secretKey: secret_access_key
+            - secretKey: s3_secret_key
               remoteRef:
                 key: /core/ceph
                 property: s3_secret_key
