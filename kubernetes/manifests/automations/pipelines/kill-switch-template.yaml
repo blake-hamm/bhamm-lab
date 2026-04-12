@@ -137,6 +137,13 @@ spec:
         command: ["/bin/sh", "-c"]
         source: |
           SKIP_APPS="{{workflow.parameters.skip-apps}}"
+          echo "Installing kubectl..."
+          apt-get update -qq && apt-get install -y -qq curl gnupg
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          mv kubectl /usr/local/bin/
+          echo "kubectl installed."
+
           echo "Deleting non-skip ArgoCD applications with cascade..."
 
           # Login to ArgoCD
