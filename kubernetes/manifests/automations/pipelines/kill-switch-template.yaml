@@ -27,6 +27,8 @@ spec:
             template: cleanup-cnpg
         - - name: delete-apps
             template: delete-apps
+        - - name: delete-workloads
+            template: delete-workloads
         - - name: wait-for-pods
             template: wait-for-pods
         - - name: delete-pvcs
@@ -190,6 +192,41 @@ spec:
             sleep 10
           done
           echo "App deletion complete."
+    - name: delete-workloads
+      script:
+        image: alpine/kubectl
+        command: ["/bin/sh", "-c"]
+        source: |
+          SKIP_NS="{{workflow.parameters.skip-namespaces}}"
+          echo "Deleting workloads in non-skip namespaces (cleanup pass)..."
+
+          for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
+            if ! echo " $SKIP_NS " | grep -q " $ns "; then
+              RESOURCES=$(kubectl get deploy,sts,ds,jobs -n $ns --no-headers 2>/dev/null | wc -l)
+              if [ "$RESOURCES" -gt 0 ]; then
+                echo "Deleting $RESOURCES workloads in: $ns"
+                kubectl delete deploy,sts,ds,jobs --all -n $ns --wait=true --timeout=300s 2>/dev/null || true
+              fi
+            fi
+          done
+
+          echo "Waiting for all workloads to terminate..."
+          for attempt in $(seq 1 30); do
+            REMAINING=0
+            for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
+              if ! echo " $SKIP_NS " | grep -q " $ns "; then
+                COUNT=$(kubectl get deploy,sts,ds,jobs -n $ns --no-headers 2>/dev/null | wc -l)
+                REMAINING=$((REMAINING + COUNT))
+              fi
+            done
+            if [ "$REMAINING" -eq 0 ]; then
+              echo "All workloads deleted."
+              break
+            fi
+            echo "Waiting for $REMAINING workloads... ($attempt/30)"
+            sleep 10
+          done
+          echo "Workload cleanup complete."
     - name: wait-for-pods
       script:
         image: alpine/kubectl
