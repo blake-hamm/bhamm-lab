@@ -38,11 +38,11 @@ spec:
           secrets:
             - secretKey: REGISTRY_STORAGE_S3_ACCESSKEY
               remoteRef:
-                key: /core/ceph-rgw
+                key: /core/ceph
                 property: s3_access_key
             - secretKey: REGISTRY_STORAGE_S3_SECRETKEY
               remoteRef:
-                key: /core/ceph-rgw
+                key: /core/ceph
                 property: s3_secret_key
             - secretKey: HARBOR_ADMIN_PASSWORD
               remoteRef:
