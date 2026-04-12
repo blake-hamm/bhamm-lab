@@ -233,18 +233,37 @@ spec:
         command: ["/bin/sh", "-c"]
         source: |
           SKIP_NS="{{workflow.parameters.skip-namespaces}}"
-          echo "Waiting for all pods to terminate..."
+          echo "Waiting for pods to terminate in namespaces with PVCs..."
 
-          for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
-            if ! echo " $SKIP_NS " | grep -q " $ns "; then
-              POD_COUNT=$(kubectl get pod -n $ns --no-headers 2>/dev/null | wc -l)
-              if [ "$POD_COUNT" -gt 0 ]; then
-                echo "Waiting for $POD_COUNT pods in $ns..."
-                kubectl wait --for=delete pod --all -n $ns --timeout=300s 2>/dev/null || true
-              fi
+          for attempt in $(seq 1 30); do
+            # Get namespaces that still have PVCs
+            PVC_NS=$(kubectl get pvc --all-namespaces -o jsonpath='{.items[*].metadata.namespace}' 2>/dev/null | tr ' ' '\n' | sort -u)
+
+            if [ -z "$PVC_NS" ]; then
+              echo "No namespaces with PVCs remain."
+              break
             fi
+
+            FOUND=false
+            for ns in $PVC_NS; do
+              if ! echo " $SKIP_NS " | grep -q " $ns "; then
+                POD_COUNT=$(kubectl get pod -n $ns --no-headers 2>/dev/null | wc -l)
+                if [ "$POD_COUNT" -gt 0 ]; then
+                  echo "  $ns: $POD_COUNT pods still running"
+                  FOUND=true
+                fi
+              fi
+            done
+
+            if [ "$FOUND" = "false" ]; then
+              echo "All pods in PVC namespaces terminated."
+              break
+            fi
+
+            echo "Waiting... ($attempt/30)"
+            sleep 10
           done
-          echo "All pods terminated."
+          echo "Pod wait complete."
     - name: delete-pvcs
       script:
         image: alpine/kubectl
