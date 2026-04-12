@@ -1789,4 +1789,4 @@ Or ignore the 500 error and verify with `s3 ls` — the bucket was created succe
 ---
 
 *Document generated for the bhamm-lab infrastructure migration.*
-*Last updated: 2026-04-11 — Migration complete. SeaweedFS removed, ~3TB+ Ceph space recovered.*
+*Last updated: 2026-04-12 — Migration complete through Phase 11. SeaweedFS removed, kill-switch redesigned and tested successfully, ~3TB+ Ceph space recovered, blue cluster deployed.*
