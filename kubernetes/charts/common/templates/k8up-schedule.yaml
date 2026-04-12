@@ -30,7 +30,7 @@ spec:
                   - name: location
                     value: onsite
                   - name: k8up-endpoint
-                    value: http://external-rgw.ceph.svc.cluster.local:80
+                    value: {{ .Values.s3.endpoint }}
                   - name: k8up-bucket
                     value: k8up-backups
                   - name: k8up-secret

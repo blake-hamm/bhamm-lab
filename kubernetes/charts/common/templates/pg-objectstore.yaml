@@ -10,7 +10,7 @@ metadata:
 spec:
   configuration:
     destinationPath: "{{ .Values.postgresql.basePath }}/{{ .Values.postgresql.backup.pathVersion }}/"
-    endpointURL: http://external-rgw.ceph.svc.cluster.local:80
+    endpointURL: {{ .Values.s3.endpoint }}
     s3Credentials:
       accessKeyId:
         name: cnpg-s3-backup-creds
@@ -41,7 +41,7 @@ metadata:
 spec:
   configuration:
     destinationPath: "{{ .Values.postgresql.basePath }}/{{ .Values.postgresql.restore.pathVersion }}/"
-    endpointURL: http://external-rgw.ceph.svc.cluster.local:80
+    endpointURL: {{ .Values.s3.endpoint }}
     s3Credentials:
       accessKeyId:
         name: cnpg-s3-backup-creds

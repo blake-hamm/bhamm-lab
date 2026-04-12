@@ -71,6 +71,8 @@ pvc: []
 #   storageSize: 10Gi
 #   storageClassName: local-path
 #   accessMode: ReadWriteOnce
+s3:
+  endpoint: http://external-rgw.ceph.svc.cluster.local:80
 dragonfly:
   enabled: false
   replicas: 1
