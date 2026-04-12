@@ -133,16 +133,14 @@ spec:
           echo "CNPG clusters deleted."
     - name: delete-apps
       script:
-        image: quay.io/argoproj/argocd
+        image: alpine/kubectl
         command: ["/bin/sh", "-c"]
         source: |
           SKIP_APPS="{{workflow.parameters.skip-apps}}"
-          echo "Installing kubectl..."
-          apt-get update -qq && apt-get install -y -qq curl gnupg
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl
-          mv kubectl /usr/local/bin/
-          echo "kubectl installed."
+          echo "Installing ArgoCD CLI..."
+          curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x /usr/local/bin/argocd
+          echo "ArgoCD CLI installed."
 
           echo "Deleting non-skip ArgoCD applications with cascade..."
 
