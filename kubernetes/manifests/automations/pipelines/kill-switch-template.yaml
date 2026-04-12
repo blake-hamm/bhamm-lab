@@ -165,7 +165,7 @@ spec:
             echo "Deleting apps: $TO_DELETE"
             for app in $TO_DELETE; do
               echo "Deleting app: $app"
-              argocd app delete $app --cascade --wait --yes 2>/dev/null || true
+              argocd app delete $app --cascade --yes 2>/dev/null || true
               sleep 2
             done
           else
