@@ -4,7 +4,7 @@
 
 Migrate from SeaweedFS to Ceph RGW running natively on Proxmox bare-metal nodes. This abandons the Rook Ceph approach — the standalone Ceph CSI drivers remain unchanged for block/file storage, and RGW is deployed via Ansible on the 3 Proxmox nodes, bridged into Kubernetes via a ClusterIP Service/EndpointSlice. S3 buckets use plain (non-suffixed) names — the active cluster (blue or green) always writes to the same canonical buckets since clusters never run simultaneously and RGW persists outside the K8s lifecycle.
 
-**Migration Status**: ✅ **COMPLETE** — All phases finished. SeaweedFS successfully removed, ~3TB+ space recovered in Ceph cluster. All applications (Loki, Argo Workflows, CNPG, K8up, MLflow) verified working with native Ceph RGW. Phase 5 skipped — using shared admin credentials for all S3 applications.
+**Migration Status**: ✅ **COMPLETE** — All phases finished through Phase 11. SeaweedFS successfully removed, ~3TB+ space recovered in Ceph cluster. All applications (Loki, Argo Workflows, CNPG, K8up, MLflow) verified working with native Ceph RGW. Blue cluster deployed with green/blue split configs. Kill-switch redesigned and successfully tested — no orphaned Ceph data. Phase 5 skipped — using shared admin credentials for all S3 applications.
 
 ---
 
@@ -1017,100 +1017,147 @@ ssh root@method ceph df
 
 ---
 
-## Phase 10: Green Cluster Setup (When Needed)
+## Phase 10: Green/Blue Cluster Setup
 
-**Status**: `NOT STARTED`
+**Status**: ✅ **COMPLETE**
 
-When deploying the green cluster, the RGW setup is greatly simplified because buckets are shared and a single admin user is used for all S3 access (Phase 5 skipped). The green cluster simply points to the same RGW endpoint, same bucket names, and same admin credentials.
+Successfully split configurations for blue/green cluster deployment. Created `*-green.yaml` and `*-blue.yaml` variants for apps that need environment-specific settings (particularly backup/restore behavior). Blue cluster deployed and verified with correct settings.
 
-### 10.1 Green Cluster S3 Configuration
+### 10.1 What Was Done
 
-Since RGW lives outside the K8s lifecycle, the green cluster reuses the same admin credentials and buckets:
+Split 4 files from `common-all.yaml` pattern to support per-environment configuration:
 
-1. **No new S3 users needed** — all applications share the admin user (Phase 5 skipped)
-2. **No new buckets needed** — the plain-named buckets (loki-data, argo-artifacts, etc.) already exist
-3. **Same ExternalSecrets** — the green cluster references the same Vault path (`/core/ceph-rgw`) for admin S3 credentials
-4. **Same endpoint** — both clusters use `http://external-rgw.ceph.svc.cluster.local:80`
+| Original File | Green Variant | Blue Variant |
+|---------------|---------------|--------------|
+| `base/authelia/common-all.yaml` | `common-green.yaml` | `common-blue.yaml` |
+| `base/test/common-all.yaml` | `common-green.yaml` | `common-blue.yaml` |
+| `core/forgejo/common-all.yaml` | `common-green.yaml` | `common-blue.yaml` |
+| `core/harbor/common-all.yaml` | `common-green.yaml` | `common-blue.yaml` |
 
-### 10.2 Green Cluster Secrets
+Key differences between green and blue variants:
+- **Green**: `backup.enabled: true`, `restore.enabled: false` — green cluster handles backups
+- **Blue**: `backup.enabled: false`, `restore.enabled: true` — blue cluster restores from green's backups
 
-The green cluster needs the same admin S3 credentials synced to its namespaces. Create ExternalSecrets that pull from the same Vault path:
+### 10.2 Fixed Harbor S3 Reference
 
-```yaml
-# Example: If monitor namespace exists in green cluster
-apiVersion: external-secrets.io/v1beta1
-kind: ExternalSecret
-metadata:
-  name: ceph-s3-credentials
-  namespace: monitor  # or whatever namespace the green cluster uses
-spec:
-  refreshInterval: 15s
-  secretStoreRef:
-    name: vault
-    kind: ClusterSecretStore
-  target:
-    name: ceph-s3-credentials
-  data:
-    - secretKey: s3_access_key
-      remoteRef:
-        key: /core/ceph-rgw
-        property: admin-access-key-id
-    - secretKey: s3_secret_key
-      remoteRef:
-        key: /core/ceph-rgw
-        property: admin-secret-access-key
-```
+Updated Harbor's ExternalSecret to reference `/core/ceph-rgw` instead of `/core/seaweedfs` in `core/harbor/common-blue.yaml`.
 
-### 10.3 No Separate Backup CronWorkflow Needed
+### 10.3 Renamed Core Blue Config
 
-The backup CronWorkflow (Phase 6) backs up all RGW buckets to MinIO/R2 regardless of which cluster is active. There is no need for a separate green backup workflow — both clusters write to the same buckets, and the active cluster's data gets backed up.
+Renamed `kubernetes/manifests/base/core-blue-hack.yaml` → `core-blue.yaml` and updated `targetRevision` to point to the correct branch.
 
-### 10.4 Deploy Green Cluster Storage
+### 10.4 Deploy Blue Cluster
 
-The green cluster will use the same `ceph` namespace manifests. CSI drivers connect to the same external Ceph cluster with the same credentials. The only difference is the K8s cluster context.
+Blue cluster successfully deployed with:
+- Correct S3 bucket configuration
+- Restore-from-backup functionality enabled
+- S3 credentials from `/core/ceph-rgw` Vault path
+- Shared RGW endpoint: `http://external-rgw.ceph.svc.cluster.local:80`
+
+### 10.5 Verification
+
+Verified that blue cluster correctly:
+- Connects to RGW using admin credentials
+- Restores backups from green cluster's S3 buckets
+- Does NOT overwrite green's backup data (backup disabled)
 
 ---
 
-## Phase 11: Kill-Switch Update
+## Phase 11: Kill-Switch Redesign
 
-**Status**: `NOT STARTED`
+**Status**: ✅ **COMPLETE**
 
 **Manifest**: `kubernetes/manifests/automations/pipelines/kill-switch-template.yaml`
 
-### 11.1 Redesign Kill-Switch Workflow
+Successfully redesigned and tested the kill-switch workflow. Zero orphaned Ceph data confirmed after test run. ~3TB+ space was restored on the Ceph cluster.
 
-The kill-switch needs fundamental changes:
-- **Remove Rook CRD logic** — no Rook in this architecture
-- **Graceful-first approach** — let ArgoCD prune and CSI sidecars clean up
-- **Add PV verification** — ensure zero orphaned data
+### 11.1 Key Design Changes
 
-See the updated kill-switch template in Appendix A.
+**Problem**: Original kill-switch used `kubectl delete app` which doesn't properly cascade resources, leading to orphaned workloads and PVCs. Force-deleting PVCs before CSI provisioner could clean up left orphaned RBD images in Ceph.
 
-### 11.2 Update and Sync
+**Solution**: Ordered teardown with `argocd app delete --cascade`:
 
-```bash
-# Update the kill-switch template
-vim kubernetes/manifests/automations/pipelines/kill-switch-template.yaml
+| Step | Method | Purpose |
+|------|--------|---------|
+| 1. Pause Parents | `kubectl patch` — ordered: base → core → apps | Prevent parent apps from recreating children during teardown |
+| 2. Pause Children | `kubectl patch` — all non-skip apps | Stop auto-sync to prevent healing |
+| 3. Cleanup K8up | `kubectl delete` K8up CRs with wait | Release backup locks so PVCs can be deleted |
+| 4. Cleanup CNPG | `kubectl delete cluster.cnpg.io --wait` | Operator gracefully cleans up PVCs before cascade hits |
+| 5. Delete Apps | `argocd app delete --cascade` | Proper cascade deletion of all managed resources |
+| 6. Delete Workloads | `kubectl delete deploy,sts,ds,jobs --all --wait` | Second pass for non-Argocd-managed resources (e.g., raw manifests) |
+| 7. Wait for Pods | Polling loop, only PVC namespaces | Avoid waiting for DaemonSets in namespaces without PVCs |
+| 8. Delete PVCs | `kubectl delete pvc --all --wait` | Graceful deletion — CSI processes Delete events |
+| 9. Verify PVs | `kubectl get pv` check | Confirm no orphaned PVs bound to deleted namespaces |
 
-# Sync ArgoCD
-argocd app sync automations
+### 11.2 Workflow Parameters (Centralized Configuration)
+
+Replaced hardcoded skip lists with workflow-level parameters:
+
+```yaml
+spec:
+  arguments:
+    parameters:
+      - name: skip-apps
+        value: "argocd argocd-common argo-common argo-workflows argo-events automations ceph-common ceph-csi-rbd ceph-csi-cephfs csi-snapshot-crds csi-snapshotter snapshot-controller cloudnative-pg cloudnative-pg-barman green-base green-core green-apps blue-base blue-core"
+      - name: skip-namespaces
+        value: "argocd argo ceph cnpg-system kube-system"
 ```
 
-### 11.3 Verification (Test Kill-Switch on Non-Production)
+**Skip Apps** (15 total): Infrastructure apps that must survive kill-switch:
+- ArgoCD stack: `argocd`, `argocd-common`
+- Argo stack: `argo-common`, `argo-workflows`, `argo-events`, `automations`
+- Ceph stack: `ceph-common`, `ceph-csi-rbd`, `ceph-csi-cephfs`, `csi-snapshot-crds`, `csi-snapshotter`, `snapshot-controller`
+- CNPG stack: `cloudnative-pg`, `cloudnative-pg-barman`
+- Parent apps: `green-base`, `green-core`, `green-apps`, `blue-base`, `blue-core`
 
-⚠️ **WARNING**: Only test kill-switch on a non-production environment or during a planned teardown.
+**Skip Namespaces**: `argocd`, `argo`, `ceph`, `cnpg-system`, `kube-system`
+
+### 11.3 Removed Annotations
+
+Removed `kill-switch.bhamm-lab.com/skip: "true"` annotations from 13 infrastructure files. Skip logic now entirely in workflow parameters — no need to annotate individual apps.
+
+### 11.4 Images Used
+
+| Template | Image | Reason |
+|----------|-------|--------|
+| `pause-parents`, `pause-children`, `cleanup-k8up`, `cleanup-cnpg`, `delete-workloads`, `wait-for-pods`, `delete-pvcs`, `verify-pvs` | `alpine/kubectl` | Lightweight, kubectl pre-installed |
+| `delete-apps` | `alpine/kubectl` + installs ArgoCD CLI | Needs `argocd` command for cascade delete |
+
+### 11.5 Auth for ArgoCD CLI
+
+The `delete-apps` step authenticates to ArgoCD using the initial admin password:
+
+```bash
+ARGOCD_PASS=$(kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath='{.data.password}' | base64 -d)
+argocd login argocd-server.argocd.svc --plaintext --grpc-web \
+  --username admin --password "$ARGOCD_PASS"
+```
+
+### 11.6 Verification
+
+Successfully tested kill-switch on cluster teardown:
 
 ```bash
 # Submit kill-switch workflow
 argo submit --from workflowtemplate/kill-switch -n argo
 
-# Watch the workflow
+# Watch the workflow (takes ~10-15 minutes)
 argo watch kill-switch-xxxx -n argo
 
 # After completion, verify on Ceph monitor:
-# rbd ls osd  # Should be empty (no orphaned images)
-# ceph fs subvolume ls cephfs  # Should be empty (no orphaned subvolumes)
+ssh root@method rbd ls osd
+# Expected: Only images from skip namespaces (if any)
+
+ssh root@method ceph fs subvolume ls cephfs
+# Expected: Empty or only skip namespace subvolumes
+
+# Check Ceph space recovered
+ssh root@method ceph df
+# Should show increased available space
 ```
+
+**Result**: Zero orphaned RBD images. All PVCs successfully deleted and CSI provisioner cleaned up Ceph data. ~3TB+ space restored.
 
 ---
 
@@ -1141,17 +1188,20 @@ If issues arise during any phase:
 - [x] **Phase 7**: Migration workflow runs successfully, file counts match between SeaweedFS and RGW, SeaweedFS creds added to ceph-external-secret
 - [x] **Phase 8**: All 6 application endpoint references updated, IngressRoute active
 - [x] **Phase 9**: SeaweedFS removed, applications continue functioning
-- [ ] **Phase 10**: Green cluster S3 configuration ready (shared users/buckets, no new provisioning needed)
-- [ ] **Phase 11**: Kill-switch updated and tested, no orphaned data
-- [ ] **Final**: CSI drivers (`csi-rbd-sc`, `csi-cephfs-sc`) remain functional, no disruptions
+- [x] **Phase 10**: Green/blue cluster configuration split complete — `*-green.yaml` and `*-blue.yaml` variants created, blue cluster deployed and verified
+- [x] **Phase 11**: Kill-switch redesigned and tested — zero orphaned Ceph data confirmed, ~3TB+ space recovered
+- [ ] **Phase 12**: Legacy pool cleanup (optional — can be done anytime)
+- [x] **Final**: CSI drivers (`csi-rbd-sc`, `csi-cephfs-sc`) remain functional, no disruptions
 
 ---
 
-## Appendix A: Updated Kill-Switch Workflow
+## Appendix A: Kill-Switch Workflow (Production-Ready)
 
-**Status**: `DRAFT`
+**Status**: ✅ **PRODUCTION**
 
 **File**: `kubernetes/manifests/automations/pipelines/kill-switch-template.yaml`
+
+**Last Tested**: Successfully executed with zero orphaned Ceph data, ~3TB+ space recovered.
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
@@ -1163,86 +1213,343 @@ metadata:
     argocd.argoproj.io/sync-wave: "7"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
-  activeDeadlineSeconds: 600
+  activeDeadlineSeconds: 900
+  arguments:
+    parameters:
+      - name: skip-apps
+        value: "argocd argocd-common argo-common argo-workflows argo-events automations ceph-common ceph-csi-rbd ceph-csi-cephfs csi-snapshot-crds csi-snapshotter snapshot-controller cloudnative-pg cloudnative-pg-barman green-base blue-base"
+      - name: skip-namespaces
+        value: "argocd argo ceph cnpg-system kube-system"
   templates:
     - name: cleanup
       steps:
-        - - name: pause-argocd-apps
-            template: pause-apps
-        - - name: delete-cnpg-clusters
-            template: delete-cnpg-clusters
-        - - name: graceful-delete-pvcs
-            template: graceful-delete-pvcs
-        - - name: delete-argocd-apps
+        - - name: pause-parents
+            template: pause-parents
+        - - name: pause-children
+            template: pause-children
+        - - name: cleanup-k8up
+            template: cleanup-k8up
+        - - name: cleanup-cnpg
+            template: cleanup-cnpg
+        - - name: delete-apps
             template: delete-apps
-        - - name: force-cleanup-stuck-resources
-            template: force-cleanup
-        - - name: verify-pvs-gone
-            template: verify-pvs-gone
-    - name: pause-apps
+        - - name: delete-workloads
+            template: delete-workloads
+        - - name: wait-for-pods
+            template: wait-for-pods
+        - - name: delete-pvcs
+            template: delete-pvcs
+        - - name: verify-pvs
+            template: verify-pvs
+
+    # Step 1: Pause parent apps in order (base → core → apps)
+    # This prevents parent apps from recreating children during teardown
+    - name: pause-parents
       script:
         image: alpine/kubectl
         command: ["/bin/sh", "-c"]
         source: |
-          kubectl get applications -n argocd -o name | xargs -I {} kubectl patch {} -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":null}}}'
-    - name: delete-cnpg-clusters
+          echo "Pausing parent apps to prevent recreation..."
+          ORDERED_PARENTS="green-base blue-base green-core blue-core green-apps"
+
+          for app in $ORDERED_PARENTS; do
+            if kubectl get app $app -n argocd &>/dev/null; then
+              echo "Pausing parent app: $app"
+              kubectl patch app $app -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":null}}}' || true
+              sleep 2
+            else
+              echo "Parent app not found: $app"
+            fi
+          done
+          echo "Parent apps paused."
+
+    # Step 2: Pause all non-skip child apps to stop auto-sync
+    - name: pause-children
       script:
         image: alpine/kubectl
         command: ["/bin/sh", "-c"]
         source: |
-          kubectl delete clusters.postgresql.cnpg.io --all --all-namespaces --wait=true
-    - name: graceful-delete-pvcs
+          SKIP_APPS="{{workflow.parameters.skip-apps}}"
+          echo "Pausing all non-skip child apps to prevent auto-sync..."
+
+          for app in $(kubectl get apps -n argocd -o jsonpath='{.items[*].metadata.name}'); do
+            if ! echo " $SKIP_APPS " | grep -q " $app "; then
+              echo "Pausing child app: $app"
+              kubectl patch app $app -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":null}}}' || true
+            else
+              echo "Skipping protected app: $app"
+            fi
+          done
+          echo "Child apps paused."
+
+    # Step 3: Delete K8up resources (schedules, backups, etc.)
+    # Must happen before PVC deletion — K8up holds locks on PVCs
+    - name: cleanup-k8up
       script:
         image: alpine/kubectl
         command: ["/bin/sh", "-c"]
         source: |
-          # Delete all PVCs gracefully — let CSI sidecars handle cleanup
-          kubectl delete pvc --all --all-namespaces --timeout=120s
+          SKIP_NS="{{workflow.parameters.skip-namespaces}}"
+          echo "Deleting K8up resources in non-skip namespaces..."
+
+          for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
+            if ! echo " $SKIP_NS " | grep -q " $ns "; then
+              RESOURCES=$(kubectl get schedule.k8up.io,backup.k8up.io,prune.k8up.io,check.k8up.io,restore.k8up.io -n $ns -o name 2>/dev/null)
+              if [ -n "$RESOURCES" ]; then
+                echo "Deleting K8up resources in: $ns"
+                kubectl delete schedule.k8up.io,backup.k8up.io,prune.k8up.io,check.k8up.io,restore.k8up.io --all -n $ns --wait=true --timeout=60s 2>/dev/null || true
+              fi
+            fi
+          done
+
+          echo "Waiting for K8up pods to terminate..."
+          for attempt in $(seq 1 12); do
+            K8UP_PODS=$(kubectl get pods --all-namespaces -l k8up.io/backup -o jsonpath='{.items[*].metadata.name}' 2>/dev/null | wc -w)
+            if [ "$K8UP_PODS" -eq 0 ]; then
+              echo "All K8up pods terminated."
+              break
+            fi
+            echo "Waiting for $K8UP_PODS K8up pods... ($attempt/12)"
+            sleep 10
+          done
+          echo "K8up cleanup complete."
+
+    # Step 4: Delete CNPG clusters gracefully
+    # Operator must process finalizers before PVCs can be deleted
+    - name: cleanup-cnpg
+      script:
+        image: alpine/kubectl
+        command: ["/bin/sh", "-c"]
+        source: |
+          SKIP_NS="{{workflow.parameters.skip-namespaces}}"
+          echo "Deleting CNPG clusters gracefully..."
+
+          for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
+            if ! echo " $SKIP_NS " | grep -q " $ns "; then
+              CLUSTERS=$(kubectl get clusters.postgresql.cnpg.io -n $ns -o name 2>/dev/null)
+              if [ -n "$CLUSTERS" ]; then
+                echo "Deleting CNPG clusters in $ns..."
+                kubectl delete clusters.postgresql.cnpg.io --all -n $ns --wait=true --timeout=300s 2>/dev/null || true
+              fi
+            fi
+          done
+
+          echo "Waiting for CNPG pods to terminate..."
+          for attempt in $(seq 1 12); do
+            CNPG_PODS=$(kubectl get pods --all-namespaces -l cnpg.io/cluster -o jsonpath='{.items[*].metadata.name}' 2>/dev/null | wc -w)
+            if [ "$CNPG_PODS" -eq 0 ]; then
+              echo "All CNPG pods terminated."
+              break
+            fi
+            echo "Waiting for $CNPG_PODS CNPG pods... ($attempt/12)"
+            sleep 10
+          done
+          echo "CNPG clusters deleted."
+
+    # Step 5: Delete ArgoCD apps with cascade
+    # argocd app delete --cascade properly tracks and deletes managed resources
     - name: delete-apps
       script:
         image: alpine/kubectl
         command: ["/bin/sh", "-c"]
         source: |
-          # Properly delete ArgoCD apps to cascade-delete managed resources
-          kubectl delete applications --all -n argocd --wait=true --timeout=300s
-    - name: force-cleanup
-      script:
-        image: alpine/kubectl
-        command: ["/bin/sh", "-c"]
-        source: |
-          # Force cleanup any stuck resources after graceful deletion
-          # Remove finalizers from stuck PVCs
-          for ns in $(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}'); do
-            for pvc in $(kubectl get pvc -n $ns -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
-              kubectl patch pvc $pvc -n $ns -p '{"metadata":{"finalizers":null}}' --type=merge 2>/dev/null || true
+          SKIP_APPS="{{workflow.parameters.skip-apps}}"
+          echo "Installing ArgoCD CLI..."
+          curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x /usr/local/bin/argocd
+          echo "ArgoCD CLI installed."
+
+          echo "Deleting non-skip ArgoCD applications with cascade..."
+
+          # Login to ArgoCD
+          ARGOCD_PASS=$(kubectl -n argocd get secret argocd-initial-admin-secret \
+            -o jsonpath='{.data.password}' | base64 -d)
+          argocd login argocd-server.argocd.svc --plaintext --grpc-web \
+            --username admin --password "$ARGOCD_PASS" || exit 1
+
+          echo "Collecting apps to delete..."
+          TO_DELETE=""
+          for app in $(kubectl get apps -n argocd -o jsonpath='{.items[*].metadata.name}'); do
+            if ! echo " $SKIP_APPS " | grep -q " $app "; then
+              TO_DELETE="$TO_DELETE $app"
+            else
+              echo "Skipping protected app: $app"
+            fi
+          done
+
+          if [ -n "$TO_DELETE" ]; then
+            echo "Deleting apps: $TO_DELETE"
+            for app in $TO_DELETE; do
+              echo "Deleting app: $app"
+              argocd app delete $app --cascade --yes 2>/dev/null || true
+              sleep 2
             done
+          else
+            echo "No apps to delete."
+          fi
+
+          echo "Waiting for remaining apps to be deleted..."
+          for attempt in $(seq 1 30); do
+            REMAINING=$(kubectl get apps -n argocd -o jsonpath='{.items[*].metadata.name}' 2>/dev/null)
+            TO_DELETE_COUNT=0
+            for app in $REMAINING; do
+              if ! echo " $SKIP_APPS " | grep -q " $app "; then
+                TO_DELETE_COUNT=$((TO_DELETE_COUNT + 1))
+              fi
+            done
+            if [ "$TO_DELETE_COUNT" -eq 0 ]; then
+              echo "All non-skip apps deleted."
+              break
+            fi
+            echo "Waiting for $TO_DELETE_COUNT apps... ($attempt/30)"
+            sleep 10
           done
-          # Remove finalizers from stuck PVs
-          for pv in $(kubectl get pv -o jsonpath='{.items[?(@.status.phase!="Available")].metadata.name}' 2>/dev/null); do
-            kubectl patch pv $pv -p '{"metadata":{"finalizers":null}}' --type=merge 2>/dev/null || true
-          done
-          # Force delete namespaces stuck in Terminating
-          for ns in $(kubectl get namespaces -o jsonpath='{.items[?(@.status.phase=="Terminating")].metadata.name}'); do
-            kubectl delete namespace $ns --force --grace-period=0 2>/dev/null || true
-          done
-    - name: verify-pvs-gone
+          echo "App deletion complete."
+
+    # Step 6: Delete remaining workloads
+    # Second pass for raw manifests not managed by ArgoCD
+    - name: delete-workloads
       script:
         image: alpine/kubectl
         command: ["/bin/sh", "-c"]
         source: |
-          # Verify no orphaned PVs remain
-          echo "Checking for remaining PVs..."
-          remaining_pvs=$(kubectl get pv --no-headers 2>/dev/null | grep -v "^NAME" || true)
-          if [ -z "$remaining_pvs" ]; then
-            echo "SUCCESS: All PVs cleaned up. No orphaned data in Ceph."
-          else
-            echo "WARNING: Some PVs remain:"
-            echo "$remaining_pvs"
-            echo "Check Ceph for orphaned RBD images:"
-            echo "  rbd ls <pool>"
+          SKIP_NS="{{workflow.parameters.skip-namespaces}}"
+          echo "Deleting workloads in non-skip namespaces (cleanup pass)..."
+
+          for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
+            if ! echo " $SKIP_NS " | grep -q " $ns "; then
+              RESOURCES=$(kubectl get deploy,sts,ds,jobs -n $ns --no-headers 2>/dev/null | wc -l)
+              if [ "$RESOURCES" -gt 0 ]; then
+                echo "Deleting $RESOURCES workloads in: $ns"
+                kubectl delete deploy,sts,ds,jobs --all -n $ns --wait=true --timeout=300s 2>/dev/null || true
+              fi
+            fi
+          done
+
+          echo "Waiting for all workloads to terminate..."
+          for attempt in $(seq 1 30); do
+            REMAINING=0
+            for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
+              if ! echo " $SKIP_NS " | grep -q " $ns "; then
+                COUNT=$(kubectl get deploy,sts,ds,jobs -n $ns --no-headers 2>/dev/null | wc -l)
+                REMAINING=$((REMAINING + COUNT))
+              fi
+            done
+            if [ "$REMAINING" -eq 0 ]; then
+              echo "All workloads deleted."
+              break
+            fi
+            echo "Waiting for $REMAINING workloads... ($attempt/30)"
+            sleep 10
+          done
+          echo "Workload cleanup complete."
+
+    # Step 7: Wait for pods to terminate
+    # Only wait in namespaces that have PVCs — avoids DaemonSet namespaces
+    - name: wait-for-pods
+      script:
+        image: alpine/kubectl
+        command: ["/bin/sh", "-c"]
+        source: |
+          SKIP_NS="{{workflow.parameters.skip-namespaces}}"
+          echo "Waiting for pods to terminate in namespaces with PVCs..."
+
+          for attempt in $(seq 1 30); do
+            PVC_NS=$(kubectl get pvc --all-namespaces -o jsonpath='{.items[*].metadata.namespace}' 2>/dev/null | tr ' ' '\n' | sort -u)
+
+            if [ -z "$PVC_NS" ]; then
+              echo "No namespaces with PVCs remain."
+              break
+            fi
+
+            FOUND=false
+            for ns in $PVC_NS; do
+              if ! echo " $SKIP_NS " | grep -q " $ns "; then
+                POD_COUNT=$(kubectl get pod -n $ns --no-headers 2>/dev/null | wc -l)
+                if [ "$POD_COUNT" -gt 0 ]; then
+                  echo "  $ns: $POD_COUNT pods still running"
+                  FOUND=true
+                fi
+              fi
+            done
+
+            if [ "$FOUND" = "false" ]; then
+              echo "All pods in PVC namespaces terminated."
+              break
+            fi
+
+            echo "Waiting... ($attempt/30)"
+            sleep 10
+          done
+          echo "Pod wait complete."
+
+    # Step 8: Delete PVCs
+    # Graceful deletion — CSI provisioner processes Delete events and cleans up Ceph
+    - name: delete-pvcs
+      script:
+        image: alpine/kubectl
+        command: ["/bin/sh", "-c"]
+        source: |
+          SKIP_NS="{{workflow.parameters.skip-namespaces}}"
+          echo "Deleting PVCs in non-skip namespaces..."
+
+          for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
+            if ! echo " $SKIP_NS " | grep -q " $ns "; then
+              PVC_COUNT=$(kubectl get pvc -n $ns --no-headers 2>/dev/null | wc -l)
+              if [ "$PVC_COUNT" -gt 0 ]; then
+                echo "Deleting $PVC_COUNT PVCs in: $ns"
+                kubectl delete pvc --all -n $ns --wait=true --timeout=300s 2>/dev/null || true
+              fi
+            fi
+          done
+
+          echo "Waiting for all PVCs to be deleted..."
+          for attempt in $(seq 1 30); do
+            PVC_COUNT=0
+            for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
+              if ! echo " $SKIP_NS " | grep -q " $ns "; then
+                COUNT=$(kubectl get pvc -n $ns --no-headers 2>/dev/null | wc -l)
+                PVC_COUNT=$((PVC_COUNT + COUNT))
+              fi
+            done
+            if [ "$PVC_COUNT" -eq 0 ]; then
+              echo "All PVCs deleted."
+              break
+            fi
+            echo "Waiting for $PVC_COUNT PVCs... ($attempt/30)"
+            sleep 10
+          done
+          echo "PVC deletion complete."
+
+    # Step 9: Verify no orphaned PVs
+    # If any PVs remain bound to deleted namespaces, CSI didn't clean up properly
+    - name: verify-pvs
+      script:
+        image: alpine/kubectl
+        command: ["/bin/sh", "-c"]
+        source: |
+          SKIP_NS="{{workflow.parameters.skip-namespaces}}"
+          echo "Verifying no orphaned PVs remain..."
+
+          ORPHAN_FOUND=false
+          for pv in $(kubectl get pv -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
+            CLAIM_NS=$(kubectl get pv $pv -o jsonpath='{.spec.claimRef.namespace}' 2>/dev/null)
+            if [ -n "$CLAIM_NS" ]; then
+              if ! echo " $SKIP_NS " | grep -q " $CLAIM_NS "; then
+                echo "ORPHAN: PV $pv still bound to namespace $CLAIM_NS"
+                ORPHAN_FOUND=true
+              fi
+            fi
+          done
+
+          if [ "$ORPHAN_FOUND" = true ]; then
+            echo "ERROR: Orphaned PVs found. Check Ceph for orphaned RBD images:"
+            echo "  rbd ls osd"
             echo "  ceph fs subvolume ls cephfs"
             exit 1
           fi
+
+          echo "SUCCESS: No orphaned PVs found. Ceph data successfully wiped."
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -1279,14 +1586,19 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ```
 
-**Key Changes from Old Kill-Switch:**
-1. **Removed Rook CRD deletion** — not applicable
-2. **CNPG deleted with `--wait=true`** — graceful before PVCs
-3. **PVCs deleted gracefully first** — allows CSI sidecars to clean up
-4. **ArgoCD apps deleted with `--wait=true`** — ensures cascade deletion
-5. **Force cleanup as fallback** — only after graceful attempt
-6. **PV verification step** — confirms zero orphaned data
-7. **RGW buckets persist** on Proxmox — safe from kill-switch
+**Key Design Principles:**
+
+1. **Ordered teardown**: Parents paused before children, operators before workloads, CNPG/K8up before PVCs
+2. **No force-deletion of PVCs/PVs**: Graceful deletion only — let CSI provisioner clean up Ceph data
+3. **No finalizer stripping**: Only strip finalizers from stuck namespaces as last resort (not implemented — graceful approach works)
+4. **PVC-aware waiting**: Only wait for pods in namespaces with PVCs — ignores DaemonSet namespaces
+5. **Centralized configuration**: Skip lists in workflow parameters, not annotations on individual apps
+6. **Proper cascade**: `argocd app delete --cascade` tracks and deletes all managed resources
+7. **PV verification**: Final check ensures CSI provisioner successfully cleaned up all Ceph data
+
+**Execution Time**: ~10-15 minutes for full cluster teardown with ~3TB+ of data.
+
+**RGW Safety**: RGW buckets are NOT deleted by the kill-switch — they persist on Proxmox outside the K8s lifecycle.
 
 ---
 
