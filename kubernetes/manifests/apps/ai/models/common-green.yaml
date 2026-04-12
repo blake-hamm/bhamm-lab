@@ -26,12 +26,12 @@ spec:
                 property: hf_token
             - secretKey: access_key_id
               remoteRef:
-                key: /core/seaweedfs
-                property: admin_access_key_id
+                key: /core/ceph
+                property: s3_access_key
             - secretKey: secret_access_key
               remoteRef:
-                key: /core/seaweedfs
-                property: admin_secret_access_key
+                key: /core/ceph
+                property: s3_secret_key
         postgresql:
           enabled: true
           storageSize: 20Gi

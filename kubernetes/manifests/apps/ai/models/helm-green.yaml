@@ -80,10 +80,10 @@ spec:
               bucket: mlflow
               existingSecret:
                 name: "models-external-secret"
-                keyOfAccessKeyId: "access_key_id"
-                keyOfSecretAccessKey: "secret_access_key"
+                keyOfAccessKeyId: "s3_access_key"
+                keyOfSecretAccessKey: "s3_secret_key"
           extraEnvVars:
-            MLFLOW_S3_ENDPOINT_URL: http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333
+            MLFLOW_S3_ENDPOINT_URL: http://external-rgw.ceph.svc.cluster.local:80
             MLFLOW_S3_IGNORE_TLS: "true"
             MLFLOW_SERVER_DISABLE_SECURITY_MIDDLEWARE: "true"
           extraFlags:

@@ -64,6 +64,17 @@ spec:
               remoteRef:
                 key: /core/seaweedfs
                 property: admin_secret_access_key
+        ingressRoutes:
+          - enabled: true
+            name: rgw
+            ingressClass: traefik-external
+            routes:
+              - kind: Rule
+                match: Host(`rgw.bhamm-lab.com`)
+                services:
+                  - name: external-rgw
+                    scheme: http
+                    port: 80
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
