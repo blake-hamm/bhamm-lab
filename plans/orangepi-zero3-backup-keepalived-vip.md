@@ -47,7 +47,7 @@ If primary fails, VIP moves to backup (~1-3 seconds), clients continue using `10
 - Virtual IP: 10.0.9.2/24
 - Interface: end0
 - VRRP Instance: pihole_vip
-- Health Check: Verify pihole-ftl process is running
+- Health Check: Verify pihole-FTL process is running
 
 **Secondary (orangepi-zero3-backup)**
 - State: BACKUP
@@ -55,18 +55,268 @@ If primary fails, VIP moves to backup (~1-3 seconds), clients continue using `10
 - Virtual IP: 10.0.9.2/24
 - Interface: end0
 - VRRP Instance: pihole_vip
-- Health Check: Verify pihole-ftl process is running
+- Health Check: Verify pihole-FTL process is running
 
 **Failover Behavior**
 - MASTER loses pihole-ftl: VIP moves to BACKUP
 - MASTER recovers: VIP preempts back to MASTER (configurable)
 - VRRP multicast: Sent between 10.0.9.3 and 10.0.9.4 (needs firewall rules)
 
+## Critical Bug Fix: Keepalived Health Check Weight
+
+### The Bug in Original Plan
+
+Original plan used `weight = 2` for health check:
+
+| State | Primary Priority | Backup Priority |
+|-------|------------------|-----------------|
+| Healthy | 100 + 2 = **102** | 90 + 2 = **92** |
+| Primary dead | **100** (weight removed) | 92 |
+
+**Problem**: When primary's pihole dies, priority drops to 100. Since 100 > 92 (backup), **VIP stays on dead primary!** DNS broken. No failover.
+
+### The Fix: Use `weight = 0`
+
+With `weight = 0`:
+
+| State | Primary Priority | Backup Priority |
+|-------|------------------|-----------------|
+| Healthy | **100** | **90** |
+| Primary dead | **FAULT** (removed from VRRP) | 90 |
+
+When health check fails with `weight = 0`, VRRP instance enters **FAULT state**. VRRP removes FAULT node from election. Backup becomes MASTER. VIP moves. DNS works.
+
+**Bottom line**: Use `weight = 0` in vrrp_scripts for this failover use case.
+
 ## Implementation Steps
 
 ### Phase 1: NixOS Configuration
 
-#### 1.1 Create New Host Directory: `nix/hosts/orangepi-zero3-backup/`
+#### 1.1 Create Keepalived Module: `nix/modules/services/keepalived.nix`
+
+Uses structured NixOS `services.keepalived` options (vrrpInstances/vrrpScripts) with SOPS-managed authentication:
+
+```nix
+{ config, lib, pkgs, ... }:
+
+with lib;
+
+let
+  cfg = config.cfg.keepalived;
+in
+{
+  options.cfg.keepalived = {
+    enable = mkEnableOption "Keepalived VRRP for high availability";
+
+    state = mkOption {
+      type = types.enum [ "MASTER" "BACKUP" ];
+      default = "BACKUP";
+      description = "VRRP state (MASTER or BACKUP)";
+    };
+
+    priority = mkOption {
+      type = types.int;
+      default = 100;
+      description = "VRRP priority (higher = preferred for MASTER)";
+    };
+
+    virtualIp = mkOption {
+      type = types.str;
+      description = "Virtual IP address for the VIP";
+      example = "10.0.9.2";
+    };
+
+    interface = mkOption {
+      type = types.str;
+      default = "end0";
+      description = "Network interface for VRRP";
+    };
+
+    virtualRouterId = mkOption {
+      type = types.ints.between 1 255;
+      default = 51;
+      description = "Unique VRRP virtual router ID (1-255)";
+    };
+
+    authPassFile = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = ''
+        Path to an environment file containing KEEPALIVED_AUTH_PASS for VRRP authentication.
+        Use sops.templates for SOPS-managed secrets. Set to null to disable authentication.
+      '';
+      example = "config.sops.templates.\"keepalived-env\".path";
+    };
+  };
+
+  config = mkIf cfg.enable {
+    services.keepalived = {
+      enable = true;
+      openFirewall = true;  # Handles VRRP/AH iptables rules automatically
+      enableScriptSecurity = true;
+
+      vrrpScripts.check_pihole = {
+        script = "${pkgs.procps}/bin/pgrep -x pihole-FTL";
+        interval = 1;
+        weight = 0;  # CRITICAL: weight=0 causes FAULT state on failure (correct failover)
+        fall = 2;
+        rise = 2;
+        user = "keepalived_script";
+      };
+
+      vrrpInstances.pihole_vip = {
+        interface = cfg.interface;
+        state = cfg.state;
+        virtualRouterId = cfg.virtualRouterId;
+        priority = cfg.priority;
+        virtualIps = [{ addr = "${cfg.virtualIp}/24"; }];
+        trackScripts = [ "check_pihole" ];
+        extraConfig =
+          ''
+            advert_int 1
+          ''
+          + optionalString (cfg.state == "MASTER") ''
+            preempt_delay 5
+          ''
+          + optionalString (cfg.authPassFile != null) ''
+            authentication {
+              auth_type PASS
+              auth_pass ''${KEEPALIVED_AUTH_PASS}
+            }
+          '';
+      };
+
+      secretFile = mkIf (cfg.authPassFile != null) cfg.authPassFile;
+    };
+  };
+}
+```
+
+**Key improvements over original plan:**
+- Uses structured `vrrpInstances`/`vrrpScripts` instead of raw `extraConfig`
+- `weight = 0` for correct failover behavior
+- `openFirewall = true` instead of manual iptables rules
+- SOPS-managed auth via `secretFile` and envsubst
+
+#### 1.2 Update Module Imports
+
+**`nix/modules/services/options.nix`** - Add keepalived options
+
+```nix
+keepalived = {
+  enable = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = "Enable Keepalived VRRP for high availability";
+  };
+
+  state = lib.mkOption {
+    type = lib.types.enum [ "MASTER" "BACKUP" ];
+    default = "BACKUP";
+    description = "VRRP state for this node";
+  };
+
+  priority = lib.mkOption {
+    type = lib.types.int;
+    default = 100;
+    description = "VRRP priority (higher is preferred)";
+  };
+
+  virtualIp = lib.mkOption {
+    type = lib.types.str;
+    default = "";
+    description = "Virtual IP address for the VIP";
+  };
+
+  interface = lib.mkOption {
+    type = lib.types.str;
+    default = "end0";
+    description = "Network interface for VRRP";
+  };
+
+  virtualRouterId = lib.mkOption {
+    type = lib.types.int;
+    default = 51;
+    description = "Unique VRRP virtual router ID (1-255)";
+  };
+
+  authPassFile = lib.mkOption {
+    type = lib.types.nullOr lib.types.str;
+    default = null;
+    description = "Path to environment file with KEEPALIVED_AUTH_PASS for VRRP authentication";
+  };
+};
+```
+
+**`nix/modules/services/default.nix`** - Import keepalived module
+
+```nix
+{ imports = [
+  ./options.nix
+  ./backups.nix
+  ./docker.nix
+  ./pihole.nix
+  ./pre-commit.nix
+  ./samba.nix
+  ./virtualization.nix
+  ./keepalived.nix  # NEW
+]; }
+```
+
+#### 1.3 Add VRRP Auth Password to SOPS
+
+Edit `nix/secrets.yaml` and add:
+
+```yaml
+keepalived_auth_pass: <8-character-password>
+```
+
+Then encrypt: `sops -e -i nix/secrets.yaml`
+
+#### 1.4 Update Existing Host: `nix/hosts/orangepi-zero3/`
+
+**config.nix** - Change static IP to 10.0.9.3 and add keepalived + SOPS
+
+```nix
+{
+  cfg = {
+    orangepi-zero3.enable = true;
+    pihole.enable = true;
+    keepalived = {
+      enable = true;
+      state = "MASTER";
+      priority = 100;
+      virtualIp = "10.0.9.2";
+      interface = "end0";
+      authPassFile = config.sops.templates."keepalived-env".path;
+    };
+    networking = {
+      backend = "networkd";
+      static = {
+        interface = "end0";
+        # RENUMBERED: Was 10.0.9.2, now 10.0.9.3
+        address = "10.0.9.3";
+        gateway = "10.0.9.1";
+        nameservers = [ "10.0.9.1" "9.9.9.9" ];
+      };
+    };
+  };
+
+  # SOPS secrets for Keepalived authentication
+  sops.secrets.keepalived_auth_pass = {
+    sopsFile = ../../secrets.yaml;
+    key = "keepalived_auth_pass";
+  };
+
+  sops.templates."keepalived-env".content = ''
+    KEEPALIVED_AUTH_PASS=${config.sops.placeholder.keepalived_auth_pass}
+  '';
+}
+```
+
+**IMPORTANT**: Keep `targetHost = "10.0.9.2"` in `default.nix` for initial deployment (chicken-and-egg problem). Will update to `10.0.9.3` after deployment.
+
+#### 1.5 Create New Host Directory: `nix/hosts/orangepi-zero3-backup/`
 
 ```
 nix/hosts/orangepi-zero3-backup/
@@ -106,6 +356,7 @@ nix/hosts/orangepi-zero3-backup/
       priority = 90;
       virtualIp = "10.0.9.2";
       interface = "end0";
+      authPassFile = config.sops.templates."keepalived-env".path;
     };
     networking = {
       backend = "networkd";
@@ -117,6 +368,16 @@ nix/hosts/orangepi-zero3-backup/
       };
     };
   };
+
+  # SOPS secrets for Keepalived authentication
+  sops.secrets.keepalived_auth_pass = {
+    sopsFile = ../../secrets.yaml;
+    key = "keepalived_auth_pass";
+  };
+
+  sops.templates."keepalived-env".content = ''
+    KEEPALIVED_AUTH_PASS=${config.sops.placeholder.keepalived_auth_pass}
+  '';
 }
 ```
 
@@ -144,7 +405,7 @@ in
 }
 ```
 
-**hardware.nix** (initial stub)
+**hardware.nix** (initial stub - replace after first boot)
 ```nix
 { config, lib, pkgs, modulesPath, ... }:
 {
@@ -159,206 +420,7 @@ in
 }
 ```
 
-#### 1.2 Update Existing Host: `nix/hosts/orangepi-zero3/`
-
-**config.nix** - Change static IP to 10.0.9.3 and add keepalived
-
-```nix
-{
-  cfg = {
-    orangepi-zero3.enable = true;
-    pihole.enable = true;
-    keepalived = {
-      enable = true;
-      state = "MASTER";
-      priority = 100;
-      virtualIp = "10.0.9.2";
-      interface = "end0";
-    };
-    networking = {
-      backend = "networkd";
-      static = {
-        interface = "end0";
-        # RENUMBERED: Was 10.0.9.2, now 10.0.9.3
-        address = "10.0.9.3";
-        gateway = "10.0.9.1";
-        nameservers = [ "10.0.9.1" "9.9.9.9" ];
-      };
-    };
-  };
-}
-```
-
-#### 1.3 Create Keepalived Module: `nix/modules/services/keepalived.nix`
-
-```nix
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
-  cfg = config.cfg.keepalived;
-in
-{
-  options.cfg.keepalived = {
-    enable = mkEnableOption "Keepalived VRRP for high availability";
-
-    state = mkOption {
-      type = types.enum [ "MASTER" "BACKUP" ];
-      description = "VRRP state (MASTER or BACKUP)";
-      default = "BACKUP";
-    };
-
-    priority = mkOption {
-      type = types.int;
-      description = "VRRP priority (higher = preferred for MASTER)";
-      default = 100;
-    };
-
-    virtualIp = mkOption {
-      type = types.str;
-      description = "Virtual IP address (with CIDR)";
-      example = "10.0.9.2/24";
-    };
-
-    interface = mkOption {
-      type = types.str;
-      description = "Network interface for VRRP";
-      default = "end0";
-    };
-
-    virtualRouterId = mkOption {
-      type = types.int;
-      description = "Unique VRRP virtual router ID (1-255)";
-      default = 51;
-    };
-
-    authentication = {
-      authType = mkOption {
-        type = types.enum [ "PASS" "AH" ];
-        default = "PASS";
-        description = "Authentication type";
-      };
-
-      authPass = mkOption {
-        type = types.str;
-        default = "changeme";
-        description = "Authentication password (8 chars max for PASS)";
-      };
-    };
-  };
-
-  config = mkIf cfg.enable {
-    services.keepalived = {
-      enable = true;
-      # VRRP instance configuration
-      extraConfig = ''
-        global_defs {
-          router_id ${config.networking.hostName}
-          script_user root
-          enable_script_security
-        }
-
-        vrrp_script check_pihole {
-          script "${pkgs.procps}/bin/pgrep -f 'pihole-FTL'"
-          interval 2
-          weight 2
-          fall 2
-          rise 2
-        }
-
-        vrrp_instance pihole_vip {
-          state ${cfg.state}
-          interface ${cfg.interface}
-          virtual_router_id ${toString cfg.virtualRouterId}
-          priority ${toString cfg.priority}
-          advert_int 1
-
-          authentication {
-            auth_type ${cfg.authentication.authType}
-            auth_pass ${cfg.authentication.authPass}
-          }
-
-          virtual_ipaddress {
-            ${cfg.virtualIp}/24
-          }
-
-          track_script {
-            check_pihole
-          }
-
-          ${optionalString (cfg.state == "MASTER") ''
-            # Preempt on recovery (optional - remove to stay on BACKUP)
-            preempt_delay 5
-          ''}
-        }
-      '';
-    };
-
-    # Firewall rules for VRRP
-    networking.firewall.allowedUDPPorts = [ 112 ]; # VRRP protocol
-    networking.firewall.extraInputRules = ''
-      # Allow VRRP multicast
-      ip protocol vrrp accept
-    '';
-  };
-}
-```
-
-#### 1.4 Update Module Imports
-
-**`nix/modules/services/options.nix`** - Add keepalived options
-
-```nix
-keepalived = {
-  enable = lib.mkOption {
-    type = lib.types.bool;
-    default = false;
-    description = "Enable Keepalived VRRP for high availability";
-  };
-
-  state = lib.mkOption {
-    type = lib.types.enum [ "MASTER" "BACKUP" ];
-    default = "BACKUP";
-    description = "VRRP state for this node";
-  };
-
-  priority = lib.mkOption {
-    type = lib.types.int;
-    default = 100;
-    description = "VRRP priority (higher is preferred)";
-  };
-
-  virtualIp = lib.mkOption {
-    type = lib.types.str;
-    default = "";
-    description = "Virtual IP address for the VIP";
-  };
-
-  interface = lib.mkOption {
-    type = lib.types.str;
-    default = "end0";
-    description = "Network interface for VRRP";
-  };
-};
-```
-
-**`nix/modules/services/default.nix`** - Import keepalived module
-
-```nix
-{ imports = [
-  ./options.nix
-  ./backups.nix
-  ./docker.nix
-  ./pihole.nix
-  ./pre-commit.nix
-  ./samba.nix
-  ./virtualization.nix
-  ./keepalived.nix  # NEW
-]; }
-```
-
-#### 1.5 Update flake.nix
+#### 1.6 Update flake.nix
 
 Add SD image builder for the new host:
 
@@ -395,7 +457,7 @@ orangepi-zero3-backup-image = nixpkgs.lib.nixosSystem {
   "interface": "lan",
   "sequence": 2,
   "ip_protocol": "inet",
-  "protocol": "VRRP",  # or IP protocol 112
+  "protocol": "112",  # IP protocol number for VRRP
   "source_net": "10.0.9.3",
   "destination_net": "10.0.9.4"
 }
@@ -406,7 +468,7 @@ orangepi-zero3-backup-image = nixpkgs.lib.nixosSystem {
   "interface": "lan",
   "sequence": 2,
   "ip_protocol": "inet",
-  "protocol": "VRRP",
+  "protocol": "112",
   "source_net": "10.0.9.4",
   "destination_net": "10.0.9.3"
 }
@@ -455,6 +517,7 @@ orangepi-zero3-backup-image = nixpkgs.lib.nixosSystem {
 
 #### 3.1 Pre-deployment Checklist
 
+- [ ] Add VRRP auth password to `nix/secrets.yaml` and encrypt
 - [ ] Build SD image for orangepi-zero3-backup
 - [ ] Flash SD card
 - [ ] Boot new Orange Pi Zero3
@@ -464,7 +527,11 @@ orangepi-zero3-backup-image = nixpkgs.lib.nixosSystem {
 
 #### 3.2 Deployment Order
 
-1. **Build and deploy primary (existing) first**
+**CRITICAL: Handle chicken-and-egg problem with IP change**
+
+1. **Prepare and commit all code changes** (Phases 1 & 2)
+
+2. **Build and deploy primary (existing) first**
    ```bash
    # This will:
    # - Change static IP from 10.0.9.2 -> 10.0.9.3
@@ -472,30 +539,45 @@ orangepi-zero3-backup-image = nixpkgs.lib.nixosSystem {
    # - Keep pihole-ftl running
    colmena apply --on orangepi-zero3 --impure
    ```
+   **Expect**: SSH connection will drop during IP change. Wait ~30s before next step.
 
-2. **Wait and verify**
-   - Check `10.0.9.2` is still reachable (should be VIP now)
+3. **Wait and verify**
+   - Check `10.0.9.2` is still reachable (should be VIP now via keepalived)
    - Check `10.0.9.3` is reachable (new static IP)
    - Verify Pi-hole admin at `https://10.0.9.2/admin` works
    - Verify DNS resolution works: `dig @10.0.9.2 google.com`
 
-3. **Build and flash backup SD card**
+4. **Update targetHost in primary's default.nix**
+   ```nix
+   # nix/hosts/orangepi-zero3/default.nix
+   deploy.targetHost = "10.0.9.3";  # Change from 10.0.9.2
+   ```
+   Commit this change. Now colmena will connect to the new static IP for future deployments.
+
+5. **Build and flash backup SD card**
    ```bash
    nix build .#nixosConfigurations.orangepi-zero3-backup-image.config.system.build.sdImage
    # Flash to SD card
    ```
 
-4. **Boot backup Pi-hole**
+6. **Boot backup Pi-hole**
    - Insert SD, power on
    - Wait for boot
-   - Verify `10.0.9.4` reachable via SSH
+   - Verify `10.0.9.4` reachable via SSH on port 4185
 
-5. **Deploy backup configuration**
+7. **Generate hardware config for backup**
+   ```bash
+   ssh -p 4185 root@10.0.9.4 nixos-generate-config --show-hardware-config > \
+     nix/hosts/orangepi-zero3-backup/hardware.nix
+   ```
+   Commit the updated hardware.nix.
+
+8. **Deploy backup configuration**
    ```bash
    colmena apply --on orangepi-zero3-backup --impure
    ```
 
-6. **Verify VIP and failover**
+9. **Verify VIP and failover**
    ```bash
    # Check VIP on primary
    ssh orangepi-zero3 ip addr show end0

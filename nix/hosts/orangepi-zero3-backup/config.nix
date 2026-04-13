@@ -1,4 +1,4 @@
-# Shared configuration for orangepi-zero3
+# Shared configuration for orangepi-zero3-backup
 # Used by both sd-image.nix (initial image) and default.nix (deployment)
 { config, ... }:
 {
@@ -7,8 +7,8 @@
     pihole.enable = true;
     keepalived = {
       enable = true;
-      state = "MASTER";
-      priority = 100;
+      state = "BACKUP";
+      priority = 90;
       virtualIp = "10.0.9.2";
       interface = "end0";
       authPassFile = config.sops.templates."keepalived-env".path;
@@ -17,7 +17,7 @@
       backend = "networkd";
       static = {
         interface = "end0";
-        address = "10.0.9.3";
+        address = "10.0.9.4";
         gateway = "10.0.9.1";
         nameservers = [ "10.0.9.1" "9.9.9.9" ];
       };

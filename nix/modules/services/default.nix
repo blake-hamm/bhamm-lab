@@ -7,5 +7,6 @@
     ./pre-commit.nix
     ./samba.nix
     ./virtualization.nix
+    ./keepalived.nix
   ];
 }

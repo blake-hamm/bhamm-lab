@@ -2,8 +2,8 @@
   system = "aarch64-linux";
 
   deploy = {
-    tags = [ "orangepi" "sbc" "server" ];
-    targetHost = "10.0.9.2";
+    tags = [ "orangepi" "sbc" "server" "backup" ];
+    targetHost = "10.0.9.4";
   };
 
   imports = [
