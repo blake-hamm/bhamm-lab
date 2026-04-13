@@ -1,4 +1,4 @@
-{ config, lib, inputs, shared, ... }:
+{ config, lib, inputs, shared, pkgs, pkgs-unstable, ... }:
 {
   options.cfg = {
     opencode.enable = lib.mkOption {
@@ -23,6 +23,17 @@
           };
         };
       };
+
+      xdg.configFile."opencode/skills/caveman/SKILL.md".source =
+        let
+          cavemanRepo = pkgs.fetchFromGitHub {
+            owner = "JuliusBrussee";
+            repo = "caveman";
+            rev = "v1.5.1";
+            hash = "sha256-gDPgQx1TIhGrJ2EVvEoDY+4MXdlI79zdcx6pL5nMEG4=";
+          };
+        in
+        "${cavemanRepo}/caveman/SKILL.md";
     };
   };
 }
