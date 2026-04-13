@@ -2,7 +2,7 @@
   system = "aarch64-linux";
 
   deploy = {
-    tags = [ "orangepi" "sbc" "server" "backup" ];
+    tags = [ "orangepi" "sbc" "pihole" "server" ];
     targetHost = "10.0.9.4";
   };
 
