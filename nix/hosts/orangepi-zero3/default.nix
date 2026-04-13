@@ -3,7 +3,7 @@
 
   deploy = {
     tags = [ "orangepi" "sbc" "server" ];
-    targetHost = "10.0.9.2";
+    targetHost = "10.0.9.3";
   };
 
   imports = [
