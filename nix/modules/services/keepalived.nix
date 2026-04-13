@@ -51,6 +51,14 @@ in
   };
 
   config = mkIf cfg.enable {
+    # Create user for health check scripts
+    users.users.keepalived_script = {
+      isSystemUser = true;
+      group = "keepalived_script";
+      description = "Keepalived script user";
+    };
+    users.groups.keepalived_script = { };
+
     services.keepalived = {
       enable = true;
       openFirewall = true;

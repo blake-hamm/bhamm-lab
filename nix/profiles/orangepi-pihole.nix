@@ -8,6 +8,7 @@
   sops.secrets.keepalived_auth_pass = {
     sopsFile = ../secrets.yaml;
     key = "keepalived_auth_pass";
+    restartUnits = [ "keepalived.service" ];
   };
 
   sops.templates."keepalived-env".content = ''
