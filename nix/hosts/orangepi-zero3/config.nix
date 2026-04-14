@@ -5,6 +5,17 @@
   cfg = {
     orangepi-zero3.enable = true;
     pihole.enable = true;
+    nut = {
+      enable = true;
+      mode = "netserver";
+      driver = "usbhid-ups";
+      directives = [
+        "vendorid = 0764"
+        "productid = 0601"
+      ];
+      listenAddresses = [ "127.0.0.1" ];
+      passwordFile = config.sops.secrets.nut_password.path;
+    };
     keepalived = {
       enable = true;
       state = "MASTER";
