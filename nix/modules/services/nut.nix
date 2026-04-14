@@ -74,6 +74,11 @@ in
         passwordFile = cfg.passwordFile;
         type = "primary";
       };
+      upsmon.settings = {
+        BATTERYLEVEL = "10";
+        MINUTES = "3";
+        FINALDELAY = "30";
+      };
     };
   };
 }
