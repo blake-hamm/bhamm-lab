@@ -31,8 +31,8 @@
                 baseURL = "https://api.kimi.com/coding/v1";
               };
               models = {
-                k2p5 = {
-                  name = "Kimi K2.5";
+                k2p6 = {
+                  name = "Kimi K2.6";
                   reasoning = true;
                   attachment = false;
                   limit = {
