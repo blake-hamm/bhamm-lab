@@ -47,9 +47,19 @@ data:
         url: https://grafana.bhamm-lab.com/d/Kczn-jPZz/node-exporter-freebsd?orgId=1&from=now-24h&to=now&timezone=browser&var-DS_PROMETHEUS=default&var-job=opnsense&var-node=10.0.9.1:9100&refresh=1m
         statusCheck: false
       - title: Pi-hole
-        description: Visit Pi-hole Dashboard
+        description: Visit Pi-hole Dashboard (VIP)
         icon: hl-pi-hole
         url: https://10.0.9.2/
+        statusCheck: false
+      - title: Pi-hole Primary
+        description: Visit Primary Pi-hole Dashboard
+        icon: hl-pi-hole
+        url: https://10.0.9.3/
+        statusCheck: false
+      - title: Pi-hole Backup
+        description: Visit Backup Pi-hole Dashboard
+        icon: hl-pi-hole
+        url: https://10.0.9.4/
         statusCheck: false
       - title: Access Point
         description: Visit tp link eap650 access point
@@ -297,25 +307,10 @@ data:
     - name: Storage
       icon: mdi-database
       items:
-      - title: SWFS Master
-        description: Visit Seaweedfs master
-        icon: https://raw.githubusercontent.com/seaweedfs/seaweedfs/refs/heads/master/note/seaweedfs.svg
-        url: https://master-swfs.bhamm-lab.com/
-        statusCheckAcceptCodes: '401'
-      - title: SWFS Filer
-        description: Visit Seaweedfs filer
-        icon: https://raw.githubusercontent.com/seaweedfs/seaweedfs/refs/heads/master/note/seaweedfs.svg
-        url: https://filer-swfs.bhamm-lab.com/
-        statusCheckAcceptCodes: '401'
-      - title: SWFS Volume
-        description: Visit Seaweedfs volume
-        icon: https://raw.githubusercontent.com/seaweedfs/seaweedfs/refs/heads/master/note/seaweedfs.svg
-        url: https://volume-swfs.bhamm-lab.com/ui/index.html
-        statusCheckAcceptCodes: '401'
-      - title: SWFS Grafana
-        description: Seaweedfs grafana dashboard
-        icon: hl-grafana
-        url: https://grafana.bhamm-lab.com/d/a24009d7-cbda-4443-a132-1cc1c4677304/seaweedfs?orgId=1&from=now-1d&to=now&timezone=browser&var-DS_PROMETHEUS=prometheus&var-NAMESPACE=seaweedfs
+      - title: TrueNAS
+        description: Visit TrueNAS Site
+        icon: hl-truenas-scale
+        url: https://10.0.20.199/ui/signin
         statusCheck: false
       - title: Minio
         description: Minio (on TrueNAS)
@@ -331,11 +326,6 @@ data:
         description: View SMART drive dashboard
         icon: hl-grafana
         url: https://grafana.bhamm-lab.com/d/f8f249a0-be78-41b1-97fe-8d0a92a71b93/smartctl-exporter?orgId=1&from=now-2d&to=now&timezone=browser&var-datasource=prometheus&var-instance=$__all
-        statusCheck: false
-      - title: TrueNAS
-        description: Visit TrueNAS Site
-        icon: hl-truenas-scale
-        url: https://10.0.20.199/ui/signin
         statusCheck: false
       - title: PBS
         description: Proxmox Backup Server Volume
