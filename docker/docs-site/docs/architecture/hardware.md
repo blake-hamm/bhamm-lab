@@ -25,12 +25,14 @@ This page provides a view of the lab's physical infrastructure. It covers the ha
 
 ### Single Board Computers
 
-| Name         | Model           | Architecture | IP        | Network | Role                |
-|--------------|-----------------|--------------|-----------|---------|---------------------|
-| Orange Pi    | Orange Pi Zero3 | aarch64/ARM  | 10.0.9.2  | LAN     | Pi-hole DNS Server  |
+| Name                   | Model           | Architecture | IP                            | Network | Role                           |
+|------------------------|-----------------|--------------|-------------------------------|---------|--------------------------------|
+| Orange Pi Zero3        | Orange Pi Zero3 | aarch64/ARM  | 10.0.9.3 (static) + 10.0.9.2 (VIP) | LAN     | Pi-hole DNS (Primary) + NUT UPS Server |
+| Orange Pi Zero3 Backup | Orange Pi Zero3 | aarch64/ARM  | 10.0.9.4 (static) + 10.0.9.2 (VIP) | LAN     | Pi-hole DNS (Backup) + NUT UPS Server |
 
 ### Peripheral Devices
-- **UPS:** CyberPower OR500LCDRM1U Smart App LCD UPS
+- **UPS (Primary):** CyberPower OR1500LCDRT2U Smart App LCD UPS
+- **UPS (Backup):** CyberPower OR1500LCDRT2U Smart App LCD UPS
 - **PiKVM:** KVM for managing physical devices
 
 ## Future Plans
