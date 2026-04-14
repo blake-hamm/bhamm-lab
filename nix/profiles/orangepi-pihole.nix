@@ -4,6 +4,19 @@
     ./sbc.nix
   ];
 
+  # Shared NUT config (same UPS model on both systems)
+  cfg.nut = {
+    enable = true;
+    mode = "netserver";
+    driver = "usbhid-ups";
+    directives = [
+      "vendorid = 0764"
+      "productid = 0601"
+    ];
+    listenAddresses = [ "127.0.0.1" ];
+    passwordFile = config.sops.secrets.nut_password.path;
+  };
+
   # SOPS secrets for Keepalived authentication (shared across primary/backup)
   sops.secrets.keepalived_auth_pass = {
     sopsFile = ../secrets.yaml;

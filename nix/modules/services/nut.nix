@@ -66,6 +66,7 @@ in
       users."nut-admin" = mkIf (cfg.passwordFile != null) {
         passwordFile = cfg.passwordFile;
         upsmon = "primary";
+        instcmds = [ "ALL" ];
       };
       upsmon.monitor.${cfg.upsName} = mkIf (cfg.passwordFile != null) {
         system = "${cfg.upsName}@localhost";
