@@ -14,11 +14,46 @@
         enable = true;
         settings = {
           theme = "catppuccin";
+          model = "kimi-for-coding/k2p5";
           mcp = {
             github = {
               enabled = false;
               type = "remote";
               url = "https://api.githubcopilot.com/mcp/";
+            };
+          };
+
+          provider = {
+            "kimi-for-coding" = {
+              name = "Kimi For Coding";
+              npm = "@ai-sdk/anthropic";
+              options = {
+                baseURL = "https://api.kimi.com/coding/v1";
+              };
+              models = {
+                k2p5 = {
+                  name = "Kimi K2.5";
+                  reasoning = true;
+                  attachment = false;
+                  limit = {
+                    context = 262144;
+                    output = 32768;
+                  };
+                  modalities = {
+                    input = [ "text" "image" "video" ];
+                    output = [ "text" ];
+                  };
+                  options = {
+                    interleaved = {
+                      field = "reasoning_content";
+                    };
+                    thinking = {
+                      type = "enabled";
+                      budgetTokens = 32000;
+                    };
+                  };
+                };
+              };
             };
           };
         };
