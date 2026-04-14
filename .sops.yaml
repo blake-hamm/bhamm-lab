@@ -1,11 +1,13 @@
 keys:
   - &framework_laptop age1l37eugsfaaetyr7l9zqj6usmg0xkvfnywvll73ml6jyy85u5ffjq85mg3g
   - &orangepi_zero3 age18nmkcrzuq3y204s6yvldczs790j9dr8tq577uzzu0syknjjjh3wqm588wq
+  - &orangepi_zero3_backup age1cj9htsn7xw5stt57tgpgjjm0w8nptqv4q4ylk52x86hr0mgnuufq7388xf
 creation_rules:
   - key_groups:
       - age:
           - *framework_laptop
           - *orangepi_zero3
+          - *orangepi_zero3_backup
         gcp_kms:
           # This resource is used to decrypt secrets in applications using a gcp service account
           - resource_id: projects/deep-contact-445917-i9/locations/us-central1/keyRings/sops-key-ring/cryptoKeys/sops-key
