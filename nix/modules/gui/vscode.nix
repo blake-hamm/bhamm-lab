@@ -19,6 +19,7 @@
             ms-toolsai.jupyter
             ms-toolsai.jupyter-renderers
             streetsidesoftware.code-spell-checker
+            rust-lang.rust-analyzer
             # kilocode.kilo-code
             # dracula-theme.theme-dracula
             # vscodevim.vim
