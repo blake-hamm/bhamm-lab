@@ -14,7 +14,7 @@
         enable = true;
         settings = {
           theme = "catppuccin";
-          model = "kimi-for-coding/k2p5";
+          model = "kimi-for-coding/k2p6";
           mcp = {
             github = {
               enabled = false;
