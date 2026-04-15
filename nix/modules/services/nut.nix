@@ -76,7 +76,7 @@ in
         type = "primary";
       };
       upsmon.settings = {
-        BATTERYLEVEL = "10";
+        BATTERYLEVEL = "20";
         MINUTES = "3";
         FINALDELAY = "30";
       };
