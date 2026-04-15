@@ -11,3 +11,4 @@ customization:
       - siderolabs/amd-ucode
       - siderolabs/amdgpu
       - siderolabs/thunderbolt
+      - siderolabs/nut-client
