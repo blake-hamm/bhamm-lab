@@ -18,7 +18,7 @@
       static = {
         interface = "end0";
         address = "10.0.9.3";
-        gateway = "10.0.9.1";
+        gateway = "10.0.9.5";
         nameservers = [ "10.0.9.1" "9.9.9.9" ];
       };
     };
