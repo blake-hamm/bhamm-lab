@@ -24,6 +24,8 @@
 
     sops-nix.url = "github:Mic92/sops-nix";
 
+    opencode.url = "github:anomalyco/opencode/704fca074d9b14b0d34c8933f175234729ee9b6e";
+
     nixos-anywhere = {
       url = "github:nix-community/nixos-anywhere";
       inputs.nixpkgs.follows = "nixpkgs";

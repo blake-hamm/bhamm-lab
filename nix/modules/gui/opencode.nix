@@ -12,9 +12,10 @@
     home-manager.users.${shared.username} = {
       programs.opencode = {
         enable = true;
+        package = inputs.opencode.packages.${pkgs.system}.default;
         settings = {
-          theme = "catppuccin";
           model = "kimi-for-coding/k2p6";
+          default_agent = "orchestrator";
           mcp = {
             github = {
               enabled = false;
@@ -22,7 +23,9 @@
               url = "https://api.githubcopilot.com/mcp/";
             };
           };
-
+          plugin = [
+            "oh-my-opencode-slim@v0.9.12"
+          ];
           provider = {
             "kimi-for-coding" = {
               name = "Kimi For Coding";
@@ -57,6 +60,27 @@
             };
           };
         };
+      };
+
+      xdg.configFile."opencode/oh-my-opencode-slim.json".text = builtins.toJSON {
+        preset = "kimi";
+        presets = {
+          kimi = {
+            orchestrator = { model = "kimi-for-coding/k2p6"; variant = "high"; skills = [ "*" ]; mcps = [ "*" ]; };
+            oracle = { model = "kimi-for-coding/k2p6"; variant = "high"; skills = [ ]; mcps = [ ]; };
+            librarian = { model = "kimi-for-coding/k2p6"; variant = "low"; skills = [ ]; mcps = [ "websearch" "context7" "grep_app" ]; };
+            explorer = { model = "kimi-for-coding/k2p6"; variant = "low"; skills = [ ]; mcps = [ ]; };
+            designer = { model = "kimi-for-coding/k2p6"; variant = "medium"; skills = [ "agent-browser" ]; mcps = [ ]; };
+            fixer = { model = "kimi-for-coding/k2p6"; variant = "low"; skills = [ ]; mcps = [ ]; };
+            council = { model = "kimi-for-coding/k2p6"; variant = "med"; skills = [ ]; mcps = [ ]; };
+            councillor = { model = "kimi-for-coding/k2p6"; variant = "low"; skills = [ ]; mcps = [ ]; };
+            council-master = { model = "kimi-for-coding/k2p6"; variant = "low"; skills = [ ]; mcps = [ ]; };
+          };
+        };
+      };
+
+      xdg.configFile."opencode/tui.json".text = builtins.toJSON {
+        theme = "catppuccin";
       };
 
       xdg.configFile."opencode/skills/caveman/SKILL.md".source =
