@@ -33,21 +33,13 @@ let
 
   generateColmena = lib.mapAttrs mkDeployment deployableHosts;
 
-  mkNixosConfig = hostName: hostModule:
-    let
-      hostSystem = hostModule.system or shared.system;
-      hostPkgs = import inputs.nixpkgs {
-        system = hostSystem;
-        config.allowUnfree = true;
-      };
-    in
-    lib.nixosSystem {
-      pkgs = hostPkgs;
-      specialArgs = { inherit self inputs shared; host = hostName; };
-      modules = [ (lib.removeAttrs hostModule [ "deploy" "system" ]) ];
+  mkNodeNixpkgs = hostName: hostModule:
+    import inputs.nixpkgs {
+      system = hostModule.system or shared.system;
+      config.allowUnfree = true;
     };
 
-  generateNixosConfigurations = lib.mapAttrs mkNixosConfig deployableHosts;
+  generateNodeNixpkgs = lib.mapAttrs mkNodeNixpkgs deployableHosts;
 
   mkNodeSpecialArgs = hostName: hostModule: {
     host = hostName;
@@ -59,7 +51,7 @@ in
 {
   inherit
     generateColmena
-    generateNixosConfigurations
+    generateNodeNixpkgs
     generateNodeSpecialArgs
     ;
 }

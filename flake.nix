@@ -43,6 +43,20 @@
         config.allowUnfree = true;
       };
       gen = shared.generators { lib = nixpkgs.lib; inherit shared self inputs; };
+      rawHive = {
+        meta = {
+          nixpkgs = import nixpkgs {
+            system = shared.system;
+          };
+          nodeNixpkgs = gen.generateNodeNixpkgs;
+          specialArgs = {
+            inherit self inputs shared;
+            inherit pkgs-unstable;
+          };
+          nodeSpecialArgs = gen.generateNodeSpecialArgs;
+        };
+      } // gen.generateColmena;
+      hive = inputs.colmena.lib.makeHive rawHive;
     in
     {
       devShells.x86_64-linux.default = import ./nix/shell.nix { inherit pkgs inputs; };
@@ -53,21 +67,8 @@
         };
         inherit inputs;
       };
-      colmena =
-        {
-          meta = {
-            nixpkgs = import nixpkgs {
-              system = shared.system;
-            };
-            specialArgs = {
-              inherit self inputs shared;
-              inherit pkgs-unstable;
-            };
-            nodeSpecialArgs = gen.generateNodeSpecialArgs;
-          };
-        } // gen.generateColmena;
 
-      colmenaHive = inputs.colmena.lib.makeHive self.outputs.colmena;
+      colmenaHive = hive;
 
       # VM and iso configs without colmena
       nixosConfigurations =
@@ -112,6 +113,6 @@
               inherit self inputs shared;
             };
           };
-        } // gen.generateNixosConfigurations;
+        } // (nixpkgs.lib.mapAttrs (_: node: node) hive.nodes);
     };
 }
