@@ -26,8 +26,8 @@ spec:
                 parameters:
                   - name: buckets
                     value: "{{steps.list-buckets.outputs.result}}"
-          - - name: rclone-sync-to-b2
-              template: rclone-sync-to-b2
+          - - name: rclone-sync-to-r2
+              template: rclone-sync-to-r2
       - name: list-buckets
         container:
           image: rclone/rclone
