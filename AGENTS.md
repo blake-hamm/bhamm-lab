@@ -18,10 +18,16 @@ This repository is a NixOS/infrastructure monorepo for managing homelab infrastr
 ## Architecture Overview
 
 ### Hardware
-- **Servers:** 5 servers – 'Method' (SuperMicro H12SSL-i), 'Indy' (SuperMicro D-2146NT), 'Stale' (X10SDV-4C-TLN4F), 'Nose' & 'Tail' (Framework)
-- **SBCs:** Orange Pi Zero3 (Pi-hole DNS), Raspberry Pi 4 (PiKVM)
+- **Servers:** 6 servers – 'Method' (SuperMicro H12SSL-i), 'Indy' (SuperMicro D-2146NT), 'Japan' (X10SDV-4C-TLN4F), 'Stale' (X10SDV-4C-TLN4F), 'Nose' & 'Tail' (Framework)
+- **SBCs:** Orange Pi Zero3 (Pi-hole DNS, NUT primary), Raspberry Pi 4 (PiKVM)
 - **Networking:** TP-Link Omada switches & Protectli OPNsense firewall
 - **Accelerated Compute:** Intel Arc A310, AMD Radeon AI Pro R9700, AMD Ryzen AI MAX+ 395 (Strix Halo)
+
+### Power Protection (NUT)
+- **Primary:** Orange Pi Zero3 monitors the UPS directly and triggers a global Forced Shutdown when battery reaches 20%.
+- **Secondaries:**
+  - **Proxmox nodes** (`method`, `indy`, `japan`) run `upssched` with a 10-minute local timer. If power is restored within 10 minutes, they stay up. Otherwise they shut down gracefully before the primary FSD fires.
+  - **Talos bare-metal nodes** (`nose`, `tail`) use the `siderolabs/nut-client` extension and shut down only when the primary sends FSD.
 
 ### Software Stack
 - **Operating Systems:** Debian, Proxmox, Talos, NixOS, TrueNAS

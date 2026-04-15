@@ -62,8 +62,8 @@ All NixOS, Ansible, and OpenTofu secrets will source from the root-level `secret
 2. **Update NixOS SOPS configuration**
    Modify `nix/modules/core/sops.nix`:
    ```nix
-   sops.defaultSopsFile = ../../secrets.enc.json;
-   sops.defaultSopsFormat = "json";
+   sops.defaultSopsFile = ../../../secrets.enc.json;
+   sops.defaultSopsFormat = "yaml";  # YAML parser handles JSON; works around sops-nix nested-key bug
    ```
 
 3. **Update `nix/profiles/orangepi-pihole.nix`**
@@ -120,26 +120,36 @@ Add tasks to the existing custom `proxmox` role:
      no_log: true
    ```
 
-3. **Create `upsmon.conf`**
-   Template content:
-   ```
-   MONITOR cyberpower@10.0.9.3 1 nut-admin {{ nut_password }} secondary
-   SHUTDOWNCMD "/sbin/shutdown -h now"
-   MINSUPPLIES 1
-   POLLFREQ 5
-   POLLFREQALERT 5
-   HOSTSYNC 15
-   DEADTIME 15
-   RBWARNTIME 43200
-   NOCOMMWARNTIME 300
-   FINALDELAY 5
-   ```
-   > **Why `now`?** FSD is sent when the server estimates ~3 minutes of battery remain. A client-side delay risks hard power loss. If you want to tolerate transient outages, handle delays server-side with `upssched` or `NOTIFYCMD`.
+3. **Create `upsmon.conf` and `nut.conf`**
+    Template content for `upsmon.conf`:
+    ```
+    MONITOR cyberpower@10.0.9.3 1 nut-admin {{ nut_password }} secondary
+    SHUTDOWNCMD "/sbin/shutdown -h now"
+    MINSUPPLIES 1
+    POLLFREQ 5
+    POLLFREQALERT 5
+    HOSTSYNC 15
+    DEADTIME 15
+    RBWARNTIME 43200
+    NOCOMMWARNTIME 300
+    FINALDELAY 5
+    NOTIFYCMD "/usr/sbin/upssched"
+    NOTIFYFLAG ONBATT  SYSLOG+WALL+EXEC
+    NOTIFYFLAG ONLINE  SYSLOG+WALL+EXEC
+    NOTIFYFLAG LOWBATT SYSLOG+WALL+EXEC
+    NOTIFYFLAG FSD     SYSLOG+WALL+EXEC
+    ```
+    > **Note:** Debian 12 / Proxmox VE requires `/etc/nut/nut.conf` with `MODE=netclient`. Without it, `nut-monitor` exits immediately.
 
-4. **Configure service**
-   - Ensure `nut-monitor` systemd service is enabled and started
-   - Restart the service when `upsmon.conf` changes
-   > **Note:** On Debian 12 / Proxmox VE, the correct unit name is `nut-monitor.service`, not `nut-client.service`.
+4. **Configure `upssched` for early local shutdown**
+    - Deploy `upssched.conf` with a 10-minute cancellable timer (`START-TIMER early-shutdown 600` on `ONBATT`, `CANCEL-TIMER` on `ONLINE`).
+    - Deploy `upssched-cmd` to call `/sbin/shutdown -h now` when the timer fires.
+    - This lets Proxmox tolerate brief outages while still shutting down gracefully before the Orange Pi primary sends FSD at 20% battery.
+
+5. **Configure service**
+    - Ensure `nut-monitor` systemd service is enabled and started
+    - Restart the service when `upsmon.conf` or `nut.conf` changes
+    > **Note:** On Debian 12 / Proxmox VE, the correct unit name is `nut-monitor.service`, not `nut-client.service`.
 
 5. **Variables to add**
    - In `ansible/inventory/group_vars/proxmox.yml`:
@@ -291,16 +301,28 @@ Update `AGENTS.md` to reflect the current server inventory. Specifically:
 | File | Action |
 |------|--------|
 | `secrets.enc.json` | Add `vault_secrets.core.orangepi.password` and `vault_secrets.core.orangepi.keepalived_auth_pass` (migrate from `nix/secrets.yaml`) |
-| `nix/modules/core/sops.nix` | Change `defaultSopsFile` to `../../secrets.enc.json` and `defaultSopsFormat` to `"json"` |
+| `nix/modules/core/sops.nix` | Change `defaultSopsFile` to `../../../secrets.enc.json` and `defaultSopsFormat` to `"yaml"` |
 | `nix/profiles/orangepi-pihole.nix` | Remove explicit `sopsFile` overrides; update `nut_password` and `keepalived_auth_pass` keys to point under `vault_secrets.core.orangepi` |
+| `nix/modules/services/nut.nix` | Set `BATTERYLEVEL = "20"`, `openFirewall = true`, remove shared `listenAddresses` |
+| `nix/hosts/orangepi-zero3/default.nix` | Add host-specific `cfg.nut.listenAddresses = [ "127.0.0.1" "10.0.9.3" ]` |
+| `nix/hosts/orangepi-zero3/config.nix` | Change `gateway` to `"10.0.9.5"` |
+| `nix/hosts/orangepi-zero3-backup/default.nix` | Add host-specific `cfg.nut.listenAddresses = [ "127.0.0.1" "10.0.9.4" ]` |
+| `nix/hosts/orangepi-zero3-backup/config.nix` | Change `gateway` to `"10.0.9.5"` |
 | `nix/secrets.yaml` | Delete after migration and validation |
 | `ansible/roles/proxmox/tasks/main.yml` | Include new `nut-client.yml` task file |
 | `ansible/roles/proxmox/tasks/nut-client.yml` | Create new tasks for NUT client install/config |
+| `ansible/roles/proxmox/handlers/main.yml` | Add `Restart nut-monitor` handler |
+| `ansible/roles/proxmox/defaults/main.yml` | Add safe defaults for NUT variables |
+| `ansible/roles/proxmox/templates/upsmon.conf.j2` | Secondary monitor config template |
+| `ansible/roles/proxmox/templates/nut.conf.j2` | `MODE=netclient` template |
+| `ansible/roles/proxmox/templates/upssched.conf.j2` | 10-minute timer config template |
+| `ansible/roles/proxmox/templates/upssched-cmd.j2` | Shutdown script template |
 | `ansible/inventory/group_vars/proxmox.yml` | Add NUT client variables |
 | `tofu/proxmox/talos/config/schematic-amd-framework.yaml` | Add `siderolabs/nut-client` extension |
-| `tofu/proxmox/talos/sops.tf` | Add or confirm SOPS data source for `secrets.enc.json` |
+| `tofu/proxmox/talos/providers.tf` | Add `carlpett/sops` provider |
+| `tofu/proxmox/talos/sops.tf` | Read NUT password from `secrets.enc.json` |
 | `tofu/proxmox/talos/cluster.tf` | Add `ExtensionServiceConfig` patch to bare metal machine config apply |
-| `AGENTS.md` | Update server inventory to include `japan` |
+| `AGENTS.md` | Update server inventory and add Power Protection (NUT) section |
 
 ---
 
@@ -309,6 +331,9 @@ Update `AGENTS.md` to reflect the current server inventory. Specifically:
 - **Unified secrets:** All tools now source secrets from a single `secrets.enc.json` file. Any password rotation requires updating only this file.
 - **Talos `nut-client` extension** is community-tier (`contrib`). It has known issues on some hardware (e.g., Raspberry Pi 4 boot issues). For AMD Framework laptops, it should work but monitor logs after deployment.
 - **Talos shutdown behavior:** The extension only supports `SHUTDOWNCMD "/sbin/poweroff"`. There is no built-in hook to drain Kubernetes workloads before shutdown. Proxmox handles VM shutdown gracefully via its own init system.
-- **Proxmox shutdown delay:** `SHUTDOWNCMD "/sbin/shutdown -h now"` shuts down immediately upon receiving the FSD signal. FSD is sent when the server estimates ~3 minutes of battery remain; delaying client shutdown risks hard power loss. If you want to tolerate transient outages, implement a cancellable timer server-side using NUT `upssched` or `NOTIFYCMD`.
+- **Proxmox shutdown delay:** `upssched` provides a 10-minute cancellable timer on `ONBATT`. If power returns within 10 minutes, the shutdown is cancelled. If not, the node shuts down before the Orange Pi primary sends FSD at 20% battery.
+- **Network fixes discovered during deployment:**
+  - `listenAddresses` for `upsd` were moved from the shared NixOS module to host-specific configs (`orangepi-zero3` → `10.0.9.3`, `orangepi-zero3-backup` → `10.0.9.4`) because `upsd` cannot bind to IPs that don't exist on the local host.
+  - The Orange Pi default gateway was changed from `10.0.9.1` (OPNsense) to `10.0.9.5` (L3 switch). This fixed asymmetric routing that caused OPNsense to block return traffic from the NUT server to Proxmox nodes on the `metal` VLAN.
 - **Talos password exposure:** The NUT password is embedded as plaintext in the Talos machine config via `ExtensionServiceConfig`. This is unavoidable with the current extension design.
 - **No redundancy:** The plan assigns Proxmox to `10.0.9.3` and Talos to `10.0.9.4`. Consider adding both NUT servers as `MONITOR` targets (with `MINSUPPLIES 1`) in a future iteration for failover resilience.
