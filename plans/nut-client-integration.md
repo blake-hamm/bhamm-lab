@@ -37,33 +37,58 @@ Both sets of nodes will monitor the existing NUT servers running on Orange Pi Ze
 
 ## Part 0: Pre-Requisites — Unify Secrets in `secrets.enc.json`
 
-All secrets (Ansible, OpenTofu, and NixOS) will source the NUT password from the root-level `secrets.enc.json` file.
+All NixOS, Ansible, and OpenTofu secrets will source from the root-level `secrets.enc.json` file.
+
+> **Scope:** Only two NixOS hosts define SOPS secrets: `orangepi-zero3` and `orangepi-zero3-backup` (both import `nix/profiles/orangepi-pihole.nix`). The blast radius is minimal.
 
 ### Steps
 
-1. **Add NUT secrets to `secrets.enc.json`**
-   Add the following structure under the `core` namespace:
+1. **Migrate all NixOS secrets into `secrets.enc.json`**
+   Add the following keys:
    ```json
    {
      "core": {
        "nut_server": {
          "password": "<nut-admin-password>"
        }
-     }
+     },
+     "keepalived_auth_pass": "<keepalived-password>"
    }
    ```
-   > **Note:** Migrate the existing `nut_password` value from `nix/secrets.yaml` into this new key, then re-encrypt `secrets.enc.json`.
+   > **Note:** Migrate both `nut_password` and `keepalived_auth_pass` from `nix/secrets.yaml`, then re-encrypt `secrets.enc.json`.
 
 2. **Update NixOS SOPS configuration**
-   Modify `nix/modules/core/sops.nix` to point to `secrets.enc.json`:
+   Modify `nix/modules/core/sops.nix`:
    ```nix
    sops.defaultSopsFile = ../../secrets.enc.json;
    sops.defaultSopsFormat = "json";
    ```
-   Update any NixOS profiles that previously referenced `../secrets.yaml` (e.g., `nix/profiles/orangepi-pihole.nix`) to remove explicit `sopsFile` overrides if they are now covered by the default.
 
-3. **(Optional) Retire `nix/secrets.yaml`**
-   Once all NixOS secrets are migrated to `secrets.enc.json`, delete `nix/secrets.yaml` to eliminate duplication.
+3. **Update `nix/profiles/orangepi-pihole.nix`**
+   - Remove both explicit `sopsFile = ../secrets.yaml;` overrides
+   - Update `nut_password` to reference the shared key:
+     ```nix
+     sops.secrets.nut_password = {
+       key = "core.nut_server.password";
+       restartUnits = [ "upsdrv.service" "upsd.service" "upsmon.service" ];
+     };
+     ```
+   - `keepalived_auth_pass` can keep its default key (`keepalived_auth_pass`) since it matches the top-level key in `secrets.enc.json`:
+     ```nix
+     sops.secrets.keepalived_auth_pass = {
+       restartUnits = [ "keepalived.service" ];
+     };
+     ```
+
+4. **Validate NixOS builds**
+   Before applying, confirm both Orange Pi hosts still build:
+   ```bash
+   nix build .#nixosConfigurations.orangepi-zero3.config.system.build.toplevel
+   nix build .#nixosConfigurations.orangepi-zero3-backup.config.system.build.toplevel
+   ```
+
+5. **Retire `nix/secrets.yaml`**
+   Once builds pass and hosts activate successfully, delete `nix/secrets.yaml`.
 
 ---
 
@@ -83,11 +108,11 @@ Add tasks to the existing custom `proxmox` role:
    - `nut-client` (Debian package)
 
 2. **Load root-level SOPS secrets**
-   Use `community.sops.load_vars` to decrypt `secrets.enc.json` from the repo root:
+   Use the `community.sops.sops` lookup plugin with `extract` to read only the required password:
    ```yaml
-   - name: Load SOPS secrets
-     community.sops.load_vars:
-       file: "{{ playbook_dir }}/../secrets.enc.json"
+   - name: Get NUT password from SOPS
+     ansible.builtin.set_fact:
+       nut_password: "{{ lookup('community.sops.sops', playbook_dir + '/../secrets.enc.json', extract=['core','nut_server','password']) }}"
      delegate_to: localhost
      no_log: true
    ```
@@ -95,8 +120,8 @@ Add tasks to the existing custom `proxmox` role:
 3. **Create `upsmon.conf`**
    Template content:
    ```
-   MONITOR cyberpower@10.0.9.3 1 nut-admin {{ ansible_secrets.core.nut_server.password }} secondary
-   SHUTDOWNCMD "/sbin/shutdown -h +5"
+   MONITOR cyberpower@10.0.9.3 1 nut-admin {{ nut_password }} secondary
+   SHUTDOWNCMD "/sbin/shutdown -h now"
    MINSUPPLIES 1
    POLLFREQ 5
    POLLFREQALERT 5
@@ -106,10 +131,12 @@ Add tasks to the existing custom `proxmox` role:
    NOCOMMWARNTIME 300
    FINALDELAY 5
    ```
+   > **Why `now`?** FSD is sent when the server estimates ~3 minutes of battery remain. A client-side delay risks hard power loss. If you want to tolerate transient outages, handle delays server-side with `upssched` or `NOTIFYCMD`.
 
 4. **Configure service**
-   - Ensure `nut-client` systemd service is enabled and started
+   - Ensure `nut-monitor` systemd service is enabled and started
    - Restart the service when `upsmon.conf` changes
+   > **Note:** On Debian 12 / Proxmox VE, the correct unit name is `nut-monitor.service`, not `nut-client.service`.
 
 5. **Variables to add**
    - In `ansible/inventory/group_vars/proxmox.yml`:
@@ -118,7 +145,6 @@ Add tasks to the existing custom `proxmox` role:
      nut_server_host: "10.0.9.3"
      nut_ups_name: "cyberpower"
      nut_user: "nut-admin"
-     nut_shutdown_delay_minutes: 5
      ```
 
 6. **Proxmox role task flow update**
@@ -160,7 +186,7 @@ Add tasks to the existing custom `proxmox` role:
    ```
 
 2. **Read the NUT password from SOPS in OpenTofu**
-   Ensure `tofu/proxmox/talos/sops.tf` loads `secrets.enc.json` (or add a new `data.sops_file` resource scoped to this module):
+   Ensure `tofu/proxmox/talos/sops.tf` loads `secrets.enc.json`:
    ```hcl
    data "sops_file" "this" {
      source_file = "../../secrets.enc.json"
@@ -190,22 +216,15 @@ Add tasks to the existing custom `proxmox` role:
          DEADTIME 15
        mountPath: /usr/local/etc/nut/upsmon.conf
    ```
+   > **Warning:** `ExtensionServiceConfig` embeds the password as plaintext in the Talos machine configuration. It will be visible in Terraform state and node config (`talosctl get machineconfigs`). This is a fundamental limitation of the extension.
 
-4. **Variables to add (optional)**
-   If you prefer a Terraform variable wrapper instead of direct `local.nut_password`, add to `tofu/proxmox/talos/variables.tf`:
-   ```hcl
-   variable "nut_admin_password" {
-     description = "Password for NUT admin user"
-     type        = string
-     sensitive   = true
-     default     = ""
-   }
-   ```
-   Then use `coalesce(var.nut_admin_password, local.nut_password)` in the patch. However, sourcing directly from SOPS is preferred.
-
-5. **Re-provision bare metal nodes**
-   - Running `tofu apply` will regenerate the schematic ID (due to changed schematic file) and update the machine configuration.
-   - The `nut-client` extension will be installed and `upsmon` will connect to `10.0.9.4`.
+4. **Re-provision bare metal nodes**
+   - Running `tofu apply` will regenerate the schematic ID and update the machine configuration.
+   - **Crucially, for bare metal nodes the extension must be baked into the installed OS image.** Existing nodes (`nose`, `tail`) will **not** automatically receive the extension until you explicitly upgrade them:
+     ```bash
+     talosctl upgrade --nodes <ip> --image factory.talos.dev/installer/<new-schematic-id>:<version>
+     ```
+   - After upgrading, `upsmon` will connect to `10.0.9.4`.
 
 ---
 
@@ -219,9 +238,9 @@ Add tasks to the existing custom `proxmox` role:
 2. After apply, SSH to the node and verify:
    ```bash
    upsc cyberpower@10.0.9.3
-   systemctl status nut-client
+   systemctl status nut-monitor
    ```
-3. Simulate power failure (if safe) or disconnect NUT server to verify shutdown behavior after 5 minutes.
+3. Simulate power failure (if safe) or disconnect NUT server to verify shutdown behavior.
 
 ### Talos
 1. Plan OpenTofu changes:
@@ -230,13 +249,21 @@ Add tasks to the existing custom `proxmox` role:
    tofu workspace select green
    tofu plan -var-file=green.tfvars
    ```
-2. Apply and reboot bare metal nodes if needed (schematic changes typically require an upgrade/reboot cycle on Talos).
-3. Verify extension is running:
+2. Apply the configuration changes:
+   ```bash
+   tofu apply -var-file=green.tfvars
+   ```
+3. Upgrade the bare metal nodes with the new schematic installer image (get the schematic ID from `files.tf` or Terraform output):
+   ```bash
+   talosctl upgrade --nodes 10.0.30.78 --image factory.talos.dev/installer/<schematic-id>:<talos-version>
+   talosctl upgrade --nodes 10.0.30.79 --image factory.talos.dev/installer/<schematic-id>:<talos-version>
+   ```
+4. Verify the extension is running:
    ```bash
    talosctl -n 10.0.30.78 services | grep nut
    talosctl -n 10.0.30.78 logs nut-client
    ```
-4. Test connectivity from within the extension:
+5. Test connectivity from within the extension:
    ```bash
    talosctl -n 10.0.30.78 exec --service nut-client -- /usr/local/bin/upsc cyberpower@10.0.9.4
    ```
@@ -260,24 +287,25 @@ Update `AGENTS.md` to reflect the current server inventory. Specifically:
 
 | File | Action |
 |------|--------|
-| `secrets.enc.json` | Add `core.nut_server.password` (manual migration from `nix/secrets.yaml`) |
+| `secrets.enc.json` | Add `core.nut_server.password` and `keepalived_auth_pass` (migrate from `nix/secrets.yaml`) |
 | `nix/modules/core/sops.nix` | Change `defaultSopsFile` to `../../secrets.enc.json` and `defaultSopsFormat` to `"json"` |
-| `nix/profiles/orangepi-pihole.nix` | Remove explicit `sopsFile` overrides if now covered by default |
-| `nix/secrets.yaml` | Delete after migration is complete |
+| `nix/profiles/orangepi-pihole.nix` | Remove explicit `sopsFile` overrides; update `nut_password` key to `"core.nut_server.password"` |
+| `nix/secrets.yaml` | Delete after migration and validation |
 | `ansible/roles/proxmox/tasks/main.yml` | Include new `nut-client.yml` task file |
 | `ansible/roles/proxmox/tasks/nut-client.yml` | Create new tasks for NUT client install/config |
 | `ansible/inventory/group_vars/proxmox.yml` | Add NUT client variables |
 | `tofu/proxmox/talos/config/schematic-amd-framework.yaml` | Add `siderolabs/nut-client` extension |
 | `tofu/proxmox/talos/sops.tf` | Add or confirm SOPS data source for `secrets.enc.json` |
 | `tofu/proxmox/talos/cluster.tf` | Add `ExtensionServiceConfig` patch to bare metal machine config apply |
-| `tofu/proxmox/talos/variables.tf` | Optionally add `nut_admin_password` variable |
 | `AGENTS.md` | Update server inventory to include `japan` |
 
 ---
 
 ## Notes & Caveats
 
-- **Unified secrets:** All tools now source the NUT password from a single `secrets.enc.json` file. Any password rotation requires updating only this file.
+- **Unified secrets:** All tools now source secrets from a single `secrets.enc.json` file. Any password rotation requires updating only this file.
 - **Talos `nut-client` extension** is community-tier (`contrib`). It has known issues on some hardware (e.g., Raspberry Pi 4 boot issues). For AMD Framework laptops, it should work but monitor logs after deployment.
 - **Talos shutdown behavior:** The extension only supports `SHUTDOWNCMD "/sbin/poweroff"`. There is no built-in hook to drain Kubernetes workloads before shutdown. Proxmox handles VM shutdown gracefully via its own init system.
-- **Proxmox shutdown delay:** `SHUTDOWNCMD "/sbin/shutdown -h +5"` schedules shutdown 5 minutes after the low-battery/on-battery signal triggers. Adjust as needed.
+- **Proxmox shutdown delay:** `SHUTDOWNCMD "/sbin/shutdown -h now"` shuts down immediately upon receiving the FSD signal. FSD is sent when the server estimates ~3 minutes of battery remain; delaying client shutdown risks hard power loss. If you want to tolerate transient outages, implement a cancellable timer server-side using NUT `upssched` or `NOTIFYCMD`.
+- **Talos password exposure:** The NUT password is embedded as plaintext in the Talos machine config via `ExtensionServiceConfig`. This is unavoidable with the current extension design.
+- **No redundancy:** The plan assigns Proxmox to `10.0.9.3` and Talos to `10.0.9.4`. Consider adding both NUT servers as `MONITOR` targets (with `MINSUPPLIES 1`) in a future iteration for failover resilience.
