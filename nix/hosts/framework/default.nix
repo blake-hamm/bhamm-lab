@@ -16,6 +16,7 @@
   cfg = {
     # Machine-specific settings
     framework.enable = true;
+    uhk.enable = true;
     wireguard.enable = true;
   };
 

@@ -35,5 +35,10 @@
       default = false;
       description = "Enable Vesktop";
     };
+    audio.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable PipeWire audio";
+    };
   };
 }

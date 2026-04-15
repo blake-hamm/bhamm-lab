@@ -10,5 +10,6 @@
     ./vesktop.nix
     ./opencode.nix
     ./printing.nix
+    ./audio.nix
   ];
 }
