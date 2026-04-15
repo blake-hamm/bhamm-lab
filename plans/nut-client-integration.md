@@ -45,17 +45,19 @@ All NixOS, Ansible, and OpenTofu secrets will source from the root-level `secret
 
 1. **Migrate all NixOS secrets into `secrets.enc.json`**
    Add the following keys:
-   ```json
-   {
-     "core": {
-       "nut_server": {
-         "password": "<nut-admin-password>"
-       }
-     },
-     "keepalived_auth_pass": "<keepalived-password>"
-   }
-   ```
-   > **Note:** Migrate both `nut_password` and `keepalived_auth_pass` from `nix/secrets.yaml`, then re-encrypt `secrets.enc.json`.
+    ```json
+    {
+      "vault_secrets": {
+        "core": {
+          "orangepi": {
+            "password": "<nut-admin-password>",
+            "keepalived_auth_pass": "<keepalived-password>"
+          }
+        }
+      }
+    }
+    ```
+    > **Note:** Migrate both `nut_password` and `keepalived_auth_pass` from `nix/secrets.yaml` into `vault_secrets.core.orangepi`, then re-encrypt `secrets.enc.json`.
 
 2. **Update NixOS SOPS configuration**
    Modify `nix/modules/core/sops.nix`:
@@ -69,16 +71,17 @@ All NixOS, Ansible, and OpenTofu secrets will source from the root-level `secret
    - Update `nut_password` to reference the shared key:
      ```nix
      sops.secrets.nut_password = {
-       key = "core.nut_server.password";
+       key = "vault_secrets.core.orangepi.password";
        restartUnits = [ "upsdrv.service" "upsd.service" "upsmon.service" ];
      };
      ```
-   - `keepalived_auth_pass` can keep its default key (`keepalived_auth_pass`) since it matches the top-level key in `secrets.enc.json`:
-     ```nix
-     sops.secrets.keepalived_auth_pass = {
-       restartUnits = [ "keepalived.service" ];
-     };
-     ```
+   - Update `keepalived_auth_pass` to reference the new key under `orangepi`:
+      ```nix
+      sops.secrets.keepalived_auth_pass = {
+        key = "vault_secrets.core.orangepi.keepalived_auth_pass";
+        restartUnits = [ "keepalived.service" ];
+      };
+      ```
 
 4. **Validate NixOS builds**
    Before applying, confirm both Orange Pi hosts still build:
@@ -112,7 +115,7 @@ Add tasks to the existing custom `proxmox` role:
    ```yaml
    - name: Get NUT password from SOPS
      ansible.builtin.set_fact:
-       nut_password: "{{ lookup('community.sops.sops', playbook_dir + '/../secrets.enc.json', extract=['core','nut_server','password']) }}"
+       nut_password: "{{ lookup('community.sops.sops', playbook_dir + '/../secrets.enc.json', extract=['vault_secrets','core','orangepi','password']) }}"
      delegate_to: localhost
      no_log: true
    ```
@@ -195,7 +198,7 @@ Add tasks to the existing custom `proxmox` role:
    Extract the password locally:
    ```hcl
    locals {
-     nut_password = jsondecode(nonsensitive(data.sops_file.this.raw)).core.nut_server.password
+     nut_password = jsondecode(nonsensitive(data.sops_file.this.raw)).vault_secrets.core.orangepi.password
    }
    ```
 
@@ -287,9 +290,9 @@ Update `AGENTS.md` to reflect the current server inventory. Specifically:
 
 | File | Action |
 |------|--------|
-| `secrets.enc.json` | Add `core.nut_server.password` and `keepalived_auth_pass` (migrate from `nix/secrets.yaml`) |
+| `secrets.enc.json` | Add `vault_secrets.core.orangepi.password` and `vault_secrets.core.orangepi.keepalived_auth_pass` (migrate from `nix/secrets.yaml`) |
 | `nix/modules/core/sops.nix` | Change `defaultSopsFile` to `../../secrets.enc.json` and `defaultSopsFormat` to `"json"` |
-| `nix/profiles/orangepi-pihole.nix` | Remove explicit `sopsFile` overrides; update `nut_password` key to `"core.nut_server.password"` |
+| `nix/profiles/orangepi-pihole.nix` | Remove explicit `sopsFile` overrides; update `nut_password` and `keepalived_auth_pass` keys to point under `vault_secrets.core.orangepi` |
 | `nix/secrets.yaml` | Delete after migration and validation |
 | `ansible/roles/proxmox/tasks/main.yml` | Include new `nut-client.yml` task file |
 | `ansible/roles/proxmox/tasks/nut-client.yml` | Create new tasks for NUT client install/config |
