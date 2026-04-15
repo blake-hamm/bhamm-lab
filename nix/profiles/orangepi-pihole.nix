@@ -13,7 +13,6 @@
       "vendorid = 0764"
       "productid = 0601"
     ];
-    listenAddresses = [ "127.0.0.1" ];
     passwordFile = config.sops.secrets.nut_password.path;
   };
 

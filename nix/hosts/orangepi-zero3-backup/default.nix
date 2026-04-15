@@ -6,6 +6,8 @@
     targetHost = "10.0.9.4";
   };
 
+  cfg.nut.listenAddresses = [ "127.0.0.1" "10.0.9.4" ];
+
   imports = [
     ./hardware.nix
     ./config.nix

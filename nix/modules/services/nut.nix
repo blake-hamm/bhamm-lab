@@ -56,6 +56,7 @@ in
   config = mkIf cfg.enable {
     power.ups = {
       enable = true;
+      openFirewall = true;
       mode = cfg.mode;
       ups.${cfg.upsName} = {
         driver = cfg.driver;
