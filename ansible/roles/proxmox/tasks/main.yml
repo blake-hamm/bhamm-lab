@@ -13,6 +13,9 @@
 - name: Install pbs
   ansible.builtin.include_tasks: pbs.yml
   when: proxmox_pbs
+- name: Configure NUT client
+  ansible.builtin.include_tasks: nut-client.yml
+  when: nut_client_enabled | default(false)
 - name: Run post tasks
   ansible.builtin.include_tasks: post.yml
   run_once: true

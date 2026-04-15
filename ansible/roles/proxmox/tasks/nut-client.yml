@@ -1,0 +1,43 @@
+- name: Get NUT password from SOPS
+  ansible.builtin.set_fact:
+    nut_password: "{{ (lookup('community.sops.sops', playbook_dir + '/../secrets.enc.json') | from_json).vault_secrets.core.orangepi.password }}"
+  delegate_to: localhost
+  no_log: true
+  when: nut_client_enabled | default(false)
+- name: Install NUT client packages
+  ansible.builtin.apt:
+    name:
+      - nut-client
+    state: present
+  when: nut_client_enabled | default(false)
+- name: Configure upsmon.conf
+  ansible.builtin.template:
+    src: upsmon.conf.j2
+    dest: /etc/nut/upsmon.conf
+    owner: root
+    group: nut
+    mode: '0640'
+  when: nut_client_enabled | default(false)
+  notify: Restart nut-monitor
+- name: Configure upssched.conf
+  ansible.builtin.template:
+    src: upssched.conf.j2
+    dest: /etc/nut/upssched.conf
+    owner: root
+    group: nut
+    mode: '0640'
+  when: nut_client_enabled | default(false)
+- name: Deploy upssched command script
+  ansible.builtin.template:
+    src: upssched-cmd.j2
+    dest: /etc/nut/upssched-cmd
+    owner: root
+    group: root
+    mode: '0755'
+  when: nut_client_enabled | default(false)
+- name: Ensure nut-monitor service is enabled and started
+  ansible.builtin.systemd:
+    name: nut-monitor
+    state: started
+    enabled: true
+  when: nut_client_enabled | default(false)

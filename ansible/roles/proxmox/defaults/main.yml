@@ -1,6 +1,10 @@
 proxmox_pbs: false
 proxmox_reset_ceph: false
 pve_ceph_rgw_enabled: false
+nut_client_enabled: false
+nut_server_host: ""
+nut_ups_name: ""
+nut_user: ""
 # Ceph RGW Erasure Coding Configuration
 pve_ceph_rgw_ec_k: 2
 pve_ceph_rgw_ec_m: 1
