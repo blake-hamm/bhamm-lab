@@ -5,6 +5,11 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
+    colmena = {
+      url = "github:zhaofengli/colmena/349b035a5027f23d88eeb3bc41085d7ee29f18ed";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -61,6 +66,8 @@
             nodeSpecialArgs = gen.generateNodeSpecialArgs;
           };
         } // gen.generateColmena;
+
+      colmenaHive = inputs.colmena.lib.makeHive self.outputs.colmena;
 
       # VM and iso configs without colmena
       nixosConfigurations =

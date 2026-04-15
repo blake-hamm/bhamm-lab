@@ -8,7 +8,7 @@ pkgs.mkShell {
     argo-workflows
     argocd
     k9s
-    colmena
+    inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena
     poetry
     sops
     mkdocs
