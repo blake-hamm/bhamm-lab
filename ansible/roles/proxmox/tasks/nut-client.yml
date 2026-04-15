@@ -10,6 +10,15 @@
       - nut-client
     state: present
   when: nut_client_enabled | default(false)
+- name: Configure nut.conf
+  ansible.builtin.template:
+    src: nut.conf.j2
+    dest: /etc/nut/nut.conf
+    owner: root
+    group: nut
+    mode: '0640'
+  when: nut_client_enabled | default(false)
+  notify: Restart nut-monitor
 - name: Configure upsmon.conf
   ansible.builtin.template:
     src: upsmon.conf.j2
