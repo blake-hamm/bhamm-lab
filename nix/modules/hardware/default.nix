@@ -1,6 +1,5 @@
 {
   imports = [
-    ./options.nix
     ./framework.nix
     ./uhk.nix
     ./strix-halo.nix

@@ -1,6 +1,12 @@
 { config, lib, inputs, shared, pkgs, ... }:
 
 {
+  options.cfg.gnome.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = "Enable GNOME desktop environment";
+  };
+
   config = lib.mkIf config.cfg.gnome.enable {
     # Enable the X11 windowing system.
     services.xserver.enable = true;

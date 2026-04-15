@@ -1,6 +1,5 @@
 {
   imports = [
-    ./options.nix
     ./backups.nix
     ./docker.nix
     ./nut.nix

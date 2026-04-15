@@ -1,6 +1,12 @@
 { config, lib, pkgs, ... }:
 
 {
+  options.cfg.orangepi-zero3.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = "Enable Orange Pi Zero 3 specific settings";
+  };
+
   config = lib.mkIf config.cfg.orangepi-zero3.enable {
     # Force aarch64 platform
     nixpkgs.hostPlatform = lib.mkForce "aarch64-linux";

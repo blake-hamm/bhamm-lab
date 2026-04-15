@@ -1,6 +1,12 @@
 { config, lib, inputs, shared, pkgs-unstable, ... }:
 
 {
+  options.cfg.vscode.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = "Enable VS Codium";
+  };
+
   config = lib.mkIf config.cfg.vscode.enable {
     home-manager.users.${shared.username} = {
       programs.vscode = {
