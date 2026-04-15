@@ -19,7 +19,7 @@
 
   # SOPS secrets for Keepalived authentication (shared across primary/backup)
   sops.secrets.keepalived_auth_pass = {
-    key = "vault_secrets.core.orangepi.keepalived_auth_pass";
+    key = "vault_secrets/core/orangepi/keepalived_auth_pass";
     restartUnits = [ "keepalived.service" ];
   };
 
@@ -29,7 +29,7 @@
 
   # SOPS secret for NUT UPS password
   sops.secrets.nut_password = {
-    key = "vault_secrets.core.orangepi.password";
+    key = "vault_secrets/core/orangepi/password";
     restartUnits = [ "upsdrv.service" "upsd.service" "upsmon.service" ];
   };
 }
