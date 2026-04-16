@@ -8,7 +8,8 @@ metadata:
     argocd.argoproj.io/sync-wave: "25"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
-  schedule: "{{ .Values.k8up.backup.schedule }}"
+  schedules:
+    - "{{ .Values.k8up.backup.schedule }}"
   timezone: America/Denver
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
