@@ -7,7 +7,10 @@ metadata:
     argocd.argoproj.io/sync-wave: "7"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
-  ttlStrategy: {}
+  ttlStrategy:
+    secondsAfterCompletion: 315360000
+    secondsAfterSuccess: 315360000
+    secondsAfterFailure: 315360000
   entrypoint: sops-vault-sync-workflow
   serviceAccountName: argo-workflow
   templates:
