@@ -6,7 +6,7 @@
       inputs.sops-nix.nixosModules.sops
     ];
 
-  sops.defaultSopsFile = ../../secrets.yaml;
+  sops.defaultSopsFile = ../../../secrets.enc.json;
   sops.defaultSopsFormat = "yaml";
 
   # sops.age.keyFile = "/home/bhamm/.config/sops/age/keys.txt";

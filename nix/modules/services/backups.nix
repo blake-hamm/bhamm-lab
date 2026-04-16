@@ -1,6 +1,12 @@
 { config, lib, inputs, shared, pkgs, ... }:
 
 {
+  options.cfg.backups.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = "Enable backups";
+  };
+
   config = lib.mkIf config.cfg.backups.enable {
     home-manager.users.${shared.username} = {
       programs.borgmatic = {

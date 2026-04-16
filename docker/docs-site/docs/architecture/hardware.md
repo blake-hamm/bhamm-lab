@@ -9,11 +9,12 @@ This page provides a view of the lab's physical infrastructure. It covers the ha
 
 | Name     | Model                          | CPU                          | RAM       | Storage                                      | Features                               | Role                           |
 |----------|--------------------------------|------------------------------|-----------|----------------------------------------------|----------------------------------------|--------------------------------|
-| Method   | Supermicro H12SSL-i            | AMD EPYC 7502    | 128 GB ECC     | 1TB NVME (boot and vm storage), 1 TB NVME (ceph db/wal), 1TB SSD (ceph osd), 3.84 TB SSD (ceph osd), 2x2TB and 1TB SSD (TrueNas pcie passthrough) | Dual 10 GB NIC SFP+, ipmi, AMD Radeon AI Pro R9700 (Talos llama.cpp VM), Intel Arc A310e (Talos immich/jellyfin VM), SATA pcie | Proxmox and ceph |
-| Indy     | Supermicro D-2146NT            | Intel Xeon D-2146NT 8-Core   | 128 GB ECC| 1TB NVME (boot and vm storage), 1 TB NVME (ceph db/wal), 1TB SSD (ceph osd), 3.84 TB SSD (ceph osd) | 2x10GB NIC SFP+, 2x10GB NIC, 2x1GB NIC, ipmi | Proxmox and ceph |
+| Method   | Supermicro H12SSL-i            | AMD EPYC 7502    | 128 GB ECC     | 1TB NVME (boot and vm storage), 1 TB NVME (ceph db/wal), 1TB SSD (ceph osd), 3.84 TB SSD (ceph osd), 2x2TB and 1TB SSD (TrueNas pcie passthrough) | Dual 10 GB NIC SFP+, ipmi, AMD Radeon AI Pro R9700 (Talos llama.cpp VM), Intel Arc A310e (Talos immich/jellyfin VM), SATA pcie | Proxmox, ceph, NUT client |
+| Indy     | Supermicro D-2146NT            | Intel Xeon D-2146NT 8-Core   | 128 GB ECC| 1TB NVME (boot and vm storage), 1 TB NVME (ceph db/wal), 1TB SSD (ceph osd), 3.84 TB SSD (ceph osd) | 2x10GB NIC SFP+, 2x10GB NIC, 2x1GB NIC, ipmi | Proxmox, ceph, NUT client |
+| Japan    | X10SDV-4C-TLN4F                | Intel Xeon CPU D-1518 8-Core | 64 GB ECC     | 1TB NVME (boot and vm storage), 1 TB NVME (ceph db/wal), 1TB SSD (ceph osd), 3.84 TB SSD (ceph osd) | 2x10GB NIC, 2x1GB NIC, ipmi           | Proxmox, ceph, NUT client      |
 | Stale    | X10SDV-4C-TLN4F                | Intel Xeon CPU D-1518 8-Core | 64 GB ECC     | 1TB NVME (boot and vm storage), 1 TB NVME (ceph db/wal), 1TB SSD (ceph osd), 3.84 TB SSD (ceph osd) | 2x10GB NIC, 2x1GB NIC, ipmi           | Proxmox and ceph               |
-| Nose     | Framework Mainboard            | AMD Ryzen AI MAX+ 395        | 128 GB (120 dedicated vram)     | 500GB NVME (boot drive), 1 TB NVME (model local path storage)           | 5GB NIC, Thunderbolt | Talos bare metal |
-| Tail     | Framework Mainboard            | AMD Ryzen AI MAX+ 395        | 128 GB (120 dedicated vram)     | 500GB NVME (boot drive), 1 TB NVME (model local path storage)           | 5GB NIC, Thunderbolt | Talos bare metal |
+| Nose     | Framework Mainboard            | AMD Ryzen AI MAX+ 395        | 128 GB (120 dedicated vram)     | 500GB NVME (boot drive), 1 TB NVME (model local path storage)           | 5GB NIC, Thunderbolt | Talos bare metal, NUT client |
+| Tail     | Framework Mainboard            | AMD Ryzen AI MAX+ 395        | 128 GB (120 dedicated vram)     | 500GB NVME (boot drive), 1 TB NVME (model local path storage)           | 5GB NIC, Thunderbolt | Talos bare metal, NUT client |
 
 ### Networking Equipment
 
@@ -25,12 +26,14 @@ This page provides a view of the lab's physical infrastructure. It covers the ha
 
 ### Single Board Computers
 
-| Name         | Model           | Architecture | IP        | Network | Role                |
-|--------------|-----------------|--------------|-----------|---------|---------------------|
-| Orange Pi    | Orange Pi Zero3 | aarch64/ARM  | 10.0.9.2  | LAN     | Pi-hole DNS Server  |
+| Name                   | Model           | Architecture | IP                            | Network | Role                           |
+|------------------------|-----------------|--------------|-------------------------------|---------|--------------------------------|
+| Orange Pi Zero3        | Orange Pi Zero3 | aarch64/ARM  | 10.0.9.3 (static) + 10.0.9.2 (VIP) | LAN     | Pi-hole DNS (Primary) + NUT UPS Server |
+| Orange Pi Zero3 Backup | Orange Pi Zero3 | aarch64/ARM  | 10.0.9.4 (static) + 10.0.9.2 (VIP) | LAN     | Pi-hole DNS (Backup) + NUT UPS Server |
 
 ### Peripheral Devices
-- **UPS:** CyberPower OR500LCDRM1U Smart App LCD UPS
+- **UPS (Primary):** CyberPower OR1500LCDRT2U Smart App LCD UPS
+- **UPS (Backup):** CyberPower OR1500LCDRT2U Smart App LCD UPS
 - **PiKVM:** KVM for managing physical devices
 
 ## Future Plans

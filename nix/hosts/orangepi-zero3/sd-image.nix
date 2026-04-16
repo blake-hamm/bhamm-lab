@@ -4,7 +4,7 @@ let
 in
 {
   imports = [
-    ../../profiles/sbc.nix
+    ./../../profiles/orangepi-pihole.nix
     ./config.nix
   ];
 

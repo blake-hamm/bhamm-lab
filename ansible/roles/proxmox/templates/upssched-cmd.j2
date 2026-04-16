@@ -1,0 +1,15 @@
+#!/bin/bash
+case "$1" in
+  early-shutdown)
+    /sbin/shutdown -h now "UPS on battery for 10 minutes. Shutting down."
+    ;;
+  lowbatt-warning)
+    logger -t upssched "UPS low battery warning received"
+    ;;
+  fsd-warning)
+    logger -t upssched "Forced shutdown flag received"
+    ;;
+  *)
+    logger -t upssched "Unknown upssched command: $1"
+    ;;
+esac

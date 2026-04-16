@@ -21,3 +21,8 @@
     name: "ceph-radosgw@radosgw.{{ inventory_hostname }}.service"
     state: restarted
     enabled: true
+- name: Restart nut-monitor
+  ansible.builtin.systemd:
+    name: nut-monitor
+    state: restarted
+    enabled: true

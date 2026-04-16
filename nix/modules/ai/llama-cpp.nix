@@ -1,6 +1,12 @@
 { config, lib, shared, ... }:
 
 {
+  options.cfg.ai.llama-cpp.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = "Enable the llama-cpp service";
+  };
+
   config = lib.mkIf config.cfg.ai.llama-cpp.enable {
     users.users.${shared.username}.extraGroups = [ "docker" ];
     virtualisation.oci-containers = {

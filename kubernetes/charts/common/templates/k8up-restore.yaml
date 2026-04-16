@@ -8,6 +8,9 @@ metadata:
     argocd.argoproj.io/sync-wave: "2"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
+  ttlStrategy:
+    secondsAfterSuccess: 0
+    secondsAfterFailure: 0
   entrypoint: main
   templates:
     - name: main
@@ -20,15 +23,15 @@ spec:
             arguments:
               parameters:
                 - name: target-namespace
-                  value: {{ .Values.name }}
+                  value: {{ .Values.name | quote }}
                 - name: location
                   value: onsite
                 - name: k8up-endpoint
-                  value: {{ .Values.s3.endpoint }}
+                  value: {{ .Values.s3.endpoint | quote }}
                 - name: k8up-bucket
                   value: k8up-backups
                 - name: k8up-secret
                   value: k8up
                 - name: fsGroup
-                  value: {{ .Values.k8up.restore.config.fsGroup }}
+                  value: {{ .Values.k8up.restore.config.fsGroup | quote }}
 {{- end }}

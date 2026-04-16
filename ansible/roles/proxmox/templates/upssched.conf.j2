@@ -1,0 +1,8 @@
+CMDSCRIPT /etc/nut/upssched-cmd
+PIPEFN /etc/nut/upssched.pipe
+LOCKFN /etc/nut/upssched.lock
+
+AT ONBATT * START-TIMER early-shutdown 600
+AT ONLINE * CANCEL-TIMER early-shutdown
+AT LOWBATT * EXECUTE lowbatt-warning
+AT FSD * EXECUTE fsd-warning

@@ -5,6 +5,11 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
+    colmena = {
+      url = "github:zhaofengli/colmena/349b035a5027f23d88eeb3bc41085d7ee29f18ed";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -18,6 +23,8 @@
     catppuccin.url = "github:catppuccin/nix/release-25.11";
 
     sops-nix.url = "github:Mic92/sops-nix";
+
+    opencode.url = "github:anomalyco/opencode/704fca074d9b14b0d34c8933f175234729ee9b6e";
 
     nixos-anywhere = {
       url = "github:nix-community/nixos-anywhere";
@@ -38,6 +45,20 @@
         config.allowUnfree = true;
       };
       gen = shared.generators { lib = nixpkgs.lib; inherit shared self inputs; };
+      rawHive = {
+        meta = {
+          nixpkgs = import nixpkgs {
+            system = shared.system;
+          };
+          nodeNixpkgs = gen.generateNodeNixpkgs;
+          specialArgs = {
+            inherit self inputs shared;
+            inherit pkgs-unstable;
+          };
+          nodeSpecialArgs = gen.generateNodeSpecialArgs;
+        };
+      } // gen.generateColmena;
+      hive = inputs.colmena.lib.makeHive rawHive;
     in
     {
       devShells.x86_64-linux.default = import ./nix/shell.nix { inherit pkgs inputs; };
@@ -48,19 +69,8 @@
         };
         inherit inputs;
       };
-      colmena =
-        {
-          meta = {
-            nixpkgs = import nixpkgs {
-              system = shared.system;
-            };
-            specialArgs = {
-              inherit self inputs shared;
-              inherit pkgs-unstable;
-            };
-            nodeSpecialArgs = gen.generateNodeSpecialArgs;
-          };
-        } // gen.generateColmena;
+
+      colmenaHive = hive;
 
       # VM and iso configs without colmena
       nixosConfigurations =
@@ -93,6 +103,18 @@
               inherit self inputs shared;
             };
           };
-        } // gen.generateNixosConfigurations;
+
+          orangepi-zero3-backup-image = nixpkgs.lib.nixosSystem {
+            system = "aarch64-linux";
+            modules = [
+              "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
+              (import ./nix/hosts/orangepi-zero3-backup/sd-image.nix)
+            ];
+            specialArgs = {
+              host = "orangepi-zero3-backup";
+              inherit self inputs shared;
+            };
+          };
+        } // (nixpkgs.lib.mapAttrs (_: node: node) hive.nodes);
     };
 }

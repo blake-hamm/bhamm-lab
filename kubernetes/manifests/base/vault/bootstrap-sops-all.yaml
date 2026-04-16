@@ -7,6 +7,9 @@ metadata:
     argocd.argoproj.io/sync-wave: "7"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
+  ttlStrategy:
+    secondsAfterSuccess: 0
+    secondsAfterFailure: 0
   entrypoint: sops-vault-sync-workflow
   serviceAccountName: argo-workflow
   templates:
@@ -48,7 +51,7 @@ spec:
 
             # Clone repository
             echo "Cloning repository..."
-            git clone -b feature/ceph-rgw https://github.com/blake-hamm/bhamm-lab.git /workspace/repo
+            git clone -b main https://github.com/blake-hamm/bhamm-lab.git /workspace/repo
 
             # Decrypt secrets
             echo "Decrypting secrets..."

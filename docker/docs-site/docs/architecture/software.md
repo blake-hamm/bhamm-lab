@@ -173,10 +173,28 @@ This document outlines the software components that form the digital backbone of
 - **Pi-hole:**
   - *Role:* Primary DNS server for main VLANs, Proxmox hosts, and Talos Kubernetes nodes
   - *Platform:* Orange Pi Zero3 (aarch64/ARM) running NixOS
-  - *IP:* 10.0.9.2 (gateway: 10.0.9.1 OPNsense)
-  - *Usage:* Network-wide DNS ad-blocking and filtering
+  - *VIP:* 10.0.9.2 (gateway: 10.0.9.1 OPNsense)
+  - *Primary:* 10.0.9.3 — Orange Pi Zero3 (VRRP MASTER)
+  - *Backup:* 10.0.9.4 — Orange Pi Zero3 Backup (VRRP BACKUP)
+  - *Usage:* Network-wide DNS ad-blocking and filtering with automatic failover via Keepalived (VRRP)
   - *Components:* Pi-hole FTL (DNS filtering) and Pi-hole Web (admin interface on ports 80/443)
-  - *Deployment:* Managed via Colmena from `nix/hosts/orangepi-zero3/`
+  - *Deployment:* Managed via Colmena from `nix/hosts/orangepi-zero3/` and `nix/hosts/orangepi-zero3-backup/`
+  - *Failover:* < 3 second switchover when primary Pi-hole or host fails
+
+- **NUT (Network UPS Tools):**
+  - *Role:* UPS monitoring and graceful shutdown across the lab
+  - *Primary Servers:* Orange Pi Zero3 devices running NixOS (`10.0.9.3` and `10.0.9.4`)
+    - *Usage:* Each Orange Pi runs an independent NUT server (`upsd`) monitoring its attached CyberPower UPS via `usbhid-ups`
+    - *Components:* `usbhid-ups` driver, `upsd` server, `upsmon` primary monitor
+    - *Deployment:* Shared config via `nix/profiles/orangepi-pihole.nix`, managed via Colmena
+    - *FSD Threshold:* Global Forced Shutdown is triggered when battery reaches 20%
+  - *Proxmox Clients:* `method`, `indy`, `japan`
+    - *Usage:* NUT secondary clients monitoring `cyberpower@10.0.9.3` with a 10-minute `upssched` timer. If power is restored within 10 minutes, shutdown is cancelled; otherwise the node shuts down gracefully before FSD.
+    - *Deployment:* Managed via Ansible `proxmox` role
+  - *Talos Clients:* `nose`, `tail` (bare-metal Framework nodes)
+    - *Usage:* NUT secondary clients using the `siderolabs/nut-client` Talos system extension to monitor `cyberpower@10.0.9.4`
+    - *Shutdown:* Responds to FSD only (`SHUTDOWNCMD "/sbin/poweroff"`)
+    - *Deployment:* Extension baked into the AMD Framework schematic; configuration applied via OpenTofu `ExtensionServiceConfig` patch
 - **Cilium:**
   - *Role:* Kubernetes CNI + Service Mesh
   - *Usage:* L7 network policies, Hubble observability, and encrypted pod traffic

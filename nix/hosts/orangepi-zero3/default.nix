@@ -2,13 +2,15 @@
   system = "aarch64-linux";
 
   deploy = {
-    tags = [ "orangepi" "sbc" "server" ];
-    targetHost = "10.0.9.2";
+    tags = [ "orangepi" "sbc" "pihole" "server" ];
+    targetHost = "10.0.9.3";
   };
+
+  cfg.nut.listenAddresses = [ "127.0.0.1" "10.0.9.3" ];
 
   imports = [
     ./hardware.nix
     ./config.nix
-    ./../../profiles/sbc.nix
+    ./../../profiles/orangepi-pihole.nix
   ];
 }

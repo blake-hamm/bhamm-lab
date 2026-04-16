@@ -93,6 +93,26 @@ resource "talos_machine_configuration_apply" "bare_metal" {
   machine_configuration_input = data.talos_machine_configuration.this[each.key].machine_configuration
   config_patches = [
     yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "ExtensionServiceConfig"
+      name       = "nut-client"
+      configFiles = [
+        {
+          content   = <<-EOT
+            MONITOR cyberpower@10.0.9.4 1 nut-admin ${local.nut_password} secondary
+            SHUTDOWNCMD "/sbin/poweroff"
+            MINSUPPLIES 1
+            POLLFREQ 5
+            POLLFREQALERT 5
+            HOSTSYNC 15
+            DEADTIME 15
+            FINALDELAY 5
+          EOT
+          mountPath = "/usr/local/etc/nut/upsmon.conf"
+        }
+      ]
+    }),
+    yamlencode({
       machine = {
         install = {
           disk = var.metal_amd_framework_disk_path

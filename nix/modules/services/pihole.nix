@@ -1,6 +1,12 @@
 { config, lib, ... }:
 
 {
+  options.cfg.pihole.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = "Enable Pi-hole DNS server";
+  };
+
   config = lib.mkIf config.cfg.pihole.enable {
     services.resolved = {
       enable = true;

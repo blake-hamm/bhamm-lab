@@ -1,0 +1,20 @@
+{ lib, pkgs, ... }:
+let
+  bootloaderPackage = pkgs.ubootOrangePiZero3;
+in
+{
+  imports = [
+    ./../../profiles/orangepi-pihole.nix
+    ./config.nix
+  ];
+
+  nixpkgs.hostPlatform = "aarch64-linux";
+
+  sdImage = {
+    compressImage = true;
+    postBuildCommands = ''
+      dd if=${bootloaderPackage}/u-boot-sunxi-with-spl.bin of=$img \
+        bs=1024 seek=8 conv=notrunc
+    '';
+  };
+}

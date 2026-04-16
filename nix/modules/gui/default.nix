@@ -1,6 +1,5 @@
 {
   imports = [
-    ./options.nix
     ./catppuccin.nix
     ./extras.nix
     ./gnome.nix
@@ -10,5 +9,6 @@
     ./vesktop.nix
     ./opencode.nix
     ./printing.nix
+    ./audio.nix
   ];
 }

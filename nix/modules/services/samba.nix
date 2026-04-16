@@ -1,6 +1,12 @@
 { config, lib, shared, pkgs, ... }:
 
 {
+  options.cfg.samba.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = "Enable Samba shares";
+  };
+
   config = lib.mkIf config.cfg.samba.enable {
     # Required package for CIFS mounting
     environment.systemPackages = [ pkgs.cifs-utils ];

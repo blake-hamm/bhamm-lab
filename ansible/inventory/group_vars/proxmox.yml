@@ -79,6 +79,10 @@ pve_storages:
 #     content: ["images", "iso", "backup", "snippets", "vztmpl"]
 #     server: 192.168.69.12
 #     export: /mnt/storage/proxmox
+nut_client_enabled: true
+nut_server_host: "10.0.9.3"
+nut_ups_name: "cyberpower"
+nut_user: "nut-admin"
 proxmox_reset_ceph: false
 pve_ceph_enabled: true
 pve_ceph_network: '10.0.20.0/24'

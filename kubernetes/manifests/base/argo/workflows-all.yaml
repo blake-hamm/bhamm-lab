@@ -13,14 +13,17 @@ spec:
   source:
     chart: argo-workflows
     repoURL: https://argoproj.github.io/argo-helm
-    targetRevision: 0.42.5
+    targetRevision: 1.0.8
     helm:
       valuesObject:
         workflow:
           serviceAccount:
             create: true
+          rbac:
+            artifactGC: true
         controller:
-          parallelism: 3
+          parallelism: 10
+          workflowTTLWorkers: 32
           metricsConfig:
             enabled: true
           serviceMonitor:
@@ -31,10 +34,11 @@ spec:
             spec:
               serviceAccountName: argo-workflow
               ttlStrategy:
-                secondsAfterSuccess: 86400
-                secondsAfterFailure: 604800
+                secondsAfterSuccess: 3600
+                secondsAfterFailure: 86400
               artifactGC:
                 strategy: OnWorkflowDeletion
+                serviceAccountName: argo-workflow
           workflowNamespaces:
             - argo
         server:

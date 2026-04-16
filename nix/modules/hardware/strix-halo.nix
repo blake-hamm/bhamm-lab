@@ -1,5 +1,11 @@
 { config, pkgs-unstable, lib, ... }:
 {
+  options.cfg.strix-halo.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = "Enable Strix Halo specific settings";
+  };
+
   config = lib.mkIf config.cfg.strix-halo.enable {
     nixpkgs.overlays = [
       (final: prev: {

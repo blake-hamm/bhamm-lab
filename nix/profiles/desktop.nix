@@ -9,10 +9,10 @@
     docker.enable = true;
     kitty.enable = true;
     vscode.enable = true;
-    uhk.enable = true;
     precommit.enable = true;
     networking.backend = "networkmanager";
     vesktop.enable = true;
     opencode.enable = true;
+    audio.enable = true;
   };
 }

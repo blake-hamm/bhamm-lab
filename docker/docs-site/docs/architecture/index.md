@@ -22,7 +22,7 @@ This philosophy is supported by several key principles:
 - **Single Board Computers:** Orange Pi Zero3 (Pi-hole DNS server), Raspberry pi 4 (PiKVM)
 - **Networking:** TP‑Link Omada switches & Protectli Opnsense firewall
 - **Accelerated compute:** Intel Arc A310, AMD Radeon AI Pro R9700, AMD Ryzen AI MAX+ 395 (Strix Halo)
-- **Management:** UPS, PiKVM
+- **Management:** NUT (UPS/power management), PiKVM
 
 **Software Stack:**
 

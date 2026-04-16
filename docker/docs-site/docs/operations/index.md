@@ -10,6 +10,7 @@
 - 🛡️ [Ceph](ceph.md) - Ceph management
 - 🐝 [Cilium](cilium.md) - Cilium management
 - 🕳️ [Pi-hole](pihole.md) - DNS ad-blocking server
+- ⚡ [NUT](nut.md) - UPS monitoring and power management
 - 🐳 [Restic](restic.md) - Restic commands
 - 🔒 [Wireguard](wireguard.md) - Wireguard commands
 

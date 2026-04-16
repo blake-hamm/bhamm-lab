@@ -1,6 +1,12 @@
 { config, lib, inputs, shared, ... }:
 
 {
+  options.cfg.kitty.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = "Enable Kitty terminal";
+  };
+
   config = lib.mkIf config.cfg.kitty.enable {
     home-manager.users.${shared.username} = {
       programs.kitty = {
