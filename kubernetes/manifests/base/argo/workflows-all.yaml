@@ -22,7 +22,8 @@ spec:
           rbac:
             artifactGC: true
         controller:
-          parallelism: 6
+          parallelism: 10
+          workflowTTLWorkers: 32
           metricsConfig:
             enabled: true
           serviceMonitor:
@@ -33,8 +34,8 @@ spec:
             spec:
               serviceAccountName: argo-workflow
               ttlStrategy:
-                secondsAfterSuccess: 86400
-                secondsAfterFailure: 604800
+                secondsAfterSuccess: 3600
+                secondsAfterFailure: 3600
               artifactGC:
                 strategy: OnWorkflowDeletion
                 serviceAccountName: argo-workflow
