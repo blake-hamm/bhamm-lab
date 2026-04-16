@@ -8,9 +8,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "2"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
-  ttlStrategy:
-    secondsAfterSuccess: 0
-    secondsAfterFailure: 0
+  ttlStrategy: {}
   entrypoint: main
   templates:
     - name: main
