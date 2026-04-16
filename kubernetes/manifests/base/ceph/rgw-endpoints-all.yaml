@@ -12,27 +12,19 @@ spec:
       targetPort: 7480
       protocol: TCP
 ---
-apiVersion: discovery.k8s.io/v1
-kind: EndpointSlice
+apiVersion: v1
+kind: Endpoints
 metadata:
   name: external-rgw
   namespace: ceph
-  labels:
-    kubernetes.io/service-name: external-rgw
   annotations:
     argocd.argoproj.io/sync-wave: "7"
-addressType: IPv4
-endpoints:
+subsets:
   - addresses:
-      - 10.0.20.11
-    conditions: {}
-  - addresses:
-      - 10.0.20.12
-    conditions: {}
-  - addresses:
-      - 10.0.20.15
-    conditions: {}
-ports:
-  - name: s3
-    port: 7480
-    protocol: TCP
+      - ip: 10.0.20.11
+      - ip: 10.0.20.12
+      - ip: 10.0.20.15
+    ports:
+      - name: s3
+        port: 7480
+        protocol: TCP
