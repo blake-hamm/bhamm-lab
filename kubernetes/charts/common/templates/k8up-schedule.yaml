@@ -27,11 +27,11 @@ spec:
               arguments:
                 parameters:
                   - name: target-namespace
-                    value: {{ .Values.name }}
+                    value: {{ .Values.name | quote }}
                   - name: location
                     value: onsite
                   - name: k8up-endpoint
-                    value: {{ .Values.s3.endpoint }}
+                    value: {{ .Values.s3.endpoint | quote }}
                   - name: k8up-bucket
                     value: k8up-backups
                   - name: k8up-secret

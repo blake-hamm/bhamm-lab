@@ -12,7 +12,7 @@ spec:
   templates:
     - name: main
       retryStrategy:
-        limit: 3
+        limit: "3"
         backoff:
           duration: "10s"
           factor: 2
