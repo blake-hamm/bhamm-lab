@@ -95,22 +95,84 @@ ssh root@10.0.20.15 -p 4185 reboot
 > 3. NixOS does **not** publish official QCOW2/cloud images on `channels.nixos.org`. The canonical approach for Proxmox is to build a native `.vma.zst` image.
 > 4. Cloud-init works correctly inside a NixOS guest when `services.cloud-init.enable = true` is configured in the image.
 
+### 3.0 Refactor NixOS Profiles for Reusability
+
+Before building the image, extract a reusable `base.nix` profile so both the Proxmox image and the ISO can share universal configuration without duplicating literals.
+
+#### `nix/modules/core/base.nix`
+```nix
+{
+  imports = [
+    ./system.nix
+    ./terminal.nix
+    ./user.nix
+  ];
+}
+```
+
+#### `nix/profiles/base.nix`
+```nix
+{
+  imports = [
+    ../modules/core/base.nix
+  ];
+}
+```
+
+#### `nix/profiles/server.nix`
+```nix
+{
+  imports = [
+    ./base.nix
+    ../modules/core/boot.nix
+    ../modules/core/ssh.nix
+    ../modules/core/sops.nix
+    ../modules/core/home.nix
+    ../modules/core/git.nix
+  ];
+
+  cfg = {
+    networking.backend = "networkd";
+  };
+}
+```
+
+#### Fix `nix/hosts/iso/default.nix`
+Replace the missing `../../modules/profiles/minimal.nix` import:
+```nix
+{ pkgs, lib, ... }:
+{
+  system = "x86_64-linux";
+
+  imports = [
+    ../../profiles/base.nix
+  ];
+
+  boot.kernelPackages = lib.mkForce pkgs.linuxPackages_latest;
+  boot.supportedFilesystems = lib.mkForce [ "btrfs" "reiserfs" "vfat" "f2fs" "xfs" "ntfs" "cifs" ];
+  networking.networkmanager.enable = lib.mkForce false;
+}
+```
+
 ### 3.1 Build the Generic NixOS Proxmox Image
 
-Create a reusable, generic NixOS image for Proxmox. This image is **not** garage-specific; it can be reused for future NixOS VMs.
+Create a reusable, generic NixOS image for Proxmox. This image is **not** garage-specific; it can be reused for future NixOS VMs. It imports `base.nix` for universal config (timezone, locale, user, basic packages) and adds image-specific settings (GRUB, cloud-init, SSH on port 22).
 
 #### `nix/hosts/proxmox-image/default.nix`
 ```nix
-{ config, lib, pkgs, modulesPath, ... }:
+{ config, lib, pkgs, modulesPath, shared, ... }:
 {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     (modulesPath + "/virtualisation/proxmox-image.nix")
+    ../../profiles/base.nix
   ];
 
-  # Boot support
+  # Boot support: GRUB for Proxmox compatibility (base.nix uses systemd-boot)
+  boot.loader.grub.enable = true;
   boot.loader.grub.efiSupport = true;
   boot.loader.grub.efiInstallAsRemovable = true;
+  boot.loader.grub.device = "/dev/sda";
 
   # Cloud-init for Proxmox metadata (IP, SSH keys, hostname)
   services.cloud-init = {
@@ -121,33 +183,25 @@ Create a reusable, generic NixOS image for Proxmox. This image is **not** garage
   # QEMU guest agent for Proxmox integrations
   services.qemuGuest.enable = true;
 
-  # SSH must be enabled for Colmena / remote access
+  # SSH on port 22 for initial provisioning (cloud-init, emergency access)
   services.openssh = {
     enable = true;
+    ports = [ 22 ];
     settings.PermitRootLogin = lib.mkDefault "prohibit-password";
   };
 
-  # Create the default user that cloud-init will inject keys for
-  users.users.bhamm = {
-    isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" ];
-    openssh.authorizedKeys.keys = [
-      # Keys will be injected by Proxmox cloud-init; these are fallbacks
-    ];
-  };
+  # Reuse the same authorized key from shared
+  users.users.${shared.username}.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKsS2H4frdi7AvzkGMPMRaQ+B46Af5oaRFtNJY3uCHt blake.j.hamm@gmail.com",
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEn6e5VeOkY4WcW0wPmz8uWj+yd+kulj7Ls7upTdKFUO gitea@bhamm-lab.com"
+  ];
 
   # Allow sudo without password for wheel during initial bootstrap
   security.sudo.wheelNeedsPassword = lib.mkDefault false;
 
-  # Basic packages
-  environment.systemPackages = with pkgs; [
-    git
-    vim
-  ];
-
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-  system.stateVersion = "25.11";
+  system.stateVersion = shared.nixVersion;
 }
 ```
 
@@ -454,14 +508,19 @@ Outline:
 
   cfg = {
     networking = {
+      backend = "networkd";
       static = {
-        interface = "ens18"; # Verify after cloud-init / virtio
+        interface = "ens18";     # Verify with `ip link` after first boot
         address = "10.0.20.21";
+        prefixLength = 24;       # Explicit; matches 10.0.20.0/24
         gateway = "10.0.20.1";
         nameservers = [ "10.0.9.2" ];
       };
     };
   };
+
+  # Hand off network control from cloud-init to NixOS networkd
+  services.cloud-init.network.enable = lib.mkForce false;
 
   # Garage service (to be enabled in a later iteration)
   # services.garage = { ... };
@@ -803,6 +862,9 @@ Modify the templates as follows:
 - [x] Phase 1: Update `ansible/inventory/host_vars/japan.yml` with passthrough vars
 - [x] Phase 1: Run Ansible on `japan` and reboot
 - [x] Phase 2: Migrate physical SSDs from `method` to `japan`
+- [ ] Phase 3: Create `nix/modules/core/base.nix` with universal core modules
+- [ ] Phase 3: Create `nix/profiles/base.nix` and refactor `nix/profiles/server.nix`
+- [ ] Phase 3: Fix `nix/hosts/iso/default.nix` to import `base.nix` (was broken: missing `minimal.nix`)
 - [ ] Phase 3: Create `nix/hosts/proxmox-image/` generic NixOS Proxmox image config
 - [ ] Phase 3: Build the generic Proxmox image (`nixos-rebuild build-image --image-variant proxmox`)
 - [ ] Phase 3: Upload image to Proxmox and restore as a template

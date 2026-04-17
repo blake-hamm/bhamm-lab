@@ -92,6 +92,19 @@
             };
           };
 
+          # Generic Proxmox image (reusable for any NixOS VM on Proxmox)
+          proxmox-image = nixpkgs.lib.nixosSystem {
+            system = shared.system;
+            modules = [
+              (import ./nix/hosts/proxmox-image)
+            ];
+            specialArgs = {
+              host = "proxmox-image";
+              inherit self inputs shared;
+              inherit pkgs-unstable;
+            };
+          };
+
           orangepi-zero3-image = nixpkgs.lib.nixosSystem {
             system = "aarch64-linux";
             modules = [
