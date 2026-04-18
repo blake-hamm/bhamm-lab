@@ -55,3 +55,17 @@ nix flake update
 ```bash
 nix build .#nixosConfigurations.minimal-iso.config.system.build.isoImage
 ```
+
+## Building Proxmox Images
+
+Build a raw EFI disk image for Proxmox VMs with cloud-init, qemu-guest-agent, and hardened SSH pre-configured:
+
+```bash
+nix build .#nixosConfigurations.proxmox-image.config.system.build.image
+```
+
+Produces `result/nixos.img` — copy to Proxmox storage and reference via OpenTofu data source.
+
+```bash
+scp result/nixos.img root@proxmox-node:/var/lib/vz/template/iso/
+```

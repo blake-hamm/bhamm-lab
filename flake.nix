@@ -92,6 +92,20 @@
             };
           };
 
+          # Generic NixOS raw image for Proxmox (direct download approach)
+          proxmox-image = nixpkgs.lib.nixosSystem {
+            system = shared.system;
+            modules = [
+              (import ./nix/hosts/proxmox-image)
+              ./nix/hosts/proxmox-image/img-build.nix
+            ];
+            specialArgs = {
+              host = "proxmox-image";
+              inherit self inputs shared;
+              inherit pkgs-unstable;
+            };
+          };
+
           orangepi-zero3-image = nixpkgs.lib.nixosSystem {
             system = "aarch64-linux";
             modules = [

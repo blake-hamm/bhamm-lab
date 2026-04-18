@@ -1,9 +1,7 @@
 { pkgs, lib, ... }:
 {
-  system = "x86_64-linux";
-
   imports = [
-    ./../../modules/profiles/minimal.nix
+    ../../profiles/base.nix
   ];
 
   # use the latest Linux kernel"${out}

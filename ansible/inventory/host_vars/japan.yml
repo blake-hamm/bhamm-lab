@@ -14,12 +14,20 @@ ceph_partitions:
     start: 201GiB
     end: 585GiB
 pve_ceph_osds:
-  - device: /dev/sdb
+  - device: /dev/sdd
     block.db: /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part1
     crush.device.class: ssd
-  - device: /dev/sdc
+  - device: /dev/sde
     block.db: /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part2
     crush.device.class: ssd
-  - device: /dev/sda
+  - device: /dev/sdf
     block.db: /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part3
     crush.device.class: ssd
+pve_pcie_passthrough_enabled: true
+pve_iommu_passthrough_mode: true
+pve_iommu_unsafe_interrupts: false
+pve_pcie_ovmf_enabled: false
+pve_pci_device_ids:
+  - id: "1000:0097" # Broadcom / LSI SAS3008
+pve_vfio_blacklist_drivers:
+  - name: "mpt3sas"

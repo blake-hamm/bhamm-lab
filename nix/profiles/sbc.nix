@@ -14,5 +14,8 @@
     vscode.enable = lib.mkDefault false;
     uhk.enable = lib.mkDefault false;
     vesktop.enable = lib.mkDefault false;
+
+    monitoring.enable = true;
+    monitoring.smartctlExporter.enable = false;
   };
 }

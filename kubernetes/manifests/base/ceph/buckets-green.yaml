@@ -31,20 +31,167 @@ spec:
                   value: s3_access_key
                 - name: aws-secret-access-key
                   value: s3_secret_key
-    - name: restore-from-minio
+    - name: restore-from-r2-to-garage
       steps:
-        - - name: list-buckets
-            template: list-buckets
+        - - name: sync-r2-to-garage
+            template: sync-r2-to-garage
+        - - name: verify-garage
+            template: verify-garage
+    - name: sync-r2-to-garage
+      container:
+        image: rclone/rclone
+        resources:
+          requests:
+            memory: 512Mi
+          limits:
+            memory: 4Gi
+        env:
+          - name: R2_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: R2_ACCESS_KEY_ID
+          - name: R2_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: R2_SECRET_ACCESS_KEY
+          - name: R2_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: R2_ENDPOINT
+          - name: GARAGE_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: garage_s3_access_key
+          - name: GARAGE_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: garage_s3_secret_key
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            set -ex
+            rclone config create r2 s3 \
+              provider Cloudflare \
+              access_key_id $R2_ACCESS_KEY_ID \
+              secret_access_key $R2_SECRET_ACCESS_KEY \
+              endpoint $R2_ENDPOINT
+
+            rclone config create garage s3 \
+              provider Other \
+              access_key_id $GARAGE_ACCESS_KEY_ID \
+              secret_access_key $GARAGE_SECRET_ACCESS_KEY \
+              endpoint http://external-garage.garage.svc.cluster.local:80 \
+              force_path_style true \
+              region garage
+
+            echo "=== Syncing r2:ceph-rgw → garage:ceph-rgw ==="
+            rclone sync r2:ceph-rgw garage:ceph-rgw \
+              --progress \
+              --fast-list \
+              --checksum \
+              --check-first \
+              --transfers=16 \
+              --checkers=32 \
+              --s3-chunk-size=16M \
+              --s3-upload-concurrency=8 \
+              --s3-no-head \
+              --s3-no-check-bucket \
+              --disable-http2 \
+              --max-backlog=10000 \
+              --stats=30s
+    - name: verify-garage
+      container:
+        image: rclone/rclone
+        resources:
+          requests:
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+        env:
+          - name: R2_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: R2_ACCESS_KEY_ID
+          - name: R2_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: R2_SECRET_ACCESS_KEY
+          - name: R2_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: R2_ENDPOINT
+          - name: GARAGE_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: garage_s3_access_key
+          - name: GARAGE_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ceph-external-secret
+                key: garage_s3_secret_key
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            rclone config create r2 s3 \
+              provider Cloudflare \
+              access_key_id $R2_ACCESS_KEY_ID \
+              secret_access_key $R2_SECRET_ACCESS_KEY \
+              endpoint $R2_ENDPOINT
+
+            rclone config create garage s3 \
+              provider Other \
+              access_key_id $GARAGE_ACCESS_KEY_ID \
+              secret_access_key $GARAGE_SECRET_ACCESS_KEY \
+              endpoint http://external-garage.garage.svc.cluster.local:80 \
+              force_path_style true \
+              region garage
+
+            echo "=== Verification: r2:ceph-rgw vs garage:ceph-rgw ==="
+            rclone check r2:ceph-rgw garage:ceph-rgw --one-way --checksum
+    - name: restore-from-garage-to-rgw
+      steps:
+        - - name: list-garage-buckets
+            template: list-garage-buckets
+        - - name: create-rgw-buckets
+            templateRef:
+              name: s3-bucket-management
+              template: bucket-management
+              clusterScope: true
+            arguments:
+              parameters:
+                - name: bucket-names
+                  value: "{{steps.list-garage-buckets.outputs.result}}"
+                - name: endpoint-url
+                  value: http://external-rgw.ceph.svc.cluster.local:80
+                - name: aws-region
+                  value: us-east-1
+                - name: destroy-and-create
+                  value: "false"
+                - name: aws-auth-secret
+                  value: ceph-external-secret
+                - name: aws-access-key-id
+                  value: s3_access_key
+                - name: aws-secret-access-key
+                  value: s3_secret_key
         - - name: restore-bucket
-            template: restore-bucket
+            template: restore-bucket-from-garage
             arguments:
               parameters:
                 - name: bucket
                   value: "{{item}}"
-            withParam: "{{steps.list-buckets.outputs.result}}"
+            withParam: "{{steps.list-garage-buckets.outputs.result}}"
         - - name: verify-restore
-            template: verify-restore
-    - name: list-buckets
+            template: verify-rgw
+    - name: list-garage-buckets
       container:
         image: rclone/rclone
         resources:
@@ -53,31 +200,28 @@ spec:
           limits:
             memory: 256Mi
         env:
-          - name: AWS_ACCESS_KEY_ID
+          - name: GARAGE_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
                 name: ceph-external-secret
-                key: AWS_ACCESS_KEY_ID
-          - name: AWS_SECRET_ACCESS_KEY
+                key: garage_s3_access_key
+          - name: GARAGE_SECRET_ACCESS_KEY
             valueFrom:
               secretKeyRef:
                 name: ceph-external-secret
-                key: AWS_SECRET_ACCESS_KEY
-          - name: AWS_ENDPOINT
-            valueFrom:
-              secretKeyRef:
-                name: ceph-external-secret
-                key: AWS_ENDPOINT
+                key: garage_s3_secret_key
         command: ["/bin/sh", "-c"]
         args:
           - |
-            rclone config create minio s3 \
-              provider Minio \
-              access_key_id $AWS_ACCESS_KEY_ID \
-              secret_access_key $AWS_SECRET_ACCESS_KEY \
-              endpoint $AWS_ENDPOINT
-            rclone lsd minio:ceph-rgw | awk 'BEGIN{s="["; sep=""} {s=s sep"\""$NF"\""; sep=","} END{print s"]"}'
-    - name: restore-bucket
+            rclone config create garage s3 \
+              provider Other \
+              access_key_id $GARAGE_ACCESS_KEY_ID \
+              secret_access_key $GARAGE_SECRET_ACCESS_KEY \
+              endpoint http://external-garage.garage.svc.cluster.local:80 \
+              force_path_style true \
+              region garage
+            rclone lsf garage:ceph-rgw | awk -F/ '{a[$1]} END{for(i in a) print i}' | sort | awk 'BEGIN{s="["; sep=""} {s=s sep"\""$0"\""; sep=","} END{print s"]"}'
+    - name: restore-bucket-from-garage
       inputs:
         parameters:
           - name: bucket
@@ -99,21 +243,16 @@ spec:
               secretKeyRef:
                 name: ceph-external-secret
                 key: s3_secret_key
-          - name: AWS_ACCESS_KEY_ID
+          - name: GARAGE_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
                 name: ceph-external-secret
-                key: AWS_ACCESS_KEY_ID
-          - name: AWS_SECRET_ACCESS_KEY
+                key: garage_s3_access_key
+          - name: GARAGE_SECRET_ACCESS_KEY
             valueFrom:
               secretKeyRef:
                 name: ceph-external-secret
-                key: AWS_SECRET_ACCESS_KEY
-          - name: AWS_ENDPOINT
-            valueFrom:
-              secretKeyRef:
-                name: ceph-external-secret
-                key: AWS_ENDPOINT
+                key: garage_s3_secret_key
           - name: BUCKET
             value: "{{inputs.parameters.bucket}}"
         command: ["/bin/sh", "-c"]
@@ -121,26 +260,28 @@ spec:
           - |
             set -ex
             rclone config create rgw s3 \
-              provider Other \
+              provider Ceph \
               access_key_id $RGW_ACCESS_KEY \
               secret_access_key $RGW_SECRET_KEY \
               endpoint http://external-rgw.ceph.svc.cluster.local:80
 
-            rclone config create minio s3 \
-              provider Minio \
-              access_key_id $AWS_ACCESS_KEY_ID \
-              secret_access_key $AWS_SECRET_ACCESS_KEY \
-              endpoint $AWS_ENDPOINT
+            rclone config create garage s3 \
+              provider Other \
+              access_key_id $GARAGE_ACCESS_KEY_ID \
+              secret_access_key $GARAGE_SECRET_ACCESS_KEY \
+              endpoint http://external-garage.garage.svc.cluster.local:80 \
+              force_path_style true \
+              region garage
 
-            echo "=== Restoring minio:ceph-rgw/${BUCKET} -> rgw:${BUCKET} ==="
-            rclone sync "minio:ceph-rgw/${BUCKET}" "rgw:${BUCKET}" \
+            echo "=== Restoring garage:ceph-rgw/${BUCKET} -> rgw:${BUCKET} ==="
+            rclone sync "garage:ceph-rgw/${BUCKET}" "rgw:${BUCKET}" \
               --progress \
               --fast-list \
               --transfers=8 \
               --checkers=16 \
               --disable-http2 \
               --stats=30s
-    - name: verify-restore
+    - name: verify-rgw
       container:
         image: rclone/rclone
         resources:
@@ -159,38 +300,35 @@ spec:
               secretKeyRef:
                 name: ceph-external-secret
                 key: s3_secret_key
-          - name: AWS_ACCESS_KEY_ID
+          - name: GARAGE_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
                 name: ceph-external-secret
-                key: AWS_ACCESS_KEY_ID
-          - name: AWS_SECRET_ACCESS_KEY
+                key: garage_s3_access_key
+          - name: GARAGE_SECRET_ACCESS_KEY
             valueFrom:
               secretKeyRef:
                 name: ceph-external-secret
-                key: AWS_SECRET_ACCESS_KEY
-          - name: AWS_ENDPOINT
-            valueFrom:
-              secretKeyRef:
-                name: ceph-external-secret
-                key: AWS_ENDPOINT
+                key: garage_s3_secret_key
         command: ["/bin/sh", "-c"]
         args:
-          - |-
+          - |
             rclone config create rgw s3 \
-              provider Other \
+              provider Ceph \
               access_key_id $RGW_ACCESS_KEY \
               secret_access_key $RGW_SECRET_KEY \
               endpoint http://external-rgw.ceph.svc.cluster.local:80
 
-            rclone config create minio s3 \
-              provider Minio \
-              access_key_id $AWS_ACCESS_KEY_ID \
-              secret_access_key $AWS_SECRET_ACCESS_KEY \
-              endpoint $AWS_ENDPOINT
+            rclone config create garage s3 \
+              provider Other \
+              access_key_id $GARAGE_ACCESS_KEY_ID \
+              secret_access_key $GARAGE_SECRET_ACCESS_KEY \
+              endpoint http://external-garage.garage.svc.cluster.local:80 \
+              force_path_style true \
+              region garage
 
             echo "=== Verification: Checking restore integrity ==="
-            for bucket in $(rclone lsd minio:ceph-rgw | awk '{print $NF}'); do
+            for bucket in $(rclone lsf garage:ceph-rgw | awk -F/ '{a[$1]} END{for(i in a) print i}' | sort); do
               echo "--- Checking rgw:${bucket} ---"
-              rclone check "minio:ceph-rgw/${bucket}" "rgw:${bucket}" --one-way --size-only
+              rclone check "garage:ceph-rgw/${bucket}" "rgw:${bucket}" --one-way --size-only
             done

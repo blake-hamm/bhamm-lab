@@ -149,6 +149,10 @@ spec:
               systemd-exporter:
                 url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/main/kubernetes/manifests/base/monitor/dashboards/systemd.json
                 token: ''
+              garage:
+                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/feature/garage/kubernetes/manifests/base/monitor/dashboards/garage.json
+                token: ''
+                datasource: Prometheus
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
@@ -190,6 +194,9 @@ spec:
                       - '10.0.20.11:9100' # Method
                       - '10.0.20.12:9100' # Indy
                       - '10.0.20.15:9100' # Japan
+                      - '10.0.30.21:9100' # Garage (VLAN 30 for direct L2)
+                      - '10.0.9.3:9100' # orangepi-zero3
+                      - '10.0.9.4:9100' # orangepi-zero3-backup
               - job_name: 'ceph'
                 scrape_interval: 1m
                 static_configs:
@@ -204,12 +211,20 @@ spec:
                       - '10.0.20.11:9633' # Method
                       - '10.0.20.12:9633' # Indy
                       - '10.0.20.15:9633' # Japan
+                      - '10.0.30.21:9633' # Garage (VLAN 30 for direct L2)
               - job_name: 'systemd'
                 static_configs:
                   - targets:
                       - '10.0.20.11:9558' # Method
                       - '10.0.20.12:9558' # Indy
                       - '10.0.20.15:9558' # Japan
+                      - '10.0.30.21:9558' # Garage (VLAN 30 for direct L2)
+                      - '10.0.9.3:9558' # orangepi-zero3
+                      - '10.0.9.4:9558' # orangepi-zero3-backup
+              - job_name: 'garage'
+                static_configs:
+                  - targets:
+                      - '10.0.30.21:3903'
             ruleSelectorNilUsesHelmValues: false
             serviceMonitorSelectorNilUsesHelmValues: false
             podMonitorSelectorNilUsesHelmValues: false

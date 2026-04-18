@@ -68,6 +68,14 @@ spec:
               remoteRef:
                 key: /external/backblaze
                 property: B2_ENDPOINT
+            - secretKey: garage_s3_access_key
+              remoteRef:
+                key: /core/garage
+                property: s3_access_key
+            - secretKey: garage_s3_secret_key
+              remoteRef:
+                key: /core/garage
+                property: s3_secret_key
         ingressRoutes:
           - enabled: true
             name: rgw
