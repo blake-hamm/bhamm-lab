@@ -3,30 +3,19 @@ variable "proxmox_url" {
   type    = string
 }
 
-variable "datastore_iso" {
-  default = "cephfs"
-  type    = string
-}
-
 variable "node_name" {
   default = "japan"
   type    = string
 }
 
-variable "nixos_url" {
-  description = "NixOS cloud image URL"
-  default     = "https://channels.nixos.org/nixos-25.11/nixos-amazon-image-25.11-x86_64-linux.qcow2"
-  type        = string
-}
-
-variable "nixos_file" {
-  description = "Local file name for the downloaded NixOS cloud image"
-  default     = "nixos-cloud-25.11.img"
+variable "datastore_boot" {
+  description = "Datastore for the VM boot disk"
+  default     = "lvm"
   type        = string
 }
 
 variable "vm_id" {
-  default = 200
+  default = 300
   type    = number
 }
 
@@ -55,14 +44,14 @@ variable "net_trunks" {
   type    = string
 }
 
-variable "net_mtu" {
-  default = 9000
+variable "net_vlan_id" {
+  default = 20
   type    = number
 }
 
-variable "datastore_boot" {
-  default = "lvm"
-  type    = string
+variable "net_mtu" {
+  default = 9000
+  type    = number
 }
 
 variable "garage_ip" {
@@ -77,7 +66,7 @@ variable "hba_pcie_ids" {
 }
 
 variable "initial_user" {
-  description = "Username for cloud-init injection (must exist in the cloud image)"
+  description = "Username for cloud-init injection"
   default     = "bhamm"
   type        = string
 }
@@ -85,7 +74,6 @@ variable "initial_user" {
 variable "ssh_keys" {
   type = list(string)
   default = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKsS2H4frdi7AvzkGMPMRaQ+B46Af5oaRFtNJY3uCHt blake.j.hamm@gmail.com",
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEn6e5VeOkY4WcW0wPmz8uWj+yd+kulj7Ls7upTdKFUO gitea@bhamm-lab.com"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKsS2H4frdi7AvzkGMPMRaQ+B46Af5oaRFtNJY3uCHt blake.j.hamm@gmail.com"
   ]
 }

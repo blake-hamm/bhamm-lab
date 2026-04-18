@@ -25,18 +25,6 @@
   # QEMU guest agent for Proxmox integration
   services.qemuGuest.enable = true;
 
-  # SSH on port 22 for initial provisioning (cloud-init, emergency access)
-  services.openssh = {
-    enable = true;
-    ports = [ 22 ];
-    settings.PermitRootLogin = lib.mkDefault "prohibit-password";
-  };
-
-  # Inject our authorized keys into the bhamm user
-  users.users.${shared.username}.openssh.authorizedKeys.keys = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKsS2H4frdi7AvzkGMPMRaQ+B46Af5oaRFtNJY3uCHt blake.j.hamm@gmail.com"
-  ];
-
   # Allow sudo without password for wheel during initial bootstrap
   security.sudo.wheelNeedsPassword = lib.mkDefault false;
 

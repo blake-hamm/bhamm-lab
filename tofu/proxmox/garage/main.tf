@@ -12,15 +12,11 @@ provider "proxmox" {
   }
 }
 
-# Download the NixOS generic cloud image (QCOW2).
-# Fallback: if 25.11 is not yet available, switch to nixos-unstable.
-resource "proxmox_virtual_environment_download_file" "nixos_cloud" {
-  content_type   = "iso"
-  datastore_id   = var.datastore_iso
-  node_name      = var.node_name
-  url            = var.nixos_url
-  file_name      = var.nixos_file
-  upload_timeout = 2400
+data "proxmox_file" "nixos_image" {
+  content_type = "iso"
+  datastore_id = "cephfs"
+  node_name    = var.node_name
+  file_name    = "nixos.img"
 }
 
 resource "proxmox_virtual_environment_vm" "garage" {
@@ -53,10 +49,11 @@ resource "proxmox_virtual_environment_vm" "garage" {
   }
 
   network_device {
-    model  = "virtio"
-    bridge = var.net_bridge
-    trunks = var.net_trunks
-    mtu    = var.net_mtu
+    model   = "virtio"
+    bridge  = var.net_bridge
+    trunks  = var.net_trunks
+    vlan_id = var.net_vlan_id
+    mtu     = var.net_mtu
   }
 
   boot_order = ["scsi0"]
@@ -70,15 +67,17 @@ resource "proxmox_virtual_environment_vm" "garage" {
     type         = "4m"
   }
 
+  # Main OS disk: raw image placed on lvm
   disk {
     datastore_id = var.datastore_boot
-    file_id      = proxmox_virtual_environment_download_file.nixos_cloud.id
+    file_id      = data.proxmox_file.nixos_image.id
     interface    = "scsi0"
     iothread     = true
     cache        = "writethrough"
     discard      = "on"
     ssd          = true
     size         = var.boot_size
+    file_format  = "raw"
   }
 
   # HBA PCIe passthrough
@@ -92,13 +91,19 @@ resource "proxmox_virtual_environment_vm" "garage" {
     }
   }
 
-  # Cloud-Init
+  # Serial device for boot debugging (matches console=ttyS0 kernel param)
+  serial_device {
+    device = "socket"
+  }
+
+  # Cloud-Init on ide2 (standard Proxmox cloud-init location)
   initialization {
     datastore_id = var.datastore_boot
+    interface    = "ide2"
     ip_config {
       ipv4 {
         address = "${var.garage_ip}/24"
-        gateway = "10.0.20.1"
+        gateway = "10.0.20.2"
       }
     }
     dns {
