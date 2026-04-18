@@ -137,6 +137,17 @@
   };
   users.groups.garage = { };
 
+  # VLAN 30 interface for direct L2 connectivity to k8s
+  # Avoids MTU black hole on L3 switch inter-VLAN routing
+  networking.vlans."eth0.30" = {
+    id = 30;
+    interface = "eth0";
+  };
+
+  networking.interfaces."eth0.30" = {
+    ipv4.addresses = [{ address = "10.0.30.21"; prefixLength = 24; }];
+  };
+
   # Open firewall for S3 API and admin/metrics
   networking.firewall.allowedTCPPorts = [
     3900 # S3 API
