@@ -85,7 +85,9 @@ spec:
               provider Other \
               access_key_id $GARAGE_ACCESS_KEY_ID \
               secret_access_key $GARAGE_SECRET_ACCESS_KEY \
-              endpoint http://external-garage.garage.svc.cluster.local:80
+              endpoint http://external-garage.garage.svc.cluster.local:80 \
+              force_path_style true \
+              region garage
 
             echo "=== Syncing r2:ceph-rgw → garage:ceph-rgw ==="
             rclone sync r2:ceph-rgw garage:ceph-rgw \
@@ -149,7 +151,9 @@ spec:
               provider Other \
               access_key_id $GARAGE_ACCESS_KEY_ID \
               secret_access_key $GARAGE_SECRET_ACCESS_KEY \
-              endpoint http://external-garage.garage.svc.cluster.local:80
+              endpoint http://external-garage.garage.svc.cluster.local:80 \
+              force_path_style true \
+              region garage
 
             echo "=== Verification: r2:ceph-rgw vs garage:ceph-rgw ==="
             rclone check r2:ceph-rgw garage:ceph-rgw --one-way --checksum

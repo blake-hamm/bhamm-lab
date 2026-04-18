@@ -100,7 +100,9 @@ spec:
                 provider Other \
                 access_key_id $GARAGE_ACCESS_KEY_ID \
                 secret_access_key $GARAGE_SECRET_ACCESS_KEY \
-                endpoint http://external-garage.garage.svc.cluster.local:80
+                endpoint http://external-garage.garage.svc.cluster.local:80 \
+                force_path_style true \
+                region garage
 
               for bucket in $BUCKETS; do
                 echo "=== Syncing rgw:${bucket} → garage:ceph-rgw/${bucket}/ ==="
@@ -164,7 +166,9 @@ spec:
                 provider Other \
                 access_key_id $GARAGE_ACCESS_KEY_ID \
                 secret_access_key $GARAGE_SECRET_ACCESS_KEY \
-                endpoint http://external-garage.garage.svc.cluster.local:80
+                endpoint http://external-garage.garage.svc.cluster.local:80 \
+                force_path_style true \
+                region garage
 
               rclone config create r2 s3 \
                 provider Cloudflare \
@@ -227,7 +231,9 @@ spec:
                 provider Other \
                 access_key_id $GARAGE_ACCESS_KEY_ID \
                 secret_access_key $GARAGE_SECRET_ACCESS_KEY \
-                endpoint http://external-garage.garage.svc.cluster.local:80
+                endpoint http://external-garage.garage.svc.cluster.local:80 \
+                force_path_style true \
+                region garage
 
               rclone config create b2 b2 \
                 account $B2_APPLICATION_KEY_ID \
