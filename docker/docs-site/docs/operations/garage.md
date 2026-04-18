@@ -10,7 +10,10 @@ Garage is a lightweight, self-hosted S3-compatible object storage service runnin
   - 2x PNY CS900 2TB (`disk1`, `disk2`)
   - 1x Crucial CT1000BX500SSD1 1TB (`disk3`)
 - **Replication Factor:** 1 (single-node cluster, no redundancy)
-- **Network:** S3 API on port 3900, RPC on localhost:3901, Admin on localhost:3903
+- **Network:** Dual virtio NICs via Proxmox (VLAN tagging at hypervisor)
+  - `eth0` → VLAN 20 (Storage/Services) → `10.0.20.21`
+  - `eth1` → VLAN 30 (Kubernetes/Prometheus) → `10.0.30.21`
+  - S3 API on port 3900 (all interfaces), RPC on localhost:3901, Admin on `0.0.0.0:3903`
 
 ## Files
 

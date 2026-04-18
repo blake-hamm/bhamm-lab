@@ -21,7 +21,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "7"
 subsets:
   - addresses:
-      - ip: 10.0.20.21
+      - ip: 10.0.30.21
     ports:
       - name: s3
         port: 3900

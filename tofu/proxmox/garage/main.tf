@@ -49,11 +49,19 @@ resource "proxmox_virtual_environment_vm" "garage" {
     floating  = 0
   }
 
+  # NIC 1: VLAN 20 (Storage/Services)
   network_device {
     model   = "virtio"
     bridge  = var.net_bridge
-    trunks  = var.net_trunks
-    vlan_id = var.net_vlan_id
+    vlan_id = 20
+    mtu     = var.net_mtu
+  }
+
+  # NIC 2: VLAN 30 (Kubernetes/Prometheus)
+  network_device {
+    model   = "virtio"
+    bridge  = var.net_bridge
+    vlan_id = 30
     mtu     = var.net_mtu
   }
 

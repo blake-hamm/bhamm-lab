@@ -39,16 +39,6 @@ variable "net_bridge" {
   type    = string
 }
 
-variable "net_trunks" {
-  default = "1;20;30"
-  type    = string
-}
-
-variable "net_vlan_id" {
-  default = 20
-  type    = number
-}
-
 variable "net_mtu" {
   default = 9000
   type    = number

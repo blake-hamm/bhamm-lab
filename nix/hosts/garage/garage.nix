@@ -137,14 +137,9 @@
   };
   users.groups.garage = { };
 
-  # VLAN 30 interface for direct L2 connectivity to k8s
-  # Avoids MTU black hole on L3 switch inter-VLAN routing
-  networking.vlans."eth0.30" = {
-    id = 30;
-    interface = "eth0";
-  };
-
-  networking.interfaces."eth0.30" = {
+  # NIC 2: VLAN 30 (Kubernetes/Prometheus)
+  # Proxmox handles VLAN tagging transparently via a second virtio NIC.
+  networking.interfaces."eth1" = {
     ipv4.addresses = [{ address = "10.0.30.21"; prefixLength = 24; }];
   };
 
