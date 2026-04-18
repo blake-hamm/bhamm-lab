@@ -71,6 +71,8 @@ spec:
           sidecar:
             dashboards:
               enabled: true
+              defaultDatasourceEnabled: true
+              uid: Prometheus
               defaultFolderName: "General"
               label: grafana_dashboard
               labelValue: "1"
