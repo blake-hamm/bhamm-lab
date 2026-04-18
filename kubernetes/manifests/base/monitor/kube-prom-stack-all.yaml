@@ -224,7 +224,7 @@ spec:
               - job_name: 'garage'
                 static_configs:
                   - targets:
-                      - '10.0.20.21:3903'
+                      - '10.0.30.21:3903'
             ruleSelectorNilUsesHelmValues: false
             serviceMonitorSelectorNilUsesHelmValues: false
             podMonitorSelectorNilUsesHelmValues: false
