@@ -23,7 +23,7 @@ resource "proxmox_virtual_environment_vm" "garage" {
   name          = "garage"
   node_name     = var.node_name
   vm_id         = var.vm_id
-  tags          = ["tofu", "garage", "nixos"]
+  tags          = ["tofu", "garage", "nixos", "japan"]
   machine       = "q35"
   scsi_hardware = "virtio-scsi-single"
   bios          = "ovmf"
