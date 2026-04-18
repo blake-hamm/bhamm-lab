@@ -1,3 +1,0 @@
-k3s_agent:
-  node-label:
-    - "gpu=true"
