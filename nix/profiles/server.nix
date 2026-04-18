@@ -6,5 +6,6 @@
 
   cfg = {
     networking.backend = "networkd";
+    monitoring.enable = true;
   };
 }

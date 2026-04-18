@@ -24,7 +24,7 @@
         s3_region = "garage";
       };
       admin = {
-        api_bind_addr = "127.0.0.1:3903";
+        api_bind_addr = "0.0.0.0:3903";
       };
     };
   };
@@ -137,6 +137,9 @@
   };
   users.groups.garage = { };
 
-  # Open firewall for S3 API only (RPC and admin are localhost-only)
-  networking.firewall.allowedTCPPorts = [ 3900 ];
+  # Open firewall for S3 API and admin/metrics
+  networking.firewall.allowedTCPPorts = [
+    3900 # S3 API
+    3903 # Garage admin /metrics
+  ];
 }
