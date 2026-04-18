@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-garage
+  namespace: garage
+  annotations:
+    argocd.argoproj.io/sync-wave: "7"
+spec:
+  ports:
+    - name: s3
+      port: 80
+      targetPort: 3900
+      protocol: TCP
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: external-garage
+  namespace: garage
+  annotations:
+    argocd.argoproj.io/sync-wave: "7"
+subsets:
+  - addresses:
+      - ip: 10.0.20.21
+    ports:
+      - name: s3
+        port: 3900
+        protocol: TCP

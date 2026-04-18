@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: garage-common
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "14"
+spec:
+  destination:
+    namespace: garage
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    targetRevision: main
+    path: kubernetes/charts/common
+    helm:
+      valuesObject:
+        name: garage
+        externalSecrets:
+          enabled: true
+          secrets:
+            - secretKey: s3_access_key
+              remoteRef:
+                key: vault_secrets/core/garage
+                property: s3_access_key
+            - secretKey: s3_secret_key
+              remoteRef:
+                key: vault_secrets/core/garage
+                property: s3_secret_key
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
