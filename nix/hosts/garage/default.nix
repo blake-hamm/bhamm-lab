@@ -22,8 +22,15 @@
     };
   };
 
-  # Hand off network control from cloud-init to NixOS networkd
+  # Disable cloud-init after first boot (Proxmox metadata already applied)
+  services.cloud-init.enable = false;
   services.cloud-init.network.enable = false;
+
+  # Keep virtio NIC named eth0 (matches cfg.networking.static.interface)
+  networking.usePredictableInterfaceNames = false;
+
+  # QEMU guest agent for Proxmox IP reporting and shutdown integration
+  services.qemuGuest.enable = true;
 
   # The base profile enables systemd-boot by default, but this VM was
   # provisioned with GRUB (EFI, nodev). Keep GRUB to avoid bootloader conflicts.

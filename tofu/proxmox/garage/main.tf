@@ -31,6 +31,7 @@ resource "proxmox_virtual_environment_vm" "garage" {
   started         = true
   on_boot         = true
   stop_on_destroy = true
+  reboot          = true
 
   agent {
     enabled = true

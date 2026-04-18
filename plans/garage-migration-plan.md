@@ -88,48 +88,282 @@ colmena apply --on garage --impure
 
 ---
 
-## Phase 5: Post-Deployment Garage Setup
+## Phase 5: NixOS Garage Module Setup
 
-The NixOS module only configures the daemon. Buckets and keys must be created via `garage-manage`.
+Garage is configured declaratively via the NixOS `services.garage` module. Disks are formatted once via disko (manual apply). Secrets are injected via sops-nix templates and `environmentFile`.
 
-### 5.1 SSH to Garage VM
+### 5.1 Pre-Deploy: Generate Static Secrets
+
+Run locally and add to `secrets.enc.json` under `vault_secrets.core.garage`:
+```bash
+# RPC secret (hex, 32 bytes)
+openssl rand -hex 32
+
+# Admin token (base64, 32 bytes)
+openssl rand -base64 32
+```
+
+Structure in `secrets.enc.json`:
+```json
+"garage": {
+  "rpc_secret": "<hex-output>",
+  "admin_token": "<base64-output>",
+  "s3_access_key": "",
+  "s3_secret_key": ""
+}
+```
+
+### 5.2 Files Created / Modified
+
+#### `nix/hosts/garage/disko.nix` (NEW)
+
+Declares the three SSDs as XFS filesystems mounted at `/mnt/garage/disk{1,2,3}`:
+
+```nix
+{ inputs, ... }:
+{
+  imports = [ inputs.disko.nixosModules.disko ];
+
+  disko.devices = {
+    disk = {
+      garage-data-1 = {
+        device = "/dev/disk/by-id/ata-PNY_CS900_2TB_SSD_PNY225122122301009C8";
+        type = "disk";
+        content = {
+          type = "gpt";
+          partitions = {
+            data = {
+              size = "100%";
+              content = {
+                type = "filesystem";
+                format = "xfs";
+                mountpoint = "/mnt/garage/disk1";
+              };
+            };
+          };
+        };
+      };
+      garage-data-2 = {
+        device = "/dev/disk/by-id/ata-PNY_CS900_2TB_SSD_PNY225122122301009CB";
+        type = "disk";
+        content = {
+          type = "gpt";
+          partitions = {
+            data = {
+              size = "100%";
+              content = {
+                type = "filesystem";
+                format = "xfs";
+                mountpoint = "/mnt/garage/disk2";
+              };
+            };
+          };
+        };
+      };
+      garage-data-3 = {
+        device = "/dev/disk/by-id/ata-CT1000BX500SSD1_2308E6B0E700";
+        type = "disk";
+        content = {
+          type = "gpt";
+          partitions = {
+            data = {
+              size = "100%";
+              content = {
+                type = "filesystem";
+                format = "xfs";
+                mountpoint = "/mnt/garage/disk3";
+              };
+            };
+          };
+        };
+      };
+    };
+  };
+}
+```
+
+#### `nix/hosts/garage/default.nix` (MODIFIED)
+
+```nix
+{ config, pkgs, lib, ... }:
+{
+  system = "x86_64-linux";
+
+  deploy = {
+    tags = [ "garage" "server" ];
+    targetHost = "10.0.20.21";
+  };
+
+  imports = [
+    ./hardware-configuration.nix
+    ./disko.nix
+    ./../../profiles/server.nix
+  ];
+
+  cfg = {
+    networking = {
+      static = {
+        interface = "eth0";
+        address = "10.0.20.21";
+        gateway = "10.0.20.2";
+        nameservers = [ "10.0.9.2" ];
+      };
+    };
+  };
+
+  # Hand off network control from cloud-init to NixOS networkd
+  services.cloud-init.network.enable = false;
+
+  # Keep GRUB to avoid bootloader conflicts
+  boot.loader.systemd-boot.enable = false;
+  boot.loader.efi.canTouchEfiVariables = false;
+  boot.loader.grub = {
+    enable = true;
+    device = "nodev";
+    efiSupport = true;
+    efiInstallAsRemovable = true;
+  };
+
+  # Enable periodic TRIM for consumer SSD longevity
+  services.fstrim.enable = true;
+
+  # Garage S3 Object Storage
+  services.garage = {
+    enable = true;
+    package = pkgs.garage_2;
+    environmentFile = config.sops.templates."garage-env".path;
+
+    settings = {
+      replication_factor = 1;
+      # metadata_dir omitted -- defaults to /var/lib/garage/meta on NVMe root disk
+      data_dir = [
+        { path = "/mnt/garage/disk1"; capacity = "2T"; }
+        { path = "/mnt/garage/disk2"; capacity = "2T"; }
+        { path = "/mnt/garage/disk3"; capacity = "1T"; }
+      ];
+      # Single-node: bind RPC to localhost only
+      rpc_bind_addr = "127.0.0.1:3901";
+      s3_api = {
+        api_bind_addr = "[::]:3900";
+        s3_region = "garage";
+      };
+      admin = {
+        api_bind_addr = "127.0.0.1:3903";
+      };
+    };
+  };
+
+  # Sops secrets for garage
+  sops.secrets.garage_rpc_secret = {
+    key = "vault_secrets/core/garage/rpc_secret";
+    mode = "0400";
+  };
+
+  sops.secrets.garage_admin_token = {
+    key = "vault_secrets/core/garage/admin_token";
+    mode = "0400";
+  };
+
+  # Environment file template for garage service
+  # Garage supports GARAGE_*_FILE env vars since v0.8.5/v0.9.1
+  sops.templates."garage-env".content = ''
+    GARAGE_RPC_SECRET_FILE=${config.sops.secrets.garage_rpc_secret.path}
+    GARAGE_ADMIN_TOKEN_FILE=${config.sops.secrets.garage_admin_token.path}
+  '';
+
+  # Open firewall for S3 API only (RPC and admin are localhost-only)
+  networking.firewall.allowedTCPPorts = [ 3900 ];
+}
+```
+
+**Notes:**
+- **DynamicUser / Permissions:** The NixOS `services.garage` module sets `DynamicUser = true` by default, but it automatically adds non-default data directories to `ReadWritePaths`. This allows the service to write to `/mnt/garage/disk*` without manual permission management.
+- **Admin API:** Bound to `127.0.0.1`. Use `ssh -L 3903:localhost:3903 garage` for admin operations.
+- **TRIM:** `services.fstrim.enable = true` is enabled since these are consumer SSDs without DRAM caches.
+
+### 5.3 Deploy
+
+```bash
+colmena apply --on garage --impure
+```
+
+### 5.4 Format Disks with Disko (One-Time, Manual)
+
+**Do not automate this.** Run once after the NixOS config is deployed and the `disko.nix` module is in place:
+
 ```bash
 ssh -p 4185 bhamm@10.0.20.21
+sudo nix run github:nix-community/disko -- --mode disko /etc/nixos/disko.nix
 ```
 
-### 5.2 Create Layout, Bucket, and Key
+This will partition and format all three SSDs as XFS and mount them at `/mnt/garage/disk{1,2,3}`. Verify:
+
 ```bash
-# 1. Register the single node
-sudo garage-manage node id
-# Note the node ID output (e.g., e5e4d972-...)
+mount | grep garage
+lsblk
+```
+
+### 5.5 Verify Garage Service
+
+```bash
+ssh -p 4185 bhamm@10.0.20.21
+sudo systemctl status garage
+sudo garage node id
+```
+
+### 5.6 Create Layout, Bucket, and Key (Manual)
+
+```bash
+# 1. Get node ID
+sudo garage node id
 
 # 2. Assign node to zone
-sudo garage-manage zone assign <NODE_ID> japan --capacity 5T
+sudo garage zone assign <NODE_ID> japan --capacity 5T
 
 # 3. Create the bucket
-sudo garage-manage bucket create ceph-rgw
+sudo garage bucket create ceph-rgw
 
 # 4. Create the access key
-sudo garage-manage key create garage-key
-# Note the access key ID and secret, or specify them if supported by your Garage version
+sudo garage key create garage-key
 ```
 
-### 5.3 Sync Keys to Secrets
+### 5.7 Sync S3 Keys to Secrets
 
-Add the generated `access_key_id` and `secret_access_key` to `secrets.enc.json` under:
+Add the generated `access_key_id` and `secret_access_key` to `secrets.enc.json`:
 ```json
 "vault_secrets": {
   "core": {
     "garage": {
-      "s3_access_key": "...",
-      "s3_secret_key": "...",
       "rpc_secret": "...",
-      "admin_token": "..."
+      "admin_token": "...",
+      "s3_access_key": "<generated>",
+      "s3_secret_key": "<generated>"
     }
   }
 }
 ```
 Re-encrypt and commit.
+
+---
+
+## Phase 5.x: Monitoring & Observability (Post-Deploy)
+
+> **Note:** Not a blocker for initial deployment, but should be added shortly after cutover.
+
+Garage exposes Prometheus metrics at `http://127.0.0.1:3903/metrics` (requires `metrics_token` if configured). Recommended monitoring:
+
+- **Disk space:** Alert when `/mnt/garage/disk*` exceeds 85% capacity
+- **SMART health:** Install `smartmontools` and schedule periodic `smartctl` checks on the physical SSDs
+- **Service health:** Monitor `systemctl status garage` and alert on failure
+- **Backup job failures:** The Argo CronWorkflow can emit metrics; alert if the backup fails
+- **Garage-specific metrics:** `garage_api_request_duration_seconds`, `garage_block_manager_storage_used_bytes`
+
+Quick SMART check (add to a systemd timer or cron):
+```bash
+sudo smartctl -H /dev/disk/by-id/ata-PNY_CS900_2TB_SSD_PNY225122122301009C8
+sudo smartctl -H /dev/disk/by-id/ata-PNY_CS900_2TB_SSD_PNY225122122301009CB
+sudo smartctl -H /dev/disk/by-id/ata-CT1000BX500SSD1_2308E6B0E700
+```
 
 ---
 
@@ -394,7 +628,7 @@ Modify the templates as follows:
 ## Execution Checklist
 
 - [x] Phase 0: Discover HBA ID and disk `/dev/disk/by-id/` paths
-- [ ] Phase 0: Generate Garage secrets and add to `secrets.enc.json` (deferred)
+- [ ] Phase 0: Generate Garage `rpc_secret` and `admin_token`, add to `secrets.enc.json`
 - [x] Phase 1: Update `ansible/inventory/host_vars/japan.yml` with passthrough vars
 - [x] Phase 1: Run Ansible on `japan` and reboot
 - [x] Phase 2: Migrate physical SSDs from `method` to `japan`
@@ -402,7 +636,11 @@ Modify the templates as follows:
 - [x] Phase 3: Verify VM boots, cloud-init applies network, SSH works
 - [x] Phase 4: Create `nix/hosts/garage/` configuration
 - [x] Phase 4: Deploy with `colmena apply --on garage`
-- [ ] Phase 5: Run `garage-manage` commands to create bucket and key
+- [ ] Phase 5: Create `nix/hosts/garage/disko.nix` with XFS disks
+- [ ] Phase 5: Update `nix/hosts/garage/default.nix` with `services.garage` module
+- [ ] Phase 5: Deploy updated config with `colmena apply --on garage --impure`
+- [ ] Phase 5: Run disko manually to format and mount disks
+- [ ] Phase 5: Run `garage` CLI to assign zone, create bucket and key
 - [ ] Phase 5: Update `secrets.enc.json` with generated Garage S3 credentials
 - [ ] Phase 6: Create `kubernetes/manifests/base/garage/` manifests
 - [ ] Phase 6: Update ArgoCD `core-green.yaml` to include garage manifests
