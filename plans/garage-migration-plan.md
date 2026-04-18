@@ -66,95 +66,14 @@ Garage service deployed with 3 data disks, sops-nix secrets, `noauto`+`automount
 ---
 
 ## Phase 6: Kubernetes Manifests
+**STATUS: COMPLETE**
 
-### 6.1 New Directory: `kubernetes/manifests/base/garage/`
+Garage namespace, external Service/Endpoints, and ExternalSecret deployed via the common Helm chart. Auto-synced by the existing `${environment}-base` ArgoCD Application — no manual ArgoCD registration needed.
 
-#### `kubernetes/manifests/base/garage/ns-all.yaml`
-```yaml
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: garage
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
-```
-
-#### `kubernetes/manifests/base/garage/endpoints-all.yaml`
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: external-garage
-  namespace: garage
-  annotations:
-    argocd.argoproj.io/sync-wave: "7"
-spec:
-  ports:
-    - name: s3
-      port: 80
-      targetPort: 3900
-      protocol: TCP
----
-apiVersion: v1
-kind: Endpoints
-metadata:
-  name: external-garage
-  namespace: garage
-  annotations:
-    argocd.argoproj.io/sync-wave: "7"
-subsets:
-  - addresses:
-      - ip: 10.0.20.21
-    ports:
-      - name: s3
-        port: 3900
-        protocol: TCP
-```
-
-#### `kubernetes/manifests/base/garage/common-green.yaml`
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: garage-common
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "14"
-spec:
-  destination:
-    namespace: garage
-    server: https://kubernetes.default.svc
-  project: default
-  source:
-    repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: main
-    path: kubernetes/charts/common
-    helm:
-      valuesObject:
-        name: garage
-        externalSecrets:
-          enabled: true
-          secrets:
-            - secretKey: s3_access_key
-              remoteRef:
-                key: vault_secrets/core/garage
-                property: s3_access_key
-            - secretKey: s3_secret_key
-              remoteRef:
-                key: vault_secrets/core/garage
-                property: s3_secret_key
-  syncPolicy:
-    syncOptions:
-      - ApplyOutOfSyncOnly=true
-      - CreateNamespace=true
-    automated:
-      prune: true
-      selfHeal: true
-```
-
-### 6.2 No ArgoCD Application Update Needed
-
-The `${environment}-base` ArgoCD Application deployed by `tofu/kubernetes/argocd.tf` already watches `kubernetes/manifests/base/` with `recurse: true` and picks up all `**all.yaml` and `**green.yaml` files automatically. No additional configuration is required.
+**Key files:**
+- `kubernetes/manifests/base/garage/ns-all.yaml` — Namespace
+- `kubernetes/manifests/base/garage/endpoints-all.yaml` — Service + Endpoints (`10.0.20.21:3900`)
+- `kubernetes/manifests/base/garage/common-green.yaml` — Common chart Application for ExternalSecret
 
 ---
 
