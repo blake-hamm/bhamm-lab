@@ -21,8 +21,8 @@ spec:
         steps:
           - - name: list-buckets
               template: list-buckets
-          - - name: rclone-sync-to-minio
-              template: rclone-sync-to-minio
+          - - name: rclone-sync-to-garage
+              template: rclone-sync-to-garage
               arguments:
                 parameters:
                   - name: buckets
@@ -52,7 +52,7 @@ spec:
                 secret_access_key $RGW_SECRET_KEY \
                 endpoint http://external-rgw.ceph.svc.cluster.local:80 >&2
               rclone lsd rgw: --fast-list | awk '{print $NF}' | tr '\n' ' '
-      - name: rclone-sync-to-minio
+      - name: rclone-sync-to-garage
         inputs:
           parameters:
             - name: buckets
@@ -74,21 +74,16 @@ spec:
                 secretKeyRef:
                   name: ceph-external-secret
                   key: s3_secret_key
-            - name: AWS_ACCESS_KEY_ID
+            - name: GARAGE_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
                   name: ceph-external-secret
-                  key: AWS_ACCESS_KEY_ID
-            - name: AWS_SECRET_ACCESS_KEY
+                  key: garage_s3_access_key
+            - name: GARAGE_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
                   name: ceph-external-secret
-                  key: AWS_SECRET_ACCESS_KEY
-            - name: AWS_ENDPOINT
-              valueFrom:
-                secretKeyRef:
-                  name: ceph-external-secret
-                  key: AWS_ENDPOINT
+                  key: garage_s3_secret_key
             - name: BUCKETS
               value: "{{inputs.parameters.buckets}}"
           command: ["/bin/sh", "-c"]
@@ -101,15 +96,15 @@ spec:
                 secret_access_key $RGW_SECRET_KEY \
                 endpoint http://external-rgw.ceph.svc.cluster.local:80
 
-              rclone config create minio s3 \
-                provider Minio \
-                access_key_id $AWS_ACCESS_KEY_ID \
-                secret_access_key $AWS_SECRET_ACCESS_KEY \
-                endpoint $AWS_ENDPOINT
+              rclone config create garage s3 \
+                provider Other \
+                access_key_id $GARAGE_ACCESS_KEY_ID \
+                secret_access_key $GARAGE_SECRET_ACCESS_KEY \
+                endpoint http://external-garage.garage.svc.cluster.local:80
 
               for bucket in $BUCKETS; do
-                echo "=== Syncing rgw:${bucket} → minio:ceph-rgw/${bucket}/ ==="
-                rclone sync "rgw:${bucket}" "minio:ceph-rgw/${bucket}" \
+                echo "=== Syncing rgw:${bucket} → garage:ceph-rgw/${bucket}/ ==="
+                rclone sync "rgw:${bucket}" "garage:ceph-rgw/${bucket}" \
                   --progress \
                   --fast-list \
                   --checksum \
@@ -125,8 +120,8 @@ spec:
                   --stats=30s
               done
 
-              echo "=== Verification: MinIO bucket contents ==="
-              rclone ls minio:ceph-rgw
+              echo "=== Verification: Garage bucket contents ==="
+              rclone ls garage:ceph-rgw
       - name: rclone-sync-to-r2
         container:
           image: rclone/rclone
@@ -136,21 +131,16 @@ spec:
             limits:
               memory: 4Gi
           env:
-            - name: AWS_ACCESS_KEY_ID
+            - name: GARAGE_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
                   name: ceph-external-secret
-                  key: AWS_ACCESS_KEY_ID
-            - name: AWS_SECRET_ACCESS_KEY
+                  key: garage_s3_access_key
+            - name: GARAGE_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
                   name: ceph-external-secret
-                  key: AWS_SECRET_ACCESS_KEY
-            - name: AWS_ENDPOINT
-              valueFrom:
-                secretKeyRef:
-                  name: ceph-external-secret
-                  key: AWS_ENDPOINT
+                  key: garage_s3_secret_key
             - name: R2_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
@@ -170,11 +160,11 @@ spec:
           args:
             - |-
               set -ex
-              rclone config create minio s3 \
-                provider Minio \
-                access_key_id $AWS_ACCESS_KEY_ID \
-                secret_access_key $AWS_SECRET_ACCESS_KEY \
-                endpoint $AWS_ENDPOINT
+              rclone config create garage s3 \
+                provider Other \
+                access_key_id $GARAGE_ACCESS_KEY_ID \
+                secret_access_key $GARAGE_SECRET_ACCESS_KEY \
+                endpoint http://external-garage.garage.svc.cluster.local:80
 
               rclone config create r2 s3 \
                 provider Cloudflare \
@@ -182,8 +172,8 @@ spec:
                 secret_access_key $R2_SECRET_ACCESS_KEY \
                 endpoint $R2_ENDPOINT
 
-              echo "=== Syncing minio:ceph-rgw → r2:ceph-rgw ==="
-              rclone sync minio:ceph-rgw r2:ceph-rgw \
+              echo "=== Syncing garage:ceph-rgw → r2:ceph-rgw ==="
+              rclone sync garage:ceph-rgw r2:ceph-rgw \
                 --progress \
                 --fast-list \
                 --checksum \
@@ -199,7 +189,7 @@ spec:
                 --stats=30s
 
               echo "=== Verification: Checking sync integrity ==="
-              rclone check minio:ceph-rgw r2:ceph-rgw --one-way --checksum
+              rclone check garage:ceph-rgw r2:ceph-rgw --one-way --checksum
       - name: rclone-sync-to-b2
         container:
           image: rclone/rclone
@@ -209,21 +199,16 @@ spec:
             limits:
               memory: 4Gi
           env:
-            - name: AWS_ACCESS_KEY_ID
+            - name: GARAGE_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
                   name: ceph-external-secret
-                  key: AWS_ACCESS_KEY_ID
-            - name: AWS_SECRET_ACCESS_KEY
+                  key: garage_s3_access_key
+            - name: GARAGE_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
                   name: ceph-external-secret
-                  key: AWS_SECRET_ACCESS_KEY
-            - name: AWS_ENDPOINT
-              valueFrom:
-                secretKeyRef:
-                  name: ceph-external-secret
-                  key: AWS_ENDPOINT
+                  key: garage_s3_secret_key
             - name: B2_APPLICATION_KEY_ID
               valueFrom:
                 secretKeyRef:
@@ -238,18 +223,18 @@ spec:
           args:
             - |-
               set -ex
-              rclone config create minio s3 \
-                provider Minio \
-                access_key_id $AWS_ACCESS_KEY_ID \
-                secret_access_key $AWS_SECRET_ACCESS_KEY \
-                endpoint $AWS_ENDPOINT
+              rclone config create garage s3 \
+                provider Other \
+                access_key_id $GARAGE_ACCESS_KEY_ID \
+                secret_access_key $GARAGE_SECRET_ACCESS_KEY \
+                endpoint http://external-garage.garage.svc.cluster.local:80
 
               rclone config create b2 b2 \
                 account $B2_APPLICATION_KEY_ID \
                 key $B2_APPLICATION_KEY
 
-              echo "=== Syncing minio:ceph-rgw → b2:bhamm-lab-ceph-rgw ==="
-              rclone sync minio:ceph-rgw b2:bhamm-lab-ceph-rgw \
+              echo "=== Syncing garage:ceph-rgw → b2:bhamm-lab-ceph-rgw ==="
+              rclone sync garage:ceph-rgw b2:bhamm-lab-ceph-rgw \
                 --progress \
                 --fast-list \
                 --check-first \
@@ -261,4 +246,4 @@ spec:
                 --stats=30s
 
               echo "=== Verification: Checking sync integrity ==="
-              rclone check minio:ceph-rgw b2:bhamm-lab-ceph-rgw --one-way
+              rclone check garage:ceph-rgw b2:bhamm-lab-ceph-rgw --one-way
