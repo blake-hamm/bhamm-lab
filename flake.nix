@@ -92,11 +92,12 @@
             };
           };
 
-          # Generic Proxmox image (reusable for any NixOS VM on Proxmox)
+          # Generic NixOS raw image for Proxmox (direct download approach)
           proxmox-image = nixpkgs.lib.nixosSystem {
             system = shared.system;
             modules = [
               (import ./nix/hosts/proxmox-image)
+              ./nix/hosts/proxmox-image/img-build.nix
             ];
             specialArgs = {
               host = "proxmox-image";
