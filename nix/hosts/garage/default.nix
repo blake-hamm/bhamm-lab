@@ -8,6 +8,7 @@
 
   imports = [
     ./hardware-configuration.nix
+    ./garage.nix
     ./../../profiles/server.nix
   ];
 
@@ -42,4 +43,7 @@
     efiSupport = true;
     efiInstallAsRemovable = true;
   };
+
+  # Enable periodic TRIM for consumer SSD longevity
+  services.fstrim.enable = true;
 }
