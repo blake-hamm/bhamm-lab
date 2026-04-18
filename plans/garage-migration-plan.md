@@ -6,6 +6,7 @@ Decommission the TrueNAS VM (currently on Proxmox node `method`) and migrate its
 ## Target Architecture
 - **Hostname:** `garage`
 - **IP:** `10.0.20.21` (VLAN 20)
+- **Gateway:** `10.0.20.2`
 - **Node:** `japan`
 - **IaC Pipeline:** OpenTofu (`tofu/proxmox/garage`) → Cloud-Init → Colmena (`nix/hosts/garage`)
 - **Storage:** Garage multi-HDD with zero replication (`replication_factor = 1`)
@@ -17,601 +18,72 @@ Decommission the TrueNAS VM (currently on Proxmox node `method`) and migrate its
 ## Phase 0: Discovery & Pre-Requisites
 **STATUS: COMPLETE** (secrets deferred until after VM is stable)
 
-### 0.1 Discover HBA PCIe ID
-Discovered on `japan`:
-```
-03:00.0 Serial Attached SCSI controller [0107]: Broadcom / LSI SAS3008 PCI-Express Fusion-MPT SAS-3 [1000:0097] (rev 02)
-```
-**Vendor:device ID for Ansible:** `1000:0097`
+### Hardware Discovered
+- **HBA PCIe ID:** `1000:0097` (Broadcom / LSI SAS3008) on IOMMU group 16
+- **Disk `/dev/disk/by-id/` paths:**
+  | Disk | by-id | Size |
+  |---|---|---|
+  | 1 | `ata-PNY_CS900_2TB_SSD_PNY225122122301009C8` | 2TB |
+  | 2 | `ata-PNY_CS900_2TB_SSD_PNY225122122301009CB` | 2TB |
+  | 3 | `ata-CT1000BX500SSD1_2308E6B0E700` | 1TB |
 
-### 0.2 Discover Disk `/dev/disk/by-id/` Paths
-Discovered on `japan`:
-| Disk | by-id | Size |
-|---|---|---|
-| 1 | `ata-PNY_CS900_2TB_SSD_PNY225122122301009C8` | 2TB |
-| 2 | `ata-PNY_CS900_2TB_SSD_PNY225122122301009CB` | 2TB |
-| 3 | `ata-CT1000BX500SSD1_2308E6B0E700` | 1TB |
-
-### 0.3 Secrets to Generate
-**DEFERRED** — The following secrets will be added to `secrets.enc.json` (under `vault_secrets.core.garage`) after the VM is installed:
-- `GARAGE_ACCESS_KEY_ID`
-- `GARAGE_SECRET_ACCESS_KEY`
-- `GARAGE_ADMIN_TOKEN`
-- `GARAGE_RPC_SECRET` (32-byte hex, e.g. `openssl rand -hex 32`)
+### Secrets to Generate (Deferred to Phase 5)
+Add to `vault_secrets.core.garage` in `secrets.enc.json`:
+- `s3_access_key` / `s3_secret_key` (generated via `garage-manage key create`)
+- `rpc_secret` (`openssl rand -hex 32`)
+- `admin_token`
 
 ---
 
 ## Phase 1: Ansible — Enable PCIe Passthrough on Japan
 **STATUS: COMPLETE**
 
-### 1.1 Modify `ansible/inventory/host_vars/japan.yml`
-Added:
-```yaml
-pve_pcie_passthrough_enabled: true
-pve_iommu_passthrough_mode: true
-pve_iommu_unsafe_interrupts: false
-pve_pcie_ovmf_enabled: false
-pve_pci_device_ids:
-  - id: "1000:0097"  # Broadcom / LSI SAS3008
-pve_vfio_blacklist_drivers:
-  - name: "mpt3sas"
-```
-
-### 1.2 Run Ansible
-```bash
-ansible-playbook -i ansible/inventory/hosts ansible/debian.yml --limit japan
-```
-
-### 1.3 Reboot Japan
-```bash
-ssh root@10.0.20.15 -p 4185 reboot
-```
-**Verified after reboot:**
-- `dmesg | grep -i vfio` shows `vfio_pci: add [1000:0097...]`
-- IOMMU group 16 contains `0000:03:00.0`
+Applied passthrough config to `ansible/inventory/host_vars/japan.yml`, ran the playbook, rebooted, and verified `vfio_pci` claimed the HBA (`0000:03:00.0`).
 
 ---
 
-## Phase 2: Physical Migration
+## Phase 3: Raw Image Build + VM Provisioning
 **STATUS: COMPLETE**
 
-1. **Power off the TrueNAS VM** (VM ID 199 on `method`).
-2. **Physically remove** the three SSDs from the `method` backplane.
-3. **Install** the three SSDs into the backplane of `japan`.
-4. **Verified disk visibility** on `japan`:
-   ```bash
-   ls -l /dev/disk/by-id/
-   ```
-   Disks are visible as `sda`, `sdb`, `sdc` (plus existing Ceph OSDs).
+The original template/clone approach was abandoned after multiple failures (disk interface mismatches, cross-node storage migration, EFI config issues). The **raw image direct-download** approach proved simpler and more reliable.
 
----
+### Key Files
+- **`nix/hosts/proxmox-image/default.nix`** — Generic image config (GRUB EFI `nodev`, `networkd`, `virtio_scsi`/`sd_mod` initrd, cloud-init, qemu-guest-agent)
+- **`nix/hosts/proxmox-image/img-build.nix`** — `make-disk-image.nix` invocation producing a raw EFI image
+- **`flake.nix`** — `proxmox-image` nixosConfiguration
+- **`tofu/proxmox/garage/main.tf`** — VM definition using `data.proxmox_file` to reference `nixos.img` from Proxmox storage (cephfs)
 
-## Phase 3: Build Generic NixOS Raw Image + Provision VM
-**STATUS: REVISED** — After multiple failed attempts with the `.vma.zst` template/clone approach (disk interface mismatches, cross-node storage migration errors, EFI configuration issues), we are switching to a **raw image direct-download approach**. This is cleaner for a single VM and avoids Proxmox template/clone complexities.
-
-### Lessons Learned (Template/Clone Approach)
-1. NixOS `proxmox-image.nix` builds images with `virtio0` disk interface and `ide2` cloud-init — overriding these in Terraform causes boot failures.
-2. Proxmox cannot clone from shared storage (`osd`) to local storage (`lvm`) across nodes.
-3. The `clone` block + explicit `disk` block causes disk interface conflicts.
-4. EFI disks must be configured on the template before cloning; otherwise `bios = "ovmf"` fails.
-
-### Why Raw Image is Better for This Use Case
-- **No template lifecycle:** Download image directly to Proxmox, create VM in one step
-- **No clone semantics:** Avoid disk interface mismatches and storage migration issues
-- **Declarative:** Image source is a URL/file in Terraform config
-- **Simpler for single VM:** Template benefits (fast cloning) are irrelevant when provisioning one VM
-
-### Architecture
-```
-┌─────────────────┐     ┌──────────────────────────┐     ┌──────────────────┐
-│  NixOS Build    │────▶│  Raw Image               │────▶│  Proxmox `local` │
-│  (make-disk-image)│    │  (NFS/HTTP/Local)        │     │  (staging store) │
-└─────────────────┘     └──────────────────────────┘     └──────────────────┘
-                                                                  │
-                                                                  ▼
-                                              ┌───────────────────────────┐
-                                              │  OpenTofu creates VM on   │
-                                              │  `lvm` with file_id ref   │
-                                              │  + cloud-init drive       │
-                                              └───────────────────────────┘
-```
-
-### Critical Fixes from Code Review
-
-The following corrections were identified during review and are incorporated below:
-
-1. **GRUB device = `nodev`** (not `/dev/vda`): For pure EFI boot, GRUB should not install to the MBR.
-2. **`networking.useNetworkd = true`**: Required so cloud-init's network configuration is actually applied by systemd-networkd.
-3. **Initrd modules include `virtio_scsi` + `sd_mod`**: The OpenTofu config uses `interface = "scsi0"`, so the initrd must load the SCSI drivers. `virtio_blk` is removed since we use SCSI, not virtio-blk.
-4. **`flake.nix` uses a separate module file**: The `make-disk-image.nix` call must receive `config`, `pkgs`, `lib`, and `modulesPath` via proper module arguments, not from the flake's `let` block.
-5. **Serial device for debugging**: Added to the OpenTofu config to match `console=ttyS0` kernel parameter, enabling boot log viewing via Proxmox console.
-
-### 3.0 Refactor NixOS Profiles for Reusability
-**STATUS: COMPLETE**
-
-Already done in previous iterations:
-- ✅ `nix/modules/core/base.nix` — universal core modules
-- ✅ `nix/profiles/base.nix` — imports base module
-- ✅ `nix/profiles/server.nix` — refactored to import base + full modules
-- ✅ `nix/hosts/iso/default.nix` — fixed to use `base.nix`
-
-### 3.1 Build the Generic NixOS Raw Image
-
-Create a NixOS configuration that builds a raw image (instead of `.vma.zst`). The image must include:
-- **UEFI boot** (`partitionTableType = "efi"`)
-- **Cloud-init** for Proxmox metadata (IP, SSH keys, hostname)
-- **QEMU guest agent** for Proxmox integration
-- **SSHD** for remote access
-- **Grow partition** to resize disk on first boot
-- **GRUB** bootloader (EFI-compatible)
-
-#### `nix/hosts/proxmox-image/default.nix`
-```nix
-{ config, lib, pkgs, modulesPath, shared, ... }:
-{
-  imports = [
-    (modulesPath + "/installer/scan/not-detected.nix")
-    ../../profiles/base.nix
-  ];
-
-  # Boot: GRUB with EFI support (nodev for pure EFI, no MBR)
-  boot.loader.grub = {
-    enable = true;
-    efiSupport = true;
-    efiInstallAsRemovable = true;
-    device = "nodev";
-  };
-
-  # Ensure systemd-networkd is active so cloud-init network config is applied
-  networking.useNetworkd = true;
-
-  # Cloud-init for Proxmox metadata (IP, SSH keys, hostname)
-  services.cloud-init = {
-    enable = true;
-    network.enable = true;
-  };
-
-  # QEMU guest agent for Proxmox integrations
-  services.qemuGuest.enable = true;
-
-  # SSH on port 22 for initial provisioning (cloud-init, emergency access)
-  services.openssh = {
-    enable = true;
-    ports = [ 22 ];
-    settings.PermitRootLogin = lib.mkDefault "prohibit-password";
-  };
-
-  # Inject our authorized keys into the bhamm user
-  users.users.${shared.username}.openssh.authorizedKeys.keys = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKsS2H4frdi7AvzkGMPMRaQ+B46Af5oaRFtNJY3uCHt blake.j.hamm@gmail.com",
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEn6e5VeOkY4WcW0wPmz8uWj+yd+kulj7Ls7upTdKFUO gitea@bhamm-lab.com"
-  ];
-
-  # Allow sudo without password for wheel during initial bootstrap
-  security.sudo.wheelNeedsPassword = lib.mkDefault false;
-
-  # Filesystems: ext4 with auto-resize
-  fileSystems."/" = {
-    device = "/dev/disk/by-label/nixos";
-    fsType = "ext4";
-    autoResize = true;
-  };
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-label/ESP";
-    fsType = "vfat";
-  };
-
-  boot.growPartition = true;
-  boot.kernelParams = [ "console=ttyS0" ];
-  # virtio_scsi + sd_mod required for scsi0 disk interface in Proxmox
-  boot.initrd.availableKernelModules = [ "uas" "virtio_pci" "virtio_scsi" "sd_mod" ];
-
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-  system.stateVersion = shared.nixVersion;
-}
-```
-
-#### `flake.nix` addition
-
-Add a new module file that defines the raw image build, then reference it in `nixosConfigurations`:
-
-**`nix/hosts/proxmox-image/img-build.nix`:**
-```nix
-{ config, pkgs, lib, modulesPath, ... }:
-{
-  system.build.image = import "${modulesPath}/../lib/make-disk-image.nix" {
-    inherit lib config pkgs;
-    format = "raw";
-    partitionTableType = "efi";
-    diskSize = "auto";
-    additionalSpace = "512M";
-    bootSize = "256M";
-  };
-}
-```
-
-**`flake.nix`:**
-```nix
-proxmox-image = nixpkgs.lib.nixosSystem {
-  system = shared.system;
-  modules = [
-    (import ./nix/hosts/proxmox-image)
-    ./nix/hosts/proxmox-image/img-build.nix
-  ];
-  specialArgs = {
-    host = "proxmox-image";
-    inherit self inputs shared;
-    inherit pkgs-unstable;
-  };
-};
-```
-
-#### Build the image
+### Image Staging
+The image was built and copied to Proxmox's `cephfs` datastore:
 ```bash
 nix build .#nixosConfigurations.proxmox-image.config.system.build.image
+# Image placed on Proxmox node at /var/lib/vz/template/iso/nixos.img
 ```
-
-The build produces a file like `nixos.img` in the result directory.
-
-#### Stage the image for Proxmox
-
-The image must be placed on the Proxmox node's `local` datastore (which maps to `/var/lib/vz/template/iso/` for `iso` content type). Proxmox's `iso` content type indexes `.img` files natively.
-
-```bash
-scp ./result/nixos.img root@10.0.20.15:/var/lib/vz/template/iso/
-```
-
-**Note:** Do not use `.qcow2` extension — Proxmox's `iso` content type only indexes `.iso` and `.img` files. The NixOS build produces `nixos.img` natively when `format = "raw"`.
-
-### 3.2 OpenTofu VM Configuration (Raw Image Direct Download)
-
-#### `tofu/proxmox/garage/main.tf`
-```hcl
-provider "proxmox" {
-  endpoint = var.proxmox_url
-  insecure = true
-  ssh {
-    agent    = true
-    username = "root"
-    node {
-      name    = "japan"
-      address = "10.0.20.15"
-      port    = "4185"
-    }
-  }
-}
-
-# Reference the already-copied NixOS image on Proxmox storage
-data "proxmox_virtual_environment_file" "nixos_image" {
-  content_type = "iso"
-  datastore_id = "local"
-  node_name    = var.node_name
-  file_name    = "nixos.img"
-}
-
-resource "proxmox_virtual_environment_vm" "garage" {
-  name          = "garage"
-  node_name     = var.node_name
-  vm_id         = var.vm_id
-  tags          = ["tofu", "garage", "nixos"]
-  machine       = "q35"
-  scsi_hardware = "virtio-scsi-single"
-  bios          = "ovmf"
-
-  started         = true
-  on_boot         = true
-  stop_on_destroy = true
-
-  agent {
-    enabled = true
-    trim    = true
-    type    = "virtio"
-  }
-
-  cpu {
-    cores = var.cpu_cores
-    type  = "host"
-  }
-
-  memory {
-    dedicated = var.memory
-    floating  = 0
-  }
-
-  network_device {
-    model   = "virtio"
-    bridge  = var.net_bridge
-    trunks  = var.net_trunks
-    vlan_id = var.net_vlan_id
-    mtu     = var.net_mtu
-  }
-
-  boot_order = ["scsi0"]
-
-  operating_system {
-    type = "l26"
-  }
-
-  efi_disk {
-    datastore_id = var.datastore_boot
-    type         = "4m"
-  }
-
-  # Main OS disk: raw image placed on lvm
-  disk {
-    datastore_id = var.datastore_boot
-    file_id      = data.proxmox_virtual_environment_file.nixos_image.id
-    interface    = "scsi0"
-    iothread     = true
-    cache        = "writethrough"
-    discard      = "on"
-    ssd          = true
-    size         = var.boot_size
-    file_format  = "raw"
-  }
-
-  # HBA PCIe passthrough
-  dynamic "hostpci" {
-    for_each = var.hba_pcie_ids
-    content {
-      device = "hostpci${hostpci.key}"
-      id     = hostpci.value
-      pcie   = true
-      rombar = true
-    }
-  }
-
-  # Serial device for boot debugging (matches console=ttyS0 kernel param)
-  serial_device {
-    device = "socket"
-  }
-
-  # Cloud-Init on ide2 (standard Proxmox cloud-init location)
-  initialization {
-    datastore_id = var.datastore_boot
-    interface    = "ide2"
-    ip_config {
-      ipv4 {
-        address = "${var.garage_ip}/24"
-        gateway = "10.0.20.1"
-      }
-    }
-    dns {
-      domain  = ""
-      servers = ["10.0.9.2"]
-    }
-    user_account {
-      username = var.initial_user
-      keys     = var.ssh_keys
-    }
-  }
-}
-```
-
-#### `tofu/proxmox/garage/variables.tf`
-```hcl
-variable "proxmox_url" {
-  default = "https://10.0.20.11:8006" # Use method for API auth; cluster proxies to japan
-  type    = string
-}
-
-variable "node_name" {
-  default = "japan"
-  type    = string
-}
-
-variable "datastore_boot" {
-  description = "Datastore for the VM boot disk"
-  default     = "lvm"
-  type        = string
-}
-
-variable "vm_id" {
-  default = 300
-  type    = number
-}
-
-variable "boot_size" {
-  default = 20
-  type    = number
-}
-
-variable "cpu_cores" {
-  default = 4
-  type    = number
-}
-
-variable "memory" {
-  default = 10240
-  type    = number
-}
-
-variable "net_bridge" {
-  default = "vmbr0"
-  type    = string
-}
-
-variable "net_trunks" {
-  default = "1;20;30"
-  type    = string
-}
-
-variable "net_vlan_id" {
-  default = 20
-  type    = number
-}
-
-variable "net_mtu" {
-  default = 9000
-  type    = number
-}
-
-variable "garage_ip" {
-  default = "10.0.20.21"
-  type    = string
-}
-
-variable "hba_pcie_ids" {
-  description = "PCIe slot addresses for the HBA controller"
-  type        = list(string)
-  default     = ["0000:03:00.0"] # Discovered in Phase 0
-}
-
-variable "initial_user" {
-  description = "Username for cloud-init injection"
-  default     = "bhamm"
-  type        = string
-}
-
-variable "ssh_keys" {
-  type = list(string)
-  default = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKsS2H4frdi7AvzkGMPMRaQ+B46Af5oaRFtNJY3uCHt blake.j.hamm@gmail.com"
-  ]
-}
-```
-
-#### `tofu/proxmox/garage/providers.tf`
-```hcl
-terraform {
-  required_version = ">= 1.7"
-  required_providers {
-    proxmox = {
-      source  = "bpg/proxmox"
-      version = "0.73.0"
-    }
-  }
-}
-```
-
-#### `tofu/proxmox/garage/backend.tf`
-```hcl
-terraform {
-  backend "local" {
-    path = "terraform.tfstate"
-  }
-}
-```
-
-### 3.3 Apply OpenTofu
-
-**Prerequisite:** The image must already be on the Proxmox node at `/var/lib/vz/template/iso/nixos.img`.
-
-```bash
-cd tofu/proxmox/garage
-tofu init
-tofu plan
-tofu apply
-```
-
-After `tofu apply`, the VM will boot directly into NixOS. Cloud-init will apply the static IP and inject SSH keys. You can then SSH in as `bhamm@10.0.20.21`.
-
-### 3.4 Verify the VM
-
-```bash
-# Check VM status on Proxmox
-ssh root@10.0.20.15 "qm status 300"
-
-# SSH into the VM
-ssh -p 4185 bhamm@10.0.20.21
-
-# Verify cloud-init worked
-cat /var/log/cloud-init.log | grep -i "success"
-
-# Verify qemu-guest-agent
-systemctl status qemu-guest-agent
-
-# Verify network
-ip addr show
-ip route show
-```
-
-### 3.5 Document the Process
-
-Add a guide to the docs-site so future Proxmox NixOS VMs follow the same pattern:
-
-#### `docker/docs-site/docs/operations/proxmox-images.md`
-Outline:
-- Why build a custom image (no official NixOS cloud images for Proxmox)
-- Two approaches: `.vma.zst` templates vs raw image direct download
-- How to build the raw image from the flake
-- How to copy the image to Proxmox storage
-- How to reference the image in OpenTofu via data source
-- How cloud-init works with NixOS on Proxmox
-- Lessons learned and gotchas (disk interfaces, cloud-init device, EFI)
-- Link to relevant NixOS wiki pages
 
 ---
 
 ## Phase 4: Colmena — NixOS Configuration
-**STATUS: PENDING** — Strategy: minimal config first (no Garage, no secrets), verify Colmena works, then layer in Garage.
+**STATUS: COMPLETE**
 
-### 4.1 Files to Create
+Deployed a minimal NixOS config (no Garage, no secrets) to verify Colmena connectivity before layering in Garage.
 
-#### `nix/hosts/garage/default.nix`
-```nix
-{ config, pkgs, lib, ... }:
-{
-  system = "x86_64-linux";
+### Files Created
+- **`nix/hosts/garage/default.nix`** — Colmena host config (`targetHost: 10.0.20.21`, static networking on `eth0`)
+- **`nix/hosts/garage/hardware-configuration.nix`** — Generated on the VM via `nixos-generate-config`
 
-  deploy = {
-    tags = [ "garage" "server" ];
-    targetHost = "10.0.20.21";
-  };
+### Fixes Applied
+1. **`default.nix` must be a plain attrset, not a function** — Colmena auto-discovery (`lib/generators.nix`) checks `hostModule ? "deploy"`; a function has no such attribute, so the host is silently skipped.
+2. **Bootloader override** — `profiles/server.nix` pulls in `modules/core/boot.nix` which enables `systemd-boot` by default. The VM was provisioned with GRUB, so `garage/default.nix` must override:
+   ```nix
+   boot.loader.systemd-boot.enable = false;
+   boot.loader.efi.canTouchEfiVariables = false;
+   boot.loader.grub = { enable = true; device = "nodev"; efiSupport = true; efiInstallAsRemovable = true; };
+   ```
+3. **`canTouchEfiVariables = false`** is required when using `efiInstallAsRemovable` (NixOS assertion).
 
-  imports = [
-    ./hardware-configuration.nix
-    ./../../profiles/server.nix
-  ];
-
-  cfg = {
-    networking = {
-      backend = "networkd";
-      static = {
-        interface = "ens18";     # Verify with `ip link` after first boot
-        address = "10.0.20.21";
-        prefixLength = 24;       # Explicit; matches 10.0.20.0/24
-        gateway = "10.0.20.1";
-        nameservers = [ "10.0.9.2" ];
-      };
-    };
-  };
-
-  # Hand off network control from cloud-init to NixOS networkd
-  services.cloud-init.network.enable = lib.mkForce false;
-
-  # Garage service (to be enabled in a later iteration)
-  # services.garage = { ... };
-
-  # Firewall
-  # networking.firewall.allowedTCPPorts = [ 3900 3901 3902 ];
-}
-```
-
-#### `nix/hosts/garage/hardware-configuration.nix`
-Minimal template for a Proxmox VM:
-```nix
-{ config, lib, pkgs, modulesPath, ... }:
-{
-  imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
-
-  boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "usbhid" "usb_storage" "sr_mod" "virtio_pci" "virtio_scsi" ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-amd" "vfio-pci" ];
-  boot.extraModulePackages = [ ];
-
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-}
-```
-
-### 4.2 Deploy with Colmena
-
-Once the VM boots from the raw image and cloud-init configures the network:
+### Deploy
 ```bash
-cd /home/bhamm/repos/bhamm-lab
-colmena apply --on garage
+colmena apply --on garage --impure
 ```
 
 ---
@@ -926,21 +398,10 @@ Modify the templates as follows:
 - [x] Phase 1: Update `ansible/inventory/host_vars/japan.yml` with passthrough vars
 - [x] Phase 1: Run Ansible on `japan` and reboot
 - [x] Phase 2: Migrate physical SSDs from `method` to `japan`
-- [x] Phase 3: Refactor NixOS profiles (`base.nix`, `server.nix`)
-- [x] Phase 3: Fix `nix/hosts/iso/default.nix` to import `base.nix`
-- [x] Phase 3: Create `nix/hosts/proxmox-image/` generic NixOS image config
-- [ ] Phase 3: **REVISED** — Update `nix/hosts/proxmox-image/default.nix` for raw image (GRUB nodev, networkd, scsi modules)
-- [ ] Phase 3: **REVISED** — Create `nix/hosts/proxmox-image/img-build.nix` for make-disk-image invocation
-- [ ] Phase 3: **REVISED** — Update `flake.nix` with `proxmox-image` build target
-- [ ] Phase 3: Build the raw image
-- [ ] Phase 3: Stage/host the raw image for Proxmox download
-- [ ] Phase 3: **REVISED** — Rewrite `tofu/proxmox/garage/main.tf` for raw image download + disk file_id approach
-- [ ] Phase 3: **REVISED** — Update `tofu/proxmox/garage/variables.tf` with new variables
-- [ ] Phase 3: Run `tofu apply` to create the VM
-- [ ] Phase 3: Verify VM boots, cloud-init applies network, SSH works
-- [ ] Phase 3: Document the Proxmox image workflow
-- [ ] Phase 4: Create `nix/hosts/garage/` configuration
-- [ ] Phase 4: Deploy with `colmena apply --on garage`
+- [x] Phase 3: Build raw NixOS image, stage on Proxmox, provision VM via OpenTofu
+- [x] Phase 3: Verify VM boots, cloud-init applies network, SSH works
+- [x] Phase 4: Create `nix/hosts/garage/` configuration
+- [x] Phase 4: Deploy with `colmena apply --on garage`
 - [ ] Phase 5: Run `garage-manage` commands to create bucket and key
 - [ ] Phase 5: Update `secrets.enc.json` with generated Garage S3 credentials
 - [ ] Phase 6: Create `kubernetes/manifests/base/garage/` manifests
@@ -950,62 +411,3 @@ Modify the templates as follows:
 - [ ] Phase 8: Update `ceph-rgw-backup-green.yaml` to sync rgw → garage → r2/b2
 - [ ] Phase 8: Verify backup CronJob runs successfully
 - [ ] Phase 8: Destroy TrueNAS VM
-
----
-
-## Appendix: Phase 3 Detailed Steps (Raw Image Approach)
-
-### A.1 Clean Up Previous Attempts
-
-```bash
-# Destroy any partially-created VM 300 on japan
-ssh root@10.0.20.15 "qm destroy 300 --purge 2>/dev/null || true"
-
-# Remove old templates
-ssh root@10.0.20.11 "qm destroy 9000 --purge 2>/dev/null || true"
-ssh root@10.0.20.15 "qm destroy 9000 --purge 2>/dev/null || true"
-```
-
-### A.2 Update NixOS Image Config for raw image
-
-Edit `nix/hosts/proxmox-image/default.nix`:
-- Change `boot.loader.grub.device` to `"nodev"` (pure EFI, no MBR)
-- Add `networking.useNetworkd = true`
-- Replace `virtio_blk` with `virtio_scsi` + `sd_mod` in initrd modules
-- Keep cloud-init, qemu-guest-agent, sshd, growPartition as-is
-
-### A.3 Add raw image build target to `flake.nix`
-
-Create `nix/hosts/proxmox-image/img-build.nix` with the `make-disk-image.nix` invocation using proper module arguments. Then add the `proxmox-image` entry to `nixosConfigurations` in `flake.nix`.
-
-### A.4 Build the Image
-
-```bash
-nix build .#nixosConfigurations.proxmox-image.config.system.build.image
-```
-
-### A.5 Stage the Image
-
-Copy the image to the Proxmox node:
-```bash
-scp ./result/nixos.img root@10.0.20.15:/var/lib/vz/template/iso/
-```
-
-### A.6 Update OpenTofu Config
-
-Replace `tofu/proxmox/garage/main.tf` and `variables.tf` with the data source approach (see Section 3.2 above).
-
-### A.7 Apply
-
-```bash
-cd tofu/proxmox/garage
-tofu init
-tofu apply
-```
-
-### A.8 Verify
-
-```bash
-ssh -p 4185 bhamm@10.0.20.21
-# Check cloud-init log, network, qemu-guest-agent
-```
