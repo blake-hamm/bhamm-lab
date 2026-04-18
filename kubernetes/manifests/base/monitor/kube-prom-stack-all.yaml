@@ -150,7 +150,7 @@ spec:
                 url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/main/kubernetes/manifests/base/monitor/dashboards/systemd.json
                 token: ''
               garage:
-                url: https://git.deuxfleurs.fr/Deuxfleurs/garage/raw/commit/7b119c0b4fa58ab3cb6d5db435fe52d990f6a7aa/script/telemetry/grafana-garage-dashboard-prometheus.json
+                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/feature/garage/kubernetes/manifests/base/monitor/dashboards/garage.json
                 token: ''
                 datasource: Prometheus
           dashboardProviders:
