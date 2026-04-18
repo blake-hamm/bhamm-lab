@@ -7,6 +7,9 @@
     enable = true;
     package = pkgs.garage_2;
     environmentFile = config.sops.templates."garage-env".path;
+    extraEnvironment = {
+      GARAGE_DEFAULT_BUCKET = "ceph-rgw";
+    };
 
     settings = {
       replication_factor = 1;
@@ -36,6 +39,18 @@
 
   sops.secrets.garage_admin_token = {
     key = "vault_secrets/core/garage/admin_token";
+    owner = config.users.users.garage.name;
+    mode = "0600";
+  };
+
+  sops.secrets.garage_s3_access_key = {
+    key = "vault_secrets/core/garage/s3_access_key";
+    owner = config.users.users.garage.name;
+    mode = "0600";
+  };
+
+  sops.secrets.garage_s3_secret_key = {
+    key = "vault_secrets/core/garage/s3_secret_key";
     owner = config.users.users.garage.name;
     mode = "0600";
   };
@@ -95,6 +110,20 @@
         "/mnt/garage/disk2"
         "/mnt/garage/disk3"
       ];
+      # Conditionally bootstrap on first start (--single-node --default-bucket),
+      # otherwise run normally. Secrets are read from sops-nix and exported as
+      # env vars so Garage auto-creates the bucket and key with our declared
+      # credentials on fresh installs.
+      ExecStart = lib.mkForce (pkgs.writeShellScript "garage-start" ''
+        export GARAGE_DEFAULT_ACCESS_KEY=$(cat "${config.sops.secrets.garage_s3_access_key.path}")
+        export GARAGE_DEFAULT_SECRET_KEY=$(cat "${config.sops.secrets.garage_s3_secret_key.path}")
+
+        if [ ! -d /var/lib/garage/meta ]; then
+          exec ${pkgs.garage_2}/bin/garage server --single-node --default-bucket
+        else
+          exec ${pkgs.garage_2}/bin/garage server
+        fi
+      '');
     };
   };
 

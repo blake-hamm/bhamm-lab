@@ -17,10 +17,25 @@ Garage is a lightweight, self-hosted S3-compatible object storage service runnin
 | File | Purpose |
 |------|---------|
 | `nix/hosts/garage/default.nix` | Main host config (imports, networking, GRUB, fstrim) |
-| `nix/hosts/garage/garage.nix` | Garage service, secrets, mounts, firewall |
+| `nix/hosts/garage/garage.nix` | Garage service, secrets, mounts, firewall, bootstrap logic |
 | `nix/hosts/garage/disko.nix` | **Reference only** — disk layout documentation |
 | `nix/hosts/garage/hardware-configuration.nix` | Generated hardware config (boot disk UUIDs) |
 | `tofu/proxmox/garage/` | OpenTofu VM definition |
+
+## Bootstrap Behavior
+
+The NixOS config handles Garage bootstrapping automatically on first start:
+
+- **Secrets:** `rpc_secret`, `admin_token`, `s3_access_key`, and `s3_secret_key` are managed by `sops-nix` and injected into the service environment.
+- **First start** (no `/var/lib/garage/meta`): Garage launches with `--single-node --default-bucket`, which auto-creates:
+  - The single-node cluster layout
+  - The bucket `ceph-rgw`
+  - The access key with the credentials declared in `vault_secrets/core/garage`
+  - Read+write+owner permissions on the bucket
+- **Restarts** (metadata exists): Garage starts normally without flags. No bucket/key/permission changes occur.
+- **Rebuilds** (wipe metadata): Bootstrap re-runs automatically with the same declared credentials.
+
+**You do not need to run `garage layout assign`, `garage bucket create`, `garage key create`, or `garage bucket allow` manually.**
 
 ## Deployment (Full Rebuild)
 
@@ -53,9 +68,10 @@ colmena apply --on garage --impure
 
 This deploys the full Garage config, including:
 - `services.garage` with 3 data disks
-- `sops-nix` secrets (`rpc_secret`, `admin_token`)
+- `sops-nix` secrets (`rpc_secret`, `admin_token`, `s3_access_key`, `s3_secret_key`)
 - `systemd` automount units for `/mnt/garage/disk{1,2,3}`
 - Firewall rule on TCP 3900
+- Conditional bootstrap logic for first-time bucket/key creation
 
 ### 3. Partition and format the data disks (One-Time)
 
@@ -88,79 +104,45 @@ The `garage` user (created by the NixOS config) needs ownership of the mountpoin
 sudo chown -R garage:garage /mnt/garage/disk*
 ```
 
-### 5. Verify Garage is running
+### 5. Restart Garage to trigger bootstrap
 
 ```bash
 # Trigger the automounts
 ls /mnt/garage/disk1 /mnt/garage/disk2 /mnt/garage/disk3
 
-# Check mounts
-mount | grep garage
+# Restart garage (first start after disks are ready will auto-bootstrap)
+sudo systemctl restart garage
 
 # Check service status
 sudo systemctl status garage
 
-# Get node ID
+# Verify node ID
 sudo -u garage garage node id
 ```
 
 Expected output: a 64-character hex node ID.
 
-### 6. Configure Garage cluster layout
-
-Assign the node to the `japan` zone:
+### 6. Verify bucket and key were created
 
 ```bash
-NODE_ID=$(sudo -u garage garage node id | head -1)
-
-# Stage the layout change
-sudo -u garage garage layout assign -z japan -c 5TB $NODE_ID
-
-# Review staged changes
-sudo -u garage garage layout show
-
-# Apply with version number (replace 1 with the version shown)
-sudo -u garage garage layout apply --version 1
+sudo -u garage garage bucket info ceph-rgw
+sudo -u garage garage key info GK50682da0a73630dd1098c9ad
 ```
 
-### 7. Create bucket and access key
+### 7. Verify secrets are in place
 
-```bash
-# Create the bucket
-sudo -u garage garage bucket create ceph-rgw
-
-# Create an access key
-sudo -u garage garage key create garage-key
-```
-
-**Save the output.** You need the `Key ID` and `Secret key` for the next step.
-
-### 8. Grant key access to bucket
-
-```bash
-sudo -u garage garage bucket allow ceph-rgw --key garage-key --read --write
-```
-
-### 9. Update secrets.enc.json
-
-Add the generated S3 credentials to `vault_secrets.core.garage`:
+Ensure `vault_secrets/core.garage` in `secrets.enc.json` contains:
 
 ```json
 "garage": {
   "rpc_secret": "<hex-output>",
   "admin_token": "<base64-output>",
-  "s3_access_key": "<Key ID from garage key create>",
-  "s3_secret_key": "<Secret key from garage key create>"
+  "s3_access_key": "GK...",
+  "s3_secret_key": "..."
 }
 ```
 
-Re-encrypt and commit:
-
-```bash
-sops -e -i secrets.enc.json
-git add secrets.enc.json .sops.yaml nix/hosts/garage/
-git commit -m "Update garage S3 credentials and config"
-```
+These values are pre-declared and must match the credentials Garage was bootstrapped with. Changing the secret for an existing key ID will cause Garage to fail on startup.
 
 ## Post-Deploy Verification
 
@@ -194,9 +176,15 @@ sudo chown -R garage:garage /mnt/garage/disk*
 
 Garage enforces `0600` permissions on secret files. The NixOS config handles this via `sops.secrets.*.mode = "0600"` and `owner = "garage"`.
 
-### "Layout not ready" when creating buckets
+### "Access key is associated with a different secret key"
 
-You must assign the node to a zone and apply the layout **before** creating buckets or keys. See Step 6.
+This happens if `s3_secret_key` in `secrets.enc.json` is changed after the key was created. Garage refuses to start. To fix:
+- Restore the original secret, **or**
+- Wipe `/var/lib/garage/meta` and restart (destructive — all metadata is lost, but data on `/mnt/garage/disk*` remains).
+
+### "Access key was deleted in the cluster, cannot add it back"
+
+If the default key was manually deleted via `garage key delete`, the key ID is permanently burned. Change `s3_access_key` in `secrets.enc.json` to a new value and redeploy.
 
 ### SOPS decryption fails after VM rebuild
 
@@ -235,3 +223,5 @@ ssh -p 4185 -L 3903:localhost:3903 bhamm@10.0.20.21
 3. **Single-node, replication=1:** No redundancy — this is a backup target, not primary storage. Ceph RGW remains the primary S3 endpoint.
 4. **XFS on bare partitions:** Simple, robust filesystem for object storage backends.
 5. **HBA passthrough:** Direct disk access via PCIe passthrough avoids Proxmox virtual disk overhead.
+6. **Declarative bootstrap:** `--single-node --default-bucket` with sops-managed secrets eliminates all post-deploy CLI steps for bucket/key creation.
+7. **Immutable secrets after bootstrap:** Changing `s3_secret_key` for an existing key ID is a fatal error. Rotate by changing the key ID or wiping metadata.
