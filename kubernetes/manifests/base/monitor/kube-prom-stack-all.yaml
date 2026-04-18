@@ -69,10 +69,6 @@ spec:
               auto_login: true
               auto_assign_org_role: Viewer
           sidecar:
-            datasources:
-              enabled: true
-              defaultDatasourceEnabled: true
-              uid: Prometheus
             dashboards:
               enabled: true
               defaultFolderName: "General"
