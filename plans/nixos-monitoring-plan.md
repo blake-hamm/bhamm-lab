@@ -195,7 +195,7 @@ Add NixOS targets to `prometheusSpec.additionalScrapeConfigs`.
 - job_name: 'garage'
   static_configs:
     - targets:
-        - '10.0.20.21:3903'
+        - '10.0.30.21:3903'
 ```
 
 No `authorization` section needed — metrics endpoint is unauthenticated (VLAN-segmented).
@@ -358,11 +358,11 @@ Deploy this into the `monitor` namespace alongside the rest of the monitoring st
 8. **Verify metrics endpoints**
    From any K8s node or host with network access:
    ```bash
-   # Garage
-   curl http://10.0.20.21:9100/metrics     # node_exporter
-   curl http://10.0.20.21:9558/metrics     # systemd_exporter
-   curl http://10.0.20.21:9633/metrics     # smartctl_exporter
-   curl http://10.0.20.21:3903/metrics     # Garage native
+   # Garage (via VLAN 30 interface for direct L2 to k8s/Prometheus)
+   curl http://10.0.30.21:9100/metrics     # node_exporter
+   curl http://10.0.30.21:9558/metrics     # systemd_exporter
+   curl http://10.0.30.21:9633/metrics     # smartctl_exporter
+   curl http://10.0.30.21:3903/metrics     # Garage native
 
    # Tail
    curl http://10.0.30.79:9100/metrics
@@ -396,6 +396,13 @@ Deploy this into the `monitor` namespace alongside the rest of the monitoring st
 Orange Pi hosts live on the LAN VLAN (`10.0.9.0/24`). Prometheus runs in the k8s VLAN (`10.0.30.0/24`). If scraping fails:
 - Check OPNsense firewall rules for k8s → LAN on ports 9100 and 9558
 - Consider adding explicit rules similar to the existing "Allow k8s to access opnsense node exporter" rule in `ansible/inventory/group_vars/opnsense.yml`
+
+### Garage Network Architecture
+Garage runs with dual virtio NICs provisioned by Proxmox (VLAN tagging at the hypervisor level):
+- `eth0` → VLAN 20 (`10.0.20.21`) — Storage/Services traffic
+- `eth1` → VLAN 30 (`10.0.30.21`) — Direct L2 to Kubernetes/Prometheus
+
+This avoids an MTU blackhole encountered with inter-VLAN routing on the TP-Link L3 switch. Prometheus scrapes all Garage targets via `10.0.30.21`. The S3 API (`:3900`) and admin metrics (`:3903`) bind to all interfaces.
 
 ### Framework Laptop
 Excluded from central monitoring. If local metrics are desired later, the module can be enabled on the Framework with `monitoring.enable = true` and a local Prometheus/Grafana stack, or via tailscale mesh scraping.
