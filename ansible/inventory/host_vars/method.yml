@@ -6,18 +6,25 @@ ceph_partitions:
   - number: 1
     name: osd1_db
     start: 1GiB
-    end: 101GiB # 100GiB for 1TB OSD DB
+    end: 101GiB # 100 GiB for 1TB OSD
   - number: 2
     name: osd2_db
     start: 101GiB
-    end: 495GiB # 384GiB for 3.84TB OSD DB
+    end: 495GiB # 394 GiB for 3.5TB OSD
+    # - number: 3
+    #   name: osd3_db
+    #   start: 495GiB
+    #   end: 931GiB      # ~436 GiB for 7TB OSD
 # Proxmox config
 pve_ceph_osds:
-  - device: /dev/sdd # 1 TB
+  - device: /dev/sde # 1TB
     block.db: /dev/disk/by-id/nvme-SHGP31-1000GM-2_AS0CN42841190CT25-part1
     crush.device.class: ssd
-  - device: /dev/sdc # 3.84 TB
-    block.db: /dev/disk/by-id/nvme-SHGP31-1000GM-2_AS0CN42841190CT25-part3
+  - device: /dev/sdc # 3.5TB
+    block.db: /dev/disk/by-id/nvme-SHGP31-1000GM-2_AS0CN42841190CT25-part2
+    crush.device.class: ssd
+  - device: /dev/sda # 7TB (new)
+    # block.db: /dev/disk/by-id/nvme-SHGP31-1000GM-2_AS0CN42841190CT25-part3
     crush.device.class: ssd
 pve_pcie_passthrough_enabled: true
 pve_iommu_passthrough_mode: true

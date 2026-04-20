@@ -20,19 +20,6 @@
     mode: "0644"
   become: true
   notify: Network cutover
-- name: Remove dynamic DNS/DHCP managers
-  ansible.builtin.apt:
-    name:
-      - resolvconf
-      - isc-dhcp-client
-      - dhcpcd
-      - dhcpcd5
-      - dhcpcd-base
-      - systemd-resolved
-    state: absent
-    purge: true
-  become: true
-  notify: Network cutover
 - name: Stop dhcpcd if present
   ansible.builtin.systemd:
     name: dhcpcd

@@ -1,3 +1,54 @@
+- name: Stop Ceph OSD services
+  ansible.builtin.shell: |
+    systemctl stop ceph-osd@* 2>/dev/null || true
+    systemctl disable ceph-osd@* 2>/dev/null || true
+  changed_when: true
+- name: Deactivate all Ceph logical volumes
+  ansible.builtin.shell: |
+    # Deactivate all Ceph LVs globally
+    for lv in $(lvs --noheadings -o lv_path 2>/dev/null | grep 'ceph-' | awk '{print $1}'); do
+      lvchange -an "$lv" 2>/dev/null || true
+    done
+
+    # Remove all ceph DM mappings
+    for dm in $(dmsetup ls --target linear 2>/dev/null | grep 'ceph-' | awk '{print $1}'); do
+      dmsetup remove "$dm" 2>/dev/null || true
+    done
+  changed_when: true
+- name: Remove all Ceph volume groups
+  ansible.builtin.shell: |
+    for vg in $(vgs --noheadings -o vg_name 2>/dev/null | grep 'ceph-' | awk '{print $1}'); do
+      vgremove -y "$vg" 2>/dev/null || true
+    done
+  changed_when: true
+- name: Remove all Ceph physical volumes from data disks
+  ansible.builtin.shell: |
+    for dev in $(echo '{{ pve_ceph_osds | map(attribute="device") | list | join(" ") }}'); do
+      pvremove -y "$dev" 2>/dev/null || true
+    done
+  changed_when: true
+- name: Remove all Ceph physical volumes from DB partitions
+  ansible.builtin.shell: |
+    {% for osd in pve_ceph_osds %}
+    {% if osd['block.db'] is defined %}
+    pvremove -y "{{ osd['block.db'] }}" 2>/dev/null || true
+    {% endif %}
+    {% endfor %}
+  changed_when: true
+- name: Wipe all existing signatures on OSD devices
+  ansible.builtin.shell: |
+    for dev in $(echo '{{ pve_ceph_osds | map(attribute="device") | list | join(" ") }}'); do
+      wipefs --all --force "$dev" 2>/dev/null || true
+    done
+  changed_when: true
+- name: Wipe all existing signatures on DB partition devices
+  ansible.builtin.shell: |
+    {% for osd in pve_ceph_osds %}
+    {% if osd['block.db'] is defined %}
+    wipefs --all --force "{{ osd['block.db'] }}" 2>/dev/null || true
+    {% endif %}
+    {% endfor %}
+  changed_when: true
 - name: Check if OSD devices or partitions are mounted
   ansible.builtin.shell: |
     lsblk -no MOUNTPOINT "{{ item.device }}"
@@ -13,10 +64,3 @@
   loop: "{{ lsblk_mount_check.results }}"
   loop_control:
     label: "{{ item.item.device }}"
-- name: Wipe all existing signatures on OSD devices
-  ansible.builtin.command: wipefs --all "{{ item.device }}"
-  changed_when: "'erased' in wipefs_result.stdout"
-  register: wipefs_result
-  loop: "{{ pve_ceph_osds }}"
-  loop_control:
-    label: "{{ item.device }}"

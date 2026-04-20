@@ -57,7 +57,7 @@ pve_roles:
       - "VM.Config.Network"
       - "VM.Config.Options"
       - "VM.Migrate"
-      - "VM.Monitor"
+      - "VM.Console"
       - "VM.PowerMgmt"
       - "SDN.Use"
 pve_manage_ssh: false
@@ -90,6 +90,8 @@ pve_ceph_crush_rules:
   - name: ssd_rule
     class: ssd
     type: host
+    min_size: 1
+    max_size: 10
 pve_ceph_pools:
   - name: rbd
     size: 3

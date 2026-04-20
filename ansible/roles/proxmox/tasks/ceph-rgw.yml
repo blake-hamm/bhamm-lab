@@ -71,7 +71,7 @@
   run_once: true
 - name: Copy keyring to Proxmox ClusterFS for distribution
   ansible.builtin.command:
-    cmd: cp -p /etc/ceph/ceph.client.radosgw.keyring /etc/pve/priv/ceph.client.radosgw.keyring
+    cmd: cp /etc/ceph/ceph.client.radosgw.keyring /etc/pve/priv/ceph.client.radosgw.keyring
   when:
     - pve_ceph_rgw_enabled | bool
     - inventory_hostname == (groups['proxmox'] | first)
