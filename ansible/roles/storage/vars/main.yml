@@ -1,4 +1,5 @@
+storage_root_vg: "{{ 'local-vg' if not storage_vm_device | length else ansible_hostname + '-vg' }}"
 storage_old_root: "/dev/mapper/{{ ansible_hostname }}--vg-root"
-storage_new_root: "/dev/mapper/local--vg-root"
+storage_new_root: "/dev/{{ storage_root_vg }}/root"
 storage_old_swap: "/dev/mapper/{{ ansible_hostname }}--vg-swap_1"
-storage_new_swap: "/dev/mapper/local--vg-swap_1"
+storage_new_swap: "/dev/{{ storage_root_vg }}/swap_1"

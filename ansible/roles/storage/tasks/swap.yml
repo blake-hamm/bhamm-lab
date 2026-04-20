@@ -3,12 +3,29 @@
   ansible.builtin.command:
     cmd: swapoff -a
   changed_when: false
-- name: Resize swap LV to 4GB
+- name: Get current swap LV size
+  ansible.builtin.command:
+    cmd: lvs --noheadings -o lv_size --units g --nosuffix {{ storage_root_vg }}/swap_1
+  register: storage_swap_lv_size
+  changed_when: false
+  failed_when: false
+- name: Remove existing swap LV
   community.general.lvol:
-    vg: local-vg
+    vg: "{{ storage_root_vg }}"
     lv: swap_1
-    size: 4g
+    state: absent
     force: true
+  when:
+    - storage_swap_lv_size.rc == 0
+    - storage_swap_lv_size.stdout | trim | float != storage_swap_size | regex_replace('[gG]', '') | float
+- name: Create swap LV at target size
+  community.general.lvol:
+    vg: "{{ storage_root_vg }}"
+    lv: swap_1
+    size: "{{ storage_swap_size }}"
+    state: present
+  when:
+    - storage_swap_lv_size.rc != 0 or storage_swap_lv_size.stdout | trim | float != storage_swap_size | regex_replace('[gG]', '') | float
 - name: Update /etc/fstab swap entry
   ansible.builtin.replace:
     path: /etc/fstab

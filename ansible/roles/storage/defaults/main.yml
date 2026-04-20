@@ -1,1 +1,4 @@
 storage_resize_swap: false
+storage_vm_device: ""
+storage_root_size: 100g
+storage_swap_size: 4g
