@@ -86,12 +86,12 @@ pve_ceph_enabled: true
 pve_ceph_network: '10.0.20.0/24'
 pve_ceph_cluster_network: '10.0.50.0/24'
 # pve_ceph_repository_line: "deb http://download.proxmox.com/debian/ceph-squid bookworm no-subscription"
-pve_ceph_crush_rules:
-  - name: ssd_rule
-    class: ssd
-    type: host
-    min_size: 1
-    max_size: 10
+pve_ceph_crush_rules: [] # Not idempotent upstream
+# - name: ssd_rule
+#   class: ssd
+#   type: host
+#   min_size: 1
+#   max_size: 10
 pve_ceph_pools:
   - name: rbd
     size: 3
@@ -103,6 +103,21 @@ pve_ceph_pools:
     storage: true
 pve_ceph_fs: []
 pve_ceph_rgw_enabled: true
+# EC CephFS Configuration
+pve_ceph_ecfs_enabled: true
+pve_ceph_ecfs_name: cephfs
+pve_ceph_ecfs_storage_name: cephfs
+pve_ceph_ecfs_content: ["backup", "iso", "vztmpl", "snippets"]
+pve_ceph_ecfs_ec_k: 2
+pve_ceph_ecfs_ec_m: 1
+pve_ceph_ecfs_ec_failure_domain: host
+pve_ceph_ecfs_ec_plugin: isa
+pve_ceph_ecfs_ec_technique: reed_sol_van
+pve_ceph_ecfs_ec_profile_name: ec-2-1-profile
+pve_ceph_ecfs_ec_stripe_unit: 16384
+pve_ceph_ecfs_ec_pgs: 128
+pve_ceph_ecfs_metadata_pgs: 32
+pve_ceph_ecfs_backup_pgs: 32
 # pve_cluster_ha_groups:
 #   - name: main
 #     comment: "HA group"
