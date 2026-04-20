@@ -24,6 +24,8 @@
       - resolvconf
       - isc-dhcp-client
       - dhcpcd5
+      - dhcpcd
+      - systemd-resolved
     state: absent
     purge: true
   become: true
