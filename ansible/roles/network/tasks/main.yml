@@ -4,48 +4,65 @@
     file: pre.yml
     apply:
       become: true
+- name: Gather service facts
+  ansible.builtin.service_facts:
 - name: Disable ipv6
   ansible.builtin.copy:
     src: 99-disable-ipv6.conf
     dest: /etc/sysctl.d/99-disable-ipv6.conf
-    mode: "644"
+    mode: "0644"
   become: true
-  notify: Restart network
+  notify: Network cutover
 - name: Setup network interface
   ansible.builtin.template:
     src: "network/{{ inventory_hostname }}.j2"
     dest: /etc/network/interfaces
-    mode: "644"
+    mode: "0644"
   become: true
-  notify: Restart network
-- name: Purge dynamic DNS managers to prevent resolv.conf overwrites
+  notify: Network cutover
+- name: Remove dynamic DNS/DHCP managers
   ansible.builtin.apt:
     name:
       - resolvconf
       - isc-dhcp-client
-      - dhcpcd5
       - dhcpcd
+      - dhcpcd5
+      - dhcpcd-base
       - systemd-resolved
     state: absent
     purge: true
   become: true
-- name: Disable systemd-resolved (if present)
+  notify: Network cutover
+- name: Stop dhcpcd if present
   ansible.builtin.systemd:
-    name: systemd-resolved
+    name: dhcpcd
     state: stopped
     enabled: false
   become: true
-  ignore_errors: true
+  when: "'dhcpcd.service' in ansible_facts.services"
+  notify: Network cutover
+- name: Check if /etc/resolv.conf is a symlink
+  ansible.builtin.stat:
+    path: /etc/resolv.conf
+  register: resolv_conf_stat
+  become: true
+- name: Remove /etc/resolv.conf only if it is a symlink
+  ansible.builtin.file:
+    path: /etc/resolv.conf
+    state: absent
+  become: true
+  when: resolv_conf_stat.stat.islnk | default(false)
 - name: Write static /etc/resolv.conf
   ansible.builtin.copy:
     dest: /etc/resolv.conf
     content: |
       nameserver {{ network_nameservers | first }}
       search localdomain
-    mode: "0644"
     owner: root
     group: root
+    mode: "0644"
   become: true
+  notify: Network cutover
 - name: Optimize 10g nics
   ansible.builtin.include_tasks:
     file: nic.yml

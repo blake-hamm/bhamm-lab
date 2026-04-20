@@ -1,17 +1,32 @@
-- name: Reload and restart network
+- name: Network cutover
   become: true
   block:
-    - name: Ensure rt_tables.d directory exists for ifupdown2 bug in Debian 13
-      ansible.builtin.file:
-        path: /etc/iproute2/rt_tables.d
-        state: directory
-        mode: "0755"
+    - name: Kill any lingering dhcpcd processes
+      ansible.builtin.command: pkill -f dhcpcd
+      changed_when: false
+      failed_when: false
+    - name: Remove stale dhcpcd lease files
+      ansible.builtin.shell: rm -f /var/lib/dhcpcd/*.lease /var/db/dhcpcd/*.lease
+      changed_when: false
+      failed_when: false
+    - name: Flush stale DHCP address from raw trunk NIC
+      ansible.builtin.command: ip addr flush dev {{ network_trunk_nic }}
+      changed_when: false
+      failed_when: false
+    - name: Re-write static resolv.conf after cleanup
+      ansible.builtin.copy:
+        dest: /etc/resolv.conf
+        content: |
+          nameserver {{ network_nameservers | first }}
+          search localdomain
         owner: root
         group: root
-    - name: Reload network interfaces
+        mode: "0644"
+    - name: Reload interfaces
       ansible.builtin.command: ifreload -a
       changed_when: false
-    - name: Restart networking service
+      failed_when: false
+    - name: Restart networking
       ansible.builtin.systemd:
         name: networking
         state: restarted
