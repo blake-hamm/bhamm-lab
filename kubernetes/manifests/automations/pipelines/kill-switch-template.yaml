@@ -320,7 +320,7 @@ spec:
 
           if [ "$ORPHAN_FOUND" = true ]; then
             echo "ERROR: Orphaned PVs found. Check Ceph for orphaned RBD images:"
-            echo "  rbd ls osd"
+            echo "  rbd ls rbd"
             echo "  ceph fs subvolume ls cephfs"
             exit 1
           fi
