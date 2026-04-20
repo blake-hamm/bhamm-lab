@@ -31,6 +31,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    garage-upstream = {
+      url = "github:deuxfleurs-org/garage/v2.3.0";
+    };
+
   };
 
   outputs = { nixpkgs, self, ... } @ inputs:
