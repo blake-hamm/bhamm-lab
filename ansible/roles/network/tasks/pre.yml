@@ -13,7 +13,6 @@
       - iputils-tracepath
       - ethtool
       - gnupg
-      - resolvconf
     state: present
 - name: Ensure 8021q kernel module is loaded
   community.general.modprobe:

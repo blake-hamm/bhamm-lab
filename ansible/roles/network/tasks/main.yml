@@ -18,21 +18,32 @@
     mode: "644"
   become: true
   notify: Restart network
-- name: Remove unwanted nameserver line (192.168.69.1)
-  ansible.builtin.lineinfile:
-    path: /etc/resolv.conf
-    regexp: '^nameserver 192.168.69.1$'
+- name: Purge dynamic DNS managers to prevent resolv.conf overwrites
+  ansible.builtin.apt:
+    name:
+      - resolvconf
+      - isc-dhcp-client
+      - dhcpcd5
     state: absent
+    purge: true
   become: true
-  notify: Restart network
-- name: Ensure /etc/resolv.conf is updated with the correct nameservers
-  ansible.builtin.lineinfile:
-    path: /etc/resolv.conf
-    line: "nameserver {{ item }}"
-    state: present
-  with_items: "{{ network_nameservers }}"
+- name: Disable systemd-resolved (if present)
+  ansible.builtin.systemd:
+    name: systemd-resolved
+    state: stopped
+    enabled: false
   become: true
-  notify: Restart network
+  ignore_errors: true
+- name: Write static /etc/resolv.conf
+  ansible.builtin.copy:
+    dest: /etc/resolv.conf
+    content: |
+      nameserver {{ network_nameservers | first }}
+      search localdomain
+    mode: "0644"
+    owner: root
+    group: root
+  become: true
 - name: Optimize 10g nics
   ansible.builtin.include_tasks:
     file: nic.yml

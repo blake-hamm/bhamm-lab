@@ -37,3 +37,4 @@ smartctl_exporter_smartctl_rescan: "6h"
 smartctl_exporter_system_user: "root"
 smartctl_exporter_system_group: "root"
 smartctl_exporter_log_level: "warn"
+storage_resize_swap: true

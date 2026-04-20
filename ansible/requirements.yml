@@ -1,25 +1,25 @@
 collections:
   - name: community.hashi_vault
-    version: "6.2.0"
+    version: "7.1.0"
     source: https://galaxy.ansible.com
   - name: devsec.hardening
-    version: "10.5.0"
+    version: "10.5.2"
     source: https://galaxy.ansible.com
   - name: oxlorg.opnsense
-    version: "25.7.7"
+    version: "25.7.8"
     source: https://galaxy.ansible.com
   - name: community.sops
-    version: "2.0.1"
+    version: "2.2.7"
     source: https://galaxy.ansible.com
   - name: prometheus.prometheus
-    version: "0.27.5"
+    version: "0.29.1"
     source: https://galaxy.ansible.com
   - name: grafana.grafana
     version: "6.0.6"
     source: https://galaxy.ansible.com
 roles:
   - name: geerlingguy.ntp
-    version: "2.5.0"
+    version: "4.0.0"
   - src: https://github.com/lae/ansible-role-proxmox.git
     name: lae.proxmox
-    version: "develop"
+    version: "v1.10.1"

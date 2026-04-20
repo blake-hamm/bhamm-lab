@@ -85,19 +85,21 @@ proxmox_reset_ceph: false
 pve_ceph_enabled: true
 pve_ceph_network: '10.0.20.0/24'
 pve_ceph_cluster_network: '10.0.50.0/24'
-pve_ceph_repository_line: "deb http://download.proxmox.com/debian/ceph-squid bookworm no-subscription"
+# pve_ceph_repository_line: "deb http://download.proxmox.com/debian/ceph-squid bookworm no-subscription"
+pve_ceph_crush_rules:
+  - name: ssd_rule
+    class: ssd
+    type: host
 pve_ceph_pools:
-  - name: osd
-    rule: replicated_rule
+  - name: rbd
+    size: 3
+    min_size: 2
+    pgs: 128
+    rule: ssd_rule
     application: rbd
-    autoscale_mode: 'on'
+    autoscale_mode: "on"
     storage: true
-pve_ceph_fs:
-  - name: cephfs
-    pgs: 32
-    rule: replicated_rule
-    storage: true
-pve_ceph_crush_rules: []
+pve_ceph_fs: []
 pve_ceph_rgw_enabled: true
 # pve_cluster_ha_groups:
 #   - name: main
