@@ -50,7 +50,10 @@ This document outlines the software components that form the digital backbone of
 
 - **Local LVM:**
   - *Role:* Boot and primary VM storage for Proxmox
-  - *Usage:* Local volume management for Proxmox virtual machines and system disks
+  - *Usage:* Managed by the Ansible `storage` role. Uses a consistent `local-vg` volume group name across all Proxmox hosts so Terraform and the `lae.proxmox` role can provision VMs without per-host logic.
+  - *Modes:*
+    - **Single-drive:** Root VG (`<hostname>-vg`) is renamed to `local-vg` on hosts with one disk (e.g. `indy`, `japan`). Root LV is capped at 100GB, swap at 4GB; remaining space hosts VMs.
+    - **Dedicated VM drive:** On hosts with a separate VM disk (e.g. `method`), the boot drive keeps its original VG name and a second `local-vg` is created on the dedicated device.
 
 - **Ceph:**
   - *Role:* Primary distributed storage cluster
