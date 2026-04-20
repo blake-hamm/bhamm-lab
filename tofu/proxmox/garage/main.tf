@@ -6,7 +6,7 @@ provider "proxmox" {
     username = "root"
     node {
       name    = "japan"
-      address = "10.0.20.15"
+      address = "10.0.20.13"
       port    = "4185"
     }
   }
@@ -113,6 +113,12 @@ resource "proxmox_virtual_environment_vm" "garage" {
       ipv4 {
         address = "${var.garage_ip}/24"
         gateway = "10.0.20.2"
+      }
+    }
+    ip_config {
+      ipv4 {
+        address = "${var.garage_vlan30_ip}/24"
+        gateway = "10.0.30.2"
       }
     }
     dns {

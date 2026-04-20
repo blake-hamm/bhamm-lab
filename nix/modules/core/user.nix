@@ -1,4 +1,4 @@
-{ shared, ... }:
+{ shared, lib, ... }:
 {
   # Nixos user config
   users.users.${shared.username} = {
