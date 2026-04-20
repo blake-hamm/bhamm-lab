@@ -98,7 +98,7 @@ data:
       - title: Japan
         description: Visit japan proxmox server
         icon: hl-proxmox
-        url: https://10.0.20.15:8006/
+        url: https://10.0.20.13:8006/
         statusCheckAllowInsecure: true
       - title: Method ipmi
         description: Visit method ipmi interface

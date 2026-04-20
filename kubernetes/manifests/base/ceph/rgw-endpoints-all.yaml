@@ -23,7 +23,7 @@ subsets:
   - addresses:
       - ip: 10.0.20.11
       - ip: 10.0.20.12
-      - ip: 10.0.20.15
+      - ip: 10.0.20.13
     ports:
       - name: s3
         port: 7480
