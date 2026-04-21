@@ -386,9 +386,15 @@ spec:
             rclone sync "garage:ceph-rgw/${BUCKET}" "rgw:${BUCKET}" \
               --progress \
               --fast-list \
-              --transfers=8 \
-              --checkers=16 \
+              --check-first \
+              --transfers=16 \
+              --checkers=32 \
+              --s3-chunk-size=16M \
+              --s3-upload-concurrency=8 \
+              --s3-no-head \
+              --s3-no-check-bucket \
               --disable-http2 \
+              --max-backlog=10000 \
               --stats=30s
     - name: verify-rgw
       container:
