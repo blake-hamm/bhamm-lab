@@ -54,10 +54,7 @@ spec:
                   name: servarr-postgresql-app
                   key: password
             - name: DB_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: servarr-postgresql-app
-                  key: host
+              value: "servarr-postgresql-rw.servarr.svc.cluster.local"
             - name: DB_PORT
               valueFrom:
                 secretKeyRef:
