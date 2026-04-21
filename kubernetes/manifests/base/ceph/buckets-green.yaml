@@ -329,8 +329,8 @@ spec:
             rclone lsf garage:ceph-rgw | awk -F/ '{a[$1]} END{for(i in a) print i}' | sort | awk 'BEGIN{s="["; sep=""} {s=s sep"\""$0"\""; sep=","} END{print s"]"}'
     - name: restore-bucket-from-garage
       synchronization:
-        mutex:
-          name: garage-to-rgw-restore
+        mutexes:
+          - name: garage-to-rgw-restore
       inputs:
         parameters:
           - name: bucket
