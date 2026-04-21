@@ -5,6 +5,7 @@ metadata:
   namespace: site
   annotations:
     argocd.argoproj.io/sync-wave: "25"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 subjects:
   - name: main-site
     spec:
