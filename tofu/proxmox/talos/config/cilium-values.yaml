@@ -66,3 +66,6 @@ bandwidthManager:
   enabled: true
   bbr: true
 MTU: 8950
+bpf:
+  hostLegacyRouting: false
+  masquerade: true

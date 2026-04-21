@@ -74,9 +74,7 @@ spec:
           command:
             - cilium
             - install
-            - --version=v1.18.4
-            - --set
-            - kubeProxyReplacement=true
+            - --version=v1.19.3
             - --values
             - /root/app/values.yaml
       volumes:
