@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: restore-ceph-rgw-green
+  namespace: argo
+  annotations:
+    argocd.argoproj.io/sync-wave: "9"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  serviceAccountName: argo-workflow
+  entrypoint: restore-chain
+  ttlStrategy:
+    secondsAfterCompletion: 86400
+    secondsAfterSuccess: 86400
+    secondsAfterFailure: 604800
+  templates:
+    - name: restore-chain
+      steps:
+        - - name: r2-to-garage
+            templateRef:
+              name: create-ceph-buckets-green
+              template: restore-from-r2-to-garage
+              clusterScope: true
+        - - name: garage-to-rgw
+            templateRef:
+              name: create-ceph-buckets-green
+              template: restore-from-garage-to-rgw
+              clusterScope: true
