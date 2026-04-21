@@ -4,6 +4,7 @@ metadata:
   name: create-ceph-buckets-green
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "8"
 spec:
   serviceAccountName: argo-workflow
   entrypoint: main

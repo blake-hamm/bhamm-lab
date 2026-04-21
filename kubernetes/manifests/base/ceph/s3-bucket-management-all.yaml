@@ -1,0 +1,120 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterWorkflowTemplate
+metadata:
+  name: s3-bucket-management
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  templates:
+    - name: bucket-management
+      inputs:
+        parameters:
+          - name: bucket-names
+          - name: endpoint-url
+          - name: aws-region
+          - name: destroy-and-create
+          - name: aws-auth-secret
+          - name: aws-access-key-id
+          - name: aws-secret-access-key
+      steps:
+        - - name: optionally-destroy
+            when: "{{inputs.parameters.destroy-and-create}}"
+            template: destroy-bucket
+            arguments:
+              parameters:
+                - name: bucket-name
+                  value: "{{item}}"
+                - name: endpoint-url
+                  value: "{{inputs.parameters.endpoint-url}}"
+                - name: aws-region
+                  value: "{{inputs.parameters.aws-region}}"
+                - name: aws-auth-secret
+                  value: "{{inputs.parameters.aws-auth-secret}}"
+                - name: aws-access-key-id
+                  value: "{{inputs.parameters.aws-access-key-id}}"
+                - name: aws-secret-access-key
+                  value: "{{inputs.parameters.aws-secret-access-key}}"
+            withParam: "{{inputs.parameters.bucket-names}}"
+        - - name: create-bucket
+            template: create-bucket
+            arguments:
+              parameters:
+                - name: bucket-name
+                  value: "{{item}}"
+                - name: endpoint-url
+                  value: "{{inputs.parameters.endpoint-url}}"
+                - name: aws-region
+                  value: "{{inputs.parameters.aws-region}}"
+                - name: aws-auth-secret
+                  value: "{{inputs.parameters.aws-auth-secret}}"
+                - name: aws-access-key-id
+                  value: "{{inputs.parameters.aws-access-key-id}}"
+                - name: aws-secret-access-key
+                  value: "{{inputs.parameters.aws-secret-access-key}}"
+            withParam: "{{inputs.parameters.bucket-names}}"
+    - name: destroy-bucket
+      inputs:
+        parameters:
+          - name: bucket-name
+          - name: endpoint-url
+          - name: aws-region
+          - name: aws-auth-secret
+          - name: aws-access-key-id
+          - name: aws-secret-access-key
+      container:
+        image: minio/mc:RELEASE.2025-08-13T08-35-41Z
+        env:
+          - name: ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: "{{inputs.parameters.aws-auth-secret}}"
+                key: "{{inputs.parameters.aws-access-key-id}}"
+          - name: SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: "{{inputs.parameters.aws-auth-secret}}"
+                key: "{{inputs.parameters.aws-secret-access-key}}"
+          - name: ENDPOINT_URL
+            value: "{{inputs.parameters.endpoint-url}}"
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Attempting to remove bucket: {{inputs.parameters.bucket-name}} from $ENDPOINT_URL"
+            mc alias set ceph $ENDPOINT_URL $ACCESS_KEY $SECRET_KEY
+            mc rb --force ceph/{{inputs.parameters.bucket-name}} || echo "Bucket did not exist or was already empty"
+    - name: create-bucket
+      inputs:
+        parameters:
+          - name: bucket-name
+          - name: endpoint-url
+          - name: aws-region
+          - name: aws-auth-secret
+          - name: aws-access-key-id
+          - name: aws-secret-access-key
+      container:
+        image: minio/mc:RELEASE.2025-08-13T08-35-41Z
+        env:
+          - name: ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: "{{inputs.parameters.aws-auth-secret}}"
+                key: "{{inputs.parameters.aws-access-key-id}}"
+          - name: SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: "{{inputs.parameters.aws-auth-secret}}"
+                key: "{{inputs.parameters.aws-secret-access-key}}"
+          - name: ENDPOINT_URL
+            value: "{{inputs.parameters.endpoint-url}}"
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Checking if bucket {{inputs.parameters.bucket-name}} already exists"
+            mc alias set ceph $ENDPOINT_URL $ACCESS_KEY $SECRET_KEY
+            if mc ls ceph/{{inputs.parameters.bucket-name}} >/dev/null 2>&1; then
+              echo "Bucket already exists. Skipping creation."
+            else
+              echo "Creating new bucket: {{inputs.parameters.bucket-name}} at $ENDPOINT_URL"
+              mc mb ceph/{{inputs.parameters.bucket-name}}
+            fi
