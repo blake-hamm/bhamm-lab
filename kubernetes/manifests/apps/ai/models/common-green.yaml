@@ -38,7 +38,7 @@ spec:
           backup:
             enabled: true
           restore:
-            enabled: false
+            enabled: true
           additionalDatabases:
             - name: mlflow
             - name: phoenix

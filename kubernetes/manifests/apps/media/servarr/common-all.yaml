@@ -70,7 +70,7 @@ spec:
           backup:
             enabled: true
           restore:
-            enabled: false
+            enabled: true
         ingressRoutes:
           - enabled: true
             name: sabnzbd

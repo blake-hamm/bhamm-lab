@@ -22,7 +22,7 @@ spec:
           backup:
             enabled: true
           restore:
-            enabled: false
+            enabled: true
         dragonfly:
           enabled: true
         pvc:
@@ -32,7 +32,7 @@ spec:
           backup:
             enabled: true
           restore:
-            enabled: false
+            enabled: true
         externalSecrets:
           enabled: true
           secrets:
