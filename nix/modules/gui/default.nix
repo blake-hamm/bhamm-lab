@@ -8,6 +8,7 @@
     ./vscode.nix
     ./vesktop.nix
     ./opencode.nix
+    ./pi.nix
     ./printing.nix
     ./audio.nix
   ];
