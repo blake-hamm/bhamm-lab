@@ -45,7 +45,7 @@ spec:
           authModes:
             - sso
           sso:
-            enabled: false
+            enabled: true
             issuer: https://auth.bhamm-lab.com
             clientId:
               name: argo-external-secret
