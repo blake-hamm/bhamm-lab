@@ -1,4 +1,11 @@
 { config, lib, inputs, shared, pkgs, ... }:
+let
+  piNpm = pkgs.writeShellScript "pi-npm" ''
+    export NPM_CONFIG_PREFIX="${"$"}{HOME}/.pi/npm-global"
+    mkdir -p "${"$"}{NPM_CONFIG_PREFIX}/lib"
+    exec ${pkgs.nodejs}/bin/npm "$@"
+  '';
+in
 {
   options.cfg.pi.enable = lib.mkEnableOption "pi coding agent";
 
@@ -10,7 +17,10 @@
     };
 
     home-manager.users.${shared.username} = {
-      home.packages = [ inputs.llm-agents.packages.${pkgs.system}.pi ];
+      home.packages = [
+        inputs.llm-agents.packages.${pkgs.system}.pi
+        pkgs.nodejs # pi needs npm to resolve packages
+      ];
 
       # Pi auth: credentials for providers
       # The !command syntax is evaluated by pi at runtime and cached for the process lifetime
@@ -36,7 +46,7 @@
         text = builtins.toJSON {
           model = "kimi-for-coding/k2p6";
           theme = "catppuccin-mocha";
-          defaultThinkingLevel = "medium";
+          defaultThinkingLevel = "high";
           quietStartup = false;
           collapseChangelog = true;
           enableInstallTelemetry = false;
@@ -69,7 +79,11 @@
             blockImages = false;
           };
 
-          packages = [ ];
+          npmCommand = [ "${piNpm}" ];
+          packages = [
+            "npm:pi-web-access"
+            "npm:pi-subagents"
+          ];
         };
       };
     };
