@@ -307,16 +307,11 @@ data:
     - name: Storage
       icon: mdi-database
       items:
-      - title: TrueNAS
-        description: Visit TrueNAS Site
-        icon: hl-truenas-scale
-        url: https://10.0.20.199/ui/signin
+      - title: Garage
+        description: Visit Garage grafana dashboard
+        icon: hl-grafana
+        url: https://grafana.bhamm-lab.com/d/ys3pnpZ4k/garage?orgId=1&from=now-6h&to=now&timezone=browser&refresh=30s
         statusCheck: false
-      - title: Minio
-        description: Minio (on TrueNAS)
-        icon: hl-minio
-        url: http://10.0.20.199:9002/
-        statusCheck: true
       - title: Ceph
         description: Visit Ceph grafana dashboard
         icon: hl-ceph
@@ -327,11 +322,6 @@ data:
         icon: hl-grafana
         url: https://grafana.bhamm-lab.com/d/f8f249a0-be78-41b1-97fe-8d0a92a71b93/smartctl-exporter?orgId=1&from=now-2d&to=now&timezone=browser&var-datasource=prometheus&var-instance=$__all
         statusCheck: false
-      - title: PBS
-        description: Proxmox Backup Server Volume
-        icon: hl-proxmox
-        url: https://10.0.30.199:8007/
-        statusCheckAllowInsecure: true
       - title: k8up
         description: View k8up backup dashboard
         icon: mdi-backup-restore
