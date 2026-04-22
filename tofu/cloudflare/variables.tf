@@ -30,5 +30,5 @@ variable "ceph_rgw_bucket_storage_class" {
 variable "tunnel_name" {
   description = "The name of the Cloudflare Zero Trust tunnel."
   type        = string
-  default     = "bhamm-lab-site"
+  default     = "bhamm-lab"
 }
