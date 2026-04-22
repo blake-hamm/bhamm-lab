@@ -8,6 +8,10 @@
   ansible.builtin.command:
     cmd: update-initramfs -u
   changed_when: false
+- name: Update initramfs
+  ansible.builtin.command:
+    cmd: update-initramfs -u -k all
+  changed_when: false
 - name: Update fstab and GRUB
   ansible.builtin.command:
     cmd: update-grub

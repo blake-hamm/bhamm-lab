@@ -5,6 +5,11 @@
     ../../profiles/base.nix
   ];
 
+  # Recovery password for serial console access on Proxmox VMs
+  users.users.${shared.username} = {
+    hashedPassword = "$y$j9T$bF.UzX.ELz.HhcnuhVQFX.$xwelbUwR.xnnY6w02HCTFT3yW.QmAAUciZt3v8A3PU/";
+  };
+
   # Boot: GRUB with EFI support (nodev for pure EFI, no MBR)
   boot.loader.grub = {
     enable = true;

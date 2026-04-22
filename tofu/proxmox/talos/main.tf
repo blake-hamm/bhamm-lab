@@ -16,7 +16,7 @@ provider "proxmox" {
     }
     node {
       name    = "japan"
-      address = "10.0.20.15"
+      address = "10.0.20.13"
       port    = "4185"
     }
   }

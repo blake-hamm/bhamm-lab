@@ -1,0 +1,145 @@
+# Deploy Erasure-Coded CephFS on Proxmox nodes
+# Note: pveceph fs create does not support erasure coding for CephFS.
+# We create the EC pools and filesystem manually with raw ceph commands,
+# then register the existing filesystem as Proxmox storage.
+# Pattern: EC data pool as default + replicated backup pool (like RGW).
+
+# --- First node: EC profile, pools, and filesystem creation ---
+- name: Check if EC CephFS already exists
+  ansible.builtin.command: ceph fs ls -f json
+  register: ecfs_check
+  changed_when: false
+  when:
+    - pve_ceph_ecfs_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+  run_once: true
+- name: Ensure Erasure Code Profile Exists
+  ansible.builtin.command: |
+    ceph osd erasure-code-profile set {{ pve_ceph_ecfs_ec_profile_name }} \
+      k={{ pve_ceph_ecfs_ec_k }} \
+      m={{ pve_ceph_ecfs_ec_m }} \
+      crush-failure-domain={{ pve_ceph_ecfs_ec_failure_domain }} \
+      plugin={{ pve_ceph_ecfs_ec_plugin }} \
+      technique={{ pve_ceph_ecfs_ec_technique }} \
+      stripe_unit={{ pve_ceph_ecfs_ec_stripe_unit }}
+  register: ecfs_profile_creation
+  failed_when: "ecfs_profile_creation.rc != 0 and 'already exists' not in ecfs_profile_creation.stderr"
+  changed_when: "'already exists' not in ecfs_profile_creation.stderr"
+  when:
+    - pve_ceph_ecfs_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+    - pve_ceph_ecfs_name not in (ecfs_check.stdout | from_json | map(attribute='name'))
+  run_once: true
+- name: Create EC CephFS data pool
+  ansible.builtin.command: >
+    ceph osd pool create {{ pve_ceph_ecfs_name }}_data {{ pve_ceph_ecfs_ec_pgs }} erasure {{ pve_ceph_ecfs_ec_profile_name }}
+
+  register: ecfs_data_pool_create
+  changed_when: "'already exists' not in ecfs_data_pool_create.stderr"
+  when:
+    - pve_ceph_ecfs_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+    - pve_ceph_ecfs_name not in (ecfs_check.stdout | from_json | map(attribute='name'))
+  run_once: true
+- name: Enable EC overwrites on CephFS data pool
+  ansible.builtin.command: ceph osd pool set {{ pve_ceph_ecfs_name }}_data allow_ec_overwrites true
+  register: ecfs_overwrites
+  changed_when: false
+  when:
+    - pve_ceph_ecfs_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+  run_once: true
+- name: Create EC CephFS metadata pool
+  ansible.builtin.command: ceph osd pool create {{ pve_ceph_ecfs_name }}_metadata {{ pve_ceph_ecfs_metadata_pgs }}
+  register: ecfs_metadata_pool_create
+  changed_when: "'already exists' not in ecfs_metadata_pool_create.stderr"
+  when:
+    - pve_ceph_ecfs_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+    - pve_ceph_ecfs_name not in (ecfs_check.stdout | from_json | map(attribute='name'))
+  run_once: true
+- name: Create EC CephFS replicated backup data pool
+  ansible.builtin.command: ceph osd pool create {{ pve_ceph_ecfs_name }}_data_backup {{ pve_ceph_ecfs_backup_pgs }}
+  register: ecfs_backup_pool_create
+  changed_when: "'already exists' not in ecfs_backup_pool_create.stderr"
+  when:
+    - pve_ceph_ecfs_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+    - pve_ceph_ecfs_name not in (ecfs_check.stdout | from_json | map(attribute='name'))
+  run_once: true
+- name: Enable cephfs application on EC CephFS pools
+  ansible.builtin.command: ceph osd pool application enable {{ item }} cephfs
+  loop:
+    - "{{ pve_ceph_ecfs_name }}_data"
+    - "{{ pve_ceph_ecfs_name }}_metadata"
+    - "{{ pve_ceph_ecfs_name }}_data_backup"
+  register: ecfs_app_enable
+  failed_when: "ecfs_app_enable.rc != 0 and 'already enabled' not in ecfs_app_enable.stderr"
+  changed_when: false
+  when:
+    - pve_ceph_ecfs_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+  run_once: true
+- name: Create EC CephFS filesystem
+  ansible.builtin.command: ceph fs new {{ pve_ceph_ecfs_name }} {{ pve_ceph_ecfs_name }}_metadata {{ pve_ceph_ecfs_name }}_data --force
+  register: ecfs_create
+  changed_when: "'already exists' not in ecfs_create.stderr"
+  when:
+    - pve_ceph_ecfs_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+    - pve_ceph_ecfs_name not in (ecfs_check.stdout | from_json | map(attribute='name'))
+  run_once: true
+- name: Add replicated backup pool to CephFS filesystem
+  ansible.builtin.command: ceph fs add_data_pool {{ pve_ceph_ecfs_name }} {{ pve_ceph_ecfs_name }}_data_backup
+  register: ecfs_add_backup_pool
+  failed_when: "ecfs_add_backup_pool.rc != 0 and 'already used' not in ecfs_add_backup_pool.stderr"
+  changed_when: "'already used' not in ecfs_add_backup_pool.stderr"
+  when:
+    - pve_ceph_ecfs_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+  run_once: true
+- name: Set min_size on EC CephFS data pool
+  ansible.builtin.command: ceph osd pool set {{ pve_ceph_ecfs_name }}_data min_size {{ pve_ceph_ecfs_ec_k }}
+  register: ecfs_min_size
+  changed_when: false
+  when:
+    - pve_ceph_ecfs_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+  run_once: true
+- name: Flag EC CephFS data pool as bulk for autoscaler
+  ansible.builtin.command: ceph osd pool set {{ pve_ceph_ecfs_name }}_data bulk true
+  register: ecfs_bulk
+  changed_when: false
+  when:
+    - pve_ceph_ecfs_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+  run_once: true
+# --- All nodes: ensure MDS exists ---
+# The lae.proxmox role only creates MDS when pve_ceph_fs has entries.
+# Since we bypass pve_ceph_fs for EC CephFS, we create MDS ourselves.
+- name: Ensure Ceph MDS exists
+  ansible.builtin.command: pveceph mds create
+  args:
+    creates: "/var/lib/ceph/mds/ceph-{{ ansible_hostname }}"
+  when: pve_ceph_ecfs_enabled | bool
+# --- First node: register as Proxmox storage ---
+- name: Check if Proxmox storage entry exists
+  ansible.builtin.command: pvesh get /storage/{{ pve_ceph_ecfs_storage_name }}
+  register: ecfs_storage_check
+  failed_when: false
+  changed_when: false
+  when:
+    - pve_ceph_ecfs_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+  run_once: true
+- name: Add EC CephFS as Proxmox storage
+  ansible.builtin.command: |
+    pvesm add cephfs {{ pve_ceph_ecfs_storage_name }} \
+      --fs-name {{ pve_ceph_ecfs_name }} \
+      --content {{ pve_ceph_ecfs_content | join(',') }}
+  changed_when: ecfs_storage_check.rc != 0
+  when:
+    - pve_ceph_ecfs_enabled | bool
+    - inventory_hostname == (groups['proxmox'] | first)
+    - ecfs_storage_check.rc != 0
+  run_once: true

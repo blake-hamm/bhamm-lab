@@ -1,0 +1,88 @@
+# root-drive.yml - Manage root filesystem on the boot drive
+# Handles VG rename (single-drive mode) and root LV resize
+- name: Check if hostname VG still exists
+  ansible.builtin.command:
+    cmd: vgs --noheadings -o vg_name {{ ansible_hostname }}-vg
+  register: storage_old_vg_check
+  changed_when: false
+  failed_when: false
+- name: Set current root VG fact
+  ansible.builtin.set_fact:
+    storage_current_root_vg: "{{ ansible_hostname + '-vg' if storage_old_vg_check.rc == 0 else storage_root_vg }}"
+- name: Get current root LV size
+  ansible.builtin.command:
+    cmd: lvs --noheadings -o lv_size --units g --nosuffix {{ storage_current_root_vg }}/root
+  register: storage_root_lv_size
+  changed_when: false
+  failed_when: false
+- name: Get root filesystem type
+  ansible.builtin.command:
+    cmd: findmnt -n -o FSTYPE /
+  register: storage_root_fstype
+  changed_when: false
+- name: Fail if root shrink is required but filesystem does not support it
+  ansible.builtin.fail:
+    msg: >
+      Root LV is {{ storage_root_lv_size.stdout | trim }}GB but target is {{ storage_root_size }}. Filesystem is {{ storage_root_fstype.stdout | trim }} which cannot be shrunk online. Please resize manually or adjust storage_root_size.
+  when:
+    - storage_root_lv_size.rc == 0
+    - storage_root_lv_size.stdout | trim | float > storage_root_size | regex_replace('[gG]', '') | float
+    - storage_root_fstype.stdout | trim == 'xfs'
+- name: Resize root LV to target size
+  community.general.lvol:
+    vg: "{{ storage_current_root_vg }}"
+    lv: root
+    size: "{{ storage_root_size }}"
+    resizefs: false
+    force: true
+  register: storage_root_lv_resize
+- name: Resize root filesystem # noqa: no-handler
+  ansible.builtin.command:
+    cmd: "{{ 'xfs_growfs -d /' if storage_root_fstype.stdout | trim == 'xfs' else 'resize2fs /dev/' + storage_current_root_vg + '/root' }}"
+  register: storage_root_fs_resize
+  when: storage_root_lv_resize.changed | bool
+  changed_when:
+    - storage_root_fs_resize.rc == 0
+    - "'data size unchanged' not in storage_root_fs_resize.stdout"
+    - "'Nothing to do' not in storage_root_fs_resize.stdout"
+    - "'is already' not in storage_root_fs_resize.stdout"
+- name: Rename volume group
+  community.general.lvg_rename:
+    vg: "{{ ansible_hostname }}-vg"
+    vg_new: local-vg
+  when:
+    - storage_old_vg_check.rc == 0
+    - not storage_vm_device | length
+  notify: Reload udev and devices
+- name: Ensure old LV symlink exists for grub-probe
+  ansible.builtin.file:
+    src: "{{ storage_new_root }}"
+    path: "{{ storage_old_root }}"
+    state: link
+  when:
+    - storage_old_vg_check.rc == 0
+    - not storage_vm_device | length
+  notify: Reload udev and devices
+- name: Trigger udev to recognize new device names
+  ansible.builtin.command:
+    cmd: udevadm trigger --action=change --type=devices --subsystem-match=block
+  changed_when: false
+- name: Update /etc/fstab root entry
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: "{{ storage_old_root | regex_escape }}"
+    replace: "{{ storage_new_root }}"
+  when:
+    - storage_old_vg_check.rc == 0
+    - not storage_vm_device | length
+  notify: Update fstab and GRUB
+- name: Ensure root LV is set exactly once via grub.d drop-in
+  ansible.builtin.copy:
+    dest: /etc/default/grub.d/10-root-lv.cfg
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      # Managed by Ansible: force single root= parameter
+      GRUB_CMDLINE_LINUX="root={{ storage_new_root }} $GRUB_CMDLINE_LINUX"
+  notify: Update fstab and GRUB

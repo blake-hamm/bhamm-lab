@@ -10,6 +10,9 @@
 - name: Configure Ceph RGW
   ansible.builtin.include_tasks: ceph-rgw.yml
   when: pve_ceph_rgw_enabled | bool
+- name: Configure Erasure-Coded CephFS
+  ansible.builtin.include_tasks: ceph-ecfs.yml
+  when: pve_ceph_ecfs_enabled | bool
 - name: Install pbs
   ansible.builtin.include_tasks: pbs.yml
   when: proxmox_pbs

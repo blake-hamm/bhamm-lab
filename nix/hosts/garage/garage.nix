@@ -1,11 +1,11 @@
 # nix/hosts/garage/garage.nix
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 {
   # Garage S3 Object Storage
   services.garage = {
     enable = true;
-    package = pkgs.garage_2;
+    package = inputs.garage-upstream.packages.${pkgs.system}.default;
     environmentFile = config.sops.templates."garage-env".path;
     extraEnvironment = {
       GARAGE_DEFAULT_BUCKET = "ceph-rgw";
@@ -119,9 +119,9 @@
         export GARAGE_DEFAULT_SECRET_KEY=$(cat "${config.sops.secrets.garage_s3_secret_key.path}")
 
         if [ ! -d /var/lib/garage/meta ]; then
-          exec ${pkgs.garage_2}/bin/garage server --single-node --default-bucket
+          exec ${inputs.garage-upstream.packages.${pkgs.system}.default}/bin/garage server --single-node --default-bucket
         else
-          exec ${pkgs.garage_2}/bin/garage server
+          exec ${inputs.garage-upstream.packages.${pkgs.system}.default}/bin/garage server
         fi
       '');
     };
@@ -140,7 +140,27 @@
   # NIC 2: VLAN 30 (Kubernetes/Prometheus)
   # Proxmox handles VLAN tagging transparently via a second virtio NIC.
   networking.interfaces."eth1" = {
+    mtu = 9000;
     ipv4.addresses = [{ address = "10.0.30.21"; prefixLength = 24; }];
+  };
+
+  # NIC 1: VLAN 20 (Storage/Services)
+  # eth0 is configured via cfg.networking.static in default.nix,
+  # but MTU must be set explicitly here to match Proxmox jumbo frames.
+  networking.interfaces."eth0".mtu = 9000;
+
+  # 10GbE / jumbo frame TCP tuning (mirrors Talos node sysctls)
+  boot.kernel.sysctl = {
+    "net.core.default_qdisc" = "fq";
+    "net.core.rmem_max" = 67108864;
+    "net.core.wmem_max" = 67108864;
+    "net.core.netdev_max_backlog" = 30000;
+    "net.ipv4.tcp_congestion_control" = "cubic";
+    "net.ipv4.tcp_fastopen" = 3;
+    "net.ipv4.tcp_mtu_probing" = 1;
+    "net.ipv4.tcp_rmem" = "4096 65536 67108864";
+    "net.ipv4.tcp_wmem" = "4096 65536 67108864";
+    "net.ipv4.tcp_window_scaling" = 1;
   };
 
   # Open firewall for S3 API and admin/metrics

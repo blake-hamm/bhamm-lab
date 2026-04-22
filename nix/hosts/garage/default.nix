@@ -27,9 +27,10 @@
   services.cloud-init.enable = false;
   services.cloud-init.network.enable = false;
 
-  # Remove stale cloud-init network config that shadows NixOS systemd-networkd
+  # Remove stale cloud-init network configs for both interfaces
   systemd.tmpfiles.rules = [
     "R /etc/systemd/network/10-cloud-init-eth0.network - - - -"
+    "R /etc/systemd/network/10-cloud-init-eth1.network - - - -"
   ];
 
   # Keep virtio NIC named eth0 (matches cfg.networking.static.interface)

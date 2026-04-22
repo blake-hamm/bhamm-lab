@@ -33,18 +33,21 @@ spec:
         provisioner:
           replicaCount: 1
         csiConfig:
-          - clusterID: "25afe9dc-2a59-4135-b1fc-6728b065c2a9"
+          - clusterID: "35ac4f5e-cdf1-4150-b706-3fd8c0e8b5f5"
             monitors:
+              - "10.0.20.11:6789"
               - "10.0.20.11:3300"
+              - "10.0.20.12:6789"
               - "10.0.20.12:3300"
-              - "10.0.20.15:3300"
+              - "10.0.20.13:6789"
+              - "10.0.20.13:3300"
         storageClass:
           create: true
           name: csi-rbd-sc
           annotations:
             storageclass.kubernetes.io/is-default-class: "true"
-          clusterID: "25afe9dc-2a59-4135-b1fc-6728b065c2a9"
-          pool: osd
+          clusterID: "35ac4f5e-cdf1-4150-b706-3fd8c0e8b5f5"
+          pool: rbd
           mountOptions:
             - discard
           provisionerSecret: csi-rbd-secret

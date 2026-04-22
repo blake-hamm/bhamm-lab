@@ -37,6 +37,7 @@
   loop: "{{ groups['proxmox'] }}"
   loop_control:
     label: "{{ item }}"
+  changed_when: false
   when:
     - pve_ceph_rgw_enabled | bool
     - inventory_hostname == (groups['proxmox'] | first)
@@ -71,7 +72,8 @@
   run_once: true
 - name: Copy keyring to Proxmox ClusterFS for distribution
   ansible.builtin.command:
-    cmd: cp -p /etc/ceph/ceph.client.radosgw.keyring /etc/pve/priv/ceph.client.radosgw.keyring
+    cmd: cp /etc/ceph/ceph.client.radosgw.keyring /etc/pve/priv/ceph.client.radosgw.keyring
+  changed_when: false
   when:
     - pve_ceph_rgw_enabled | bool
     - inventory_hostname == (groups['proxmox'] | first)
@@ -88,9 +90,14 @@
     - inventory_hostname == (groups['proxmox'] | first)
   run_once: true
 - name: Ensure Erasure Code Profile Exists
-  ansible.builtin.command: >
-    ceph osd erasure-code-profile set {{ pve_ceph_rgw_ec_profile_name }} k={{ pve_ceph_rgw_ec_k }} m={{ pve_ceph_rgw_ec_m }} crush-failure-domain={{ pve_ceph_rgw_ec_failure_domain }} plugin={{ pve_ceph_rgw_ec_plugin }} technique={{ pve_ceph_rgw_ec_technique }} stripe_unit={{ pve_ceph_rgw_ec_stripe_unit }}
-
+  ansible.builtin.command: |
+    ceph osd erasure-code-profile set {{ pve_ceph_rgw_ec_profile_name }} \
+      k={{ pve_ceph_rgw_ec_k }} \
+      m={{ pve_ceph_rgw_ec_m }} \
+      crush-failure-domain={{ pve_ceph_rgw_ec_failure_domain }} \
+      plugin={{ pve_ceph_rgw_ec_plugin }} \
+      technique={{ pve_ceph_rgw_ec_technique }} \
+      stripe_unit={{ pve_ceph_rgw_ec_stripe_unit }}
   register: proxmox_ec_profile_creation
   failed_when: "proxmox_ec_profile_creation.rc != 0 and 'already exists' not in proxmox_ec_profile_creation.stderr"
   changed_when: "'already exists' not in proxmox_ec_profile_creation.stderr"
@@ -122,7 +129,7 @@
 - name: Set min_size on RGW data pool
   ansible.builtin.command: ceph osd pool set default.rgw.buckets.data min_size 2
   register: proxmox_rgw_ec_minsize
-  changed_when: "'already' not in proxmox_rgw_ec_minsize.stderr"
+  changed_when: false
   when:
     - pve_ceph_rgw_enabled | bool
     - inventory_hostname == (groups['proxmox'] | first)
@@ -130,7 +137,7 @@
 - name: Flag RGW data pool as bulk for autoscaler
   ansible.builtin.command: ceph osd pool set default.rgw.buckets.data bulk true
   register: proxmox_rgw_ec_bulk
-  changed_when: "'already' not in proxmox_rgw_ec_bulk.stderr"
+  changed_when: false
   when:
     - pve_ceph_rgw_enabled | bool
     - inventory_hostname == (groups['proxmox'] | first)
@@ -142,7 +149,7 @@
     - default.rgw.buckets.non-ec
   register: proxmox_rgw_app_enable
   failed_when: "proxmox_rgw_app_enable.rc != 0 and 'already enabled' not in proxmox_rgw_app_enable.stderr"
-  changed_when: "'already enabled' not in proxmox_rgw_app_enable.stderr"
+  changed_when: false
   when:
     - pve_ceph_rgw_enabled | bool
     - inventory_hostname == (groups['proxmox'] | first)

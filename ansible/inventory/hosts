@@ -1,7 +1,7 @@
 # debian bootstrap args: ansible_port=22 ansible_ssh_common_args="-o PasswordAuthentication=yes"
 method ansible_host=10.0.20.11
 indy ansible_host=10.0.20.12
-japan ansible_host=10.0.20.15
+japan ansible_host=10.0.20.13
 opnsense ansible_host=10.0.9.1
 
 [debian]

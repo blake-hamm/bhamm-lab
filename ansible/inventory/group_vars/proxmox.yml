@@ -3,10 +3,8 @@ ssh_allow_users: ""
 ssh_authorized_keys:
   bhamm:
     - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKsS2H4frdi7AvzkGMPMRaQ+B46Af5oaRFtNJY3uCHt blake.j.hamm@gmail.com
-    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEn6e5VeOkY4WcW0wPmz8uWj+yd+kulj7Ls7upTdKFUO gitea@bhamm-lab.com
   root:
     - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKsS2H4frdi7AvzkGMPMRaQ+B46Af5oaRFtNJY3uCHt blake.j.hamm@gmail.com
-    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEn6e5VeOkY4WcW0wPmz8uWj+yd+kulj7Ls7upTdKFUO gitea@bhamm-lab.com
 network_nameservers:
   - 10.0.9.2
 # vars for ansible/roles/proxmox
@@ -59,7 +57,7 @@ pve_roles:
       - "VM.Config.Network"
       - "VM.Config.Options"
       - "VM.Migrate"
-      - "VM.Monitor"
+      - "VM.Console"
       - "VM.PowerMgmt"
       - "SDN.Use"
 pve_manage_ssh: false
@@ -87,20 +85,39 @@ proxmox_reset_ceph: false
 pve_ceph_enabled: true
 pve_ceph_network: '10.0.20.0/24'
 pve_ceph_cluster_network: '10.0.50.0/24'
-pve_ceph_repository_line: "deb http://download.proxmox.com/debian/ceph-squid bookworm no-subscription"
+# pve_ceph_repository_line: "deb http://download.proxmox.com/debian/ceph-squid bookworm no-subscription"
+pve_ceph_crush_rules: [] # Not idempotent upstream
+# - name: ssd_rule
+#   class: ssd
+#   type: host
+#   min_size: 1
+#   max_size: 10
 pve_ceph_pools:
-  - name: osd
-    rule: replicated_rule
+  - name: rbd
+    size: 3
+    min_size: 2
+    pgs: 128
+    rule: ssd_rule
     application: rbd
-    autoscale_mode: 'on'
+    autoscale_mode: "on"
     storage: true
-pve_ceph_fs:
-  - name: cephfs
-    pgs: 32
-    rule: replicated_rule
-    storage: true
-pve_ceph_crush_rules: []
+pve_ceph_fs: []
 pve_ceph_rgw_enabled: true
+# EC CephFS Configuration
+pve_ceph_ecfs_enabled: true
+pve_ceph_ecfs_name: cephfs
+pve_ceph_ecfs_storage_name: cephfs
+pve_ceph_ecfs_content: ["backup", "iso", "vztmpl", "snippets"]
+pve_ceph_ecfs_ec_k: 2
+pve_ceph_ecfs_ec_m: 1
+pve_ceph_ecfs_ec_failure_domain: host
+pve_ceph_ecfs_ec_plugin: isa
+pve_ceph_ecfs_ec_technique: reed_sol_van
+pve_ceph_ecfs_ec_profile_name: ec-2-1-profile
+pve_ceph_ecfs_ec_stripe_unit: 16384
+pve_ceph_ecfs_ec_pgs: 128
+pve_ceph_ecfs_metadata_pgs: 32
+pve_ceph_ecfs_backup_pgs: 32
 # pve_cluster_ha_groups:
 #   - name: main
 #     comment: "HA group"

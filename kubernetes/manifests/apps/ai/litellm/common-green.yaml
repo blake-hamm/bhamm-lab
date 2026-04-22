@@ -33,9 +33,9 @@ spec:
         postgresql:
           enabled: true
           backup:
-            enabled: false
+            enabled: true
           restore:
-            enabled: false
+            enabled: true
         dragonfly:
           enabled: true
         externalSecrets:

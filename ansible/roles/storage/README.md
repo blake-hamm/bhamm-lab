@@ -1,38 +1,59 @@
-Role Name
-=========
+# storage
 
-A brief description of the role goes here.
+Configures LVM storage for Proxmox hosts.
 
-Requirements
-------------
+## Role behavior
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+The role operates in one of two modes depending on host hardware.
 
-Role Variables
---------------
+### Single-drive mode
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Used on hosts with one drive shared by the OS and VMs (e.g. `indy`, `japan`).
 
-Dependencies
-------------
+- Root LV is resized to `storage_root_size` (default: `100g`).
+- Root VG is renamed from `<hostname>-vg` to `local-vg`.
+- Swap LV is created/resized to `storage_swap_size` (default: `4g`).
+- Remaining space in `local-vg` is available for Proxmox VMs.
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+### Separate VM drive mode
 
-Example Playbook
-----------------
+Used on hosts with a small boot drive and a separate larger VM drive (e.g. `method`).
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+- `storage_vm_device` must be set to the VM drive path (e.g. `/dev/disk/by-id/...`).
+- Root LV on the boot drive is resized to `storage_root_size`.
+- Root VG keeps its original name (`<hostname>-vg`).
+- A separate `local-vg` is created on `storage_vm_device`.
+- Swap LV is created on the root VG.
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+## Variables
 
-License
--------
+### `defaults/main.yml`
 
-BSD
+| Variable            | Default | Description                                          |
+|---------------------|---------|------------------------------------------------------|
+| `storage_vm_device` | `""`    | Path to dedicated VM storage device. Empty string enables single-drive mode. |
+| `storage_root_size` | `100g`  | Size of the root logical volume.                     |
+| `storage_swap_size` | `4g`    | Size of the swap logical volume.                     |
+| `storage_resize_swap`| `true` | Whether to create/resize swap.                       |
 
-Author Information
-------------------
+### `vars/main.yml`
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+| Variable         | Value                        | Description                              |
+|------------------|------------------------------|------------------------------------------|
+| `storage_root_vg`| `local-vg` or `<hostname>-vg`| Dynamically set based on mode.           |
+| `storage_root_lv`| `/dev/<vg>/root`             | Full path to the root logical volume.    |
+| `storage_swap_lv`| `/dev/<vg>/swap1`            | Full path to the swap logical volume.    |
+
+## Why `local-vg`?
+
+The [`lae.proxmox`](https://galaxy.ansible.com/lae/proxmox) role provisions Proxmox storage using `vgname: local-vg`. Using a consistent VG name across all hosts lets Terraform provision VMs without per-host logic.
+
+## Idempotency
+
+The role is fully idempotent. Re-runs report no changes when the system is already correctly configured.
+
+## Known behaviors
+
+- Uses `/dev/<vg>/<lv>` paths instead of `/dev/mapper/` to avoid LVM rename escaping issues.
+- Swap LV resize uses remove-and-recreate because `lvreduce` cannot shrink swap filesystems.
+- Filesystem resize uses separate `xfs_growfs`/`resize2fs` calls because `lvol resizefs` fails after a VG rename.

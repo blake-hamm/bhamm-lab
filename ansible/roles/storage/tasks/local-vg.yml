@@ -1,0 +1,99 @@
+# local-vg.yml - Create a dedicated LVM volume group on a separate device for VM storage
+# Only runs when storage_vm_device is defined and non-empty
+- name: Resolve VM device canonical path
+  ansible.builtin.command:
+    cmd: "readlink -f {{ storage_vm_device }}"
+  register: storage_vm_dev_readlink
+  changed_when: false
+- name: Set canonical device path fact
+  ansible.builtin.set_fact:
+    storage_vm_device_canonical: "{{ storage_vm_dev_readlink.stdout }}"
+- name: Verify VM device is a block device
+  ansible.builtin.stat:
+    path: "{{ storage_vm_device_canonical }}"
+  register: storage_vm_dev_stat
+- name: Fail if VM device is not a block device
+  ansible.builtin.fail:
+    msg: "{{ storage_vm_device }} (resolved: {{ storage_vm_device_canonical }}) is not a block device"
+  when: not storage_vm_dev_stat.stat.exists or not storage_vm_dev_stat.stat.isblk
+- name: Check if VM device is mounted
+  ansible.builtin.command:
+    cmd: "findmnt -n -o SOURCE {{ storage_vm_device_canonical }}"
+  register: storage_vm_device_mount
+  changed_when: false
+  failed_when: false
+- name: Fail if VM device is mounted
+  ansible.builtin.fail:
+    msg: "Device {{ storage_vm_device_canonical }} is mounted at {{ storage_vm_device_mount.stdout }}"
+  when:
+    - storage_vm_device_mount.rc == 0
+    - storage_vm_device_mount.stdout | length > 0
+- name: Check if VM device is a PV in root VG
+  ansible.builtin.command:
+    cmd: "pvs --noheadings -o pv_name,vg_name {{ storage_vm_device_canonical }}"
+  register: storage_vm_device_pv
+  changed_when: false
+  failed_when: false
+- name: Fail if VM device is in root VG
+  ansible.builtin.fail:
+    msg: "Device {{ storage_vm_device_canonical }} is already a PV in {{ storage_root_vg }}"
+  when:
+    - storage_vm_device_pv.rc == 0
+    - storage_root_vg in storage_vm_device_pv.stdout
+- name: Check if local-vg already exists on expected device
+  ansible.builtin.command:
+    cmd: "pvs --noheadings -o vg_name {{ storage_vm_device_canonical }}"
+  register: storage_local_vg_on_expected
+  changed_when: false
+  failed_when: false
+- name: Check if local-vg exists on any device
+  ansible.builtin.command:
+    cmd: vgs --noheadings -o vg_name local-vg
+  register: storage_local_vg_exists
+  changed_when: false
+  failed_when: false
+- name: Fail if local-vg exists on unexpected device
+  ansible.builtin.fail:
+    msg: "local-vg already exists but not on {{ storage_vm_device_canonical }}"
+  when:
+    - storage_local_vg_exists.rc == 0
+    - storage_local_vg_on_expected.rc != 0
+- name: Skip if local-vg already exists on expected device
+  ansible.builtin.debug:
+    msg: "local-vg already exists on {{ storage_vm_device_canonical }}; skipping creation"
+  when:
+    - storage_local_vg_on_expected.rc == 0
+- name: Wipe filesystem signatures from VM device
+  ansible.builtin.command:
+    cmd: wipefs --all --force {{ storage_vm_device_canonical }}
+  when:
+    - storage_local_vg_on_expected.rc != 0
+  changed_when: true
+- name: Create physical volume on VM device
+  ansible.builtin.command:
+    cmd: pvcreate -y {{ storage_vm_device_canonical }}
+  when:
+    - storage_local_vg_on_expected.rc != 0
+  changed_when: true
+  register: storage_pvcreate
+  failed_when:
+    - storage_pvcreate.rc != 0
+    - "'Physical volume' not in storage_pvcreate.stderr"
+- name: Create local-vg volume group
+  ansible.builtin.command:
+    cmd: vgcreate local-vg {{ storage_vm_device_canonical }}
+  when:
+    - storage_local_vg_on_expected.rc != 0
+  changed_when: true
+  register: storage_vgcreate
+  failed_when:
+    - storage_vgcreate.rc != 0
+    - "'already exists' not in storage_vgcreate.stderr"
+- name: Scan for new volume groups
+  ansible.builtin.command:
+    cmd: vgscan
+  changed_when: false
+- name: Refresh LVM device cache
+  ansible.builtin.command:
+    cmd: pvscan --cache
+  changed_when: false

@@ -49,6 +49,11 @@ variable "garage_ip" {
   type    = string
 }
 
+variable "garage_vlan30_ip" {
+  default = "10.0.30.21"
+  type    = string
+}
+
 variable "hba_pcie_ids" {
   description = "PCIe slot addresses for the HBA controller"
   type        = list(string)

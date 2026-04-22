@@ -310,7 +310,7 @@ spec:
           - name: k8up-bucket
           - name: k8up-secret
           - name: fsGroup
-            value: 0
+            value: "0"
       dag:
         tasks:
           - name: list-snapshots
