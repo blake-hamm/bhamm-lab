@@ -42,32 +42,32 @@ spec:
           workflowNamespaces:
             - argo
         server:
-        # authModes:
-        #   - sso
-        # sso:
-        #   enabled: false
-        #   issuer: https://auth.bhamm-lab.com
-        #   clientId:
-        #     name: argo-external-secret
-        #     key: client-id
-        #   clientSecret:
-        #     name: argo-external-secret
-        #     key: client-secret
-        #   redirectUrl: "https://argo.bhamm-lab.com/oauth2/callback"
-        #   rbac:
-        #     enabled: false
-        #     secretWhitelist: []
-        #   scopes:
-        #     - 'openid'
-        #     - 'groups'
-        #     - 'email'
-        #     - 'profile'
-        #   sessionExpiry: ""
-        #   issuerAlias: ""
-        #   customGroupClaimName: ""
-        #   userInfoPath: ""
-        #   insecureSkipVerify: false
-        #   filterGroupsRegex:
+          authModes:
+            - sso
+          sso:
+            enabled: false
+            issuer: https://auth.bhamm-lab.com
+            clientId:
+              name: argo-external-secret
+              key: client-id
+            clientSecret:
+              name: argo-external-secret
+              key: client-secret
+            redirectUrl: "https://argo.bhamm-lab.com/oauth2/callback"
+            rbac:
+              enabled: false
+              secretWhitelist: []
+            scopes:
+              - 'openid'
+              - 'groups'
+              - 'email'
+              - 'profile'
+            sessionExpiry: ""
+            issuerAlias: ""
+            customGroupClaimName: ""
+            userInfoPath: ""
+            insecureSkipVerify: false
+            filterGroupsRegex:
         artifactRepository:
           s3:
             endpoint: "external-rgw.ceph.svc.cluster.local:80"
