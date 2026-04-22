@@ -309,7 +309,7 @@ data:
       items:
       - title: Garage
         description: Visit Garage grafana dashboard
-        icon: hl-grafana
+        icon: hl-garage
         url: https://grafana.bhamm-lab.com/d/ys3pnpZ4k/garage?orgId=1&from=now-6h&to=now&timezone=browser&refresh=30s
         statusCheck: false
       - title: Ceph
