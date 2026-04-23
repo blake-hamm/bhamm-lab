@@ -20,6 +20,8 @@ in
       home.packages = [
         inputs.llm-agents.packages.${pkgs.system}.pi
         pkgs.nodejs # pi needs npm to resolve packages
+        pkgs.ffmpeg # pi-web-access video frame extraction
+        pkgs.yt-dlp # pi-web-access YouTube stream URLs
       ];
 
       # Pi auth: credentials for providers
@@ -40,11 +42,41 @@ in
         source = ./catppuccin-mocha.json;
       };
 
+      # Pi web search settings: sane defaults for pi-web-access
+      # Note: YouTube and local video analysis are disabled because they require
+      # Gemini API/Web access. With only Kimi credentials available, these features
+      # would fail. Web search still works via Exa MCP (zero-config) and Perplexity.
+      home.file.".pi/web-search.json" = {
+        force = true;
+        text = builtins.toJSON {
+          provider = "auto";
+          workflow = "summary-review";
+          curatorTimeoutSeconds = 20;
+          githubClone = {
+            enabled = true;
+            maxRepoSizeMB = 350;
+            cloneTimeoutSeconds = 30;
+            clonePath = "/tmp/pi-github-repos";
+          };
+          youtube = {
+            enabled = false;
+          };
+          video = {
+            enabled = false;
+          };
+          shortcuts = {
+            curate = "ctrl+shift+s";
+            activity = "ctrl+shift+w";
+          };
+        };
+      };
+
       # Pi settings: defaults and behavior
       home.file.".pi/agent/settings.json" = {
         force = true;
         text = builtins.toJSON {
-          model = "kimi-for-coding/k2p6";
+          defaultProvider = "kimi-coding";
+          defaultModel = "kimi-for-coding";
           theme = "catppuccin-mocha";
           defaultThinkingLevel = "high";
           quietStartup = false;
@@ -83,7 +115,41 @@ in
           packages = [
             "npm:pi-web-access"
             "npm:pi-subagents"
+            "npm:pi-rewind"
           ];
+
+          subagents = {
+            agentOverrides = {
+              scout = {
+                model = "kimi-coding/kimi-for-coding";
+                thinking = "high";
+              };
+              planner = {
+                model = "kimi-coding/kimi-for-coding";
+                thinking = "high";
+              };
+              worker = {
+                model = "kimi-coding/kimi-for-coding";
+                thinking = "high";
+              };
+              reviewer = {
+                model = "kimi-coding/kimi-for-coding";
+                thinking = "high";
+              };
+              context-builder = {
+                model = "kimi-coding/kimi-for-coding";
+                thinking = "high";
+              };
+              researcher = {
+                model = "kimi-coding/kimi-for-coding";
+                thinking = "high";
+              };
+              delegate = {
+                model = "kimi-coding/kimi-for-coding";
+                thinking = "high";
+              };
+            };
+          };
         };
       };
     };
