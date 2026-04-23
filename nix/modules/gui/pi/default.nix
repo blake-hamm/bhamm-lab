@@ -78,7 +78,7 @@ in
           defaultProvider = "kimi-coding";
           defaultModel = "kimi-for-coding";
           theme = "catppuccin-mocha";
-          defaultThinkingLevel = "high";
+          defaultThinkingLevel = "medium";
           quietStartup = false;
           collapseChangelog = true;
           enableInstallTelemetry = false;
@@ -122,31 +122,31 @@ in
             agentOverrides = {
               scout = {
                 model = "kimi-coding/kimi-for-coding";
-                thinking = "high";
+                thinking = "minimal";
               };
               planner = {
                 model = "kimi-coding/kimi-for-coding";
-                thinking = "high";
+                thinking = "medium";
               };
               worker = {
                 model = "kimi-coding/kimi-for-coding";
-                thinking = "high";
+                thinking = "medium";
               };
               reviewer = {
                 model = "kimi-coding/kimi-for-coding";
-                thinking = "high";
+                thinking = "medium";
               };
               context-builder = {
                 model = "kimi-coding/kimi-for-coding";
-                thinking = "high";
+                thinking = "medium";
               };
               researcher = {
                 model = "kimi-coding/kimi-for-coding";
-                thinking = "high";
+                thinking = "medium";
               };
               delegate = {
                 model = "kimi-coding/kimi-for-coding";
-                thinking = "high";
+                thinking = "minimal";
               };
             };
           };
