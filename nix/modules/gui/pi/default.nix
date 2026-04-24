@@ -71,6 +71,41 @@ in
         };
       };
 
+      # Global AGENTS.md: Karpathy principles + caveman-lite + delegation hints
+      home.file.".pi/agent/AGENTS.md" = {
+        force = true;
+        source = ./agents.md;
+      };
+
+      # Global skills
+      home.file.".pi/agent/skills/council/SKILL.md" = {
+        force = true;
+        source = ./skills/council/SKILL.md;
+      };
+      home.file.".pi/agent/skills/interview/SKILL.md" = {
+        force = true;
+        source = ./skills/interview/SKILL.md;
+      };
+
+      # Custom subagents
+      home.file.".pi/agent/agents/architect.md" = {
+        force = true;
+        source = ./agents/architect.md;
+      };
+      home.file.".pi/agent/agents/product.md" = {
+        force = true;
+        source = ./agents/product.md;
+      };
+
+      # Pi caveman: default to lite mode
+      home.file.".pi/agent/caveman.json" = {
+        force = true;
+        text = builtins.toJSON {
+          defaultLevel = "full";
+          showStatus = true;
+        };
+      };
+
       # Pi settings: defaults and behavior
       home.file.".pi/agent/settings.json" = {
         force = true;
@@ -79,9 +114,10 @@ in
           defaultModel = "kimi-for-coding";
           theme = "catppuccin-mocha";
           defaultThinkingLevel = "medium";
-          quietStartup = false;
+          quietStartup = true;
           collapseChangelog = true;
           enableInstallTelemetry = false;
+          enableSkillCommands = true;
 
           compaction = {
             enabled = true;
@@ -98,7 +134,7 @@ in
 
           steeringMode = "one-at-a-time";
           followUpMode = "one-at-a-time";
-          transport = "auto";
+          transport = "websocket";
 
           terminal = {
             showImages = true;
@@ -116,6 +152,8 @@ in
             "npm:pi-web-access"
             "npm:pi-subagents"
             "npm:pi-rewind"
+            "git:github.com/jonjonrankin/pi-caveman"
+            "npm:@devkade/pi-plan"
           ];
 
           subagents = {
@@ -126,27 +164,28 @@ in
               };
               planner = {
                 model = "kimi-coding/kimi-for-coding";
-                thinking = "medium";
               };
               worker = {
                 model = "kimi-coding/kimi-for-coding";
-                thinking = "medium";
               };
               reviewer = {
                 model = "kimi-coding/kimi-for-coding";
-                thinking = "medium";
               };
               context-builder = {
                 model = "kimi-coding/kimi-for-coding";
-                thinking = "medium";
               };
               researcher = {
                 model = "kimi-coding/kimi-for-coding";
-                thinking = "medium";
               };
               delegate = {
                 model = "kimi-coding/kimi-for-coding";
                 thinking = "minimal";
+              };
+              oracle = {
+                model = "kimi-coding/kimi-for-coding";
+              };
+              oracle-executor = {
+                model = "kimi-coding/kimi-for-coding";
               };
             };
           };
