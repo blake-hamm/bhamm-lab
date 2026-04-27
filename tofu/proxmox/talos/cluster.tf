@@ -115,7 +115,10 @@ resource "talos_machine_configuration_apply" "bare_metal" {
     yamlencode({
       machine = {
         install = {
-          disk = var.metal_amd_framework_disk_path
+          diskSelector = {
+            size = "< 1TB"
+            type = "nvme"
+          }
           extraKernelArgs = [
             "amd_iommu=off",
             "amdgpu.gttsize=122800",
