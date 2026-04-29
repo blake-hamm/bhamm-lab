@@ -5,6 +5,8 @@ let
     mkdir -p "${"$"}{NPM_CONFIG_PREFIX}/lib"
     exec ${pkgs.nodejs}/bin/npm "$@"
   '';
+  kimiKeyPath = config.sops.secrets.kimi_api_key.path;
+  litellmKeyPath = config.sops.secrets.litellm_api_key.path;
 in
 {
   options.cfg.pi.enable = lib.mkEnableOption "pi coding agent";
@@ -21,7 +23,7 @@ in
       owner = shared.username;
     };
 
-    home-manager.users.${shared.username} = {
+    home-manager.users.${shared.username} = { config, lib, ... }: {
       home.packages = [
         inputs.llm-agents.packages.${pkgs.system}.pi
         pkgs.nodejs # pi needs npm to resolve packages
@@ -36,41 +38,33 @@ in
         text = builtins.toJSON {
           "kimi-coding" = {
             type = "api_key";
-            key = "!cat ${config.sops.secrets.kimi_api_key.path}";
+            key = "!cat ${kimiKeyPath}";
           };
         };
       };
 
-      # Pi models: custom providers
-      home.file.".pi/agent/models.json" = {
-        force = true;
-        text = builtins.toJSON {
-          providers = {
-            litellm = {
-              baseUrl = "https://litellm.bhamm-lab.com/v1";
-              api = "openai-completions";
-              apiKey = "!cat ${config.sops.secrets.litellm_api_key.path}";
-              authHeader = true;
-              compat = {
-                supportsStore = false;
-                supportsDeveloperRole = false;
-                supportsReasoningEffort = false;
-              };
-              models = [
-                {
-                  id = "gpt-oss-120b";
-                  name = "GPT OSS 120b";
-                  reasoning = false;
-                  input = [ "text" ];
-                  contextWindow = 65536;
-                  maxTokens = 4096;
-                  cost = { input = 0; output = 0; cacheRead = 0; cacheWrite = 0; };
-                }
-              ];
-            };
-          };
-        };
-      };
+      # Dynamic model discovery via pi-dynamic-models extension.
+      # The extension does not resolve !command syntax itself, so we write the
+      # config at activation time after sops-nix secrets are available on disk.
+      home.activation.piDynamicModels = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        mkdir -p "${config.home.homeDirectory}/.pi/agent/settings"
+        ${pkgs.jq}/bin/jq -n \
+          --arg key "$(${pkgs.coreutils}/bin/cat ${litellmKeyPath})" \
+          '[
+            {
+              provider: "litellm",
+              baseUrl: "https://litellm.bhamm-lab.com/v1",
+              apiKey: $key,
+              api: "openai-completions",
+              compat: {
+                supportsStore: false,
+                supportsDeveloperRole: false,
+                supportsReasoningEffort: false
+              }
+            }
+          ]' > "${config.home.homeDirectory}/.pi/agent/settings/pi-dynamic-models.json"
+      '';
+
 
       # Pi themes
       home.file.".pi/agent/themes/catppuccin-mocha.json" = {
@@ -206,6 +200,7 @@ in
             "npm:pi-rewind"
             "git:github.com/jonjonrankin/pi-caveman"
             "npm:@devkade/pi-plan"
+            "npm:@ssweens/pi-dynamic-models"
           ];
 
           subagents = {
