@@ -27,6 +27,7 @@ spec:
             config:
               litellm_settings:
                 request_timeout: 1800
+                drop_params: true
                 modify_params: True
                 cache: False
                 cache_params:
