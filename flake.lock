@@ -419,6 +419,22 @@
         "type": "github"
       }
     },
+    "nixos-hardware": {
+      "locked": {
+        "lastModified": 1776983936,
+        "narHash": "sha256-ZOQyNqSvJ8UdrrqU1p7vaFcdL53idK+LOM8oRWEWh6o=",
+        "owner": "NixOS",
+        "repo": "nixos-hardware",
+        "rev": "2096f3f411ce46e88a79ae4eafcfc9df8ed41c61",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixos-hardware",
+        "rev": "2096f3f411ce46e88a79ae4eafcfc9df8ed41c61",
+        "type": "github"
+      }
+    },
     "nixos-images": {
       "inputs": {
         "nixos-stable": [
@@ -600,6 +616,7 @@
         "home-manager": "home-manager",
         "llm-agents": "llm-agents",
         "nixos-anywhere": "nixos-anywhere",
+        "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_4",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "opencode": "opencode",

@@ -37,6 +37,10 @@
       url = "github:deuxfleurs-org/garage/v2.3.0";
     };
 
+    nixos-hardware = {
+      url = "github:NixOS/nixos-hardware/2096f3f411ce46e88a79ae4eafcfc9df8ed41c61";
+    };
+
   };
 
   outputs = { nixpkgs, self, ... } @ inputs:
