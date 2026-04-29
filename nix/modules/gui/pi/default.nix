@@ -6,7 +6,6 @@ let
     exec ${pkgs.nodejs}/bin/npm "$@"
   '';
   kimiKeyPath = config.sops.secrets.kimi_api_key.path;
-  litellmKeyPath = config.sops.secrets.litellm_api_key.path;
 in
 {
   options.cfg.pi.enable = lib.mkEnableOption "pi coding agent";
@@ -43,28 +42,11 @@ in
         };
       };
 
-      # Dynamic model discovery via pi-dynamic-models extension.
-      # The extension does not resolve !command syntax itself, so we write the
-      # config at activation time after sops-nix secrets are available on disk.
-      home.activation.piDynamicModels = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        mkdir -p "${config.home.homeDirectory}/.pi/agent/settings"
-        ${pkgs.jq}/bin/jq -n \
-          --arg key "$(${pkgs.coreutils}/bin/cat ${litellmKeyPath})" \
-          '[
-            {
-              provider: "litellm",
-              baseUrl: "https://litellm.bhamm-lab.com/v1",
-              apiKey: $key,
-              api: "openai-completions",
-              compat: {
-                supportsStore: false,
-                supportsDeveloperRole: false,
-                supportsReasoningEffort: false
-              }
-            }
-          ]' > "${config.home.homeDirectory}/.pi/agent/settings/pi-dynamic-models.json"
-      '';
-
+      # LiteLLM dynamic model discovery extension
+      home.file.".pi/agent/extensions/litellm-discovery.ts" = {
+        force = true;
+        source = ./extensions/litellm-discovery.ts;
+      };
 
       # Pi themes
       home.file.".pi/agent/themes/catppuccin-mocha.json" = {
@@ -200,7 +182,7 @@ in
             "npm:pi-rewind"
             "git:github.com/jonjonrankin/pi-caveman"
             "npm:@devkade/pi-plan"
-            "npm:@ssweens/pi-dynamic-models"
+
           ];
 
           subagents = {
