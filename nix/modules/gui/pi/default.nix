@@ -16,6 +16,11 @@ in
       owner = shared.username;
     };
 
+    sops.secrets.litellm_api_key = {
+      key = "vault_secrets/default/litellm/LITELLM_MASTER_KEY";
+      owner = shared.username;
+    };
+
     home-manager.users.${shared.username} = {
       home.packages = [
         inputs.llm-agents.packages.${pkgs.system}.pi
@@ -32,6 +37,37 @@ in
           "kimi-coding" = {
             type = "api_key";
             key = "!cat ${config.sops.secrets.kimi_api_key.path}";
+          };
+        };
+      };
+
+      # Pi models: custom providers
+      home.file.".pi/agent/models.json" = {
+        force = true;
+        text = builtins.toJSON {
+          providers = {
+            litellm = {
+              baseUrl = "https://litellm.bhamm-lab.com/v1";
+              api = "openai-completions";
+              apiKey = "!cat ${config.sops.secrets.litellm_api_key.path}";
+              authHeader = true;
+              compat = {
+                supportsStore = false;
+                supportsDeveloperRole = false;
+                supportsReasoningEffort = false;
+              };
+              models = [
+                {
+                  id = "gpt-oss-120b";
+                  name = "GPT OSS 120b";
+                  reasoning = false;
+                  input = [ "text" ];
+                  contextWindow = 65536;
+                  maxTokens = 4096;
+                  cost = { input = 0; output = 0; cacheRead = 0; cacheWrite = 0; };
+                }
+              ];
+            };
           };
         };
       };
@@ -87,7 +123,23 @@ in
         source = ./skills/interview/SKILL.md;
       };
 
-      # Custom subagents
+      # Custom subagents (override builtins to suppress cwd output files)
+      home.file.".pi/agent/agents/scout.md" = {
+        force = true;
+        source = ./agents/scout.md;
+      };
+      home.file.".pi/agent/agents/planner.md" = {
+        force = true;
+        source = ./agents/planner.md;
+      };
+      home.file.".pi/agent/agents/researcher.md" = {
+        force = true;
+        source = ./agents/researcher.md;
+      };
+      home.file.".pi/agent/agents/context-builder.md" = {
+        force = true;
+        source = ./agents/context-builder.md;
+      };
       home.file.".pi/agent/agents/architect.md" = {
         force = true;
         source = ./agents/architect.md;
@@ -158,23 +210,10 @@ in
 
           subagents = {
             agentOverrides = {
-              scout = {
-                model = "kimi-coding/kimi-for-coding";
-                thinking = "minimal";
-              };
-              planner = {
-                model = "kimi-coding/kimi-for-coding";
-              };
               worker = {
                 model = "kimi-coding/kimi-for-coding";
               };
               reviewer = {
-                model = "kimi-coding/kimi-for-coding";
-              };
-              context-builder = {
-                model = "kimi-coding/kimi-for-coding";
-              };
-              researcher = {
                 model = "kimi-coding/kimi-for-coding";
               };
               delegate = {
