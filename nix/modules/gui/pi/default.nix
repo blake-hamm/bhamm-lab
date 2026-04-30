@@ -7,6 +7,7 @@ let
   '';
   kimiKeyPath = config.sops.secrets.kimi_api_key.path;
   opensenseKeyPath = config.sops.secrets.opensense_api_key.path;
+  fffBinPatched = pkgs.callPackage ./fff-bin.nix { };
 in
 {
   options.cfg.pi.enable = lib.mkEnableOption "pi coding agent";
@@ -50,6 +51,12 @@ in
             key = "!cat ${opensenseKeyPath}";
           };
         };
+      };
+
+      # Pre-seed patched fff native binary so npm reuses it instead of
+      # fetching the unpatched upstream binary that fails on NixOS.
+      home.file.".pi/npm-global/lib/node_modules/@ff-labs/fff-bin-linux-x64-gnu" = {
+        source = "${fffBinPatched}";
       };
 
       # LiteLLM dynamic model discovery extension
@@ -192,7 +199,7 @@ in
             "npm:pi-rewind"
             "git:github.com/jonjonrankin/pi-caveman"
             "npm:@devkade/pi-plan"
-
+            "npm:@ff-labs/pi-fff"
           ];
 
           subagents = {
