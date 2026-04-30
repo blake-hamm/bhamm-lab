@@ -285,9 +285,9 @@ spec:
             description: High quality MoE model for general chat
             enabled: true
             pvc:
-              storage: "40Gi"
+              storage: "70Gi"
             image:
-              tag: rocm-7.2.2
+              tag: rocm-7.2.2-pr21344
             args:
               - llama-server
               - -hf
