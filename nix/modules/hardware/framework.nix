@@ -1,4 +1,4 @@
-{ config, lib, pkgs, inputs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   options.cfg.framework.enable = lib.mkOption {
@@ -6,10 +6,6 @@
     default = false;
     description = "Enable Framework specific settings";
   };
-
-  imports = [
-    inputs.nixos-hardware.nixosModules.framework-13-7040-amd
-  ];
 
   config = lib.mkIf config.cfg.framework.enable {
     services = {
