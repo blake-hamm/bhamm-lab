@@ -6,6 +6,7 @@ let
     exec ${pkgs.nodejs}/bin/npm "$@"
   '';
   kimiKeyPath = config.sops.secrets.kimi_api_key.path;
+  opensenseKeyPath = config.sops.secrets.opensense_api_key.path;
 in
 {
   options.cfg.pi.enable = lib.mkEnableOption "pi coding agent";
@@ -19,6 +20,11 @@ in
 
     sops.secrets.litellm_api_key = {
       key = "vault_secrets/default/litellm/LITELLM_MASTER_KEY";
+      owner = shared.username;
+    };
+
+    sops.secrets.opensense_api_key = {
+      key = "vault_secrets/external/opencode/pi-framework";
       owner = shared.username;
     };
 
@@ -38,6 +44,10 @@ in
           "kimi-coding" = {
             type = "api_key";
             key = "!cat ${kimiKeyPath}";
+          };
+          "opencode" = {
+            type = "api_key";
+            key = "!cat ${opensenseKeyPath}";
           };
         };
       };
