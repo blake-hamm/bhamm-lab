@@ -285,7 +285,7 @@ spec:
             description: High quality MoE model for general chat
             enabled: true
             pvc:
-              storage: "70Gi"
+              storage: "40Gi"
             image:
               tag: rocm-7.2.2-pr21344
             args:
