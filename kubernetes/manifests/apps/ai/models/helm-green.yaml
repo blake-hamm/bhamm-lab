@@ -281,6 +281,57 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
+          - name: qwen-36-a3b
+            description: High quality MoE model for general chat
+            enabled: true
+            pvc:
+              storage: "40Gi"
+            image:
+              tag: rocm-7.2.2
+            args:
+              - llama-server
+              - -hf
+              - unsloth/Qwen3.6-35B-A3B-GGUF:BF16
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - --timeout
+              - "1800"
+              - -v
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "1024"
+              - -b
+              - "1024"
+              - -c
+              - "65536"
+              - --parallel
+              - "2"
+              - --cont-batching
+              - --temp
+              - "0.8"
+              - --min-p
+              - "0.00"
+              - --top-p
+              - "0.95"
+              - --top-k
+              - "20"
+              - --presence-penalty
+              - "1.5"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "120Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
           - name: qwen-instruct
             description: High quality MoE model for general chat
             enabled: true
