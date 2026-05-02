@@ -31,4 +31,11 @@
     key = "vault_secrets/core/orangepi/password";
     restartUnits = [ "upsdrv.service" "upsd.service" "upsmon.service" ];
   };
+
+  # Prometheus NUT exporter (node/systemd already enabled via cfg.monitoring)
+  services.prometheus.exporters.nut = {
+    enable = true;
+    openFirewall = true;
+    nutServer = "127.0.0.1";
+  };
 }
