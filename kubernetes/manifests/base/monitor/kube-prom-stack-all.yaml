@@ -150,6 +150,10 @@ spec:
                 url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/main/kubernetes/manifests/base/monitor/dashboards/systemd.json
                 token: ''
               garage:
+                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/feature/beyond-vibes-0/kubernetes/manifests/base/monitor/dashboards/nut.json
+                token: ''
+                datasource: Prometheus
+              nut:
                 url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/main/kubernetes/manifests/base/monitor/dashboards/garage.json
                 token: ''
                 datasource: Prometheus
@@ -221,6 +225,11 @@ spec:
                       - '10.0.30.21:9558' # Garage (VLAN 30 for direct L2)
                       - '10.0.9.3:9558' # orangepi-zero3
                       - '10.0.9.4:9558' # orangepi-zero3-backup
+              - job_name: 'nut'
+                static_configs:
+                  - targets:
+                      - '10.0.9.3:9199'
+                      - '10.0.9.4:9199'
               - job_name: 'garage'
                 static_configs:
                   - targets:
