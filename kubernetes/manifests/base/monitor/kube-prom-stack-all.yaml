@@ -226,6 +226,9 @@ spec:
                       - '10.0.9.3:9558' # orangepi-zero3
                       - '10.0.9.4:9558' # orangepi-zero3-backup
               - job_name: 'nut'
+                metrics_path: /ups_metrics
+                params:
+                  ups: ['cyberpower']
                 static_configs:
                   - targets:
                       - '10.0.9.3:9199'
