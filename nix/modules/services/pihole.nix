@@ -8,13 +8,6 @@
   };
 
   config = lib.mkIf config.cfg.pihole.enable {
-    services.resolved = {
-      enable = true;
-      extraConfig = ''
-        DNSStubListener=no
-        MulticastDNS=off
-      '';
-    };
     services.pihole-ftl = {
       enable = true;
       openFirewallDNS = true;
