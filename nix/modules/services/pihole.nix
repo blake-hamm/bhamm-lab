@@ -41,6 +41,10 @@
       enable = true;
       ports = [ "80r" "443s" ];
     };
+
+    # systemd-resolved binds port 53; Pi-hole needs it
+    services.resolved.enable = false;
+
     # The following silences a benign FTL.log warning:
     # WARNING API: Failed to read /etc/pihole/versions (key: internal_error)
     systemd.tmpfiles.rules = [
