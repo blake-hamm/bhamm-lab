@@ -14,6 +14,7 @@
       "productid = 0601"
     ];
     passwordFile = config.sops.secrets.nut_password.path;
+    exporter.enable = true;
   };
 
   # SOPS secrets for Keepalived authentication (shared across primary/backup)
@@ -30,12 +31,5 @@
   sops.secrets.nut_password = {
     key = "vault_secrets/core/orangepi/password";
     restartUnits = [ "upsdrv.service" "upsd.service" "upsmon.service" ];
-  };
-
-  # Prometheus NUT exporter (node/systemd already enabled via cfg.monitoring)
-  services.prometheus.exporters.nut = {
-    enable = true;
-    openFirewall = true;
-    nutServer = "127.0.0.1";
   };
 }

@@ -51,6 +51,16 @@ in
       default = null;
       description = "Path to password file for upsmon/upsd users";
     };
+
+    exporter = {
+      enable = mkEnableOption "Prometheus NUT exporter";
+
+      nutServer = mkOption {
+        type = types.str;
+        default = "127.0.0.1";
+        description = "NUT server address for the exporter to connect to";
+      };
+    };
   };
 
   config = mkIf cfg.enable {
@@ -81,6 +91,12 @@ in
         MINUTES = "3";
         FINALDELAY = "30";
       };
+    };
+
+    services.prometheus.exporters.nut = mkIf cfg.exporter.enable {
+      enable = true;
+      openFirewall = true;
+      nutServer = cfg.exporter.nutServer;
     };
   };
 }
