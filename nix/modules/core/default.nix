@@ -8,5 +8,6 @@
     ./system.nix
     ./terminal.nix
     ./user.nix
+    ./zsh
   ];
 }

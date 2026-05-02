@@ -7,7 +7,7 @@
   cfg = {
     gnome.enable = true;
     docker.enable = true;
-    kitty.enable = true;
+    ghostty.enable = true;
     vscode.enable = true;
     precommit.enable = true;
     networking.backend = "networkmanager";
@@ -15,5 +15,6 @@
     opencode.enable = true;
     pi.enable = true;
     audio.enable = true;
+    zsh.enable = true;
   };
 }

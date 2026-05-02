@@ -11,6 +11,7 @@
     gnome.enable = lib.mkDefault false;
     docker.enable = lib.mkDefault false;
     kitty.enable = lib.mkDefault false;
+    ghostty.enable = lib.mkDefault false;
     vscode.enable = lib.mkDefault false;
     uhk.enable = lib.mkDefault false;
     vesktop.enable = lib.mkDefault false;
