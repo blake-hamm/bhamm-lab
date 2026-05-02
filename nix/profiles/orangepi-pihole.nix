@@ -32,4 +32,10 @@
     key = "vault_secrets/core/orangepi/password";
     restartUnits = [ "upsdrv.service" "upsd.service" "upsmon.service" ];
   };
+
+  # Bootloader config so colmena deploys update /boot/extlinux/extlinux.conf
+  boot.loader.generic-extlinux-compatible.enable = true;
+
+  # Use Cloudflare NTP to avoid pool.ntp.org rate-limiting after clock skew
+  services.timesyncd.servers = [ "time.cloudflare.com" ];
 }
