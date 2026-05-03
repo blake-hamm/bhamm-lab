@@ -1,5 +1,6 @@
 network_10gb_nics: [enp1s0f0, enp1s0f1]
-# storage_vm_device: /dev/disk/by-id/nvme-CT1000P3PSSD8_2422492E9226
+# VM storage on WD_BLACK SN850X 1TB
+storage_vm_device: /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502
 # Ceph DB/WAL on new 1.5TB Intel NVMe
 ceph_nvme_device: /dev/disk/by-id/nvme-INTEL_SSDPED1K015TA_PHKS8203005G1P5CGN
 ceph_partitions:
