@@ -146,7 +146,7 @@ in
       home.file.".pi/agent/caveman.json" = {
         force = true;
         text = builtins.toJSON {
-          defaultLevel = "full";
+          defaultLevel = "lite";
           showStatus = true;
         };
       };
