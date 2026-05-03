@@ -74,6 +74,26 @@ colmena apply --on orangepi-zero3 --impure
 colmena apply --on orangepi-zero3-backup --impure
 ```
 
+### Rebuilding the SD Card Image
+
+Requires an `aarch64-linux` builder (QEMU binfmt, remote builder, or native on-device).
+
+```bash
+# Primary
+nix build .#nixosConfigurations.orangepi-zero3-image.config.system.build.sdImage
+
+# Backup
+nix build .#nixosConfigurations.orangepi-zero3-backup-image.config.system.build.sdImage
+```
+
+Result: `./result/sd-image/nixos-image-sd-card-*.img.zst`
+
+**Flash to SD card** (verify `/dev/sdX` with `lsblk`):
+
+```bash
+zstdcat result/sd-image/nixos-image-sd-card-*.img.zst | sudo dd of=/dev/sdX bs=4M status=progress conv=fsync
+```
+
 ### Failover Testing
 
 ```bash

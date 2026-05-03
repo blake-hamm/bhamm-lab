@@ -26,6 +26,8 @@
 
     opencode.url = "github:anomalyco/opencode/704fca074d9b14b0d34c8933f175234729ee9b6e";
 
+    llm-agents.url = "github:numtide/llm-agents.nix";
+
     nixos-anywhere = {
       url = "github:nix-community/nixos-anywhere";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -33,6 +35,10 @@
 
     garage-upstream = {
       url = "github:deuxfleurs-org/garage/v2.3.0";
+    };
+
+    nixos-hardware = {
+      url = "github:NixOS/nixos-hardware/2096f3f411ce46e88a79ae4eafcfc9df8ed41c61";
     };
 
   };

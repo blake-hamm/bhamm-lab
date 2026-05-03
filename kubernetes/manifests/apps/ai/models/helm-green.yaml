@@ -12,7 +12,7 @@ spec:
     namespace: models
   source:
     repoURL: https://github.com/blake-hamm/kube-ai-stack.git
-    targetRevision: main
+    targetRevision: fix/svc-labels
     path: charts/kube-ai-stack
     helm:
       valuesObject:
@@ -27,6 +27,7 @@ spec:
             config:
               litellm_settings:
                 request_timeout: 1800
+                drop_params: true
                 modify_params: True
                 cache: False
                 cache_params:
@@ -188,7 +189,7 @@ spec:
             pvc:
               storage: "80Gi"
             image:
-              tag: rocm7-nightlies_20260205T023611
+              tag: rocm-7.2.2
             args:
               - llama-server
               - -hf
@@ -267,6 +268,58 @@ spec:
               - "0.00"
               - --top-p
               - "0.8"
+              - --top-k
+              - "20"
+              - --presence-penalty
+              - "1.5"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "120Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
+          - name: qwen-36-a3b
+            description: High quality MoE model for general chat
+            enabled: true
+            pvc:
+              storage: "40Gi"
+            image:
+              tag: vulkan-amdvlk_20260430T172622
+            args:
+              - llama-server
+              - -hf
+              - unsloth/Qwen3.6-35B-A3B-GGUF:BF16
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - --timeout
+              - "1800"
+              - -v
+              - --no-warmup
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - -ub
+              - "1024"
+              - -b
+              - "1024"
+              - -c
+              - "131072"
+              - --parallel
+              - "2"
+              - --cont-batching
+              - --temp
+              - "0.8"
+              - --min-p
+              - "0.00"
+              - --top-p
+              - "0.95"
               - --top-k
               - "20"
               - --presence-penalty
@@ -539,7 +592,7 @@ spec:
             pvc:
               storage: "80Gi"
             image:
-              tag: rocm7-nightlies_20260213T024720 #vulkan-radv_20260211T025037
+              tag: rocm-7.2.2 #vulkan-radv_20260211T025037
             args:
               - llama-server
               - -hf
@@ -881,7 +934,7 @@ spec:
             description: Reasoning model from nvidia
             enabled: true
             image:
-              tag: rocm7-nightlies_20260213T024720 #vulkan-radv_20260211T025037
+              tag: rocm-7.2.2 #vulkan-radv_20260211T025037
             pvc:
               storage: "70Gi"
             args:
@@ -923,7 +976,7 @@ spec:
             pvc:
               storage: "60Gi"
             image:
-              tag: rocm7-nightlies_20260213T024720
+              tag: rocm-7.2.2
             args:
               - llama-server
               - -hf
@@ -1072,7 +1125,7 @@ spec:
             pvc:
               storage: "70Gi"
             image:
-              tag: rocm7-nightlies_20260213T024720 #vulkan-radv_20260211T025037
+              tag: rocm-7.2.2 #vulkan-radv_20260211T025037
             args:
               - llama-server
               - -hf
@@ -1121,7 +1174,7 @@ spec:
             pvc:
               storage: "50Gi"
             image:
-              tag: rocm7-nightlies_20260213T024720 #vulkan-radv_20260211T025037
+              tag: rocm-7.2.2 #vulkan-radv_20260211T025037
             args:
               - llama-server
               - -hf
@@ -1143,7 +1196,7 @@ spec:
               - -b
               - "1024"
               - -c
-              - "65536"
+              - "131072"
               - --parallel
               - "2"
               - --cont-batching
@@ -1315,7 +1368,7 @@ spec:
             pvc:
               storage: "90Gi"
             image:
-              tag: rocm7-nightlies_20260213T024720 #vulkan-radv_20260211T025037
+              tag: rocm-7.2.2 #vulkan-radv_20260211T025037
             args:
               - llama-server
               - -hf

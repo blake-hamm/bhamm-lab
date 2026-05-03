@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/truefoundry/KubeElasti.git
-    targetRevision: v0.1.17
+    targetRevision: v0.1.23
     path: charts/elasti
     helm:
       valuesObject:

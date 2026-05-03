@@ -130,6 +130,11 @@ data:
         icon: hl-grafana
         url: https://grafana.bhamm-lab.com/d/d67da086-b996-4b94-be01-84e607a60956/systemd-exporter?orgId=1&from=now-2d&to=now&timezone=browser&var-datasource=prometheus&var-instance=10.0.20.11:9558
         statusCheck: false
+      - title: UPS
+        description: Visit NUT UPS grafana dashboard
+        icon: mdi-car-battery
+        url: https://grafana.bhamm-lab.com/d/j4a-DMWRk/ups-statistics?orgId=1&from=now-30m&to=now&timezone=browser&var-instance=10.0.9.3:9199&var-job=nut&var-ups=
+        statusCheck: false
 
     - name: Media
       icon: mdi-multimedia

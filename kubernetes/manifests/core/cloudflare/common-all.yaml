@@ -24,6 +24,10 @@ spec:
               remoteRef:
                 key: /external/cloudflare
                 property: cloudflare-token
+            - secretKey: tunnel-secret
+              remoteRef:
+                key: /external/cloudflare
+                property: tunnel_secret
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

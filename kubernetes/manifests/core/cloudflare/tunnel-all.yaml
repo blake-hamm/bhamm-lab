@@ -14,6 +14,7 @@ spec:
     email: bhamm.lab@gmail.com
     secret: cloudflare-operator-system-external-secret
     CLOUDFLARE_API_TOKEN: cloudflare-token
-  newTunnel:
-    name: external-tunnel
+    CLOUDFLARE_TUNNEL_CREDENTIAL_SECRET: tunnel-secret
+  existingTunnel:
+    id: 37d16cb9-cb73-4f21-8e76-23f03a8f502f
   noTlsVerify: false
