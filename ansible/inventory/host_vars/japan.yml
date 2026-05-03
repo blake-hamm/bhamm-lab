@@ -14,16 +14,16 @@ ceph_partitions:
     start: 201GiB
     end: 585GiB
 pve_ceph_osds:
-  # OSD 1: 3.5TB (sdd) → needs largest DB → part3 (384GiB ≈ 11%)
-  - device: /dev/sdd
+  # OSD 1: 3.5TB (sda) → needs largest DB → part3 (384GiB ≈ 11%)
+  - device: /dev/sda
     block.db: /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part3
     crush.device.class: ssd
-  # OSD 2: 1TB (sde) → part1 (100GiB ≈ 10%)
-  - device: /dev/sde
+  # OSD 2: 1TB (sdb) → part1 (100GiB ≈ 10%)
+  - device: /dev/sdb
     block.db: /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part1
     crush.device.class: ssd
-  # OSD 3: 1TB (sdf) → part2 (100GiB ≈ 10%)
-  - device: /dev/sdf
+  # OSD 3: 1TB (sdc) → part2 (100GiB ≈ 10%)
+  - device: /dev/sdc
     block.db: /dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502-part2
     crush.device.class: ssd
 pve_pcie_passthrough_enabled: true

@@ -1,4 +1,5 @@
 network_10gb_nics: [eno7np2, eno8np3]
+storage_vm_device: /dev/nvme1n1
 # Ceph config for proxmox
 ceph_nvme_device: /dev/nvme0n1
 ceph_partitions:
@@ -9,19 +10,19 @@ ceph_partitions:
   - number: 2
     name: osd2_db
     start: 101GiB
-    end: 495GiB # 394 GiB for 3.5TB OSD
-    # - number: 3
-    #   name: osd3_db
-    #   start: 495GiB
-    #   end: 931GiB      # ~436 GiB for 7TB OSD
+    end: 485GiB # 384 GiB for 3.84TB OSD
+  - number: 3
+    name: osd3_db
+    start: 485GiB
+    end: 1185GiB # 700 GiB for 7TB OSD
 # Proxmox config
 pve_ceph_osds:
-  - device: /dev/sdd # 1TB
-    block.db: /dev/disk/by-id/nvme-Sabrent_Rocket_4.0_Plus_A5CD0712179183364499-part1
+  - device: /dev/sdd # 1TB SSD
+    block.db: /dev/disk/by-id/nvme-INTEL_SSDPED1K015TA_PHKS8203003F1P5CGN-part1
     crush.device.class: ssd
-  - device: /dev/sdb # 3.5TB
-    block.db: /dev/disk/by-id/nvme-Sabrent_Rocket_4.0_Plus_A5CD0712179183364499-part2
+  - device: /dev/sdc # 3.84TB SSD
+    block.db: /dev/disk/by-id/nvme-INTEL_SSDPED1K015TA_PHKS8203003F1P5CGN-part2
     crush.device.class: ssd
-  - device: /dev/sda # 7TB (new)
-    # block.db: /dev/disk/by-id/nvme-Sabrent_Rocket_4.0_Plus_A5CD0712179183364499-part3
+  - device: /dev/sdb # 7TB SSD
+    block.db: /dev/disk/by-id/nvme-INTEL_SSDPED1K015TA_PHKS8203003F1P5CGN-part3
     crush.device.class: ssd
