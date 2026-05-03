@@ -35,6 +35,7 @@
 
         shellAliases = {
           ll = "ls -al";
+          nd = "nix develop --command zsh";
         };
 
         initContent = lib.mkMerge [
