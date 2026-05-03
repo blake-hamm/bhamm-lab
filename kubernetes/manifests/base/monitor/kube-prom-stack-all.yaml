@@ -150,11 +150,11 @@ spec:
                 url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/main/kubernetes/manifests/base/monitor/dashboards/systemd.json
                 token: ''
               garage:
-                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/feature/beyond-vibes-0/kubernetes/manifests/base/monitor/dashboards/nut.json
+                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/main/kubernetes/manifests/base/monitor/dashboards/garage.json
                 token: ''
                 datasource: Prometheus
               nut:
-                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/main/kubernetes/manifests/base/monitor/dashboards/garage.json
+                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/feature/beyond-vibes-0/kubernetes/manifests/base/monitor/dashboards/nut.json
                 token: ''
                 datasource: Prometheus
           dashboardProviders:
