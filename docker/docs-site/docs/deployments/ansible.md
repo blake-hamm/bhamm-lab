@@ -24,15 +24,18 @@ During bootstrap, the `storage` role runs automatically as part of the `debian` 
 
 It handles LVM setup for Proxmox hosts in two modes:
 
-**Single-drive hosts** (`indy`, `japan`):
-- Root LV is resized to 100GB (`storage_root_size`)
-- Root VG is renamed from `<hostname>-vg` to `local-vg`
-- Swap LV is configured to 4GB (`storage_swap_size`)
-- Remaining space in `local-vg` is used for Proxmox VM storage
+**All Proxmox hosts** (`method`, `indy`, `japan`) use dedicated boot drives with separate VM storage:
+- Boot drive keeps its original VG name (`<hostname>-vg`) with root at 100GB and swap at 4GB
+- A second `local-vg` is created on the dedicated VM storage device for Proxmox VM disks
 
-**Separate VM drive host** (`method`):
-- Boot drive keeps its original VG name (`method-vg`) with root at 100GB and swap at 4GB
-- A dedicated 1TB SSD (set via `storage_vm_device` in host vars) creates a separate `local-vg` for VM storage
+**Host-specific VM storage:**
+- `method`: 1TB NVMe (`/dev/disk/by-id/nvme-SHGP31-1000GM-2_AS0CN42841190CT25`)
+- `indy`: 1TB NVMe (`/dev/disk/by-id/nvme-Sabrent_Rocket_4.0_Plus_A5CD0712179183364499`)
+- `japan`: 1TB NVMe (`/dev/disk/by-id/nvme-WD_BLACK_SN850X_1000GB_25286M804502`)
+
+**Legacy single-drive mode** (no longer used):
+- Root VG (`<hostname>-vg`) is renamed to `local-vg`
+- Root LV is capped at 100GB, swap at 4GB; remaining space hosts VMs
 
 **Why `local-vg`?**
 - Downstream Terraform and the `lae.proxmox` role reference `local-vg` when provisioning VMs. Consistent naming avoids per-host logic.
