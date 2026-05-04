@@ -18,7 +18,10 @@ in
           theme = "catppuccin-mocha";
           font-size = 8;
           scrollback-limit = 10000000;
-          command = lib.getExe userShell;
+          command =
+            if config.cfg.tmux.enable
+            then "tmux new-session -A -s main"
+            else lib.getExe userShell;
         };
       };
     };

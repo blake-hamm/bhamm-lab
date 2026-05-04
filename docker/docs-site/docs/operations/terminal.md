@@ -1,6 +1,6 @@
-# Zsh Cheat Sheet
+# Terminal Cheat Sheet
 
-Key bindings, completions, and tools for the zsh shell configuration.
+Key bindings, completions, and tools for terminal usage across zsh and tmux.
 
 ## Key Bindings
 
@@ -56,6 +56,53 @@ Key bindings, completions, and tools for the zsh shell configuration.
 
 - `scp host:*` — works (no `no matches found` error)
 - `echo hello # comment` — inline comments work
+
+## tmux
+
+Prefix key is `Ctrl+Space` (instead of default `Ctrl+b`).
+
+### Sessions
+
+| Command | Action |
+|---------|--------|
+| `tmux new -s foo` | New session named `foo` |
+| `tmux attach -t foo` | Attach to session `foo` |
+| `tmux ls` | List sessions |
+| `Prefix + d` | Detach from session |
+| `Prefix + s` | Interactive session switcher |
+
+### Windows (tabs)
+
+| Key | Action |
+|-----|--------|
+| `Prefix + c` | New window |
+| `Prefix + n` | Next window |
+| `Prefix + p` | Previous window |
+| `Prefix + <number>` | Jump to window |
+| `Prefix + ,` | Rename window |
+| `Prefix + &` | Kill window |
+
+### Panes (splits)
+
+| Key | Action |
+|-----|--------|
+| `Prefix + %` | Split vertically |
+| `Prefix + "` | Split horizontally |
+| `Prefix + o` | Cycle panes |
+| `Prefix + q` | Show pane numbers |
+| `Prefix + x` | Kill pane |
+| `Prefix + z` | Zoom pane (toggle) |
+
+### Scroll / Copy
+
+| Key | Action |
+|-----|--------|
+| `Prefix + [` | Copy mode (scroll with arrows/PgUp/PgDn) |
+| `q` | Exit copy mode |
+
+### Ghostty Integration
+
+Ghostty is configured to auto-attach to a tmux session named `main` on launch. Every new Ghostty window joins the same session. Detach with `Prefix + d` to keep it running in the background.
 
 ## Tips
 

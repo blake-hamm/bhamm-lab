@@ -7,6 +7,7 @@
     ./ssh.nix
     ./system.nix
     ./terminal.nix
+    ./tmux.nix
     ./user.nix
     ./zsh
   ];

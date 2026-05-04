@@ -15,6 +15,7 @@
     opencode.enable = true;
     pi.enable = true;
     audio.enable = true;
+    tmux.enable = true;
     zsh.enable = true;
   };
 }
