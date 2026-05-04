@@ -17,9 +17,10 @@ in
         settings = {
           theme = "catppuccin-mocha";
           font-size = 8;
+          grapheme-width-method = "legacy";
           scrollback-limit = 10000000;
           # Drastically slow down scroll speed (default: precision:1,discrete:3)
-          mouse-scroll-multiplier = "precision:0.3,discrete:1";
+          mouse-scroll-multiplier = "precision:0.2,discrete:1";
           command =
             if config.cfg.tmux.enable
             then "tmux new-session -A -s main"

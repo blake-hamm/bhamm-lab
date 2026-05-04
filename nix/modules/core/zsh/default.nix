@@ -46,6 +46,7 @@
         shellAliases = {
           ll = "ls -al";
           nd = "nix develop --command zsh";
+          k9s = "TERM=xterm-256color k9s";
         };
 
         initContent = lib.mkMerge [

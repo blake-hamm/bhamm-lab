@@ -8,6 +8,7 @@
   home-manager = {
     useUserPackages = true;
     useGlobalPkgs = true;
+    backupFileExtension = "backup";
     extraSpecialArgs = { inherit inputs shared; };
     sharedModules = [
       inputs.catppuccin.homeModules.catppuccin
@@ -19,6 +20,12 @@
       systemd.user.startServices = "sd-switch";
       home.stateVersion = "${shared.nixVersion}";
       catppuccin.enable = true;
+      catppuccin.flavor = "mocha";
+
+      programs.k9s = {
+        enable = true;
+        catppuccin.enable = true;
+      };
     };
   };
 }

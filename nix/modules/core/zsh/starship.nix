@@ -46,7 +46,7 @@
             diverged = "⇕ ";
             up_to_date = "";
             untracked = "?$count ";
-            stashed = "\$$count ";
+            stashed = "$count ";
             modified = "!$count ";
             staged = "+$count ";
             renamed = "»$count ";
