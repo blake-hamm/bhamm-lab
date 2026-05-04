@@ -1,7 +1,7 @@
 network_10gb_nics: [eno7np2, eno8np3]
-storage_vm_device: /dev/nvme1n1
-# Ceph config for proxmox
-ceph_nvme_device: /dev/nvme0n1
+# Use by-id paths — NVMe device numbers shift on reboot
+storage_vm_device: /dev/disk/by-id/nvme-Sabrent_Rocket_4.0_Plus_A5CD0712179183364499
+ceph_nvme_device: /dev/disk/by-id/nvme-INTEL_SSDPED1K015TA_PHKS8203003F1P5CGN
 ceph_partitions:
   - number: 1
     name: osd1_db
