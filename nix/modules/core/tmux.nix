@@ -17,6 +17,7 @@
         baseIndex = 1;
         mouse = true;
         terminal = "tmux-256color";
+
         extraConfig = ''
           set -g renumber-windows on
           set -g status-right ""

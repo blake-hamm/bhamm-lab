@@ -46,7 +46,7 @@ in
             type = "api_key";
             key = "!cat ${kimiKeyPath}";
           };
-          "opencode" = {
+          "opencode-go" = {
             type = "api_key";
             key = "!cat ${opensenseKeyPath}";
           };

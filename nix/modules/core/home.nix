@@ -9,12 +9,16 @@
     useUserPackages = true;
     useGlobalPkgs = true;
     extraSpecialArgs = { inherit inputs shared; };
+    sharedModules = [
+      inputs.catppuccin.homeModules.catppuccin
+    ];
     users.${shared.username} = {
       home.username = "${shared.username}";
       home.homeDirectory = "/home/${shared.username}";
       programs.home-manager.enable = true;
       systemd.user.startServices = "sd-switch";
       home.stateVersion = "${shared.nixVersion}";
+      catppuccin.enable = true;
     };
   };
 }

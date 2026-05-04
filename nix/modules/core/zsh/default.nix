@@ -22,7 +22,10 @@
       programs.zsh = {
         enable = true;
         enableCompletion = true;
-        autosuggestion.enable = true;
+        autosuggestion = {
+          enable = true;
+          highlight = "fg=242";
+        };
         syntaxHighlighting.enable = true;
 
         history = {
@@ -56,7 +59,6 @@
             zstyle ':completion:*' cache-path ~/.zsh/cache
             zstyle ':completion:*' menu select
             zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
-            zstyle ':completion:*' list-colors "''${(s.:.)LS_COLORS}"
             zstyle ':completion:*:*:*:*:descriptions' format '%F{green}-- %d --%f'
             zstyle ':completion:*' group-name ""
 

@@ -9,6 +9,8 @@
 
   config = lib.mkIf config.cfg.vscode.enable {
     home-manager.users.${shared.username} = {
+      catppuccin.vscode.profiles.default.accent = "sapphire";
+
       programs.vscode = {
         enable = true;
         package = pkgs-unstable.vscodium;
