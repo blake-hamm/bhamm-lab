@@ -37,6 +37,10 @@ in
         pkgs.yt-dlp # pi-web-access YouTube stream URLs
       ];
 
+      # pi-fff: keep FFF-powered tools (fffind/ffgrep/multi-grep) but
+      # disable FFF-backed @-mention autocomplete override
+      home.sessionVariables.PI_FFF_MODE = "tools-only";
+
       # Pi auth: credentials for providers
       # The !command syntax is evaluated by pi at runtime and cached for the process lifetime
       home.file.".pi/agent/auth.json" = {

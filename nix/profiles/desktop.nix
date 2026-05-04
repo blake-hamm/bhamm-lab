@@ -17,5 +17,6 @@
     audio.enable = true;
     tmux.enable = true;
     zsh.enable = true;
+    zsh.starship.enable = true;
   };
 }

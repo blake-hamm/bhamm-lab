@@ -1,10 +1,21 @@
 { config, lib, pkgs, shared, ... }:
 
 {
-  options.cfg.zsh.enable = lib.mkOption {
-    type = lib.types.bool;
-    default = false;
-    description = "Enable Zsh with Powerlevel10k";
+  imports = [
+    ./starship.nix
+  ];
+
+  options.cfg.zsh = {
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable Zsh";
+    };
+    starship.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable Starship prompt (disabled by default for servers)";
+    };
   };
 
   config = lib.mkIf config.cfg.zsh.enable {
@@ -15,10 +26,6 @@
     programs.zsh.enable = true;
 
     home-manager.users.${shared.username} = {
-      home.packages = with pkgs; [
-        zsh-powerlevel10k
-      ];
-
       programs.zsh = {
         enable = true;
         enableCompletion = true;
@@ -42,11 +49,6 @@
         };
 
         initContent = lib.mkMerge [
-          (lib.mkBefore ''
-            if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
-              source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
-            fi
-          '')
           ''
             setopt appendhistory
             setopt incappendhistory
@@ -61,9 +63,6 @@
             zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
             zstyle ':completion:*:*:*:*:descriptions' format '%F{green}-- %d --%f'
             zstyle ':completion:*' group-name ""
-
-            source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
-            source ~/.config/p10k.zsh
           ''
         ];
       };
@@ -78,7 +77,7 @@
         nix-direnv.enable = true;
       };
 
-      xdg.configFile."p10k.zsh".source = ./p10k.zsh;
+
     };
   };
 }
