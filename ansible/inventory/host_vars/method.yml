@@ -1,7 +1,8 @@
-network_10gb_nics: [enp65s0f0, enp65s0f1]
-storage_vm_device: /dev/disk/by-id/ata-Samsung_SSD_870_EVO_1TB_S75BNL0Y201685W
-# Ceph config for proxmox
-ceph_nvme_device: /dev/nvme0n1
+network_10gb_nics: [enp67s0f0, enp67s0f1]
+# VM storage on freed consumer NVMe
+storage_vm_device: /dev/disk/by-id/nvme-SHGP31-1000GM-2_AS0CN42841190CT25
+# Ceph DB/WAL on new enterprise Intel NVMe
+ceph_nvme_device: /dev/disk/by-id/nvme-INTEL_SSDPE21K015TA_PHKE0350002P1P5CGN
 ceph_partitions:
   - number: 1
     name: osd1_db
@@ -10,21 +11,21 @@ ceph_partitions:
   - number: 2
     name: osd2_db
     start: 101GiB
-    end: 495GiB # 394 GiB for 3.5TB OSD
-    # - number: 3
-    #   name: osd3_db
-    #   start: 495GiB
-    #   end: 931GiB      # ~436 GiB for 7TB OSD
+    end: 201GiB # 100 GiB for 1TB OSD
+  - number: 3
+    name: osd3_db
+    start: 201GiB
+    end: 585GiB # 384 GiB for 3.5TB OSD
 # Proxmox config
 pve_ceph_osds:
-  - device: /dev/sde # 1TB
-    block.db: /dev/disk/by-id/nvme-SHGP31-1000GM-2_AS0CN42841190CT25-part1
+  - device: /dev/sdd # 1TB (was sde before Micron removal)
+    block.db: /dev/disk/by-id/nvme-INTEL_SSDPE21K015TA_PHKE0350002P1P5CGN-part1
     crush.device.class: ssd
-  - device: /dev/sdc # 3.5TB
-    block.db: /dev/disk/by-id/nvme-SHGP31-1000GM-2_AS0CN42841190CT25-part2
+  - device: /dev/sdc # 1TB Samsung 870 EVO
+    block.db: /dev/disk/by-id/nvme-INTEL_SSDPE21K015TA_PHKE0350002P1P5CGN-part2
     crush.device.class: ssd
-  - device: /dev/sda # 7TB (new)
-    # block.db: /dev/disk/by-id/nvme-SHGP31-1000GM-2_AS0CN42841190CT25-part3
+  - device: /dev/sdb # 3.5TB (was sdc before Micron removal)
+    block.db: /dev/disk/by-id/nvme-INTEL_SSDPE21K015TA_PHKE0350002P1P5CGN-part3
     crush.device.class: ssd
 pve_pcie_passthrough_enabled: true
 pve_iommu_passthrough_mode: true
@@ -34,8 +35,10 @@ pve_pcie_ovmf_enabled: true
 pve_pci_device_ids:
   - id: "1002:7551" # AMD R9700
   - id: "1002:ab40" # AMD R9700 audio
-  - id: "8086:56a6" # Intel arc
-  - id: "8086:4f92" # Intel arc audio
+  - id: "8086:56a6" # Intel Arc A310
+  - id: "8086:4f92" # Intel Arc A310 audio
+  - id: "8086:e223" # Intel Battlemage G21
+  - id: "8086:e2f7" # Intel Battlemage G21 audio
   - id: "1b21:1064" # Sata device
   - id: "2116:2116" # Sata device
 pve_vfio_blacklist_drivers:

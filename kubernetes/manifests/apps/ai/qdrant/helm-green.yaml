@@ -31,7 +31,7 @@ spec:
         # modification example for configuration to overwrite defaults
         # https://qdrant.tech/documentation/guides/configuration/
         config:
-          storage:
+          # storage:
           # snapshots_config:
           #   snapshots_storage: s3
           #   s3_config:

@@ -41,6 +41,9 @@
             # Theme
             "window.zoomLevel" = -3;
 
+            # Terminal
+            "terminal.integrated.defaultProfile.linux" = "zsh";
+
             # Roo
             "roo-cline.apiRequestTimeout" = 1800;
             "roo-cline.codeIndex.embeddingBatchSize" = 200;

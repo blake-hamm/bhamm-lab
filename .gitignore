@@ -3,6 +3,16 @@
 result
 secrets
 build
+.direnv
+
+# Binary files that crash fff-core highlight slicing
+*.gpg
+*.png
+*.jpg
+*.jpeg
+*.kra
+*.so
+*.pyc
 
 # Python
 # Byte-compiled / optimized / DLL files
