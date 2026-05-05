@@ -70,6 +70,7 @@ Prefix key is `Ctrl+Space` (instead of default `Ctrl+b`).
 | `tmux ls` | List sessions |
 | `Prefix + d` | Detach from session |
 | `Prefix + s` | Interactive session switcher |
+| `Prefix + $` | Rename session |
 
 ### Windows (tabs)
 
