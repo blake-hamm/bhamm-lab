@@ -251,6 +251,12 @@ These commands replicate VSCode's sidebar, quick-open, and global search.
 - `m` — move
 - `q` — close tree
 
+**Switching focus between tree and editor:**
+- `Ctrl+w h` — move focus to the left window (neo-tree)
+- `Ctrl+w l` — move focus to the right window (editor)
+- `<Space>e` toggles the tree and puts focus inside it automatically
+
+
 **Telescope** (fuzzy finder):
 - `<Space>ff` then type — fuzzy match filenames
 - `<Space>fg` then type — search text across all files
