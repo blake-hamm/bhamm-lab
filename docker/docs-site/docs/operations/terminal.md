@@ -184,6 +184,38 @@ Leader key is `<Space>`. Press it in normal mode, then another key for a command
 
 In visual mode: `"+y` copies selection to system clipboard.
 
+### Navigation & File Management
+
+These commands replicate VSCode's sidebar, quick-open, and global search.
+
+| Key | Action |
+|-----|--------|
+| `<Space>e` | toggle file tree (neo-tree) |
+| `<Space>ff` | find files (telescope) — like `Ctrl+P` |
+| `<Space>fg` | live grep (telescope) — like `Ctrl+Shift+F` |
+| `<Space>fb` | list open buffers (telescope) |
+
+**Neo-tree** (file explorer):
+- Open with `<Space>e`, navigate with `j`/`k`
+- `Enter` — open file in current window
+- `s` — open file in **vertical split** (tree stays left)
+- `S` — open file in horizontal split
+- `a` — add file/directory
+- `d` — delete
+- `r` — rename
+- `m` — move
+- `q` — close tree
+
+**Telescope** (fuzzy finder):
+- `<Space>ff` then type — fuzzy match filenames
+- `<Space>fg` then type — search text across all files
+- `Ctrl+n` / `Ctrl+p` — move between results
+- `Ctrl+v` — open result in vertical split
+- `Ctrl+x` — open result in horizontal split
+- `Esc` — close telescope
+
+**The VSCode layout**: Open a directory with `nvim .`, then `<Space>e`. The tree appears on the left. Press `s` on any file to open it on the right while the tree stays visible.
+
 ### Essential Starter Commands
 
 | Key | Action |
