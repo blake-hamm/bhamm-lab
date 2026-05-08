@@ -103,6 +103,7 @@ in
           "/home/${user}/.local/share/docker"
           "/home/${user}/.conda"
           "/home/${user}/backups"
+          "/mnt/bhamm-sports"
         ];
         pruneOpts = [
           "--keep-last 5"

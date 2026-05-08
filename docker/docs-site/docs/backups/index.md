@@ -22,6 +22,7 @@ D -->|Daily| E[Cloudflare R2]
 | Kubernetes PVCs   | k8up              | 3 hrs     | Minio/NFS        |
 | PostgreSQL DBs    | CloudNative-PG    | 3 hrs     | Minio/NFS (separate bucket) |
 | Minio Bucket Data | PVC Backup        | Daily     | GCP Storage      |
+| Framework Laptop  | Restic            | Daily     | Ceph RGW         |
 
 ## Restoration Workflow
 1. **Infrastructure Recovery**:
@@ -57,3 +58,4 @@ sequenceDiagram
 ## Related Documents
 - [Cloudnative PG](cloudnative_pg.md): PostgreSQL backup/restore details
 - [Kubernetes PVC](kubernetes.md): k8up configuration and procedure
+- [Framework Laptop](framework.md): Restic backup to Ceph RGW

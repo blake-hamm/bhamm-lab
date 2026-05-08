@@ -6,7 +6,7 @@
     ./nut.nix
     ./pihole.nix
     ./pre-commit.nix
-    ./samba.nix
+    ./cephfs.nix
     ./virtualization.nix
     ./keepalived.nix
   ];
