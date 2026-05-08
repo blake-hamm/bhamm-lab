@@ -18,6 +18,8 @@
     framework.enable = true;
     uhk.enable = true;
     wireguard.enable = true;
+    backups.enable = true;
+    backups.target = "rgw";
   };
 
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
