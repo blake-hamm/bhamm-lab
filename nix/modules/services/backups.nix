@@ -121,6 +121,9 @@ in
       };
 
       home-manager.users.${user}.home.packages = with pkgs; [ restic ];
+
+      # Enable progress output in systemd journal (non-TTY)
+      systemd.services.restic-backups-framework.serviceConfig.Environment = [ "RESTIC_PROGRESS_FPS=0.05" ];
     })
   ]);
 }
