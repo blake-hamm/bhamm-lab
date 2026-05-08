@@ -46,6 +46,15 @@
           vim.comments.comment-nvim.enable = true;
           vim.visuals.indent-blankline.enable = true;
 
+          vim.keymaps = [
+            {
+              key = "<leader>e";
+              mode = "n";
+              silent = true;
+              action = "<cmd>Neotree toggle<CR>";
+            }
+          ];
+
           vim.lsp = {
             enable = true;
             formatOnSave = true;
