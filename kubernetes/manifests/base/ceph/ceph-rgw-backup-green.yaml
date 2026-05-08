@@ -16,7 +16,7 @@ spec:
   workflowSpec:
     serviceAccountName: argo-workflow
     entrypoint: main
-    activeDeadlineSeconds: 43200
+    activeDeadlineSeconds: 432000
     templates:
       - name: main
         steps:
