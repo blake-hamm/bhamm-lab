@@ -12,6 +12,7 @@
     extraSpecialArgs = { inherit inputs shared; };
     sharedModules = [
       inputs.catppuccin.homeModules.catppuccin
+      inputs.nvf.homeManagerModules.default
     ];
     users.${shared.username} = {
       home.username = "${shared.username}";

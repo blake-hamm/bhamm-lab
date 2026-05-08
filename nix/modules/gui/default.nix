@@ -12,5 +12,6 @@
     ./pi
     ./printing.nix
     ./audio.nix
+    ./neovim.nix
   ];
 }

@@ -14,6 +14,7 @@
     vesktop.enable = true;
     opencode.enable = true;
     pi.enable = true;
+    neovim.enable = true;
     audio.enable = true;
     tmux.enable = true;
     zsh.enable = true;

@@ -105,6 +105,101 @@ Prefix key is `Ctrl+Space` (instead of default `Ctrl+b`).
 
 Ghostty is configured to auto-attach to a tmux session named `main` on launch. Every new Ghostty window joins the same session. Detach with `Prefix + d` to keep it running in the background.
 
+## Neovim Basics
+
+Leader key is `<Space>`. Press it in normal mode, then another key for a command.
+
+### Modes
+
+| Mode | Enter | Exit |
+|------|-------|------|
+| Normal | `Esc` or `Ctrl+[` | — (default) |
+| Insert | `i` (before cursor), `a` (after), `o` (new line) | `Esc` |
+| Visual | `v` (char), `V` (line), `Ctrl+v` (block) | `Esc` |
+
+### Movement (normal mode)
+
+| Key | Action |
+|-----|--------|
+| `h` `j` `k` `l` | left, down, up, right |
+| `w` / `b` | next / previous word |
+| `0` / `$` | start / end of line |
+| `gg` / `G` | first / last line of file |
+| `Ctrl+d` / `Ctrl+u` | half-page down / up |
+| `{` / `}` | previous / next paragraph |
+| `H` / `M` / `L` | top / middle / bottom of screen |
+
+### Editing
+
+| Key | Action |
+|-----|--------|
+| `x` | delete character under cursor |
+| `dd` | delete line |
+| `yy` | yank (copy) line |
+| `p` | paste after cursor |
+| `u` | undo |
+| `Ctrl+r` | redo |
+| `r` | replace single character |
+| `c` | change (e.g., `cw` = change word) |
+| `>` / `<` | indent / unindent (visual mode) |
+
+### Files and Buffers
+
+| Command | Action |
+|---------|--------|
+| `:e path` | open file |
+| `:w` | save |
+| `:q` | quit |
+| `:q!` | quit without saving |
+| `:wq` | save and quit |
+| `:bn` / `:bp` | next / previous buffer |
+| `:bd` | close buffer |
+| `:sp file` | horizontal split |
+| `:vsp file` | vertical split |
+
+### Searching
+
+| Key | Action |
+|-----|--------|
+| `/text` | search forward |
+| `?text` | search backward |
+| `n` / `N` | next / previous match |
+| `*` | search word under cursor |
+
+### Windows
+
+| Key | Action |
+|-----|--------|
+| `Ctrl+w` `h/j/k/l` | move to window |
+| `Ctrl+w` `c` | close window |
+| `Ctrl+w` `o` | only this window (close others) |
+| `Ctrl+w` `=` | equalize window sizes |
+
+### System Clipboard
+
+| Command | Action |
+|---------|--------|
+| `"+y` | yank to system clipboard |
+| `"+p` | paste from system clipboard |
+
+In visual mode: `"+y` copies selection to system clipboard.
+
+### Essential Starter Commands
+
+| Key | Action |
+|-----|--------|
+| `<Space>` | leader (wait for next key) |
+| `<Space>e` | toggle file tree (neo-tree) |
+| `<Space>ff` | find files (telescope) |
+| `<Space>fg` | live grep (telescope) |
+| `<Space>fb` | list buffers (telescope) |
+| `<Space>th` | toggle terminal |
+| `gd` | go to definition |
+| `gr` | go to references |
+| `K` | hover documentation |
+| `<Space>ca` | code action |
+| `<Space>rn` | rename symbol |
+
 ## Tips
 
 - Type partial command — **gray autosuggestion** appears — `Right-arrow` to accept
