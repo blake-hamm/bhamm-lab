@@ -1,6 +1,6 @@
 # CephFS Client Mounts
 
-Mount CephFS directories on external machines (e.g. the Framework laptop) using `ceph-fuse`.
+Mount CephFS directories on external machines (e.g. the Framework laptop) using the **Linux kernel CephFS client**.
 
 ## Overview
 
@@ -10,19 +10,33 @@ Mount CephFS directories on external machines (e.g. the Framework laptop) using 
 | Mount point | `/mnt/bhamm` |
 | Ceph client | `client.bhamm` |
 | Access | Read-write, restricted to `/bhamm` |
-| Tool | `ceph-fuse` (via `mount.fuse.ceph`) |
+| Mount mode | **On-demand automount** (systemd) |
+| Idle timeout | 5 minutes |
+| Tool | `mount.ceph` (kernel client) |
 
 ## Architecture
 
 ```
-┌─────────────┐     ceph-fuse      ┌─────────────────────────────┐
-│  Framework  │ ◄────────────────► │  Proxmox Ceph Cluster       │
-│  /mnt/...   │   (S3 + CephFS)    │  cephfs_data pool           │
-└─────────────┘                    │  /volumes/_nogroup/...      │
-                                   └─────────────────────────────┘
+┌─────────────┐     autofs ──► mount.ceph     ┌─────────────────────────────┐
+│  Framework  │ ◄───────────────────────────► │  Proxmox Ceph Cluster       │
+│  /mnt/bhamm │  mounts on first access       │  cephfs_data pool           │
+└─────────────┘  unmounts after 5 min idle    │  /bhamm/...                 │
+                                               └─────────────────────────────┘
 ```
 
 The Framework laptop connects directly to Ceph mons (10.0.20.11/12/13) on the local network. No VPN required when at home.
+
+### On-Demand Behavior
+
+The mount uses **systemd automount** — it is not connected to Ceph at boot. Instead:
+
+1. **First access** (`ls /mnt/bhamm`, file manager, etc.) triggers the mount
+2. The kernel Ceph client connects to the cluster and mounts the filesystem
+3. After **5 minutes of idle** time, systemd automatically unmounts
+4. Before **sleep/hibernate**, the mount is cleanly stopped to prevent stale sessions
+5. Next access after resume triggers a **fresh mount**
+
+The kernel client is more stable than FUSE for intermittent use — no userspace daemon to crash or hang. The first access after boot or resume has a ~1–2 second delay while the connection establishes.
 
 ## Backend Setup
 
@@ -73,37 +87,47 @@ Add to `secrets.enc.json` (via sops):
 sudo nixos-rebuild switch --flake .#framework
 ```
 
-The `cephfs-bhamm.service` systemd unit handles the mount.
+Systemd units handle the mount:
+- `mnt-bhamm.automount` — creates the on-demand trigger
+- `mnt-bhamm.mount` — performs the actual kernel mount when accessed
+- `cephfs-bhamm-sleep.service` — cleanly unmounts before sleep/hibernate
 
 ## Operations
 
 ### Check mount status
 
 ```bash
-systemctl status cephfs-bhamm.service
+# Is the automount trigger active?
+systemctl status mnt-bhamm.automount
+
+# Is the filesystem currently mounted?
+systemctl status mnt-bhamm.mount
 mount | grep bhamm
+
+# Access triggers mount (first call may take 1–2s)
 ls -la /mnt/bhamm
+```
+
+### Force mount/unmount manually
+
+```bash
+# Mount now (normally triggered automatically on access)
+sudo systemctl start mnt-bhamm.mount
+
+# Unmount now (normally happens automatically after idle)
+sudo systemctl stop mnt-bhamm.mount
 ```
 
 ### Manual mount (debugging)
 
 ```bash
-sudo /nix/store/...-ceph-client/bin/mount.fuse.ceph \
-  -o ceph.id=bhamm,\
-      ceph.conf=/run/secrets/cephfs_conf,\
-      ceph.keyring=/run/secrets/cephfs_keyring,\
-      ceph.client-mountpoint=/bhamm,\
-      _netdev,defaults,nonempty \
-  -- none /mnt/bhamm
+sudo mount -t ceph \
+  10.0.20.11:6789,10.0.20.12:6789,10.0.20.13:6789:/bhamm \
+  /mnt/bhamm \
+  -o name=bhamm,conf=/run/secrets/cephfs_conf,secretfile=/run/ceph/bhamm.key,_netdev
 ```
 
-**Note:** The `--` separator is required because `mount.fuse.ceph` uses argparse and treats `none` as an optional argument without it.
-
-### Unmount
-
-```bash
-sudo umount /mnt/bhamm
-```
+The kernel client needs the **raw key** (not the full keyring). The activation script extracts it from the sops secret to `/run/ceph/bhamm.key` at boot time.
 
 ## Data Storage
 
