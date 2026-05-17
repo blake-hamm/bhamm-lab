@@ -26,6 +26,13 @@ Enabled in `nix/hosts/framework/default.nix`:
 
 The `rgw` target is defined in `nix/modules/services/backups.nix`.
 
+## Backup Paths
+
+Restic backs up the following paths to Ceph RGW:
+
+- `/home/bhamm` (home directory)
+- `/mnt/bhamm` (CephFS mount — personal directories including `bhamm-sports`, `bhamm-lab`, etc.)
+
 ## Secrets
 
 Secrets live in `secrets.enc.json` (sops-encrypted):
@@ -46,7 +53,7 @@ The following are excluded from backup:
 - `~/.local/share/docker`
 - `~/.conda`
 - `~/backups`
-- `/mnt/bhamm-sports` (CephFS mount — data already on redundant ceph storage)
+- `/mnt/bhamm` is no longer excluded — CephFS data is now included in backups
 
 ## Operations
 

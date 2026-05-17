@@ -5,21 +5,18 @@
 To mount a CephFS subdirectory on an external machine (e.g. the Framework laptop):
 
 ```bash
-# Create a subvolume
-ceph fs subvolume create cephfs bhamm-sports
+# Create the root directory and subdirectory in CephFS
+sudo mkdir -p /mnt/cephfs-root/bhamm/bhamm-sports
 
-# Get the path
-ceph fs subvolume getpath cephfs bhamm-sports
-
-# Create a restricted client key
-ceph auth get-or-create client.bhamm-sports \
+# Create a restricted client key scoped to /bhamm
+ceph auth get-or-create client.bhamm \
   mon 'allow r' \
   osd 'allow rw pool=cephfs_data' \
-  mds 'allow rw path=/volumes/_nogroup/bhamm-sports' \
+  mds 'allow rw path=/bhamm' \
   mgr 'allow r'
 
 # Export keyring for the client
-ceph auth get client.bhamm-sports -o /tmp/cephfs_client_keyring
+ceph auth get client.bhamm -o /tmp/cephfs_client_keyring
 ```
 
 See [CephFS Client Mounts](cephfs-client.md) for the client-side NixOS configuration.

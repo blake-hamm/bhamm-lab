@@ -95,7 +95,10 @@ in
         repository = "s3:https://rgw.bhamm-lab.com/framework-backup";
         passwordFile = config.sops.secrets.restic_password.path;
         environmentFile = config.sops.templates."restic-rgw-env".path;
-        paths = [ "/home/${user}" ];
+        paths = [
+          "/home/${user}"
+          "/mnt/bhamm"
+        ];
         exclude = [
           "/home/${user}/.cache"
           "/home/${user}/Downloads"
@@ -103,7 +106,6 @@ in
           "/home/${user}/.local/share/docker"
           "/home/${user}/.conda"
           "/home/${user}/backups"
-          "/mnt/bhamm-sports"
         ];
         pruneOpts = [
           "--keep-last 5"

@@ -7,7 +7,7 @@ in
   options.cfg.cephfs.enable = lib.mkOption {
     type = lib.types.bool;
     default = false;
-    description = "Enable CephFS mounts for bhamm-sports archive";
+    description = "Enable CephFS mounts for bhamm archive";
   };
 
   config = lib.mkIf cfg.enable {
@@ -16,7 +16,7 @@ in
 
     # Create mount point
     systemd.tmpfiles.rules = [
-      "d /mnt/bhamm-sports 0755 bhamm users -"
+      "d /mnt/bhamm 0755 bhamm users -"
     ];
 
     # Ceph config and keyring from sops secrets
@@ -31,16 +31,16 @@ in
     };
 
     # CephFS mount service
-    systemd.services.cephfs-bhamm-sports = {
-      description = "CephFS bhamm-sports archive";
+    systemd.services.cephfs-bhamm = {
+      description = "CephFS bhamm archive";
       after = [ "network-online.target" ];
       wants = [ "network-online.target" ];
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
         Type = "forking";
-        ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p /mnt/bhamm-sports";
-        ExecStart = "${pkgs.ceph-client}/bin/mount.fuse.ceph -o ceph.id=bhamm-sports,ceph.conf=${config.sops.secrets.cephfs_conf.path},ceph.keyring=${config.sops.secrets.cephfs_keyring.path},ceph.client-mountpoint=/bhamm-sports,_netdev,defaults,nonempty -- none /mnt/bhamm-sports";
-        ExecStop = "${pkgs.util-linux}/bin/umount /mnt/bhamm-sports";
+        ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p /mnt/bhamm";
+        ExecStart = "${pkgs.ceph-client}/bin/mount.fuse.ceph -o ceph.id=bhamm,ceph.conf=${config.sops.secrets.cephfs_conf.path},ceph.keyring=${config.sops.secrets.cephfs_keyring.path},ceph.client-mountpoint=/bhamm,_netdev,defaults,nonempty -- none /mnt/bhamm";
+        ExecStop = "${pkgs.util-linux}/bin/umount /mnt/bhamm";
         Restart = "on-failure";
         RestartSec = "30s";
       };

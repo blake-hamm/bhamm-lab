@@ -7,9 +7,9 @@ Mount CephFS directories on external machines (e.g. the Framework laptop) using 
 | Property | Value |
 |----------|-------|
 | Host | `framework` |
-| Mount point | `/mnt/bhamm-sports` |
-| Ceph client | `client.bhamm-sports` |
-| Access | Read-write, restricted to `/volumes/_nogroup/bhamm-sports` subvolume |
+| Mount point | `/mnt/bhamm` |
+| Ceph client | `client.bhamm` |
+| Access | Read-write, restricted to `/bhamm` |
 | Tool | `ceph-fuse` (via `mount.fuse.ceph`) |
 
 ## Architecture
@@ -29,22 +29,20 @@ The Framework laptop connects directly to Ceph mons (10.0.20.11/12/13) on the lo
 Run on any Ceph mon (e.g. Proxmox node):
 
 ```bash
-# Create a subvolume (directory with quota/namespace isolation)
-ceph fs subvolume create cephfs bhamm-sports
+# Mount CephFS root as admin to create directories
+sudo mount.ceph 10.0.20.11:6789:/ /tmp/cephfs-root -o name=admin,secret=$(sudo ceph auth get-key client.admin)
+sudo mkdir -p /tmp/cephfs-root/bhamm/bhamm-sports
+sudo umount /tmp/cephfs-root
 
-# Get the actual path
-ceph fs subvolume getpath cephfs bhamm-sports
-# → /volumes/_nogroup/bhamm-sports
-
-# Create a restricted client key
-ceph auth get-or-create client.bhamm-sports \
+# Create a restricted client key scoped to /bhamm
+ceph auth get-or-create client.bhamm \
   mon 'allow r' \
   osd 'allow rw pool=cephfs_data' \
-  mds 'allow rw path=/volumes/_nogroup/bhamm-sports' \
+  mds 'allow rw path=/bhamm' \
   mgr 'allow r'
 
 # Export the keyring for use on the client
-ceph auth get client.bhamm-sports -o /tmp/cephfs_client_keyring
+ceph auth get client.bhamm -o /tmp/cephfs_client_keyring
 ```
 
 ## NixOS Configuration
@@ -75,28 +73,28 @@ Add to `secrets.enc.json` (via sops):
 sudo nixos-rebuild switch --flake .#framework
 ```
 
-The `cephfs-bhamm-sports.service` systemd unit handles the mount.
+The `cephfs-bhamm.service` systemd unit handles the mount.
 
 ## Operations
 
 ### Check mount status
 
 ```bash
-systemctl status cephfs-bhamm-sports.service
-mount | grep bhamm-sports
-ls -la /mnt/bhamm-sports
+systemctl status cephfs-bhamm.service
+mount | grep bhamm
+ls -la /mnt/bhamm
 ```
 
 ### Manual mount (debugging)
 
 ```bash
 sudo /nix/store/...-ceph-client/bin/mount.fuse.ceph \
-  -o ceph.id=bhamm-sports,\
+  -o ceph.id=bhamm,\
       ceph.conf=/run/secrets/cephfs_conf,\
       ceph.keyring=/run/secrets/cephfs_keyring,\
-      ceph.client-mountpoint=/bhamm-sports,\
+      ceph.client-mountpoint=/bhamm,\
       _netdev,defaults,nonempty \
-  -- none /mnt/bhamm-sports
+  -- none /mnt/bhamm
 ```
 
 **Note:** The `--` separator is required because `mount.fuse.ceph` uses argparse and treats `none` as an optional argument without it.
@@ -104,11 +102,11 @@ sudo /nix/store/...-ceph-client/bin/mount.fuse.ceph \
 ### Unmount
 
 ```bash
-sudo umount /mnt/bhamm-sports
+sudo umount /mnt/bhamm
 ```
 
 ## Data Storage
 
-CephFS stores file data in the `cephfs_data` pool alongside all other CephFS content. The `client.bhamm-sports` key is restricted to a specific path (`/volumes/_nogroup/bhamm-sports`) so the client cannot access other CephFS directories.
+CephFS stores file data in the `cephfs_data` pool alongside all other CephFS content. The `client.bhamm` key is restricted to `/bhamm` so the client cannot access other CephFS directories.
 
 There is no separate volume or pool for the sports data — it's namespace isolation within the shared filesystem. If dedicated pools are needed later (e.g. for performance isolation), create a second CephFS filesystem with its own data pool.
