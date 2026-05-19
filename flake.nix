@@ -41,6 +41,8 @@
       url = "github:NixOS/nixos-hardware/2096f3f411ce46e88a79ae4eafcfc9df8ed41c61";
     };
 
+    nvf.url = "github:notashelf/nvf";
+
   };
 
   outputs = { nixpkgs, self, ... } @ inputs:

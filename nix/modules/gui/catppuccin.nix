@@ -16,20 +16,15 @@ in
       flavor = catppuccinFlavor;
     };
 
-    home-manager.sharedModules = [
-      inputs.catppuccin.homeModules.catppuccin
-    ];
-
-    home-manager.users.${shared.username} = {
-      catppuccin = {
-        enable = true;
-        vscode.profiles.default.accent = "sapphire";
-      };
-    };
-
     # Optional: Export catppuccin colors for use in other modules
     environment.variables = {
       CATPPUCCIN_FLAVOR = catppuccinFlavor;
+    };
+
+    # Home-manager Catppuccin theming (desktop only)
+    home-manager.users.${shared.username} = {
+      catppuccin.enable = true;
+      catppuccin.flavor = catppuccinFlavor;
     };
   };
 }

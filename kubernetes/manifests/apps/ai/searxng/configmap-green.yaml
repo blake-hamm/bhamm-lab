@@ -14,23 +14,64 @@ data:
       port: 8080
       bind_address: 0.0.0.0
       base_url: https://searxng.bhamm-lab.com
-      limiter: false
+      limiter: true
       public_instance: false
       image_proxy: true
+      method: POST
     valkey:
       url: valkey://searxng-dragonfly.searxng.svc.cluster.local:6379
     search:
       safe_search: 0
       autocomplete: ""
-      default_language: en
+      default_lang: "en"
       formats:
         - html
         - json
+      suspended_times:
+        SearxEngineAccessDenied: 3600
+        SearxEngineCaptcha: 86400
+        SearxEngineTooManyRequests: 3600
+        cf_SearxEngineCaptcha: 604800
+        cf_SearxEngineAccessDenied: 86400
+        recaptcha_SearxEngineCaptcha: 604800
+    outgoing:
+      request_timeout: 5.0
+      max_request_timeout: 15.0
+      useragent_suffix: "admin@bhamm-lab.com"
+      pool_connections: 100
+      pool_maxsize: 20
+      enable_http2: false
+      retries: 2
     ui:
       static_use_hash: true
       theme_args:
         simple_style: dark
+    engines:
+      - name: duckduckgo
+        disabled: false
+      - name: brave
+        disabled: false
+      - name: startpage
+        disabled: false
+      - name: google
+        disabled: true
+      - name: bing
+        disabled: true
   limiter.toml: |
+    [botdetection.ip_lists]
+    pass_ip = [
+      "10.0.0.0/8",
+      "172.16.0.0/12",
+      "192.168.0.0/16",
+      "127.0.0.1",
+    ]
+
     [botdetection.ip_limit]
-    # activate link_token method in the ip_limit method
     link_token = true
+
+    [botdetection]
+    trusted_proxies = [
+      "10.0.0.0/8",
+      "172.16.0.0/12",
+      "192.168.0.0/16",
+    ]

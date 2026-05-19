@@ -16,6 +16,7 @@ spec:
   workflowSpec:
     serviceAccountName: argo-workflow
     entrypoint: main
+    activeDeadlineSeconds: 432000
     templates:
       - name: main
         steps:
@@ -27,8 +28,8 @@ spec:
                 parameters:
                   - name: buckets
                     value: "{{steps.list-buckets.outputs.result}}"
-          - - name: rclone-sync-to-r2
-              template: rclone-sync-to-r2
+          - - name: rclone-sync-to-b2
+              template: rclone-sync-to-b2
       - name: list-buckets
         container:
           image: rclone/rclone
@@ -56,11 +57,16 @@ spec:
         inputs:
           parameters:
             - name: buckets
+        retryStrategy:
+          limit: 2
+          backoff:
+            duration: 10m
+            factor: 2
         container:
           image: rclone/rclone
           resources:
             requests:
-              memory: 512Mi
+              memory: 2Gi
             limits:
               memory: 4Gi
           env:
@@ -125,11 +131,16 @@ spec:
               echo "=== Verification: Garage bucket contents ==="
               rclone ls garage:ceph-rgw
       - name: rclone-sync-to-r2
+        retryStrategy:
+          limit: 2
+          backoff:
+            duration: 10m
+            factor: 2
         container:
           image: rclone/rclone
           resources:
             requests:
-              memory: 512Mi
+              memory: 2Gi
             limits:
               memory: 4Gi
           env:
@@ -195,11 +206,16 @@ spec:
               echo "=== Verification: Checking sync integrity ==="
               rclone check garage:ceph-rgw r2:ceph-rgw --one-way --checksum
       - name: rclone-sync-to-b2
+        retryStrategy:
+          limit: 2
+          backoff:
+            duration: 10m
+            factor: 2
         container:
           image: rclone/rclone
           resources:
             requests:
-              memory: 512Mi
+              memory: 2Gi
             limits:
               memory: 4Gi
           env:
@@ -252,4 +268,4 @@ spec:
                 --stats=30s
 
               echo "=== Verification: Checking sync integrity ==="
-              rclone check garage:ceph-rgw b2:bhamm-lab-ceph-rgw --one-way
+              rclone check garage:ceph-rgw b2:bhamm-lab-ceph-rgw --one-way --checksum

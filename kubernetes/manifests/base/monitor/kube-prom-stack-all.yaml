@@ -154,7 +154,7 @@ spec:
                 token: ''
                 datasource: Prometheus
               nut:
-                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/feature/ceph-db-wal/kubernetes/manifests/base/monitor/dashboards/nut.json
+                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/main/kubernetes/manifests/base/monitor/dashboards/nut.json
                 token: ''
                 datasource: Prometheus
           dashboardProviders:
