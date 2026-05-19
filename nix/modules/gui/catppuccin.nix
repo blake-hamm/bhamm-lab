@@ -20,5 +20,11 @@ in
     environment.variables = {
       CATPPUCCIN_FLAVOR = catppuccinFlavor;
     };
+
+    # Home-manager Catppuccin theming (desktop only)
+    home-manager.users.${shared.username} = {
+      catppuccin.enable = true;
+      catppuccin.flavor = catppuccinFlavor;
+    };
   };
 }

@@ -20,13 +20,7 @@
       programs.home-manager.enable = true;
       systemd.user.startServices = "sd-switch";
       home.stateVersion = "${shared.nixVersion}";
-      catppuccin.enable = true;
-      catppuccin.flavor = "mocha";
-
-      programs.k9s = {
-        enable = true;
-        catppuccin.enable = true;
-      };
+      # Universal home-manager settings only — theming and tools are opt-in per profile
     };
   };
 }
