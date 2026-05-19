@@ -1,4 +1,20 @@
 opnsense_vlan_interface: lagg1
+# Multi-WAN gateway configuration
+opnsense_wan_gateways:
+  - name: ALLWEST_DHCP
+    interface: opt10
+    monitor: 9.9.9.9
+    priority: 1
+    default_gw: true
+  - name: COMCAST_DHCP
+    interface: opt12
+    monitor: 1.1.1.1
+    priority: 2
+    default_gw: false
+# Gateway group for policy-based outbound routing
+opnsense_gateway_default: ALLWEST_PRIMARY
+opnsense_gateway_interface_map:
+  opt8: COMCAST_PRIMARY
 opnsense_interface_map:
   - name: LAN
     interface: lan

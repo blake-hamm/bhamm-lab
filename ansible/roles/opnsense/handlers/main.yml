@@ -1,3 +1,6 @@
 - name: Reload vlan
   oxlorg.opnsense.reload:
     target: 'interface_vlan'
+- name: Reload gateway
+  oxlorg.opnsense.reload:
+    target: 'gateway'
