@@ -24,6 +24,14 @@ spec:
               remoteRef:
                 key: /core/monitor
                 property: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+            - secretKey: OPNSENSE_EXPORTER_OPS_API_KEY
+              remoteRef:
+                key: /external/opnsense
+                property: API_KEY
+            - secretKey: OPNSENSE_EXPORTER_OPS_API_SECRET
+              remoteRef:
+                key: /external/opnsense
+                property: API_SECRET
             - secretKey: S3_ACCESS_KEY_ID
               remoteRef:
                 key: /core/ceph

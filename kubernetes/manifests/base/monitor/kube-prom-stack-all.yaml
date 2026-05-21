@@ -157,6 +157,9 @@ spec:
                 url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/main/kubernetes/manifests/base/monitor/dashboards/nut.json
                 token: ''
                 datasource: Prometheus
+              opnsense:
+                url: https://raw.githubusercontent.com/blake-hamm/bhamm-lab/refs/heads/feature/some-cleanup/kubernetes/manifests/base/monitor/dashboards/opnsense.json
+                token: ''
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
