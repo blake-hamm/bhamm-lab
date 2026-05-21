@@ -250,7 +250,7 @@ data:
       - title: Open Webui
         description: Visit Open Webui
         icon: hl-open-webui
-        url: https://open-webui.bhamm-lab.com/
+        url: https://chat.bhamm-lab.com/
       - title: LiteLLM
         description: Visit Lite LLM
         icon: generative
