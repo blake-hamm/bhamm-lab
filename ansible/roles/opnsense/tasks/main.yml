@@ -3,6 +3,12 @@
   ansible.builtin.set_fact:
     all_interfaces: "{{ opnsense_interface_map | map(attribute='interface') | list }}"
     private_networks: "{{ opnsense_interface_map | map(attribute='subnet') | list }}"
+- name: Configure gateways
+  ansible.builtin.include_tasks:
+    file: gateways.yml
+    apply:
+      tags: [gateways]
+      notify: Reload gateway
 - name: Configure vlans
   ansible.builtin.include_tasks:
     file: vlans.yml

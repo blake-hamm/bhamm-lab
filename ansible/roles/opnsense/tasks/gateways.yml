@@ -1,0 +1,27 @@
+# Multi-WAN gateway monitoring and priority configuration
+#
+# PREREQUISITES (manual OPNsense UI steps):
+#   - Comcast interface (opt12) has DHCP enabled and dynamic gateway auto-created
+#   - Gateway groups created:
+#       ALLWEST_PRIMARY  -> opt10 Tier 1, opt12 Tier 2, trigger: Member Down
+#       COMCAST_PRIMARY  -> opt12 Tier 1, opt10 Tier 2, trigger: Member Down
+#   - "Allow default gateway switching" enabled in System > Settings > Miscellaneous
+#   - "Kill states on gateway failure" enabled on each gateway edit page (Advanced)
+- name: Configure WAN gateways
+  oxlorg.opnsense.gateway:
+    name: "{{ item.name }}"
+    interface: "{{ item.interface }}"
+    gateway: "{{ item.gateway | default(omit) }}"
+    ip_protocol: inet
+    monitor_disable: false
+    monitor: "{{ item.monitor }}"
+    priority: "{{ item.priority }}"
+    weight: 1
+    default_gw: "{{ item.default_gw }}"
+    far_gw: false
+    match_fields:
+      - name
+  loop: "{{ opnsense_wan_gateways }}"
+  loop_control:
+    label: "{{ item.name }}"
+  notify: Reload gateway
