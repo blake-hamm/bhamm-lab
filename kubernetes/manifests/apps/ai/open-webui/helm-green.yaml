@@ -78,8 +78,6 @@ spec:
             value: "False"
           - name: DEFAULT_USER_ROLE
             value: "user"
-          - name: ENABLE_PERSISTENT_CONFIG
-            value: "False"
           - name: ENABLE_WEB_SEARCH
             value: "True"
           - name: WEB_SEARCH_ENGINE
