@@ -73,6 +73,10 @@ spec:
                 secretKeyRef:
                   name: searxng-external-secret
                   key: SEARXNG_OPEN_METRICS
+            - name: SEARXNG_PORT
+              value: "8080"
+            - name: GRANIAN_PORT
+              value: "8080"
       volumes:
         - name: config
           configMap:
