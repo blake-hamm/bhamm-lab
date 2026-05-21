@@ -7,7 +7,14 @@ metadata:
     argocd.argoproj.io/sync-wave: "19"
 data:
   settings.yml: |
-    use_default_settings: true
+    use_default_settings:
+      engines:
+        remove:
+          - google
+          - bing
+          - wikidata
+          - yandex
+          - baidu
     general:
       open_metrics: "default"
     server:
@@ -53,10 +60,6 @@ data:
         disabled: false
       - name: startpage
         disabled: false
-      - name: google
-        disabled: true
-      - name: bing
-        disabled: true
   limiter.toml: |
     [botdetection.ip_lists]
     pass_ip = [
