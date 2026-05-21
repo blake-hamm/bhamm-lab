@@ -63,6 +63,19 @@ spec:
                 key: uri
           - name: ENABLE_LOGIN_FORM
             value: "False"
+          - name: WEBUI_URL
+            value: "https://chat.bhamm-lab.com"
+          - name: WEBUI_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: open-webui-external-secret
+                key: WEBUI_SECRET_KEY
+          - name: ENABLE_PASSWORD_AUTH
+            value: "False"
+          - name: DEFAULT_USER_ROLE
+            value: "user"
+          - name: ENABLE_PERSISTENT_CONFIG
+            value: "False"
           - name: ENABLE_WEB_SEARCH
             value: "True"
           - name: WEB_SEARCH_ENGINE

@@ -343,7 +343,7 @@ spec:
                   require_pkce: false
                   pkce_challenge_method: ''
                   redirect_uris:
-                    - 'https://open-webui.bhamm-lab.com/oauth/oidc/callback'
+                    - 'https://chat.bhamm-lab.com/oauth/oidc/callback'
                   scopes:
                     - 'openid'
                     - 'profile'
