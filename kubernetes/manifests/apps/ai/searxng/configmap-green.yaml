@@ -9,12 +9,10 @@ data:
   settings.yml: |
     use_default_settings:
       engines:
-        remove:
-          - google
-          - bing
-          - wikidata
-          - yandex
-          - baidu
+        keep_only:
+          - duckduckgo
+          - brave
+          - startpage
     general:
       open_metrics: "default"
     server:
