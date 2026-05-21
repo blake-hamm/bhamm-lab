@@ -13,12 +13,14 @@ spec:
   source:
     chart: open-webui
     repoURL: https://helm.openwebui.com
-    targetRevision: 8.12.2
+    targetRevision: 14.7.0
     helm:
       valuesObject:
         ollama:
           enabled: false
         ollamaUrls: []
+        websocket:
+          enabled: false
         pipelines:
           enabled: true
           extraEnvVars: []
