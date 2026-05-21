@@ -31,7 +31,9 @@ spec:
               value: "true"
             - name: OPNSENSE_EXPORTER_DISABLE_UNBOUND
               value: "true"
-            - name: OPNSENSE_EXPORTER_DISABLE_KEA
+            - name: OPNSENSE_EXPORTER_DISABLE_KEADHCPV4
+              value: "true"
+            - name: OPNSENSE_EXPORTER_DISABLE_KEADHCPV6
               value: "true"
           envFrom:
             - secretRef:
