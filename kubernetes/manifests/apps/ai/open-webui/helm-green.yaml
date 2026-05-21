@@ -54,8 +54,12 @@ spec:
               secretKeyRef:
                 name: open-webui-external-secret
                 key: OPENAI_API_KEY
-          - name: OPENAI_API_BASE_URL
-            value: "http://litellm.litellm.svc.cluster.local:4000/v1"
+          - name: OPENAI_API_BASE_URLS
+            value: "http://open-webui-pipelines.open-webui.svc.cluster.local:9099;http://litellm.litellm.svc.cluster.local:4000/v1"
+          - name: PIPELINES_API_KEY
+            value: "0p3n-w3bu!"
+          - name: OPENAI_API_KEYS
+            value: "$(PIPELINES_API_KEY);$(OPENAI_API_KEY)"
           - name: DATABASE_URL
             valueFrom:
               secretKeyRef:
