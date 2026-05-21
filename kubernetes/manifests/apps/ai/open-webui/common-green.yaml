@@ -22,7 +22,7 @@ spec:
             ingressClass: traefik-external
             websocket: true
             routes:
-              - match: Host(`open-webui.bhamm-lab.com`)
+              - match: Host(`chat.bhamm-lab.com`)
                 kind: Rule
                 middlewares:
                   - name: default-headers
@@ -41,6 +41,10 @@ spec:
               remoteRef:
                 key: /default/open-webui
                 property: oidc
+            - secretKey: WEBUI_SECRET_KEY
+              remoteRef:
+                key: /default/open-webui
+                property: webui_secret_key
         postgresql:
           enabled: true
           backup:
