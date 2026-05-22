@@ -64,6 +64,9 @@ data:
     [botdetection.ip_limit]
     link_token = false
 
+    [botdetection.ip_limit.pass_ip]
+    10.244.0.0/16 = "kubernetes pods"
+
     [botdetection]
     trusted_proxies = [
       "10.0.0.0/8",
