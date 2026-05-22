@@ -93,6 +93,26 @@ spec:
             value: "http://searxng.searxng.svc.cluster.local:8080/search?q=<query>"
           - name: BYPASS_WEB_SEARCH_WEB_LOADER
             value: "true"
+          - name: VECTOR_DB
+            value: "qdrant"
+          - name: QDRANT_URI
+            value: "http://qdrant.qdrant.svc.cluster.local:6333"
+          - name: RAG_EMBEDDING_ENGINE
+            value: "openai"
+          - name: RAG_EMBEDDING_MODEL
+            value: "qwen-embed"
+          - name: RAG_OPENAI_API_BASE_URL
+            value: "http://litellm.litellm.svc.cluster.local:4000/v1"
+          - name: QDRANT_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: open-webui-external-secret
+                key: QDRANT_API_KEY
+          - name: RAG_OPENAI_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: open-webui-external-secret
+                key: OPENAI_API_KEY
         enableOpenaiApi: true
         sso:
           enabled: true

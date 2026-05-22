@@ -45,6 +45,10 @@ spec:
               remoteRef:
                 key: /default/open-webui
                 property: webui_secret_key
+            - secretKey: QDRANT_API_KEY
+              remoteRef:
+                key: /default/qdrant
+                property: API_KEY
         postgresql:
           enabled: true
           backup:
