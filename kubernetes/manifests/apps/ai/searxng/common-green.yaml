@@ -17,6 +17,19 @@ spec:
     helm:
       valuesObject:
         name: searxng
+        ingressRoutes:
+          - name: searxng
+            ingressClass: traefik-external
+            routes:
+              - match: Host(`searxng.bhamm-lab.com`)
+                kind: Rule
+                middlewares:
+                  - name: default-headers
+                  - name: forwardauth-authelia
+                services:
+                  - name: searxng
+                    scheme: http
+                    port: http
         dragonfly:
           enabled: true
         externalSecrets:
