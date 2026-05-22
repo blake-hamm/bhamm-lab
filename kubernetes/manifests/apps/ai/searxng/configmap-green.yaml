@@ -59,14 +59,6 @@ data:
       - name: startpage
         disabled: false
   limiter.toml: |
-    [botdetection.ip_lists]
-    pass_ip = [
-      "10.0.0.0/8",
-      "172.16.0.0/12",
-      "192.168.0.0/16",
-      "127.0.0.1",
-    ]
-
     [botdetection.ip_limit]
     link_token = true
 
