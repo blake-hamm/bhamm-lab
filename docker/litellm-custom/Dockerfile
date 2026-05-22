@@ -1,3 +1,3 @@
 FROM ghcr.io/berriai/litellm:v1.85.1
 
-RUN uv add "mlflow>=3.1.4"
+RUN python -m pip install "mlflow>=3.1.4"
