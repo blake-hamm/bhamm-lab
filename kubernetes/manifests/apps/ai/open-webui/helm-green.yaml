@@ -88,7 +88,7 @@ spec:
             value: "1"
           - name: SEARXNG_QUERY_URL
             value: "http://searxng.searxng.svc.cluster.local:8080/search?q=<query>"
-          - name: BYPASS_WEB_SEARCH_RESULT_LINK_SCRAPE
+          - name: BYPASS_WEB_SEARCH_WEB_LOADER
             value: "true"
         enableOpenaiApi: true
         sso:
