@@ -72,7 +72,7 @@ data:
         disabled: false
   limiter.toml: |
     [botdetection.ip_limit]
-    link_token = true
+    link_token = false
 
     [botdetection]
     trusted_proxies = [
