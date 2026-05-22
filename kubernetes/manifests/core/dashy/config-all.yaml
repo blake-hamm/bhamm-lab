@@ -44,7 +44,7 @@ data:
       - title: Opnsense
         description: Visit opnsense exporter grafana dashboard
         icon: hl-grafana
-        url: https://grafana.bhamm-lab.com/d/Kczn-jPZz/node-exporter-freebsd?orgId=1&from=now-24h&to=now&timezone=browser&var-DS_PROMETHEUS=default&var-job=opnsense&var-node=10.0.9.1:9100&refresh=1w
+        url: https://grafana.bhamm-lab.com/d/cdmf5fk3ip4aob/opnsense?var-rate_interval=1m&orgId=1&from=now-3h&to=now&timezone=browser&var-opnsense_instance=opnsense&refresh=1m
         statusCheck: false
       - title: BSD
         description: Visit bsd node exporter grafana dashboard
