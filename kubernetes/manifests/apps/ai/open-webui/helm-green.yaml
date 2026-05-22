@@ -33,12 +33,14 @@ spec:
             port: http
           failureThreshold: 2
           periodSeconds: 10
+          timeoutSeconds: 10
         readinessProbe:
           httpGet:
             path: /health/db
             port: http
           failureThreshold: 2
           periodSeconds: 10
+          timeoutSeconds: 10
         startupProbe:
           httpGet:
             path: /health
@@ -46,6 +48,7 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 5
           failureThreshold: 20
+          timeoutSeconds: 10
         persistence:
           enabled: true
           existingClaim: "open-webui-data"
