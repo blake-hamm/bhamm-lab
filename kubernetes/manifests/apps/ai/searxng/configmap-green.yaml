@@ -7,7 +7,11 @@ metadata:
     argocd.argoproj.io/sync-wave: "19"
 data:
   settings.yml: |
-    use_default_settings: true
+    use_default_settings:
+      engines:
+        keep_only:
+          - bing
+          - wikipedia
     general:
       open_metrics: "default"
     server:
@@ -56,12 +60,6 @@ data:
         disabled: false
       - name: wikipedia
         disabled: false
-      - name: duckduckgo
-        disabled: true
-      - name: startpage
-        disabled: true
-      - name: mojeek
-        disabled: true
   limiter.toml: |
     [botdetection.ip_limit]
     link_token = false
