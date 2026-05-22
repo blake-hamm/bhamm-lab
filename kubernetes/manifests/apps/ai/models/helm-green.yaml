@@ -35,7 +35,12 @@ spec:
                   qdrant_semantic_cache_embedding_model: qwen-embed
                   qdrant_collection_name: litellm
                   similarity_threshold: 0.6
-                callbacks: ["arize_phoenix"]
+                callbacks:
+                  - "arize_phoenix"
+                  - websearch_interception:
+                      enabled_providers:
+                        - openai
+                      search_tool_name: searxng-search
                 success_callback: ["mlflow"]
                 failure_callback: ["mlflow"]
               general_settings:
@@ -52,6 +57,11 @@ spec:
                 redis_host: os.environ/REDIS_HOST
                 redis_port: os.environ/REDIS_PORT
                 redis_password: os.environ/REDIS_PASSWORD
+              search_tools:
+                - search_tool_name: searxng-search
+                  litellm_params:
+                    search_provider: searxng
+                    api_base: http://searxng.searxng.svc.cluster.local:8080
         mlflow:
           image:
             repository: ghcr.io/mlflow/mlflow
