@@ -7,15 +7,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "19"
 data:
   settings.yml: |
-    use_default_settings:
-      engines:
-        keep_only:
-          - duckduckgo
-          - braveapi
-          - startpage
-          - bing
-          - mojeek
-          - wikipedia
+    use_default_settings: true
     general:
       open_metrics: "default"
     server:
@@ -60,16 +52,16 @@ data:
         api_key: '${BRAVE_API_KEY}'
         results_per_page: 20
         disabled: false
-      - name: duckduckgo
-        disabled: false
-      - name: startpage
-        disabled: false
       - name: bing
-        disabled: false
-      - name: mojeek
         disabled: false
       - name: wikipedia
         disabled: false
+      - name: duckduckgo
+        disabled: true
+      - name: startpage
+        disabled: true
+      - name: mojeek
+        disabled: true
   limiter.toml: |
     [botdetection.ip_limit]
     link_token = false
