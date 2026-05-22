@@ -11,8 +11,11 @@ data:
       engines:
         keep_only:
           - duckduckgo
-          - brave
+          - braveapi
           - startpage
+          - bing
+          - mojeek
+          - wikipedia
     general:
       open_metrics: "default"
     server:
@@ -52,11 +55,20 @@ data:
       theme_args:
         simple_style: dark
     engines:
+      - name: braveapi
+        engine: braveapi
+        api_key: '${BRAVE_API_KEY}'
+        results_per_page: 20
+        disabled: false
       - name: duckduckgo
         disabled: false
-      - name: brave
-        disabled: false
       - name: startpage
+        disabled: false
+      - name: bing
+        disabled: false
+      - name: mojeek
+        disabled: false
+      - name: wikipedia
         disabled: false
   limiter.toml: |
     [botdetection.ip_limit]

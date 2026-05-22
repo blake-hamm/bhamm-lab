@@ -34,6 +34,10 @@ spec:
               remoteRef:
                 key: /default/searxng
                 property: smon_username
+            - secretKey: BRAVE_API_KEY
+              remoteRef:
+                key: /external/brave
+                property: BRAVE_API_KEY
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

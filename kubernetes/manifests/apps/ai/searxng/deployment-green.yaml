@@ -16,6 +16,25 @@ spec:
       labels:
         app: searxng
     spec:
+      initContainers:
+        - name: envsubst
+          image: bhgedigital/envsubst:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              envsubst < /config/settings.yml > /etc/searxng/settings.yml
+              cp /config/limiter.toml /etc/searxng/limiter.toml
+          env:
+            - name: BRAVE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: searxng-external-secret
+                  key: BRAVE_API_KEY
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: templated-config
+              mountPath: /etc/searxng
       containers:
         - name: searxng
           image: ghcr.io/searxng/searxng:2026.5.13-8e5aa9d39
@@ -45,12 +64,8 @@ spec:
             failureThreshold: 30
             periodSeconds: 10
           volumeMounts:
-            - name: config
-              mountPath: /etc/searxng/settings.yml
-              subPath: settings.yml
-            - name: config
-              mountPath: /etc/searxng/limiter.toml
-              subPath: limiter.toml
+            - name: templated-config
+              mountPath: /etc/searxng
             - name: data
               mountPath: /var/cache/searxng
           resources:
@@ -81,6 +96,8 @@ spec:
         - name: config
           configMap:
             name: searxng-config
+        - name: templated-config
+          emptyDir: {}
         - name: data
           emptyDir: {}
       nodeSelector:
