@@ -35,14 +35,13 @@ spec:
                   qdrant_semantic_cache_embedding_model: qwen-embed
                   qdrant_collection_name: litellm
                   similarity_threshold: 0.6
-                callbacks:
-                  - "arize_phoenix"
-                  - websearch_interception:
-                      enabled_providers:
-                        - openai
-                      search_tool_name: searxng-search
-                success_callback: ["mlflow"]
+                callbacks: ["arize_phoenix"]
+                success_callback: ["mlflow", "websearch_interception"]
                 failure_callback: ["mlflow"]
+                websearch_interception_params:
+                  enabled_providers:
+                    - openai
+                  search_tool_name: searxng-search
               general_settings:
                 enforce_user_param: False
                 store_model_in_db: True
