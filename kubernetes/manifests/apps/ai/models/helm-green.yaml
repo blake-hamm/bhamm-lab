@@ -36,12 +36,8 @@ spec:
                   qdrant_collection_name: litellm
                   similarity_threshold: 0.6
                 callbacks: ["arize_phoenix"]
-                success_callback: ["mlflow", "websearch_interception"]
+                success_callback: ["mlflow"]
                 failure_callback: ["mlflow"]
-                websearch_interception_params:
-                  enabled_providers:
-                    - openai
-                  search_tool_name: searxng-search
               general_settings:
                 enforce_user_param: False
                 store_model_in_db: True
