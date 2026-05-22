@@ -12,7 +12,7 @@ spec:
     namespace: qdrant
   source:
     repoURL: https://qdrant.github.io/qdrant-helm
-    targetRevision: v1.15.5
+    targetRevision: v1.17.1
     chart: qdrant
     helm:
       valuesObject:

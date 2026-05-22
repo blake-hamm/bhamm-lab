@@ -97,6 +97,8 @@ spec:
             value: "qdrant"
           - name: QDRANT_URI
             value: "http://qdrant.qdrant.svc.cluster.local:6333"
+          - name: QDRANT_TIMEOUT
+            value: "30"
           - name: RAG_EMBEDDING_ENGINE
             value: "openai"
           - name: RAG_EMBEDDING_MODEL
