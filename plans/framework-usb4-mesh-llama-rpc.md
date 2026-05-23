@@ -6,53 +6,41 @@
 
 ---
 
-## Hardware
+## Completed Setup (Phases 1–6)
 
-| Node | Hostname | IP (mgmt) | RAM | OS |
-|------|----------|-----------|-----|----|
-| nose | green-talos-worker-nose | 10.0.30.78 | 128 GB | Talos v1.11.3 |
-| tail | green-talos-worker-tail | 10.0.30.79 | 128 GB | Talos v1.12.6 |
-
-Both nodes have two rear USB4-C ports (40 Gbps capable). Front ports are USB 3.2×2 only and must not be used for this purpose.
-
----
-
-## Current State (Phase 1 Complete)
-
-- `nose` has been provisioned via `tofu apply` and joined the green cluster.
-- **Version mismatch:** `nose` is on Talos `v1.11.3`; the rest of the cluster is `v1.12.6`.
-- Thunderbolt controller is detected on both nodes (dmesg shows peer discovery).
-- **Cable appears already connected:** `nose` dmesg shows `thunderbolt 0-2: Linux green-talos-worker-tail`.
-- **`thunderbolt-net` module is NOT loaded** on either node; only `thunderbolt` core module is present.
-- No `thunderbolt0`/`thunderbolt1` network interfaces exist yet.
-- `nose` shows an AVC denial for `/usr/lib/udev/rules.d/99-thunderbolt.rules` (Talos 1.11.3).
+| Item | Value |
+|------|-------|
+| **nose** (10.0.30.78) | Talos v1.12.6, `thunderbolt-net` loaded, `enx02438fee9b2c` @ `busPath: 0-2.0` |
+| **tail** (10.0.30.79) | Talos v1.12.6, `thunderbolt-net` loaded, `enx020dce5a986d` @ `busPath: 1-2.0` |
+| **iperf3** | 9.05 Gbits/sec sustained, 8 retransmits over 30 s |
 
 ---
 
-## Phase 2 — Upgrade nose to v1.12.6
+## USB4 Mesh Network
 
-`nose` must match the cluster Talos version before applying thunderbolt networking patches.
+| Node | Interface | busPath | IP |
+|------|-----------|---------|-----|
+| nose | `enx02438fee9b2c` | `0-2.0` | `10.30.0.78/32` |
+| tail | `enx020dce5a986d` | `1-2.0` | `10.30.0.79/32` |
+
+Dedicated `10.30.0.0/30` subnet. Point-to-point `/32` routes with metric 2048.
+
+---
+
+## Required Environment
 
 ```bash
 export TALOSCONFIG=./tofu/proxmox/talos/result/talos-config-green.yaml
-
-# Upgrade nose to v1.12.6 (uses the same factory schematic)
-talosctl -n 10.0.30.78 upgrade --image factory.talos.dev/installer/<SCHEMATIC_ID>:v1.12.6
-
-# Wait for reboot and confirm version
-talosctl -n 10.0.30.78 version
-talosctl -n 10.0.30.78 get members
+export KUBECONFIG=./tofu/proxmox/talos/result/kube-config-green.yaml
 ```
-
-**Success criteria:** `nose` reports `Talos (v1.12.6)` and Kubernetes node is Ready.
 
 ---
 
-## Phase 3 — Load thunderbolt-net Kernel Module
+## IaC Changes Required
 
-The `siderolabs/thunderbolt` extension ships both `thunderbolt` and `thunderbolt-net`, but Talos does not auto-load `thunderbolt-net`. It must be declared in the machine config.
+### 1. Talos Machine Config (`tofu/proxmox/talos/cluster.tf`)
 
-Apply this patch to **both** nodes:
+Add to `talos_machine_configuration_apply.bare_metal.config_patches` for both nodes:
 
 ```yaml
 machine:
@@ -60,157 +48,59 @@ machine:
     modules:
       - name: thunderbolt
       - name: thunderbolt-net
-```
-
-Commands:
-
-```bash
-cat > /tmp/tb-modules.yaml <<'EOF'
-machine:
-  kernel:
-    modules:
-      - name: thunderbolt
-      - name: thunderbolt-net
-EOF
-
-talosctl -n 10.0.30.78 patch --patch @/tmp/tb-modules.yaml
-talosctl -n 10.0.30.79 patch --patch @/tmp/tb-modules.yaml
-```
-
-**Verify:**
-
-```bash
-talosctl -n 10.0.30.78 read /proc/modules | grep thunder
-talosctl -n 10.0.30.79 read /proc/modules | grep thunder
-```
-
-Both should show `thunderbolt` and `thunderbolt-net` loaded.
-
----
-
-## Phase 4 — Discover Bus Paths
-
-With `thunderbolt-net` loaded and the cable connected, interfaces should appear. Identify which `busPath` on each node maps to the peer.
-
-```bash
-talosctl -n 10.0.30.78 get links | grep thunderbolt
-talosctl -n 10.0.30.79 get links | grep thunderbolt
-```
-
-Then map peers via dmesg:
-
-```bash
-talosctl -n 10.0.30.78 dmesg | grep thunderbolt
-talosctl -n 10.0.30.79 dmesg | grep thunderbolt
-```
-
-Look for lines like:
-
-```
-thunderbolt 0-2: Linux green-talos-worker-tail
-```
-
-Note the bus path (e.g., `0-1.0`, `0-2`, `1-1.0`). Talos may report it as `0-1.0` or similar in `get links -oyaml` under `busPath`.
-
-**Success criteria:** Each node shows one `thunderbolt` link with `operationalState: up` and a known bus path.
-
----
-
-## Phase 5 — Configure Point-to-Point IP Addresses
-
-Using the discovered bus paths, apply per-node network patches.
-
-**nose:**
-
-```yaml
-machine:
   network:
     interfaces:
       - deviceSelector:
-          busPath: "0-2"          # <-- replace with discovered path
+          busPath: "0-2.0"   # nose
         dhcp: false
         mtu: 65520
         addresses:
-          - 169.254.255.78/32
+          - 10.30.0.78/32
         routes:
-          - network: 169.254.255.79/32
+          - network: 10.30.0.79/32
             metric: 2048
 ```
 
-**tail:**
+Tail uses `busPath: "1-2.0"`, address `10.30.0.79/32`, route `10.30.0.78/32`.
+
+**Note:** Current nodes have stale duplicate addresses (`169.254.255.x` and `10.0.30.17x`). These must be cleaned up before or during the next `tofu apply`.
+
+### 2. ArgoCD Namespace Metadata (`kubernetes/manifests/apps/ai/models/helm-green.yaml`)
+
+The `models` namespace must enforce `privileged` pod security for host-network DaemonSets:
 
 ```yaml
-machine:
-  network:
-    interfaces:
-      - deviceSelector:
-          busPath: "1-2"          # <-- replace with discovered path
-        dhcp: false
-        mtu: 65520
-        addresses:
-          - 169.254.255.79/32
-        routes:
-          - network: 169.254.255.78/32
-            metric: 2048
+spec:
+  destination:
+    namespace: models
+  syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
 ```
-
-Apply:
-
-```bash
-talosctl -n 10.0.30.78 patch --patch @/tmp/tb-nose.yaml
-talosctl -n 10.0.30.79 patch --patch @/tmp/tb-tail.yaml
-```
-
-**Verify connectivity:**
-
-```bash
-talosctl -n 10.0.30.78 read /proc/net/arp | grep 169.254.255.79
-```
-
-Or run a privileged debug pod and `ping`.
-
----
-
-## Phase 6 — Benchmark with iperf3
-
-Run privileged debug pods on both nodes to test throughput.
-
-**Server (nose):**
-
-```bash
-kubectl run iperf-nose --rm -i --restart=Never \
-  --overrides='{"spec":{"hostNetwork":true,"nodeName":"green-talos-worker-nose","containers":[{"name":"iperf","image":"networkstatic/iperf3","command":["iperf3","-s","-B","169.254.255.78"]}]}}' \
-  --image=networkstatic/iperf3
-```
-
-**Client (tail):**
-
-```bash
-kubectl run iperf-tail --rm -i --restart=Never \
-  --overrides='{"spec":{"hostNetwork":true,"nodeName":"green-talos-worker-tail","containers":[{"name":"iperf","image":"networkstatic/iperf3","command":["iperf3","-c","169.254.255.78","-B","169.254.255.79","-t","30"]}]}}' \
-  --image=networkstatic/iperf3
-```
-
-**Success criteria:** Sustained ~9–11 Gbps, zero retransmits, stable over 30 seconds.
-
-> **Note:** Real-world USB4/Thunderbolt IP throughput is ~9–11 Gbps. The theoretical 40 Gbps is not achievable over this protocol stack. Parallel streams or bonding are not supported (`thunderbolt_net` lacks `ndo_set_mac_address`; 802.3ad bonding is broken).
 
 ---
 
 ## Phase 7 — Deploy llama.cpp RPC Servers
 
-Build or use a pre-built image that includes `rpc-server` compiled with ROCm/Vulkan support.
+**Problem:** Official `ghcr.io/ggml-org/llama.cpp` images do **not** include `rpc-server`. RPC requires a custom build with `-DGGML_RPC=ON`.
 
-**Option A (fastest):** Use Donato Capitella's pre-built image:
+### Option A: Use Pre-Built Image (Fastest)
+
+Donato Capitella's pre-built image includes `rpc-server` with Vulkan/RADV:
 
 ```yaml
 image: kyuz0/amd-strix-halo-toolboxes:vulkan-radv
 command: ["rpc-server", "-H", "0.0.0.0", "-p", "50052"]
 ```
 
-**Option B (cleanest):** Build `ghcr.io/ggml-org/llama.cpp` with `-DGGML_RPC=ON` and your ROCm/Vulkan backend.
+### Option B: Build Custom Image (Recommended)
 
-Deploy as a DaemonSet on both nodes, binding to the USB4 IP:
+Build `ghcr.io/ggml-org/llama.cpp` with `-DGGML_RPC=ON` and your ROCm/Vulkan backend. Both `rpc-server` and `llama-server` must be built with RPC support.
+
+### DaemonSet
+
+Deploy on both nodes, binding to the USB4 IP:
 
 ```yaml
 apiVersion: apps/v1
@@ -273,7 +163,7 @@ Both should show `rpc-server` listening on `0.0.0.0:50052`.
 
 ## Phase 8 — Run Distributed Inference
 
-Add an RPC-capable model to the existing `helm-green.yaml` (or a new Argo Application). Example:
+Add an RPC-capable model to `kubernetes/manifests/apps/ai/models/helm-green.yaml`:
 
 ```yaml
 - name: distributed-large
@@ -295,7 +185,7 @@ Add an RPC-capable model to the existing `helm-green.yaml` (or a new Argo Applic
     - -fa
     - "on"
     - --rpc
-    - "169.254.255.78:50052,169.254.255.79:50052"
+    - "10.30.0.78:50052,10.30.0.79:50052"
     - -c
     - "65536"
   resources:
@@ -313,12 +203,31 @@ Add an RPC-capable model to the existing `helm-green.yaml` (or a new Argo Applic
 
 ```bash
 # Inside the client pod
-llama-bench -m /models/... -ngl 99 --rpc 169.254.255.78:50052,169.254.255.79:50052
+llama-bench -m /models/... -ngl 99 --rpc 10.30.0.78:50052,10.30.0.79:50052
 ```
 
 **Success criteria:** Model loads across both nodes' memory pools and inference completes without hangs. Start with `llama-bench`; if stable, test `llama-server`.
 
 > **Warning:** llama.cpp RPC is still PoC. Large model tensor uploads can crash or hang. Use `--tensor-split` if you need to control weight distribution.
+
+---
+
+## Kubernetes Debug Notes
+
+Host-network pods require a namespace with `pod-security.kubernetes.io/enforce=privileged`:
+
+```bash
+kubectl create ns debug-tb
+kubectl label ns debug-tb pod-security.kubernetes.io/enforce=privileged --overwrite
+```
+
+Example ping test:
+
+```bash
+kubectl run ping-test -n debug-tb --rm -i --restart=Never \
+  --overrides='{"spec":{"hostNetwork":true,"nodeName":"green-talos-worker-nose","containers":[{"name":"ping","image":"busybox","command":["ping","-c","3","10.30.0.79"]}]}}' \
+  --image=busybox
+```
 
 ---
 
@@ -331,7 +240,7 @@ llama-bench -m /models/... -ngl 99 --rpc 169.254.255.78:50052,169.254.255.79:500
 | **No bonding** | `thunderbolt_net` lacks MAC address setting; 802.3ad bonding is broken. |
 | **Single link** | With two cables between two nodes, run two separate /32 routes with different metrics. Do not use LACP. |
 | **RPC stability** | llama.cpp RPC can hang on very large models during tensor upload. Start with `llama-bench`. |
-| **Talos 1.11.3 AVC** | The thunderbolt udev rules SELinux denial on 1.11.3 may have prevented interface creation. Upgrading to 1.12.6 is required. |
+| **No official RPC image** | `ghcr.io/ggml-org/llama.cpp` images do not include `rpc-server`. Custom build required. |
 
 ---
 
@@ -339,11 +248,11 @@ llama-bench -m /models/... -ngl 99 --rpc 169.254.255.78:50052,169.254.255.79:500
 
 | Phase | Verify |
 |-------|--------|
-| 2 | `talosctl -n 10.0.30.78 version` shows `v1.12.6` |
-| 3 | `/proc/modules` on both nodes contains `thunderbolt-net` |
-| 4 | `talosctl get links` shows `thunderbolt0` (or similar) `up` |
-| 5 | `ping` from `169.254.255.78` to `169.254.255.79` succeeds |
-| 6 | `iperf3` shows ≥9 Gbps, zero packet loss |
+| 2 | `talosctl -n 10.0.30.78 version` shows `v1.12.6` ✅ |
+| 3 | `/proc/modules` on both nodes contains `thunderbolt-net` ✅ |
+| 4 | `talosctl get links` shows `thunderbolt` interface `up` ✅ |
+| 5 | `ping` across mesh succeeds ✅ |
+| 6 | `iperf3` shows ≥9 Gbps, stable ✅ |
 | 7 | `rpc-server` listening on `:50052` on both nodes |
 | 8 | `llama-bench` completes distributed inference |
 
