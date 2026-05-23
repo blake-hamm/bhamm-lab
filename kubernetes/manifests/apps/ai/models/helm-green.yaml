@@ -239,7 +239,7 @@ spec:
                 memory: "110Gi"
           - name: qwen
             description: High quality dense model
-            enabled: true
+            enabled: false
             pvc:
               storage: "40Gi"
             args:
@@ -340,7 +340,7 @@ spec:
                 memory: "110Gi"
           - name: qwen-instruct
             description: High quality MoE model for general chat
-            enabled: true
+            enabled: false
             pvc:
               storage: "40Gi"
             image:
@@ -391,7 +391,7 @@ spec:
                 memory: "110Gi"
           - name: qwen-thinking
             description: High quality, reasoning MoE model for general chat
-            enabled: true
+            enabled: false
             pvc:
               storage: "70Gi"
             image:
@@ -444,7 +444,7 @@ spec:
                 memory: "110Gi"
           - name: qwen-coder
             description: High quality MoE model for coding
-            enabled: true
+            enabled: false
             pvc:
               storage: "40Gi"
             args:
@@ -493,7 +493,7 @@ spec:
                 memory: "110Gi"
           - name: qwen-coder-next
             description: '...'
-            enabled: true
+            enabled: false
             pvc:
               storage: "100Gi"
             image:
@@ -542,7 +542,7 @@ spec:
                 memory: "110Gi"
           - name: minimax-25
             description: '...'
-            enabled: true
+            enabled: false
             pvc:
               storage: "100Gi"
             image:
@@ -593,7 +593,7 @@ spec:
                 memory: "110Gi"
           - name: devstral
             description: Mistral development model
-            enabled: true
+            enabled: false
             pvc:
               storage: "80Gi"
             image:
@@ -901,7 +901,7 @@ spec:
                 memory: "110Gi"
           - name: devstral-instruct
             description: Mistral development model
-            enabled: true
+            enabled: false
             pvc:
               storage: "100Gi"
             image:
@@ -937,7 +937,7 @@ spec:
               - "0.01"
           - name: nemotron
             description: Reasoning model from nvidia
-            enabled: true
+            enabled: false
             image:
               tag: rocm-7.2.2 #vulkan-radv_20260211T025037
             pvc:
@@ -975,7 +975,7 @@ spec:
               - "0.01"
           - name: gemma-3
             description: Mid model with multimodal support
-            enabled: true
+            enabled: false
             image:
               tag: rocm-6.4.4
             pvc:
@@ -1028,7 +1028,7 @@ spec:
                 memory: "110Gi"
           - name: glm-air-reap
             description: High quality MoE model for agents, coding or complex chat
-            enabled: true
+            enabled: false
             pvc:
               storage: "90Gi"
             image:
@@ -1077,7 +1077,7 @@ spec:
                 memory: "110Gi"
           - name: glm-air
             description: High quality dense model for agents, coding or complex chat
-            enabled: true
+            enabled: false
             pvc:
               storage: "90Gi"
             image:
@@ -1126,7 +1126,7 @@ spec:
                 memory: "110Gi"
           - name: glm-flash
             description: High quality moe model for agents, coding or complex chat
-            enabled: true
+            enabled: false
             pvc:
               storage: "70Gi"
             image:
@@ -1224,7 +1224,7 @@ spec:
                 memory: "110Gi"
           - name: glm-47-reap
             description: High quality moe model for agents, coding or complex chat (REAP)
-            enabled: true
+            enabled: false
             pvc:
               storage: "90Gi"
             image:
@@ -1273,7 +1273,7 @@ spec:
                 memory: "110Gi"
           - name: step-flash
             description: desc
-            enabled: true
+            enabled: false
             pvc:
               storage: "100Gi"
             image:
@@ -1322,7 +1322,7 @@ spec:
                 memory: "110Gi"
           - name: llama-4
             description: High quality multimodal model
-            enabled: true
+            enabled: false
             pvc:
               storage: "90Gi"
             image:
@@ -1369,7 +1369,7 @@ spec:
                 memory: "90Gi"
           - name: seed-oss
             description: Mid model specialized in agentic and coding
-            enabled: true
+            enabled: false
             pvc:
               storage: "90Gi"
             image:
@@ -1414,7 +1414,7 @@ spec:
                 memory: "110Gi"
           - name: kimi
             description: desc
-            enabled: true
+            enabled: false
             pvc:
               storage: "100Gi"
             image:
@@ -1542,7 +1542,7 @@ spec:
                 threshold: "1"
           - name: kimi-dev
             description: '...'
-            enabled: true
+            enabled: false
             pvc:
               storage: "100Gi"
             image:
