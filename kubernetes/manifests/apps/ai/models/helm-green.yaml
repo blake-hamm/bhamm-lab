@@ -1489,7 +1489,7 @@ spec:
               kubernetes.io/hostname: green-talos-worker-tail
             zeroscaling:
               enabled: true
-              minReplicas: 0
+              minReplicas: 1
               cooldownPeriod: 1200
               trigger:
                 query: >-
@@ -1534,7 +1534,7 @@ spec:
               kubernetes.io/hostname: green-talos-worker-nose
             zeroscaling:
               enabled: true
-              minReplicas: 0
+              minReplicas: 1
               cooldownPeriod: 1800
               trigger:
                 query: >-
