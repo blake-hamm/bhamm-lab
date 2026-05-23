@@ -1,0 +1,11 @@
+# Cilium bootstrap job — required by design before CNI exists
+AVD-KSV-0009
+AVD-KSV-0037
+AVD-KSV-0111
+AVD-KSV-0118
+AVD-KSV-0125
+# Image runs as root; non-root breaks distroless /root/app workdir
+AVD-KSV-0012
+AVD-KSV-0014
+AVD-KSV-0020
+AVD-KSV-0021

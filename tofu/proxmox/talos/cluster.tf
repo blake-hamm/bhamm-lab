@@ -142,6 +142,7 @@ resource "talos_machine_bootstrap" "this" {
   client_configuration = talos_machine_secrets.this.client_configuration
 }
 
+# tflint-ignore: terraform_unused_declarations
 data "talos_cluster_health" "this" {
   depends_on = [
     talos_machine_configuration_apply.vms,

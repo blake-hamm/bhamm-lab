@@ -11,13 +11,13 @@ intel_gpu_worker_id = [
   "0000:87:00.0"
 ]
 metal_amd_framework_workers = {
-  # nose = {
-  #   ip = "10.0.30.78"
-  #   taint = {
-  #     key    = "amd.com/gpu"
-  #     effect = "NoSchedule"
-  #   }
-  # }
+  nose = {
+    ip = "10.0.30.78"
+    taint = {
+      key    = "amd.com/gpu"
+      effect = "NoSchedule"
+    }
+  }
   tail = {
     ip = "10.0.30.79"
     taint = {
