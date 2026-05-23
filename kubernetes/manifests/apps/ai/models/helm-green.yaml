@@ -12,7 +12,7 @@ spec:
     namespace: models
   source:
     repoURL: https://github.com/blake-hamm/kube-ai-stack.git
-    targetRevision: main
+    targetRevision: fix/rpc-litellm
     path: charts/kube-ai-stack
     helm:
       valuesObject:
@@ -1385,6 +1385,8 @@ spec:
             probes:
               enabled: false
             servicemonitor:
+              enabled: false
+            litellm:
               enabled: false
             image:
               tag: rocm-7.2.3_20260523T170726
