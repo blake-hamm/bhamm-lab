@@ -1409,7 +1409,7 @@ spec:
             zeroscaling:
               enabled: true
               minReplicas: 1
-              cooldownPeriod: 1200
+              cooldownPeriod: 1800
               trigger:
                 query: >-
                   sum(llamacpp:requests_processing{container="minimax-m27"}) or vector(0)
