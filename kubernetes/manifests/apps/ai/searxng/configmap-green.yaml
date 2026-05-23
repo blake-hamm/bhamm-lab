@@ -7,7 +7,11 @@ metadata:
     argocd.argoproj.io/sync-wave: "19"
 data:
   settings.yml: |
-    use_default_settings: true
+    use_default_settings:
+      engines:
+        keep_only:
+          - bing
+          - wikipedia
     general:
       open_metrics: "default"
     server:
@@ -47,27 +51,24 @@ data:
       theme_args:
         simple_style: dark
     engines:
-      - name: duckduckgo
+      - name: braveapi
+        engine: braveapi
+        api_key: '${BRAVE_API_KEY}'
+        results_per_page: 20
         disabled: false
-      - name: brave
-        disabled: false
-      - name: startpage
-        disabled: false
-      - name: google
-        disabled: true
       - name: bing
-        disabled: true
+        disabled: false
+      - name: wikipedia
+        disabled: false
   limiter.toml: |
+    [botdetection.ip_limit]
+    link_token = false
+
     [botdetection.ip_lists]
     pass_ip = [
-      "10.0.0.0/8",
-      "172.16.0.0/12",
-      "192.168.0.0/16",
-      "127.0.0.1",
+      "10.244.0.0/16",
     ]
-
-    [botdetection.ip_limit]
-    link_token = true
+    block_ip = []
 
     [botdetection]
     trusted_proxies = [

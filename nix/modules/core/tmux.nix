@@ -42,6 +42,9 @@
           # Reduce mouse scroll speed in copy mode (default scrolls multiple lines)
           bind -T copy-mode WheelUpPane select-pane \; send-keys -X -N 1 scroll-up
           bind -T copy-mode WheelDownPane select-pane \; send-keys -X -N 1 scroll-down
+
+          # Visual indicator for active pane in multi-pane layouts
+          set -g pane-border-indicators arrows
         '';
       };
 
@@ -52,6 +55,9 @@
         # so renames via Prefix+, are visible in the status bar.
         set -g @catppuccin_window_text " #W"
         set -g @catppuccin_window_current_text " #W"
+
+        # Enable pane border status labels for clearer active pane identification
+        set -g @catppuccin_pane_status_enabled "yes"
       '';
     };
   };

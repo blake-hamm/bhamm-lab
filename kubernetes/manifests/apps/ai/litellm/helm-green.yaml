@@ -12,14 +12,14 @@ spec:
   project: default
   source:
     repoURL: https://github.com/BerriAI/litellm.git
-    targetRevision: v1.81.3-stable
+    targetRevision: v1.85.1
     path: deploy/charts/litellm-helm
     helm:
       valuesObject:
         replicaCount: 1
         image:
           repository: harbor.bhamm-lab.com/library/litellm-custom
-          pullPolicy: IfNotPresent
+          pullPolicy: Always
           tag: "latest"
         deploymentAnnotations:
           reloader.stakater.com/auto: "true"

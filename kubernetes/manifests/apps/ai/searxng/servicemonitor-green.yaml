@@ -13,7 +13,7 @@ spec:
   endpoints:
     - port: http
       path: /metrics
-      interval: 30s
+      interval: 120s
       basicAuth:
         username:
           name: searxng-external-secret

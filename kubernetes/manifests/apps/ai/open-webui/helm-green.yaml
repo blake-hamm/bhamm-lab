@@ -13,15 +13,19 @@ spec:
   source:
     chart: open-webui
     repoURL: https://helm.openwebui.com
-    targetRevision: 8.12.2
+    targetRevision: 14.6.0
     helm:
       valuesObject:
         ollama:
           enabled: false
         ollamaUrls: []
+        websocket:
+          enabled: false
         pipelines:
           enabled: true
           extraEnvVars: []
+        openaiBaseApiUrls:
+          - "http://litellm.litellm.svc.cluster.local:4000/v1"
         strategy: {}
         livenessProbe:
           httpGet:
@@ -29,12 +33,14 @@ spec:
             port: http
           failureThreshold: 2
           periodSeconds: 10
+          timeoutSeconds: 10
         readinessProbe:
           httpGet:
             path: /health/db
             port: http
           failureThreshold: 2
           periodSeconds: 10
+          timeoutSeconds: 10
         startupProbe:
           httpGet:
             path: /health
@@ -42,6 +48,7 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 5
           failureThreshold: 20
+          timeoutSeconds: 10
         persistence:
           enabled: true
           existingClaim: "open-webui-data"
@@ -52,8 +59,10 @@ spec:
               secretKeyRef:
                 name: open-webui-external-secret
                 key: OPENAI_API_KEY
-          - name: OPENAI_API_BASE_URL
-            value: "http://litellm.litellm.svc.cluster.local:4000/v1"
+          - name: PIPELINES_API_KEY
+            value: "0p3n-w3bu!"
+          - name: OPENAI_API_KEYS
+            value: "$(PIPELINES_API_KEY);$(OPENAI_API_KEY)"
           - name: DATABASE_URL
             valueFrom:
               secretKeyRef:
@@ -61,16 +70,51 @@ spec:
                 key: uri
           - name: ENABLE_LOGIN_FORM
             value: "False"
-          - name: ENABLE_RAG_WEB_SEARCH
+          - name: WEBUI_URL
+            value: "https://chat.bhamm-lab.com"
+          - name: WEBUI_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: open-webui-external-secret
+                key: WEBUI_SECRET_KEY
+          - name: ENABLE_PASSWORD_AUTH
+            value: "False"
+          - name: DEFAULT_USER_ROLE
+            value: "user"
+          - name: ENABLE_WEB_SEARCH
             value: "True"
-          - name: RAG_WEB_SEARCH_ENGINE
+          - name: WEB_SEARCH_ENGINE
             value: "searxng"
-          - name: RAG_WEB_SEARCH_RESULT_COUNT
+          - name: WEB_SEARCH_RESULT_COUNT
             value: "3"
-          - name: RAG_WEB_SEARCH_CONCURRENT_REQUESTS
-            value: "10"
+          - name: WEB_SEARCH_CONCURRENT_REQUESTS
+            value: "1"
           - name: SEARXNG_QUERY_URL
             value: "http://searxng.searxng.svc.cluster.local:8080/search?q=<query>"
+          - name: BYPASS_WEB_SEARCH_WEB_LOADER
+            value: "true"
+          - name: VECTOR_DB
+            value: "qdrant"
+          - name: QDRANT_URI
+            value: "http://qdrant.qdrant.svc.cluster.local:6333"
+          - name: QDRANT_TIMEOUT
+            value: "30"
+          - name: RAG_EMBEDDING_ENGINE
+            value: "openai"
+          - name: RAG_EMBEDDING_MODEL
+            value: "qwen-embed"
+          - name: RAG_OPENAI_API_BASE_URL
+            value: "http://litellm.litellm.svc.cluster.local:4000/v1"
+          - name: QDRANT_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: open-webui-external-secret
+                key: QDRANT_API_KEY
+          - name: RAG_OPENAI_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: open-webui-external-secret
+                key: OPENAI_API_KEY
         enableOpenaiApi: true
         sso:
           enabled: true

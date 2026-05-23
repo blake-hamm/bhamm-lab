@@ -1,4 +1,4 @@
-{ config, lib, shared, ... }:
+{ config, lib, shared, pkgs, ... }:
 
 {
   options.cfg.neovim.enable = lib.mkOption {
@@ -35,7 +35,15 @@
               close_if_last_window = false;
             };
           };
-          vim.telescope.enable = true;
+          vim.telescope = {
+            enable = true;
+            setupOpts.pickers.find_files.find_command = [
+              "${pkgs.fd}/bin/fd"
+              "--type=file"
+              "--hidden"
+              "--no-ignore"
+            ];
+          };
           vim.git.gitsigns.enable = true;
           vim.binds.whichKey.enable = true;
           vim.terminal.toggleterm.enable = true;

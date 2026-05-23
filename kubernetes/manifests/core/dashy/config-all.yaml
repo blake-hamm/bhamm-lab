@@ -42,6 +42,11 @@ data:
         url: https://10.0.9.1/
         statusCheckAllowInsecure: true
       - title: Opnsense
+        description: Visit opnsense exporter grafana dashboard
+        icon: hl-grafana
+        url: https://grafana.bhamm-lab.com/d/cdmf5fk3ip4aob/opnsense?var-rate_interval=1m&orgId=1&from=now-3h&to=now&timezone=browser&var-opnsense_instance=opnsense&refresh=1m
+        statusCheck: false
+      - title: BSD
         description: Visit bsd node exporter grafana dashboard
         icon: hl-grafana
         url: https://grafana.bhamm-lab.com/d/Kczn-jPZz/node-exporter-freebsd?orgId=1&from=now-24h&to=now&timezone=browser&var-DS_PROMETHEUS=default&var-job=opnsense&var-node=10.0.9.1:9100&refresh=1m
@@ -250,7 +255,12 @@ data:
       - title: Open Webui
         description: Visit Open Webui
         icon: hl-open-webui
-        url: https://open-webui.bhamm-lab.com/
+        url: https://chat.bhamm-lab.com/
+      - title: SearXNG
+        description: Visit SearXNG search engine
+        icon: hl-searxng
+        url: https://searxng.bhamm-lab.com/
+        statusCheckAcceptCodes: '401'
       - title: LiteLLM
         description: Visit Lite LLM
         icon: generative
