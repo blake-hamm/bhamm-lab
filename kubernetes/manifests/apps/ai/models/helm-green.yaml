@@ -1435,7 +1435,7 @@ spec:
                   -dio \
                   --split-mode row \
                   --rpc 10.30.0.79:50052 \
-                  -c 131072 \
+                  -c 262144 \
                   --parallel 2 \
                   --cont-batching \
                   --temp 1.0 \
