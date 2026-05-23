@@ -41,6 +41,31 @@ export TALOSCONFIG=./tofu/proxmox/talos/result/talos-config-blue.yaml
 talosctl dashboard
 ```
 
+## Bare Metal Framework Nodes
+
+Framework Desktop nodes with AMD Strix Halo APUs are deployed as bare-metal workers via `talos_machine_configuration_apply.bare_metal`. Their USB4 mesh networking configuration is declared in the `.tfvars` file:
+
+```hcl
+metal_amd_framework_workers = {
+  nose = {
+    ip            = "10.0.30.78"
+    taint         = { key = "amd.com/gpu", effect = "NoSchedule" }
+    usb4_bus_path = "0-2.0"
+    usb4_mesh_ip  = "10.30.0.78"
+    usb4_peer_ip  = "10.30.0.79"
+  }
+  tail = {
+    ip            = "10.0.30.79"
+    taint         = { key = "amd.com/gpu", effect = "NoSchedule" }
+    usb4_bus_path = "1-2.0"
+    usb4_mesh_ip  = "10.30.0.79"
+    usb4_peer_ip  = "10.30.0.78"
+  }
+}
+```
+
+This drives the `thunderbolt` / `thunderbolt-net` kernel modules and the point-to-point `/32` interface configuration applied to each node. See [Strix Halo](../ai/strix-halo.md) for details.
+
 ## Create talos iso
 ```bash
 # To get id:
