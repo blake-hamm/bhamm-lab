@@ -63,6 +63,15 @@
             }
           ];
 
+          vim.autocmds = [
+            {
+              event = [ "BufRead" "BufNewFile" ];
+              pattern = [ "*.env" ".env.*" ];
+              desc = "Set env files to conf filetype to avoid sh tooling";
+              command = "setfiletype conf";
+            }
+          ];
+
           vim.lsp = {
             enable = true;
             formatOnSave = true;
