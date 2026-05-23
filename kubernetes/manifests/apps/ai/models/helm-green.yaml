@@ -12,7 +12,7 @@ spec:
     namespace: models
   source:
     repoURL: https://github.com/blake-hamm/kube-ai-stack.git
-    targetRevision: main
+    targetRevision: feature/rpc-support
     path: charts/kube-ai-stack
     helm:
       valuesObject:
@@ -1461,6 +1461,81 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
+          - name: rpc-tail
+            description: RPC backend for minimax-m2.7
+            enabled: true
+            hostNetwork: true
+            probes:
+              enabled: false
+            servicemonitor:
+              enabled: false
+            args:
+              - rpc-server
+              - -H
+              - 0.0.0.0
+              - -p
+              - "50052"
+              - -c
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "124Gi"
+              requests:
+                amd.com/gpu: 1
+                memory: "110Gi"
+            nodeSelector:
+              kubernetes.io/hostname: green-talos-worker-tail
+            zeroscaling:
+              enabled: true
+              minReplicas: 0
+              cooldownPeriod: 1200
+              trigger:
+                query: >-
+                  sum(kube_deployment_status_replicas{deployment="minimax-m2.7",namespace="models"}) or vector(0)
+                threshold: "1"
+          - name: minimax-m2.7
+            description: MiniMax-M2.7 distributed across nose+tail
+            enabled: true
+            pvc:
+              storage: "200Gi"
+            args:
+              - /bin/bash
+              - -c
+              - |
+                until bash -c 'echo >/dev/tcp/10.30.0.79/50052' 2>/dev/null; do sleep 5; done
+                exec llama-server \
+                  -hf unsloth/MiniMax-M2.7-GGUF:UD-Q5_K_XL \
+                  --host 0.0.0.0 \
+                  --metrics \
+                  --no-webui \
+                  --jinja \
+                  --no-mmap \
+                  -fa on \
+                  -ngl 999 \
+                  -dio \
+                  --rpc 10.30.0.79:50052 \
+                  -c 65536 \
+                  --timeout 1800 \
+                  -v
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "124Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
+            nodeSelector:
+              kubernetes.io/hostname: green-talos-worker-nose
+            zeroscaling:
+              enabled: true
+              minReplicas: 0
+              cooldownPeriod: 1800
+              trigger:
+                query: >-
+                  sum(llamacpp:requests_processing{container="minimax-m2.7"}) or vector(0)
+                threshold: "1"
           - name: kimi-dev
             description: '...'
             enabled: true
