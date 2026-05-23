@@ -49,6 +49,12 @@
           vim.terminal.toggleterm.enable = true;
           vim.visuals.nvim-web-devicons.enable = true;
 
+          vim.clipboard = {
+            enable = true;
+            registers = "unnamedplus";
+            providers.wl-copy.enable = true;
+          };
+
           vim.treesitter.enable = true;
           vim.autocomplete.nvim-cmp.enable = true;
           vim.comments.comment-nvim.enable = true;
