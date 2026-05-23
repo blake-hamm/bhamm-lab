@@ -302,6 +302,7 @@ spec:
               - "999"
               - -fa
               - "on"
+              - -dio
               - -c
               - "131072"
               - --parallel
