@@ -11,19 +11,25 @@ intel_gpu_worker_id = [
   "0000:87:00.0"
 ]
 metal_amd_framework_workers = {
-  # nose = {
-  #   ip = "10.0.30.78"
-  #   taint = {
-  #     key    = "amd.com/gpu"
-  #     effect = "NoSchedule"
-  #   }
-  # }
+  nose = {
+    ip = "10.0.30.78"
+    taint = {
+      key    = "amd.com/gpu"
+      effect = "NoSchedule"
+    }
+    usb4_bus_path = "0-2.0"
+    usb4_mesh_ip  = "10.30.0.78"
+    usb4_peer_ip  = "10.30.0.79"
+  }
   tail = {
     ip = "10.0.30.79"
     taint = {
       key    = "amd.com/gpu"
       effect = "NoSchedule"
     }
+    usb4_bus_path = "1-2.0"
+    usb4_mesh_ip  = "10.30.0.79"
+    usb4_peer_ip  = "10.30.0.78"
   }
 }
 amd_gpu_worker_id = [

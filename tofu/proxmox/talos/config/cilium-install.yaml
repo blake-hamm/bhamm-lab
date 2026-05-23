@@ -1,3 +1,4 @@
+# trivy:ignore:AVD-KSV-0111 -- Cilium install job requires cluster-admin to install CNI and cluster networking components
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -17,6 +18,10 @@ metadata:
   name: cilium-install
   namespace: kube-system
 ---
+# trivy:ignore:AVD-KSV-0009 -- hostNetwork required before CNI exists; job must reach API server directly
+# trivy:ignore:AVD-KSV-0037 -- Cilium is a system component; kube-system is the correct namespace
+# trivy:ignore:AVD-KSV-0118 -- cilium-cli image runs as root by design; non-root breaks /root/app workdir
+# trivy:ignore:AVD-KSV-0125 -- quay.io/cilium is the official Cilium project registry
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -58,7 +63,7 @@ spec:
       hostNetwork: true
       containers:
         - name: cilium-install
-          image: quay.io/cilium/cilium-cli-ci:latest
+          image: quay.io/cilium/cilium-cli:v0.19.4
           env:
             - name: KUBERNETES_SERVICE_HOST
               valueFrom:
@@ -77,6 +82,20 @@ spec:
             - --version=v1.19.3
             - --values
             - /root/app/values.yaml
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
       volumes:
         - name: values
           configMap:

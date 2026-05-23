@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/some-cleanup
+    targetRevision: feature/llamacpp-grpc
     path: kubernetes/manifests/core
     directory:
       recurse: true

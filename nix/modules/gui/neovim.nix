@@ -49,6 +49,12 @@
           vim.terminal.toggleterm.enable = true;
           vim.visuals.nvim-web-devicons.enable = true;
 
+          vim.clipboard = {
+            enable = true;
+            registers = "unnamedplus";
+            providers.wl-copy.enable = true;
+          };
+
           vim.treesitter.enable = true;
           vim.autocomplete.nvim-cmp.enable = true;
           vim.comments.comment-nvim.enable = true;
@@ -60,6 +66,15 @@
               mode = "n";
               silent = true;
               action = "<cmd>Neotree toggle<CR>";
+            }
+          ];
+
+          vim.autocmds = [
+            {
+              event = [ "BufRead" "BufNewFile" ];
+              pattern = [ "*.env" ".env.*" ];
+              desc = "Set env files to conf filetype to avoid sh tooling";
+              command = "setfiletype conf";
             }
           ];
 

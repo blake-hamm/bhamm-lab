@@ -50,13 +50,6 @@ pkgs.mkShell {
     # Install ansible galaxy requirements
     ansible-galaxy install -r ansible/requirements.yml
 
-    # Source .env file if it exists
-    if [ -f .env ]; then
-      set -a
-      source .env
-      set +a
-    fi
-
     # Define python interpreter for ansible
     export NIX_PYTHON_INTERPRETER=$(which python)
 

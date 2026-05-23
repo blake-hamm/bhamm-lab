@@ -10,7 +10,7 @@ The AI infrastructure is powered by a combination of specialized hardware to han
 
 - **AMD R9700:** This GPU is the workhorse for running embedding models. It's primarily used for the `qwen-embed` model running on `llama.cpp` with the AMD GPU plugin, providing embedding capabilities accross my stack.
 
-- **2x AMD Ryzen AI MAX 395+ (Strix Halo):** These are powerful APUs that are used for running larger, more demanding language models, also using the AMD GPU plugin. I primarily run GPT OSS 120b for chat in Open WebUI and GLM 4.5 Air for agent and coding assistance. I also have models from the qwen family, llama 4, gemma 3, devstral and seed oss, but these models are used far less.
+- **2x AMD Ryzen AI MAX 395+ (Strix Halo):** These powerful APUs are connected via a USB4 point-to-point mesh network (`10.30.0.78/32` ↔ `10.30.0.79/32`, ~9 Gbps) for distributed inference. Individually, they run larger language models using the AMD GPU plugin. I primarily run GPT OSS 120b for chat in Open WebUI and GLM 4.5 Air for agent and coding assistance. When combined via [llama.cpp RPC](llama-cpp.md), the pooled ~256 GB unified memory allows running models that exceed a single node's capacity.
 
 ## Software Stack
 
@@ -25,6 +25,17 @@ The software stack is built on Kubernetes and leverages a set of interconnected 
 - **`Open WebUI`:** This is the primary user interface for interacting with the language models. It's a user-friendly chat interface that connects to `litellm`'s OpenAI-compatible endpoint.
 
 - **`qdrant`:** This is the vector database used for storing and searching embeddings. The `qwen-embed` model generates embeddings for various data sources, which are then stored in `qdrant` to enable semantic search and other retrieval-augmented generation (RAG) tasks.
+
+## USB4 Mesh
+
+The two Strix Halo nodes (`nose` and `tail`) are connected via rear USB4-C ports using a point-to-point `/32` route configuration:
+
+| Node | USB4 IP | busPath |
+|------|---------|---------|
+| nose | `10.30.0.78/32` | `0-2.0` |
+| tail | `10.30.0.79/32` | `1-2.0` |
+
+This dedicated link achieves ~9 Gbps sustained throughput (iperf3), enabling llama.cpp to offload tensor computation across both nodes' unified memory pools via RPC. See [Strix Halo](strix-halo.md) for network configuration details and [llama.cpp](llama-cpp.md) for RPC usage.
 
 ## Diagram
 
@@ -49,7 +60,9 @@ graph TD
         subgraph "Hardware"
             E[Intel Arc A310e] --> F(Immich & Jellyfin)
             G[AMD R9700] --> C
-            H[2x AMD Strix Halo] --> C
+            H1["Strix Halo (nose)"] --> C
+            H2["Strix Halo (tail)"] --> C
+            H1 -. "USB4 9 Gbps" .-> H2
         end
 
         I -- "API Request" --> Ingress

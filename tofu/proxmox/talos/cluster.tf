@@ -129,7 +129,35 @@ resource "talos_machine_configuration_apply" "bare_metal" {
         }
       }
     }),
-    file("${path.module}/config/volumes-amd-framework.yaml")
+    file("${path.module}/config/volumes-amd-framework.yaml"),
+    each.value.usb4_mesh_ip != "" ? yamlencode({
+      machine = {
+        kernel = {
+          modules = [
+            { name = "thunderbolt" },
+            { name = "thunderbolt-net" }
+          ]
+        }
+        network = {
+          interfaces = [
+            {
+              deviceSelector = {
+                busPath = each.value.usb4_bus_path
+              }
+              dhcp      = false
+              mtu       = 65520
+              addresses = ["${each.value.usb4_mesh_ip}/32"]
+              routes = [
+                {
+                  network = "${each.value.usb4_peer_ip}/32"
+                  metric  = 2048
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }) : ""
   ]
 }
 
@@ -142,6 +170,7 @@ resource "talos_machine_bootstrap" "this" {
   client_configuration = talos_machine_secrets.this.client_configuration
 }
 
+# tflint-ignore: terraform_unused_declarations
 data "talos_cluster_health" "this" {
   depends_on = [
     talos_machine_configuration_apply.vms,

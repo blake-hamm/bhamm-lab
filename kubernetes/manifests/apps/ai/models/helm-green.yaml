@@ -12,7 +12,7 @@ spec:
     namespace: models
   source:
     repoURL: https://github.com/blake-hamm/kube-ai-stack.git
-    targetRevision: main
+    targetRevision: feature/rpc-support
     path: charts/kube-ai-stack
     helm:
       valuesObject:
@@ -211,10 +211,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -239,7 +235,7 @@ spec:
                 memory: "110Gi"
           - name: qwen
             description: High quality dense model
-            enabled: true
+            enabled: false
             pvc:
               storage: "40Gi"
             args:
@@ -258,10 +254,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -292,7 +284,7 @@ spec:
             pvc:
               storage: "40Gi"
             image:
-              tag: vulkan-amdvlk_20260430T172622
+              tag: rocm-7.2.3_20260523T170726
             args:
               - llama-server
               - -hf
@@ -310,10 +302,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "131072"
               - --parallel
@@ -340,7 +328,7 @@ spec:
                 memory: "110Gi"
           - name: qwen-instruct
             description: High quality MoE model for general chat
-            enabled: true
+            enabled: false
             pvc:
               storage: "40Gi"
             image:
@@ -361,10 +349,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -391,7 +375,7 @@ spec:
                 memory: "110Gi"
           - name: qwen-thinking
             description: High quality, reasoning MoE model for general chat
-            enabled: true
+            enabled: false
             pvc:
               storage: "70Gi"
             image:
@@ -414,10 +398,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -444,7 +424,7 @@ spec:
                 memory: "110Gi"
           - name: qwen-coder
             description: High quality MoE model for coding
-            enabled: true
+            enabled: false
             pvc:
               storage: "40Gi"
             args:
@@ -463,10 +443,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -493,7 +469,7 @@ spec:
                 memory: "110Gi"
           - name: qwen-coder-next
             description: '...'
-            enabled: true
+            enabled: false
             pvc:
               storage: "100Gi"
             image:
@@ -514,10 +490,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -542,7 +514,7 @@ spec:
                 memory: "110Gi"
           - name: minimax-25
             description: '...'
-            enabled: true
+            enabled: false
             pvc:
               storage: "100Gi"
             image:
@@ -563,10 +535,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -593,7 +561,7 @@ spec:
                 memory: "110Gi"
           - name: devstral
             description: Mistral development model
-            enabled: true
+            enabled: false
             pvc:
               storage: "80Gi"
             image:
@@ -617,10 +585,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -901,7 +865,7 @@ spec:
                 memory: "110Gi"
           - name: devstral-instruct
             description: Mistral development model
-            enabled: true
+            enabled: false
             pvc:
               storage: "100Gi"
             image:
@@ -922,10 +886,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -937,7 +897,7 @@ spec:
               - "0.01"
           - name: nemotron
             description: Reasoning model from nvidia
-            enabled: true
+            enabled: false
             image:
               tag: rocm-7.2.2 #vulkan-radv_20260211T025037
             pvc:
@@ -958,10 +918,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -975,7 +931,7 @@ spec:
               - "0.01"
           - name: gemma-3
             description: Mid model with multimodal support
-            enabled: true
+            enabled: false
             image:
               tag: rocm-6.4.4
             pvc:
@@ -998,10 +954,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -1028,7 +980,7 @@ spec:
                 memory: "110Gi"
           - name: glm-air-reap
             description: High quality MoE model for agents, coding or complex chat
-            enabled: true
+            enabled: false
             pvc:
               storage: "90Gi"
             image:
@@ -1051,10 +1003,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -1077,7 +1025,7 @@ spec:
                 memory: "110Gi"
           - name: glm-air
             description: High quality dense model for agents, coding or complex chat
-            enabled: true
+            enabled: false
             pvc:
               storage: "90Gi"
             image:
@@ -1100,10 +1048,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -1126,7 +1070,7 @@ spec:
                 memory: "110Gi"
           - name: glm-flash
             description: High quality moe model for agents, coding or complex chat
-            enabled: true
+            enabled: false
             pvc:
               storage: "70Gi"
             image:
@@ -1147,10 +1091,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -1196,10 +1136,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "131072"
               - --parallel
@@ -1224,7 +1160,7 @@ spec:
                 memory: "110Gi"
           - name: glm-47-reap
             description: High quality moe model for agents, coding or complex chat (REAP)
-            enabled: true
+            enabled: false
             pvc:
               storage: "90Gi"
             image:
@@ -1245,10 +1181,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -1273,7 +1205,7 @@ spec:
                 memory: "110Gi"
           - name: step-flash
             description: desc
-            enabled: true
+            enabled: false
             pvc:
               storage: "100Gi"
             image:
@@ -1294,10 +1226,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -1322,7 +1250,7 @@ spec:
                 memory: "110Gi"
           - name: llama-4
             description: High quality multimodal model
-            enabled: true
+            enabled: false
             pvc:
               storage: "90Gi"
             image:
@@ -1343,10 +1271,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -1369,7 +1293,7 @@ spec:
                 memory: "90Gi"
           - name: seed-oss
             description: Mid model specialized in agentic and coding
-            enabled: true
+            enabled: false
             pvc:
               storage: "90Gi"
             image:
@@ -1390,10 +1314,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -1414,7 +1334,7 @@ spec:
                 memory: "110Gi"
           - name: kimi
             description: desc
-            enabled: true
+            enabled: false
             pvc:
               storage: "100Gi"
             image:
@@ -1435,10 +1355,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -1461,9 +1377,95 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
+          - name: rpc-tail
+            description: RPC backend for minimax-m27
+            enabled: true
+            hostNetwork: true
+            probes:
+              enabled: false
+            servicemonitor:
+              enabled: false
+            image:
+              tag: rocm-7.2.3_20260523T170726
+            args:
+              - rpc-server
+              - -H
+              - 0.0.0.0
+              - -p
+              - "50052"
+              - -c
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "124Gi"
+              requests:
+                amd.com/gpu: 1
+                memory: "110Gi"
+            nodeSelector:
+              kubernetes.io/hostname: green-talos-worker-tail
+            zeroscaling:
+              enabled: true
+              minReplicas: 1
+              cooldownPeriod: 1200
+              trigger:
+                query: >-
+                  sum(kube_deployment_status_replicas{deployment="minimax-m27",namespace="models"}) or vector(0)
+                threshold: "1"
+          - name: minimax-m27
+            description: MiniMax-M2.7 distributed across nose+tail
+            enabled: true
+            pvc:
+              storage: "200Gi"
+            image:
+              tag: rocm-7.2.3_20260523T170726
+            args:
+              - /bin/bash
+              - -c
+              - |
+                until bash -c 'echo >/dev/tcp/10.30.0.79/50052' 2>/dev/null; do sleep 5; done
+                exec llama-server \
+                  -hf unsloth/MiniMax-M2.7-GGUF:UD-Q5_K_XL \
+                  --host 0.0.0.0 \
+                  --metrics \
+                  --no-webui \
+                  --jinja \
+                  --no-mmap \
+                  -fa on \
+                  -ngl 999 \
+                  -dio \
+                  --split-mode row \
+                  --rpc 10.30.0.79:50052 \
+                  -c 262144 \
+                  --parallel 2 \
+                  --cont-batching \
+                  --temp 1.0 \
+                  --top-p 0.95 \
+                  --top-k 40 \
+                  --min-p 0.01 \
+                  --timeout 1800 \
+                  -v
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "124Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
+            nodeSelector:
+              kubernetes.io/hostname: green-talos-worker-nose
+            zeroscaling:
+              enabled: true
+              minReplicas: 1
+              cooldownPeriod: 1800
+              trigger:
+                query: >-
+                  sum(llamacpp:requests_processing{container="minimax-m27"}) or vector(0)
+                threshold: "1"
           - name: kimi-dev
             description: '...'
-            enabled: true
+            enabled: false
             pvc:
               storage: "100Gi"
             image:
@@ -1484,10 +1486,6 @@ spec:
               - "999"
               - -fa
               - "on"
-              - -ub
-              - "1024"
-              - -b
-              - "1024"
               - -c
               - "65536"
               - --parallel
@@ -1517,6 +1515,9 @@ spec:
       jsonPointers:
         - /spec/replicas
   syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
     syncOptions:
       - CreateNamespace=true
       - ApplyOutOfSyncOnly=true
