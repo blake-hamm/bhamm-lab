@@ -180,6 +180,8 @@ Add two model entries to `kubernetes/manifests/apps/ai/models/helm-green.yaml`.
 **Notes:**
 - `--rpc` points **only** to `tail` (remote). `nose`'s GPU is used locally; listing `nose`'s own IP would double-count it.
 - `-dio` (direct I/O) is required for large models on Strix Halo UMA. Without it, `llama-server` hangs indefinitely at `load_tensors` during RPC tensor upload. Donato's `models.ini.example` sets `direct-io = on` globally for the same reason.
+- `--split-mode row` distributes tensors by row across backends, avoiding the large contiguous allocations that exhaust RADV's VRAM carveout.
+- **Image:** `kyuz0/amd-strix-halo-toolboxes:rocm-7.2.3_20260523T170726` — ROCm 7.2.3 handles UMA memory allocation correctly where RADV (`vulkan-radv`) exhausted the VRAM domain and crashed.
 - The bash `/dev/tcp` wait loop blocks startup until the RPC server is reachable. No extra binaries needed.
 - `pvc.storage: 200Gi` accommodates the ~157–169 GB model plus HuggingFace cache overhead.
 
@@ -235,7 +237,7 @@ kubectl exec -n models deploy/minimax-m27 -- \
 | 5 | `ping` across mesh succeeds ✅ |
 | 6 | `iperf3` shows ≥9 Gbps, stable ✅ |
 | 7 | Chart PR merged with generic toggles ✅ |
-| 8 | `minimax-m27` scales from 0, loads model across both nodes, inference completes |
+| 8 | `minimax-m27` scales from 0, loads model across both nodes, inference completes ✅ (~55 t/s)
 
 ---
 
