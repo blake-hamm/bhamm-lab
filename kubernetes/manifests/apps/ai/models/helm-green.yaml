@@ -1462,13 +1462,15 @@ spec:
                 cpu: "4"
                 memory: "110Gi"
           - name: rpc-tail
-            description: RPC backend for minimax-m2.7
+            description: RPC backend for minimax-m27
             enabled: true
             hostNetwork: true
             probes:
               enabled: false
             servicemonitor:
               enabled: false
+            image:
+              tag: vulkan-radv
             args:
               - rpc-server
               - -H
@@ -1491,13 +1493,15 @@ spec:
               cooldownPeriod: 1200
               trigger:
                 query: >-
-                  sum(kube_deployment_status_replicas{deployment="minimax-m2.7",namespace="models"}) or vector(0)
+                  sum(kube_deployment_status_replicas{deployment="minimax-m27",namespace="models"}) or vector(0)
                 threshold: "1"
-          - name: minimax-m2.7
+          - name: minimax-m27
             description: MiniMax-M2.7 distributed across nose+tail
             enabled: true
             pvc:
               storage: "200Gi"
+            image:
+              tag: vulkan-radv
             args:
               - /bin/bash
               - -c
@@ -1534,7 +1538,7 @@ spec:
               cooldownPeriod: 1800
               trigger:
                 query: >-
-                  sum(llamacpp:requests_processing{container="minimax-m2.7"}) or vector(0)
+                  sum(llamacpp:requests_processing{container="minimax-m27"}) or vector(0)
                 threshold: "1"
           - name: kimi-dev
             description: '...'

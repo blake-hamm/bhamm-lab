@@ -89,7 +89,7 @@ Add two model entries to `kubernetes/manifests/apps/ai/models/helm-green.yaml`.
 ```yaml
 - name: rpc-tail
   enabled: true
-  description: RPC backend for minimax-m2.7
+  description: RPC backend for minimax-m27
   hostNetwork: true
   probes:
     enabled: false
@@ -117,7 +117,7 @@ Add two model entries to `kubernetes/manifests/apps/ai/models/helm-green.yaml`.
     cooldownPeriod: 1200
     trigger:
       query: >-
-        sum(kube_deployment_status_replicas{deployment="minimax-m2.7",namespace="models"}) or vector(0)
+        sum(kube_deployment_status_replicas{deployment="minimax-m27",namespace="models"}) or vector(0)
       threshold: "1"
 ```
 
@@ -132,7 +132,7 @@ Add two model entries to `kubernetes/manifests/apps/ai/models/helm-green.yaml`.
 ### 8b — MiniMax-M2.7 on `nose`
 
 ```yaml
-- name: minimax-m2.7
+- name: minimax-m27
   enabled: true
   description: MiniMax-M2.7 distributed across nose+tail
   pvc:
@@ -173,7 +173,7 @@ Add two model entries to `kubernetes/manifests/apps/ai/models/helm-green.yaml`.
     cooldownPeriod: 1800
     trigger:
       query: >-
-        sum(llamacpp:requests_processing{container="minimax-m2.7"}) or vector(0)
+        sum(llamacpp:requests_processing{container="minimax-m27"}) or vector(0)
       threshold: "1"
 ```
 
@@ -190,7 +190,7 @@ Add two model entries to `kubernetes/manifests/apps/ai/models/helm-green.yaml`.
 **Check both scale to 0 when idle:**
 
 ```bash
-kubectl get deploy -n models rpc-tail minimax-m2.7
+kubectl get deploy -n models rpc-tail minimax-m27
 # Expect 0/0 replicas after cooldown period with no traffic
 ```
 
@@ -203,7 +203,7 @@ talosctl -n 10.0.30.79 read /proc/net/tcp | grep 50052
 **Benchmark:**
 
 ```bash
-kubectl exec -n models deploy/minimax-m2.7 -- \
+kubectl exec -n models deploy/minimax-m27 -- \
   llama-bench -m /models/cache/MiniMax-M2.7-UD-Q5_K_XL-00001-of-00005.gguf -ngl 99 --rpc 10.30.0.79:50052
 ```
 
@@ -235,7 +235,7 @@ kubectl exec -n models deploy/minimax-m2.7 -- \
 | 5 | `ping` across mesh succeeds ✅ |
 | 6 | `iperf3` shows ≥9 Gbps, stable ✅ |
 | 7 | Chart PR merged with generic toggles ✅ |
-| 8 | `minimax-m2.7` scales from 0, loads model across both nodes, inference completes |
+| 8 | `minimax-m27` scales from 0, loads model across both nodes, inference completes |
 
 ---
 
