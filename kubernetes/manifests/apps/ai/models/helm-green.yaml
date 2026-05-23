@@ -1412,7 +1412,7 @@ spec:
               cooldownPeriod: 1200
               trigger:
                 query: >-
-                  sum(kube_deployment_status_replicas{deployment="minimax-m27",namespace="models"}) or vector(0)
+                  sum(llamacpp:requests_processing{container="minimax-m27"}) or vector(0)
                 threshold: "1"
           - name: minimax-m27
             description: MiniMax-M2.7 distributed across nose+tail
