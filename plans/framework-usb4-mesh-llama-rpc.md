@@ -42,13 +42,15 @@ Applied via Talos machine config patches (`thunderbolt-net` module, USB4 interfa
 
 ---
 
-## Phase 7 — Extend kube-ai-stack Chart
+## Phase 7 — Extend kube-ai-stack Chart ✅
 
-The `kube-ai-stack` Helm chart requires three generic toggles so that non-standard model workloads (like `rpc-server`) can reuse the same Deployment / ElastiService / PVC machinery without being forced into HTTP-oriented defaults. These are secondary/escape-hatch features — not first-class RPC support.
+**Status:** Complete. Merged in `feature/rpc-support` branch of `kube-ai-stack`.
+
+The `kube-ai-stack` Helm chart required three generic toggles so that non-standard model workloads (like `rpc-server`) can reuse the same Deployment / ElastiService / PVC machinery without being forced into HTTP-oriented defaults.
 
 ### Chart Changes (kube-ai-stack repo)
 
-**`templates/deployment.yaml`** — add conditional blocks:
+**`templates/deployment.yaml`** — added conditional blocks:
 
 ```yaml
     spec:
@@ -56,7 +58,7 @@ The `kube-ai-stack` Helm chart requires three generic toggles so that non-standa
       hostNetwork: true
 {{- end }}
       ...
-{{- if (default true .probes.enabled) }}
+{{- if (dig "probes" "enabled" true .) }}
           startupProbe:
             ...
           readinessProbe:
@@ -66,26 +68,28 @@ The `kube-ai-stack` Helm chart requires three generic toggles so that non-standa
 {{- end }}
 ```
 
-**`templates/servicemonitor.yaml`** — add conditional:
+**`templates/servicemonitor.yaml`** — added conditional:
 
 ```yaml
-{{- if and .enabled (default true .servicemonitor.enabled) }}
+{{- if and .enabled (dig "servicemonitor" "enabled" true .) }}
 ```
 
-No RPC-specific templates, values keys, or documentation are added to the chart.
+`values.yaml` and `README.md` updated with commented examples and documentation for the new toggles.
 
 ---
 
-## Phase 8 — Deploy Distributed Model via helm-green.yaml
+## Phase 8 — Deploy MiniMax-M2.7 via Distributed RPC
 
 Add two model entries to `kubernetes/manifests/apps/ai/models/helm-green.yaml`.
+
+**Model:** `unsloth/MiniMax-M2.7-GGUF:UD-Q5_K_XL` (~157–169 GB, 229B total params / 10B active per token, standard llama.cpp compatible)
 
 ### 8a — RPC Backend on `tail`
 
 ```yaml
 - name: rpc-tail
   enabled: true
-  description: RPC backend for distributed-large
+  description: RPC backend for minimax-m2.7
   hostNetwork: true
   probes:
     enabled: false
@@ -113,7 +117,7 @@ Add two model entries to `kubernetes/manifests/apps/ai/models/helm-green.yaml`.
     cooldownPeriod: 1200
     trigger:
       query: >-
-        sum(kube_deployment_status_replicas{deployment="distributed-large",namespace="models"}) or vector(0)
+        sum(kube_deployment_status_replicas{deployment="minimax-m2.7",namespace="models"}) or vector(0)
       threshold: "1"
 ```
 
@@ -125,23 +129,21 @@ Add two model entries to `kubernetes/manifests/apps/ai/models/helm-green.yaml`.
 
 **Scale trigger:** Watches `kube_deployment_status_replicas` for the main model. Fires immediately when the main model scales up, before `llama-server` starts. Avoids deadlock.
 
-### 8b — Distributed Model on `nose`
+### 8b — MiniMax-M2.7 on `nose`
 
 ```yaml
-- name: distributed-large
+- name: minimax-m2.7
   enabled: true
-  description: Distributed inference across nose+tail
+  description: MiniMax-M2.7 distributed across nose+tail
   pvc:
-    storage: "100Gi"
-  image:
-    tag: vulkan-radv
+    storage: "200Gi"
   args:
     - /bin/bash
     - -c
     - |
       until bash -c 'echo >/dev/tcp/10.30.0.79/50052' 2>/dev/null; do sleep 5; done
       exec llama-server \
-        -hf unsloth/MiniMax-M2.5-GGUF:Q6_K_XL \
+        -hf unsloth/MiniMax-M2.7-GGUF:UD-Q5_K_XL \
         --host 0.0.0.0 \
         --metrics \
         --no-webui \
@@ -171,7 +173,7 @@ Add two model entries to `kubernetes/manifests/apps/ai/models/helm-green.yaml`.
     cooldownPeriod: 1800
     trigger:
       query: >-
-        sum(llamacpp:requests_processing{container="distributed-large"}) or vector(0)
+        sum(llamacpp:requests_processing{container="minimax-m2.7"}) or vector(0)
       threshold: "1"
 ```
 
@@ -179,6 +181,7 @@ Add two model entries to `kubernetes/manifests/apps/ai/models/helm-green.yaml`.
 - `--rpc` points **only** to `tail` (remote). `nose`'s GPU is used locally; listing `nose`'s own IP would double-count it.
 - `-dio` (direct I/O) is required for large models on Strix Halo UMA. Without it, `llama-server` hangs indefinitely at `load_tensors` during RPC tensor upload. Donato's `models.ini.example` sets `direct-io = on` globally for the same reason.
 - The bash `/dev/tcp` wait loop blocks startup until the RPC server is reachable. No extra binaries needed.
+- `pvc.storage: 200Gi` accommodates the ~157–169 GB model plus HuggingFace cache overhead.
 
 ---
 
@@ -187,7 +190,7 @@ Add two model entries to `kubernetes/manifests/apps/ai/models/helm-green.yaml`.
 **Check both scale to 0 when idle:**
 
 ```bash
-kubectl get deploy -n models rpc-tail distributed-large
+kubectl get deploy -n models rpc-tail minimax-m2.7
 # Expect 0/0 replicas after cooldown period with no traffic
 ```
 
@@ -200,8 +203,8 @@ talosctl -n 10.0.30.79 read /proc/net/tcp | grep 50052
 **Benchmark:**
 
 ```bash
-kubectl exec -n models deploy/distributed-large -- \
-  llama-bench -m /models/cache/... -ngl 99 --rpc 10.30.0.79:50052
+kubectl exec -n models deploy/minimax-m2.7 -- \
+  llama-bench -m /models/cache/MiniMax-M2.7-UD-Q5_K_XL-00001-of-00005.gguf -ngl 99 --rpc 10.30.0.79:50052
 ```
 
 **Success criteria:** Model loads across both nodes' memory pools and inference completes without hangs.
@@ -231,8 +234,8 @@ kubectl exec -n models deploy/distributed-large -- \
 | 4 | `talosctl get links` shows `thunderbolt` interface `up` ✅ |
 | 5 | `ping` across mesh succeeds ✅ |
 | 6 | `iperf3` shows ≥9 Gbps, stable ✅ |
-| 7 | Chart PR merged with generic toggles |
-| 8 | `distributed-large` scales from 0, loads model across both nodes, inference completes |
+| 7 | Chart PR merged with generic toggles ✅ |
+| 8 | `minimax-m2.7` scales from 0, loads model across both nodes, inference completes |
 
 ---
 
