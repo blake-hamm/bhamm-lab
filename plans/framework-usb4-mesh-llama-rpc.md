@@ -36,198 +36,175 @@ export KUBECONFIG=./tofu/proxmox/talos/result/kube-config-green.yaml
 
 ---
 
-## IaC Changes Required
+## IaC Changes
 
-### 1. Talos Machine Config (`tofu/proxmox/talos/cluster.tf`)
-
-Add to `talos_machine_configuration_apply.bare_metal.config_patches` for both nodes:
-
-```yaml
-machine:
-  kernel:
-    modules:
-      - name: thunderbolt
-      - name: thunderbolt-net
-  network:
-    interfaces:
-      - deviceSelector:
-          busPath: "0-2.0"   # nose
-        dhcp: false
-        mtu: 65520
-        addresses:
-          - 10.30.0.78/32
-        routes:
-          - network: 10.30.0.79/32
-            metric: 2048
-```
-
-Tail uses `busPath: "1-2.0"`, address `10.30.0.79/32`, route `10.30.0.78/32`.
-
-**Note:** Current nodes have stale duplicate addresses (`169.254.255.x` and `10.0.30.17x`). These must be cleaned up before or during the next `tofu apply`.
-
-### 2. ArgoCD Namespace Metadata (`kubernetes/manifests/apps/ai/models/helm-green.yaml`)
-
-The `models` namespace must enforce `privileged` pod security for host-network DaemonSets:
-
-```yaml
-spec:
-  destination:
-    namespace: models
-  syncPolicy:
-    managedNamespaceMetadata:
-      labels:
-        pod-security.kubernetes.io/enforce: privileged
-```
+Applied via Talos machine config patches (`thunderbolt-net` module, USB4 interface `/32` routes) and ArgoCD `managedNamespaceMetadata` (`pod-security.kubernetes.io/enforce: privileged`). Both nodes have clean `10.30.0.x` addressing — stale `169.254.255.x` and `10.0.30.17x` duplicates removed.
 
 ---
 
-## Phase 7 — Deploy llama.cpp RPC Servers
+## Phase 7 — Extend kube-ai-stack Chart
 
-**Problem:** Official `ghcr.io/ggml-org/llama.cpp` images do **not** include `rpc-server`. RPC requires a custom build with `-DGGML_RPC=ON`.
+The `kube-ai-stack` Helm chart requires three generic toggles so that non-standard model workloads (like `rpc-server`) can reuse the same Deployment / ElastiService / PVC machinery without being forced into HTTP-oriented defaults. These are secondary/escape-hatch features — not first-class RPC support.
 
-### Option A: Use Pre-Built Image (Fastest)
+### Chart Changes (kube-ai-stack repo)
 
-Donato Capitella's pre-built image includes `rpc-server` with Vulkan/RADV:
-
-```yaml
-image: kyuz0/amd-strix-halo-toolboxes:vulkan-radv
-command: ["rpc-server", "-H", "0.0.0.0", "-p", "50052"]
-```
-
-### Option B: Build Custom Image (Recommended)
-
-Build `ghcr.io/ggml-org/llama.cpp` with `-DGGML_RPC=ON` and your ROCm/Vulkan backend. Both `rpc-server` and `llama-server` must be built with RPC support.
-
-### DaemonSet
-
-Deploy on both nodes, binding to the USB4 IP:
+**`templates/deployment.yaml`** — add conditional blocks:
 
 ```yaml
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: llama-rpc
-  namespace: models
-spec:
-  selector:
-    matchLabels:
-      app: llama-rpc
-  template:
-    metadata:
-      labels:
-        app: llama-rpc
     spec:
+{{- if .hostNetwork }}
       hostNetwork: true
-      nodeSelector:
-        machine_tier: accelerated
-      tolerations:
-        - key: "amd.com/gpu"
-          operator: "Exists"
-          effect: "NoSchedule"
-      containers:
-        - name: rpc
-          image: kyuz0/amd-strix-halo-toolboxes:vulkan-radv
-          command: ["/bin/sh", "-c"]
-          args:
-            - rpc-server -H 0.0.0.0 -p 50052
-          env:
-            - name: GGML_RPC_DEBUG
-              value: "1"
-          resources:
-            limits:
-              amd.com/gpu: 1
-              memory: "120Gi"
-            requests:
-              amd.com/gpu: 1
-              memory: "110Gi"
-          volumeMounts:
-            - name: models
-              mountPath: /models
-      volumes:
-        - name: models
-          hostPath:
-            path: /var/lib/llama-cpp/models
-            type: DirectoryOrCreate
+{{- end }}
+      ...
+{{- if (default true .probes.enabled) }}
+          startupProbe:
+            ...
+          readinessProbe:
+            ...
+          livenessProbe:
+            ...
+{{- end }}
 ```
 
-**Verify:**
+**`templates/servicemonitor.yaml`** — add conditional:
 
-```bash
-talosctl -n 10.0.30.78 read /proc/net/tcp | grep 50052
-talosctl -n 10.0.30.79 read /proc/net/tcp | grep 50052
+```yaml
+{{- if and .enabled (default true .servicemonitor.enabled) }}
 ```
 
-Both should show `rpc-server` listening on `0.0.0.0:50052`.
+No RPC-specific templates, values keys, or documentation are added to the chart.
 
 ---
 
-## Phase 8 — Run Distributed Inference
+## Phase 8 — Deploy Distributed Model via helm-green.yaml
 
-Add an RPC-capable model to `kubernetes/manifests/apps/ai/models/helm-green.yaml`:
+Add two model entries to `kubernetes/manifests/apps/ai/models/helm-green.yaml`.
+
+### 8a — RPC Backend on `tail`
+
+```yaml
+- name: rpc-tail
+  enabled: true
+  description: RPC backend for distributed-large
+  hostNetwork: true
+  probes:
+    enabled: false
+  servicemonitor:
+    enabled: false
+  args:
+    - rpc-server
+    - -H
+    - 0.0.0.0
+    - -p
+    - "50052"
+    - -c
+  resources:
+    limits:
+      amd.com/gpu: 1
+      memory: "124Gi"
+    requests:
+      amd.com/gpu: 1
+      memory: "110Gi"
+  nodeSelector:
+    kubernetes.io/hostname: green-talos-worker-tail
+  zeroscaling:
+    enabled: true
+    minReplicas: 0
+    cooldownPeriod: 1200
+    trigger:
+      query: >-
+        sum(kube_deployment_status_replicas{deployment="distributed-large",namespace="models"}) or vector(0)
+      threshold: "1"
+```
+
+**Why `hostNetwork: true`:** The `rpc-server` must bind to the USB4 interface (`10.30.0.79`). Pod network is not routable from `nose`'s USB4 link.
+
+**Why `probes.enabled: false`:** `rpc-server` has no HTTP endpoint.
+
+**Why `servicemonitor.enabled: false`:** Prevents Prometheus scrape noise on a non-HTTP workload.
+
+**Scale trigger:** Watches `kube_deployment_status_replicas` for the main model. Fires immediately when the main model scales up, before `llama-server` starts. Avoids deadlock.
+
+### 8b — Distributed Model on `nose`
 
 ```yaml
 - name: distributed-large
   enabled: true
+  description: Distributed inference across nose+tail
+  pvc:
+    storage: "100Gi"
   image:
-    repository: ghcr.io/ggml-org/llama.cpp
-    tag: server-rocm-b8864   # must be built with GGML_RPC=ON
+    tag: vulkan-radv
   args:
-    - llama-server
-    - -hf
-    - unsloth/MiniMax-M2.5-GGUF:Q6_K_XL
-    - --host
-    - 0.0.0.0
-    - --metrics
-    - --no-webui
-    - --jinja
-    - -ngl
-    - "999"
-    - -fa
-    - "on"
-    - --rpc
-    - "10.30.0.78:50052,10.30.0.79:50052"
+    - /bin/bash
     - -c
-    - "65536"
+    - |
+      until bash -c 'echo >/dev/tcp/10.30.0.79/50052' 2>/dev/null; do sleep 5; done
+      exec llama-server \
+        -hf unsloth/MiniMax-M2.5-GGUF:Q6_K_XL \
+        --host 0.0.0.0 \
+        --metrics \
+        --no-webui \
+        --jinja \
+        --no-mmap \
+        -fa on \
+        -ngl 999 \
+        -dio \
+        --rpc 10.30.0.79:50052 \
+        -c 65536 \
+        --timeout 1800 \
+        -v
   resources:
     limits:
-      memory: "120Gi"
+      amd.com/gpu: 1
+      memory: "124Gi"
       cpu: "8"
     requests:
-      memory: "110Gi"
+      amd.com/gpu: 1
       cpu: "4"
+      memory: "110Gi"
   nodeSelector:
     kubernetes.io/hostname: green-talos-worker-nose
+  zeroscaling:
+    enabled: true
+    minReplicas: 0
+    cooldownPeriod: 1800
+    trigger:
+      query: >-
+        sum(llamacpp:requests_processing{container="distributed-large"}) or vector(0)
+      threshold: "1"
+```
+
+**Notes:**
+- `--rpc` points **only** to `tail` (remote). `nose`'s GPU is used locally; listing `nose`'s own IP would double-count it.
+- `-dio` (direct I/O) is required for large models on Strix Halo UMA. Without it, `llama-server` hangs indefinitely at `load_tensors` during RPC tensor upload. Donato's `models.ini.example` sets `direct-io = on` globally for the same reason.
+- The bash `/dev/tcp` wait loop blocks startup until the RPC server is reachable. No extra binaries needed.
+
+---
+
+## Verification
+
+**Check both scale to 0 when idle:**
+
+```bash
+kubectl get deploy -n models rpc-tail distributed-large
+# Expect 0/0 replicas after cooldown period with no traffic
+```
+
+**Check RPC server listening on `tail`:**
+
+```bash
+talosctl -n 10.0.30.79 read /proc/net/tcp | grep 50052
 ```
 
 **Benchmark:**
 
 ```bash
-# Inside the client pod
-llama-bench -m /models/... -ngl 99 --rpc 10.30.0.78:50052,10.30.0.79:50052
+kubectl exec -n models deploy/distributed-large -- \
+  llama-bench -m /models/cache/... -ngl 99 --rpc 10.30.0.79:50052
 ```
 
-**Success criteria:** Model loads across both nodes' memory pools and inference completes without hangs. Start with `llama-bench`; if stable, test `llama-server`.
-
-> **Warning:** llama.cpp RPC is still PoC. Large model tensor uploads can crash or hang. Use `--tensor-split` if you need to control weight distribution.
-
----
-
-## Kubernetes Debug Notes
-
-Host-network pods require a namespace with `pod-security.kubernetes.io/enforce=privileged`:
-
-```bash
-kubectl create ns debug-tb
-kubectl label ns debug-tb pod-security.kubernetes.io/enforce=privileged --overwrite
-```
-
-Example ping test:
-
-```bash
-kubectl run ping-test -n debug-tb --rm -i --restart=Never \
-  --overrides='{"spec":{"hostNetwork":true,"nodeName":"green-talos-worker-nose","containers":[{"name":"ping","image":"busybox","command":["ping","-c","3","10.30.0.79"]}]}}' \
-  --image=busybox
-```
+**Success criteria:** Model loads across both nodes' memory pools and inference completes without hangs.
 
 ---
 
@@ -239,8 +216,9 @@ kubectl run ping-test -n debug-tb --rm -i --restart=Never \
 | **No RDMA** | Strix Halo USB4 does not support RDMA. RPC uses TCP. |
 | **No bonding** | `thunderbolt_net` lacks MAC address setting; 802.3ad bonding is broken. |
 | **Single link** | With two cables between two nodes, run two separate /32 routes with different metrics. Do not use LACP. |
-| **RPC stability** | llama.cpp RPC can hang on very large models during tensor upload. Start with `llama-bench`. |
-| **No official RPC image** | `ghcr.io/ggml-org/llama.cpp` images do not include `rpc-server`. Custom build required. |
+| **RPC stability** | llama.cpp RPC is PoC. Start with `llama-bench`; if stable, test `llama-server`. |
+| **kube-state-metrics dependency** | RPC server scale-up relies on `kube_deployment_status_replicas` being scraped by Prometheus. |
+| **Strix Halo UMA** | Large models require `-dio` to avoid mmap↔HIP collision during tensor upload. |
 
 ---
 
@@ -253,8 +231,8 @@ kubectl run ping-test -n debug-tb --rm -i --restart=Never \
 | 4 | `talosctl get links` shows `thunderbolt` interface `up` ✅ |
 | 5 | `ping` across mesh succeeds ✅ |
 | 6 | `iperf3` shows ≥9 Gbps, stable ✅ |
-| 7 | `rpc-server` listening on `:50052` on both nodes |
-| 8 | `llama-bench` completes distributed inference |
+| 7 | Chart PR merged with generic toggles |
+| 8 | `distributed-large` scales from 0, loads model across both nodes, inference completes |
 
 ---
 
@@ -262,6 +240,8 @@ kubectl run ping-test -n debug-tb --rm -i --restart=Never \
 
 - GitHub Issue: https://github.com/blake-hamm/bhamm-lab/issues/82
 - llama.cpp RPC docs: https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md
+- llama.cpp RPC UMA hang fix (`-dio`): https://github.com/ggml-org/llama.cpp/issues/19745
+- Strix Halo toolboxes: https://github.com/kyuz0/amd-strix-halo-toolboxes
 - Talos Thunderbolt gists: https://gist.github.com/gavinmcfall/ea6cb1233d3a300e9f44caf65a32d519
 - Jeff Geerling cluster: https://www.jeffgeerling.com/blog/2025/i-clustered-four-framework-mainboards-test-huge-llms/
 - Donato Capitella 2-node setup: https://www.youtube.com/watch?v=0cIcth224hk
