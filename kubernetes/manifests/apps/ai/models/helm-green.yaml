@@ -288,7 +288,7 @@ spec:
             args:
               - llama-server
               - -hf
-              - unsloth/Qwen3.6-35B-A3B-GGUF:UD-Q8_K_XL
+              - unsloth/Qwen3.6-35B-A3B-MTP-GGUF:UD-Q8_K_XL
               - --host
               - 0.0.0.0
               - --metrics
@@ -302,6 +302,10 @@ spec:
               - "999"
               - -fa
               - "on"
+              - --spec-type
+              - draft-mtp
+              - --spec-draft-n-max
+              - "2"
               - -dio
               - -c
               - "131072"
