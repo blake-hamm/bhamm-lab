@@ -90,6 +90,9 @@ locals {
       hostpci        = null
       interface      = var.metal_amd_framework_interface
       schematic_id   = local.schematic_id_amd_framework
+      usb4_bus_path  = config.usb4_bus_path
+      usb4_mesh_ip   = config.usb4_mesh_ip
+      usb4_peer_ip   = config.usb4_peer_ip
     }
   ]
 

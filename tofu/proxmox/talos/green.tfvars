@@ -17,6 +17,9 @@ metal_amd_framework_workers = {
       key    = "amd.com/gpu"
       effect = "NoSchedule"
     }
+    usb4_bus_path = "0-2.0"
+    usb4_mesh_ip  = "10.30.0.78"
+    usb4_peer_ip  = "10.30.0.79"
   }
   tail = {
     ip = "10.0.30.79"
@@ -24,6 +27,9 @@ metal_amd_framework_workers = {
       key    = "amd.com/gpu"
       effect = "NoSchedule"
     }
+    usb4_bus_path = "1-2.0"
+    usb4_mesh_ip  = "10.30.0.79"
+    usb4_peer_ip  = "10.30.0.78"
   }
 }
 amd_gpu_worker_id = [

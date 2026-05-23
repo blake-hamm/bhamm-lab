@@ -201,6 +201,9 @@ variable "metal_amd_framework_workers" {
       key    = string
       effect = string
     })
+    usb4_bus_path = optional(string, "")
+    usb4_mesh_ip  = optional(string, "")
+    usb4_peer_ip  = optional(string, "")
   }))
   default = {}
 }
