@@ -1521,6 +1521,58 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
+          - name: gemma-4-26b
+            description: Google Gemma 4 26B A4B IT - high quality multimodal MoE
+            enabled: true
+            pvc:
+              storage: "40Gi"
+            image:
+              tag: rocm-7.2.3_20260523T170726
+            args:
+              - llama-server
+              - -hf
+              - unsloth/gemma-4-26B-A4B-it-GGUF:UD-Q8_K_XL
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - --timeout
+              - "1800"
+              - -v
+              - --no-warmup
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --mmproj-auto
+              - --mmproj-offload
+              - --chat-template-kwargs
+              - '{"enable_thinking":true}'
+              - -c
+              - "262144"
+              - --parallel
+              - "8"
+              - --cont-batching
+              - --temp
+              - "1.0"
+              - --top-p
+              - "0.95"
+              - --top-k
+              - "64"
+              - --min-p
+              - "0.01"
+              - --repeat-penalty
+              - "1.0"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "120Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
   ignoreDifferences:
     - group: apps
       kind: Deployment
