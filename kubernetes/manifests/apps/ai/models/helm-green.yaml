@@ -312,6 +312,12 @@ spec:
               - --parallel
               - "2"
               - --cont-batching
+              - --reasoning-budget
+              - "2048"
+              - --reasoning-budget-message
+              - "Due to time constraints, I need to give my answer now."
+              - --chat-template-kwargs
+              - '{"preserve_thinking":true}'
               - --temp
               - "0.8"
               - --min-p
