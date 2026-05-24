@@ -1550,7 +1550,7 @@ spec:
               - --chat-template-kwargs
               - '{"enable_thinking":true}'
               - -c
-              - "262144"
+              - "2097152"
               - --parallel
               - "8"
               - --cont-batching
