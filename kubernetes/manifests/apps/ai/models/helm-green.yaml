@@ -308,9 +308,9 @@ spec:
               - "2"
               - -dio
               - -c
-              - "262144"
+              - "1835008"
               - --parallel
-              - "1"
+              - "7"
               - --cont-batching
               - --reasoning-budget
               - "2048"
