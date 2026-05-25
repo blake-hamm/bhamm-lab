@@ -105,8 +105,8 @@ efficiency._
   - _Platform:_ NixOS VM on Proxmox `japan` (`10.0.20.21`, `10.0.30.21`)
   - _Storage:_ 3x physical SSDs via HBA PCIe passthrough (2x PNY 2TB, 1x Crucial
     1TB)
-  - _Usage:_ Daily rclone mirror of all Ceph RGW buckets. Intermediate tier for
-    offsite replication.
+  - _Usage:_ Weekly rclone mirror of all Ceph RGW buckets (Sunday 1am MDT).
+    Intermediate tier for offsite replication.
   - _Replaces:_ TrueNAS/MinIO as local backup target
 
 - **Backblaze B2:**
