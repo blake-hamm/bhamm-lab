@@ -1603,9 +1603,9 @@ spec:
               - "2"
               - -dio
               - -c
-              - "2097152"
+              - "1048576"
               - --parallel
-              - "8"
+              - "4"
               - --cont-batching
               - --reasoning-budget
               - "2048"
