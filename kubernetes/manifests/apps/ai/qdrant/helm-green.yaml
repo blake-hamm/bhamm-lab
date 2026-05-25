@@ -49,6 +49,11 @@ spec:
         metrics:
           serviceMonitor:
             enabled: true
+            authorization:
+              type: Bearer
+              credentials:
+                name: qdrant-external-secret
+                key: API_KEY
         env:
           - name: QDRANT__SERVICE__API_KEY
             valueFrom:
