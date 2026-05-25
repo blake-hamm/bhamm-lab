@@ -1573,6 +1573,67 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
+          - name: qwen-36-27b
+            description: High quality dense MTP model for general chat
+            enabled: true
+            pvc:
+              storage: "35Gi"
+            image:
+              tag: rocm-7.2.3_20260523T170726
+            args:
+              - llama-server
+              - -hf
+              - unsloth/Qwen3.6-27B-MTP-GGUF:UD-Q8_K_XL
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - --timeout
+              - "1800"
+              - -v
+              - --no-warmup
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --spec-type
+              - draft-mtp
+              - --spec-draft-n-max
+              - "2"
+              - -dio
+              - -c
+              - "2097152"
+              - --parallel
+              - "8"
+              - --cont-batching
+              - --reasoning-budget
+              - "2048"
+              - --reasoning-budget-message
+              - "Due to time constraints, I need to give my answer now."
+              - --chat-template-kwargs
+              - '{"preserve_thinking":true}'
+              - --temp
+              - "0.8"
+              - --min-p
+              - "0.00"
+              - --top-p
+              - "0.95"
+              - --top-k
+              - "20"
+              - --presence-penalty
+              - "1.5"
+              - --repeat-penalty
+              - "1.0"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "120Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
   ignoreDifferences:
     - group: apps
       kind: Deployment
