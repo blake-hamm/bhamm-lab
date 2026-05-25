@@ -44,7 +44,7 @@ The best way for me to learn new technologies is hands on. YouTube videos only g
 #### Current Lab Highlights
 *   **Infrastructure:** A hybrid setup running **Proxmox** and **Talos Linux**, orchestrated with Kubernetes and managed with ArgoCD, Terraform and Ansible.
 *   **Local AI:** Experimenting with local LLM inference (llama.cpp), search (searnxg), vector db (qdrant) and hardware acceleration (ROCm/Vulkan) to run models like Qwen and GLM privately.
-*   **Disaster Recovery:** Ensuring data integrity with a 3-2-1 backup strategy for persistent volumes and databases using local object storage (Minio) and offsite cloud backups (Cloudflare R2), orchestrated with K8up and Argo Workflows.
+*   **Disaster Recovery:** Ensuring data integrity with a 3-2-1 backup strategy for persistent volumes and databases using local object storage (Garage) and offsite cloud backups (Backblaze B2), orchestrated with K8up and Argo Workflows.
 
 *More info in my [documentation](https://docs.bhamm-lab.com). PS: You're viewing this website from my homelab!*
 
