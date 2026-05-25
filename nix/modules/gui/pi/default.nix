@@ -170,8 +170,8 @@ in
       home.file.".pi/agent/settings.json" = {
         force = true;
         text = builtins.toJSON {
-          defaultProvider = "cloudflare-workers-ai";
-          defaultModel = "@cf/moonshotai/kimi-k2.6";
+          defaultProvider = "opencode-go";
+          defaultModel = "deepseek-v4-flash";
           theme = "catppuccin-mocha";
           defaultThinkingLevel = "medium";
           quietStartup = true;
@@ -219,20 +219,20 @@ in
           subagents = {
             agentOverrides = {
               worker = {
-                model = "cloudflare-workers-ai/@cf/moonshotai/kimi-k2.6";
+                model = "opencode-go/deepseek-v4-flash";
               };
               reviewer = {
-                model = "cloudflare-workers-ai/@cf/moonshotai/kimi-k2.6";
+                model = "opencode-go/deepseek-v4-flash";
               };
               delegate = {
-                model = "cloudflare-workers-ai/@cf/moonshotai/kimi-k2.6";
+                model = "opencode-go/deepseek-v4-flash";
                 thinking = "minimal";
               };
               oracle = {
-                model = "cloudflare-workers-ai/@cf/moonshotai/kimi-k2.6";
+                model = "opencode-go/deepseek-v4-flash";
               };
               oracle-executor = {
-                model = "cloudflare-workers-ai/@cf/moonshotai/kimi-k2.6";
+                model = "opencode-go/deepseek-v4-flash";
               };
             };
           };
