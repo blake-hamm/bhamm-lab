@@ -7,6 +7,7 @@ let
   '';
   kimiKeyPath = config.sops.secrets.kimi_api_key.path;
   opensenseKeyPath = config.sops.secrets.opensense_api_key.path;
+  workersAiTokenPath = config.sops.secrets.pi_workers_ai.path;
 in
 {
   options.cfg.pi.enable = lib.mkEnableOption "pi coding agent";
@@ -25,6 +26,11 @@ in
 
     sops.secrets.opensense_api_key = {
       key = "vault_secrets/external/opencode/pi-framework";
+      owner = shared.username;
+    };
+
+    sops.secrets.pi_workers_ai = {
+      key = "vault_secrets/external/cloudflare/pi-workers-ai";
       owner = shared.username;
     };
 
@@ -49,6 +55,10 @@ in
             type = "api_key";
             key = "!cat ${opensenseKeyPath}";
           };
+          "cloudflare-workers-ai" = {
+            type = "api_key";
+            key = "!cat ${workersAiTokenPath}";
+          };
         };
       };
 
@@ -56,6 +66,18 @@ in
       home.file.".pi/agent/extensions/litellm-discovery.ts" = {
         force = true;
         source = ./extensions/litellm-discovery.ts;
+      };
+
+      # Cloudflare Workers AI baseUrl with hardcoded account ID — avoids needing CLOUDFLARE_ACCOUNT_ID env var
+      home.file.".pi/agent/models.json" = {
+        force = true;
+        text = builtins.toJSON {
+          providers = {
+            "cloudflare-workers-ai" = {
+              baseUrl = "https://api.cloudflare.com/client/v4/accounts/334b75e7892d552ad3ec86277e987ca4/ai/v1";
+            };
+          };
+        };
       };
 
       # Pi themes
@@ -148,8 +170,8 @@ in
       home.file.".pi/agent/settings.json" = {
         force = true;
         text = builtins.toJSON {
-          defaultProvider = "kimi-coding";
-          defaultModel = "kimi-for-coding";
+          defaultProvider = "cloudflare-workers-ai";
+          defaultModel = "@cf/moonshotai/kimi-k2.6";
           theme = "catppuccin-mocha";
           defaultThinkingLevel = "medium";
           quietStartup = true;
@@ -197,20 +219,20 @@ in
           subagents = {
             agentOverrides = {
               worker = {
-                model = "kimi-coding/kimi-for-coding";
+                model = "cloudflare-workers-ai/@cf/moonshotai/kimi-k2.6";
               };
               reviewer = {
-                model = "kimi-coding/kimi-for-coding";
+                model = "cloudflare-workers-ai/@cf/moonshotai/kimi-k2.6";
               };
               delegate = {
-                model = "kimi-coding/kimi-for-coding";
+                model = "cloudflare-workers-ai/@cf/moonshotai/kimi-k2.6";
                 thinking = "minimal";
               };
               oracle = {
-                model = "kimi-coding/kimi-for-coding";
+                model = "cloudflare-workers-ai/@cf/moonshotai/kimi-k2.6";
               };
               oracle-executor = {
-                model = "kimi-coding/kimi-for-coding";
+                model = "cloudflare-workers-ai/@cf/moonshotai/kimi-k2.6";
               };
             };
           };
