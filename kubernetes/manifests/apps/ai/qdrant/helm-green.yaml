@@ -49,11 +49,12 @@ spec:
         metrics:
           serviceMonitor:
             enabled: true
-        apiKey:
-          valueFrom:
-            secretKeyRef:
-              name: qdrant-external-secret
-              key: API_KEY
+        env:
+          - name: QDRANT__SERVICE__API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: qdrant-external-secret
+                key: API_KEY
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
