@@ -26,8 +26,8 @@ This philosophy is supported by several key principles:
 
 **Software Stack:**
 
-- **Operating Systems**: [Debian](https://www.debian.org/), [Proxmox](https://www.proxmox.com/), [Talos](https://www.talos.dev/), [NixOS](https://nixos.org/), [Truenas](https://www.truenas.com/)
-- **Storage:** [Ceph](https://ceph.io/) cluster (hot storage) and [Truenas](https://www.truenas.com/) (cold storage)
+- **Operating Systems**: [Debian](https://www.debian.org/), [Proxmox](https://www.proxmox.com/), [Talos](https://www.talos.dev/), [NixOS](https://nixos.org/)
+- **Storage:** [Ceph](https://ceph.io/) cluster with RGW (primary S3), [Garage](https://garagehq.deuxfleurs.fr/) local mirror, [Backblaze B2](https://www.backblaze.com/cloud-storage) offsite
 - **Container Orchestration:** Ephemeral [Talos](https://www.talos.dev/) [Kubernetes](https://kubernetes.io/) clusters and [Harbor](https://goharbor.io/) proxy/registry
 - **Automation:** [OpenTofu](https://opentofu.org/), [Ansible](https://www.ansible.com/), [ArgoCD](https://argo-cd.readthedocs.io/en/stable/), [NixOS](https://nixos.org/), [Argo Events](https://argoproj.github.io/argo-events/) and [Argo Workflows](https://argoproj.github.io/argo-workflows/)
 - **Security:** [SOPS](https://github.com/mozilla/sops), [HashiCorp Vault](https://www.vaultproject.io/), [Authelia](https://www.authelia.com/), [Traefik](https://traefik.io/traefik/), VLANs
@@ -52,15 +52,15 @@ This philosophy is supported by several key principles:
 - Blue/green deployment strategies
 - Container registry and proxy with [Harbor](https://goharbor.io/)
 - [Argo Events](https://argoproj.github.io/argo-events/) and [Argo Workflows](https://argoproj.github.io/argo-workflows/) for backups, secret management and CI/CD pipelines
-- [NixOS](https://nixos.org/) for Framework 13 laptop and Aorus gaming desktop
+- [NixOS](https://nixos.org/) for Framework 13 laptop, Garage VM, and Orange Pi Zero3 SBCs
 - [Common helm chart](kubernetes/charts/common)
 
 **Storage & Backups:**
 
-- [Ceph](https://ceph.io/) backbone
-- [SeaweedFS](https://github.com/chrislusf/seaweedfs) PVC hot storage
-- [Truenas](https://www.truenas.com/) / [MinIO](https://min.io/) cold storage
-- Offsite replication to [Cloudflare R2](https://www.cloudflare.com/products/cloudflare-r2/)
+- [Ceph](https://ceph.io/) backbone with RGW (primary S3 endpoint)
+- [Garage](https://garagehq.deuxfleurs.fr/) local backup mirror on NixOS VM
+- [Backblaze B2](https://www.backblaze.com/cloud-storage) primary offsite tier
+- [Cloudflare R2](https://www.cloudflare.com/products/cloudflare-r2/) standby offsite (restore fallback)
 - Automated backups with [Argo Workflows](https://argoproj.github.io/argo-workflows/), [k8up](https://github.com/k8up-io/k8up) and [CloudNative PG](https://cloudnative-pg.io/)
 
 **Security:**

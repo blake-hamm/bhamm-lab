@@ -1,7 +1,9 @@
 # Kubernetes backups
 
 ## k8up
-k8up backups are used for pvc and tested with the `test` application. They require pvc to be labeled with `k8up.io/backup: "true"` and guarantee that data can be backed up on a schedule and restored. This can be configured in the `common` helm chart and more details can be found in the deployments/helm section of these docs. Specifically, you will need these values:
+
+k8up backs up PVCs directly to Ceph RGW as an S3 target. PVCs must be labeled with `k8up.io/backup: "true"` to be included. Configuration is done through the `common` helm chart — see [deployments/helm](../deployments/helm.md) for details:
+
 ```yaml
 k8up:
   backup:
@@ -10,11 +12,20 @@ k8up:
     enabled: true
 ```
 
-## Minio [Depreciated]
-*Determined that this minio backups are functioning correctly.*
-I have discovered that backing up and restoring the pvc of minio will not suffice.. I need to re-visit this, but ultimately, I plan to backup minio with k8up as a s3 to s3 backup. This will restore all data in minio (while not necessarily restoring the minio config). In the future, I need to better understand how to backup the config (like authelia settings). For now, in a DR, I will need to take some manual steps to recover minio fully.
+The backup target (`AWS_ENDPOINT`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`) is configured via External Secrets pulling from Vault at `/core/k8up`.
 
-## Velero [Depreciated]
-Originally, I thought velero would work for backups, but this is not the case. Because I manage my manifests with gitops, I can easily guarantee that my cluster will bootstrap and restore state. However, what I cannot guaruntee is that the pv and pvc will be restored. They will be provisioned by argocd - no problem, but the underlying data will be new and historical data is lost.
+### Restore Process
 
-This is a common problem and velero currently has no solution as outlined in this gh issue - https://github.com/vmware-tanzu/velero/issues/7345.
+1. Ensure Ceph RGW is running and accessible at `http://external-rgw.ceph.svc.cluster.local:80`
+2. If RGW needs to be restored first, use the restore workflow: B2 → Garage → RGW (or R2 → Garage → RGW as fallback)
+3. k8up restores PVCs from Ceph RGW into the cluster
+
+## Minio [Deprecated]
+
+*Replaced by Garage VM as local backup target. Garage mirrors Ceph RGW buckets via rclone and forwards to Backblaze B2 for offsite.*
+
+Previously, Minio on TrueNAS was used as an intermediate backup target. Backing up Minio's PVC proved insufficient — the config required manual steps. This is no longer relevant as the backup chain is now RGW → Garage → B2.
+
+## Velero [Deprecated]
+
+Originally evaluated for cluster backups but abandoned. GitOps (ArgoCD + Helm) guarantees cluster state restoration; the remaining challenge is PVC data, which k8up handles by backing up to Ceph RGW.
