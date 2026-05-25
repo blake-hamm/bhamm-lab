@@ -1,25 +1,8 @@
 # Ceph
 
-## CephFS Client Key for External Hosts
+## CephFS Client Key
 
-To mount a CephFS subdirectory on an external machine (e.g. the Framework laptop):
-
-```bash
-# Create the root directory and subdirectory in CephFS
-sudo mkdir -p /mnt/cephfs-root/bhamm/bhamm-sports
-
-# Create a restricted client key scoped to /bhamm
-ceph auth get-or-create client.bhamm \
-  mon 'allow r' \
-  osd 'allow rw pool=cephfs_data' \
-  mds 'allow rw path=/bhamm' \
-  mgr 'allow r'
-
-# Export keyring for the client
-ceph auth get client.bhamm -o /tmp/cephfs_client_keyring
-```
-
-See [CephFS Client Mounts](cephfs-client.md) for the client-side NixOS configuration.
+See [CephFS Client Mounts](cephfs-client.md) for creating a restricted CephFS client key and configuring mounts on external machines (e.g. the Framework laptop).
 
 ## In case you need to destroy ceph, check these:
 - https://forum.proxmox.com/threads/removing-ceph-completely.62818/

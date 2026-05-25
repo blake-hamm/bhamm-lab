@@ -1,6 +1,6 @@
-# Restic
+# Restic (Framework Laptop)
 
-Some helpful command for restic
+Restic backs up the Framework laptop to Ceph RGW. These are for the laptop only — cluster PVC backups use k8up (which uses restic internally).
 
 ```bash
 restic snapshots
