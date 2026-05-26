@@ -24,15 +24,7 @@ RUN adduser -D -H -s /sbin/nologin -u 1000 caddy
 COPY --from=builder /src/public /usr/share/caddy
 
 # Caddyfile: serve static files, port 8080, proper MIME types built-in
-RUN cat > /etc/caddy/Caddyfile <<'EOF'
-:8080 {
-    root * /usr/share/caddy
-    file_server
-    log {
-        output discard
-    }
-}
-EOF
+RUN printf ':8080 {\n\troot * /usr/share/caddy\n\tfile_server\n\tlog {\n\t\toutput discard\n\t}\n}\n' > /etc/caddy/Caddyfile
 
 RUN chown -R caddy:caddy /usr/share/caddy /etc/caddy
 
