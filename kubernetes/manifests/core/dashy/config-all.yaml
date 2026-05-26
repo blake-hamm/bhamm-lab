@@ -280,6 +280,10 @@ data:
         icon: generative
         url: https://phoenix.bhamm-lab.com/
         statusCheckAcceptCodes: '401'
+      - title: Qdrant
+        description: Visit Qdrant
+        icon: hl-qdrant
+        url: https://qdrant.bhamm-lab.com/dashboard
 
     - name: Security
       icon: mdi-security

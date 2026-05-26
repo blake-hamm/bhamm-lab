@@ -12,27 +12,27 @@
   - Kubernetes metrics
   - Vault
   - Traefik
--wave 0 seaweedfs ns
+-wave 0 Garage ns
 -wave 1 cert manager smon for metrics
 -wave 1 k8up helm
 -wave 1 Checkpoint job for storage health
--wave 1 Seaweedfs deployment
--wave 1 Cilum config
+-wave 1 Ceph RGW endpoints and Garage endpoints
+-wave 1 Cilium config
 -wave 2 Vault
--wave 2 CloudnativePG
--wave 2 Checkpoint job for seaweedfs s3 health
+-wave 2 CloudNativePG
+-wave 2 Checkpoint job for RGW s3 health
 -wave 3 Checkpoint job for vault health
 -wave 3 External Secrets
 -wave 3 argo events helm
--wave 3 Seaweedfs k8up offsite restore from gcp
+-wave 3 k8up offsite restore from B2/R2
 -wave 4 Vault secret store
 -wave 4 argo eventbus
--wave 5 push seaweedfs s3 credentails to vault
+-wave 5 push RGW s3 credentials to vault
 -wave 6 argo workflows helm
 -wave 7 Vault secret sync argo workflow
 -wave 7 Automation app
 -wave 8 argo workflow - rclone s3 create buckets (k8up/cnpg)
--wave 8 nfs common (secrets for k8up restore/backup)
+-wave 8 ceph common (secrets for k8up backup/restore)
 -wave 9 Test ns
 -wave 10 Test common (k8up/cnpg backups)
 -wave 10 Test pvc
@@ -55,7 +55,7 @@
 -wave 21 Loki
 -wave 21 Monitor common
 -wave 21 Alloy
-*At this point all my storage classes, secretes and s3 (seaweedfs) should be functioning. I should also have ingress setup and sites should be accessible at my ip. I should also be able to deploy common helm charts w/ external secrets, k8up pvc restores, cnpg postgres databases restores and ingress.*
+*At this point all my storage classes, secrets and S3 (Ceph RGW) should be functioning. I should also have ingress setup and sites should be accessible at my ip. I should also be able to deploy common helm charts w/ external secrets, k8up pvc restores, cnpg postgres databases restores and ingress.*
 -wave 25 Core apps
 
 ### Common helm chart
@@ -72,9 +72,9 @@
 -wave 20 Harbor
 -wave 20 Forgejo
 -wave 21 Dashy deployment
-*At this point all my core k8s utilities should be run and confirmed with the test app. Everything should be accessible with my traefik lb ip. Data should be restored from k8up backups which are in the minio. I should also be able to deploy common helm charts w/ ingress (authelia/traefik) and k8up pvc backups/schedules.*
+*At this point all my core k8s utilities should be running and confirmed with the test app. Everything should be accessible with my traefik lb ip. Data should be restored from k8up backups which are in Ceph RGW. I should also be able to deploy common helm charts w/ ingress (authelia/traefik) and k8up pvc backups/schedules.*
 
 ## Apps
 -wave 25 apps/site (docs)
--wave 25 apps/media (immich/servar)
+-wave 25 apps/media (immich/servarr)
 *At this point all my 'fun' apps should be running and accessible.*

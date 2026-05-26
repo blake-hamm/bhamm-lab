@@ -1,7 +1,7 @@
 # Vault
 
 
-## `kuberenetes/core/vault/cr-raft.yaml`
+## `kubernetes/core/vault/cr-raft.yaml`
 This file defines the config that vault operator applies to our vault instance. More details found here:
 
  - https://bank-vaults.dev/docs/concepts/external-configuration/

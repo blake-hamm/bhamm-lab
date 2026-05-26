@@ -21,6 +21,8 @@ spec:
         ollamaUrls: []
         websocket:
           enabled: false
+        image:
+          tag: dev
         pipelines:
           enabled: true
           extraEnvVars: []

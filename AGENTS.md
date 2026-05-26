@@ -1,13 +1,23 @@
 # AGENTS.md - Coding Guidelines for bhamm-lab
 
-This repository is a infrastructure monorepo for managing homelab infrastructure across Proxmox, Kubernetes, NixOS, and cloud providers.
+This repository is an infrastructure monorepo for managing homelab infrastructure across Proxmox, Kubernetes, NixOS, and cloud providers.
+
+## Architecture Primer
+
+Key infrastructure facts. When in doubt, verify against the actual code — not these summaries.
+
+- **Storage chain:** Ceph RGW (primary S3, on Proxmox) → Garage (local mirror, NixOS VM on Proxmox `japan`) → Backblaze B2 (primary offsite). Cloudflare R2 is standby restore-only.
+- **Kubernetes:** Talos Linux, ephemeral blue/green clusters, GitOps via ArgoCD.
+- **Hypervisors:** Proxmox on Debian, configured via Ansible. VMs provisioned with OpenTofu (`tofu/`).
+- **Secrets:** SOPS encrypted with GCP KMS, synced to Vault via Argo Workflows.
+- **Docs site:** `docker/docs-site/docs/` (mkdocs, material theme) — mirrors deployed state. Keep in sync with infrastructure changes.
 
 ## Project Structure
 
 ```
 .
-├── ansible/          # Ansible playbooks and inventory for configuring Proxmox and opensense
-├── docker/           # Custom container images
+├── ansible/          # Ansible playbooks and inventory for configuring Proxmox and OPNsense
+├── docker/           # Container images, docs-site (mkdocs), and personal site (Hugo)
 ├── kubernetes/       # K8s manifests and Helm charts
 ├── nix/              # NixOS configurations and modules
 ├── tofu/             # OpenTofu/Terraform infrastructure
@@ -84,9 +94,14 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ---
 
+## Docs Site
+
+When changing infrastructure code (ansible roles, tofu configs, k8s manifests, nix modules), check whether `docker/docs-site/docs/` needs a corresponding update.
+
 ## Important Notes
 
 - **Never** commit any code; I will always have the last say
-- **Never** run critical commands like tofu apply or ansible-playbook
+- **Never** run critical commands like `tofu apply` or `ansible-playbook`
 - Always run linters before committing
+- Pre-commit runs: `nixpkgs-fmt`, `yamlfmt` (Google), `shfmt`, `ansible-lint` (ansible/ only), `terraform_fmt` + `tflint` + `trivy`, `gitleaks` + `ripsecrets` (dual secret scanning), `trailing-whitespace`, `mixed-line-ending`, `forbid-tabs` (2-space indent)
 - The dev shell auto-installs ansible requirements and pre-commit hooks

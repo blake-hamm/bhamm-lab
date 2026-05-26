@@ -1,4 +1,4 @@
-# k3s [Depreciated]
+# k3s [Deprecated]
 To spin up a kubernetes cluster in bhamm-lab, you need to follow these steps:
 1. Terraform to spin up vm's
 ```bash

@@ -21,8 +21,8 @@ params:
         url: /portfolio
       - name: Blogs
         url: /blogs
-      - name: Docs
-        url: https://docs.bhamm-lab.com/
+  footer:
+    text: "Running on my [Homelab](https://docs.bhamm-lab.com/)"
   # PaperMod options
   ShowShareButtons: false
   ShowPostNavLinks: true
@@ -45,7 +45,3 @@ menu:
       name: Blogs
       url: /blogs/
       weight: 3
-    - identifier: docs
-      name: Docs
-      url: https://docs.bhamm-lab.com/
-      weight: 4
