@@ -16,25 +16,28 @@ RUN hugo --minify
 #####################################################################
 #                            Final Stage                            #
 #####################################################################
-FROM docker.io/busybox:1.37.0
+FROM docker.io/caddy:2.11.3-alpine
 
 # Create non-root user
-RUN adduser -D -H -s /sbin/nologin -u 1000 staticuser
+RUN adduser -D -H -s /sbin/nologin -u 1000 caddy
 
-# Copy the generated files
-COPY --from=builder /src/public /var/www
+COPY --from=builder /src/public /usr/share/caddy
 
-# Set proper ownership
-RUN chown -R staticuser:staticuser /var/www
+# Caddyfile: serve static files, port 8080, proper MIME types built-in
+RUN cat > /etc/caddy/Caddyfile <<'EOF'
+:8080 {
+    root * /usr/share/caddy
+    file_server
+    log {
+        output discard
+    }
+}
+EOF
 
-# Switch to non-root user
-USER staticuser
+RUN chown -R caddy:caddy /usr/share/caddy /etc/caddy
 
-# Expose port 8080 (non-root can't bind to 80)
+USER caddy
+
 EXPOSE 8080
 
-# Start busybox httpd
-# -f: run in foreground
-# -p: port to listen on
-# -h: home directory for files
-ENTRYPOINT ["httpd", "-f", "-p", "8080", "-h", "/var/www"]
+ENTRYPOINT ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
