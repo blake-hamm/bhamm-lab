@@ -3,7 +3,7 @@ title: "Summit-Sim"
 weight: 15
 ---
 
-#### [summit-sim.bhamm-lab.com](https://summit-sim.bhamm-lab.com/) · [Weber State AI Hackathon](https://weber-state-ai-hackathon.devpost.com/)
+#### [summit-sim.bhamm-lab.com](https://summit-sim.bhamm-lab.com/) · [github.com/blake-hamm/summit-sim](https://github.com/blake-hamm/summit-sim) · [Weber State AI Hackathon](https://weber-state-ai-hackathon.devpost.com/)
 
 **🏆 Finalist — Advanced Category**
 
