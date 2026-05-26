@@ -170,8 +170,8 @@ in
       home.file.".pi/agent/settings.json" = {
         force = true;
         text = builtins.toJSON {
-          defaultProvider = "opencode-go";
-          defaultModel = "deepseek-v4-flash";
+          defaultProvider = "kimi-coding";
+          defaultModel = "kimi-for-coding";
           theme = "catppuccin-mocha";
           defaultThinkingLevel = "medium";
           quietStartup = true;
@@ -219,20 +219,20 @@ in
           subagents = {
             agentOverrides = {
               worker = {
-                model = "opencode-go/deepseek-v4-flash";
+                model = "kimi-coding/kimi-for-coding";
               };
               reviewer = {
-                model = "opencode-go/deepseek-v4-flash";
+                model = "kimi-coding/kimi-for-coding";
               };
               delegate = {
-                model = "opencode-go/deepseek-v4-flash";
+                model = "kimi-coding/kimi-for-coding";
                 thinking = "minimal";
               };
               oracle = {
-                model = "opencode-go/deepseek-v4-flash";
+                model = "kimi-coding/kimi-for-coding";
               };
               oracle-executor = {
-                model = "opencode-go/deepseek-v4-flash";
+                model = "kimi-coding/kimi-for-coding";
               };
             };
           };
