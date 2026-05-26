@@ -11,12 +11,12 @@ An AI-powered wilderness rescue simulator for Wilderness First Responder (WFR) t
 
 **Problem:** WFR training relies on expensive live-action roleplay or static paper scenarios. Students rarely get enough dynamic, unpredictable repetitions to build critical decision-making under pressure.
 
-**Solution:** Summit-Sim provides infinite, medically accurate WFR scenarios through a dynamic AI game loop. Students use natural language to evaluate scenes, check vitals, and apply treatments. Every action is evaluated against a hidden medical "truth," evolving the patient state dynamically.
+**Solution:** Summit-Sim provides infinite, medically accurate WFR scenarios through a dynamic AI game loop. Students interact through a Chainlit-powered chat interface — free-text actions, progressive information revelation, and a post-simulation debrief with clinical reasoning feedback. Every action is evaluated against a hidden medical "truth," evolving the patient state dynamically. Scenarios are shareable via unique URLs, and a solo practice mode lets students generate their own scenarios without instructor involvement.
 
-**Agent Architecture:** Four specialized PydanticAI agents — Generator (creates scenarios with strict visible/hidden information separation), Image Generator (produces unique atmospheric scene images), Action Responder (evaluates student actions, updates PAS scores), and Debrief (post-simulation analysis with clinical reasoning assessment).
+**Agent Architecture:** Four specialized PydanticAI agents — Generator (creates scenarios with strict visible/hidden information separation), Image Generator (produces unique atmospheric scene images), Action Responder (evaluates student actions, updates Patient Assessment System (PAS) scores), and Debrief (post-simulation analysis with clinical reasoning assessment).
 
 **AI Workflows:** Two interconnected LangGraph graphs handle authoring (scenario generation, image creation, instructor review via human-in-the-loop interrupts) and simulation (continuous game loop with progressive information revelation, capped at 80% PAS milestone completion or max turns).
 
-**Observability:** MLflow tracks all LLM spans, captures instructor feedback, and logs judge evaluations across structure, scoring, medical accuracy, and continuity. A GEPA optimization framework iteratively improves agent prompts from expert feedback.
+**Observability:** MLflow tracks all trace spans, captures instructor feedback, and logs judge evaluations across structure, scoring, medical accuracy, and continuity. A Genetic Pareto (GEPA) optimization framework iteratively improves agent prompts from expert feedback.
 
 **Deployment:** Containerized with Docker, deployed on Kubernetes via Harbor registry + DragonflyDB for state persistence, fronted by Cloudflare Tunnel.
