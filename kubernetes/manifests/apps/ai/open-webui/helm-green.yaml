@@ -22,7 +22,7 @@ spec:
         websocket:
           enabled: false
         image:
-          tag: dev
+          tag: v0.9.6
         pipelines:
           enabled: true
           extraEnvVars: []
