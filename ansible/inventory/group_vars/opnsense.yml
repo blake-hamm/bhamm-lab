@@ -13,8 +13,8 @@ opnsense_wan_gateways:
     default_gw: false
 # Gateway group for policy-based outbound routing
 opnsense_gateway_default: ALLWEST_PRIMARY
-opnsense_gateway_interface_map:
-  opt8: COMCAST_PRIMARY
+# opnsense_gateway_interface_map:
+#   opt8: COMCAST_PRIMARY
 opnsense_interface_map:
   - name: LAN
     interface: lan
