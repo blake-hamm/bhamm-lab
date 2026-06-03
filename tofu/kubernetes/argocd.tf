@@ -27,7 +27,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    repoURL: https://codeberg.org/bhamm-lab/bhamm-lab.git
     targetRevision: ${var.branch_name}
     path: kubernetes/manifests/base
     directory:

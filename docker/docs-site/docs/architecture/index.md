@@ -14,6 +14,12 @@ This philosophy is supported by several key principles:
 -   **Open Source First:** I prioritize the use of open-source software to maintain flexibility and support the community.
 -   **Accelerated AI/ML:** The environment is specifically tailored for AI/ML workloads, with a focus on leveraging AMD and Intel GPU acceleration for inference.
 
+## Source of Truth
+
+All infrastructure and GitOps manifests are version-controlled on [Codeberg](https://codeberg.org/bhamm-lab/bhamm-lab), which acts as the deployment source of truth. A [GitHub mirror](https://github.com/blake-hamm/bhamm-lab) is maintained for public visibility and portfolio reference.
+
+This is partly because [GitHub's uptime record](https://isgithubcooked.com/) leaves something to be desired, and partly because Codeberg is built on [Forgejo](https://forgejo.org/) — which I also self-host and trust far more than a third-party SaaS for my production deployments.
+
 ## Core Infrastructure
 
 **Hardware:**

@@ -11,7 +11,7 @@ spec:
     namespace: actual-budget
     server: https://kubernetes.default.svc
   source:
-    repoURL: https://github.com/blake-hamm/bhamm-lab.git
+    repoURL: https://codeberg.org/bhamm-lab/bhamm-lab.git
     targetRevision: main
     path: kubernetes/charts/common
     helm:
