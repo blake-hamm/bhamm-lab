@@ -8,8 +8,8 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/blake-hamm/bhamm-lab.git
-    targetRevision: feature/update-site
+    repoURL: https://codeberg.org/bhamm-lab/bhamm-lab.git
+    targetRevision: main
     path: kubernetes/manifests/core
     directory:
       recurse: true
