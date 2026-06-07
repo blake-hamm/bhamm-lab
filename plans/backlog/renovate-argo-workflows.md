@@ -34,20 +34,12 @@ Generate PAT for bot with these scopes:
 ### 0.3 Grant Repo Access
 Add bot as collaborator to `blake-hamm/bhamm-lab` with **Write** access.
 
-### 0.4 Generate SSH Signing Key (optional but recommended)
-```bash
-ssh-keygen -t ed25519 -C "renovate@bhamm-lab.com" -f renovate_signing_key -N ""
-```
-- Add **public** key to bot's Codeberg profile under SSH/GPG Keys > Signing Keys
-- Save **private** key for SOPS/Vault/External Secret
-
-### 0.5 Add Secrets to SOPS
-Add the Renovate secrets to `secrets.enc.json` under `.vault_secrets.core.renovate`:
+### 0.4 Add Secrets to SOPS
+Add the Renovate PAT to `secrets.enc.json` under `.vault_secrets.external.codeberg`:
 
 ```json
-"renovate": {
-  "renovate_token": "YOUR_CODEBERG_PAT_HERE",
-  "renovate_ssh_private_key": "-----BEGIN OPENSSH PRIVATE KEY-----\n..."
+"codeberg": {
+  "renovate_token": "YOUR_CODEBERG_PAT_HERE"
 }
 ```
 
@@ -56,7 +48,7 @@ Then encrypt and commit:
 sops --encrypt --in-place secrets.enc.json
 ```
 
-The `sops-vault-sync` Argo WorkflowTemplate (already running on push) will decrypt and push these to Vault at `secret/core/renovate`. External Secrets Operator then syncs them to the cluster.
+The `sops-vault-sync` Argo WorkflowTemplate (already running on push) will decrypt and push these to Vault at `secret/external/codeberg`. External Secrets Operator then syncs them to the cluster.
 
 ---
 
@@ -80,19 +72,13 @@ Add Renovate entries to `kubernetes/manifests/base/argo/common-all.yaml`:
                 property: forgejo-token
             - secretKey: renovate-token
               remoteRef:
-                key: /core/renovate
+                key: /external/codeberg
                 property: renovate_token
-            - secretKey: renovate-ssh-private-key
-              remoteRef:
-                key: /core/renovate
-                property: renovate_ssh_private_key
         pvc:
           - name: renovate-cache
             storageSize: 5Gi
-            storageClassName: ceph-block
+            storageClassName: csi-rbd-sc
 ```
-
-**Note:** `renovate-ssh-private-key` is optional — only add if using SSH commit signing.
 
 ### 1.2 ConfigMap for Renovate Config
 
@@ -112,6 +98,7 @@ data:
       platform: 'forgejo',
       endpoint: 'https://codeberg.org/api/v1',
       repositories: ['blake-hamm/bhamm-lab'],
+      onboarding: false,
       dependencyDashboard: true,
       gitAuthor: 'Renovate Bot <renovate@bhamm-lab.com>',
       automerge: false,
@@ -160,10 +147,6 @@ spec:
                 secretKeyRef:
                   name: argo-external-secret
                   key: renovate-token
-            - name: RENOVATE_PLATFORM
-              value: forgejo
-            - name: RENOVATE_ENDPOINT
-              value: https://codeberg.org/api/v1
             - name: LOG_LEVEL
               value: info
           volumeMounts:
@@ -190,6 +173,8 @@ spec:
 **Notes:**
 - `concurrencyPolicy: Forbid` prevents overlapping runs if a scan takes >4 hours
 - Cache PVC avoids re-cloning and re-fetching package metadata on every run
+- Platform and endpoint are set in `config.js` only — env vars would override and create confusion
+- Memory request is conservative (512Mi); bump to 1Gi if first run OOMKills
 - Adjust `schedule` as needed (e.g., `"0 6 * * *"` for daily at 6 AM)
 
 ---
@@ -218,20 +203,8 @@ Or via Argo UI: Cron Workflows → renovate → Submit.
 argo logs -n argo -l workflows.argoproj.io/workflow=$(argo list -n argo | grep renovate | head -1 | awk '{print $1}')
 ```
 
-### 3.3 Onboarding PR
-First successful run opens an **onboarding PR** in `blake-hamm/bhamm-lab` proposing a `renovate.json` file:
-
-```json
-{
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["local>blake-hamm/bhamm-lab//.github/renovate"]
-}
-```
-
-Merge the onboarding PR to enable dependency updates.
-
-### 3.4 Verify PR Creation
-After onboarding is merged, subsequent runs should open PRs for outdated dependencies. Check:
+### 3.3 Verify PR Creation
+With `onboarding: false` in config.js and `renovate.json` already in repo root (Phase 4.1), runs should open PRs for outdated dependencies. Check:
 - Codeberg PRs tab
 - Dependency Dashboard issue (created automatically if `dependencyDashboard: true`)
 
@@ -241,7 +214,7 @@ After onboarding is merged, subsequent runs should open PRs for outdated depende
 **STATUS: PENDING**
 
 ### 4.1 Custom renovate.json in Repo
-Add `renovate.json` to repo root for repo-specific overrides:
+**Create before first run.** With `onboarding: false`, Renovate expects this file to exist in the repo. Add `renovate.json` to repo root:
 
 ```json
 {
@@ -265,10 +238,7 @@ Add `renovate.json` to repo root for repo-specific overrides:
 }
 ```
 
-### 4.2 Enable SSH Commit Signing (optional)
-If generated signing key, update CronWorkflow to mount the secret and set `RENOVATE_GIT_PRIVATE_KEY`.
-
-### 4.3 Add GitHub Rate-Limit Token (optional)
+### 4.2 Add GitHub Rate-Limit Token (optional)
 For changelog/release note lookups without hitting GitHub rate limits:
 - Generate GitHub PAT with `public_repo` scope
 - Add to SOPS/Vault/External Secret as `gh_token`
@@ -292,16 +262,17 @@ Update `docker/docs-site/docs/`:
 kubernetes/manifests/automations/renovate/
 ├── renovate-configmap.yaml
 └── renovate-cronworkflow.yaml
+renovate.json                          # repo root — create before first run
 ```
 
 ## Files to Update
 
 - `kubernetes/manifests/base/argo/common-all.yaml` — Add `renovate-token` external secret and `renovate-cache` PVC
-- `secrets.enc.json` — Add `vault_secrets.core.renovate` entries
+- `secrets.enc.json` — Add `vault_secrets.external.codeberg.renovate_token` entry
 - `docker/docs-site/docs/architecture/index.md` — Add Renovate to automation list
 - `docker/docs-site/docs/index.md` — Mark renovate as complete in mid-term goals
 - `docker/docs-site/docs/security/index.md` — Mark renovate as complete in future goals
-- (Optional) Repo root `renovate.json` — after onboarding PR is created
+- `renovate.json` — repo root, create before first run
 
 ---
 
@@ -310,19 +281,16 @@ kubernetes/manifests/automations/renovate/
 - [ ] Phase 0: Create Renovate bot account on Codeberg with full name + email
 - [ ] Phase 0: Generate PAT with `repo`, `user`, `issue`, `organization` scopes
 - [ ] Phase 0: Grant bot Write access to `blake-hamm/bhamm-lab` repo
-- [ ] Phase 0: (Optional) Generate SSH signing key and add public key to bot profile
-- [ ] Phase 0: Add `renovate_token` (and optional `renovate_ssh_private_key`) to `secrets.enc.json` and encrypt
+- [ ] Phase 0: Add `renovate_token` to `secrets.enc.json` under `vault_secrets.external.codeberg` and encrypt
 - [ ] Phase 0: Commit and push `secrets.enc.json` to trigger `sops-vault-sync` workflow
 - [ ] Phase 1: Update `kubernetes/manifests/base/argo/common-all.yaml` with renovate external secret and PVC
 - [ ] Phase 1: Create `kubernetes/manifests/automations/renovate/` directory with ConfigMap and CronWorkflow
 - [ ] Phase 1: Verify ConfigMap and CronWorkflow syntax
 - [ ] Phase 2: Commit and push manifests
 - [ ] Phase 2: Verify ArgoCD syncs new manifests to `argo` namespace
+- [ ] Phase 4: Create `renovate.json` in repo root (must exist before first run)
 - [ ] Phase 3: Trigger manual run: `argo submit --from cronworkflow/renovate -n argo`
 - [ ] Phase 3: Monitor workflow logs for errors
-- [ ] Phase 3: Verify onboarding PR is created in Codeberg
-- [ ] Phase 3: Merge onboarding PR
 - [ ] Phase 3: Verify dependency update PRs are created on subsequent runs
-- [ ] Phase 4: Tune `renovate.json` config in repo root
 - [ ] Phase 5: Update docs-site with Renovate documentation
 - [ ] Phase 5: Run `pre-commit` before final commit
