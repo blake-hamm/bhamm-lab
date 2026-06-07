@@ -58,6 +58,7 @@ This is partly because [GitHub's uptime record](https://isgithubcooked.com/) lea
 - Blue/green deployment strategies
 - Container registry and proxy with [Harbor](https://goharbor.io/)
 - [Argo Events](https://argoproj.github.io/argo-events/) and [Argo Workflows](https://argoproj.github.io/argo-workflows/) for backups, secret management and CI/CD pipelines
+- [Renovate](https://docs.renovatebot.com/) bot for automated dependency updates via Argo Workflows CronWorkflow
 - [NixOS](https://nixos.org/) for Framework 13 laptop, Garage VM, and Orange Pi Zero3 SBCs
 - [Common helm chart](kubernetes/charts/common)
 

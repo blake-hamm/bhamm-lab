@@ -18,7 +18,7 @@ The documentation is organized into six main sections:
 ## Roadmap
 
 - **Short-term:** Run MiniMax with llama.cpp grpc accross two Strix Halo system
-- **Mid-term:** Setup renovate and automate maintenance processes
+- **Mid-term:** ~~Setup renovate and automate maintenance processes~~
 - **Long-term:** Fine-tuning generative models, Home Assistant integration
 
 *Github issues are more up to date with detailed task tracking.*
