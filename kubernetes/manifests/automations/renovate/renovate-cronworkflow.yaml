@@ -12,6 +12,9 @@ spec:
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: 300
   workflowSpec:
+    securityContext:
+      runAsUser: 0
+      runAsGroup: 0
     serviceAccountName: argo-workflow
     entrypoint: renovate
     templates:
