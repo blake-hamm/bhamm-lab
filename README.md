@@ -5,7 +5,7 @@
 
 Welcome to my personal lab for exploring AI/ML, DevOps, and security. I've built a robust platform to power self hosted apps. It's a place for learning, tinkering, and maybe over-engineer a solution or two.
 
-> **Repository Hosting:** This project is mirrored on [Codeberg](https://codeberg.org/bhamm-lab/bhamm-lab), which serves as the source of truth for all GitOps and infrastructure-as-code deployments. The [GitHub mirror](https://github.com/blake-hamm/bhamm-lab) remains available for public visibility and portfolio reference (and because [GitHub is cooked](https://isgithubcooked.com/) more often than I'd like). Codeberg is built on [Forgejo](https://forgejo.org/), which I also self-host.
+> **Repository Hosting:** This project is mirrored on [Codeberg](https://codeberg.org/blake-hamm/bhamm-lab), which serves as the source of truth for all GitOps and infrastructure-as-code deployments. The [GitHub mirror](https://github.com/blake-hamm/bhamm-lab) remains available for public visibility and portfolio reference (and because [GitHub is cooked](https://isgithubcooked.com/) more often than I'd like). Codeberg is built on [Forgejo](https://forgejo.org/), which I also self-host.
 
 - [Documentation](#documentation)
 - [Guiding Principles](#guiding-principles)
