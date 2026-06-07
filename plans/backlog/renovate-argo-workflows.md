@@ -1,12 +1,12 @@
 # Renovate via Argo Workflows CronWorkflow
 
 ## Objective
-Deploy Renovate as a self-hosted bot using an Argo Workflows `CronWorkflow`, keeping all execution within the existing Kubernetes + Argo stack. Renovate will scan the `bhamm-lab/bhamm-lab` monorepo on Codeberg and automatically open PRs for dependency updates.
+Deploy Renovate as a self-hosted bot using an Argo Workflows `CronWorkflow`, keeping all execution within the existing Kubernetes + Argo stack. Renovate will scan the `blake-hamm/bhamm-lab` monorepo on Codeberg and automatically open PRs for dependency updates.
 
 ## Target Architecture
 - **Execution:** Argo Workflows `CronWorkflow` in namespace `argo`
 - **Platform:** Codeberg (Forgejo) via Renovate's `forgejo` platform module
-- **Auth:** Dedicated bot account + PAT stored in Vault → External Secret
+- **Auth:** Dedicated bot account + PAT stored in SOPS → Vault → External Secret
 - **Cache:** PVC mounted at `/tmp/renovate/cache` for repo/package metadata between runs
 - **Config:** `config.js` injected via ConfigMap or env vars
 - **Observability:** Argo UI, Prometheus workflow metrics (already enabled), logs in existing stack
@@ -32,77 +32,69 @@ Generate PAT for bot with these scopes:
 | `organization` | Read | Read org labels and teams |
 
 ### 0.3 Grant Repo Access
-Add bot to `bhamm-lab` organization team with **Write** access to target repos, or add as direct collaborator.
+Add bot as collaborator to `blake-hamm/bhamm-lab` with **Write** access.
 
 ### 0.4 Generate SSH Signing Key (optional but recommended)
 ```bash
 ssh-keygen -t ed25519 -C "renovate@bhamm-lab.com" -f renovate_signing_key -N ""
 ```
 - Add **public** key to bot's Codeberg profile under SSH/GPG Keys > Signing Keys
-- Save **private** key for Vault/External Secret
+- Save **private** key for SOPS/Vault/External Secret
 
-### 0.5 Add Secrets to Vault
-Add these keys to the Vault path for Argo Workflows:
-- `renovate_token` — Codeberg PAT
-- `renovate_ssh_private_key` — SSH signing private key (optional)
+### 0.5 Add Secrets to SOPS
+Add the Renovate secrets to `secrets.enc.json` under `.vault_secrets.core.renovate`:
+
+```json
+"renovate": {
+  "renovate_token": "YOUR_CODEBERG_PAT_HERE",
+  "renovate_ssh_private_key": "-----BEGIN OPENSSH PRIVATE KEY-----\n..."
+}
+```
+
+Then encrypt and commit:
+```bash
+sops --encrypt --in-place secrets.enc.json
+```
+
+The `sops-vault-sync` Argo WorkflowTemplate (already running on push) will decrypt and push these to Vault at `secret/core/renovate`. External Secrets Operator then syncs them to the cluster.
 
 ---
 
 ## Phase 1: Kubernetes Manifests
 **STATUS: PENDING**
 
-### 1.1 External Secret
+The PVC and ExternalSecret are provisioned through the existing `common` Helm chart (used by `argo-common`). This keeps them consistent with the rest of the stack and provides standard benefits like k8up backup annotations and uniform secret management.
 
-Create `kubernetes/manifests/automations/renovate/renovate-external-secret.yaml`:
+### 1.1 Update `argo-common` Application
 
-```yaml
-apiVersion: external-secrets.io/v1beta1
-kind: ExternalSecret
-metadata:
-  name: renovate-external-secret
-  namespace: argo
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
-spec:
-  secretStoreRef:
-    kind: ClusterSecretStore
-    name: vault-backend
-  target:
-    name: renovate-external-secret
-    creationPolicy: Owner
-  data:
-    - secretKey: token
-      remoteRef:
-        key: /core/renovate
-        property: renovate_token
-    - secretKey: ssh-private-key
-      remoteRef:
-        key: /core/renovate
-        property: renovate_ssh_private_key
-```
-
-### 1.2 PVC for Cache
-
-Create `kubernetes/manifests/automations/renovate/renovate-pvc.yaml`:
+Add Renovate entries to `kubernetes/manifests/base/argo/common-all.yaml`:
 
 ```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: renovate-cache
-  namespace: argo
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
-  storageClassName: ceph-block
+        externalSecrets:
+          enabled: true
+          secrets:
+            # ... existing secrets ...
+            - secretKey: forgejo-token
+              remoteRef:
+                key: /core/argo-workflows
+                property: forgejo-token
+            - secretKey: renovate-token
+              remoteRef:
+                key: /core/renovate
+                property: renovate_token
+            - secretKey: renovate-ssh-private-key
+              remoteRef:
+                key: /core/renovate
+                property: renovate_ssh_private_key
+        pvc:
+          - name: renovate-cache
+            storageSize: 5Gi
+            storageClassName: ceph-block
 ```
 
-### 1.3 ConfigMap for Renovate Config
+**Note:** `renovate-ssh-private-key` is optional — only add if using SSH commit signing.
+
+### 1.2 ConfigMap for Renovate Config
 
 Create `kubernetes/manifests/automations/renovate/renovate-configmap.yaml`:
 
@@ -119,7 +111,7 @@ data:
     module.exports = {
       platform: 'forgejo',
       endpoint: 'https://codeberg.org/api/v1',
-      repositories: ['bhamm-lab/bhamm-lab'],
+      repositories: ['blake-hamm/bhamm-lab'],
       dependencyDashboard: true,
       gitAuthor: 'Renovate Bot <renovate@bhamm-lab.com>',
       automerge: false,
@@ -136,7 +128,7 @@ data:
 
 **Note:** Set `platform: 'forgejo'` explicitly. Codeberg runs Forgejo, and Renovate is deprecating `gitea` platform support.
 
-### 1.4 CronWorkflow
+### 1.3 CronWorkflow
 
 Create `kubernetes/manifests/automations/renovate/renovate-cronworkflow.yaml`:
 
@@ -166,8 +158,8 @@ spec:
             - name: RENOVATE_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: renovate-external-secret
-                  key: token
+                  name: argo-external-secret
+                  key: renovate-token
             - name: RENOVATE_PLATFORM
               value: forgejo
             - name: RENOVATE_ENDPOINT
@@ -227,12 +219,12 @@ argo logs -n argo -l workflows.argoproj.io/workflow=$(argo list -n argo | grep r
 ```
 
 ### 3.3 Onboarding PR
-First successful run opens an **onboarding PR** in `bhamm-lab/bhamm-lab` proposing a `renovate.json` file:
+First successful run opens an **onboarding PR** in `blake-hamm/bhamm-lab` proposing a `renovate.json` file:
 
 ```json
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["local>bhamm-lab/bhamm-lab//.github/renovate"]
+  "extends": ["local>blake-hamm/bhamm-lab//.github/renovate"]
 }
 ```
 
@@ -279,7 +271,7 @@ If generated signing key, update CronWorkflow to mount the secret and set `RENOV
 ### 4.3 Add GitHub Rate-Limit Token (optional)
 For changelog/release note lookups without hitting GitHub rate limits:
 - Generate GitHub PAT with `public_repo` scope
-- Add to Vault/External Secret as `gh_token`
+- Add to SOPS/Vault/External Secret as `gh_token`
 - Set `RENOVATE_GITHUB_TOKEN` env var in CronWorkflow
 
 ---
@@ -298,14 +290,14 @@ Update `docker/docs-site/docs/`:
 
 ```
 kubernetes/manifests/automations/renovate/
-├── renovate-external-secret.yaml
-├── renovate-pvc.yaml
 ├── renovate-configmap.yaml
 └── renovate-cronworkflow.yaml
 ```
 
 ## Files to Update
 
+- `kubernetes/manifests/base/argo/common-all.yaml` — Add `renovate-token` external secret and `renovate-cache` PVC
+- `secrets.enc.json` — Add `vault_secrets.core.renovate` entries
 - `docker/docs-site/docs/architecture/index.md` — Add Renovate to automation list
 - `docker/docs-site/docs/index.md` — Mark renovate as complete in mid-term goals
 - `docker/docs-site/docs/security/index.md` — Mark renovate as complete in future goals
@@ -317,11 +309,13 @@ kubernetes/manifests/automations/renovate/
 
 - [ ] Phase 0: Create Renovate bot account on Codeberg with full name + email
 - [ ] Phase 0: Generate PAT with `repo`, `user`, `issue`, `organization` scopes
-- [ ] Phase 0: Grant bot Write access to `bhamm-lab/bhamm-lab` repo
+- [ ] Phase 0: Grant bot Write access to `blake-hamm/bhamm-lab` repo
 - [ ] Phase 0: (Optional) Generate SSH signing key and add public key to bot profile
-- [ ] Phase 0: Add `renovate_token` (and optional `renovate_ssh_private_key`) to Vault
-- [ ] Phase 1: Create `kubernetes/manifests/automations/renovate/` directory and manifests
-- [ ] Phase 1: Verify ExternalSecret, PVC, ConfigMap, and CronWorkflow syntax
+- [ ] Phase 0: Add `renovate_token` (and optional `renovate_ssh_private_key`) to `secrets.enc.json` and encrypt
+- [ ] Phase 0: Commit and push `secrets.enc.json` to trigger `sops-vault-sync` workflow
+- [ ] Phase 1: Update `kubernetes/manifests/base/argo/common-all.yaml` with renovate external secret and PVC
+- [ ] Phase 1: Create `kubernetes/manifests/automations/renovate/` directory with ConfigMap and CronWorkflow
+- [ ] Phase 1: Verify ConfigMap and CronWorkflow syntax
 - [ ] Phase 2: Commit and push manifests
 - [ ] Phase 2: Verify ArgoCD syncs new manifests to `argo` namespace
 - [ ] Phase 3: Trigger manual run: `argo submit --from cronworkflow/renovate -n argo`
