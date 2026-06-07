@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://codeberg.org/blake-hamm/bhamm-lab.git
-    targetRevision: main
+    targetRevision: feature/renovate
     path: kubernetes/manifests/core
     directory:
       recurse: true
