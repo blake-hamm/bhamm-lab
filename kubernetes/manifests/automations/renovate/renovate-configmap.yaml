@@ -11,6 +11,7 @@ data:
       platform: 'gitea',
       endpoint: 'https://codeberg.org/api/v1',
       repositories: ['blake-hamm/bhamm-lab'],
+      baseBranches: ['feature/renovate'],
       onboarding: false,
       dependencyDashboard: true,
       gitAuthor: 'Renovate Bot <renovate@bhamm-lab.com>',
