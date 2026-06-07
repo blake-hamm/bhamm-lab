@@ -17,8 +17,8 @@
 - **Future**: Automated rotation
 
 ### Application Security
-- **Current**: Manual updates
-- **Future**: Automated vulnerability scanning and renovate bot
+- **Current**: Manual updates, Renovate bot for dependency updates
+- **Future**: Automated vulnerability scanning and ~~renovate bot~~
 
 ### Monitoring & Auditing
 - **Current**: Basic logs

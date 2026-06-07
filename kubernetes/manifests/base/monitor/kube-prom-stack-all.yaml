@@ -128,10 +128,10 @@ spec:
                 revision: 12
                 datasource: Prometheus
               amd-gpu:
-                url: https://codeberg.org/bhamm-lab/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/amd-gpu.json
+                url: https://codeberg.org/blake-hamm/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/amd-gpu.json
                 token: ''
               k8up:
-                url: https://codeberg.org/bhamm-lab/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/k8up.json
+                url: https://codeberg.org/blake-hamm/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/k8up.json
                 token: ''
               nfs:
                 url: https://raw.githubusercontent.com/blake-hamm/nfs-grafana/refs/heads/master/prometheus/nfs-full.json
@@ -144,21 +144,21 @@ spec:
                 token: ''
                 datasource: Prometheus
               smartctl-exporter:
-                url: https://codeberg.org/bhamm-lab/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/smartctl.json
+                url: https://codeberg.org/blake-hamm/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/smartctl.json
                 token: ''
               systemd-exporter:
-                url: https://codeberg.org/bhamm-lab/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/systemd.json
+                url: https://codeberg.org/blake-hamm/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/systemd.json
                 token: ''
               garage:
-                url: https://codeberg.org/bhamm-lab/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/garage.json
+                url: https://codeberg.org/blake-hamm/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/garage.json
                 token: ''
                 datasource: Prometheus
               nut:
-                url: https://codeberg.org/bhamm-lab/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/nut.json
+                url: https://codeberg.org/blake-hamm/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/nut.json
                 token: ''
                 datasource: Prometheus
               opnsense:
-                url: https://codeberg.org/bhamm-lab/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/opnsense.json
+                url: https://codeberg.org/blake-hamm/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/opnsense.json
                 token: ''
           dashboardProviders:
             dashboardproviders.yaml:

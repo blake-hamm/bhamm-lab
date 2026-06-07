@@ -16,7 +16,7 @@ This philosophy is supported by several key principles:
 
 ## Source of Truth
 
-All infrastructure and GitOps manifests are version-controlled on [Codeberg](https://codeberg.org/bhamm-lab/bhamm-lab), which acts as the deployment source of truth. A [GitHub mirror](https://github.com/blake-hamm/bhamm-lab) is maintained for public visibility and portfolio reference.
+All infrastructure and GitOps manifests are version-controlled on [Codeberg](https://codeberg.org/blake-hamm/bhamm-lab), which acts as the deployment source of truth. A [GitHub mirror](https://github.com/blake-hamm/bhamm-lab) is maintained for public visibility and portfolio reference.
 
 This is partly because [GitHub's uptime record](https://isgithubcooked.com/) leaves something to be desired, and partly because Codeberg is built on [Forgejo](https://forgejo.org/) — which I also self-host and trust far more than a third-party SaaS for my production deployments.
 
@@ -58,6 +58,7 @@ This is partly because [GitHub's uptime record](https://isgithubcooked.com/) lea
 - Blue/green deployment strategies
 - Container registry and proxy with [Harbor](https://goharbor.io/)
 - [Argo Events](https://argoproj.github.io/argo-events/) and [Argo Workflows](https://argoproj.github.io/argo-workflows/) for backups, secret management and CI/CD pipelines
+- [Renovate](https://docs.renovatebot.com/) bot for automated dependency updates via Argo Workflows CronWorkflow
 - [NixOS](https://nixos.org/) for Framework 13 laptop, Garage VM, and Orange Pi Zero3 SBCs
 - [Common helm chart](kubernetes/charts/common)
 

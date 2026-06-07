@@ -15,6 +15,6 @@ git remote set-url origin ssh://git@git.bhamm-lab.com:4185/blake-hamm/bhamm-lab.
 
 ## Source of Truth
 
-While this repository is publicly visible on [GitHub](https://github.com/blake-hamm/bhamm-lab), the operational source of truth for all GitOps and infrastructure-as-code workloads lives on [Codeberg](https://codeberg.org/bhamm-lab/bhamm-lab). ArgoCD, OpenTofu, and all Kubernetes manifests point to the Codeberg remote.
+While this repository is publicly visible on [GitHub](https://github.com/blake-hamm/bhamm-lab), the operational source of truth for all GitOps and infrastructure-as-code workloads lives on [Codeberg](https://codeberg.org/blake-hamm/bhamm-lab). ArgoCD, OpenTofu, and all Kubernetes manifests point to the Codeberg remote.
 
 Why Codeberg? Because [GitHub goes down](https://isgithubcooked.com/) and I prefer my GitOps not to depend on whether Microsoft is having a good day. Codeberg runs [Forgejo](https://forgejo.org/) — the same software I self-host internally.
