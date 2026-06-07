@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: renovate-config
+  namespace: argo
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+data:
+  config.js: |
+    module.exports = {
+      platform: 'forgejo',
+      endpoint: 'https://codeberg.org/api/v1',
+      repositories: ['blake-hamm/bhamm-lab'],
+      onboarding: false,
+      dependencyDashboard: true,
+      gitAuthor: 'Renovate Bot <renovate@bhamm-lab.com>',
+      automerge: false,
+      labels: ['dependencies'],
+      extends: [
+        'config:best-practices',
+        ':dependencyDashboard',
+        ':gitSignOff',
+        ':semanticCommits',
+        ':semanticCommitTypeAll(chore)',
+      ],
+    };

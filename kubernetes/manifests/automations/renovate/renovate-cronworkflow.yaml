@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: renovate
+  namespace: argo
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  schedule: "0 1 * * *"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 300
+  workflowSpec:
+    serviceAccountName: argo-workflow
+    entrypoint: renovate
+    templates:
+      - name: renovate
+        container:
+          image: renovate/renovate:39
+          env:
+            - name: RENOVATE_CONFIG_FILE
+              value: /opt/renovate/config.js
+            - name: RENOVATE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: argo-external-secret
+                  key: renovate-token
+            - name: LOG_LEVEL
+              value: info
+          volumeMounts:
+            - name: renovate-config
+              mountPath: /opt/renovate
+            - name: renovate-cache
+              mountPath: /tmp/renovate/cache
+          resources:
+            requests:
+              memory: 512Mi
+              cpu: 250m
+            limits:
+              memory: 2Gi
+              cpu: 1000m
+    volumes:
+      - name: renovate-config
+        configMap:
+          name: renovate-config
+      - name: renovate-cache
+        persistentVolumeClaim:
+          claimName: renovate-cache

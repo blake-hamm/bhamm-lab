@@ -48,6 +48,14 @@ spec:
               remoteRef:
                 key: /core/argo-workflows
                 property: forgejo-token
+            - secretKey: renovate-token
+              remoteRef:
+                key: /external/codeberg
+                property: renovate_pat
+        pvc:
+          - name: renovate-cache
+            storageSize: 2Gi
+            storageClassName: csi-rbd-sc
         ingressRoutes:
           - enabled: true
             name: argo-workflows
