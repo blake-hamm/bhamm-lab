@@ -13,7 +13,7 @@ spec:
   source:
     chart: vault-operator
     repoURL: ghcr.io/bank-vaults/helm-charts
-    targetRevision: 1.22.5
+    targetRevision: 1.24.0
     helm:
       valuesObject:
         monitoring:
