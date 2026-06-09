@@ -47,7 +47,7 @@ spec:
   source:
     repoURL: https://lablabs.github.io/cloudflare-exporter
     chart: cloudflare-exporter
-    targetRevision: 0.2.2
+    targetRevision: 0.2.3
     helm:
       valuesObject:
         image:
