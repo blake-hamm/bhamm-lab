@@ -7,7 +7,7 @@ Deploy Renovate as a self-hosted bot using an Argo Workflows `CronWorkflow`, kee
 ## Target Architecture
 
 - **Execution:** Argo Workflows `CronWorkflow` in namespace `argo`
-- **Platform:** Codeberg via Renovate's `gitea` platform module (Forgejo platform unavailable in Renovate v39)
+- **Platform:** Codeberg via Renovate's `forgejo` platform module
 - **Auth:** Dedicated bot account + PAT stored in SOPS → Vault → External Secret
 - **Cache:** PVC mounted at `/tmp/renovate/cache` for repo/package metadata between runs
 - **Config:** `config.js` injected via ConfigMap; `renovate.json` in repo root
@@ -106,7 +106,7 @@ data:
 ```
 
 **Notes:**
-- `platform: 'gitea'` used because Renovate's standalone `forgejo` platform was added after v39 (merged July 2025). The `gitea` module is fully compatible with Forgejo.
+- `platform: 'forgejo'` — Renovate v43+ includes native Forgejo platform support (merged July 2025 in v41.41.0)
 - `onboarding: true` was used initially to generate the onboarding PR. After merging the onboarding PR, changed to `onboarding: false`.
 
 ### 1.3 CronWorkflow
@@ -133,7 +133,7 @@ spec:
     templates:
       - name: renovate
         container:
-          image: renovate/renovate:39.264
+          image: renovate/renovate:43
           securityContext:
             runAsUser: 0
             runAsGroup: 0
@@ -172,8 +172,8 @@ spec:
 - `schedules:` (array) used instead of `schedule:` (string) — Argo Workflows v4.0.4 API
 - `concurrencyPolicy: Forbid` prevents overlapping runs
 - Cache PVC avoids re-cloning and re-fetching package metadata on every run
-- Image pinned to `39.264` for reproducibility
-- Container runs as root (`runAsUser: 0`) to avoid UID fragility — Renovate v39 uses UID 12021, which may change in future versions
+- Image: `renovate/renovate:43`
+- Container runs as root (`runAsUser: 0`) to avoid UID fragility
 
 ---
 
