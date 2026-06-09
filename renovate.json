@@ -10,6 +10,8 @@
   "pinDigests": false,
   "labels": ["dependencies"],
   "kubernetes": {
-    "fileMatch": ["^kubernetes/manifests/.+\\.yaml$"]
+    "managerFilePatterns": [
+      "/^kubernetes/manifests/.+\\.yaml$/"
+    ]
   }
 }
