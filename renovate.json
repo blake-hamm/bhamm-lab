@@ -13,5 +13,10 @@
     "managerFilePatterns": [
       "/^kubernetes/manifests/.+\\.yaml$/"
     ]
+  },
+  "argocd": {
+    "managerFilePatterns": [
+      "/^kubernetes/manifests/.+\\.yaml$/"
+    ]
   }
 }

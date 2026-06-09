@@ -29,6 +29,11 @@ spec:
                 secretKeyRef:
                   name: argo-external-secret
                   key: renovate-token
+            - name: GITHUB_COM_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: argo-external-secret
+                  key: github-com-token
             - name: LOG_LEVEL
               value: info
           volumeMounts:

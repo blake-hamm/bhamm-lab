@@ -52,6 +52,10 @@ spec:
               remoteRef:
                 key: /external/codeberg
                 property: renovate_pat
+            - secretKey: github-com-token
+              remoteRef:
+                key: /external/github
+                property: general_pat
         pvc:
           - name: renovate-cache
             storageSize: 2Gi
