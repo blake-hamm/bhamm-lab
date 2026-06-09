@@ -37,7 +37,7 @@ spec:
             template: verify-pvs
     - name: pause-parents
       script:
-        image: alpine/kubectl
+        image: alpine/kubectl:1.36.1
         command: ["/bin/sh", "-c"]
         source: |
           SKIP_APPS="{{workflow.parameters.skip-apps}}"
@@ -60,7 +60,7 @@ spec:
           echo "Parent apps paused."
     - name: pause-children
       script:
-        image: alpine/kubectl
+        image: alpine/kubectl:1.36.1
         command: ["/bin/sh", "-c"]
         source: |
           SKIP_APPS="{{workflow.parameters.skip-apps}}"
@@ -77,7 +77,7 @@ spec:
           echo "Child apps paused."
     - name: cleanup-k8up
       script:
-        image: alpine/kubectl
+        image: alpine/kubectl:1.36.1
         command: ["/bin/sh", "-c"]
         source: |
           SKIP_NS="{{workflow.parameters.skip-namespaces}}"
@@ -106,7 +106,7 @@ spec:
           echo "K8up cleanup complete."
     - name: cleanup-cnpg
       script:
-        image: alpine/kubectl
+        image: alpine/kubectl:1.36.1
         command: ["/bin/sh", "-c"]
         source: |
           SKIP_NS="{{workflow.parameters.skip-namespaces}}"
@@ -135,7 +135,7 @@ spec:
           echo "CNPG clusters deleted."
     - name: delete-apps
       script:
-        image: alpine/kubectl
+        image: alpine/kubectl:1.36.1
         command: ["/bin/sh", "-c"]
         source: |
           SKIP_APPS="{{workflow.parameters.skip-apps}}"
@@ -194,7 +194,7 @@ spec:
           echo "App deletion complete."
     - name: delete-workloads
       script:
-        image: alpine/kubectl
+        image: alpine/kubectl:1.36.1
         command: ["/bin/sh", "-c"]
         source: |
           SKIP_NS="{{workflow.parameters.skip-namespaces}}"
@@ -229,7 +229,7 @@ spec:
           echo "Workload cleanup complete."
     - name: wait-for-pods
       script:
-        image: alpine/kubectl
+        image: alpine/kubectl:1.36.1
         command: ["/bin/sh", "-c"]
         source: |
           SKIP_NS="{{workflow.parameters.skip-namespaces}}"
@@ -266,7 +266,7 @@ spec:
           echo "Pod wait complete."
     - name: delete-pvcs
       script:
-        image: alpine/kubectl
+        image: alpine/kubectl:1.36.1
         command: ["/bin/sh", "-c"]
         source: |
           SKIP_NS="{{workflow.parameters.skip-namespaces}}"
@@ -301,7 +301,7 @@ spec:
           echo "PVC deletion complete."
     - name: verify-pvs
       script:
-        image: alpine/kubectl
+        image: alpine/kubectl:1.36.1
         command: ["/bin/sh", "-c"]
         source: |
           SKIP_NS="{{workflow.parameters.skip-namespaces}}"

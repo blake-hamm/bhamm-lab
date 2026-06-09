@@ -76,7 +76,7 @@ s3:
 dragonfly:
   enabled: false
   replicas: 1
-  image: "dragonflydb/dragonfly:latest"
+  image: "dragonflydb/dragonfly:v1.27.1"
   args: []
   resources:
     requests:

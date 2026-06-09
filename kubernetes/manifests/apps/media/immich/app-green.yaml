@@ -98,7 +98,7 @@ spec:
           effect: "NoSchedule"
       initContainers:
         - name: envsubst
-          image: bhgedigital/envsubst:latest
+          image: bhgedigital/envsubst:v1.0-alpine3.6
           command: ["/bin/sh", "-c"]
           args:
             - envsubst < /config/immich-config.yaml > /templated-config/config.yaml

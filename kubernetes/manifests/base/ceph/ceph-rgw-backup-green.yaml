@@ -32,7 +32,7 @@ spec:
               template: rclone-sync-to-b2
       - name: list-buckets
         container:
-          image: rclone/rclone
+          image: rclone/rclone:1.74.3
           env:
             - name: RGW_ACCESS_KEY
               valueFrom:
@@ -63,7 +63,7 @@ spec:
             duration: 10m
             factor: 2
         container:
-          image: rclone/rclone
+          image: rclone/rclone:1.74.3
           resources:
             requests:
               memory: 2Gi
@@ -137,7 +137,7 @@ spec:
             duration: 10m
             factor: 2
         container:
-          image: rclone/rclone
+          image: rclone/rclone:1.74.3
           resources:
             requests:
               memory: 2Gi
@@ -212,7 +212,7 @@ spec:
             duration: 10m
             factor: 2
         container:
-          image: rclone/rclone
+          image: rclone/rclone:1.74.3
           resources:
             requests:
               memory: 2Gi

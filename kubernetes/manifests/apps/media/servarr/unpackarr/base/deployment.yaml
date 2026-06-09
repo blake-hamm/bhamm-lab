@@ -24,7 +24,7 @@ spec:
         fsGroupChangePolicy: "OnRootMismatch"
       containers:
         - name: unpackerr
-          image: golift/unpackerr
+          image: golift/unpackerr:0.15.2
           ports:
             - containerPort: 5656
           volumeMounts:

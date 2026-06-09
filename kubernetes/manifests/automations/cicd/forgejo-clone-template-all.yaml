@@ -23,7 +23,7 @@ spec:
             archive:
               none: {}
       script:
-        image: alpine/git:latest
+        image: alpine/git:2.52.0
         command: [sh]
         source: |
           #!/bin/sh

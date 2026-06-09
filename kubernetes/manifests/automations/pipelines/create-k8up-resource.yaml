@@ -252,7 +252,7 @@ spec:
           - name: k8up-name
       script:
         command: ["/bin/sh", "-c"]
-        image: alpine/kubectl
+        image: alpine/kubectl:1.36.1
         source: |-
           set -eu
 
@@ -369,7 +369,7 @@ spec:
             valueFrom:
               path: /tmp/pvc-snapshot-map.json
       script:
-        image: restic/restic:latest
+        image: restic/restic:0.18.1
         command: [sh]
         env:
           - name: RESTIC_REPOSITORY

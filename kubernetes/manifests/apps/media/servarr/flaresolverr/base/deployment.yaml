@@ -19,6 +19,6 @@ spec:
     spec:
       containers:
         - name: flaresolverr
-          image: flaresolverr/flaresolverr
+          image: flaresolverr/flaresolverr:v3.5.0
           ports:
             - containerPort: 8191

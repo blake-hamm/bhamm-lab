@@ -148,7 +148,7 @@ spec:
             template: verify-garage
     - name: sync-r2-to-garage
       container:
-        image: rclone/rclone
+        image: rclone/rclone:1.74.3
         resources:
           requests:
             memory: 512Mi
@@ -215,7 +215,7 @@ spec:
               --stats=30s
     - name: verify-garage
       container:
-        image: rclone/rclone
+        image: rclone/rclone:1.74.3
         resources:
           requests:
             memory: 256Mi
@@ -299,7 +299,7 @@ spec:
             template: verify-rgw
     - name: list-garage-buckets
       container:
-        image: rclone/rclone
+        image: rclone/rclone:1.74.3
         resources:
           requests:
             memory: 128Mi
@@ -335,7 +335,7 @@ spec:
         parameters:
           - name: bucket
       container:
-        image: rclone/rclone
+        image: rclone/rclone:1.74.3
         resources:
           requests:
             memory: 512Mi
@@ -396,7 +396,7 @@ spec:
               --stats=30s
     - name: verify-rgw
       container:
-        image: rclone/rclone
+        image: rclone/rclone:1.74.3
         resources:
           requests:
             memory: 256Mi

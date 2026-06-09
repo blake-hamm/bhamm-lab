@@ -51,7 +51,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: ceph-healthcheck
-          image: alpine/kubectl:latest
+          image: alpine/kubectl:1.36.1
           command:
             - /bin/sh
             - -c

@@ -121,7 +121,7 @@ spec:
                           raw:
                             data: "{{inputs.parameters.commits}}"
                     script:
-                      image: python:alpine
+                      image: python:3.14-alpine
                       command: [python]
                       source: |
                         import json
@@ -149,7 +149,7 @@ spec:
                           archive:
                             none: {}
                     script:
-                      image: alpine:latest
+                      image: alpine:3.23
                       command: [sh]
                       env:
                         - name: REGISTRY

@@ -46,7 +46,7 @@ spec:
     templates:
       - name: update-timestamp
         container:
-          image: alpine/kubectl:latest
+          image: alpine/kubectl:1.36.1
           command: ["/bin/sh", "-c"]
           args:
             - |

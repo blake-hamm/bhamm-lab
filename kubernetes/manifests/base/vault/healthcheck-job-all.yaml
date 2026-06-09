@@ -54,7 +54,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: vault-healthcheck
-          image: curlimages/curl:latest
+          image: curlimages/curl:8.20.0
           command:
             - /bin/sh
             - -c
