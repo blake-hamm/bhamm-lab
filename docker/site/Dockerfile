@@ -16,7 +16,7 @@ RUN hugo --minify
 #####################################################################
 #                            Final Stage                            #
 #####################################################################
-FROM docker.io/caddy:2.11.3-alpine
+FROM docker.io/caddy:2.11.4-alpine@sha256:77c07d5ebfa5be9fd6c820d2094ae662c9e7eeb9bf98346b7f639900263ee2a2
 
 # Create non-root user
 RUN adduser -D -H -s /sbin/nologin -u 1000 caddy
