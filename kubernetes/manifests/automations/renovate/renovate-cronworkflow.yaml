@@ -20,7 +20,7 @@ spec:
     templates:
       - name: renovate
         container:
-          image: renovate/renovate:39.264
+          image: renovate/renovate:43
           env:
             - name: RENOVATE_CONFIG_FILE
               value: /opt/renovate/config.js

@@ -8,7 +8,7 @@ metadata:
 data:
   config.js: |
     module.exports = {
-      platform: 'gitea',
+      platform: 'forgejo',
       endpoint: 'https://codeberg.org/api/v1',
       repositories: ['blake-hamm/bhamm-lab'],
       onboarding: true,
