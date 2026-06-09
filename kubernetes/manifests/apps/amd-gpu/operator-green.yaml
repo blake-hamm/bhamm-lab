@@ -60,7 +60,7 @@ spec:
                 - key: "amd.com/gpu"
                   operator: "Exists"
                   effect: "NoSchedule"
-              image: docker.io/rocm/test-runner:v1.4.0
+              image: docker.io/rocm/test-runner:v1.5.0@sha256:485418194d71b0aeea1af69a9b5e17ccdc7f6514fabeafdbbabb50987d75eccb
               selector:
                 feature.node.kubernetes.io/amd-gpu: "true"
             configManager:
