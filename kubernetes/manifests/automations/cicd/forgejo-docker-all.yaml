@@ -149,7 +149,7 @@ spec:
                           archive:
                             none: {}
                     script:
-                      image: alpine:3.23
+                      image: alpine:3.24
                       command: [sh]
                       env:
                         - name: REGISTRY
