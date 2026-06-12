@@ -1522,12 +1522,12 @@ spec:
                 cpu: "4"
                 memory: "110Gi"
           - name: gemma-4-26b
-            description: Google Gemma 4 26B A4B IT - high quality multimodal MoE
+            description: Google Gemma 4 26B A4B IT - high quality MoE
             enabled: true
             pvc:
               storage: "40Gi"
             image:
-              tag: rocm-7.2.3_20260523T170726
+              tag: rocm-7.2.4_20260612T152733
             args:
               - llama-server
               - -hf
@@ -1545,8 +1545,10 @@ spec:
               - "999"
               - -fa
               - "on"
-              - --mmproj-auto
-              - --mmproj-offload
+              - --spec-type
+              - draft-mtp
+              - --spec-draft-n-max
+              - "2"
               - --chat-template-kwargs
               - '{"enable_thinking":true}'
               - -c
