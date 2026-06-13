@@ -95,6 +95,8 @@ in
         text = builtins.toJSON {
           provider = "auto";
           workflow = "summary-review";
+          searchModel = "gemini-3-flash-preview";
+          summaryModel = "opencode-go/deepseek-v4-flash";
           curatorTimeoutSeconds = 20;
           githubClone = {
             enabled = true;
