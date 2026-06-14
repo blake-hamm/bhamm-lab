@@ -13,7 +13,7 @@ spec:
   source:
     path: deploy/rbac
     repoURL: 'https://github.com/bank-vaults/vault-operator'
-    targetRevision: v1.22.4
+    targetRevision: v1.24.0
     kustomize:
       namespace: "vault"
   syncPolicy:
