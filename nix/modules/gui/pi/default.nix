@@ -95,6 +95,7 @@ in
         text = builtins.toJSON {
           provider = "auto";
           workflow = "summary-review";
+          summaryModel = "opencode-go/deepseek-v4-flash";
           curatorTimeoutSeconds = 20;
           githubClone = {
             enabled = true;

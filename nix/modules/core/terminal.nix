@@ -1,5 +1,8 @@
 { pkgs, ... }:
 {
+  programs.vim.enable = true;
+  programs.vim.defaultEditor = true;
+
   environment.systemPackages = with pkgs; [
     tree
     htop
