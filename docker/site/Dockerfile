@@ -1,7 +1,7 @@
 #####################################################################
 #                            Build Stage                            #
 #####################################################################
-FROM docker.io/hugomods/hugo:0.163.2 AS builder
+FROM docker.io/hugomods/hugo:0.163.3 AS builder
 
 WORKDIR /src
 COPY . .
