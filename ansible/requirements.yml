@@ -2,15 +2,15 @@ collections:
   - name: community.hashi_vault
     version: "7.1.0"
   - name: devsec.hardening
-    version: "10.5.2"
+    version: "10.6.0"
   - name: oxlorg.opnsense
     version: "25.7.8"
   - name: community.sops
-    version: "2.2.7"
+    version: "2.4.0"
   - name: prometheus.prometheus
     version: "0.29.1"
   - name: grafana.grafana
-    version: "6.0.6"
+    version: "6.1.0"
 roles:
   - name: geerlingguy.ntp
     version: "4.0.0"

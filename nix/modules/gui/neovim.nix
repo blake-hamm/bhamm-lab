@@ -45,6 +45,32 @@
             ];
           };
           vim.git.gitsigns.enable = true;
+          vim.git.gitsigns.codeActions.enable = true;
+
+          vim.extraPlugins = {
+            diffview = {
+              package = pkgs.vimPlugins.diffview-nvim;
+              setup = ''
+                require('diffview').setup {
+                  keymaps = {
+                    disable_defaults = false,
+                    view = {
+                      { "n", "<leader>gq", "<cmd>DiffviewClose<CR>", { desc = "Close diffview" } },
+                    },
+                    file_panel = {
+                      { "n", "<leader>gq", "<cmd>DiffviewClose<CR>", { desc = "Close diffview" } },
+                      { "n", "q",          "<cmd>DiffviewClose<CR>", { desc = "Close diffview" } },
+                    },
+                    file_history_panel = {
+                      { "n", "<leader>gq", "<cmd>DiffviewClose<CR>", { desc = "Close diffview" } },
+                      { "n", "q",          "<cmd>DiffviewClose<CR>", { desc = "Close diffview" } },
+                    },
+                  },
+                }
+              '';
+            };
+          };
+
           vim.binds.whichKey.enable = true;
           vim.terminal.toggleterm.enable = true;
           vim.visuals.nvim-web-devicons.enable = true;
@@ -61,6 +87,27 @@
           vim.visuals.indent-blankline.enable = true;
 
           vim.keymaps = [
+            {
+              key = "<leader>gd";
+              mode = "n";
+              silent = true;
+              action = "<cmd>DiffviewOpen<CR>";
+              desc = "Open diffview (all changes)";
+            }
+            {
+              key = "<leader>gh";
+              mode = "n";
+              silent = true;
+              action = "<cmd>DiffviewFileHistory %<CR>";
+              desc = "File git history";
+            }
+            {
+              key = "<leader>gq";
+              mode = "n";
+              silent = true;
+              action = "<cmd>DiffviewClose<CR>";
+              desc = "Close diffview";
+            }
             {
               key = "<leader>e";
               mode = "n";
