@@ -12,6 +12,7 @@
         user.email = "blake.j.hamm@gmail.com";
         init.defaultBranch = "main";
         credential.helper = "store";
+        core.editor = "nvim";
       };
     };
   };
