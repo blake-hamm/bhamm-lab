@@ -1,0 +1,2 @@
+# Upgrade all packages during security role run
+security_upgrade_packages: false

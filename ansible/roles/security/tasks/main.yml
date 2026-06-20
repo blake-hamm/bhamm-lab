@@ -6,6 +6,7 @@
     upgrade: true
     update_cache: true
     cache_valid_time: 86400 # One day
+  when: security_upgrade_packages | bool
 - name: Extra config for proxmox clustering
   ansible.builtin.include_tasks:
     file: proxmox.yml
