@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/BerriAI/litellm.git
-    targetRevision: v1.89.2
+    targetRevision: v1.89.3
     path: deploy/charts/litellm-helm
     helm:
       valuesObject:
