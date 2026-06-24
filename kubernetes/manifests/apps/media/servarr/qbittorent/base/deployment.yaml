@@ -60,7 +60,7 @@ spec:
             - name: gluetun-config
               mountPath: /gluetun
         - name: qbittorrent
-          image: lscr.io/linuxserver/qbittorrent:5.2.1
+          image: lscr.io/linuxserver/qbittorrent:5.2.2
           volumeMounts:
             - name: qbittorrent-config
               mountPath: /config
