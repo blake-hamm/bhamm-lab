@@ -22,7 +22,7 @@ spec:
   source:
     repoURL: https://github.com/intel/intel-device-plugins-for-kubernetes.git
     path: deployments/nfd/overlays/node-feature-rules
-    targetRevision: v0.34.0
+    targetRevision: v0.36.0
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
@@ -45,7 +45,7 @@ spec:
   source:
     repoURL: https://github.com/intel/intel-device-plugins-for-kubernetes.git
     path: deployments/gpu_plugin
-    targetRevision: v0.34.0
+    targetRevision: v0.36.0
     kustomize:
       patches:
         - target:

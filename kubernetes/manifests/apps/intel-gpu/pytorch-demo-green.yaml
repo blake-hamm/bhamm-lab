@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: https://github.com/intel/intel-device-plugins-for-kubernetes.git
     path: deployments/gpu_pytorch_demo
-    targetRevision: v0.34.0
+    targetRevision: v0.36.0
     kustomize:
       patches:
         - target:
