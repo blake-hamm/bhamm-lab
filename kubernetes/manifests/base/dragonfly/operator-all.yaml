@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: https://github.com/dragonflydb/dragonfly-operator.git
     path: charts/dragonfly-operator
-    targetRevision: v1.2.1
+    targetRevision: v1.6.1
     helm:
       valuesObject:
         rbacProxy:
