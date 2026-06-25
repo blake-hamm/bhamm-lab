@@ -11,9 +11,9 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    repoURL: oci://docker.litellm.ai/berriai/litellm-helm
-    targetRevision: 1.89.3
-    path: .
+    repoURL: https://github.com/BerriAI/litellm.git
+    targetRevision: v1.89.3
+    path: deploy/charts/litellm-helm
     helm:
       valuesObject:
         replicaCount: 1
