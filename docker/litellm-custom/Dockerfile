@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:0.11.24@sha256:99ea34acedc870ba4ad11a1f540a1c04267c9f30aadc465a94406f52dfda2c36 AS uvbin
+FROM ghcr.io/astral-sh/uv:0.11.25@sha256:1e3808aa9023d0980e7c15b1fa7c1ac16ff35925780cf5c459858b2d693f01a9 AS uvbin
 FROM ghcr.io/berriai/litellm:v1.85.1
 
 COPY --from=uvbin /uv /usr/local/bin/uv
