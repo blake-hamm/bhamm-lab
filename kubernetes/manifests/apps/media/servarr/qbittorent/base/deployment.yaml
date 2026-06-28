@@ -24,7 +24,7 @@ spec:
         fsGroupChangePolicy: "OnRootMismatch"
       containers:
         - name: gluetun
-          image: ghcr.io/qdm12/gluetun:v3.40.0
+          image: ghcr.io/qdm12/gluetun:v3.41.1
           env:
             - name: VPN_SERVICE_PROVIDER
               value: protonvpn
