@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: recyclarr
-          image: ghcr.io/recyclarr/recyclarr:7.3.0
+          image: ghcr.io/recyclarr/recyclarr:7.5.2
           resources:
             requests:
               cpu: "10m"
