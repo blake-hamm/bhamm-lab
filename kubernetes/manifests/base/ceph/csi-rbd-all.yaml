@@ -22,7 +22,7 @@ spec:
   source:
     chart: ceph-csi-rbd
     repoURL: https://ceph.github.io/csi-charts
-    targetRevision: 3.14.2
+    targetRevision: 3.17.0
     helm:
       valuesObject:
         nodeplugin:
