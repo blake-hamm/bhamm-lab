@@ -134,7 +134,6 @@ spec:
             cookies:
               - subdomain: 'auth'
                 domain: 'bhamm-lab.com'
-                authelia_url: 'https://auth.bhamm-lab.com'
             redis:
               enabled: true
               deploy: false
