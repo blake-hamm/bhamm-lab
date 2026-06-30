@@ -1,7 +1,7 @@
 {
   imports = [
     ./backups.nix
-    ./docker.nix
+    ./podman.nix
     ./k9s.nix
     ./monitoring.nix
     ./nut.nix

@@ -103,7 +103,7 @@ in
           "/home/${user}/.cache"
           "/home/${user}/Downloads"
           "/home/${user}/.local/share/Steam/steamapps/common"
-          "/home/${user}/.local/share/docker"
+          "/home/${user}/.local/share/containers"
           "/home/${user}/.conda"
           "/home/${user}/backups"
         ];

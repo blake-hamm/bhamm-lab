@@ -8,9 +8,9 @@
   };
 
   config = lib.mkIf config.cfg.ai.llama-cpp.enable {
-    users.users.${shared.username}.extraGroups = [ "docker" ];
+    users.users.${shared.username}.extraGroups = [ "podman" ];
     virtualisation.oci-containers = {
-      backend = "docker";
+      backend = "podman";
       containers = {
         llama-cpp = {
           image = "kyuz0/amd-strix-halo-toolboxes:vulkan-radv";

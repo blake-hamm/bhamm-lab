@@ -9,7 +9,7 @@
     networking.backend = "networkd";
     # Disable desktop features
     gnome.enable = lib.mkDefault false;
-    docker.enable = lib.mkDefault false;
+    podman.enable = lib.mkDefault false;
     kitty.enable = lib.mkDefault false;
     ghostty.enable = lib.mkDefault false;
     vscode.enable = lib.mkDefault false;

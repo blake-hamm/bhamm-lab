@@ -6,7 +6,7 @@
   # Default settings for a desktop machine
   cfg = {
     gnome.enable = true;
-    docker.enable = true;
+    podman.enable = false;
     ghostty.enable = true;
     k9s.enable = true;
     vscode.enable = true;
