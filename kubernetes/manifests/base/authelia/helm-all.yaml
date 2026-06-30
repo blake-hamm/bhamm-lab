@@ -14,7 +14,7 @@ spec:
   source:
     chart: authelia
     repoURL: https://charts.authelia.com
-    targetRevision: 0.10.46
+    targetRevision: 0.11.6
     helm:
       valuesObject:
         pod:
