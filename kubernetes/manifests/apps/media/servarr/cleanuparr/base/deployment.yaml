@@ -22,7 +22,7 @@ spec:
         fsGroupChangePolicy: "OnRootMismatch"
       containers:
         - name: cleanuparr
-          image: ghcr.io/cleanuparr/cleanuparr:2.9.14
+          image: ghcr.io/cleanuparr/cleanuparr:2.9.15
           ports:
             - containerPort: 11011
           volumeMounts:
