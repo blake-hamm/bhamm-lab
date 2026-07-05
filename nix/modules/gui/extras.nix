@@ -1,5 +1,10 @@
-{ inputs, shared, pkgs, config, lib, ... }:
-{
+{ inputs
+, shared
+, pkgs
+, config
+, lib
+, ...
+}: {
   imports = [
     inputs.home-manager.nixosModules.home-manager
   ];
@@ -19,10 +24,14 @@
         uv
         krita
         libreoffice
+        hunspell
+        hunspellDicts.en_US
         (shotcut.overrideAttrs (oldAttrs: {
-          qtWrapperArgs = (oldAttrs.qtWrapperArgs or [ ]) ++ [
-            "--prefix XDG_DATA_DIRS : ${gtk3}/share/gsettings-schemas/${gtk3.name}"
-          ];
+          qtWrapperArgs =
+            (oldAttrs.qtWrapperArgs or [ ])
+            ++ [
+              "--prefix XDG_DATA_DIRS : ${gtk3}/share/gsettings-schemas/${gtk3.name}"
+            ];
         }))
         # gnome-network-displays
         # steam
