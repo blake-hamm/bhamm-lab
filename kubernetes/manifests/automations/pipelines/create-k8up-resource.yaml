@@ -369,7 +369,7 @@ spec:
             valueFrom:
               path: /tmp/pvc-snapshot-map.json
       script:
-        image: restic/restic:0.18.1
+        image: restic/restic:0.19.1
         command: [sh]
         env:
           - name: RESTIC_REPOSITORY
