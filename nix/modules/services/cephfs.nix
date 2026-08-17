@@ -3,6 +3,32 @@
 let
   cfg = config.cfg.cephfs;
   mountPoint = "/mnt/bhamm";
+  mons = [ "10.0.20.11" "10.0.20.12" "10.0.20.13" ];
+  systemctl = "${pkgs.systemd}/bin/systemctl";
+
+  # Probe mons over TCP :6789 (works identically on LAN and VPN).
+  # Reachable -> enable automount; unreachable -> tear it down so
+  # ${mountPoint} becomes a plain empty dir and stats return instantly.
+  checkScript = pkgs.writeShellScript "cephfs-check" ''
+    ok=1
+    for mon in ${lib.concatStringsSep " " mons}; do
+      if timeout 1 ${pkgs.bash}/bin/bash -c "echo >/dev/tcp/$mon/6789" 2>/dev/null; then
+        ok=0
+        break
+      fi
+    done
+
+    if [ "$ok" -eq 0 ]; then
+      ${systemctl} start cephfs-reachable.service
+      ${systemctl} start mnt-bhamm.automount
+    else
+      # Requires= propagation stops mnt-bhamm.automount
+      ${systemctl} stop cephfs-reachable.service
+      # Dead cephfs can block a clean unmount; fall back to lazy detach
+      timeout 5 ${systemctl} stop mnt-bhamm.mount || \
+        ${pkgs.util-linux}/bin/umount -l ${mountPoint} || true
+    fi
+  '';
 in
 {
   options.cfg.cephfs.enable = lib.mkOption {
@@ -62,13 +88,62 @@ in
       }
     ];
 
-    # Automount: kernel intercepts access and triggers the mount unit
+    # State flag: active while ceph mons are reachable. Started/stopped
+    # exclusively by cephfs-check.service.
+    systemd.services.cephfs-reachable = {
+      description = "CephFS mons reachable (state flag for automount gate)";
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = "${pkgs.coreutils}/bin/true";
+      };
+    };
+
+    # Reachability checker: probe mons, open/close the automount gate
+    systemd.services.cephfs-check = {
+      description = "Check CephFS mon reachability and gate automount";
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = checkScript;
+      };
+    };
+
+    # Periodic re-check to catch network loss; NM dispatcher covers fast
+    # reactions on connect/disconnect
+    systemd.timers.cephfs-check = {
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnBootSec = "15s";
+        OnUnitActiveSec = "15s";
+      };
+    };
+
+    # Fire a check immediately on any network connect/disconnect
+    networking.networkmanager.dispatcherScripts = lib.mkIf (config.cfg.networking.backend == "networkmanager") [
+      {
+        type = "basic";
+        source = pkgs.writeShellScript "cephfs-dispatcher" ''
+          case "$2" in
+            up|down|connectivity-change)
+              ${systemctl} start --no-block cephfs-check.service
+              ;;
+          esac
+        '';
+      }
+    ];
+
+    # Automount: kernel intercepts access and triggers the mount unit.
+    # Gated on cephfs-reachable: when the gate closes, Requires= propagation
+    # stops the automount so no new mount jobs can be triggered.
+    # Lifecycle owned by cephfs-check (no wantedBy: booting offline would
+    # fail the Requires= and mark the unit failed).
     systemd.automounts = [
       {
         where = mountPoint;
-        wantedBy = [ "multi-user.target" ];
+        requires = [ "cephfs-reachable.service" ];
+        after = [ "cephfs-reachable.service" ];
         automountConfig = {
-          TimeoutIdleSec = "300";
+          TimeoutIdleSec = "60";
         };
       }
     ];
@@ -80,7 +155,7 @@ in
       wantedBy = [ "suspend.target" "hibernate.target" "hybrid-sleep.target" ];
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = "-${pkgs.systemd}/bin/systemctl stop mnt-bhamm.mount";
+        ExecStart = "-${systemctl} stop mnt-bhamm.mount";
       };
     };
 
@@ -91,7 +166,7 @@ in
       wantedBy = [ "suspend.target" "hibernate.target" "hybrid-sleep.target" ];
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = "-${pkgs.systemd}/bin/systemctl restart mnt-bhamm.automount";
+        ExecStart = "-${systemctl} restart mnt-bhamm.automount";
       };
     };
   };

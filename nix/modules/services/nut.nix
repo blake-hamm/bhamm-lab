@@ -98,5 +98,20 @@ in
       openFirewall = true;
       nutServer = cfg.exporter.nutServer;
     };
+
+    # After an unclean shutdown NUT leaves stale PID files in its state
+    # directory, so upsd/upsdrvctl refuse to start on the next boot with
+    # "A previous upsd instance is already running!" or "Duplicate driver
+    # instance detected!". Clean them before starting.
+    systemd.services.upsd.serviceConfig.ExecStartPre = lib.mkBefore [
+      "${pkgs.coreutils}/bin/rm -f /var/lib/nut/upsd.pid"
+    ];
+
+    systemd.services.upsdrv = {
+      serviceConfig.ExecStartPre = lib.mkBefore [
+        "${pkgs.coreutils}/bin/rm -f /var/lib/nut/${cfg.driver}-${cfg.upsName}.pid"
+      ];
+      serviceConfig.ExecStop = lib.mkDefault "${pkgs.nut}/bin/upsdrvctl -u root stop";
+    };
   };
 }

@@ -1,6 +1,7 @@
 { inputs
 , shared
 , pkgs
+, pkgs-unstable
 , config
 , lib
 , ...
@@ -19,7 +20,7 @@
         virt-manager
         obs-studio
         brave
-        signal-desktop
+        pkgs-unstable.signal-desktop
         vlc
         uv
         krita

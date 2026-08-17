@@ -172,7 +172,7 @@ in
         force = true;
         text = builtins.toJSON {
           defaultProvider = "kimi-coding";
-          defaultModel = "kimi-for-coding";
+          defaultModel = "k3-256k";
           theme = "catppuccin-mocha";
           defaultThinkingLevel = "medium";
           quietStartup = true;
