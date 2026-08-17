@@ -24,7 +24,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "2"
 spec:
   size: 1
-  image: hashicorp/vault:1.21.4
+  image: hashicorp/vault:2.0.4
   annotations:
     common/annotation: "true"
   vaultAnnotations:
@@ -50,6 +50,7 @@ spec:
     kubernetes:
       secretNamespace: vault
   config:
+    disable_mlock: true
     storage:
       file:
         path: /vault/file
