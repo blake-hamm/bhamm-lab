@@ -1,22 +1,114 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    ":gitSignOff",
-    ":semanticCommits",
-    ":semanticCommitTypeAll(chore)"
-  ],
-  "automerge": false,
-  "pinDigests": false,
+  "extends": ["config:recommended"],
+  "semanticCommitType": "chore",
+  "semanticCommits": "enabled",
+  "commitMessageLowerCase": "auto",
+
   "labels": ["dependencies"],
-  "kubernetes": {
-    "managerFilePatterns": [
-      "/^kubernetes/manifests/.+\\.yaml$/"
-    ]
+
+  "platformAutomerge": false,
+  "automerge": false,
+
+  "prHourlyLimit": 4,
+  "prConcurrentLimit": 10,
+
+  "schedule": ["every weekday before 6am"],
+
+  "packageRules": [
+    {
+      "description": "Group pre-commit hook updates together",
+      "matchManagers": ["pre-commit"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "enabled": true,
+      "groupName": "pre-commit hooks"
+    },
+    {
+      "description": "Group Nix flake inputs together — minors/patches in one PR",
+      "matchManagers": ["flake"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "nix flake inputs (minor/patch)",
+      "prPriority": -1,
+      "labels": ["dependencies", "nix"]
+    },
+    {
+      "description": "Nix flake major bumps get individual PRs for review",
+      "matchManagers": ["flake"],
+      "matchUpdateTypes": ["major"],
+      "prPriority": 1,
+      "labels": ["dependencies", "nix", "major"]
+    },
+    {
+      "description": "Group Helm chart updates by ecosystem",
+      "matchManagers": ["helm-values", "helmfile"],
+      "groupName": "helm chart versions",
+      "prPriority": -1,
+      "labels": ["dependencies", "helm"]
+    },
+    {
+      "description": "Group Docker base image minors/patches — one PR at a time",
+      "matchManagers": ["dockerfile"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "docker base images (minor/patch)",
+      "separateMajorMinor": true,
+      "prPriority": -1,
+      "labels": ["dependencies", "docker"]
+    },
+    {
+      "description": "Docker major bumps reviewed individually",
+      "matchManagers": ["dockerfile"],
+      "matchUpdateTypes": ["major"],
+      "prPriority": 1,
+      "labels": ["dependencies", "docker", "major"]
+    },
+    {
+      "description": "Group Kubernetes manifest image tag updates (minor/patch)",
+      "matchManagers": ["kubernetes-image"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "k8s container images (minor/patch)",
+      "separateMajorMinor": true,
+      "prPriority": -1,
+      "labels": ["dependencies", "k8s"]
+    },
+    {
+      "description": "Kubernetes image major bumps reviewed individually",
+      "matchManagers": ["kubernetes-image"],
+      "matchUpdateTypes": ["major"],
+      "prPriority": 1,
+      "labels": ["dependencies", "k8s", "major"]
+    },
+    {
+      "description": "Python Poetry deps grouped together",
+      "matchManagers": ["pip_requirements", "poetry"],
+      "groupName": "python dependencies",
+      "prPriority": -1,
+      "labels": ["dependencies", "python"]
+    },
+    {
+      "description": "GitHub Actions — group all action version updates",
+      "matchManagers": ["github-actions"],
+      "groupName": "github actions",
+      "enabled": true,
+      "labels": ["dependencies", "ci"]
+    },
+    {
+      "description": "Major bumps always get separate PRs (unless overridden above)",
+      "matchUpdateTypes": ["major"],
+      "prPriority": 1,
+      "labels": ["major"]
+    },
+    {
+      "description": "Disable noisy or unnecessary managers",
+      "enabled": false,
+      "matchManagers": ["npm"],
+      "matchPaths": ["docker/site/**"]
+    }
+  ],
+
+  "ignoreDeps": [],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security"]
   },
-  "argocd": {
-    "managerFilePatterns": [
-      "/^kubernetes/manifests/.+\\.yaml$/"
-    ]
-  }
+  "osvVulnerabilityAlerts": true
 }
