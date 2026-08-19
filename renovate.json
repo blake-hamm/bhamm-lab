@@ -50,7 +50,6 @@
       "matchManagers": ["dockerfile"],
       "matchUpdateTypes": ["minor", "patch"],
       "groupName": "docker base images (minor/patch)",
-      "separateMajorMinor": true,
       "prPriority": -1,
       "labels": ["dependencies", "docker"]
     },
@@ -66,7 +65,6 @@
       "matchManagers": ["kubernetes-image"],
       "matchUpdateTypes": ["minor", "patch"],
       "groupName": "k8s container images (minor/patch)",
-      "separateMajorMinor": true,
       "prPriority": -1,
       "labels": ["dependencies", "k8s"]
     },
