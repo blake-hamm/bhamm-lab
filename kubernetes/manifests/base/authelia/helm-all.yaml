@@ -20,13 +20,13 @@ spec:
         pod:
           annotations:
             reloader.stakater.com/secret: authelia-oidc-key
-          kind: 'DaemonSet'
+          kind: "DaemonSet"
           extraVolumeMounts:
-            - mountPath: '/app/custom-secrets'
-              name: 'custom-secrets'
+            - mountPath: "/app/custom-secrets"
+              name: "custom-secrets"
               readOnly: true
           extraVolumes:
-            - name: 'custom-secrets'
+            - name: "custom-secrets"
               projected:
                 sources:
                   - secret:
@@ -60,9 +60,9 @@ spec:
         configMap:
           server:
             timeouts:
-              read: '15 seconds'
-              write: '15 seconds'
-              idle: '30 seconds'
+              read: "15 seconds"
+              write: "15 seconds"
+              idle: "30 seconds"
             buffers:
               read: 8192
               write: 8192
@@ -75,19 +75,19 @@ spec:
                 labels:
                   release: monitor
           default_2fa_method: totp
-          theme: 'dark'
+          theme: "dark"
           authentication_backend:
             password_reset:
               disable: true
             password_change:
               disable: true
-            refresh_interval: '5m'
+            refresh_interval: "5m"
             ldap:
               enabled: true
-              implementation: 'lldap'
-              address: 'ldap://lldap-service.lldap.svc.cluster.local:3890'
-              timeout: '5s'
-              base_dn: 'DC=bhamm-lab,DC=com'
+              implementation: "lldap"
+              address: "ldap://lldap-service.lldap.svc.cluster.local:3890"
+              timeout: "5s"
+              base_dn: "DC=bhamm-lab,DC=com"
               additional_users_dn: ou=people
               users_filter: "(&({username_attribute}={input})(objectClass=person))"
               additional_groups_dn: ou=groups
@@ -97,7 +97,7 @@ spec:
                 username: uid
                 group_name: cn
                 mail: mail
-              user: 'uid=authelia,ou=people,DC=bhamm-lab,DC=com'
+              user: "uid=authelia,ou=people,DC=bhamm-lab,DC=com"
               password:
                 disabled: true
           storage:
@@ -106,11 +106,11 @@ spec:
             postgres:
               enabled: true
               deploy: false
-              address: 'tcp://authelia-postgresql-rw:5432'
-              timeout: '15 seconds'
-              database: 'authelia'
-              schema: 'public'
-              username: 'authelia'
+              address: "tcp://authelia-postgresql-rw:5432"
+              timeout: "15 seconds"
+              database: "authelia"
+              schema: "public"
+              username: "authelia"
               password:
                 disabled: true
               tls:
@@ -121,302 +121,321 @@ spec:
           access_control:
             default_policy: deny
             rules:
-              - domain: 'mlflow.bhamm-lab.com'
+              - domain: "mlflow.bhamm-lab.com"
                 policy: one_factor
               - domain:
-                  - '*.bhamm-lab.com'
+                  - "*.bhamm-lab.com"
                   - bhamm-lab.com
                 policy: two_factor
           session:
-            same_site: 'lax'
-            expiration: '8 hours'
-            inactivity: '30 minutes'
+            same_site: "lax"
+            expiration: "8 hours"
+            inactivity: "30 minutes"
             cookies:
-              - subdomain: 'auth'
-                domain: 'bhamm-lab.com'
+              - subdomain: "auth"
+                domain: "bhamm-lab.com"
             redis:
               enabled: true
               deploy: false
-              host: 'authelia-dragonfly'
+              host: "authelia-dragonfly"
           identity_providers:
             oidc:
               claims_policies:
                 grafana:
-                  id_token: ['email', 'name', 'groups', 'preferred_username']
+                  id_token: ["email", "name", "groups", "preferred_username"]
               enabled: true
               authorization_policies:
                 policy_name:
-                  default_policy: 'two_factor'
+                  default_policy: "two_factor"
                   rules:
-                    - policy: 'deny'
-                      subject: 'group:services'
+                    - policy: "deny"
+                      subject: "group:services"
               jwks:
-                - key_id: 'main'
-                  algorithm: 'RS256'
-                  use: 'sig'
+                - key_id: "main"
+                  algorithm: "RS256"
+                  use: "sig"
                   key:
-                    path: '/app/custom-secrets/oidc.jwk.RS256.pem'
+                    path: "/app/custom-secrets/oidc.jwk.RS256.pem"
                   certificate_chain:
-                    path: '/app/custom-secrets/oidc.jwk.RS256.crt'
+                    path: "/app/custom-secrets/oidc.jwk.RS256.crt"
               clients:
-                - client_id: 'vault'
-                  client_name: 'HashiCorp Vault'
-                  client_secret: '$pbkdf2-sha512$310000$RgShGcxpgOLtKwXIG/4h.g$N/qdg62jY71IwlloAA7B5.Fr4n3LJdg1mQbZ/pVWPoqVg7ntBRzhices5nMG9a5U437ExstmEQZ9LTMFLrEOWg'
+                - client_id: "vault"
+                  client_name: "HashiCorp Vault"
+                  client_secret: "$pbkdf2-sha512$310000$RgShGcxpgOLtKwXIG/4h.g$N/qdg62jY71IwlloAA7B5.Fr4n3LJdg1mQbZ/pVWPoqVg7ntBRzhices5nMG9a5U437ExstmEQZ9LTMFLrEOWg"
                   public: false
-                  authorization_policy: 'two_factor'
+                  authorization_policy: "two_factor"
                   redirect_uris:
-                    - 'https://vault.bhamm-lab.com/oidc/callback'
-                    - 'https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback'
-                    - 'http://localhost:8250/oidc/callback'
+                    - "https://vault.bhamm-lab.com/oidc/callback"
+                    - "https://vault.bhamm-lab.com/ui/vault/auth/oidc/oidc/callback"
+                    - "http://localhost:8250/oidc/callback"
                   scopes:
-                    - 'openid'
-                    - 'profile'
-                    - 'groups'
-                    - 'email'
-                  userinfo_signed_response_alg: 'none'
-                - client_id: 'argocd'
-                  client_name: 'Argo CD'
-                  client_secret: '$pbkdf2-sha512$310000$eEvN3ybW9uMRV0zFp90ZoA$8Oh45Cdu1GkRSmyJjKCfUC3MFyQjp91hZpKRArLN82JNZ3.iiIx.W/EAZJMiarDPWeyNwA15klst/ZMqeu4hCA'
+                    - "openid"
+                    - "profile"
+                    - "groups"
+                    - "email"
+                  userinfo_signed_response_alg: "none"
+                - client_id: "argocd"
+                  client_name: "Argo CD"
+                  client_secret: "$pbkdf2-sha512$310000$eEvN3ybW9uMRV0zFp90ZoA$8Oh45Cdu1GkRSmyJjKCfUC3MFyQjp91hZpKRArLN82JNZ3.iiIx.W/EAZJMiarDPWeyNwA15klst/ZMqeu4hCA"
                   public: false
-                  authorization_policy: 'two_factor'
+                  authorization_policy: "two_factor"
                   redirect_uris:
-                    - 'https://argocd.bhamm-lab.com/auth/callback'
+                    - "https://argocd.bhamm-lab.com/auth/callback"
                   scopes:
-                    - 'openid'
-                    - 'groups'
-                    - 'email'
-                    - 'profile'
-                  userinfo_signed_response_alg: 'none'
+                    - "openid"
+                    - "groups"
+                    - "email"
+                    - "profile"
+                  userinfo_signed_response_alg: "none"
                   # token_endpoint_auth_method: 'client_secret_post'
-                - client_id: 'argocd-cli'
-                  client_name: 'Argo CD (CLI)'
+                - client_id: "argocd-cli"
+                  client_name: "Argo CD (CLI)"
                   public: true
-                  authorization_policy: 'two_factor'
+                  authorization_policy: "two_factor"
                   redirect_uris:
-                    - 'http://localhost:8085/auth/callback'
+                    - "http://localhost:8085/auth/callback"
                   scopes:
-                    - 'openid'
-                    - 'groups'
-                    - 'email'
-                    - 'profile'
-                    - 'offline_access'
-                  userinfo_signed_response_alg: 'none'
-                - client_id: 'gitea'
-                  client_name: 'Gitea'
-                  client_secret: '$pbkdf2-sha512$310000$//HDbf48Cu7gi3BJNKrocQ$HnTNOcW6FCgpVtv.fxFsIShby1uHHTYOgQcVDUS5a3eYEfsJT9JdaIUq5.PYRvNS/D29I0WkkEcrZ1omcChDPg'
+                    - "openid"
+                    - "groups"
+                    - "email"
+                    - "profile"
+                    - "offline_access"
+                  userinfo_signed_response_alg: "none"
+                - client_id: "gitea"
+                  client_name: "Gitea"
+                  client_secret: "$pbkdf2-sha512$310000$//HDbf48Cu7gi3BJNKrocQ$HnTNOcW6FCgpVtv.fxFsIShby1uHHTYOgQcVDUS5a3eYEfsJT9JdaIUq5.PYRvNS/D29I0WkkEcrZ1omcChDPg"
                   public: false
-                  authorization_policy: 'two_factor'
+                  authorization_policy: "two_factor"
                   redirect_uris:
-                    - 'https://git.bhamm-lab.com/user/oauth2/authelia/callback'
+                    - "https://git.bhamm-lab.com/user/oauth2/authelia/callback"
                   scopes:
-                    - 'openid'
-                    - 'email'
-                    - 'profile'
-                    - 'groups'
-                  userinfo_signed_response_alg: 'none'
-                  token_endpoint_auth_method: 'client_secret_basic'
-                - client_id: 'minio'
-                  client_name: 'MinIO'
-                  client_secret: '$pbkdf2-sha512$310000$U0PxZ6W3C4G8lPbYu5MEgg$ef2lbfABxs.OXuleAxY.yl0gPYp/9uz0UhB0JXZJT4GYBVx6l5bybIdA0mii7Bbqul9jM7PkDY6SXzthSY2Zew'
+                    - "openid"
+                    - "email"
+                    - "profile"
+                    - "groups"
+                  userinfo_signed_response_alg: "none"
+                  token_endpoint_auth_method: "client_secret_basic"
+                - client_id: "minio"
+                  client_name: "MinIO"
+                  client_secret: "$pbkdf2-sha512$310000$U0PxZ6W3C4G8lPbYu5MEgg$ef2lbfABxs.OXuleAxY.yl0gPYp/9uz0UhB0JXZJT4GYBVx6l5bybIdA0mii7Bbqul9jM7PkDY6SXzthSY2Zew"
                   public: false
-                  authorization_policy: 'two_factor'
+                  authorization_policy: "two_factor"
                   redirect_uris:
-                    - 'https://minio.bhamm-lab.com/oauth_callback'
+                    - "https://minio.bhamm-lab.com/oauth_callback"
                   scopes:
-                    - 'openid'
-                    - 'profile'
-                    - 'email'
-                    - 'groups'
-                  userinfo_signed_response_alg: 'none'
-                - client_id: 'minio-ceph'
-                  client_name: 'MinIO Ceph'
-                  client_secret: '$pbkdf2-sha512$310000$U0PxZ6W3C4G8lPbYu5MEgg$ef2lbfABxs.OXuleAxY.yl0gPYp/9uz0UhB0JXZJT4GYBVx6l5bybIdA0mii7Bbqul9jM7PkDY6SXzthSY2Zew'
+                    - "openid"
+                    - "profile"
+                    - "email"
+                    - "groups"
+                  userinfo_signed_response_alg: "none"
+                - client_id: "minio-ceph"
+                  client_name: "MinIO Ceph"
+                  client_secret: "$pbkdf2-sha512$310000$U0PxZ6W3C4G8lPbYu5MEgg$ef2lbfABxs.OXuleAxY.yl0gPYp/9uz0UhB0JXZJT4GYBVx6l5bybIdA0mii7Bbqul9jM7PkDY6SXzthSY2Zew"
                   public: false
-                  authorization_policy: 'two_factor'
+                  authorization_policy: "two_factor"
                   redirect_uris:
-                    - 'https://minio-ceph.bhamm-lab.com/oauth_callback'
+                    - "https://minio-ceph.bhamm-lab.com/oauth_callback"
                   scopes:
-                    - 'openid'
-                    - 'profile'
-                    - 'email'
-                    - 'groups'
-                  userinfo_signed_response_alg: 'none'
-                - client_id: 'minio-nfs'
-                  client_name: 'MinIO NFS'
-                  client_secret: '$pbkdf2-sha512$310000$U0PxZ6W3C4G8lPbYu5MEgg$ef2lbfABxs.OXuleAxY.yl0gPYp/9uz0UhB0JXZJT4GYBVx6l5bybIdA0mii7Bbqul9jM7PkDY6SXzthSY2Zew'
+                    - "openid"
+                    - "profile"
+                    - "email"
+                    - "groups"
+                  userinfo_signed_response_alg: "none"
+                - client_id: "minio-nfs"
+                  client_name: "MinIO NFS"
+                  client_secret: "$pbkdf2-sha512$310000$U0PxZ6W3C4G8lPbYu5MEgg$ef2lbfABxs.OXuleAxY.yl0gPYp/9uz0UhB0JXZJT4GYBVx6l5bybIdA0mii7Bbqul9jM7PkDY6SXzthSY2Zew"
                   public: false
-                  authorization_policy: 'two_factor'
+                  authorization_policy: "two_factor"
                   redirect_uris:
-                    - 'https://minio-nfs.bhamm-lab.com/oauth_callback'
+                    - "https://minio-nfs.bhamm-lab.com/oauth_callback"
                   scopes:
-                    - 'openid'
-                    - 'profile'
-                    - 'email'
-                    - 'groups'
-                  userinfo_signed_response_alg: 'none'
-                - client_id: 'grafana'
-                  client_name: 'Grafana'
-                  client_secret: '$pbkdf2-sha512$310000$phufqjYSKW/CYZ8z4UuAhQ$D0W2VpoS8/wvBS4DWYcNxIW/Fta0EIZ3egveujt18tT7osBRZWeLvLFeQcRZ9M4mY2axry2XTpbpUHVIHICxdQ'
+                    - "openid"
+                    - "profile"
+                    - "email"
+                    - "groups"
+                  userinfo_signed_response_alg: "none"
+                - client_id: "grafana"
+                  client_name: "Grafana"
+                  client_secret: "$pbkdf2-sha512$310000$phufqjYSKW/CYZ8z4UuAhQ$D0W2VpoS8/wvBS4DWYcNxIW/Fta0EIZ3egveujt18tT7osBRZWeLvLFeQcRZ9M4mY2axry2XTpbpUHVIHICxdQ"
                   public: false
-                  authorization_policy: 'two_factor'
+                  authorization_policy: "two_factor"
                   require_pkce: true
-                  pkce_challenge_method: 'S256'
+                  pkce_challenge_method: "S256"
                   redirect_uris:
-                    - 'https://grafana.bhamm-lab.com/login/generic_oauth'
+                    - "https://grafana.bhamm-lab.com/login/generic_oauth"
                   scopes:
-                    - 'openid'
-                    - 'profile'
-                    - 'groups'
-                    - 'email'
+                    - "openid"
+                    - "profile"
+                    - "groups"
+                    - "email"
                   response_types:
-                    - 'code'
+                    - "code"
                   grant_types:
-                    - 'authorization_code'
-                  access_token_signed_response_alg: 'none'
-                  userinfo_signed_response_alg: 'none'
-                  token_endpoint_auth_method: 'client_secret_basic'
-                - client_id: 'harbor'
-                  client_name: 'Harbor'
-                  client_secret: '$pbkdf2-sha512$310000$GpH5jKZfiYXmgjMLe1gNnQ$tBffSkveAxfbPSdDq9SIssItEXKj5WDvgBFCuyLfXPCTtMtRhwIfTPPGDjBP48px0ZEpkJG4DdACWOMXhU3GHQ'
+                    - "authorization_code"
+                  access_token_signed_response_alg: "none"
+                  userinfo_signed_response_alg: "none"
+                  token_endpoint_auth_method: "client_secret_basic"
+                - client_id: "harbor"
+                  client_name: "Harbor"
+                  client_secret: "$pbkdf2-sha512$310000$GpH5jKZfiYXmgjMLe1gNnQ$tBffSkveAxfbPSdDq9SIssItEXKj5WDvgBFCuyLfXPCTtMtRhwIfTPPGDjBP48px0ZEpkJG4DdACWOMXhU3GHQ"
                   public: false
-                  authorization_policy: 'two_factor'
+                  authorization_policy: "two_factor"
                   require_pkce: false
-                  pkce_challenge_method: ''
+                  pkce_challenge_method: ""
                   redirect_uris:
-                    - 'https://harbor.bhamm-lab.com/c/oidc/callback'
+                    - "https://harbor.bhamm-lab.com/c/oidc/callback"
                   scopes:
-                    - 'openid'
-                    - 'offline_access'
-                    - 'profile'
-                    - 'groups'
-                    - 'email'
+                    - "openid"
+                    - "offline_access"
+                    - "profile"
+                    - "groups"
+                    - "email"
                   response_types:
-                    - 'code'
+                    - "code"
                   grant_types:
-                    - 'authorization_code'
-                    - 'refresh_token'
-                  access_token_signed_response_alg: 'none'
-                  userinfo_signed_response_alg: 'none'
-                  token_endpoint_auth_method: 'client_secret_basic'
-                - client_id: 'argo'
-                  client_name: 'Argo'
-                  client_secret: '$pbkdf2-sha512$310000$MxhhAocEQWNmHNKyLIE7Sg$CCf6xcnDFpaBVskhImasp51322SthPsytptHpuXA/oUae7xpsXj7xUwU8A85qi7H7TR7SdmmVBquK9V5YXWXqg'
+                    - "authorization_code"
+                    - "refresh_token"
+                  access_token_signed_response_alg: "none"
+                  userinfo_signed_response_alg: "none"
+                  token_endpoint_auth_method: "client_secret_basic"
+                - client_id: "argo"
+                  client_name: "Argo"
+                  client_secret: "$pbkdf2-sha512$310000$MxhhAocEQWNmHNKyLIE7Sg$CCf6xcnDFpaBVskhImasp51322SthPsytptHpuXA/oUae7xpsXj7xUwU8A85qi7H7TR7SdmmVBquK9V5YXWXqg"
                   public: false
-                  authorization_policy: 'two_factor'
+                  authorization_policy: "two_factor"
                   redirect_uris:
-                    - 'https://argo.bhamm-lab.com/oauth2/callback'
+                    - "https://argo.bhamm-lab.com/oauth2/callback"
                   scopes:
-                    - 'openid'
-                    - 'groups'
-                    - 'email'
-                    - 'profile'
-                  userinfo_signed_response_alg: 'none'
-                  token_endpoint_auth_method: 'client_secret_post'
-                - client_id: 'immich'
-                  client_name: 'immich'
-                  client_secret: '$pbkdf2-sha512$310000$wDz7kkyl23Vaq/lR6UUucQ$5IB9s7WHexynP8RKhwp7pkbH3xasLBs6JlTurQ2Oh44f3VOR/V0WbofyVZzAtiDs2ZzOHYn1/r1orKpcNDeJvg'
-                  authorization_policy: 'two_factor'
+                    - "openid"
+                    - "groups"
+                    - "email"
+                    - "profile"
+                  userinfo_signed_response_alg: "none"
+                  token_endpoint_auth_method: "client_secret_post"
+                - client_id: "immich"
+                  client_name: "immich"
+                  client_secret: "$pbkdf2-sha512$310000$wDz7kkyl23Vaq/lR6UUucQ$5IB9s7WHexynP8RKhwp7pkbH3xasLBs6JlTurQ2Oh44f3VOR/V0WbofyVZzAtiDs2ZzOHYn1/r1orKpcNDeJvg"
+                  authorization_policy: "two_factor"
                   require_pkce: false
-                  pkce_challenge_method: ''
+                  pkce_challenge_method: ""
                   redirect_uris:
-                    - 'https://immich.bhamm-lab.com/auth/login'
-                    - 'https://immich.bhamm-lab.com/user-settings'
-                    - 'app.immich:///oauth-callback'
+                    - "https://immich.bhamm-lab.com/auth/login"
+                    - "https://immich.bhamm-lab.com/user-settings"
+                    - "app.immich:///oauth-callback"
                   scopes:
-                    - 'openid'
-                    - 'profile'
-                    - 'email'
-                    - 'groups'
+                    - "openid"
+                    - "profile"
+                    - "email"
+                    - "groups"
                   response_types:
-                    - 'code'
+                    - "code"
                   grant_types:
-                    - 'authorization_code'
-                  access_token_signed_response_alg: 'none'
-                  userinfo_signed_response_alg: 'none'
-                  token_endpoint_auth_method: 'client_secret_post'
-                - client_id: 'open-webui'
-                  client_name: 'Open WebUI'
-                  client_secret: '$pbkdf2-sha512$310000$JIyI.uQZOrGhu3Ym2ZVVHQ$crcz2WSCELmOD0B.zA1bR3zRTPoUH35kqIy4/VqO1J444Zxa9kFoAhDEC69rr8avHoPag4W3unL.nysJJQ5KbA'
+                    - "authorization_code"
+                  access_token_signed_response_alg: "none"
+                  userinfo_signed_response_alg: "none"
+                  token_endpoint_auth_method: "client_secret_post"
+                - client_id: "open-webui"
+                  client_name: "Open WebUI"
+                  client_secret: "$pbkdf2-sha512$310000$JIyI.uQZOrGhu3Ym2ZVVHQ$crcz2WSCELmOD0B.zA1bR3zRTPoUH35kqIy4/VqO1J444Zxa9kFoAhDEC69rr8avHoPag4W3unL.nysJJQ5KbA"
                   public: false
-                  authorization_policy: 'two_factor'
+                  authorization_policy: "two_factor"
                   require_pkce: false
-                  pkce_challenge_method: ''
+                  pkce_challenge_method: ""
                   redirect_uris:
-                    - 'https://chat.bhamm-lab.com/oauth/oidc/callback'
+                    - "https://chat.bhamm-lab.com/oauth/oidc/callback"
                   scopes:
-                    - 'openid'
-                    - 'profile'
-                    - 'groups'
-                    - 'email'
+                    - "openid"
+                    - "profile"
+                    - "groups"
+                    - "email"
                   response_types:
-                    - 'code'
+                    - "code"
                   grant_types:
-                    - 'authorization_code'
-                  access_token_signed_response_alg: 'none'
-                  userinfo_signed_response_alg: 'none'
-                  token_endpoint_auth_method: 'client_secret_basic'
-                - client_id: 'jellyfin'
-                  client_name: 'Jellyfin'
-                  client_secret: '$pbkdf2-sha512$310000$vz8he5n9BDxOqCwm3CvxSA$Rfw1CDB.0C9HJaIqKuCaH4bGeaCPJH63AMyrt4SZWlzilKU120U0qzOgEJOIo4uAQZxIyMvZTa7mTmTl2lqShA'
+                    - "authorization_code"
+                  access_token_signed_response_alg: "none"
+                  userinfo_signed_response_alg: "none"
+                  token_endpoint_auth_method: "client_secret_basic"
+                - client_id: "jellyfin"
+                  client_name: "Jellyfin"
+                  client_secret: "$pbkdf2-sha512$310000$vz8he5n9BDxOqCwm3CvxSA$Rfw1CDB.0C9HJaIqKuCaH4bGeaCPJH63AMyrt4SZWlzilKU120U0qzOgEJOIo4uAQZxIyMvZTa7mTmTl2lqShA"
                   public: false
-                  authorization_policy: 'two_factor'
+                  authorization_policy: "two_factor"
                   require_pkce: true
-                  pkce_challenge_method: 'S256'
+                  pkce_challenge_method: "S256"
                   redirect_uris:
-                    - 'https://jellyfin.bhamm-lab.com/sso/OID/redirect/authelia'
+                    - "https://jellyfin.bhamm-lab.com/sso/OID/redirect/authelia"
                   scopes:
-                    - 'openid'
-                    - 'profile'
-                    - 'groups'
+                    - "openid"
+                    - "profile"
+                    - "groups"
                   response_types:
-                    - 'code'
+                    - "code"
                   grant_types:
-                    - 'authorization_code'
-                  access_token_signed_response_alg: 'none'
-                  userinfo_signed_response_alg: 'none'
-                  token_endpoint_auth_method: 'client_secret_post'
-                - client_id: 'jellyseerr'
-                  client_name: 'Jellyseerr'
-                  client_secret: '$pbkdf2-sha512$310000$lbwDajs96abzp8PzI8Nqnw$tIz0H9QUUReiyPzF9XpS.PaW1gaHO21q9jrYE7tJHmt5vKeTfNZX5FIwaPnito39qsCHKQvsD3udsfyS5rlUQQ'
+                    - "authorization_code"
+                  access_token_signed_response_alg: "none"
+                  userinfo_signed_response_alg: "none"
+                  token_endpoint_auth_method: "client_secret_post"
+                - client_id: "jellyseerr"
+                  client_name: "Jellyseerr"
+                  client_secret: "$pbkdf2-sha512$310000$lbwDajs96abzp8PzI8Nqnw$tIz0H9QUUReiyPzF9XpS.PaW1gaHO21q9jrYE7tJHmt5vKeTfNZX5FIwaPnito39qsCHKQvsD3udsfyS5rlUQQ"
                   public: false
-                  authorization_policy: 'two_factor'
+                  authorization_policy: "two_factor"
                   require_pkce: false
-                  pkce_challenge_method: ''
+                  pkce_challenge_method: ""
                   redirect_uris:
-                    - 'https://jellyseerr.bhamm-lab.com/login?provider=authelia&callback=true'
+                    - "https://jellyseerr.bhamm-lab.com/login?provider=authelia&callback=true"
                   scopes:
-                    - 'openid'
-                    - 'email'
-                    - 'profile'
-                    - 'groups'
+                    - "openid"
+                    - "email"
+                    - "profile"
+                    - "groups"
                   response_types:
-                    - 'code'
+                    - "code"
                   grant_types:
-                    - 'authorization_code'
-                  access_token_signed_response_alg: 'none'
-                  userinfo_signed_response_alg: 'none'
-                  token_endpoint_auth_method: 'client_secret_post'
-                - client_id: 'actual-budget'
-                  client_name: 'Actual Budget'
-                  client_secret: '$pbkdf2-sha512$310000$dweMpReHSbLscAgKrpR09Q$tuLqwWGg6npgILoip1XDN4UCQfXki03QZgkLinhAUK7/vSMR9UiCvaegTu8VUe1mxA5V1Mr80Dkc.7K89S6SEA'
+                    - "authorization_code"
+                  access_token_signed_response_alg: "none"
+                  userinfo_signed_response_alg: "none"
+                  token_endpoint_auth_method: "client_secret_post"
+                - client_id: "actual-budget"
+                  client_name: "Actual Budget"
+                  client_secret: "$pbkdf2-sha512$310000$dweMpReHSbLscAgKrpR09Q$tuLqwWGg6npgILoip1XDN4UCQfXki03QZgkLinhAUK7/vSMR9UiCvaegTu8VUe1mxA5V1Mr80Dkc.7K89S6SEA"
                   public: false
-                  authorization_policy: 'two_factor'
+                  authorization_policy: "two_factor"
                   require_pkce: false
-                  pkce_challenge_method: ''
+                  pkce_challenge_method: ""
                   redirect_uris:
-                    - 'https://actual-budget.bhamm-lab.com/openid/callback'
+                    - "https://actual-budget.bhamm-lab.com/openid/callback"
                   scopes:
-                    - 'openid'
-                    - 'profile'
-                    - 'groups'
-                    - 'email'
+                    - "openid"
+                    - "profile"
+                    - "groups"
+                    - "email"
                   response_types:
-                    - 'code'
+                    - "code"
                   grant_types:
-                    - 'authorization_code'
-                  access_token_signed_response_alg: 'none'
-                  userinfo_signed_response_alg: 'none'
-                  token_endpoint_auth_method: 'client_secret_basic'
+                    - "authorization_code"
+                  access_token_signed_response_alg: "none"
+                  userinfo_signed_response_alg: "none"
+                  token_endpoint_auth_method: "client_secret_basic"
+                - client_id: "hermes"
+                  client_name: "Hermes Agent"
+                  public: true
+                  authorization_policy: "two_factor"
+                  require_pkce: true
+                  pkce_challenge_method: "S256"
+                  redirect_uris:
+                    - "https://hermes.bhamm-lab.com/auth/callback"
+                  scopes:
+                    - "openid"
+                    - "profile"
+                    - "email"
+                  response_types:
+                    - "code"
+                  grant_types:
+                    - "authorization_code"
+                  access_token_signed_response_alg: "none"
+                  userinfo_signed_response_alg: "none"
+                  token_endpoint_auth_method: "none"
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

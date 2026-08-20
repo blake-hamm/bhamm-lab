@@ -194,7 +194,7 @@ spec:
             pvc:
               storage: "80Gi"
             image:
-              tag: rocm-7.2.2
+              tag: rocm-7.14_20260818T163752
             args:
               - llama-server
               - -hf
@@ -284,7 +284,7 @@ spec:
             pvc:
               storage: "40Gi"
             image:
-              tag: rocm-7.2.3_20260523T170726
+              tag: rocm-7.14_20260818T163752
             args:
               - llama-server
               - -hf
@@ -307,10 +307,14 @@ spec:
               - --spec-draft-n-max
               - "2"
               - -dio
+              - -ctk
+              - q8_0
+              - -ctv
+              - q8_0
               - -c
-              - "2097152"
+              - "1048576"
               - --parallel
-              - "8"
+              - "4"
               - --cont-batching
               - --reasoning-budget
               - "2048"
@@ -331,12 +335,12 @@ spec:
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "120Gi"
+                memory: "100Gi"
                 cpu: "8"
               requests:
                 amd.com/gpu: 1
                 cpu: "4"
-                memory: "110Gi"
+                memory: "80Gi"
           - name: qwen-instruct
             description: High quality MoE model for general chat
             enabled: false
@@ -1130,7 +1134,7 @@ spec:
             pvc:
               storage: "50Gi"
             image:
-              tag: rocm-7.2.2 #vulkan-radv_20260211T025037
+              tag: rocm-7.14_20260818T163752
             args:
               - llama-server
               - -hf
@@ -1399,7 +1403,7 @@ spec:
             litellm:
               enabled: false
             image:
-              tag: rocm-7.2.3_20260523T170726
+              tag: rocm-7.14_20260818T163752
             args:
               - rpc-server
               - -H
@@ -1430,7 +1434,7 @@ spec:
             pvc:
               storage: "200Gi"
             image:
-              tag: rocm-7.2.3_20260523T170726
+              tag: rocm-7.14_20260818T163752
             args:
               - /bin/bash
               - -c
@@ -1551,10 +1555,14 @@ spec:
               - "2"
               - --chat-template-kwargs
               - '{"enable_thinking":true}'
+              - -ctk
+              - q8_0
+              - -ctv
+              - q8_0
               - -c
-              - "2097152"
+              - "1048576"
               - --parallel
-              - "8"
+              - "4"
               - --cont-batching
               - --temp
               - "1.0"
@@ -1577,11 +1585,11 @@ spec:
                 memory: "110Gi"
           - name: qwen-36-27b
             description: High quality dense MTP model for general chat
-            enabled: true
+            enabled: false
             pvc:
               storage: "35Gi"
             image:
-              tag: rocm-7.2.3_20260523T170726
+              tag: rocm-7.14_20260818T163752
             args:
               - llama-server
               - -hf
@@ -1605,7 +1613,7 @@ spec:
               - "2"
               - -dio
               - -c
-              - "1048576"
+              - "524288"
               - --parallel
               - "4"
               - --cont-batching
@@ -1630,12 +1638,73 @@ spec:
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "120Gi"
+                memory: "100Gi"
                 cpu: "8"
               requests:
                 amd.com/gpu: 1
                 cpu: "4"
-                memory: "110Gi"
+                memory: "80Gi"
+          - name: qwen-38-27b
+            description: High quality dense MTP VLM model for general chat (Qwen 3.8)
+            enabled: true
+            pvc:
+              storage: "35Gi"
+            image:
+              tag: rocm-7.14_20260818T163752
+            args:
+              - llama-server
+              - -hf
+              - unsloth/Qwen3.8-27B-GGUF:UD-Q8_K_XL
+              - --host
+              - 0.0.0.0
+              - --metrics
+              - --no-webui
+              - --jinja
+              - --timeout
+              - "1800"
+              - -v
+              - --no-warmup
+              - -ngl
+              - "999"
+              - -fa
+              - "on"
+              - --spec-type
+              - draft-mtp
+              - --spec-draft-n-max
+              - "2"
+              - -dio
+              - -ctk
+              - q8_0
+              - -ctv
+              - q8_0
+              - -c
+              - "1048576"
+              - --parallel
+              - "4"
+              - --cont-batching
+              - --chat-template-kwargs
+              - '{"preserve_thinking":true,"reasoning_effort":"medium"}'
+              - --temp
+              - "1.0"
+              - --min-p
+              - "0.00"
+              - --top-p
+              - "0.95"
+              - --top-k
+              - "20"
+              - --presence-penalty
+              - "0.0"
+              - --repeat-penalty
+              - "1.0"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "100Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "80Gi"
   ignoreDifferences:
     - group: apps
       kind: Deployment

@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: hermes
+  name: hermes
+  namespace: hermes
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  # Never two gateway containers on the same /opt/data dir
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: hermes
+  template:
+    metadata:
+      labels:
+        app: hermes
+    spec:
+      volumes:
+        - name: hermes-data
+          persistentVolumeClaim:
+            claimName: hermes-data
+        # Temporary overlay: PR #76695 patch for issue #76657 (llama.cpp 400
+        # "Cannot determine type of 'item'"). Remove with configmap-patch-green.yaml
+        # once a fixed release ships.
+        - name: llamacpp-patch
+          configMap:
+            name: hermes-llamacpp-patch
+      containers:
+        - name: hermes
+          # NOTE: image starts as root (s6-overlay PID 1); stage2-hook chowns
+          # /opt/data then drops services to hermes (UID 10000) via s6-setuidgid.
+          # Do NOT set runAsNonRoot / drop ALL caps — stage2 needs them.
+          image: nousresearch/hermes-agent:v2026.8.16.2@sha256:a39fc11620213e3669a327aff5c6cb1eb2b8a238c6044e33e7ef8885833d89a7
+          imagePullPolicy: IfNotPresent
+          args:
+            - gateway
+            - run
+          env:
+            - name: OPENAI_BASE_URL
+              value: "http://litellm.litellm.svc.cluster.local:4000/v1"
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-external-secret
+                  key: OPENAI_API_KEY
+            - name: API_SERVER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-external-secret
+                  key: API_SERVER_KEY
+            - name: HERMES_DASHBOARD
+              value: "1"
+            - name: HERMES_DASHBOARD_HOST
+              value: "0.0.0.0"
+            - name: HERMES_DASHBOARD_OIDC_ISSUER
+              value: "https://auth.bhamm-lab.com"
+            - name: HERMES_DASHBOARD_OIDC_CLIENT_ID
+              value: "hermes"
+            - name: HERMES_DASHBOARD_PUBLIC_URL
+              value: "https://hermes.bhamm-lab.com"
+          ports:
+            - containerPort: 9119
+              name: dashboard
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: 9119
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 9119
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "250m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
+          volumeMounts:
+            - mountPath: /opt/data
+              name: hermes-data
+            - mountPath: /opt/hermes/agent/codex_responses_adapter.py
+              name: llamacpp-patch
+              subPath: codex_responses_adapter.py
+              readOnly: true
+      securityContext:
+        # Hermes container (root) chowns /opt/data in stage2.
+        fsGroup: 1000
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always

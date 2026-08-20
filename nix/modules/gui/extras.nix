@@ -21,6 +21,7 @@
         obs-studio
         brave
         pkgs-unstable.signal-desktop
+        telegram-desktop
         vlc
         uv
         krita

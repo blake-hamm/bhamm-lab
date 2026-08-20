@@ -1,0 +1,90 @@
+# Netpol for the hermes namespace. Cilium runs default enforcement mode
+# (policies only apply where selected), so this scopes to hermes.
+#
+# NOTE: Cilium's DNS proxy does NOT populate FQDN state on this cluster
+# (Envoy-external transparent proxy: 0 redirects, empty FQDN cache), so
+# `toFQDNs` rules grant nothing in practice. Prefer explicit in-cluster
+# selectors / service rules (here) or CIDRs. Telegram egress therefore uses
+# world:443 for now; switch back to toFQDNs if the proxy is ever fixed.
+#
+# Default-deny is implicit: any CiliumNetworkPolicy selecting these endpoints
+# flips Cilium to deny-by-default for all non-matching traffic. No separate
+# empty default-deny CNP needed (an empty ingress+egress CNP is rejected as
+# invalid by Cilium).
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: hermes-ingress
+  namespace: hermes
+  annotations:
+    argocd.argoproj.io/sync-wave: "23"
+spec:
+  endpointSelector: {}
+  ingress:
+    # Dashboard (9119) via traefik only
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: traefik
+      toPorts:
+        - ports:
+            - port: "9119"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: hermes-egress
+  namespace: hermes
+  annotations:
+    argocd.argoproj.io/sync-wave: "23"
+spec:
+  endpointSelector: {}
+  egress:
+    # DNS (kube-dns) — required for everything below
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # LLM backend
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: litellm
+      toPorts:
+        - ports:
+            - port: "4000"
+              protocol: TCP
+    # OIDC discovery / token exchange (Authelia via Traefik).
+    # App connects BOTH to the Traefik LB VIP and directly to the Traefik
+    # pod IPs (8443 = websecure), so cover both.
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: traefik
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            - port: "8443"
+              protocol: TCP
+    - toServices:
+        - k8sService:
+            namespace: traefik
+            serviceName: traefik
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    # Telegram long-polling + media (outbound only; bot handles TLS). FQDN
+    # rules non-functional (see header note) — interim world:443 until DNS
+    # proxy is fixed.
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

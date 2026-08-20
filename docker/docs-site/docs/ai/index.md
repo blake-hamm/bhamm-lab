@@ -26,6 +26,8 @@ The software stack is built on Kubernetes and leverages a set of interconnected 
 
 - **`qdrant`:** This is the vector database used for storing and searching embeddings. The `qwen-embed` model generates embeddings for various data sources, which are then stored in `qdrant` to enable semantic search and other retrieval-augmented generation (RAG) tasks.
 
+- **[Hermes Agent:](hermes.md)** A sandboxed personal AI agent (`forge` profile) reachable via Signal and a web dashboard, backed by `litellm`. Runs with a `signal-cli` sidecar under a default-deny CiliumNetworkPolicy.
+
 ## USB4 Mesh
 
 The two Strix Halo nodes (`nose` and `tail`) are connected via rear USB4-C ports using a point-to-point `/32` route configuration:
