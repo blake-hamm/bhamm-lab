@@ -20,7 +20,6 @@ spec:
         pvc:
           - name: hermes-data
             accessMode: ReadWriteMany
-            storageClassName: csi-cephfs-sc
             storageSize: 10Gi
         k8up:
           backup:
