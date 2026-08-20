@@ -30,6 +30,13 @@ spec:
                   - name: main-site
                     scheme: http
                     port: http
+        tunnelBindings:
+          - name: site-tunnel-binding
+            subjects:
+              - name: main-site
+                spec:
+                  target: http://main-site.site.svc.cluster.local:8080
+                  fqdn: site.bhamm-lab.com
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

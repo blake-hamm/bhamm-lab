@@ -1,0 +1,24 @@
+{{- range .Values.tunnelBindings }}
+---
+apiVersion: networking.cfargotunnel.com/v1alpha1
+kind: TunnelBinding
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "25"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+subjects:
+  {{- range .subjects }}
+  - name: {{ .name }}
+    spec:
+      target: {{ .spec.target }}
+      fqdn: {{ .spec.fqdn }}
+      {{- if .spec.path }}
+      path: "{{ .spec.path }}"
+      {{- end }}
+  {{- end }}
+tunnelRef:
+  kind: ClusterTunnel
+  name: external-tunnel
+{{- end }}

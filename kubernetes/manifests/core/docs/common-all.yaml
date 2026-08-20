@@ -30,6 +30,13 @@ spec:
                   - name: docs-site
                     scheme: http
                     port: http
+        tunnelBindings:
+          - name: docs-tunnel-binding
+            subjects:
+              - name: docs-site
+                spec:
+                  target: http://docs-site.docs.svc.cluster.local:80
+                  fqdn: docs.bhamm-lab.com
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

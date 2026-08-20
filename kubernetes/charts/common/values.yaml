@@ -13,6 +13,13 @@ ingressRoutes: []
 #   name: default
 #   ingressClass: traefik-external
 #   routes: []
+tunnelBindings: []
+# - name: docs-site
+#   subjects:
+#     - name: docs-site
+#       spec:
+#         target: http://docs-site.docs.svc.cluster.local:80
+#         fqdn: docs.bhamm-lab.com
 # Velero Backup Configuration
 k8up:
   backup:
