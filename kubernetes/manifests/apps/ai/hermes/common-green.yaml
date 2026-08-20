@@ -19,7 +19,6 @@ spec:
         name: hermes
         pvc:
           - name: hermes-data
-            accessMode: ReadWriteMany
             storageSize: 10Gi
         k8up:
           backup:
