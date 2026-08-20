@@ -3,7 +3,7 @@ terraform {
   required_providers {
     b2 = {
       source  = "Backblaze/b2"
-      version = "~> 0.12"
+      version = "~> 0.13"
     }
     local = {
       source  = "hashicorp/local"
