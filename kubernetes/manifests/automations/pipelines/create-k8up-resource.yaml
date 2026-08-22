@@ -207,6 +207,12 @@ spec:
                   name: "{{inputs.parameters.k8up-secret}}"
                   key: AWS_SECRET_ACCESS_KEY
             activeDeadlineSeconds: 36000
+            # Backup pods default to uid 65532 (nobody) and cannot read
+            # root-owned / mode-700 PVC data. Run as root like the restore
+            # template below.
+            podSecurityContext:
+              fsGroup: 0
+              runAsUser: 0
     - name: create-k8up-resource-prune
       inputs:
         parameters:

@@ -51,6 +51,32 @@ spec:
               protocol: UDP
             - port: "53"
               protocol: TCP
+    # Kubernetes API — Argo workflow executor (taskresult patches), kubectl
+    # wait scripts, k8up job pods
+    - toEntities:
+        - kube-apiserver
+    # Ceph RGW S3 (onsite backup target). external-rgw is a selector-less
+    # Service with manual Endpoints to Proxmox hosts; Cilium KPR translates
+    # ClusterIP:80 -> backend:7480 BEFORE egress policy enforcement, so the
+    # policy must match the backend CIDR + targetPort (7480), not the
+    # service port. toServices cannot match here.
+    - toCIDR:
+        - 10.0.20.11/32
+        - 10.0.20.12/32
+        - 10.0.20.13/32
+      toPorts:
+        - ports:
+            - port: "7480"
+              protocol: TCP
+    # Prometheus pushgateway — k8up/restic backup stats
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: monitor
+            k8s:app.kubernetes.io/name: prometheus-pushgateway
+      toPorts:
+        - ports:
+            - port: "9091"
+              protocol: TCP
     # LLM backend
     - toEndpoints:
         - matchLabels:
