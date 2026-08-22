@@ -1650,11 +1650,13 @@ spec:
             pvc:
               storage: "35Gi"
             image:
-              tag: rocm-7.14_20260818T163752
+              repository: ghcr.io/ggml-org/llama.cpp
+              tag: server-rocm-b10573
+            nodeSelector:
+              kubernetes.io/hostname: green-talos-worker-amd-gpu
             args:
-              - llama-server
               - -hf
-              - unsloth/Qwen3.8-27B-GGUF:UD-Q8_K_XL
+              - unsloth/Qwen3.8-27B-GGUF:UD-Q4_K_XL
               - --host
               - 0.0.0.0
               - --metrics
@@ -1668,19 +1670,22 @@ spec:
               - "999"
               - -fa
               - "on"
+              - -b
+              - "16384"
+              - -ub
+              - "2048"
               - --spec-type
               - draft-mtp
               - --spec-draft-n-max
-              - "2"
-              - -dio
+              - "3"
               - -ctk
               - q8_0
               - -ctv
               - q8_0
               - -c
-              - "1048576"
+              - "262144"
               - --parallel
-              - "4"
+              - "1"
               - --cont-batching
               - --chat-template-kwargs
               - '{"preserve_thinking":true,"reasoning_effort":"medium"}'
@@ -1699,12 +1704,12 @@ spec:
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "100Gi"
+                memory: "24Gi"
                 cpu: "8"
               requests:
                 amd.com/gpu: 1
                 cpu: "4"
-                memory: "80Gi"
+                memory: "16Gi"
   ignoreDifferences:
     - group: apps
       kind: Deployment
