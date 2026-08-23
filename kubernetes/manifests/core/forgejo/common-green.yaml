@@ -56,6 +56,14 @@ spec:
                   - name: git-forgejo-http
                     port: 3000
                     scheme: http
+        tunnelBindings:
+          - name: forgejo-sync-tunnel-binding
+            subjects:
+              - name: git-forgejo-http
+                spec:
+                  target: http://git-forgejo-http.git.svc.cluster.local:3000
+                  fqdn: git.bhamm-lab.com
+                  path: "^/api/v1/repos/blake-hamm/bhamm-lab/mirror-sync$"
         dragonfly:
           enabled: true
   syncPolicy:
