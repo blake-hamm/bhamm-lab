@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: git-actions
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  destination:
+    namespace: git-actions
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    # forgejo-runner chart: no tags, releases, or OCI publication exist,
+    # so targetRevision is pinned to the commit SHA
+    # 3ae5398 = "fix(deps): update docker.io/library/docker docker tag to v29.5.2 (main)"
+    repoURL: https://code.forgejo.org/forgejo-helm/forgejo-runner.git
+    targetRevision: 3ae5398156088d703afb5aefc1d6f38574ab30a6
+    path: .
+    helm:
+      valuesObject:
+        runner:
+          config:
+            create: true
+            # consumed by the helm pre-install register job; rendered by the
+            # git-actions-common app from Vault path /core/forgejo-runner
+            existingInitSecret: git-actions-external-secret
+            file:
+              log:
+                level: "info"
+              runner:
+                file: ".runner"
+                capacity: 1
+                # chart docs "dind bypass": job containers reach the dind
+                # sidecar over host networking instead of mounting the socket
+                envs:
+                  A_TEST_ENV_NAME_1: null
+                  A_TEST_ENV_NAME_2: null
+                  DOCKER_HOST: tcp://127.0.0.1:2376
+                  DOCKER_TLS_VERIFY: 1
+                  DOCKER_CERT_PATH: /certs/client
+              container:
+                network: host
+                enable_ipv6: false
+                privileged: false
+                options: -v /certs/client:/certs/client
+                valid_volumes:
+                  - /certs/client
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
