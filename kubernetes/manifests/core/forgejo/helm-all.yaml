@@ -78,8 +78,6 @@ spec:
           enabled: false
         postgresql-ha:
           enabled: false
-        actions:
-          enabled: false
         valkey-cluster:
           enabled: false
         valkey:
