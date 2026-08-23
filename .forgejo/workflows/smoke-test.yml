@@ -1,0 +1,14 @@
+name: smoke-test
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+jobs:
+  smoke:
+    # registered label of the green runner (default registration label)
+    runs-on: docker
+    steps:
+      # no checkout / external action deps on purpose: this must succeed with
+      # only the runner pod, dind sidecar and the node:lts job image
+      - name: Say hello
+        run: echo "forgejo actions runner works"
