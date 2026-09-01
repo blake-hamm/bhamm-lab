@@ -22,6 +22,7 @@
         brave
         pkgs-unstable.signal-desktop
         telegram-desktop
+        wasistlos
         vlc
         uv
         krita
