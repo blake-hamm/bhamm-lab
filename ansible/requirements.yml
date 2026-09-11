@@ -4,7 +4,7 @@ collections:
   - name: devsec.hardening
     version: "10.6.0"
   - name: oxlorg.opnsense
-    version: "25.7.8"
+    version: "26.1.11"
   - name: community.sops
     version: "2.4.0"
   - name: prometheus.prometheus
