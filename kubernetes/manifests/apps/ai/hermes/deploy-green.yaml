@@ -64,6 +64,10 @@ spec:
               value: "hermes"
             - name: HERMES_DASHBOARD_PUBLIC_URL
               value: "https://hermes.bhamm-lab.com"
+            # Web search backend (SearXNG plugin; covers all profiles in this
+            # container — env is shared across the gateway processes).
+            - name: SEARXNG_URL
+              value: "http://searxng.searxng.svc.cluster.local:8080"
           ports:
             - containerPort: 9119
               name: dashboard

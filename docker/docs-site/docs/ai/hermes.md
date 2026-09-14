@@ -62,9 +62,13 @@ The gateway connects to signal-cli once at startup and the JVM daemon is slower 
 `networkpolicy-green.yaml` holds the cluster's first CiliumNetworkPolicies (default-deny once applied):
 
 - **Ingress:** traefik pods → 9119 only
-- **Egress:** kube-dns, litellm:4000, traefik (443 + 8443, for the Authelia OIDC token exchange), the hermes Service :8080 (signal-cli), and `world:443` for Signal servers
+- **Egress:** kube-dns, litellm:4000, searxng:8080 (web search), traefik (443 + 8443, for the Authelia OIDC token exchange), the hermes Service :8080 (signal-cli), and `world:443` for Signal servers
 
-Note: Cilium's DNS proxy does not populate FQDN state on this cluster, so `toFQDNs` rules grant nothing — Signal egress uses `world:443` until that is fixed. Agent web tools (browser/curl/git) are blocked by the default-deny; append explicit rules per profile as needed.
+Note: Cilium's DNS proxy does not populate FQDN state on this cluster, so `toFQDNs` rules grant nothing — Signal egress uses `world:443` until that is fixed.
+
+### Web search
+
+`web_search` uses the in-cluster SearXNG instance (`searxng.searxng.svc.cluster.local:8080`, JSON format enabled, botdetection `pass_ip` covers the pod CIDR). The `SEARXNG_URL` env var is set on the Deployment — shared across all gateway profiles in the container. Optional deterministic pin per profile: `web.search_backend: searxng` in `config.yaml`. The external ingress (`searxng.bhamm-lab.com`) sits behind Authelia, so verify searches via the in-cluster Service URL, not the public host.
 
 ## Operations
 
