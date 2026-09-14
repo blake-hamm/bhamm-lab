@@ -64,6 +64,17 @@ spec:
               value: "hermes"
             - name: HERMES_DASHBOARD_PUBLIC_URL
               value: "https://hermes.bhamm-lab.com"
+            # Web search backend (SearXNG plugin; covers all profiles in this
+            # container — env is shared across the gateway processes).
+            - name: SEARXNG_URL
+              value: "http://searxng.searxng.svc.cluster.local:8080"
+            # CDP endpoint for browser_exec — points the browser-harness
+            # daemon at the chromium-cdp sidecar (127.0.0.1:9222). Without
+            # this, the daemon's liveness check (which only scans its own
+            # profile dirs / known browser binary names) fails before it
+            # ever reaches the port-9222 fallback probe.
+            - name: BU_CDP_URL
+              value: "http://127.0.0.1:9222"
           ports:
             - containerPort: 9119
               name: dashboard
@@ -92,6 +103,28 @@ spec:
               name: llamacpp-patch
               subPath: codex_responses_adapter.py
               readOnly: true
+        # CDP endpoint for browser_exec (browser-use harness attaches via
+        # 127.0.0.1:9222). Reuses the headless Chromium the image ships —
+        # the harness never launches it on its own (bare launch opens no
+        # CDP port). Binary path is pinned to the playwright cache
+        # revision: RE-VERIFY ON IMAGE BUMP (chromium_headless_shell-1234).
+        - name: chromium-cdp
+          image: nousresearch/hermes-agent:v2026.8.16.2@sha256:a39fc11620213e3669a327aff5c6cb1eb2b8a238c6044e33e7ef8885833d89a7
+          imagePullPolicy: IfNotPresent
+          command:
+            - /opt/hermes/.playwright/chromium_headless_shell-1234/chrome-headless-shell-linux64/chrome-headless-shell
+          args:
+            - --no-sandbox
+            - --disable-dev-shm-usage
+            - --remote-debugging-port=9222
+            - --user-data-dir=/tmp/chromium-cdp
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
       securityContext:
         # Hermes container (root) chowns /opt/data in stage2.
         fsGroup: 1000

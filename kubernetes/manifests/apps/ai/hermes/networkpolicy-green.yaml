@@ -85,6 +85,15 @@ spec:
         - ports:
             - port: "4000"
               protocol: TCP
+    # SearXNG web search API (in-cluster; botdetection limiter pass_ip
+    # already covers the pod CIDR, no auth needed internally).
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: searxng
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
     # OIDC discovery / token exchange (Authelia via Traefik).
     # App connects BOTH to the Traefik LB VIP and directly to the Traefik
     # pod IPs (8443 = websecure), so cover both.
