@@ -72,7 +72,7 @@ Note: Cilium's DNS proxy does not populate FQDN state on this cluster, so `toFQD
 
 ### Browser automation
 
-`browser_exec` (browser-use harness) attaches to a CDP Chromium at `http://127.0.0.1:9222`. A `chromium-cdp` sidecar container runs the Playwright headless-shell that ships in the image — the harness never launches it on its own (bare launch opens no CDP port), so the sidecar provides the long-lived `--no-sandbox --remote-debugging-port=9222` process. Pod-local, so no NetPol impact. The binary path is pinned to the image's playwright cache revision; **re-verify on every image bump**. Optional pin per profile: `browser.cdp_url` in `config.yaml`.
+`browser_exec` (browser-use harness) attaches to a CDP Chromium at `http://127.0.0.1:9222`. A `chromium-cdp` sidecar container runs the Playwright headless-shell that ships in the image — the harness never launches it on its own (bare launch opens no CDP port, and its auto-launch/liveness checks only recognize standard chrome/chromium/brave/edge binary names). The daemon is pointed at the sidecar via the `BU_CDP_URL=http://127.0.0.1:9222` env var (set on the container; covers all profiles). Pod-local, so no NetPol impact. The binary path is pinned to the image's playwright cache revision; **re-verify on every image bump**.
 
 ## Operations
 
