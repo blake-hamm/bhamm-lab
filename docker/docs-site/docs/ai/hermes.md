@@ -70,6 +70,10 @@ Note: Cilium's DNS proxy does not populate FQDN state on this cluster, so `toFQD
 
 `web_search` uses the in-cluster SearXNG instance (`searxng.searxng.svc.cluster.local:8080`, JSON format enabled, botdetection `pass_ip` covers the pod CIDR). The `SEARXNG_URL` env var is set on the Deployment — shared across all gateway profiles in the container. Optional deterministic pin per profile: `web.search_backend: searxng` in `config.yaml`. The external ingress (`searxng.bhamm-lab.com`) sits behind Authelia, so verify searches via the in-cluster Service URL, not the public host.
 
+### Browser automation
+
+`browser_exec` (browser-use harness) attaches to a CDP Chromium at `http://127.0.0.1:9222`. A `chromium-cdp` sidecar container runs the Playwright headless-shell that ships in the image — the harness never launches it on its own (bare launch opens no CDP port), so the sidecar provides the long-lived `--no-sandbox --remote-debugging-port=9222` process. Pod-local, so no NetPol impact. The binary path is pinned to the image's playwright cache revision; **re-verify on every image bump**. Optional pin per profile: `browser.cdp_url` in `config.yaml`.
+
 ## Operations
 
 - **Config changes:** `hermes config set` writes `/opt/data/config.yaml` but does not reload the running gateway — restart the pod (or kill the gateway PID) to apply. This bit us with `model.api_mode chat_completions`: llama-server rejects Responses-API payloads (`Cannot determine type of 'item'`), and the fix did not take effect until a restart.
