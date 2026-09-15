@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://codeberg.org/blake-hamm/bhamm-lab.git
-    targetRevision: fix/qwen-38-27b
+    targetRevision: feature/hermes-firecrawl
     path: kubernetes/manifests/apps
     directory:
       recurse: true
