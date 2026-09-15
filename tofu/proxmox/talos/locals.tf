@@ -58,10 +58,10 @@ locals {
     machine_tier   = "accelerated"
     host_node      = "method"
     vm_id          = var.worker_vm_id_start + var.count_worker + 1
-    cpu            = var.cpu_cores_worker
+    cpu            = 8
     disk_size      = var.disk_size_worker
     disk_size_user = var.disk_size_amd_gpu_worker
-    memory         = 30518
+    memory         = 32768
     vip            = null
     taint          = { key = "amd.com/gpu", effect = "NoSchedule" }
     vm_tag         = "amd-gpu"

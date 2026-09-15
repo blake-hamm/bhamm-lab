@@ -1645,71 +1645,313 @@ spec:
                 cpu: "4"
                 memory: "80Gi"
           - name: qwen-38-27b
-            description: High quality dense MTP VLM model for general chat (Qwen 3.8)
+            description: High quality dense MTP VLM model for general chat (Qwen 3.8, vLLM MXFP4 on R9700)
             enabled: true
+            hostIPC: true
             pvc:
-              storage: "35Gi"
+              storage: "80Gi"
             image:
-              repository: ghcr.io/ggml-org/llama.cpp
-              tag: server-rocm-b10573
+              repository: harbor.bhamm-lab.com/library/vllm-radiance-mxfp4
+              tag: latest
             nodeSelector:
               kubernetes.io/hostname: green-talos-worker-amd-gpu
+            hfToken:
+              enabled: true
+              secretName: models-external-secret
+              secretKey: hf_token
+            initContainers:
+              - name: setup
+                image: harbor.bhamm-lab.com/library/vllm-radiance-mxfp4:latest
+                command:
+                  - /bin/bash
+                  - -lc
+                  - |
+                    set -euo pipefail
+                    SNAP=/models/cache/Qwen3.8-27B-MXFP4-mtpfp8
+                    DRAFTER=/models/cache/Qwen3.8-27B-DFlash2-FP8
+                    R4D_DIR=/models/cache/radiance-libr4d/b9e42ab-rx6
+
+                    AVAIL_GB=$(df -BG --output=avail /models/cache | tail -1 | tr -dc '0-9')
+                    if [ ! -f "$SNAP/config.json" ] && [ "$AVAIL_GB" -lt 40 ]; then
+                      echo "[setup] only ${AVAIL_GB}GiB free on the model PVC; the checkpoint"
+                      echo "[setup] download + fp8 rewrite want ~40GiB transient. Free space or"
+                      echo "[setup] grow the user volume, then restart the pod."
+                      exit 1
+                    fi
+
+                    if [ ! -f "$SNAP/config.json" ]; then
+                      echo "[setup] downloading amd/Qwen3.8-27B-Quark-AWQ-MXFP4 (~19 GiB)"
+                      python3 -c 'from huggingface_hub import snapshot_download; snapshot_download("amd/Qwen3.8-27B-Quark-AWQ-MXFP4")'
+                      SRC=$(ls -d "$HF_HOME"/hub/models--amd--Qwen3.8-27B-Quark-AWQ-MXFP4/snapshots/*/ | head -1)
+                      echo "[setup] requantizing MTP head to fp8 (~15 min): $SRC -> $SNAP"
+                      python3 /patches/fp8_mtp.py "$SRC" "$SNAP"
+                      [ -f "$SNAP/config.json" ] || { echo "[setup] fp8_mtp.py produced no config.json"; exit 1; }
+                      # The HF source snapshot (~19GiB) is only needed during the rewrite.
+                      rm -rf "$HF_HOME"/hub/models--amd--Qwen3.8-27B-Quark-AWQ-MXFP4
+                      echo "[setup] freed the source snapshot from the HF cache"
+                    else
+                      echo "[setup] checkpoint exists: $SNAP"
+                    fi
+
+                    if [ ! -f "$DRAFTER/config.json" ]; then
+                      echo "[setup] downloading tcclaviger/Qwen3.8-27B-DFlash2-FP8 (2 GiB)"
+                      python3 -c 'from huggingface_hub import snapshot_download; snapshot_download("tcclaviger/Qwen3.8-27B-DFlash2-FP8", local_dir="/models/cache/Qwen3.8-27B-DFlash2-FP8")'
+                    else
+                      echo "[setup] drafter exists: $DRAFTER"
+                    fi
+
+                    if [ ! -f "$R4D_DIR/r4d.so" ]; then
+                      echo "[setup] building libr4d b9e42ab + r4d_radiance_extras.patch"
+                      rm -rf /models/cache/radiance-libr4d/.build
+                      mkdir -p /models/cache/radiance-libr4d
+                      git clone -q https://codeberg.org/StillDeadcode/libr4d.git /models/cache/radiance-libr4d/.build
+                      git -C /models/cache/radiance-libr4d/.build checkout -q b9e42ab
+                      git -C /models/cache/radiance-libr4d/.build apply /patches/r4d_radiance_extras.patch
+                      (cd /models/cache/radiance-libr4d/.build && ./build.sh)
+                      mv /models/cache/radiance-libr4d/.build "$R4D_DIR"
+                    else
+                      echo "[setup] libr4d exists: $R4D_DIR"
+                    fi
+                env:
+                  - name: HF_HOME
+                    value: /models/cache/huggingface
+                  - name: HF_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        name: models-external-secret
+                        key: hf_token
+                resources:
+                  requests:
+                    cpu: "2"
+                    memory: "8Gi"
+                  limits:
+                    cpu: "8"
+                    memory: "16Gi"
+                volumeMounts:
+                  - name: model-cache
+                    mountPath: /models/cache
+            command:
+              - /bin/bash
+              - -lc
+              - |
+                set -e
+                SP=/opt/vllm/lib/python3.12/site-packages
+                cd /patches
+                for p in patch_quark_mxfp4 patch_tp3_pad patch_ar_maxbytes patch_topk_triton_rows \
+                    patch_dflash_calib patch_dflash_mxfp4_kv patch_rmsquant_fusion patch_verify_head \
+                    patch_kv_group_size patch_topk_composite patch_gdn_shared_build patch_dflash_selector_topk \
+                    patch_gdn_merge_inproj patch_dynwidth patch_async_dynwidth patch_step_trace \
+                    patch_ar_geometry patch_ar_3rank patch_gdn_glue; do
+                  python3 "$p.py"
+                done
+                python3 patch_qwen3_thinkoff.py \
+                  || echo "[radiance] WARNING: thinkoff patch did not apply; thinking-off requests will return empty content"
+                cp mxfp4-configs/*.json "$SP"/aiter/ops/triton/configs/gemm/
+                cp radiance_mxfp4.py radiance_gdn.py radiance_rmsquant.py radiance_drafthead.py \
+                   radiance_verifyhead.py radiance_gdnmerge.py radiance_aroverlap.py radiance_topk.py \
+                   radiance_arnq.py radiance_tp3pad.py "$SP"/
+                hipcc -O3 -w -std=c++17 -fPIC -shared --offload-arch=gfx1201 \
+                  $(python3 -m pybind11 --includes) radiance_mxfp4_fp8.hip -o "$SP"/radiance_mxfp4_fp8.so
+                cp /models/cache/radiance-libr4d/b9e42ab-rx6/r4d.so "$SP"/r4d.so
+                echo "[radiance] libr4d b9e42ab-rx6 -> $SP/r4d.so"
+                cd /
+                exec /opt/radiance_entrypoint.sh "$@"
+              - _
             args:
-              - -hf
-              - unsloth/Qwen3.8-27B-GGUF:UD-Q4_K_XL
+              - /models/cache/Qwen3.8-27B-MXFP4-mtpfp8
+              - --served-model-name
+              - qwen-38-27b
+              - Qwen3.8
+              - Qwen3.8-MXFP4
               - --host
               - 0.0.0.0
-              - --metrics
-              - --no-webui
-              - --jinja
-              - --timeout
-              - "1800"
-              - -v
-              - --no-warmup
-              - -ngl
-              - "999"
-              - -fa
-              - "on"
-              - -b
-              - "16384"
-              - -ub
-              - "2048"
-              - --spec-type
-              - draft-mtp
-              - --spec-draft-n-max
-              - "3"
-              - -ctk
-              - q8_0
-              - -ctv
-              - q8_0
-              - -c
-              - "262144"
-              - --parallel
+              - --port
+              - "8080"
+              - --kv-cache-dtype
+              - fp8
+              - --tensor-parallel-size
               - "1"
-              - --cont-batching
-              - --chat-template-kwargs
-              - '{"preserve_thinking":true,"reasoning_effort":"medium"}'
-              - --temp
-              - "1.0"
-              - --min-p
-              - "0.00"
-              - --top-p
-              - "0.95"
-              - --top-k
-              - "20"
-              - --presence-penalty
-              - "0.0"
-              - --repeat-penalty
-              - "1.0"
+              - --gpu-memory-utilization
+              - "0.98"
+              - --max-model-len
+              - "114688"
+              - --max-num-seqs
+              - "8"
+              - --max-num-batched-tokens
+              - "8192"
+              - --attention-backend
+              - R4D
+              - --speculative-config
+              - '{"method":"dflash","model":"/models/cache/Qwen3.8-27B-DFlash2-FP8","num_speculative_tokens":7,"attention_backend":"TRITON_ATTN","disable_padded_drafter_batch":true,"draft_sample_method":"greedy"}'
+              - --no-async-scheduling
+              - --enable-prefix-caching
+              - --mamba-cache-mode
+              - align
+              - --enable-auto-tool-choice
+              - --tool-call-parser
+              - qwen3_coder
+              - --reasoning-parser
+              - qwen3
+              - --override-generation-config
+              - '{"temperature":0.7,"top_p":0.95,"top_k":20}'
+              - --enable-per-request-metrics
+              - --trust-remote-code
+              - --chat-template
+              - /patches/qwen-fixed-v22.3.jinja
+            env:
+              - name: HIP_VISIBLE_DEVICES
+                value: "0"
+              - name: ROCR_VISIBLE_DEVICES
+                value: "0"
+              - name: GPU_MAX_HW_QUEUES
+                value: "1"
+              - name: HF_HUB_OFFLINE
+                value: "1"
+              - name: VLLM_LOGGING_LEVEL
+                value: INFO
+              - name: VLLM_NO_USAGE_STATS
+                value: "1"
+              - name: VLLM_ROCM_USE_AITER
+                value: "1"
+              - name: VLLM_ROCM_USE_AITER_UNIFIED_ATTENTION
+                value: "1"
+              - name: VLLM_ROCM_USE_AITER_MHA
+                value: "0"
+              - name: VLLM_ROCM_USE_AITER_MLA
+                value: "0"
+              - name: VLLM_ROCM_USE_AITER_MOE
+                value: "0"
+              - name: VLLM_ROCM_USE_AITER_LINEAR
+                value: "0"
+              - name: VLLM_ROCM_USE_AITER_FP8BMM
+                value: "0"
+              - name: VLLM_ROCM_USE_AITER_FP4BMM
+                value: "0"
+              - name: VLLM_ROCM_USE_AITER_RMSNORM
+                value: "0"
+              - name: NCCL_PROTO
+                value: Simple
+              - name: RADIANCE_USE_R4D
+                value: "1"
+              - name: RADIANCE_USE_R4D_AR
+                value: "1"
+              - name: RADIANCE_USE_R4D_AR_QUANT
+                value: "1"
+              - name: RADIANCE_R4D_REPORT
+                value: "1"
+              - name: RADIANCE_AR_MAX_KB
+                value: "86016"
+              - name: RADIANCE_PRESHUFFLE
+                value: "1"
+              - name: RADIANCE_FUSE_RMS_QUANT
+                value: "1"
+              - name: RADIANCE_MXFP4
+                value: "1"
+              - name: RADIANCE_MXFP4_W4A8
+                value: "1"
+              - name: RADIANCE_MXFP4_W4A8_MIN_M
+                value: "0"
+              - name: RADIANCE_MXFP4_DECODE_MAX_M
+                value: "64"
+              - name: RADIANCE_MXFP4_TN4_MIN_M
+                value: "2048"
+              - name: RADIANCE_MXFP4_A_TILED_MIN_M
+                value: "513"
+              - name: RADIANCE_MXFP4_WPERM
+                value: "1"
+              - name: RADIANCE_MXFP4_DECODE_NT
+                value: "1"
+              - name: RADIANCE_MXFP4_HOIST_QUANT
+                value: "1"
+              - name: RADIANCE_MXFP4_TRACED_QUANT
+                value: "1"
+              - name: RADIANCE_MXFP4_EPIFAST
+                value: "1"
+              - name: RADIANCE_RMS_QUANT_FUSION
+                value: "1"
+              - name: RADIANCE_FP8_STREAM
+                value: "1"
+              - name: RADIANCE_FAST_DRAFT
+                value: "1"
+              - name: RADIANCE_DRAFT_TAU
+                value: "0.20"
+              - name: RADIANCE_DRAFT_RERANK
+                value: "80"
+              - name: RADIANCE_VERIFY_HEAD
+                value: "1"
+              - name: RADIANCE_VERIFY_HEAD_MAX_M
+                value: "32"
+              - name: RADIANCE_DYNAMIC_WIDTH
+                value: "1"
+              - name: RADIANCE_DYNW_ALPHA
+                value: "0.35"
+              - name: RADIANCE_DYNW_MARGIN
+                value: "2"
+              - name: RADIANCE_DYNW_MIN
+                value: "2"
+              - name: RADIANCE_DYNW_MIN_BATCH
+                value: "3"
+              - name: RADIANCE_TP_PAD
+                value: "0"
+              - name: RADIANCE_GDN_MERGE_INPROJ
+                value: "1"
+              - name: RADIANCE_GDN_NORM_QUANT
+                value: "1"
+              - name: RADIANCE_GDN_STRIDED_GATES
+                value: "0"
+              - name: RADIANCE_GDN_EMPTY_OUT
+                value: "0"
+              - name: RADIANCE_GDN_FUSED_UPDATE
+                value: "1"
+              - name: RADIANCE_GDN_PATHS
+                value: both
+              - name: RADIANCE_SKINNY_GEMM
+                value: "1"
+              - name: RADIANCE_TOPK_TRITON_MIN_ROWS
+                value: "1"
+              - name: RADIANCE_AR_OVERLAP
+                value: "0"
+              - name: RADIANCE_AR_OVERLAP_MIN_M
+                value: "2048"
+              - name: RADIANCE_AR_OVERLAP_SLICES
+                value: "4"
+              - name: RADIANCE_AR_QNB
+                value: "96"
+              - name: RADIANCE_AR_QNT
+                value: "1024"
+              - name: R4D_ATTN_FP8
+                value: "3"
+              - name: MXFP4_CUMODE
+                value: "0"
+              - name: VLLM_CACHE_ROOT
+                value: /models/cache/radiance/vllm
+              - name: TORCHINDUCTOR_CACHE_DIR
+                value: /models/cache/radiance/inductor
+              - name: TRITON_CACHE_DIR
+                value: /models/cache/radiance/triton
+              - name: AITER_ROOT_DIR
+                value: /models/cache/radiance/aiter
+              - name: TRITON_CACHE_AUTOTUNING
+                value: "1"
+              - name: PYTHONPYCACHEPREFIX
+                value: /models/cache/radiance/pypycache
+            zeroscaling:
+              enabled: true
+              minReplicas: 1
+              cooldownPeriod: 1800
+              trigger:
+                query: >-
+                  sum(vllm:num_requests_running{container="qwen-38-27b"}) or vector(0)
+                threshold: "1"
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "24Gi"
+                memory: "28Gi"
                 cpu: "8"
               requests:
                 amd.com/gpu: 1
                 cpu: "4"
-                memory: "16Gi"
+                memory: "24Gi"
   ignoreDifferences:
     - group: apps
       kind: Deployment

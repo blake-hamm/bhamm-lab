@@ -8,7 +8,7 @@ The AI infrastructure is powered by a combination of specialized hardware to han
 
 - **Intel Arc A310e:** This GPU is dedicated to media-related AI tasks. It powers [Immich](https://immich.app/) for machine learning-based photo management (facial recognition, object detection) and [Jellyfin](https://jellyfin.org/) for video transcoding, leveraging the Intel GPU plugin for Kubernetes.
 
-- **AMD R9700:** This GPU is the workhorse for running embedding models. It's primarily used for the `qwen-embed` model running on `llama.cpp` with the AMD GPU plugin, providing embedding capabilities accross my stack.
+- **AMD R9700:** This GPU serves the `qwen-38-27b` chat model via [vLLM Radiance (MXFP4)](vllm-radiance.md) and the `qwen-embed` embedding model on `llama.cpp`, using the AMD GPU plugin.
 
 - **2x AMD Ryzen AI MAX 395+ (Strix Halo):** These powerful APUs are connected via a USB4 point-to-point mesh network (`10.30.0.78/32` ↔ `10.30.0.79/32`, ~9 Gbps) for distributed inference. Individually, they run larger language models using the AMD GPU plugin. I primarily run GPT OSS 120b for chat in Open WebUI and GLM 4.5 Air for agent and coding assistance. When combined via [llama.cpp RPC](llama-cpp.md), the pooled ~256 GB unified memory allows running models that exceed a single node's capacity.
 

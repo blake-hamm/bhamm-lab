@@ -35,3 +35,4 @@ metal_amd_framework_workers = {
 amd_gpu_worker_id = [
   "0000:83:00"
 ]
+disk_size_amd_gpu_worker = 100
