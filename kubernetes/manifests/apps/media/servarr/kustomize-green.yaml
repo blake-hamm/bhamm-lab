@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: https://codeberg.org/blake-hamm/bhamm-lab.git
     path: kubernetes/manifests/apps/media/servarr
-    targetRevision: feature/hermes-firecrawl
+    targetRevision: main
     kustomize:
       patches:
         - target:
