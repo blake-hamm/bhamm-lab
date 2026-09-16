@@ -9,6 +9,8 @@ metadata:
     argocd.argoproj.io/sync-wave: "22"
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: unpackerr
@@ -25,6 +27,13 @@ spec:
       containers:
         - name: unpackerr
           image: golift/unpackerr:0.15.2
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
+            limits:
+              cpu: "100m"
+              memory: "128Mi"
           ports:
             - containerPort: 5656
           volumeMounts:

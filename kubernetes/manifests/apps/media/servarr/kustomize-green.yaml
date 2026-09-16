@@ -13,14 +13,13 @@ spec:
   source:
     repoURL: https://codeberg.org/blake-hamm/bhamm-lab.git
     path: kubernetes/manifests/apps/media/servarr
-    targetRevision: main
+    targetRevision: feature/hermes-firecrawl
     kustomize:
       patches:
         - target:
             group: apps
             version: v1
             kind: Deployment
-            name: jellyfin
           patch: |-
             - op: add
               path: /spec/template/spec/tolerations
@@ -28,6 +27,12 @@ spec:
                 - key: "intel.com/gpu"
                   operator: "Exists"
                   effect: "NoSchedule"
+        - target:
+            group: apps
+            version: v1
+            kind: Deployment
+            name: jellyfin
+          patch: |-
             - op: add
               path: /spec/template/spec/nodeSelector
               value:

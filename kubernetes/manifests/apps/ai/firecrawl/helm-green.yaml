@@ -1,0 +1,94 @@
+# Firecrawl (v2.11.162) — self-hosted, powers `web_extract` for all Hermes profiles.
+#
+# Phase 1 of issue #310: deploy the official Helm chart from git (chart-from-git
+# mode), bundled Postgres + Redis included. No custom image, no cnpg, no Dragonfly.
+#
+# Chart: examples/kubernetes/firecrawl-helm (Chart.yaml name=firecrawl, v0.2.0),
+# present in the firecrawl repo at tag v2.11.162.
+#
+# ArgoCD chart-from-git: repoURL (git) + path (chart dir) + targetRevision (git
+# tag). NOTE: the `chart:` field is only for Helm *index* repos — it is omitted
+# here (the chart is located via `path`).
+#
+# Image overrides: the chart's defaults point at a third-party mirror
+# (docker.io/winkkgmbh/*); we override to the official ghcr.io/firecrawl/* images.
+# Postgres + Playwright have no versioned tag upstream, so they run on `latest`.
+#
+# imagePullSecrets MUST be []: the chart references `docker-registry-secret`,
+# which does not exist in the firecrawl namespace — left as-is, every pod is
+# stuck in CreateContainerConfigError.
+#
+# nuqPostgres.persistence is left at the chart default (false -> emptyDir): the
+# bundled Postgres is a self-initializing appliance (auto-runs nuq.sql on initdb),
+# so a wiped volume just re-inits. No durable data to protect (see #310).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: firecrawl
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "28"
+spec:
+  destination:
+    namespace: firecrawl
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/firecrawl/firecrawl
+    targetRevision: v2.11.162
+    path: examples/kubernetes/firecrawl-helm
+    helm:
+      valuesObject:
+        # Main image (api + all workers are this single image, multi-role via args)
+        image:
+          repository: ghcr.io/firecrawl/firecrawl
+          tag: "2.11.162"
+          pullPolicy: IfNotPresent
+        # Playwright renderer (no versioned tag upstream -> latest)
+        playwright:
+          repository: ghcr.io/firecrawl/playwright-service
+          tag: "latest"
+          pullPolicy: Always
+        # Bundled Postgres (no versioned tag upstream -> latest)
+        nuqPostgres:
+          image:
+            repository: ghcr.io/firecrawl/nuq-postgres
+            tag: "latest"
+            pullPolicy: Always
+        # Chart references a non-existent docker-registry-secret — clear it.
+        imagePullSecrets: []
+        # Apply the chart's per-role resource blocks (requests/limits).
+        resources:
+          enabled: true
+        # Right-size for web_extract: /v2/scrape runs inline in the API pod,
+        # so the async NuQ pipeline only needs 1 worker. Chart defaults are
+        # 5x nuq-worker (15Gi req / 20Gi lim) + extract-worker.
+        nuqWorker:
+          replicaCount: 1
+        extractWorker:
+          enabled: false
+        # rabbitmq stays ENABLED (chart default) — required: the chart's
+        # configmap unconditionally sets NUQ_RABBITMQ_URL to the broker
+        # hostname (empty value is falsy, so the Helm default always wins),
+        # and worker/nuq-worker/prefetch connect to it on startup. With the
+        # broker absent they crash-loop (ENOTFOUND). Cost: 512Mi req / 1Gi lim.
+        # Leave config.NUQ_DATABASE_URL / REDIS_URL / NUQ_RABBITMQ_URL /
+        # PLAYWRIGHT_MICROSERVICE_URL / FIRECRAWL_APP_HOST empty -> chart
+        # bundled defaults (self-contained, keyless: USE_DB_AUTHENTICATION=false).
+        config:
+          # Route Firecrawl's own search feature through our SearXNG (optional;
+          # not used by web_extract).
+          SEARXNG_ENDPOINT: "http://searxng.searxng.svc.cluster.local:8080"
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 10
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 10m
