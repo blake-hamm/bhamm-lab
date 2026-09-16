@@ -25,6 +25,13 @@ spec:
       containers:
         - name: gluetun
           image: ghcr.io/qdm12/gluetun:v3.41.1
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
           env:
             - name: VPN_SERVICE_PROVIDER
               value: protonvpn
@@ -61,6 +68,13 @@ spec:
               mountPath: /gluetun
         - name: qbittorrent
           image: lscr.io/linuxserver/qbittorrent:5.2.2
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
           volumeMounts:
             - name: qbittorrent-config
               mountPath: /config

@@ -23,6 +23,13 @@ spec:
       containers:
         - name: cleanuparr
           image: ghcr.io/cleanuparr/cleanuparr:2.9.15
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
           ports:
             - containerPort: 11011
           volumeMounts:
