@@ -62,19 +62,20 @@ spec:
           enabled: true
         # Right-size for web_extract: /v2/scrape runs inline in the API pod,
         # so the async NuQ pipeline only needs 1 worker. Chart defaults are
-        # 5x nuq-worker (15Gi req / 20Gi lim) + extract-worker + rabbitmq.
+        # 5x nuq-worker (15Gi req / 20Gi lim) + extract-worker.
         nuqWorker:
           replicaCount: 1
         extractWorker:
           enabled: false
-        rabbitmq:
-          enabled: false
+        # rabbitmq stays ENABLED (chart default) — required: the chart's
+        # configmap unconditionally sets NUQ_RABBITMQ_URL to the broker
+        # hostname (empty value is falsy, so the Helm default always wins),
+        # and worker/nuq-worker/prefetch connect to it on startup. With the
+        # broker absent they crash-loop (ENOTFOUND). Cost: 512Mi req / 1Gi lim.
         # Leave config.NUQ_DATABASE_URL / REDIS_URL / NUQ_RABBITMQ_URL /
         # PLAYWRIGHT_MICROSERVICE_URL / FIRECRAWL_APP_HOST empty -> chart
         # bundled defaults (self-contained, keyless: USE_DB_AUTHENTICATION=false).
         config:
-          # nuq-worker polls Postgres directly (no RabbitMQ broker needed).
-          NUQ_WAIT_MODE: "poll"
           # Route Firecrawl's own search feature through our SearXNG (optional;
           # not used by web_extract).
           SEARXNG_ENDPOINT: "http://searxng.searxng.svc.cluster.local:8080"
