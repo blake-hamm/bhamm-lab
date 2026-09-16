@@ -68,6 +68,9 @@ spec:
             # container — env is shared across the gateway processes).
             - name: SEARXNG_URL
               value: "http://searxng.searxng.svc.cluster.local:8080"
+            # Web extract backend (self-hosted Firecrawl; keyless, in-cluster).
+            - name: FIRECRAWL_API_URL
+              value: "http://firecrawl-firecrawl-api.firecrawl.svc.cluster.local:3002"
             # CDP endpoint for browser_exec — points the browser-harness
             # daemon at the chromium-cdp sidecar (127.0.0.1:9222). Without
             # this, the daemon's liveness check (which only scans its own

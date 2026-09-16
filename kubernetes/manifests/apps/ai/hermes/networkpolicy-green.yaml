@@ -94,6 +94,15 @@ spec:
         - ports:
             - port: "8080"
               protocol: TCP
+    # Firecrawl web_extract API (in-cluster; keyless, no auth internally).
+    # world:443 cannot reach the in-cluster service, so this rule is required.
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: firecrawl
+      toPorts:
+        - ports:
+            - port: "3002"
+              protocol: TCP
     # OIDC discovery / token exchange (Authelia via Traefik).
     # App connects BOTH to the Traefik LB VIP and directly to the Traefik
     # pod IPs (8443 = websecure), so cover both.
