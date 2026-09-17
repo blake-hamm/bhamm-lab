@@ -1,0 +1,21 @@
+name: smoke-test
+on:
+  workflow_dispatch:
+  # the Forgejo repo is a mirror of Codeberg; mirror sync fires a push
+  # event (verified in Forgejo source: SyncPullMirror -> SyncPushCommits
+  # -> HookEventPush), and a Codeberg webhook triggers an immediate
+  # mirror-sync on push. Run on any branch: this is cheap linting/tests,
+  # and it gives pre-merge CI signal on feature branches (including
+  # renovate pushes, which is fine for this workflow).
+  push:
+    branches:
+      - "*"
+jobs:
+  smoke:
+    # registered label of the green runner (default registration label)
+    runs-on: docker
+    steps:
+      # no checkout / external action deps on purpose: this must succeed with
+      # only the runner pod, dind sidecar and the node:lts job image
+      - name: Say hello
+        run: echo "forgejo actions runner works"
