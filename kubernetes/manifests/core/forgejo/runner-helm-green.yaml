@@ -23,7 +23,7 @@ spec:
           config:
             create: true
             # consumed by the helm pre-install register job; rendered by the
-            # git-actions-common app from Vault path /core/forgejo-runner
+            # git-actions-common app from Vault path /default/forgejo-runner
             existingInitSecret: git-actions-external-secret
             file:
               log:

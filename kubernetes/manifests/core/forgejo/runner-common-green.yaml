@@ -22,15 +22,15 @@ spec:
           secrets:
             - secretKey: CONFIG_INSTANCE
               remoteRef:
-                key: /core/forgejo-runner
+                key: /default/forgejo-runner
                 property: instance
             - secretKey: CONFIG_NAME
               remoteRef:
-                key: /core/forgejo-runner
+                key: /default/forgejo-runner
                 property: name
             - secretKey: CONFIG_TOKEN
               remoteRef:
-                key: /core/forgejo-runner
+                key: /default/forgejo-runner
                 property: REGISTRATION_TOKEN
   syncPolicy:
     syncOptions:
