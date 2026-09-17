@@ -2,15 +2,19 @@
 # Manual edits may be lost in future updates.
 
 provider "registry.opentofu.org/backblaze/b2" {
-  version     = "0.12.1"
-  constraints = "~> 0.12"
+  version     = "0.14.0"
+  constraints = "~> 0.14"
   hashes = [
-    "h1:Z+NjSzzoCP7A8p65qGab43e6fGQFsuoet2ghAPs4Emg=",
-    "zh:4c7a3832f94bb2e46af0ce557bfee4227d4c94c7d626a243fdc58a48268b66ba",
-    "zh:58279e49cb9d350b00670c16a7c15ee6f4c2b7b935f25240f490599da6ca674e",
-    "zh:931bf63adae2b26ebac5794096c625aa2989fb5b39fa67f2f023efbc6e2946d5",
-    "zh:b7290453def715d49723d70f7e3047651229f45f57ab56975261e6867378c150",
-    "zh:c675c7be91214dc02193c0cb649022923648fbf768358738091dfa68d92e4ea5",
+    "h1:/DBlyQgzoUA4F9XLQByPgROfIuUMXzFKHoBiFuxWEjI=",
+    "h1:46Uwjs9cGzh4SfDdfNYE/b8jGVJK5s9tv3hQuRaSDOA=",
+    "h1:Sey48NR01ncfcHjuZrmskirj1UQcirB9vQxVlv3cEqc=",
+    "h1:nD6JAbUCge3ntZmAlMc2vTG/2k6O7D0+VprS0A5cw80=",
+    "h1:txSWoupc55QEYmajORgfUs/+JUDN+W4lQF13f8VbCRg=",
+    "zh:0251a184dec8b16f45f1b51836a060eb5192e4a32ee50d5112961208f38c736b",
+    "zh:21b4c87f066a2f668e9ac900ecde5d43228c6d4aab02d5feb477086d99129b24",
+    "zh:d5b4ab57c02e69a22978cde3f2662acb38f55c6109f69d684e8cebbb661e44be",
+    "zh:dd638846d0ce70fe0e7729b2c757d2127ea864f9ccf7e3a3a3fcd4a42879511b",
+    "zh:fabe243d49eb454117cfcad61990afeacec5389279171b4978c6d9dce8749fe7",
   ]
 }
 
