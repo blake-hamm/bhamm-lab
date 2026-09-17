@@ -1,7 +1,10 @@
 name: smoke-test
 on:
   workflow_dispatch:
-  pull_request:
+  # the Forgejo repo is a mirror of Codeberg; mirror sync fires a push
+  # event (verified in Forgejo source: SyncPullMirror -> SyncPushCommits
+  # -> HookEventPush), so push-to-main is the effective CI trigger
+  push:
     branches: [main]
 jobs:
   smoke:
