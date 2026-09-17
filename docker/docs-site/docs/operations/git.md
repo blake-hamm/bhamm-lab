@@ -27,7 +27,7 @@ The green cluster runs a self-hosted [Forgejo Actions](https://forgejo.org/docs/
 - **Chart:** `code.forgejo.org/forgejo-helm/forgejo-runner.git`, pinned to a commit SHA in the `git-actions` ArgoCD app (`kubernetes/manifests/core/forgejo/runner-helm-green.yaml`). The chart has no tags, releases, or OCI publication.
 - **Registration:** a helm pre-install job runs `forgejo-runner register` using `CONFIG_INSTANCE`/`CONFIG_NAME`/`CONFIG_TOKEN` from the `git-actions-external-secret` secret (rendered by the `git-actions-common` app from the Vault path `default/forgejo-runner`, which is synced from `secrets.enc.json`).
 - **Runner label:** `docker` (default registration label, `docker://data.forgejo.org/oci/node:lts` job image). Workflows select it with `runs-on: docker`.
-- **Smoke test:** `.forgejo/workflows/smoke-test.yml` runs on every PR and on manual dispatch; it has no external action dependencies and validates the runner, dind, and job image pull end-to-end.
+- **Smoke test:** `.forgejo/workflows/smoke-test.yml` runs on push to `main` (the Forgejo repo is a Codeberg mirror — mirror sync fires a push event; PRs are never mirrored) and on manual dispatch; it has no external action dependencies and validates the runner, dind, and job image pull end-to-end.
 
 ### Rotating the registration token
 
