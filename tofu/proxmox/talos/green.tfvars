@@ -35,4 +35,10 @@ metal_amd_framework_workers = {
 amd_gpu_worker_id = [
   "0000:83:00"
 ]
+# Intel Arc Pro B70 (Battlemage, PCI 8086:e223, audio 8086:e2f7).
+# TODO(blake): fill in the full PCI address(es) discovered on method via:
+#   sudo lspci -d 8086: | grep -i "3d\|display\|e223"   (GPU + audio function)
+# e.g. "0000:88:00.0" (GPU) + "0000:88:00.1" (audio). Until set, the B70
+# VM is not created (length == 0 -> no VM / image / schematic).
+intel_b70_worker_id = []
 disk_size_amd_gpu_worker = 100

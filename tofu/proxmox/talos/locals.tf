@@ -8,6 +8,8 @@ locals {
   schematic_id_amd_gpu       = length(var.amd_gpu_worker_id) > 0 ? jsondecode(data.http.schematic_id_amd_gpu[0].response_body)["id"] : null
   schematic_amd_framework    = file("${path.module}/config/schematic-amd-framework.yaml")
   schematic_id_amd_framework = length(var.metal_amd_framework_workers) > 0 ? jsondecode(data.http.schematic_id_amd_framework[0].response_body)["id"] : null
+  schematic_intel_b70        = file("${path.module}/config/schematic-intel-b70.yaml")
+  schematic_id_intel_b70     = length(var.intel_b70_worker_id) > 0 ? jsondecode(data.http.schematic_id_intel_b70[0].response_body)["id"] : null
   # Talos vm config
   master_nodes = [
     for idx in range(var.count_master) : {
@@ -24,6 +26,7 @@ locals {
       vip            = var.vip
       taint          = null
       vm_tag         = null
+      vm_type        = null
       node_label_gpu = null
       hostpci        = {}
       interface      = "eth0"
@@ -45,7 +48,8 @@ locals {
     memory         = floor(var.memory_base_worker * var.proxmox_nodes[1].multiplier)
     vip            = null
     taint          = { key = "intel.com/gpu", effect = "NoSchedule" }
-    vm_tag         = "intel-gpu"
+    vm_tag         = "intel-a310"
+    vm_type        = "intel-gpu"
     node_label_gpu = "intel-a310"
     hostpci        = var.intel_gpu_worker_id
     interface      = "eth0"
@@ -66,12 +70,35 @@ locals {
     memory         = 32768
     vip            = null
     taint          = { key = "amd.com/gpu", effect = "NoSchedule" }
-    vm_tag         = "amd-gpu"
+    vm_tag         = "amd-r9700"
+    vm_type        = "amd-gpu"
     node_label_gpu = "amd-r9700"
     hostpci        = var.amd_gpu_worker_id
     interface      = "eth0"
     is_vm          = true
     schematic_id   = local.schematic_id_amd_gpu
+  }]
+
+  intel_b70_worker_node = [{
+    hostname       = "${var.environment}-talos-worker-intel-b70"
+    ip             = format(var.worker_ip_format, var.count_worker + 3)
+    machine_type   = "worker"
+    machine_tier   = "accelerated"
+    host_node      = "method"
+    vm_id          = var.worker_vm_id_start + var.count_worker + 2
+    cpu            = var.cpu_cores_worker
+    disk_size      = var.disk_size_worker
+    disk_size_user = null
+    memory         = 32768
+    vip            = null
+    taint          = { key = "intel.com/gpu", effect = "NoSchedule" }
+    vm_tag         = "intel-b70"
+    vm_type        = "intel-b70"
+    node_label_gpu = "intel-b70"
+    hostpci        = var.intel_b70_worker_id
+    interface      = "eth0"
+    is_vm          = true
+    schematic_id   = local.schematic_id_intel_b70
   }]
 
   metal_amd_framework_nodes = [
@@ -90,6 +117,7 @@ locals {
       memory         = null
       vip            = null
       vm_tag         = null
+      vm_type        = null
       node_label_gpu = null
       hostpci        = null
       interface      = var.metal_amd_framework_interface
@@ -116,6 +144,7 @@ locals {
         vip            = null
         taint          = null
         vm_tag         = null
+        vm_type        = null
         node_label_gpu = null
         hostpci        = {}
         interface      = "eth0"
@@ -125,6 +154,7 @@ locals {
     ],
     length(var.intel_gpu_worker_id) > 0 ? local.intel_gpu_worker_node : [],
     length(var.amd_gpu_worker_id) > 0 ? local.amd_gpu_worker_node : [],
+    length(var.intel_b70_worker_id) > 0 ? local.intel_b70_worker_node : [],
     length(var.metal_amd_framework_workers) > 0 ? local.metal_amd_framework_nodes : [],
   )
 

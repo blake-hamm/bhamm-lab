@@ -193,6 +193,12 @@ variable "amd_gpu_worker_id" {
   default     = []
 }
 
+variable "intel_b70_worker_id" {
+  description = "A list of PCI IDs for the Intel Arc Pro B70 (Battlemage) and related devices for passthrough."
+  type        = list(string)
+  default     = []
+}
+
 variable "metal_amd_framework_workers" {
   description = "A map of framework amd metal workers to add to the cluster."
   type = map(object({
