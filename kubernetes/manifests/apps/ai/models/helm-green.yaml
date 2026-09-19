@@ -1952,6 +1952,120 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "24Gi"
+          - name: qwen-38-27b-b70
+            description: Qwen 3.8 27B INT4 on Arc Pro B70 (Intel LLM-Scaler vLLM, XPU) — benchmark counterpart to the r9700 MXFP4
+            enabled: true
+            hostIPC: true
+            pvc:
+              storage: "40Gi"
+            image:
+              repository: intel/llm-scaler-vllm
+              tag: 0.14.0-b8.2.1
+            nodeSelector:
+              kubernetes.io/hostname: green-talos-worker-intel-b70
+            hfToken:
+              enabled: true
+              secretName: models-external-secret
+              secretKey: hf_token
+            initContainers:
+              - name: setup
+                image: intel/llm-scaler-vllm:0.14.0-b8.2.1
+                command:
+                  - /bin/bash
+                  - -lc
+                  - |
+                    set -euo pipefail
+                    SNAP=/models/cache/Qwen3.8-27B-INT4
+                    AVAIL_GB=$(df -BG --output=avail /models/cache | tail -1 | tr -dc '0-9')
+                    if [ ! -f "$SNAP/config.json" ] && [ "$AVAIL_GB" -lt 20 ]; then
+                      echo "[setup] only ${AVAIL_GB}GiB free on the model PVC; the INT4 checkpoint"
+                      echo "[setup] download wants ~15GiB. Free space or grow the user volume, then restart."
+                      exit 1
+                    fi
+                    if [ ! -f "$SNAP/config.json" ]; then
+                      echo "[setup] downloading amd/Qwen3.8-27B-Quark-AWQ-INT4-W4A16 (~15 GiB)"
+                      python3 -c 'from huggingface_hub import snapshot_download; snapshot_download("amd/Qwen3.8-27B-Quark-AWQ-INT4-W4A16", local_dir="/models/cache/Qwen3.8-27B-INT4")'
+                    else
+                      echo "[setup] checkpoint exists: $SNAP"
+                    fi
+                env:
+                  - name: HF_HOME
+                    value: /models/cache/huggingface
+                  - name: HF_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        name: models-external-secret
+                        key: hf_token
+                resources:
+                  requests:
+                    cpu: "2"
+                    memory: "8Gi"
+                  limits:
+                    cpu: "8"
+                    memory: "16Gi"
+                volumeMounts:
+                  - name: model-cache
+                    mountPath: /models/cache
+            command:
+              - vllm
+              - serve
+            args:
+              - /models/cache/Qwen3.8-27B-INT4
+              - --served-model-name
+              - qwen-38-27b-b70
+              - --host
+              - 0.0.0.0
+              - --port
+              - "8080"
+              - --dtype
+              - float16
+              - --gpu-memory-utilization
+              - "0.90"
+              - --max-model-len
+              - "32768"
+              - --max-num-seqs
+              - "8"
+              - --max-num-batched-tokens
+              - "8192"
+              - --enable-prefix-caching
+              - --enable-auto-tool-choice
+              - --tool-call-parser
+              - qwen3_coder
+              - --reasoning-parser
+              - qwen3
+              - --trust-remote-code
+            env:
+              - name: VLLM_LOGGING_LEVEL
+                value: INFO
+              - name: VLLM_NO_USAGE_STATS
+                value: "1"
+              - name: VLLM_WORKER_MULTIPROC_METHOD
+                value: spawn
+              - name: VLLM_ALLOW_LONG_MAX_MODEL_LEN
+                value: "1"
+              - name: HF_HUB_OFFLINE
+                value: "1"
+              - name: ZES_ENABLE_SYSMAN
+                value: "1"
+              - name: ONEAPI_DEVICE_SELECTOR
+                value: level_zero:0
+            zeroscaling:
+              enabled: true
+              minReplicas: 1
+              cooldownPeriod: 1800
+              trigger:
+                query: >-
+                  sum(vllm:num_requests_running{container="qwen-38-27b-b70"}) or vector(0)
+                threshold: "1"
+            resources:
+              limits:
+                gpu.intel.com/xe: 1
+                memory: "30Gi"
+                cpu: "8"
+              requests:
+                gpu.intel.com/xe: 1
+                cpu: "4"
+                memory: "24Gi"
   ignoreDifferences:
     - group: apps
       kind: Deployment
