@@ -183,7 +183,7 @@ spec:
                 cpu: "2"
                 memory: "20Gi"
             nodeSelector:
-              kubernetes.io/hostname: green-talos-worker-amd-gpu
+              kubernetes.io/hostname: green-talos-worker-amd-r9700
             hfToken:
               enabled: true
               secretName: models-external-secret
@@ -1654,7 +1654,7 @@ spec:
               repository: harbor.bhamm-lab.com/library/vllm-radiance-mxfp4
               tag: latest
             nodeSelector:
-              kubernetes.io/hostname: green-talos-worker-amd-gpu
+              kubernetes.io/hostname: green-talos-worker-amd-r9700
             hfToken:
               enabled: true
               secretName: models-external-secret

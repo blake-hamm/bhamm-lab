@@ -6,6 +6,9 @@ machine:
     topology.kubernetes.io/zone: ${node_name}
     machine_tier: ${machine_tier}
     machine_type: ${type}
+%{ if node_label_gpu != null }
+    gpu: ${node_label_gpu}
+%{ endif }
 %{ if taint != null }
   kubelet:
     extraConfig:

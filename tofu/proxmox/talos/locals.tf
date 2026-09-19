@@ -24,6 +24,7 @@ locals {
       vip            = var.vip
       taint          = null
       vm_tag         = null
+      node_label_gpu = null
       hostpci        = {}
       interface      = "eth0"
       is_vm          = true
@@ -32,7 +33,7 @@ locals {
   ]
 
   intel_gpu_worker_node = [{
-    hostname       = "${var.environment}-talos-worker-intel-gpu"
+    hostname       = "${var.environment}-talos-worker-intel-a310"
     ip             = format(var.worker_ip_format, var.count_worker)
     machine_type   = "worker"
     machine_tier   = "accelerated"
@@ -45,6 +46,7 @@ locals {
     vip            = null
     taint          = { key = "intel.com/gpu", effect = "NoSchedule" }
     vm_tag         = "intel-gpu"
+    node_label_gpu = "intel-a310"
     hostpci        = var.intel_gpu_worker_id
     interface      = "eth0"
     is_vm          = true
@@ -52,7 +54,7 @@ locals {
   }]
 
   amd_gpu_worker_node = [{
-    hostname       = "${var.environment}-talos-worker-amd-gpu"
+    hostname       = "${var.environment}-talos-worker-amd-r9700"
     ip             = format(var.worker_ip_format, var.count_worker + 1)
     machine_type   = "worker"
     machine_tier   = "accelerated"
@@ -65,6 +67,7 @@ locals {
     vip            = null
     taint          = { key = "amd.com/gpu", effect = "NoSchedule" }
     vm_tag         = "amd-gpu"
+    node_label_gpu = "amd-r9700"
     hostpci        = var.amd_gpu_worker_id
     interface      = "eth0"
     is_vm          = true
@@ -87,6 +90,7 @@ locals {
       memory         = null
       vip            = null
       vm_tag         = null
+      node_label_gpu = null
       hostpci        = null
       interface      = var.metal_amd_framework_interface
       schematic_id   = local.schematic_id_amd_framework
@@ -112,6 +116,7 @@ locals {
         vip            = null
         taint          = null
         vm_tag         = null
+        node_label_gpu = null
         hostpci        = {}
         interface      = "eth0"
         is_vm          = true

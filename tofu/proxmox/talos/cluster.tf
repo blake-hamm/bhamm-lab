@@ -41,22 +41,23 @@ data "talos_machine_configuration" "this" {
   machine_secrets  = talos_machine_secrets.this.machine_secrets
   config_patches = [
     templatefile("${path.module}/config/common.yaml.tftpl", {
-      schematic_id  = each.value.schematic_id
-      talos_version = var.talos_version
-      node_name     = each.value.host_node
-      cluster_name  = var.environment
-      hostname      = each.key
-      ip            = each.value.ip
-      mtu           = var.mtu
-      gateway       = var.network_gateway
-      vip           = each.value.vip
-      interface     = each.value.interface
-      taint         = try(each.value.taint, "")
-      vlan_id       = var.vlan_id
-      nameservers   = var.dns_servers
-      machine_tier  = each.value.machine_tier
-      type          = each.value.is_vm ? "vm" : "metal"
-      is_amd_gpu    = each.value.vm_tag == "amd-gpu"
+      schematic_id   = each.value.schematic_id
+      talos_version  = var.talos_version
+      node_name      = each.value.host_node
+      cluster_name   = var.environment
+      hostname       = each.key
+      ip             = each.value.ip
+      mtu            = var.mtu
+      gateway        = var.network_gateway
+      vip            = each.value.vip
+      interface      = each.value.interface
+      taint          = try(each.value.taint, "")
+      vlan_id        = var.vlan_id
+      nameservers    = var.dns_servers
+      machine_tier   = each.value.machine_tier
+      type           = each.value.is_vm ? "vm" : "metal"
+      is_amd_gpu     = each.value.vm_tag == "amd-gpu"
+      node_label_gpu = each.value.node_label_gpu
     }), each.value.machine_type == "controlplane" ?
     templatefile("${path.module}/config/master.yaml.tftpl", {
       # kubelet = var.cluster.kubelet

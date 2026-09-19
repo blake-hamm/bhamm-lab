@@ -37,8 +37,8 @@ pve_pci_device_ids:
   - id: "1002:ab40" # AMD R9700 audio
   - id: "8086:56a6" # Intel Arc A310
   - id: "8086:4f92" # Intel Arc A310 audio
-  - id: "8086:e223" # Intel Battlemage G21
-  - id: "8086:e2f7" # Intel Battlemage G21 audio
+  - id: "8086:e223" # Intel Arc Pro B70 (Battlemage, BMG-G31)
+  - id: "8086:e2f7" # Intel Arc Pro B70 audio
   - id: "1b21:1064" # Sata device
   - id: "2116:2116" # Sata device
 pve_vfio_blacklist_drivers:
