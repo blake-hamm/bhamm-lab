@@ -1,15 +1,15 @@
 locals {
   # Gather metadata to download talos image
-  schematic                  = file("${path.module}/config/schematic.yaml")
-  schematic_id               = jsondecode(data.http.schematic_id.response_body)["id"]
-  schematic_intel_gpu        = file("${path.module}/config/schematic-intel-gpu.yaml")
-  schematic_id_intel_gpu     = length(var.intel_gpu_worker_id) > 0 ? jsondecode(data.http.schematic_id_intel_gpu[0].response_body)["id"] : null
-  schematic_amd_gpu          = file("${path.module}/config/schematic-amd-gpu.yaml")
-  schematic_id_amd_gpu       = length(var.amd_gpu_worker_id) > 0 ? jsondecode(data.http.schematic_id_amd_gpu[0].response_body)["id"] : null
-  schematic_amd_framework    = file("${path.module}/config/schematic-amd-framework.yaml")
-  schematic_id_amd_framework = length(var.metal_amd_framework_workers) > 0 ? jsondecode(data.http.schematic_id_amd_framework[0].response_body)["id"] : null
-  schematic_intel_b70        = file("${path.module}/config/schematic-intel-b70.yaml")
-  schematic_id_intel_b70     = length(var.intel_b70_worker_id) > 0 ? jsondecode(data.http.schematic_id_intel_b70[0].response_body)["id"] : null
+  schematic                 = file("${path.module}/config/schematic.yaml")
+  schematic_id              = jsondecode(data.http.schematic_id.response_body)["id"]
+  schematic_intel_a310      = file("${path.module}/config/schematic-intel-a310.yaml")
+  schematic_id_intel_a310   = length(var.intel_a310_worker_id) > 0 ? jsondecode(data.http.schematic_id_intel_a310[0].response_body)["id"] : null
+  schematic_amd_r9700       = file("${path.module}/config/schematic-amd-r9700.yaml")
+  schematic_id_amd_r9700    = length(var.amd_r9700_worker_id) > 0 ? jsondecode(data.http.schematic_id_amd_r9700[0].response_body)["id"] : null
+  schematic_amd_framework   = file("${path.module}/config/schematic-amd-framework.yaml")
+  schematic_id_amd_framework= length(var.metal_amd_framework_workers) > 0 ? jsondecode(data.http.schematic_id_amd_framework[0].response_body)["id"] : null
+  schematic_intel_b70       = file("${path.module}/config/schematic-intel-b70.yaml")
+  schematic_id_intel_b70    = length(var.intel_b70_worker_id) > 0 ? jsondecode(data.http.schematic_id_intel_b70[0].response_body)["id"] : null
   # Talos vm config
   master_nodes = [
     for idx in range(var.count_master) : {
@@ -35,7 +35,7 @@ locals {
     }
   ]
 
-  intel_gpu_worker_node = [{
+  intel_a310_worker_node = [{
     hostname       = "${var.environment}-talos-worker-intel-a310"
     ip             = format(var.worker_ip_format, var.count_worker)
     machine_type   = "worker"
@@ -49,15 +49,15 @@ locals {
     vip            = null
     taint          = { key = "intel.com/gpu", effect = "NoSchedule" }
     vm_tag         = "intel-a310"
-    vm_type        = "intel-gpu"
+    vm_type        = "intel-a310"
     node_label_gpu = "intel-a310"
-    hostpci        = var.intel_gpu_worker_id
+    hostpci        = var.intel_a310_worker_id
     interface      = "eth0"
     is_vm          = true
-    schematic_id   = local.schematic_id_intel_gpu
+    schematic_id   = local.schematic_id_intel_a310
   }]
 
-  amd_gpu_worker_node = [{
+  amd_r9700_worker_node = [{
     hostname       = "${var.environment}-talos-worker-amd-r9700"
     ip             = format(var.worker_ip_format, var.count_worker + 1)
     machine_type   = "worker"
@@ -66,17 +66,17 @@ locals {
     vm_id          = var.worker_vm_id_start + var.count_worker + 1
     cpu            = 8
     disk_size      = var.disk_size_worker
-    disk_size_user = var.disk_size_amd_gpu_worker
+    disk_size_user = var.disk_size_amd_r9700_worker
     memory         = 32768
     vip            = null
     taint          = { key = "amd.com/gpu", effect = "NoSchedule" }
     vm_tag         = "amd-r9700"
-    vm_type        = "amd-gpu"
+    vm_type        = "amd-r9700"
     node_label_gpu = "amd-r9700"
-    hostpci        = var.amd_gpu_worker_id
+    hostpci        = var.amd_r9700_worker_id
     interface      = "eth0"
     is_vm          = true
-    schematic_id   = local.schematic_id_amd_gpu
+    schematic_id   = local.schematic_id_amd_r9700
   }]
 
   intel_b70_worker_node = [{
@@ -152,8 +152,8 @@ locals {
         schematic_id   = local.schematic_id
       }
     ],
-    length(var.intel_gpu_worker_id) > 0 ? local.intel_gpu_worker_node : [],
-    length(var.amd_gpu_worker_id) > 0 ? local.amd_gpu_worker_node : [],
+    length(var.intel_a310_worker_id) > 0 ? local.intel_a310_worker_node : [],
+    length(var.amd_r9700_worker_id) > 0 ? local.amd_r9700_worker_node : [],
     length(var.intel_b70_worker_id) > 0 ? local.intel_b70_worker_node : [],
     length(var.metal_amd_framework_workers) > 0 ? local.metal_amd_framework_nodes : [],
   )

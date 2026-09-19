@@ -13,7 +13,7 @@ resource "proxmox_virtual_environment_vm" "this" {
   ], each.value.vm_tag != null ? [each.value.vm_tag] : []))
   machine       = "q35"
   scsi_hardware = "virtio-scsi-single"
-  bios          = contains(["intel-gpu", "intel-b70"], each.value.vm_type) ? "seabios" : var.bios_type
+  bios          = contains(["intel-a310", "intel-b70"], each.value.vm_type) ? "seabios" : var.bios_type
 
   started         = true
   on_boot         = true
@@ -26,7 +26,7 @@ resource "proxmox_virtual_environment_vm" "this" {
   }
 
   dynamic "efi_disk" {
-    for_each = contains(["intel-gpu", "intel-b70"], each.value.vm_type) ? [] : [1]
+    for_each = contains(["intel-a310", "intel-b70"], each.value.vm_type) ? [] : [1]
     content {
       datastore_id = var.vm_datastore_id
       type         = "4m"
@@ -70,7 +70,7 @@ resource "proxmox_virtual_environment_vm" "this" {
     ssd          = true
     file_format  = "raw"
     size         = each.value.disk_size
-    file_id      = each.value.vm_type == "intel-gpu" ? proxmox_virtual_environment_download_file.intel_gpu[0].id : (each.value.vm_type == "intel-b70" ? proxmox_virtual_environment_download_file.intel_b70[0].id : (each.value.vm_type == "amd-gpu" ? proxmox_virtual_environment_download_file.amd_gpu[0].id : proxmox_virtual_environment_download_file.this.id))
+    file_id      = each.value.vm_type == "intel-a310" ? proxmox_virtual_environment_download_file.intel_a310[0].id : (each.value.vm_type == "intel-b70" ? proxmox_virtual_environment_download_file.intel_b70[0].id : (each.value.vm_type == "amd-r9700" ? proxmox_virtual_environment_download_file.amd_r9700[0].id : proxmox_virtual_environment_download_file.this.id))
   }
 
   dynamic "disk" {

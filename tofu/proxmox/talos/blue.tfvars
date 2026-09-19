@@ -6,4 +6,4 @@ worker_vm_id_start = 220
 master_ip_format   = "10.0.30.16%d"
 worker_ip_format   = "10.0.30.17%d"
 vip                = "10.0.30.130"
-# enable_intel_gpu_worker = true
+# enable_intel_a310_worker = true

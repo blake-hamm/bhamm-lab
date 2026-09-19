@@ -5,20 +5,20 @@ data "http" "schematic_id" {
   request_body = local.schematic
 }
 
-data "http" "schematic_id_intel_gpu" {
-  count = length(var.intel_gpu_worker_id) == 0 ? 0 : 1
+data "http" "schematic_id_intel_a310" {
+  count = length(var.intel_a310_worker_id) == 0 ? 0 : 1
 
   url          = "${var.talos_factory_url}/schematics"
   method       = "POST"
-  request_body = local.schematic_intel_gpu
+  request_body = local.schematic_intel_a310
 }
 
-data "http" "schematic_id_amd_gpu" {
-  count = length(var.amd_gpu_worker_id) == 0 ? 0 : 1
+data "http" "schematic_id_amd_r9700" {
+  count = length(var.amd_r9700_worker_id) == 0 ? 0 : 1
 
   url          = "${var.talos_factory_url}/schematics"
   method       = "POST"
-  request_body = local.schematic_amd_gpu
+  request_body = local.schematic_amd_r9700
 }
 
 data "http" "schematic_id_intel_b70" {
@@ -37,8 +37,8 @@ data "http" "schematic_id_amd_framework" {
   request_body = local.schematic_amd_framework
 }
 
-resource "proxmox_virtual_environment_download_file" "intel_gpu" {
-  count = length(var.intel_gpu_worker_id) == 0 ? 0 : 1
+resource "proxmox_virtual_environment_download_file" "intel_a310" {
+  count = length(var.intel_a310_worker_id) == 0 ? 0 : 1
 
   node_name               = var.proxmox_file_node
   content_type            = "iso"
@@ -46,8 +46,8 @@ resource "proxmox_virtual_environment_download_file" "intel_gpu" {
   decompression_algorithm = "gz"
   overwrite               = false
 
-  url       = "${var.talos_factory_url}/image/${local.schematic_id_intel_gpu}/${var.talos_version}/${var.talos_platform}-${var.talos_arch}.raw.gz"
-  file_name = "${var.environment}-talos-${local.schematic_id_intel_gpu}-${var.talos_version}-${var.talos_platform}-${var.talos_arch}.img"
+  url       = "${var.talos_factory_url}/image/${local.schematic_id_intel_a310}/${var.talos_version}/${var.talos_platform}-${var.talos_arch}.raw.gz"
+  file_name = "${var.environment}-talos-${local.schematic_id_intel_a310}-${var.talos_version}-${var.talos_platform}-${var.talos_arch}.img"
 }
 
 resource "proxmox_virtual_environment_download_file" "intel_b70" {
@@ -63,8 +63,8 @@ resource "proxmox_virtual_environment_download_file" "intel_b70" {
   file_name = "${var.environment}-talos-${local.schematic_id_intel_b70}-${var.talos_version}-${var.talos_platform}-${var.talos_arch}.img"
 }
 
-resource "proxmox_virtual_environment_download_file" "amd_gpu" {
-  count = length(var.amd_gpu_worker_id) == 0 ? 0 : 1
+resource "proxmox_virtual_environment_download_file" "amd_r9700" {
+  count = length(var.amd_r9700_worker_id) == 0 ? 0 : 1
 
   node_name               = var.proxmox_file_node
   content_type            = "iso"
@@ -72,8 +72,8 @@ resource "proxmox_virtual_environment_download_file" "amd_gpu" {
   decompression_algorithm = "gz"
   overwrite               = false
 
-  url       = "${var.talos_factory_url}/image/${local.schematic_id_amd_gpu}/${var.talos_version}/${var.talos_platform}-${var.talos_arch}.raw.gz"
-  file_name = "${var.environment}-talos-${local.schematic_id_amd_gpu}-${var.talos_version}-${var.talos_platform}-${var.talos_arch}.img"
+  url       = "${var.talos_factory_url}/image/${local.schematic_id_amd_r9700}/${var.talos_version}/${var.talos_platform}-${var.talos_arch}.raw.gz"
+  file_name = "${var.environment}-talos-${local.schematic_id_amd_r9700}-${var.talos_version}-${var.talos_platform}-${var.talos_arch}.img"
 }
 
 resource "proxmox_virtual_environment_download_file" "this" {

@@ -56,7 +56,7 @@ data "talos_machine_configuration" "this" {
       nameservers    = var.dns_servers
       machine_tier   = each.value.machine_tier
       type           = each.value.is_vm ? "vm" : "metal"
-      is_amd_gpu     = each.value.vm_type == "amd-gpu"
+      is_amd_gpu     = each.value.vm_type == "amd-r9700"
       node_label_gpu = each.value.node_label_gpu
     }), each.value.machine_type == "controlplane" ?
     templatefile("${path.module}/config/master.yaml.tftpl", {
@@ -66,7 +66,7 @@ data "talos_machine_configuration" "this" {
       inline_manifests = jsonencode(terraform_data.cilium_bootstrap_inline_manifests.output)
     }) : "",
     each.value.disk_size_user != null ?
-    templatefile("${path.module}/config/user-volume-config-amd-gpu.yaml.tftpl", {
+    templatefile("${path.module}/config/user-volume-config-amd-r9700.yaml.tftpl", {
       disk_size_user = each.value.disk_size_user
     }) : ""
   ]
