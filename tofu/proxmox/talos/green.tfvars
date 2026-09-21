@@ -6,7 +6,7 @@ worker_vm_id_start = 120
 master_ip_format   = "10.0.30.6%d"
 worker_ip_format   = "10.0.30.7%d"
 vip                = "10.0.30.30"
-intel_gpu_worker_id = [
+intel_a310_worker_id = [
   "0000:86:00.0",
   "0000:87:00.0"
 ]
@@ -32,7 +32,14 @@ metal_amd_framework_workers = {
     usb4_peer_ip  = "10.30.0.78"
   }
 }
-amd_gpu_worker_id = [
+amd_r9700_worker_id = [
   "0000:83:00"
 ]
-disk_size_amd_gpu_worker = 100
+# Intel Arc Pro B70 (Battlemage, PCI 8086:e223, audio 8086:e2f7).
+# PCI addresses discovered on method via lspci: GPU=c3:00.0, Audio=c4:00.0
+intel_b70_worker_id = [
+  "0000:c3:00.0",
+  "0000:c4:00.0"
+]
+disk_size_amd_r9700_worker = 100
+disk_size_intel_b70_worker = 100

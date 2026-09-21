@@ -12,7 +12,7 @@ spec:
     namespace: models
   source:
     repoURL: https://github.com/blake-hamm/kube-ai-stack.git
-    targetRevision: main
+    targetRevision: fix/model-resources-verbatim
     path: charts/kube-ai-stack
     helm:
       valuesObject:
@@ -183,7 +183,7 @@ spec:
                 cpu: "2"
                 memory: "20Gi"
             nodeSelector:
-              kubernetes.io/hostname: green-talos-worker-amd-gpu
+              kubernetes.io/hostname: green-talos-worker-amd-r9700
             hfToken:
               enabled: true
               secretName: models-external-secret
@@ -1415,9 +1415,11 @@ spec:
               limits:
                 amd.com/gpu: 1
                 memory: "124Gi"
+                cpu: "4"
               requests:
                 amd.com/gpu: 1
                 memory: "110Gi"
+                cpu: "1"
             nodeSelector:
               kubernetes.io/hostname: green-talos-worker-tail
             zeroscaling:
@@ -1654,7 +1656,7 @@ spec:
               repository: harbor.bhamm-lab.com/library/vllm-radiance-mxfp4
               tag: latest
             nodeSelector:
-              kubernetes.io/hostname: green-talos-worker-amd-gpu
+              kubernetes.io/hostname: green-talos-worker-amd-r9700
             hfToken:
               enabled: true
               secretName: models-external-secret
@@ -1950,6 +1952,148 @@ spec:
                 cpu: "8"
               requests:
                 amd.com/gpu: 1
+                cpu: "4"
+                memory: "24Gi"
+          - name: qwen-38-27b-b70
+            description: Qwen 3.8 27B INT4 on Arc Pro B70 (Intel LLM-Scaler vLLM, XPU) — benchmark counterpart to the r9700 MXFP4
+            enabled: true
+            hostIPC: true
+            pvc:
+              storage: "40Gi"
+            image:
+              repository: intel/llm-scaler-vllm
+              tag: 0.26.0-b2
+            nodeSelector:
+              kubernetes.io/hostname: green-talos-worker-intel-b70
+            tolerations:
+              - key: "intel.com/gpu"
+                operator: "Exists"
+                effect: "NoSchedule"
+            hfToken:
+              enabled: true
+              secretName: models-external-secret
+              secretKey: hf_token
+            initContainers:
+              - name: setup
+                image: intel/llm-scaler-vllm:0.26.0-b2
+                command:
+                  - /bin/bash
+                  - -lc
+                  - |
+                    set -euo pipefail
+                    SNAP=/models/cache/Qwen3.8-27B-GPTQ-INT4
+                    AVAIL_GB=$(df -BG --output=avail /models/cache | tail -1 | tr -dc '0-9')
+                    if [ ! -f "$SNAP/config.json" ] && [ "$AVAIL_GB" -lt 25 ]; then
+                      echo "[setup] only ${AVAIL_GB}GiB free on the model PVC; the GPTQ INT4 checkpoint"
+                      echo "[setup] download wants ~20GiB. Free space or grow the user volume, then restart."
+                      exit 1
+                    fi
+                    if [ ! -f "$SNAP/config.json" ]; then
+                      echo "[setup] downloading SergiioB/Qwen3.8-27B-GPTQ-Int4-sym-G128-MTP-BF16 (~20 GiB)"
+                      python3 -c 'from huggingface_hub import snapshot_download; snapshot_download("SergiioB/Qwen3.8-27B-GPTQ-Int4-sym-G128-MTP-BF16", local_dir="/models/cache/Qwen3.8-27B-GPTQ-INT4")'
+                    else
+                      echo "[setup] checkpoint exists: $SNAP"
+                    fi
+                env:
+                  - name: HF_HOME
+                    value: /models/cache/huggingface
+                  - name: HF_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        name: models-external-secret
+                        key: hf_token
+                resources:
+                  requests:
+                    cpu: "2"
+                    memory: "8Gi"
+                  limits:
+                    cpu: "8"
+                    memory: "16Gi"
+                volumeMounts:
+                  - name: model-cache
+                    mountPath: /models/cache
+            command:
+              - vllm
+              - serve
+            args:
+              - /models/cache/Qwen3.8-27B-GPTQ-INT4
+              - --served-model-name
+              - qwen-38-27b-b70
+              - --host
+              - 0.0.0.0
+              - --port
+              - "8080"
+              - --quantization
+              - gptq
+              - --dtype
+              - float16
+              # Match the r9700 context length (114688). fp16 KV does NOT fit:
+              # vLLM startup check requires 8.63 GiB KV at 114688 but only 6.96
+              # GiB is available at gpu-mem-util 0.90 (fp16 ceiling: 88064).
+              # fp8 KV halves the requirement to ~4.3 GiB and fits with ~2.6 GiB
+              # headroom. This is the validated config: this exact checkpoint was
+              # benchmarked on this exact B70 at 131072 context with fp8 KV
+              # (56-63 tok/s). fp8 quantizes only the cached K/V tensors —
+              # weights stay GPTQ INT4, MTP head stays BF16 (same as r9700).
+              - --kv-cache-dtype
+              - fp8
+              - --gpu-memory-utilization
+              - "0.90"
+              - --max-model-len
+              - "114688"
+              - --max-num-seqs
+              - "8"
+              - --max-num-batched-tokens
+              - "8192"
+              - --speculative-config
+              - '{"method":"mtp","num_speculative_tokens":4}'
+              - --enable-prefix-caching
+              - --enable-auto-tool-choice
+              - --tool-call-parser
+              - qwen3_coder
+              - --reasoning-parser
+              - qwen3
+              - --trust-remote-code
+            env:
+              - name: VLLM_LOGGING_LEVEL
+                value: INFO
+              - name: VLLM_NO_USAGE_STATS
+                value: "1"
+              - name: VLLM_WORKER_MULTIPROC_METHOD
+                value: spawn
+              - name: VLLM_ALLOW_LONG_MAX_MODEL_LEN
+                value: "1"
+              - name: HF_HUB_OFFLINE
+                value: "1"
+              - name: ZES_ENABLE_SYSMAN
+                value: "1"
+              - name: ONEAPI_DEVICE_SELECTOR
+                value: level_zero:0
+              - name: VLLM_CACHE_ROOT
+                value: /models/cache/vllm
+              - name: TORCHINDUCTOR_CACHE_DIR
+                value: /models/cache/inductor
+              - name: TRITON_CACHE_DIR
+                value: /models/cache/triton
+              - name: TRITON_CACHE_AUTOTUNING
+                value: "1"
+              - name: PYTHONPYCACHEPREFIX
+                value: /models/cache/pypycache
+            zeroscaling:
+              enabled: true
+              minReplicas: 1
+              cooldownPeriod: 1800
+              trigger:
+                query: >-
+                  sum(vllm:num_requests_running{container="qwen-38-27b-b70"}) or vector(0)
+                threshold: "1"
+            resources:
+              limits:
+                gpu.intel.com/xe: 1
+                memory: "30Gi"
+                cpu: "8"
+              requests:
+                gpu.intel.com/xe: 1
                 cpu: "4"
                 memory: "24Gi"
   ignoreDifferences:

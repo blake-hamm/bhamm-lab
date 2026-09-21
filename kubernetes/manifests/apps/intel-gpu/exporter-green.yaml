@@ -26,7 +26,10 @@ spec:
         app: intel-gpu-exporter
     spec:
       nodeSelector:
-        intel.feature.node.kubernetes.io/gpu: "true"
+        # i915-only exporter (intel_gpu_top cannot see xe/Battlemage devices).
+        # A310 only; the B70 is covered by the plugin's Level-Zero health
+        # management and (optionally) Intel XPU Manager.
+        gpu: intel-a310
       hostPID: true
       tolerations:
         - key: "intel.com/gpu"

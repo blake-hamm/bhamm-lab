@@ -1,0 +1,61 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: intel-gpu-xpumd
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  destination:
+    namespace: intel-gpu-monitoring
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/intel/xpumanager.git
+    path: xpumd/charts/xpumd
+    targetRevision: v2.2.0
+    helm:
+      releaseName: xpumd
+      valuesObject:
+        # Pin the image (chart default is "latest").
+        image:
+          tag: v2.2.0
+        # Request the GPU plugin's monitoring resource (device-plugin model,
+        # not DRA) so xpumd runs on nodes advertising gpu.intel.com/monitoring.
+        gpuAccess: plugin
+        # Create the Service + ServiceMonitor for Prometheus scraping.
+        service:
+          create: true
+        prometheus:
+          monitor: true
+          # Matches the kube-prometheus-stack release (nameOverride: monitor)
+          # so the operator's ServiceMonitor discovery picks it up.
+          release: monitor
+        # Schedule on the taint'd GPU nodes.
+        tolerations:
+          - key: "intel.com/gpu"
+            operator: "Exists"
+            effect: "NoSchedule"
+        # Only the GPU nodes advertise gpu.intel.com/monitoring (via NFD).
+        # Without this the DaemonSet tries all nodes and the non-GPU ones
+        # stay Pending. NFD label is present on both A310 (i915) and B70 (xe).
+        nodeSelector:
+          intel.feature.node.kubernetes.io/gpu: "true"
+        # The chart's default config wires the metrics pipeline ONLY to the
+        # intel_xpu_info gRPC exporter (Unix socket /run/xpumd/...sock, the
+        # DRA-mode interface), so nothing listens on :8080 and Prometheus gets
+        # "connection refused". Add the prometheus exporter to the metrics
+        # pipeline so :8080 serves the hw_* metrics. Helm deep-merges this into
+        # the default config; only this list is replaced.
+        config:
+          service:
+            pipelines:
+              metrics:
+                exporters: [intel_xpu_info, prometheus]
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+    automated:
+      prune: true
+      selfHeal: true

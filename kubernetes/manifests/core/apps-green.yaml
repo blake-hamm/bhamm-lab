@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://codeberg.org/blake-hamm/bhamm-lab.git
-    targetRevision: feature/forgejo-actions-runner
+    targetRevision: feature/intel-b70-talos-vm
     path: kubernetes/manifests/apps
     directory:
       recurse: true

@@ -157,6 +157,9 @@ spec:
                 url: https://codeberg.org/blake-hamm/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/nut.json
                 token: ''
                 datasource: Prometheus
+              intel-gpu-xpumd:
+                url: https://codeberg.org/blake-hamm/bhamm-lab/raw/branch/feature/intel-b70-talos-vm/kubernetes/manifests/base/monitor/dashboards/intel-gpu-xpumd.json
+                token: ''
               opnsense:
                 url: https://codeberg.org/blake-hamm/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/opnsense.json
                 token: ''
