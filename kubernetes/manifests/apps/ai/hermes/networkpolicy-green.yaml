@@ -103,6 +103,14 @@ spec:
         - ports:
             - port: "3002"
               protocol: TCP
+    # Twenty CRM server (in-cluster; mint agent MCP + API access, Bearer key).
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: twenty
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
     # OIDC discovery / token exchange (Authelia via Traefik).
     # App connects BOTH to the Traefik LB VIP and directly to the Traefik
     # pod IPs (8443 = websecure), so cover both.

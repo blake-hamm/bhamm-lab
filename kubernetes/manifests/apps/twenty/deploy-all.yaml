@@ -27,9 +27,21 @@ spec:
         - name: twenty-local-data
           persistentVolumeClaim:
             claimName: twenty-local-data
+      initContainers:
+        - name: fix-local-storage-perms
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - chown -R 1000:1000 /app/packages/twenty-server/.local-storage
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - mountPath: /app/packages/twenty-server/.local-storage
+              name: twenty-local-data
       containers:
         - name: twenty
-          image: twentycrm/twenty:v1.16.7
+          image: twentycrm/twenty:v2.41.0
           imagePullPolicy: Always
           env:
             - name: NODE_PORT
@@ -56,22 +68,47 @@ spec:
                 secretKeyRef:
                   name: twenty-external-secret
                   key: APP_SECRET
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: twenty-external-secret
+                  key: ENCRYPTION_KEY
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=3072"
           ports:
             - containerPort: 3000
               name: http-tcp
               protocol: TCP
           resources:
             requests:
-              memory: "256Mi"
+              memory: "1Gi"
               cpu: "250m"
             limits:
-              memory: "1024Mi"
+              memory: "4Gi"
               cpu: "1000m"
           stdin: true
           tty: true
           volumeMounts:
             - mountPath: /app/packages/twenty-server/.local-storage
               name: twenty-local-data
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            periodSeconds: 10
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            periodSeconds: 30
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            periodSeconds: 10
+            failureThreshold: 3
       dnsPolicy: ClusterFirst
       restartPolicy: Always
 ---
@@ -102,7 +139,7 @@ spec:
     spec:
       containers:
         - name: twenty
-          image: twentycrm/twenty:v1.16.7
+          image: twentycrm/twenty:v2.41.0
           imagePullPolicy: Always
           env:
             - name: SERVER_URL
@@ -123,6 +160,11 @@ spec:
                 secretKeyRef:
                   name: twenty-external-secret
                   key: APP_SECRET
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: twenty-external-secret
+                  key: ENCRYPTION_KEY
           command:
             - yarn
             - worker:prod

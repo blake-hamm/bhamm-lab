@@ -25,6 +25,8 @@ spec:
             enabled: true
         dragonfly:
           enabled: true
+          args:
+            - --default_lua_flags=allow-undeclared-keys
         pvc:
           - name: twenty-local-data
             storageSize: 10Gi
@@ -40,6 +42,10 @@ spec:
               remoteRef:
                 key: /default/twenty
                 property: APP_SECRET
+            - secretKey: ENCRYPTION_KEY
+              remoteRef:
+                key: /default/twenty
+                property: ENCRYPTION_KEY
         ingressRoutes:
           - name: twenty
             ingressClass: traefik-external
