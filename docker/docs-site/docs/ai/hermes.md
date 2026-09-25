@@ -50,7 +50,7 @@ Key design constraints from the upstream image:
 Signal runs as a sidecar container (`ghcr.io/asamk/signal-cli`, JVM tag — the GraalVM `-native` build mangles QR output, see signal-cli #2073) in single-account daemon mode on `:8080`. Hermes reaches it via the `hermes` Service, not loopback (separate container netns).
 
 - Session data lives on the `hermes-signal-cli` rbd PVC at `/var/lib/signal-cli` (note: with `--config`, account data is at `<config>/data/accounts.json`, not the `$HOME` default).
-- Channel policy: DMs (including Note-to-Self) are dropped (`SIGNAL_ALLOWED_USERS=none`); a dedicated "hermes" Signal group is the only live channel (`SIGNAL_GROUP_ALLOWED_USERS`). Group authz relies on a backport of upstream PR #44706, mounted via `authz-patch-configmap-green.yaml` — tied to the pinned image digest; regenerate on image bump, delete once the PR ships.
+- Channel policy: DMs (including Note-to-Self) are dropped (`SIGNAL_ALLOWED_USERS=none`); a dedicated "hermes" Signal group is the only live channel (`SIGNAL_GROUP_ALLOWED_USERS`). Group authz relies on a backport of upstream PR #44706, mounted via `authz-patch-configmap-prod.yaml` — tied to the pinned image digest; regenerate on image bump, delete once the PR ships.
 - **Linking** is built into the sidecar entrypoint: if no account exists on the PVC, it runs `signal-cli link` and logs the `tsdevice:` URI. QR-ify locally (`qrencode -t ANSIUTF8 '<uri>'`) and scan from the phone; the same process then execs the daemon. Do not run `signal-cli receive`/`listAccounts` while the daemon is up — concurrent access corrupts the account DB.
 
 ### Boot race (known issue)
@@ -59,7 +59,7 @@ The gateway connects to signal-cli once at startup and the JVM daemon is slower 
 
 ## Networking
 
-`networkpolicy-green.yaml` holds the cluster's first CiliumNetworkPolicies (default-deny once applied):
+`networkpolicy-prod.yaml` holds the cluster's first CiliumNetworkPolicies (default-deny once applied):
 
 - **Ingress:** traefik pods → 9119 only
 - **Egress:** kube-dns, litellm:4000, searxng:8080 (web search), traefik (443 + 8443, for the Authelia OIDC token exchange), the hermes Service :8080 (signal-cli), and `world:443` for Signal servers

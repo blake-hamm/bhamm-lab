@@ -1,4 +1,4 @@
-environment        = "green"
+environment        = "prod"
 count_master       = 3
 count_worker       = 3
 master_vm_id_start = 110
@@ -41,5 +41,6 @@ intel_b70_worker_id = [
   "0000:c3:00.0",
   "0000:c4:00.0"
 ]
-disk_size_amd_r9700_worker = 100
-disk_size_intel_b70_worker = 100
+disk_size_amd_r9700_worker      = 100
+disk_size_boot_amd_r9700_worker = 150
+disk_size_intel_b70_worker      = 100

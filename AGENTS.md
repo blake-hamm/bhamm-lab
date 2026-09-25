@@ -7,7 +7,7 @@ This repository is an infrastructure monorepo for managing homelab infrastructur
 Key infrastructure facts. When in doubt, verify against the actual code — not these summaries.
 
 - **Storage chain:** Ceph RGW (primary S3, on Proxmox) → Garage (local mirror, NixOS VM on Proxmox `japan`) → Backblaze B2 (primary offsite). Cloudflare R2 is standby restore-only.
-- **Kubernetes:** Talos Linux, ephemeral blue/green clusters, GitOps via ArgoCD.
+- **Kubernetes:** Talos Linux, ephemeral test/prod clusters, GitOps via ArgoCD.
 - **Hypervisors:** Proxmox on Debian, configured via Ansible. VMs provisioned with OpenTofu (`tofu/`).
 - **Secrets:** SOPS encrypted with GCP KMS, synced to Vault via Argo Workflows.
 - **Docs site:** `docker/docs-site/docs/` (mkdocs, material theme) — mirrors deployed state. Keep in sync with infrastructure changes.

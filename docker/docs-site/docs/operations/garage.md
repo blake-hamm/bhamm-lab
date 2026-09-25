@@ -1,6 +1,6 @@
 # Garage Object Storage
 
-Garage is a lightweight, self-hosted S3-compatible object storage service running on a NixOS VM (`garage`, `10.0.20.21`) in the Proxmox cluster. It replaces TrueNAS/MinIO as the backup target for the green cluster.
+Garage is a lightweight, self-hosted S3-compatible object storage service running on a NixOS VM (`garage`, `10.0.20.21`) in the Proxmox cluster. It replaces TrueNAS/MinIO as the backup target for the prod cluster.
 
 ## Architecture
 

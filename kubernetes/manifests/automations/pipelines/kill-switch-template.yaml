@@ -11,7 +11,7 @@ spec:
   arguments:
     parameters:
       - name: skip-apps
-        value: "argocd argocd-common argo-common argo-workflows argo-events automations ceph-common ceph-csi-rbd ceph-csi-cephfs csi-snapshot-crds csi-snapshotter snapshot-controller cloudnative-pg cloudnative-pg-barman green-base blue-base"
+        value: "argocd argocd-common argo-common argo-workflows argo-events automations ceph-common ceph-csi-rbd ceph-csi-cephfs csi-snapshot-crds csi-snapshotter snapshot-controller cloudnative-pg cloudnative-pg-barman prod-base test-base"
       - name: skip-namespaces
         value: "argocd argo ceph cnpg-system kube-system"
   templates:
@@ -31,8 +31,12 @@ spec:
             template: delete-workloads
         - - name: wait-for-pods
             template: wait-for-pods
+        - - name: force-cleanup
+            template: force-cleanup
         - - name: delete-pvcs
             template: delete-pvcs
+        - - name: delete-argo-data-pvcs
+            template: delete-argo-data-pvcs
         - - name: verify-pvs
             template: verify-pvs
     - name: pause-parents
@@ -45,7 +49,7 @@ spec:
 
           # Order matters: pause base first, then core, then apps
           # to prevent cascaded recreation
-          ORDERED_PARENTS="green-base blue-base green-core blue-core green-apps"
+          ORDERED_PARENTS="prod-base test-base prod-core test-core prod-apps"
 
           for app in $ORDERED_PARENTS; do
             if kubectl get app $app -n argocd &>/dev/null; then
@@ -264,6 +268,58 @@ spec:
             sleep 10
           done
           echo "Pod wait complete."
+    - name: force-cleanup
+      script:
+        image: alpine/kubectl:1.36.2
+        command: ["/bin/sh", "-c"]
+        source: |
+          SKIP_NS="{{workflow.parameters.skip-namespaces}}"
+          echo "Force-cleaning up stuck workloads/pods (breaks the chicken-and-egg)..."
+          # 1) Remove finalizers from stuck workloads so they can be GC'd
+          for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
+            if ! echo " $SKIP_NS " | grep -q " $ns "; then
+              for kind in deploy sts ds jobs; do
+                for res in $(kubectl get $kind -n $ns -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
+                  FINALIZERS=$(kubectl get $kind $res -n $ns -o jsonpath='{.metadata.finalizers}' 2>/dev/null)
+                  if [ -n "$FINALIZERS" ]; then
+                    echo "  Stripping finalizers from $ns/$kind/$res"
+                    kubectl patch $kind $res -n $ns --type merge -p '{"metadata":{"finalizers":null}}' >/dev/null 2>&1 || true
+                  fi
+                done
+              done
+            fi
+          done
+          # 2) Force-delete pods stuck in Terminating (they block PVC release)
+          for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
+            if ! echo " $SKIP_NS " | grep -q " $ns "; then
+              STUCK=$(kubectl get pod -n $ns -o jsonpath='{.items[*].status.phase}' 2>/dev/null | grep -c Terminating || true)
+              if [ "$STUCK" -gt 0 ] 2>/dev/null; then
+                echo "  Force-deleting stuck pods in $ns"
+                kubectl delete pod --all -n $ns --force --grace-period=0 2>/dev/null || true
+              fi
+            fi
+          done
+          # 3) Brief settle so finalizer-stripped resources actually go away
+          sleep 10
+          # 4) Force-remove finalizers from stuck ArgoCD Application objects.
+          #    The 'argocd' namespace is in skip-namespaces (we never touch its
+          #    workloads), but the ArgoCD Application *objects* live there and can
+          #    be left in Terminating with resources-finalizer.argocd.argoproj.io
+          #    when 'argocd app delete --cascade' hangs. Only strip the finalizer
+          #    from apps that are already being deleted (deletionTimestamp set) AND
+          #    are not in the skip list — their workloads were already removed by
+          #    delete-workloads, so dropping the finalizer just lets the object GC.
+          for app in $(kubectl get apps -n argocd -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
+            if echo " $SKIP_APPS " | grep -q " $app "; then
+              continue
+            fi
+            DT=$(kubectl get app $app -n argocd -o jsonpath='{.metadata.deletionTimestamp}' 2>/dev/null)
+            if [ -n "$DT" ]; then
+              echo "  Stripping finalizer from stuck ArgoCD app: $app"
+              kubectl patch app $app -n argocd --type merge -p '{"metadata":{"finalizers":null}}' >/dev/null 2>&1 || true
+            fi
+          done
+          echo "Force cleanup complete."
     - name: delete-pvcs
       script:
         image: alpine/kubectl:1.36.2
@@ -299,6 +355,23 @@ spec:
             sleep 10
           done
           echo "PVC deletion complete."
+    - name: delete-argo-data-pvcs
+      script:
+        image: alpine/kubectl:1.36.2
+        command: ["/bin/sh", "-c"]
+        source: |
+          echo "Deleting data PVCs in the skipped 'argo' namespace (renovate-cache, etc.)..."
+          # The 'argo' namespace is in skip-namespaces to protect the Argo control plane,
+          # but it also holds app data PVCs (e.g. renovate-cache) that would otherwise be
+          # orphaned in Ceph when the cluster is destroyed. Delete the known data PVCs
+          # here so the CSI finalizer fires and cleans up the underlying RBD.
+          for pvc in renovate-cache; do
+            if kubectl get pvc $pvc -n argo &>/dev/null; then
+              echo "  Deleting PVC argo/$pvc"
+              kubectl delete pvc $pvc -n argo --wait=true --timeout=120s 2>/dev/null || true
+            fi
+          done
+          echo "Argo data PVC cleanup complete."
     - name: verify-pvs
       script:
         image: alpine/kubectl:1.36.2

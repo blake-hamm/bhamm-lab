@@ -38,7 +38,7 @@ iperf3 benchmark (30 seconds):
 
 ### Infrastructure as Code
 
-USB4 mesh config is declared in `tofu/proxmox/talos/green.tfvars` via `metal_amd_framework_workers`:
+USB4 mesh config is declared in `tofu/proxmox/talos/prod.tfvars` via `metal_amd_framework_workers`:
 
 ```hcl
 metal_amd_framework_workers = {

@@ -23,7 +23,7 @@ environment.
     `lae.proxmox` on a Debian machine for finer control).
 - **Talos:**
   - _Role:_ Primary operating system for kubernetes.
-  - _Usage:_ Operating system running my blue/green kubernetes clusters. Ensures
+  - _Usage:_ Operating system running my test/prod kubernetes clusters. Ensures
     immutable, API-managed, and stripped of non-Kubernetes component. Also,
     simpler deployment with Terraform.
 - **NixOS:**

@@ -22,7 +22,7 @@ The two Strix Halo nodes are connected via USB4 point-to-point networking, enabl
 command: ["rpc-server", "-H", "0.0.0.0", "-p", "50052"]
 ```
 
-**Frontend model** (add to `helm-green.yaml`):
+**Frontend model** (add to `helm-prod.yaml`):
 
 ```yaml
 args:

@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  name: restore-ceph-rgw-green
+  name: restore-ceph-rgw-prod
   namespace: ceph
   annotations:
     argocd.argoproj.io/sync-wave: "9"
@@ -18,11 +18,11 @@ spec:
       steps:
         - - name: r2-to-garage
             templateRef:
-              name: create-ceph-buckets-green
+              name: create-ceph-buckets-prod
               template: restore-from-r2-to-garage
               clusterScope: true
         - - name: garage-to-rgw
             templateRef:
-              name: create-ceph-buckets-green
+              name: create-ceph-buckets-prod
               template: restore-from-garage-to-rgw
               clusterScope: true

@@ -12,7 +12,7 @@ on:
       - "*"
 jobs:
   smoke:
-    # registered label of the green runner (default registration label)
+    # registered label of the prod runner (default registration label)
     runs-on: docker
     steps:
       # no checkout / external action deps on purpose: this must succeed with

@@ -26,7 +26,7 @@ spec:
           persistentVolumeClaim:
             claimName: hermes-data
         # Temporary overlay: PR #76695 patch for issue #76657 (llama.cpp 400
-        # "Cannot determine type of 'item'"). Remove with configmap-patch-green.yaml
+        # "Cannot determine type of 'item'"). Remove with configmap-patch-prod.yaml
         # once a fixed release ships.
         - name: llamacpp-patch
           configMap:

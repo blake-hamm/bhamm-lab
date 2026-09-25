@@ -55,7 +55,7 @@ This is partly because [GitHub's uptime record](https://isgithubcooked.com/) lea
 - Infrastructure as Code with [OpenTofu](https://opentofu.org/)
 - [Debian](https://www.debian.org/), [Proxmox](https://www.proxmox.com/) and [Opnsense](https://opnsense.org/) management with [Ansible](https://www.ansible.com/)
 - GitOps deployment with [ArgoCD](https://argo-cd.readthedocs.io/en/stable/)
-- Blue/green deployment strategies
+- Test/prod deployment strategies
 - Container registry and proxy with [Harbor](https://goharbor.io/)
 - [Argo Events](https://argoproj.github.io/argo-events/) and [Argo Workflows](https://argoproj.github.io/argo-workflows/) for backups, secret management and CI/CD pipelines
 - [Renovate](https://docs.renovatebot.com/) bot for automated dependency updates via Argo Workflows CronWorkflow
@@ -83,5 +83,5 @@ This is partly because [GitHub's uptime record](https://isgithubcooked.com/) lea
 
 - Infrastructure-as-Code for rapid rebuilding
 - Automated backup restoration workflows and gitops
-- Regular disaster recovery testing with blue/green cluster
+- Regular disaster recovery testing with test/prod cluster
 - 3-2-1 backup strategy

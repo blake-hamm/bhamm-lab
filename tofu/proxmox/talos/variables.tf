@@ -26,7 +26,7 @@ variable "proxmox_url" {
 }
 
 variable "environment" {
-  description = "Environment name (e.g., blue, green)"
+  description = "Environment name (e.g., test, prod)"
   type        = string
 }
 
@@ -156,6 +156,12 @@ variable "disk_size_amd_r9700_worker" {
   description = "Disk size in GB for the AMD GPU worker user disk"
   type        = number
   default     = 50
+}
+
+variable "disk_size_boot_amd_r9700_worker" {
+  description = "Boot disk size in GB for the AMD GPU worker (large ROCm container images)"
+  type        = number
+  default     = 150
 }
 
 variable "disk_size_intel_b70_worker" {

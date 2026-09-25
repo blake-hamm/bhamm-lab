@@ -23,7 +23,7 @@ spec:
             arguments:
               parameters:
                 - name: argocd-app
-                  value: "blue-base"
+                  value: "prod-base"
         - - name: full-k8up-restore
             templateRef:
               name: manage-k8up
@@ -46,7 +46,7 @@ spec:
             arguments:
               parameters:
                 - name: argocd-app
-                  value: "blue-base"
+                  value: "prod-base"
     - name: disable-argocd-autosync
       inputs:
         parameters:

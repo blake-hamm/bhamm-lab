@@ -104,6 +104,10 @@ spec:
             - name: prometheus-dir
               mountPath: /mlflow
         phoenix-helm:
+          healthChecks:
+            startupProbe:
+              periodSeconds: 5
+              failureThreshold: 60
           ingress:
             enabled: false
           postgresql:
@@ -183,14 +187,14 @@ spec:
                 cpu: "2"
                 memory: "20Gi"
             nodeSelector:
-              kubernetes.io/hostname: green-talos-worker-amd-r9700
+              kubernetes.io/hostname: prod-talos-worker-amd-r9700
             hfToken:
               enabled: true
               secretName: models-external-secret
               secretKey: hf_token
           - name: gpt-oss-120b
             description: Great reasoning MoE model for general chat queries
-            enabled: true
+            enabled: false
             pvc:
               storage: "80Gi"
             image:
@@ -284,7 +288,7 @@ spec:
             pvc:
               storage: "40Gi"
             image:
-              tag: rocm-7.14_20260818T163752
+              tag: rocm-10.0_20260925T042242
             args:
               - llama-server
               - -hf
@@ -306,7 +310,8 @@ spec:
               - draft-mtp
               - --spec-draft-n-max
               - "2"
-              - -dio
+              - --load-mode
+              - dio
               - -ctk
               - q8_0
               - -ctv
@@ -341,6 +346,8 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "80Gi"
+            nodeSelector:
+              kubernetes.io/hostname: prod-talos-worker-nose
           - name: qwen-instruct
             description: High quality MoE model for general chat
             enabled: false
@@ -1130,7 +1137,7 @@ spec:
                 memory: "110Gi"
           - name: glm-flash-reap
             description: High quality moe model for agents, coding or complex chat (REAP)
-            enabled: true
+            enabled: false
             pvc:
               storage: "50Gi"
             image:
@@ -1421,7 +1428,7 @@ spec:
                 memory: "110Gi"
                 cpu: "1"
             nodeSelector:
-              kubernetes.io/hostname: green-talos-worker-tail
+              kubernetes.io/hostname: prod-talos-worker-tail
             zeroscaling:
               enabled: true
               minReplicas: 1
@@ -1473,7 +1480,7 @@ spec:
                 cpu: "4"
                 memory: "110Gi"
             nodeSelector:
-              kubernetes.io/hostname: green-talos-worker-nose
+              kubernetes.io/hostname: prod-talos-worker-nose
             zeroscaling:
               enabled: true
               minReplicas: 1
@@ -1585,6 +1592,8 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
+            nodeSelector:
+              kubernetes.io/hostname: prod-talos-worker-tail
           - name: qwen-36-27b
             description: High quality dense MTP model for general chat
             enabled: false
@@ -1656,7 +1665,7 @@ spec:
               repository: harbor.bhamm-lab.com/library/vllm-radiance-mxfp4
               tag: latest
             nodeSelector:
-              kubernetes.io/hostname: green-talos-worker-amd-r9700
+              kubernetes.io/hostname: prod-talos-worker-amd-r9700
             hfToken:
               enabled: true
               secretName: models-external-secret
@@ -1784,7 +1793,7 @@ spec:
               - --attention-backend
               - R4D
               - --speculative-config
-              - '{"method":"dflash","model":"/models/cache/Qwen3.8-27B-DFlash2-FP8","num_speculative_tokens":7,"attention_backend":"TRITON_ATTN","disable_padded_drafter_batch":true,"draft_sample_method":"greedy"}'
+              - '{"method":"dflash","model":"/models/cache/Qwen3.8-27B-DFlash2-FP8","num_speculative_tokens":3,"attention_backend":"TRITON_ATTN","disable_padded_drafter_batch":true,"draft_sample_method":"greedy"}'
               - --no-async-scheduling
               - --enable-prefix-caching
               - --mamba-cache-mode
@@ -1956,7 +1965,7 @@ spec:
                 memory: "24Gi"
           - name: qwen-38-27b-b70
             description: Qwen 3.8 27B INT4 on Arc Pro B70 (Intel LLM-Scaler vLLM, XPU) — benchmark counterpart to the r9700 MXFP4
-            enabled: true
+            enabled: false
             hostIPC: true
             pvc:
               storage: "40Gi"
@@ -1964,7 +1973,7 @@ spec:
               repository: intel/llm-scaler-vllm
               tag: 0.26.0-b2
             nodeSelector:
-              kubernetes.io/hostname: green-talos-worker-intel-b70
+              kubernetes.io/hostname: prod-talos-worker-intel-b70
             tolerations:
               - key: "intel.com/gpu"
                 operator: "Exists"

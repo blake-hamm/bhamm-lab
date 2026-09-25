@@ -32,10 +32,11 @@ spec:
                     port: http
         postgresql:
           enabled: true
+          storageSize: 5Gi
           backup:
             enabled: true
           restore:
-            enabled: true
+            enabled: false
         dragonfly:
           enabled: true
         externalSecrets:

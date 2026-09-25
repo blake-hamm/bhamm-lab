@@ -11,33 +11,33 @@ To deploy talos run these commands:
 ```bash
 # First deploy vm's and bootstrap the cluster
 tofu -chdir=tofu/proxmox/talos init
-tofu -chdir=tofu/proxmox/talos workspace select -or-create=true blue
-tofu -chdir=tofu/proxmox/talos plan -var-file=blue.tfvars
-tofu -chdir=tofu/proxmox/talos apply -var-file=blue.tfvars
+tofu -chdir=tofu/proxmox/talos workspace select -or-create=true test
+tofu -chdir=tofu/proxmox/talos plan -var-file=test.tfvars
+tofu -chdir=tofu/proxmox/talos apply -var-file=test.tfvars
 
 # Then deploy the minimum required for kubernetes
-export KUBECONFIG=../../tofu/proxmox/talos/result/kube-config-blue.yaml
-export KUBE_CONFIG_PATH=../../tofu/proxmox/talos/result/kube-config-blue.yaml
+export KUBECONFIG=../../tofu/proxmox/talos/result/kube-config-test.yaml
+export KUBE_CONFIG_PATH=../../tofu/proxmox/talos/result/kube-config-test.yaml
 tofu -chdir=tofu/kubernetes init
-tofu -chdir=tofu/kubernetes workspace select -or-create=true blue
-tofu -chdir=tofu/kubernetes plan -var 'environment=blue' -var 'branch_name=feature/refactor-cluster'
-tofu -chdir=tofu/kubernetes apply -var 'environment=blue' -var 'branch_name=feature/refactor-cluster'
+tofu -chdir=tofu/kubernetes workspace select -or-create=true test
+tofu -chdir=tofu/kubernetes plan -var 'environment=test' -var 'branch_name=feature/refactor-cluster'
+tofu -chdir=tofu/kubernetes apply -var 'environment=test' -var 'branch_name=feature/refactor-cluster'
 
 # To destroy
-export KUBECONFIG=./tofu/proxmox/talos/result/kube-config-blue.yaml
+export KUBECONFIG=./tofu/proxmox/talos/result/kube-config-test.yaml
 argo submit   --from workflowtemplate/kill-switch   --namespace argo   --serviceaccount workflow-admin --entrypoint cleanup
-tofu -chdir=tofu/proxmox/talos workspace select -or-create=true blue
-tofu -chdir=tofu/proxmox/talos destroy -var-file=blue.tfvars
+tofu -chdir=tofu/proxmox/talos workspace select -or-create=true test
+tofu -chdir=tofu/proxmox/talos destroy -var-file=test.tfvars
 ```
 
 ```bash
 # To sync argocd apps
-export KUBECONFIG=./tofu/proxmox/talos/result/kube-config-blue.yaml
+export KUBECONFIG=./tofu/proxmox/talos/result/kube-config-test.yaml
 kubectl config set-context --current --namespace=argocd
-argocd app get blue-base --refresh
+argocd app get test-base --refresh
 
 # To connect with talosctl
-export TALOSCONFIG=./tofu/proxmox/talos/result/talos-config-blue.yaml
+export TALOSCONFIG=./tofu/proxmox/talos/result/talos-config-test.yaml
 talosctl dashboard
 ```
 

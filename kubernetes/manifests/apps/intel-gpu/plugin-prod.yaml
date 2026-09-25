@@ -33,7 +33,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: intel-gpu-plugin-green
+  name: intel-gpu-plugin-prod
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "2"
