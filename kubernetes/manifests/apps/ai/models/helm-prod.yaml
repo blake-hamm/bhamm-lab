@@ -443,11 +443,11 @@ spec:
               - serve
               - llm
               - --model
-              - /models/cache/qwen38-flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf
+              - /models/cache/qwen38-flash-next/UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf
               - --speculative
               - mtp
               - --mtp-model
-              - /models/cache/qwen38-flash-next/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf
+              - /models/cache/qwen38-flash-next/MTP/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf
               - --sessions
               - "2"
               - --context
@@ -458,32 +458,27 @@ spec:
               - "8080"
             initContainers:
               - name: setup
-                image: ghcr.io/gufo-org/toolboxes/gufo-runtime:latest
+                # python:3.12-slim (Debian) ships a proper CA store, so TLS verification
+                # just works (the gufo-runtime Nix image's curl can't locate its CA
+                # bundle). Installs the `hf` CLI (huggingface_hub) and downloads the
+                # model to the /models/cache mount. Idempotent: skips if already present.
+                image: python:3.12-slim
                 command:
                   - /bin/bash
                   - -lc
                   - |
                     set -euo pipefail
+                    pip install -q --no-cache-dir huggingface_hub
                     D=/models/cache/qwen38-flash-next
                     mkdir -p "$D"
-                    REV=38bb39ee97821de2c9009abb7e93950eec396e66
-                    BASE=https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF/resolve/${REV}
-                    for f in \
-                      UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf \
-                      UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf \
-                      UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00003-of-00004.gguf \
-                      UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00004-of-00004.gguf \
-                      MTP/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf \
-                      mmproj-BF16.gguf
-                    do
-                      dest="$D/$(basename "$f")"
-                      if [ -s "$dest" ]; then
-                        echo "[setup] exists: $dest"
-                      else
-                        echo "[setup] downloading $f"
-                        curl -fL --retry 3 -o "$dest" "$BASE/$f"
-                      fi
-                    done
+                    if [ -s "$D/UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf" ]; then
+                      echo "[setup] model already present in $D"
+                    else
+                      echo "[setup] downloading Qwen3.8-Flash-Next UD-Q4_K_XL + MTP + mmproj (~116 GiB)"
+                      hf download unsloth/Qwen3.8-Flash-Next-GGUF \
+                        --include 'UD-Q4_K_XL/*.gguf' 'MTP/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf' 'mmproj-BF16.gguf' \
+                        --local-dir "$D"
+                    fi
                     echo "[setup] done"
                 volumeMounts:
                   - name: model-cache
@@ -1738,28 +1733,27 @@ spec:
               - "8080"
             initContainers:
               - name: setup
-                image: ghcr.io/gufo-org/toolboxes/gufo-runtime:latest
+                # python:3.12-slim (Debian) ships a proper CA store, so TLS verification
+                # just works (the gufo-runtime Nix image's curl can't locate its CA
+                # bundle). Installs the `hf` CLI (huggingface_hub) and downloads the
+                # model to the /models/cache mount. Idempotent: skips if already present.
+                image: python:3.12-slim
                 command:
                   - /bin/bash
                   - -lc
                   - |
                     set -euo pipefail
+                    pip install -q --no-cache-dir huggingface_hub
                     D=/models/cache/deepseek-v4-flash
                     mkdir -p "$D"
-                    REV=1cd7b564460821938add0475a60b942c409295e0
-                    BASE=https://huggingface.co/antirez/deepseek-v4-gguf/resolve/${REV}
-                    for f in \
-                      DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-0731.gguf \
-                      DeepSeek-V4-Flash-DSpark-support-0731.gguf
-                    do
-                      dest="$D/$(basename "$f")"
-                      if [ -s "$dest" ]; then
-                        echo "[setup] exists: $dest"
-                      else
-                        echo "[setup] downloading $f"
-                        curl -fL --retry 3 -o "$dest" "$BASE/$f"
-                      fi
-                    done
+                    if [ -s "$D/DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-0731.gguf" ]; then
+                      echo "[setup] model already present in $D"
+                    else
+                      echo "[setup] downloading DeepSeek-V4-Flash 0731 IQ2XXS + DSpark (~93 GiB)"
+                      hf download antirez/deepseek-v4-gguf \
+                        --include 'DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-0731.gguf' 'DeepSeek-V4-Flash-DSpark-support-0731.gguf' \
+                        --local-dir "$D"
+                    fi
                     echo "[setup] done"
                 volumeMounts:
                   - name: model-cache
