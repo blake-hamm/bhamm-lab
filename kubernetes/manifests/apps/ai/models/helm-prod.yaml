@@ -469,12 +469,14 @@ spec:
                       secretKeyRef:
                         name: models-external-secret
                         key: hf_token
+                  - name: HF_HUB_ENABLE_HF_TRANSFER
+                    value: "1"
                 command:
                   - /bin/bash
                   - -lc
                   - |
                     set -euo pipefail
-                    pip install -q --no-cache-dir --root-user-action=ignore huggingface_hub
+                    pip install -q --no-cache-dir --root-user-action=ignore huggingface_hub hf_transfer
                     D=/models/cache/qwen38-flash-next
                     mkdir -p "$D"
                     # hf download is natively idempotent: it skips already-complete
@@ -1753,12 +1755,14 @@ spec:
                       secretKeyRef:
                         name: models-external-secret
                         key: hf_token
+                  - name: HF_HUB_ENABLE_HF_TRANSFER
+                    value: "1"
                 command:
                   - /bin/bash
                   - -lc
                   - |
                     set -euo pipefail
-                    pip install -q --no-cache-dir --root-user-action=ignore huggingface_hub
+                    pip install -q --no-cache-dir --root-user-action=ignore huggingface_hub hf_transfer
                     D=/models/cache/deepseek-v4-flash
                     mkdir -p "$D"
                     # hf download is natively idempotent: it skips already-complete
