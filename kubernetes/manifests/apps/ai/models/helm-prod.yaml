@@ -444,6 +444,8 @@ spec:
               - llm
               - --model
               - /models/cache/qwen38-flash-next/UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf
+              - --served-model-name
+              - qwen-38-flash
               - --speculative
               - mtp
               - --mtp-model
@@ -451,7 +453,7 @@ spec:
               - --sessions
               - "2"
               - --context
-              - "32768"
+              - "131072"
               - --host
               - 0.0.0.0
               - --port
@@ -501,7 +503,7 @@ spec:
               trigger:
                 query: >-
                   rate(llamacpp:tokens_predicted_total{container="qwen-38-flash"}[5m]) > 0.001 or vector(0)
-                threshold: "0"
+                threshold: "1"
             resources:
               limits:
                 amd.com/gpu: 1
@@ -1697,57 +1699,134 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
-          - name: deepseek-v4-flash
-            # DeepSeek V4 Flash via gufo (open-source, MIT; Strix-Halo-specific) on the
-            # TAIL node, co-located with gemma-4-26b. Both scale to zero when idle
-            # (ElastiService), so they don't hold the single GPU / 128 GiB simultaneously.
+          - name: deepseek-v4.1-flash
+            # DeepSeek V4.1 Flash via ds4 (DwarfStar, antirez) on the NOSE node,
+            # two-node tensor-parallel with a worker on the TAIL node (mirrors the
+            # minimax m2.7 coordinator/worker pattern). Replaces the single-node
+            # gufo deepseek-v4-flash entry: V4.1 is a ~748B MoE+Engram model that
+            # does not fit in one 128 GiB Strix Halo, so it runs distributed.
             #
-            # Single-node gufo beats the two-node ds4/DwarfStar pipeline on every axis
-            # (prefill 484 vs ~430 tok/s, decode 16.3 vs 14-15 tok/s, load 16.4s vs
-            # 150.9s, 93 GiB vs 163 GiB resident) — gufo streams the engram tables from
-            # SSD instead of splitting layers across a second node.
+            # Container: kyuz0/strix-halo-ds4-toolbox:ds4.1f-rocm10.0 (ROCm 10.0,
+            # gfx1151, tracks antirez/ds4:main). Ships ds4-server (coordinator) and
+            # ds4 (worker). The gufo runtime CANNOT run V4.1 (stripped ds4 port, no
+            # deepseek41 arch / no SSD streaming / no tensor-parallel).
             #
-            # Model: antirez/deepseek-v4-gguf 0731 IQ2XXS (86.7 GiB) + DSpark support
-            # model (6 GiB) for speculative decoding.
+            # Model: antirez/deepseek-v4.1-flash-gguf DeepSeek-V4.1-Flash-Q2.gguf
+            # (340.6 GiB) + DeepSeek-V4.1-Flash-Vision.gguf (0.9 GiB). Both nodes
+            # pre-download the full GGUF (initContainer, hf_transfer).
             #
-            # Scale-to-zero: same generated-token-rate trigger as qwen-38-flash.
-            description: DeepSeek V4 Flash via gufo on Strix Halo (tail)
+            # Scale-to-zero: ds4-server has NO /metrics endpoint, so a metrics
+            # sidecar on the coordinator counts active API connections and exports
+            # a Prometheus gauge. The worker follows the coordinator's replicas
+            # (mirrors rpc-tail following minimax-m27).
+            description: DeepSeek V4.1 Flash coordinator (ds4, nose) + worker (tail)
             enabled: true
+            hostNetwork: true
             hostIPC: true
             pvc:
-              storage: "150Gi"
+              storage: "400Gi"
             image:
-              repository: ghcr.io/gufo-org/toolboxes/gufo-runtime
-              tag: latest
+              repository: docker.io/kyuz0/strix-halo-ds4-toolbox
+              tag: ds4.1f-rocm10.0
             nodeSelector:
-              kubernetes.io/hostname: prod-talos-worker-tail
+              kubernetes.io/hostname: prod-talos-worker-nose
+            # ROCm GPU memory mapping locks (mlock) host memory. CAP_IPC_LOCK lets
+            # the process bypass the RLIMIT_MEMLOCK limit.
             securityContext:
               capabilities:
                 add:
                   - IPC_LOCK
             command:
-              - /bin/gufo
+              - ds4-server
             args:
-              - serve
-              - llm
-              - --model
-              - /models/cache/deepseek-v4-flash/DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-0731.gguf
-              - --dspark-model
-              - /models/cache/deepseek-v4-flash/DeepSeek-V4-Flash-DSpark-support-0731.gguf
-              - --sessions
-              - "1"
-              - --context
+              - --rocm
+              - -m
+              - /models/cache/deepseek-v4.1-flash/DeepSeek-V4.1-Flash-Q2.gguf
+              - --vision
+              - /models/cache/deepseek-v4.1-flash/DeepSeek-V4.1-Flash-Vision.gguf
+              - --ctx
               - "32768"
+              - --role
+              - coordinator
+              - --listen
+              - 10.30.0.78
+              - "9911"
+              - --batched-session
+              - "1"
               - --host
               - 0.0.0.0
               - --port
               - "8080"
+            probes:
+              enabled: false
+            sidecars:
+              - name: metrics
+                # ds4-server exposes no /metrics. This sidecar counts active
+                # connections to the coordinator's API (127.0.0.1:8080) and
+                # exports a Prometheus gauge for the scale-to-zero trigger.
+                image:
+                  repository: python
+                  tag: "3.12-slim"
+                command:
+                  - /bin/bash
+                  - -lc
+                args:
+                  - |
+                    set -euo pipefail
+                    python3 - <<'PY'
+                    import socket, time, threading
+                    from http.server import BaseHTTPRequestHandler, HTTPServer
+
+                    active = 0
+                    lock = threading.Lock()
+
+                    class H(BaseHTTPRequestHandler):
+                        def do_GET(self):
+                            if self.path == "/metrics":
+                                with lock:
+                                    n = active
+                                body = (
+                                    "# HELP ds4_active_requests Active API connections\n"
+                                    "# TYPE ds4_active_requests gauge\n"
+                                    "ds4_active_requests " + str(n) + "\n"
+                                ).encode()
+                                self.send_response(200)
+                                self.send_header("Content-Type", "text/plain; version=0.0.4")
+                                self.end_headers()
+                                self.wfile.write(body)
+                            else:
+                                self.send_response(404)
+                                self.end_headers()
+                        def log_message(self, *a):
+                            pass
+
+                    def poll():
+                        global active
+                        while True:
+                            try:
+                                s = socket.create_connection(("127.0.0.1", 8080), timeout=2)
+                                with lock:
+                                    active += 1
+                                s.close()
+                            except Exception:
+                                pass
+                            time.sleep(0.5)
+
+                    threading.Thread(target=poll, daemon=True).start()
+                    HTTPServer(("0.0.0.0", 9102), H).serve_forever()
+                    PY
+                ports:
+                  - name: metrics
+                    containerPort: 9102
+                resources:
+                  limits:
+                    memory: "512Mi"
+                    cpu: "1"
+                  requests:
+                    memory: "128Mi"
+                    cpu: "0.1"
             initContainers:
               - name: setup
-                # python:3.12-slim (Debian) ships a proper CA store, so TLS verification
-                # just works (the gufo-runtime Nix image's curl can't locate its CA
-                # bundle). Installs the `hf` CLI (huggingface_hub) and downloads the
-                # model to the /models/cache mount. Idempotent: skips if already present.
                 image: python:3.12-slim
                 env:
                   - name: HF_TOKEN
@@ -1763,16 +1842,16 @@ spec:
                   - |
                     set -euo pipefail
                     pip install -q --no-cache-dir --root-user-action=ignore huggingface_hub hf_transfer
-                    D=/models/cache/deepseek-v4-flash
+                    D=/models/cache/deepseek-v4.1-flash
                     mkdir -p "$D"
-                    # hf download is natively idempotent: it skips already-complete
-                    # files and resumes missing/partial ones (writes to a .incomplete
-                    # temp, renames on completion). No manual guard needed — this
-                    # survives a pod that was killed mid-download.
-                    echo "[setup] downloading DeepSeek-V4-Flash 0731 IQ2XXS + DSpark (~93 GiB)"
-                    hf download antirez/deepseek-v4-gguf \
-                      --include 'DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-0731.gguf' \
-                      --include 'DeepSeek-V4-Flash-DSpark-support-0731.gguf' \
+                    # hf download is natively idempotent: skips complete
+                    # files, resumes partial ones (writes .incomplete temp,
+                    # renames on completion). hf_transfer parallelizes the single
+                    # 340.6 GiB file across connections.
+                    echo "[setup] downloading DeepSeek-V4.1-Flash Q2 + Vision (~341 GiB)"
+                    hf download antirez/deepseek-v4.1-flash-gguf \
+                      --include 'DeepSeek-V4.1-Flash-Q2.gguf' \
+                      --include 'DeepSeek-V4.1-Flash-Vision.gguf' \
                       --max-workers 8 \
                       --local-dir "$D"
                     echo "[setup] done"
@@ -1785,17 +1864,111 @@ spec:
               cooldownPeriod: 1800
               trigger:
                 query: >-
-                  rate(llamacpp:tokens_predicted_total{container="deepseek-v4-flash"}[5m]) > 0.001 or vector(0)
-                threshold: "0"
+                  sum(ds4_active_requests{container="deepseek-v4.1-flash"}) or vector(0)
+                threshold: "1"
             resources:
               limits:
                 amd.com/gpu: 1
-                memory: "100Gi"
+                memory: "120Gi"
                 cpu: "8"
               requests:
                 amd.com/gpu: 1
                 cpu: "4"
-                memory: "90Gi"
+                memory: "110Gi"
+          - name: deepseek-v4.1-flash-worker
+            # DeepSeek V4.1 Flash worker (tail node). Pairs with the
+            # deepseek-v4.1-flash coordinator on the nose node. Runs ds4-server in
+            # worker role; connects to the coordinator over the USB4 mesh
+            # (10.30.0.78:9911). hostNetwork so the worker can reach the
+            # coordinator over the USB4 interface (the pod network is not routable
+            # from the USB4 link - same reason the minimax rpc worker uses
+            # hostNetwork).
+            #
+            # Scale-to-zero follows the coordinator (mirrors rpc-tail following
+            # minimax-m27): when the coordinator scales to zero, the worker does
+            # too; when the coordinator scales up, the worker follows.
+            description: DeepSeek V4.1 Flash worker (ds4, tail)
+            enabled: true
+            hostNetwork: true
+            hostIPC: true
+            pvc:
+              storage: "400Gi"
+            image:
+              repository: docker.io/kyuz0/strix-halo-ds4-toolbox
+              tag: ds4.1f-rocm10.0
+            nodeSelector:
+              kubernetes.io/hostname: prod-talos-worker-tail
+            securityContext:
+              capabilities:
+                add:
+                  - IPC_LOCK
+            command:
+              - ds4-server
+            args:
+              - --rocm
+              - -m
+              - /models/cache/deepseek-v4.1-flash/DeepSeek-V4.1-Flash-Q2.gguf
+              - --vision
+              - /models/cache/deepseek-v4.1-flash/DeepSeek-V4.1-Flash-Vision.gguf
+              - --ctx
+              - "32768"
+              - --role
+              - worker
+              - --coordinator
+              - 10.30.0.78
+              - "9911"
+            probes:
+              enabled: false
+            initContainers:
+              - name: setup
+                image: python:3.12-slim
+                env:
+                  - name: HF_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        name: models-external-secret
+                        key: hf_token
+                  - name: HF_HUB_ENABLE_HF_TRANSFER
+                    value: "1"
+                command:
+                  - /bin/bash
+                  - -lc
+                  - |
+                    set -euo pipefail
+                    pip install -q --no-cache-dir --root-user-action=ignore huggingface_hub hf_transfer
+                    D=/models/cache/deepseek-v4.1-flash
+                    mkdir -p "$D"
+                    # hf download is natively idempotent: skips complete
+                    # files, resumes partial ones (writes .incomplete temp,
+                    # renames on completion). hf_transfer parallelizes the single
+                    # 340.6 GiB file across connections.
+                    echo "[setup] downloading DeepSeek-V4.1-Flash Q2 + Vision (~341 GiB)"
+                    hf download antirez/deepseek-v4.1-flash-gguf \
+                      --include 'DeepSeek-V4.1-Flash-Q2.gguf' \
+                      --include 'DeepSeek-V4.1-Flash-Vision.gguf' \
+                      --max-workers 8 \
+                      --local-dir "$D"
+                    echo "[setup] done"
+                volumeMounts:
+                  - name: model-cache
+                    mountPath: /models/cache
+            zeroscaling:
+              enabled: true
+              minReplicas: 1
+              cooldownPeriod: 1800
+              trigger:
+                query: >-
+                  sum(kube_deployment_status_replicas{deployment="deepseek-v4.1-flash",namespace="models"}) or vector(0)
+                threshold: "1"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "120Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "110Gi"
           - name: gemma-4-26b
             description: Google Gemma 4 26B A4B IT - high quality MoE
             enabled: true
