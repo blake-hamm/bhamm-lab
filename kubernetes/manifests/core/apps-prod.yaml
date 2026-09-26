@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://codeberg.org/blake-hamm/bhamm-lab.git
-    targetRevision: feature/rename-prod-test
+    targetRevision: feature/qwen38-flash-halogen-embed-b70
     path: kubernetes/manifests/apps
     directory:
       recurse: true
