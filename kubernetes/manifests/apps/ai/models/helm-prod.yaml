@@ -404,96 +404,98 @@ spec:
             nodeSelector:
               kubernetes.io/hostname: prod-talos-worker-nose
           - name: qwen-38-flash
-            # Qwen 3.8 Flash-Next via peonist-ai/halogen-flash-server (ROCm, gfx1151).
-            # Co-located on the nose node with qwen-36-a3b — both scale to zero when
-            # idle (ElastiService), so they don't hold memory simultaneously.
+            # Qwen 3.8 Flash-Next via gufo (open-source, MIT; Strix-Halo-specific) on the
+            # nose node. Replaces the closed-source halogen-flash-server entry: gufo is
+            # ~2.2x faster prefill (1628 vs 752 tok/s @32k) and +45% decode (59.4 vs 41
+            # tok/s) on the same UD-Q4_K_XL model, and it has no kernel>=7.0 requirement
+            # (the halogen blocker on Talos 6.18 goes away).
             #
-            # KERNEL BLOCKER (verify before first start): the nose node runs Talos
-            # v1.12.6 -> Linux 6.18.18, but halogen REQUIRES kernel >= 7.0. On 6.18.x
-            # the driver refuses the read-only weight mapping (issue #37) and the
-            # server never reaches readiness. No current Talos release ships a 7.x
-            # kernel (latest stable v1.14.1 / alpha v1.15.0 are still 6.18.x).
-            # The GGUF path (repacks weights into RAM) is the best shot on 6.18.
+            # Model: unsloth/Qwen3.8-Flash-Next-GGUF UD-Q4_K_XL (4 shards, ~113 GiB) +
+            # shared-Q8 MTP predictor (2.8 GiB) + BF16 vision projector (0.9 GiB).
+            # initContainer pre-downloads via curl (the gufo-runtime image ships curl,
+            # no hf CLI) so the main container starts from a warm disk.
             #
-            # CHART WORKAROUNDS (halogen expects /models + port 8731; the chart
-            # hardcodes the mount to /models/cache and the container port to 8080):
-            #   HALOGEN_CHECKPOINT -> points into the /models/cache mount
-            #   HALOGEN_API_PORT=8080, HALOGEN_BIND=0.0.0.0 -> match the chart
-            #   initContainer pre-downloads the ~118 GiB checkpoint so the main
-            #   container starts from a warm disk (the chart's 2400s startup probe
-            #   window is too short for a cold download).
-            description: Qwen 3.8 Flash-Next via halogen-flash-server on Strix Halo (nose)
+            # Scale-to-zero: gufo's /metrics is unauthenticated when no --api-key is set,
+            # and it exports llama.cpp-prefixed counters. We trigger on the generated-token
+            # rate (per the agreed interim approach; a connection-counting sidecar or a
+            # metrics-rich gateway can replace this later).
+            description: Qwen 3.8 Flash-Next via gufo on Strix Halo (nose)
             enabled: true
             hostIPC: true
             pvc:
               storage: "150Gi"
             image:
-              repository: ghcr.io/peonist-ai/halogen-flash-server
-              tag: 0.13.8
+              repository: ghcr.io/gufo-org/toolboxes/gufo-runtime
+              tag: latest
             nodeSelector:
               kubernetes.io/hostname: prod-talos-worker-nose
-            # Reduced KV pool (131k ctx, 2 slots, 16k max-tok) so halogen's footprint
-            # is the smallest documented (~84 GiB) — the "smallest footprint at full
-            # context" recipe, the safest choice for co-location on a 128 GB APU.
-            env:
-              - name: HALOGEN_API_PORT
-                value: "8080"
-              - name: HALOGEN_BIND
-                value: 0.0.0.0
-              - name: HALOGEN_CHECKPOINT
-                value: /models/cache/qwen38-flash-next-w4b.hgn
-              - name: HALOGEN_MTP_HEAD
-                value: /models/cache/qwen38-flash-next-w4b.overlay.hgn
-              - name: HALOGEN_DOWNLOAD
-                value: "1"
-              - name: HALOGEN_KV_POOL_POSITIONS
-                value: "131072"
-              - name: HALOGEN_KV_SLOTS
-                value: "2"
-              - name: HALOGEN_MAX_TOK
-                value: "16384"
-              - name: HALOGEN_HOST_RESERVE_GIB
-                value: "20"
+            # ROCm GPU memory mapping needs an unlimited memlock ulimit (gufo quickstart
+            # uses --ulimit memlock=-1). The chart renders securityContext verbatim, so we
+            # set the ulimit here.
+            securityContext:
+              ulimits:
+                - name: memlock
+                  hard: -1
+                  soft: -1
+            command:
+              - /bin/gufo
+            args:
+              - serve
+              - llm
+              - --model
+              - /models/cache/qwen38-flash-next/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf
+              - --speculative
+              - mtp
+              - --mtp-model
+              - /models/cache/qwen38-flash-next/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf
+              - --sessions
+              - "2"
+              - --context
+              - "32768"
+              - --host
+              - 0.0.0.0
+              - --port
+              - "8080"
             initContainers:
               - name: setup
-                image: ghcr.io/peonist-ai/halogen-flash-server:0.13.8
+                image: ghcr.io/gufo-org/toolboxes/gufo-runtime:latest
                 command:
                   - /bin/bash
                   - -lc
                   - |
                     set -euo pipefail
-                    CK=/models/cache/qwen38-flash-next-w4b.hgn
-                    OV=/models/cache/qwen38-flash-next-w4b.overlay.hgn
-                    AVAIL_GB=$(df -BG --output=avail /models/cache | tail -1 | tr -dc '0-9')
-                    if [ ! -f "$CK" ] && [ "$AVAIL_GB" -lt 120 ]; then
-                      echo "[setup] only ${AVAIL_GB}GiB free on the model PVC; the halogen checkpoint"
-                      echo "[setup] download wants ~118GiB. Free space or grow the user volume, then restart."
-                      exit 1
-                    fi
-                    if [ ! -f "$CK" ]; then
-                      echo "[setup] downloading halogen-qwen3.8-flash-next (~118 GiB) — this is the slow first start"
-                      python3 -c 'from huggingface_hub import snapshot_download; snapshot_download("peonist-ai/halogen-qwen3.8-flash-next", local_dir="/models/cache")'
-                    else
-                      echo "[setup] checkpoint exists: $CK"
-                    fi
-                env:
-                  - name: HF_HOME
-                    value: /models/cache/huggingface
+                    D=/models/cache/qwen38-flash-next
+                    mkdir -p "$D"
+                    REV=38bb39ee97821de2c9009abb7e93950eec396e66
+                    BASE=https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF/resolve/${REV}
+                    for f in \
+                      UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf \
+                      UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf \
+                      UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00003-of-00004.gguf \
+                      UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00004-of-00004.gguf \
+                      MTP/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf \
+                      mmproj-BF16.gguf
+                    do
+                      dest="$D/$(basename "$f")"
+                      if [ -s "$dest" ]; then
+                        echo "[setup] exists: $dest"
+                      else
+                        echo "[setup] downloading $f"
+                        curl -fL --retry 3 -o "$dest" "$BASE/$f"
+                      fi
+                    done
+                    echo "[setup] done"
                 volumeMounts:
                   - name: model-cache
                     mountPath: /models/cache
-            # Scale-to-zero: trigger on the in-flight request gauge halogen exports at
-            # /metrics (llama.cpp metric names, matching the chart's default). When
-            # idle the gauge is 0 and the pod scales to 0; an incoming request hits
-            # the Elasti resolver and scales it back up (same as the other entries).
             zeroscaling:
               enabled: true
               minReplicas: 1
               cooldownPeriod: 1800
               trigger:
                 query: >-
-                  sum(llamacpp:requests_processing{container="qwen-38-flash"}) or vector(0)
-                threshold: "1"
+                  rate(llamacpp:tokens_predicted_total{container="qwen-38-flash"}[5m]) > 0.001 or vector(0)
+                threshold: "0"
             resources:
               limits:
                 amd.com/gpu: 1
@@ -1556,7 +1558,7 @@ spec:
                 memory: "110Gi"
           - name: rpc-tail
             description: RPC backend for minimax-m27
-            enabled: true
+            enabled: false
             hostNetwork: true
             probes:
               enabled: false
@@ -1594,7 +1596,7 @@ spec:
                 threshold: "1"
           - name: minimax-m27
             description: MiniMax-M2.7 distributed across nose+tail
-            enabled: true
+            enabled: false
             pvc:
               storage: "200Gi"
             image:
@@ -1689,6 +1691,97 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
+          - name: deepseek-v4-flash
+            # DeepSeek V4 Flash via gufo (open-source, MIT; Strix-Halo-specific) on the
+            # TAIL node, co-located with gemma-4-26b. Both scale to zero when idle
+            # (ElastiService), so they don't hold the single GPU / 128 GiB simultaneously.
+            #
+            # Single-node gufo beats the two-node ds4/DwarfStar pipeline on every axis
+            # (prefill 484 vs ~430 tok/s, decode 16.3 vs 14-15 tok/s, load 16.4s vs
+            # 150.9s, 93 GiB vs 163 GiB resident) — gufo streams the engram tables from
+            # SSD instead of splitting layers across a second node.
+            #
+            # Model: antirez/deepseek-v4-gguf 0731 IQ2XXS (86.7 GiB) + DSpark support
+            # model (6 GiB) for speculative decoding.
+            #
+            # Scale-to-zero: same generated-token-rate trigger as qwen-38-flash.
+            description: DeepSeek V4 Flash via gufo on Strix Halo (tail)
+            enabled: true
+            hostIPC: true
+            pvc:
+              storage: "150Gi"
+            image:
+              repository: ghcr.io/gufo-org/toolboxes/gufo-runtime
+              tag: latest
+            nodeSelector:
+              kubernetes.io/hostname: prod-talos-worker-tail
+            securityContext:
+              ulimits:
+                - name: memlock
+                  hard: -1
+                  soft: -1
+            command:
+              - /bin/gufo
+            args:
+              - serve
+              - llm
+              - --model
+              - /models/cache/deepseek-v4-flash/DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-0731.gguf
+              - --dspark-model
+              - /models/cache/deepseek-v4-flash/DeepSeek-V4-Flash-DSpark-support-0731.gguf
+              - --sessions
+              - "1"
+              - --context
+              - "32768"
+              - --host
+              - 0.0.0.0
+              - --port
+              - "8080"
+            initContainers:
+              - name: setup
+                image: ghcr.io/gufo-org/toolboxes/gufo-runtime:latest
+                command:
+                  - /bin/bash
+                  - -lc
+                  - |
+                    set -euo pipefail
+                    D=/models/cache/deepseek-v4-flash
+                    mkdir -p "$D"
+                    REV=1cd7b564460821938add0475a60b942c409295e0
+                    BASE=https://huggingface.co/antirez/deepseek-v4-gguf/resolve/${REV}
+                    for f in \
+                      DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-0731.gguf \
+                      DeepSeek-V4-Flash-DSpark-support-0731.gguf
+                    do
+                      dest="$D/$(basename "$f")"
+                      if [ -s "$dest" ]; then
+                        echo "[setup] exists: $dest"
+                      else
+                        echo "[setup] downloading $f"
+                        curl -fL --retry 3 -o "$dest" "$BASE/$f"
+                      fi
+                    done
+                    echo "[setup] done"
+                volumeMounts:
+                  - name: model-cache
+                    mountPath: /models/cache
+            zeroscaling:
+              enabled: true
+              minReplicas: 1
+              cooldownPeriod: 1800
+              trigger:
+                query: >-
+                  rate(llamacpp:tokens_predicted_total{container="deepseek-v4-flash"}[5m]) > 0.001 or vector(0)
+                threshold: "0"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "100Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "90Gi"
           - name: gemma-4-26b
             description: Google Gemma 4 26B A4B IT - high quality MoE
             enabled: true
