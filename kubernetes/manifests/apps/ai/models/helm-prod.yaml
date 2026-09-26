@@ -147,51 +147,106 @@ spec:
               value: "phoenix"
         models:
           - name: qwen-embed
-            description: Great all around embedding model
+            description: Qwen3-Embedding-8B on Arc Pro B70 (Intel LLM-Scaler vLLM, XPU) — migrated off the r9700 llama.cpp backend
             enabled: true
+            hostIPC: true
             pvc:
               storage: "30Gi"
             image:
-              repository: ghcr.io/ggml-org/llama.cpp
-              tag: server-rocm-b8864
-            args:
-              - -hf
-              - Qwen/Qwen3-Embedding-8B-GGUF:F16
-              - --host
-              - 0.0.0.0
-              - --metrics
-              - --no-webui
-              - --embeddings
-              - -v
-              - --no-warmup
-              - -ngl
-              - "999"
-              - -fa
-              - "on"
-              - -ub
-              - "512"
-              - -b
-              - "512"
-              - -c
-              - "8192"
-              - --parallel
-              - "4"
-              - --cont-batching
-            resources:
-              limits:
-                amd.com/gpu: 1
-                memory: "26Gi"
-                cpu: "4"
-              requests:
-                amd.com/gpu: 1
-                cpu: "2"
-                memory: "20Gi"
+              repository: intel/llm-scaler-vllm
+              tag: 0.26.0-b2
             nodeSelector:
-              kubernetes.io/hostname: prod-talos-worker-amd-r9700
+              kubernetes.io/hostname: prod-talos-worker-intel-b70
+            tolerations:
+              - key: "intel.com/gpu"
+                operator: "Exists"
+                effect: "NoSchedule"
             hfToken:
               enabled: true
               secretName: models-external-secret
               secretKey: hf_token
+            initContainers:
+              - name: setup
+                image: intel/llm-scaler-vllm:0.26.0-b2
+                command:
+                  - /bin/bash
+                  - -lc
+                  - |
+                    set -euo pipefail
+                    SNAP=/models/cache/Qwen3-Embedding-8B
+                    AVAIL_GB=$(df -BG --output=avail /models/cache | tail -1 | tr -dc '0-9')
+                    if [ ! -f "$SNAP/config.json" ] && [ "$AVAIL_GB" -lt 20 ]; then
+                      echo "[setup] only ${AVAIL_GB}GiB free on the model PVC; the embedding checkpoint"
+                      echo "[setup] download wants ~16GiB. Free space or grow the user volume, then restart."
+                      exit 1
+                    fi
+                    if [ ! -f "$SNAP/config.json" ]; then
+                      echo "[setup] downloading Qwen/Qwen3-Embedding-8B (~16 GiB)"
+                      python3 -c 'from huggingface_hub import snapshot_download; snapshot_download("Qwen/Qwen3-Embedding-8B", local_dir="/models/cache/Qwen3-Embedding-8B")'
+                    else
+                      echo "[setup] checkpoint exists: $SNAP"
+                    fi
+                env:
+                  - name: HF_HOME
+                    value: /models/cache/huggingface
+                  - name: HF_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        name: models-external-secret
+                        key: hf_token
+                volumeMounts:
+                  - name: model-cache
+                    mountPath: /models/cache
+            command:
+              - vllm
+              - serve
+            args:
+              - /models/cache/Qwen3-Embedding-8B
+              - --served-model-name
+              - qwen-embed
+              - --task
+              - embed
+              - --host
+              - 0.0.0.0
+              - --port
+              - "8080"
+              - --max-model-len
+              - "8192"
+              - --dtype
+              - float16
+              - --trust-remote-code
+            env:
+              - name: VLLM_LOGGING_LEVEL
+                value: INFO
+              - name: VLLM_NO_USAGE_STATS
+                value: "1"
+              - name: VLLM_WORKER_MULTIPROC_METHOD
+                value: spawn
+              - name: ZES_ENABLE_SYSMAN
+                value: "1"
+              - name: ONEAPI_DEVICE_SELECTOR
+                value: level_zero:0
+              - name: VLLM_CACHE_ROOT
+                value: /models/cache/vllm
+              - name: HF_HUB_OFFLINE
+                value: "1"
+            zeroscaling:
+              enabled: true
+              minReplicas: 1
+              cooldownPeriod: 1800
+              trigger:
+                query: >-
+                  sum(vllm:num_requests_running{container="qwen-embed"}) or vector(0)
+                threshold: "1"
+            resources:
+              limits:
+                gpu.intel.com/xe: 1
+                memory: "24Gi"
+                cpu: "8"
+              requests:
+                gpu.intel.com/xe: 1
+                cpu: "4"
+                memory: "20Gi"
           - name: gpt-oss-120b
             description: Great reasoning MoE model for general chat queries
             enabled: false
@@ -348,6 +403,106 @@ spec:
                 memory: "80Gi"
             nodeSelector:
               kubernetes.io/hostname: prod-talos-worker-nose
+          - name: qwen-38-flash
+            # Qwen 3.8 Flash-Next via peonist-ai/halogen-flash-server (ROCm, gfx1151).
+            # Co-located on the nose node with qwen-36-a3b — both scale to zero when
+            # idle (ElastiService), so they don't hold memory simultaneously.
+            #
+            # KERNEL BLOCKER (verify before first start): the nose node runs Talos
+            # v1.12.6 -> Linux 6.18.18, but halogen REQUIRES kernel >= 7.0. On 6.18.x
+            # the driver refuses the read-only weight mapping (issue #37) and the
+            # server never reaches readiness. No current Talos release ships a 7.x
+            # kernel (latest stable v1.14.1 / alpha v1.15.0 are still 6.18.x).
+            # The GGUF path (repacks weights into RAM) is the best shot on 6.18.
+            #
+            # CHART WORKAROUNDS (halogen expects /models + port 8731; the chart
+            # hardcodes the mount to /models/cache and the container port to 8080):
+            #   HALOGEN_CHECKPOINT -> points into the /models/cache mount
+            #   HALOGEN_API_PORT=8080, HALOGEN_BIND=0.0.0.0 -> match the chart
+            #   initContainer pre-downloads the ~118 GiB checkpoint so the main
+            #   container starts from a warm disk (the chart's 2400s startup probe
+            #   window is too short for a cold download).
+            description: Qwen 3.8 Flash-Next via halogen-flash-server on Strix Halo (nose)
+            enabled: true
+            hostIPC: true
+            pvc:
+              storage: "150Gi"
+            image:
+              repository: ghcr.io/peonist-ai/halogen-flash-server
+              tag: 0.13.8
+            nodeSelector:
+              kubernetes.io/hostname: prod-talos-worker-nose
+            # Reduced KV pool (131k ctx, 2 slots, 16k max-tok) so halogen's footprint
+            # is the smallest documented (~84 GiB) — the "smallest footprint at full
+            # context" recipe, the safest choice for co-location on a 128 GB APU.
+            env:
+              - name: HALOGEN_API_PORT
+                value: "8080"
+              - name: HALOGEN_BIND
+                value: 0.0.0.0
+              - name: HALOGEN_CHECKPOINT
+                value: /models/cache/qwen38-flash-next-w4b.hgn
+              - name: HALOGEN_MTP_HEAD
+                value: /models/cache/qwen38-flash-next-w4b.overlay.hgn
+              - name: HALOGEN_DOWNLOAD
+                value: "1"
+              - name: HALOGEN_KV_POOL_POSITIONS
+                value: "131072"
+              - name: HALOGEN_KV_SLOTS
+                value: "2"
+              - name: HALOGEN_MAX_TOK
+                value: "16384"
+              - name: HALOGEN_HOST_RESERVE_GIB
+                value: "20"
+            initContainers:
+              - name: setup
+                image: ghcr.io/peonist-ai/halogen-flash-server:0.13.8
+                command:
+                  - /bin/bash
+                  - -lc
+                  - |
+                    set -euo pipefail
+                    CK=/models/cache/qwen38-flash-next-w4b.hgn
+                    OV=/models/cache/qwen38-flash-next-w4b.overlay.hgn
+                    AVAIL_GB=$(df -BG --output=avail /models/cache | tail -1 | tr -dc '0-9')
+                    if [ ! -f "$CK" ] && [ "$AVAIL_GB" -lt 120 ]; then
+                      echo "[setup] only ${AVAIL_GB}GiB free on the model PVC; the halogen checkpoint"
+                      echo "[setup] download wants ~118GiB. Free space or grow the user volume, then restart."
+                      exit 1
+                    fi
+                    if [ ! -f "$CK" ]; then
+                      echo "[setup] downloading halogen-qwen3.8-flash-next (~118 GiB) — this is the slow first start"
+                      python3 -c 'from huggingface_hub import snapshot_download; snapshot_download("peonist-ai/halogen-qwen3.8-flash-next", local_dir="/models/cache")'
+                    else
+                      echo "[setup] checkpoint exists: $CK"
+                    fi
+                env:
+                  - name: HF_HOME
+                    value: /models/cache/huggingface
+                volumeMounts:
+                  - name: model-cache
+                    mountPath: /models/cache
+            # Scale-to-zero: trigger on the in-flight request gauge halogen exports at
+            # /metrics (llama.cpp metric names, matching the chart's default). When
+            # idle the gauge is 0 and the pod scales to 0; an incoming request hits
+            # the Elasti resolver and scales it back up (same as the other entries).
+            zeroscaling:
+              enabled: true
+              minReplicas: 1
+              cooldownPeriod: 1800
+              trigger:
+                query: >-
+                  sum(llamacpp:requests_processing{container="qwen-38-flash"}) or vector(0)
+                threshold: "1"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "100Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "90Gi"
           - name: qwen-instruct
             description: High quality MoE model for general chat
             enabled: false
