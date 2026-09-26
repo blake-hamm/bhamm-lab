@@ -463,12 +463,18 @@ spec:
                 # bundle). Installs the `hf` CLI (huggingface_hub) and downloads the
                 # model to the /models/cache mount. Idempotent: skips if already present.
                 image: python:3.12-slim
+                env:
+                  - name: HF_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        name: models-external-secret
+                        key: hf_token
                 command:
                   - /bin/bash
                   - -lc
                   - |
                     set -euo pipefail
-                    pip install -q --no-cache-dir huggingface_hub
+                    pip install -q --no-cache-dir --root-user-action=ignore huggingface_hub
                     D=/models/cache/qwen38-flash-next
                     mkdir -p "$D"
                     if [ -s "$D/UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf" ]; then
@@ -1740,12 +1746,18 @@ spec:
                 # bundle). Installs the `hf` CLI (huggingface_hub) and downloads the
                 # model to the /models/cache mount. Idempotent: skips if already present.
                 image: python:3.12-slim
+                env:
+                  - name: HF_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        name: models-external-secret
+                        key: hf_token
                 command:
                   - /bin/bash
                   - -lc
                   - |
                     set -euo pipefail
-                    pip install -q --no-cache-dir huggingface_hub
+                    pip install -q --no-cache-dir --root-user-action=ignore huggingface_hub
                     D=/models/cache/deepseek-v4-flash
                     mkdir -p "$D"
                     if [ -s "$D/DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-0731.gguf" ]; then
