@@ -477,16 +477,17 @@ spec:
                     pip install -q --no-cache-dir --root-user-action=ignore huggingface_hub
                     D=/models/cache/qwen38-flash-next
                     mkdir -p "$D"
-                    if [ -s "$D/UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf" ]; then
-                      echo "[setup] model already present in $D"
-                    else
-                      echo "[setup] downloading Qwen3.8-Flash-Next UD-Q4_K_XL + MTP + mmproj (~116 GiB)"
-                      hf download unsloth/Qwen3.8-Flash-Next-GGUF \
-                        --include 'UD-Q4_K_XL/*.gguf' \
-                        --include 'MTP/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf' \
-                        --include 'mmproj-BF16.gguf' \
-                        --local-dir "$D"
-                    fi
+                    # hf download is natively idempotent: it skips already-complete
+                    # files and resumes missing/partial ones (writes to a .incomplete
+                    # temp, renames on completion). No manual guard needed — this
+                    # survives a pod that was killed mid-download.
+                    echo "[setup] downloading Qwen3.8-Flash-Next UD-Q4_K_XL + MTP + mmproj (~116 GiB)"
+                    hf download unsloth/Qwen3.8-Flash-Next-GGUF \
+                      --include 'UD-Q4_K_XL/*.gguf' \
+                      --include 'MTP/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf' \
+                      --include 'mmproj-BF16.gguf' \
+                      --max-workers 8 \
+                      --local-dir "$D"
                     echo "[setup] done"
                 volumeMounts:
                   - name: model-cache
@@ -1760,15 +1761,16 @@ spec:
                     pip install -q --no-cache-dir --root-user-action=ignore huggingface_hub
                     D=/models/cache/deepseek-v4-flash
                     mkdir -p "$D"
-                    if [ -s "$D/DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-0731.gguf" ]; then
-                      echo "[setup] model already present in $D"
-                    else
-                      echo "[setup] downloading DeepSeek-V4-Flash 0731 IQ2XXS + DSpark (~93 GiB)"
-                      hf download antirez/deepseek-v4-gguf \
-                        --include 'DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-0731.gguf' \
-                        --include 'DeepSeek-V4-Flash-DSpark-support-0731.gguf' \
-                        --local-dir "$D"
-                    fi
+                    # hf download is natively idempotent: it skips already-complete
+                    # files and resumes missing/partial ones (writes to a .incomplete
+                    # temp, renames on completion). No manual guard needed — this
+                    # survives a pod that was killed mid-download.
+                    echo "[setup] downloading DeepSeek-V4-Flash 0731 IQ2XXS + DSpark (~93 GiB)"
+                    hf download antirez/deepseek-v4-gguf \
+                      --include 'DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-0731.gguf' \
+                      --include 'DeepSeek-V4-Flash-DSpark-support-0731.gguf' \
+                      --max-workers 8 \
+                      --local-dir "$D"
                     echo "[setup] done"
                 volumeMounts:
                   - name: model-cache
