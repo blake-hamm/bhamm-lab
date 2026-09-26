@@ -429,14 +429,14 @@ spec:
               tag: latest
             nodeSelector:
               kubernetes.io/hostname: prod-talos-worker-nose
-            # ROCm GPU memory mapping needs an unlimited memlock ulimit (gufo quickstart
-            # uses --ulimit memlock=-1). The chart renders securityContext verbatim, so we
-            # set the ulimit here.
+            # ROCm GPU memory mapping locks (mlock) host memory. The gufo quickstart uses
+            # --ulimit memlock=-1; the K8s container-level equivalent is CAP_IPC_LOCK,
+            # which lets the process bypass the RLIMIT_MEMLOCK limit. (ulimits is a
+            # pod-level field and is not valid in a container securityContext.)
             securityContext:
-              ulimits:
-                - name: memlock
-                  hard: -1
-                  soft: -1
+              capabilities:
+                add:
+                  - IPC_LOCK
             command:
               - /bin/gufo
             args:
@@ -1716,10 +1716,9 @@ spec:
             nodeSelector:
               kubernetes.io/hostname: prod-talos-worker-tail
             securityContext:
-              ulimits:
-                - name: memlock
-                  hard: -1
-                  soft: -1
+              capabilities:
+                add:
+                  - IPC_LOCK
             command:
               - /bin/gufo
             args:
