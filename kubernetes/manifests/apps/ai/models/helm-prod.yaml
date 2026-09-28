@@ -464,11 +464,25 @@ spec:
               - --mmproj
               - /models/cache/qwen38-flash-next/mmproj-BF16.gguf
               - --sessions
-              - "4"
+              - "2"
               - --context
               - "262144"
               - --cache-disk
               - /models/cache/gufo-disk-cache
+              # KV snapshots for ~100k-token prompts are ~3 GiB; the default
+              # staging buffer (auto: min(1 GiB, 1/8 avail RAM)) silently
+              # skips them, so long chats re-prefill from zero every turn.
+              # 4 GiB covers observed snapshots (up to ~3.1 GiB).
+              - --cache-disk-staging-bytes
+              - "4294967296"
+              # Disk cache capacity (default 8 GiB). At 8 GiB the cache churns:
+              # retained_bytes pinned at 7.2-8.5 GiB, hot snapshots evicted and
+              # re-saved within minutes (~50 GB written per 13 min window).
+              # 20 GiB fits the physical disk (173 GB free on the 2TB local-path
+              # volume on nose) alongside the ~116 GiB of model files; the PVC
+              # claim is unenforced by local-path-provisioner.
+              - --cache-disk-bytes
+              - "21474836480"
               - --host
               - 0.0.0.0
               - --port
