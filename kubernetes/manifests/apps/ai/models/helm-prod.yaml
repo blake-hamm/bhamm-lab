@@ -12,7 +12,7 @@ spec:
     namespace: models
   source:
     repoURL: https://github.com/blake-hamm/kube-ai-stack.git
-    targetRevision: fix/model-resources-verbatim
+    targetRevision: main
     path: charts/kube-ai-stack
     helm:
       valuesObject:
@@ -147,51 +147,111 @@ spec:
               value: "phoenix"
         models:
           - name: qwen-embed
-            description: Great all around embedding model
+            description: Qwen3-Embedding-8B on Arc Pro B70 (Intel LLM-Scaler vLLM, XPU) — migrated off the r9700 llama.cpp backend
             enabled: true
+            hostIPC: true
             pvc:
               storage: "30Gi"
             image:
-              repository: ghcr.io/ggml-org/llama.cpp
-              tag: server-rocm-b8864
-            args:
-              - -hf
-              - Qwen/Qwen3-Embedding-8B-GGUF:F16
-              - --host
-              - 0.0.0.0
-              - --metrics
-              - --no-webui
-              - --embeddings
-              - -v
-              - --no-warmup
-              - -ngl
-              - "999"
-              - -fa
-              - "on"
-              - -ub
-              - "512"
-              - -b
-              - "512"
-              - -c
-              - "8192"
-              - --parallel
-              - "4"
-              - --cont-batching
-            resources:
-              limits:
-                amd.com/gpu: 1
-                memory: "26Gi"
-                cpu: "4"
-              requests:
-                amd.com/gpu: 1
-                cpu: "2"
-                memory: "20Gi"
+              repository: intel/llm-scaler-vllm
+              tag: 0.26.0-b2
             nodeSelector:
-              kubernetes.io/hostname: prod-talos-worker-amd-r9700
+              kubernetes.io/hostname: prod-talos-worker-intel-b70
+            tolerations:
+              - key: "intel.com/gpu"
+                operator: "Exists"
+                effect: "NoSchedule"
             hfToken:
               enabled: true
               secretName: models-external-secret
               secretKey: hf_token
+            initContainers:
+              - name: setup
+                image: intel/llm-scaler-vllm:0.26.0-b2
+                command:
+                  - /bin/bash
+                  - -lc
+                  - |
+                    set -euo pipefail
+                    SNAP=/models/cache/Qwen3-Embedding-8B
+                    AVAIL_GB=$(df -BG --output=avail /models/cache | tail -1 | tr -dc '0-9')
+                    if [ ! -f "$SNAP/config.json" ] && [ "$AVAIL_GB" -lt 20 ]; then
+                      echo "[setup] only ${AVAIL_GB}GiB free on the model PVC; the embedding checkpoint"
+                      echo "[setup] download wants ~16GiB. Free space or grow the user volume, then restart."
+                      exit 1
+                    fi
+                    # Guard on weight shards, NOT config.json: config.json lands
+                    # first during snapshot_download, so an interrupted download
+                    # leaves a dir that passes a config.json check but has no
+                    # weights (vLLM: "Cannot find any model weights").
+                    # snapshot_download is idempotent and resumes a partial tree.
+                    if ! ls "$SNAP"/*.safetensors >/dev/null 2>&1; then
+                      echo "[setup] downloading Qwen/Qwen3-Embedding-8B (~16 GiB)"
+                      python3 -c 'from huggingface_hub import snapshot_download; snapshot_download("Qwen/Qwen3-Embedding-8B", local_dir="/models/cache/Qwen3-Embedding-8B")'
+                    else
+                      echo "[setup] checkpoint exists: $SNAP"
+                    fi
+                env:
+                  - name: HF_HOME
+                    value: /models/cache/huggingface
+                  - name: HF_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        name: models-external-secret
+                        key: hf_token
+                volumeMounts:
+                  - name: model-cache
+                    mountPath: /models/cache
+            command:
+              - vllm
+              - serve
+            args:
+              - /models/cache/Qwen3-Embedding-8B
+              - --served-model-name
+              - qwen-embed
+              - --runner
+              - pooling
+              - --host
+              - 0.0.0.0
+              - --port
+              - "8080"
+              - --max-model-len
+              - "8192"
+              - --dtype
+              - float16
+              - --trust-remote-code
+            env:
+              - name: VLLM_LOGGING_LEVEL
+                value: INFO
+              - name: VLLM_NO_USAGE_STATS
+                value: "1"
+              - name: VLLM_WORKER_MULTIPROC_METHOD
+                value: spawn
+              - name: ZES_ENABLE_SYSMAN
+                value: "1"
+              - name: ONEAPI_DEVICE_SELECTOR
+                value: level_zero:0
+              - name: VLLM_CACHE_ROOT
+                value: /models/cache/vllm
+              - name: HF_HUB_OFFLINE
+                value: "1"
+            zeroscaling:
+              enabled: true
+              minReplicas: 1
+              cooldownPeriod: 1800
+              trigger:
+                query: >-
+                  sum(vllm:num_requests_running{container="qwen-embed"}) or vector(0)
+                threshold: "1"
+            resources:
+              limits:
+                gpu.intel.com/xe: 1
+                memory: "24Gi"
+                cpu: "8"
+              requests:
+                gpu.intel.com/xe: 1
+                cpu: "4"
+                memory: "20Gi"
           - name: gpt-oss-120b
             description: Great reasoning MoE model for general chat queries
             enabled: false
@@ -348,6 +408,122 @@ spec:
                 memory: "80Gi"
             nodeSelector:
               kubernetes.io/hostname: prod-talos-worker-nose
+          - name: qwen-38-flash
+            # Qwen 3.8 Flash-Next via gufo (open-source, MIT; Strix-Halo-specific) on the
+            # nose node. Replaces the closed-source halogen-flash-server entry: gufo is
+            # ~2.2x faster prefill (1628 vs 752 tok/s @32k) and +45% decode (59.4 vs 41
+            # tok/s) on the same UD-Q4_K_XL model, and it has no kernel>=7.0 requirement
+            # (the halogen blocker on Talos 6.18 goes away).
+            #
+            # Model: unsloth/Qwen3.8-Flash-Next-GGUF UD-Q4_K_XL (4 shards, ~113 GiB) +
+            # shared-Q8 MTP predictor (2.8 GiB) + BF16 vision projector (0.9 GiB).
+            # initContainer pre-downloads via curl (the gufo-runtime image ships curl,
+            # no hf CLI) so the main container starts from a warm disk.
+            #
+            # Scale-to-zero: gufo's /metrics is unauthenticated when no --api-key is set,
+            # and it exports llama.cpp-prefixed counters. We trigger on the generated-token
+            # rate (per the agreed interim approach; a connection-counting sidecar or a
+            # metrics-rich gateway can replace this later).
+            description: Qwen 3.8 Flash-Next via gufo on Strix Halo (nose)
+            enabled: true
+            hostIPC: true
+            pvc:
+              storage: "150Gi"
+            image:
+              repository: ghcr.io/gufo-org/toolboxes/gufo-runtime
+              # Pinned build (digest matches the `latest` tag at pin time).
+              # ghcr publishes one timestamp tag per build; bump deliberately.
+              tag: 20260927T101849
+            nodeSelector:
+              kubernetes.io/hostname: prod-talos-worker-nose
+            # ROCm GPU memory mapping locks (mlock) host memory. The gufo quickstart uses
+            # --ulimit memlock=-1; the K8s container-level equivalent is CAP_IPC_LOCK,
+            # which lets the process bypass the RLIMIT_MEMLOCK limit. (ulimits is a
+            # pod-level field and is not valid in a container securityContext.)
+            securityContext:
+              capabilities:
+                add:
+                  - IPC_LOCK
+            command:
+              - /bin/gufo
+            args:
+              - serve
+              - llm
+              - --model
+              - /models/cache/qwen38-flash-next/UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf
+              - --served-model-name
+              - qwen-38-flash
+              - --speculative
+              - mtp
+              - --mtp-model
+              - /models/cache/qwen38-flash-next/MTP/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf
+              - --mmproj
+              - /models/cache/qwen38-flash-next/mmproj-BF16.gguf
+              - --sessions
+              - "4"
+              - --context
+              - "262144"
+              - --cache-disk
+              - /models/cache/gufo-disk-cache
+              - --host
+              - 0.0.0.0
+              - --port
+              - "8080"
+            initContainers:
+              - name: setup
+                # python:3.12-slim (Debian) ships a proper CA store, so TLS verification
+                # just works (the gufo-runtime Nix image's curl can't locate its CA
+                # bundle). Installs the `hf` CLI (huggingface_hub) and downloads the
+                # model to the /models/cache mount. Idempotent: skips if already present.
+                image: python:3.12-slim
+                env:
+                  - name: HF_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        name: models-external-secret
+                        key: hf_token
+                  - name: HF_HUB_ENABLE_HF_TRANSFER
+                    value: "1"
+                command:
+                  - /bin/bash
+                  - -lc
+                  - |
+                    set -euo pipefail
+                    pip install -q --no-cache-dir --root-user-action=ignore huggingface_hub hf_transfer
+                    D=/models/cache/qwen38-flash-next
+                    mkdir -p "$D"
+                    # hf download is natively idempotent: it skips already-complete
+                    # files and resumes missing/partial ones (writes to a .incomplete
+                    # temp, renames on completion). No manual guard needed — this
+                    # survives a pod that was killed mid-download.
+                    echo "[setup] downloading Qwen3.8-Flash-Next UD-Q4_K_XL + MTP + mmproj (~116 GiB)"
+                    hf download unsloth/Qwen3.8-Flash-Next-GGUF \
+                      --include 'UD-Q4_K_XL/*.gguf' \
+                      --include 'MTP/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf' \
+                      --include 'mmproj-BF16.gguf' \
+                      --max-workers 8 \
+                      --local-dir "$D"
+                    echo "[setup] done"
+                volumeMounts:
+                  - name: model-cache
+                    mountPath: /models/cache
+            zeroscaling:
+              enabled: true
+              minReplicas: 1
+              cooldownPeriod: 1800
+              trigger:
+                query: >-
+                  rate(llamacpp:tokens_predicted_total{container="qwen-38-flash"}[5m]) > 0.001 or vector(0)
+                threshold: "1"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "124Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "122Gi"
           - name: qwen-instruct
             description: High quality MoE model for general chat
             enabled: false
@@ -1401,7 +1577,7 @@ spec:
                 memory: "110Gi"
           - name: rpc-tail
             description: RPC backend for minimax-m27
-            enabled: true
+            enabled: false
             hostNetwork: true
             probes:
               enabled: false
@@ -1439,7 +1615,7 @@ spec:
                 threshold: "1"
           - name: minimax-m27
             description: MiniMax-M2.7 distributed across nose+tail
-            enabled: true
+            enabled: false
             pvc:
               storage: "200Gi"
             image:
@@ -1534,6 +1710,348 @@ spec:
                 amd.com/gpu: 1
                 cpu: "4"
                 memory: "110Gi"
+          - name: deepseek-41-flash
+            # DeepSeek V4.1 Flash via ds4 (DwarfStar, antirez) on the NOSE node,
+            # two-node tensor-parallel with a worker on the TAIL node (mirrors the
+            # minimax m2.7 coordinator/worker pattern). Replaces the single-node
+            # gufo deepseek-v4-flash entry: V4.1 is a ~748B MoE+Engram model that
+            # does not fit in one 128 GiB Strix Halo, so it runs distributed.
+            #
+            # Container: kyuz0/strix-halo-ds4-toolbox:ds4.1f-rocm10.0 (ROCm 10.0,
+            # gfx1151, tracks antirez/ds4:main). Ships ds4-server (coordinator) and
+            # ds4 (worker). The gufo runtime CANNOT run V4.1 (stripped ds4 port, no
+            # deepseek41 arch / no SSD streaming / no tensor-parallel).
+            #
+            # Model: antirez/deepseek-v4.1-flash-gguf DeepSeek-V4.1-Flash-Q2.gguf
+            # (340.6 GiB) + DeepSeek-V4.1-Flash-Vision.gguf (0.9 GiB). Both nodes
+            # pre-download the full GGUF (initContainer, hf_transfer).
+            #
+            # Scale-to-zero: ds4-server has NO /metrics endpoint, so a metrics
+            # sidecar on the coordinator counts active API connections and exports
+            # a Prometheus gauge. The worker follows the coordinator's replicas
+            # (mirrors rpc-tail following minimax-m27).
+            description: DeepSeek V4.1 Flash coordinator (ds4, nose) + worker (tail)
+            enabled: true
+            hostNetwork: true
+            hostIPC: true
+            pvc:
+              storage: "400Gi"
+            image:
+              repository: docker.io/kyuz0/strix-halo-ds4-toolbox
+              tag: ds4.1f-rocm10.0
+            nodeSelector:
+              kubernetes.io/hostname: prod-talos-worker-nose
+            # ROCm GPU memory mapping locks (mlock) host memory. CAP_IPC_LOCK lets
+            # the process bypass the RLIMIT_MEMLOCK limit.
+            securityContext:
+              capabilities:
+                add:
+                  - IPC_LOCK
+            command:
+              - ds4-server
+            args:
+              - --rocm
+              - -m
+              - /models/cache/deepseek-41-flash/DeepSeek-V4.1-Flash-Q2.gguf
+              - --vision
+              - /models/cache/deepseek-41-flash/DeepSeek-V4.1-Flash-Vision.gguf
+              - --ctx
+              - "262144"
+              - --tensor-parallel
+              - --role
+              - coordinator
+              - --listen
+              - 10.30.0.78
+              - "9911"
+              - --transport
+              - tcp
+              - --batched-session
+              - "2"
+              - --host
+              - 0.0.0.0
+              - --port
+              - "8080"
+            probes:
+              enabled: true
+              # ds4-server exposes no /health endpoint (OpenAI-style API only),
+              # so the chart's default /health:8080 probes would 404 and kill
+              # the pod. Use the per-model probe override (kube-ai-stack #72)
+              # to probe the real surface: GET /v1/models.
+              spec:
+                startupProbe:
+                  httpGet:
+                    path: /v1/models
+                    port: 8080
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+                  failureThreshold: 240
+                readinessProbe:
+                  httpGet:
+                    path: /v1/models
+                    port: 8080
+                  periodSeconds: 30
+                livenessProbe:
+                  httpGet:
+                    path: /v1/models
+                    port: 8080
+                  periodSeconds: 120
+                  failureThreshold: 15
+            sidecars:
+              - name: metrics
+                # ds4-server exposes no /metrics. This sidecar counts active
+                # connections to the coordinator's API (127.0.0.1:8080) and
+                # exports a Prometheus gauge for the scale-to-zero trigger.
+                image:
+                  repository: python
+                  tag: "3.12-slim"
+                command:
+                  - /bin/bash
+                  - -lc
+                args:
+                  - |
+                    set -euo pipefail
+                    python3 - <<'PY'
+                    import time, threading
+                    from http.server import BaseHTTPRequestHandler, HTTPServer
+
+                    active = 0
+                    lock = threading.Lock()
+
+                    def count_active():
+                        # Count ESTABLISHED TCP connections to the coordinator
+                        # API on :8080 — a real, bounded gauge of in-flight
+                        # requests (0 when idle, N when N clients connected).
+                        # Reads the kernel socket table directly; no deps.
+                        count = 0
+                        for path in ("/proc/net/tcp", "/proc/net/tcp6"):
+                            try:
+                                with open(path) as f:
+                                    next(f)  # skip header row
+                                    for line in f:
+                                        parts = line.split()
+                                        if len(parts) < 4:
+                                            continue
+                                        if parts[3] != "01":  # 01 == ESTABLISHED
+                                            continue
+                                        lport = int(parts[1].rsplit(":", 1)[1], 16)
+                                        if lport == 8080:
+                                            count += 1
+                            except Exception:
+                                pass
+                        return count
+
+                    class H(BaseHTTPRequestHandler):
+                        def do_GET(self):
+                            if self.path == "/metrics":
+                                with lock:
+                                    n = active
+                                body = (
+                                    "# HELP ds4_active_requests Active API connections to coordinator :8080\n"
+                                    "# TYPE ds4_active_requests gauge\n"
+                                    "ds4_active_requests " + str(n) + "\n"
+                                ).encode()
+                                self.send_response(200)
+                                self.send_header("Content-Type", "text/plain; version=0.0.4")
+                                self.end_headers()
+                                self.wfile.write(body)
+                            else:
+                                self.send_response(404)
+                                self.end_headers()
+                        def log_message(self, *a):
+                            pass
+
+                    def poll():
+                        global active
+                        while True:
+                            with lock:
+                                active = count_active()
+                            time.sleep(5)
+
+                    threading.Thread(target=poll, daemon=True).start()
+                    HTTPServer(("0.0.0.0", 9102), H).serve_forever()
+                    PY
+                ports:
+                  - name: metrics
+                    containerPort: 9102
+                resources:
+                  limits:
+                    memory: "512Mi"
+                    cpu: "1"
+                  requests:
+                    memory: "128Mi"
+                    cpu: "0.1"
+            initContainers:
+              - name: setup
+                image: python:3.12-slim
+                env:
+                  - name: HF_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        name: models-external-secret
+                        key: hf_token
+                  - name: HF_HUB_ENABLE_HF_TRANSFER
+                    value: "1"
+                command:
+                  - /bin/bash
+                  - -lc
+                  - |
+                    set -euo pipefail
+                    pip install -q --no-cache-dir --root-user-action=ignore huggingface_hub hf_transfer
+                    D=/models/cache/deepseek-41-flash
+                    mkdir -p "$D"
+                    # hf download is natively idempotent: skips complete
+                    # files, resumes partial ones (writes .incomplete temp,
+                    # renames on completion). hf_transfer parallelizes the single
+                    # 340.6 GiB file across connections.
+                    echo "[setup] downloading DeepSeek-V4.1-Flash Q2 + Vision (~341 GiB)"
+                    hf download antirez/deepseek-v4.1-flash-gguf \
+                      --include 'DeepSeek-V4.1-Flash-Q2.gguf' \
+                      --include 'DeepSeek-V4.1-Flash-Vision.gguf' \
+                      --max-workers 8 \
+                      --local-dir "$D"
+                    echo "[setup] done"
+                volumeMounts:
+                  - name: model-cache
+                    mountPath: /models/cache
+            zeroscaling:
+              enabled: true
+              minReplicas: 1
+              cooldownPeriod: 1800
+              trigger:
+                query: >-
+                  sum(ds4_active_requests{service="deepseek-41-flash"}) or vector(0)
+                threshold: "1"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "124Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "122Gi"
+          - name: deepseek-41-flash-worker
+            # DeepSeek V4.1 Flash worker (tail node). Pairs with the
+            # deepseek-41-flash coordinator on the nose node. Runs ds4-server in
+            # worker role; connects to the coordinator over the USB4 mesh
+            # (10.30.0.78:9911). hostNetwork so the worker can reach the
+            # coordinator over the USB4 interface (the pod network is not routable
+            # from the USB4 link - same reason the minimax rpc worker uses
+            # hostNetwork).
+            #
+            # Scale-to-zero follows the coordinator (mirrors rpc-tail following
+            # minimax-m27): when the coordinator scales to zero, the worker does
+            # too; when the coordinator scales up, the worker follows.
+            description: DeepSeek V4.1 Flash worker (ds4, tail)
+            enabled: true
+            hostNetwork: true
+            hostIPC: true
+            pvc:
+              storage: "400Gi"
+            image:
+              repository: docker.io/kyuz0/strix-halo-ds4-toolbox
+              tag: ds4.1f-rocm10.0
+            nodeSelector:
+              kubernetes.io/hostname: prod-talos-worker-tail
+            securityContext:
+              capabilities:
+                add:
+                  - IPC_LOCK
+            command:
+              - ds4
+            args:
+              - --rocm
+              - -m
+              - /models/cache/deepseek-41-flash/DeepSeek-V4.1-Flash-Q2.gguf
+              - --vision
+              - /models/cache/deepseek-41-flash/DeepSeek-V4.1-Flash-Vision.gguf
+              - --ctx
+              - "262144"
+              - --tensor-parallel
+              - --role
+              - worker
+              - --coordinator
+              - 10.30.0.78
+              - "9911"
+              - --transport
+              - tcp
+            probes:
+              enabled: true
+              # The worker (ds4 binary) has no HTTP server at all - only the
+              # tensor-parallel RPC to the coordinator - so the chart's default
+              # /health:8080 probes would connection-refuse and kill the pod.
+              # Use the per-model probe override (kube-ai-stack #72) with an
+              # exec probe. Liveness only (no startup/readiness): the worker
+              # is a peer of the coordinator, not an independently-routable
+              # endpoint, so readiness has no meaning here.
+              spec:
+                livenessProbe:
+                  exec:
+                    command:
+                      - pgrep
+                      - ds4
+                  periodSeconds: 30
+                  failureThreshold: 5
+            servicemonitor:
+              enabled: false
+            litellm:
+              enabled: false
+            initContainers:
+              - name: setup
+                image: python:3.12-slim
+                env:
+                  - name: HF_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        name: models-external-secret
+                        key: hf_token
+                  - name: HF_HUB_ENABLE_HF_TRANSFER
+                    value: "1"
+                command:
+                  - /bin/bash
+                  - -lc
+                  - |
+                    set -euo pipefail
+                    pip install -q --no-cache-dir --root-user-action=ignore huggingface_hub hf_transfer
+                    D=/models/cache/deepseek-41-flash
+                    mkdir -p "$D"
+                    # hf download is natively idempotent: skips complete
+                    # files, resumes partial ones (writes .incomplete temp,
+                    # renames on completion). hf_transfer parallelizes the single
+                    # 340.6 GiB file across connections.
+                    echo "[setup] downloading DeepSeek-V4.1-Flash Q2 + Vision (~341 GiB)"
+                    hf download antirez/deepseek-v4.1-flash-gguf \
+                      --include 'DeepSeek-V4.1-Flash-Q2.gguf' \
+                      --include 'DeepSeek-V4.1-Flash-Vision.gguf' \
+                      --max-workers 8 \
+                      --local-dir "$D"
+                    echo "[setup] done"
+                volumeMounts:
+                  - name: model-cache
+                    mountPath: /models/cache
+            zeroscaling:
+              enabled: true
+              minReplicas: 1
+              # Short cooldown (120s vs the coordinator's 1800s): the worker is
+              # only useful while the coordinator is up. When the coordinator
+              # scales to zero the worker has no tensor-parallel peer and is
+              # dead weight, so it should scale down quickly rather than sit
+              # idle for 30 min. The coordinator keeps the long cooldown to
+              # avoid flapping on transient request dips.
+              cooldownPeriod: 120
+              trigger:
+                query: >-
+                  sum(kube_deployment_status_replicas{deployment="deepseek-41-flash",namespace="models"}) or vector(0)
+                threshold: "1"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "124Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "122Gi"
           - name: gemma-4-26b
             description: Google Gemma 4 26B A4B IT - high quality MoE
             enabled: true
