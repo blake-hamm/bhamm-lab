@@ -431,9 +431,13 @@ spec:
               storage: "150Gi"
             image:
               repository: ghcr.io/gufo-org/toolboxes/gufo-runtime
-              # Pinned build (digest matches the `latest` tag at pin time).
-              # ghcr publishes one timestamp tag per build; bump deliberately.
-              tag: 20260927T101849
+              # Pinned release (digest matches the `latest` tag at pin time).
+              # Upstream switched from daily timestamp tags to release-please
+              # semver tags (vX.Y.Z -> version + series + latest). 0.1.1 is the
+              # first build containing gufo#283 (constrained JSON Schema
+              # output), which fixes the response_format 400 Hermes' session
+              # titler was hitting. Bump deliberately.
+              tag: 0.1.1
             nodeSelector:
               kubernetes.io/hostname: prod-talos-worker-nose
             # ROCm GPU memory mapping locks (mlock) host memory. The gufo quickstart uses
