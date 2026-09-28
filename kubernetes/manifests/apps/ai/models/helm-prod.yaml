@@ -512,9 +512,16 @@ spec:
               minReplicas: 1
               cooldownPeriod: 1800
               trigger:
+                # Single-series busy/idle signal: sum() keeps the scaler from
+                # erroring on multi-series results; `or vector(0)` covers the
+                # at-zero state where the series is gone. KubeElasti compares
+                # the RAW value against threshold (value < threshold → scale to
+                # zero), so the idle boundary lives in threshold, NOT in a `>`
+                # filter inside the query (that returned the raw rate, making
+                # anything under 1 tok/s look idle against threshold "1").
                 query: >-
-                  rate(llamacpp:tokens_predicted_total{container="qwen-38-flash"}[5m]) > 0.001 or vector(0)
-                threshold: "1"
+                  sum(rate(llamacpp:tokens_predicted_total{container="qwen-38-flash"}[5m])) or vector(0)
+                threshold: "0.001"
             resources:
               limits:
                 amd.com/gpu: 1

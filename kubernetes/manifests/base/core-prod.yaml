@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://codeberg.org/blake-hamm/bhamm-lab.git
-    targetRevision: feature/qwen38-flash-halogen-embed-b70
+    targetRevision: fix/qwen38-flash-scale-to-zero-threshold
     path: kubernetes/manifests/core
     directory:
       recurse: true
