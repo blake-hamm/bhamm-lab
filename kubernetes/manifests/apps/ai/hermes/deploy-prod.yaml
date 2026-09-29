@@ -25,18 +25,12 @@ spec:
         - name: hermes-data
           persistentVolumeClaim:
             claimName: hermes-data
-        # Temporary overlay: PR #76695 patch for issue #76657 (llama.cpp 400
-        # "Cannot determine type of 'item'"). Remove with configmap-patch-prod.yaml
-        # once a fixed release ships.
-        - name: llamacpp-patch
-          configMap:
-            name: hermes-llamacpp-patch
       containers:
         - name: hermes
           # NOTE: image starts as root (s6-overlay PID 1); stage2-hook chowns
           # /opt/data then drops services to hermes (UID 10000) via s6-setuidgid.
           # Do NOT set runAsNonRoot / drop ALL caps — stage2 needs them.
-          image: nousresearch/hermes-agent:v2026.8.16.2@sha256:a39fc11620213e3669a327aff5c6cb1eb2b8a238c6044e33e7ef8885833d89a7
+          image: nousresearch/hermes-agent:v2026.9.24@sha256:fca358f12efd65bfaaca05884166f15c0e2788375ca30d77061ac1ebc96452b7
           imagePullPolicy: IfNotPresent
           args:
             - gateway
@@ -102,20 +96,16 @@ spec:
           volumeMounts:
             - mountPath: /opt/data
               name: hermes-data
-            - mountPath: /opt/hermes/agent/codex_responses_adapter.py
-              name: llamacpp-patch
-              subPath: codex_responses_adapter.py
-              readOnly: true
         # CDP endpoint for browser_exec (browser-use harness attaches via
         # 127.0.0.1:9222). Reuses the headless Chromium the image ships —
         # the harness never launches it on its own (bare launch opens no
         # CDP port). Binary path is pinned to the playwright cache
-        # revision: RE-VERIFY ON IMAGE BUMP (chromium_headless_shell-1234).
+        # revision: RE-VERIFY ON IMAGE BUMP (chromium_headless_shell-1243).
         - name: chromium-cdp
-          image: nousresearch/hermes-agent:v2026.8.16.2@sha256:a39fc11620213e3669a327aff5c6cb1eb2b8a238c6044e33e7ef8885833d89a7
+          image: nousresearch/hermes-agent:v2026.9.24@sha256:fca358f12efd65bfaaca05884166f15c0e2788375ca30d77061ac1ebc96452b7
           imagePullPolicy: IfNotPresent
           command:
-            - /opt/hermes/.playwright/chromium_headless_shell-1234/chrome-headless-shell-linux64/chrome-headless-shell
+            - /opt/hermes/.playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell
           args:
             - --no-sandbox
             - --disable-dev-shm-usage

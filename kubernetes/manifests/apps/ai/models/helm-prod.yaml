@@ -12,7 +12,9 @@ spec:
     namespace: models
   source:
     repoURL: https://github.com/blake-hamm/kube-ai-stack.git
-    targetRevision: main
+    # TEMP (litellm-titler alias): points at the chart feature branch that adds
+    # global.litellm.extraModels; flip back to main after the chart PR merges.
+    targetRevision: feature/litellm-extra-models
     path: charts/kube-ai-stack
     helm:
       valuesObject:
@@ -24,6 +26,19 @@ spec:
             enabled: true
           litellm:
             manage_config: true
+            # Alias route for Hermes session titling: halogen rejects
+            # response_format json_schema unless temperature 0 is explicit
+            # (sampling-under-schema is unimplemented server-side). This alias
+            # pins temperature 0 on the same halogen backend so hermes' title
+            # calls keep strict JSON output with zero 400s. Selected per-task
+            # via auxiliary.title_generation.model in the hermes profile configs.
+            extraModels:
+              - model_name: qwen-38-flash-halogen-titler
+                litellm_params:
+                  model: openai/qwen-38-flash-halogen
+                  api_base: http://qwen-38-flash-halogen.models.svc.cluster.local:8080/v1
+                  api_key: "dummy"
+                  temperature: 0
             config:
               litellm_settings:
                 request_timeout: 1800
@@ -574,9 +589,11 @@ spec:
             #      gufo, which wants it maxed). Halogen drives the GPU through
             #      GTT and needs the carved-out RAM back for the page cache.
             #
-            # Model: the engine's native checkpoint (peonist-ai/halogen-qwen3.8-
-            # flash-next: w4b.hgn 124 GiB + quality overlay + MTP draft head +
-            # tokenizer; overlay-speed excluded, it trades quality for ~2%).
+            # Model: the engine's native v2 checkpoint (peonist-ai/halogen-
+            # qwen3.8-flash-next: v2.hgn 62.1 GiB, one file, draft head
+            # embedded + ngram.hgn 47.7 GiB lookup table + tokenizer).
+            # v2 is the 0.15.0 default: closer to the base model's outputs
+            # than w4b+overlay and ~3.5 GiB less resident memory.
             # initContainer pre-downloads via hf (idempotent/resumable) so the
             # engine starts from a warm disk; HALOGEN_DOWNLOAD stays unset (the
             # container then opens no outbound connections at all).
@@ -587,9 +604,9 @@ spec:
             # HALOGEN_VISION_TOWER=1 to trade the second resident conversation
             # back for image input.
             #
-            # Memory (upstream-measured, 128 GB): 67.7 GiB pinned weights +
-            # 14.4 GiB pool + 21.3 GiB working memory (MAX_TOK 32768) ~= 103
-            # GiB, leaving ~12 GiB page cache for the 47.7 GiB n-gram lookup
+            # Memory (upstream-measured, 128 GB): ~64 GiB pinned weights +
+            # 14.4 GiB pool + 21.3 GiB working memory (MAX_TOK 32768) ~= 100
+            # GiB, leaving ~15 GiB page cache for the 47.7 GiB n-gram lookup
             # table (streamed from disk, never resident). Concurrency: 4 slots
             # (default) sharing the pool = two full 262K conversations resident
             # or four at 131K; four fully-resident 262K sessions do NOT fit on
@@ -602,9 +619,10 @@ spec:
               storage: "200Gi"
             image:
               repository: ghcr.io/peonist-ai/halogen-flash-server
-              # Pinned deliberately (upstream's own guidance). 0.14.2 is the
-              # latest tag on ghcr at authoring time.
-              tag: 0.14.2
+              # Pinned deliberately (upstream's own guidance). 0.15.0 makes
+              # the v2 checkpoint the default (single file, embedded draft
+              # head, ~3.5 GiB less memory than w4b+overlay).
+              tag: 0.15.0
             nodeSelector:
               kubernetes.io/hostname: prod-talos-worker-tail
             # Halogen pins the checkpoint into GPU-registered memory; the K8s
@@ -622,11 +640,9 @@ spec:
               - all
             env:
               - name: HALOGEN_CHECKPOINT
-                value: /models/cache/halogen/qwen38-flash-next-w4b.hgn
+                value: /models/cache/halogen/qwen38-flash-next-v2.hgn
               - name: HALOGEN_TOKENIZER
                 value: /models/cache/halogen/tokenizer
-              - name: HALOGEN_MTP_HEAD
-                value: /models/cache/halogen/qwen38-flash-next-mtp.hgn
               # Publish the API on the chart's standard port (service, probes
               # and the LiteLLM api_base all assume 8080). The engine's own
               # port 8730 stays unpublished inside the container.
@@ -659,6 +675,12 @@ spec:
                 # python:3.12-slim ships a proper CA store (same reasoning as
                 # the gufo entry's setup container). Idempotent: hf download
                 # skips complete files and resumes partial ones.
+                #
+                # --include is explicit (not --exclude): upstream added
+                # ngram.hgn (51 GiB) and v2.hgn (67 GiB) on 2026-09-29 and an
+                # exclude-only filter pulled both on the next pod restart.
+                # --revision pins the snapshot so upstream changes can never
+                # trigger a surprise re-download; bump deliberately.
                 image: python:3.12-slim
                 env:
                   - name: HF_TOKEN
@@ -676,9 +698,13 @@ spec:
                     pip install -q --no-cache-dir --root-user-action=ignore huggingface_hub hf_transfer
                     D=/models/cache/halogen
                     mkdir -p "$D"
-                    echo "[setup] downloading halogen native ckpt + sidecars (~130 GiB)"
+                    echo "[setup] downloading halogen v2 ckpt + ngram table + tokenizer (~110 GiB)"
                     hf download peonist-ai/halogen-qwen3.8-flash-next \
-                      --exclude '*overlay-speed*' \
+                      --revision 5cc17cea1a10b502b4a5db41d8d2b1a0f22dba26 \
+                      --include 'qwen38-flash-next-v2.hgn' \
+                      --include 'qwen38-flash-next-ngram.hgn' \
+                      --include 'qwen38-flash-next-vision.hgn' \
+                      --include 'tokenizer/*' \
                       --max-workers 8 \
                       --local-dir "$D"
                     echo "[setup] done"

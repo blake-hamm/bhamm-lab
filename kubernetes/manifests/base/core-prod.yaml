@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://codeberg.org/blake-hamm/bhamm-lab.git
-    targetRevision: feature/halogen-qwen38-tail
+    targetRevision: fix/hermes-image-upgrade-0.21.5
     path: kubernetes/manifests/core
     directory:
       recurse: true
