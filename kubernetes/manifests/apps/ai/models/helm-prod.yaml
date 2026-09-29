@@ -409,6 +409,13 @@ spec:
             nodeSelector:
               kubernetes.io/hostname: prod-talos-worker-nose
           - name: qwen-38-flash
+            # DEPRECATED (2026-09-29): replaced by qwen-38-flash-halogen.
+            # A/B test via litellm showed halogen wins the agentic profile:
+            # 262K prefill 80s vs 162s, flat ~3.6s prompt-cache follow-up
+            # turns, 42 GB vs 96 GB VRAM, uniform 4-stream parallel decode.
+            # Disabled here (halogen is now primary); the entry is kept for
+            # a quick re-enable if needed.
+            #
             # Qwen 3.8 Flash-Next via gufo (open-source, MIT; Strix-Halo-specific) on the
             # nose node. Replaces the closed-source halogen-flash-server entry: gufo is
             # ~2.2x faster prefill (1628 vs 752 tok/s @32k) and +45% decode (59.4 vs 41
@@ -425,7 +432,7 @@ spec:
             # rate (per the agreed interim approach; a connection-counting sidecar or a
             # metrics-rich gateway can replace this later).
             description: Qwen 3.8 Flash-Next via gufo on Strix Halo (nose)
-            enabled: true
+            enabled: false
             hostIPC: true
             pvc:
               storage: "150Gi"
@@ -539,6 +546,154 @@ spec:
                 # anything under 1 tok/s look idle against threshold "1").
                 query: >-
                   sum(rate(llamacpp:tokens_predicted_total{container="qwen-38-flash"}[5m])) or vector(0)
+                threshold: "0.001"
+            resources:
+              limits:
+                amd.com/gpu: 1
+                memory: "124Gi"
+                cpu: "8"
+              requests:
+                amd.com/gpu: 1
+                cpu: "4"
+                memory: "122Gi"
+          - name: qwen-38-flash-halogen
+            # EXPERIMENTAL: Qwen 3.8 Flash-Next via halogen-flash-server on the
+            # tail node, to A/B against gufo (qwen-38-flash on nose) on agentic
+            # long-context workloads. Halogen's edge is decode at depth (~45
+            # tok/s at 258K vs gufo ~28) and its resume-anywhere prompt cache
+            # (follow-up turns ~2s regardless of conversation size); prefill is
+            # at parity. Serves the model's full native 262,144-token context.
+            #
+            # PREREQUISITES on tail (both are manual, see PR):
+            #   1. Kernel >= 7.0. The checkpoint is a read-only file mapping
+            #      registered with the GPU; on 6.18.x the driver refuses it with
+            #      `invalid argument` (halogen issue #37). Talos 1.12.6 ships
+            #      6.18.x, so this will NOT run on the current green-cluster
+            #      kernel — it needs a node booted on 7.0+.
+            #   2. BIOS UMA carve-out at its explicit MINIMUM (opposite of
+            #      gufo, which wants it maxed). Halogen drives the GPU through
+            #      GTT and needs the carved-out RAM back for the page cache.
+            #
+            # Model: the engine's native checkpoint (peonist-ai/halogen-qwen3.8-
+            # flash-next: w4b.hgn 124 GiB + quality overlay + MTP draft head +
+            # tokenizer; overlay-speed excluded, it trades quality for ~2%).
+            # initContainer pre-downloads via hf (idempotent/resumable) so the
+            # engine starts from a warm disk; HALOGEN_DOWNLOAD stays unset (the
+            # container then opens no outbound connections at all).
+            #
+            # Vision tower is intentionally OFF: on a 128 GB box its ~2 GiB is
+            # the difference between the 524,288-position KV pool (two full
+            # 262K conversations resident) and 262,144 (one). Flip
+            # HALOGEN_VISION_TOWER=1 to trade the second resident conversation
+            # back for image input.
+            #
+            # Memory (upstream-measured, 128 GB): 67.7 GiB pinned weights +
+            # 14.4 GiB pool + 21.3 GiB working memory (MAX_TOK 32768) ~= 103
+            # GiB, leaving ~12 GiB page cache for the 47.7 GiB n-gram lookup
+            # table (streamed from disk, never resident). Concurrency: 4 slots
+            # (default) sharing the pool = two full 262K conversations resident
+            # or four at 131K; four fully-resident 262K sessions do NOT fit on
+            # 128 GB. Scale-to-zero uses halogen's /metrics, which exports the
+            # llama.cpp-compatible counters.
+            description: Qwen 3.8 Flash-Next via halogen on Strix Halo (tail, experimental)
+            enabled: true
+            hostIPC: true
+            pvc:
+              storage: "200Gi"
+            image:
+              repository: ghcr.io/peonist-ai/halogen-flash-server
+              # Pinned deliberately (upstream's own guidance). 0.14.2 is the
+              # latest tag on ghcr at authoring time.
+              tag: 0.14.2
+            nodeSelector:
+              kubernetes.io/hostname: prod-talos-worker-tail
+            # Halogen pins the checkpoint into GPU-registered memory; the K8s
+            # equivalent of --ulimit memlock=-1 is CAP_IPC_LOCK (same as the
+            # gufo entry).
+            securityContext:
+              capabilities:
+                add:
+                  - IPC_LOCK
+            command:
+              - /usr/local/bin/entrypoint.sh
+            args:
+              # Single-container mode: engine + OpenAI API in one pod (the
+              # split compose topology isn't needed here).
+              - all
+            env:
+              - name: HALOGEN_CHECKPOINT
+                value: /models/cache/halogen/qwen38-flash-next-w4b.hgn
+              - name: HALOGEN_TOKENIZER
+                value: /models/cache/halogen/tokenizer
+              - name: HALOGEN_MTP_HEAD
+                value: /models/cache/halogen/qwen38-flash-next-mtp.hgn
+              # Publish the API on the chart's standard port (service, probes
+              # and the LiteLLM api_base all assume 8080). The engine's own
+              # port 8730 stays unpublished inside the container.
+              - name: HALOGEN_API_PORT
+                value: "8080"
+              # Two full 262K conversations resident (or four at 131K). This
+              # is also the image default; pinned so an upstream default
+              # change can't silently halve it.
+              - name: HALOGEN_KV_POOL_POSITIONS
+                value: "524288"
+              # Disk prompt cache: conversations resume across pod restarts
+              # instead of cold-prefilling (~40s saved on a 32K conversation).
+              # Needs a real filesystem with direct I/O (local-path on the user
+              # disk qualifies; tmpfs/overlay would be refused with a log line).
+              - name: HALOGEN_CACHE_DIR
+                value: /models/cache/halogen-prompt-cache
+              - name: HALOGEN_CACHE_DISK_GIB
+                value: "48"
+              # Model-card thinking-mode sampling defaults so agent clients
+              # that send no sampling fields behave like they do against gufo
+              # (halogen decodes greedy otherwise).
+              - name: HALOGEN_TEMPERATURE
+                value: "1.0"
+              - name: HALOGEN_TOP_P
+                value: "0.95"
+              - name: HALOGEN_TOP_K
+                value: "20"
+            initContainers:
+              - name: setup
+                # python:3.12-slim ships a proper CA store (same reasoning as
+                # the gufo entry's setup container). Idempotent: hf download
+                # skips complete files and resumes partial ones.
+                image: python:3.12-slim
+                env:
+                  - name: HF_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        name: models-external-secret
+                        key: hf_token
+                  - name: HF_HUB_ENABLE_HF_TRANSFER
+                    value: "1"
+                command:
+                  - /bin/bash
+                  - -lc
+                  - |
+                    set -euo pipefail
+                    pip install -q --no-cache-dir --root-user-action=ignore huggingface_hub hf_transfer
+                    D=/models/cache/halogen
+                    mkdir -p "$D"
+                    echo "[setup] downloading halogen native ckpt + sidecars (~130 GiB)"
+                    hf download peonist-ai/halogen-qwen3.8-flash-next \
+                      --exclude '*overlay-speed*' \
+                      --max-workers 8 \
+                      --local-dir "$D"
+                    echo "[setup] done"
+                volumeMounts:
+                  - name: model-cache
+                    mountPath: /models/cache
+            zeroscaling:
+              enabled: true
+              minReplicas: 1
+              cooldownPeriod: 1800
+              trigger:
+                # halogen /metrics exports the llama.cpp counter names, so the
+                # same generated-token-rate signal as the gufo entry works.
+                query: >-
+                  sum(rate(llamacpp:tokens_predicted_total{container="qwen-38-flash-halogen"}[5m])) or vector(0)
                 threshold: "0.001"
             resources:
               limits:
