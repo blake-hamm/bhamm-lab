@@ -1,0 +1,88 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hindsight
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "27" # right after hindsight-common; before hermes (28) so the API is live when hermes rolls
+spec:
+  destination:
+    namespace: hindsight
+    server: https://kubernetes.default.svc
+  project: default
+  # Chart-from-git (same pattern as firecrawl), NOT OCI: anonymous OCI chart
+  # pulls from ArgoCD's repo-server 403 against ghcr even though the chart is
+  # public ('cannot get digest for revision 0.10.2 ... denied'); git tag pin
+  # is equivalent — chart source verified byte-identical render vs the OCI
+  # chart 0.10.2. `chart:` field omitted intentionally (index-repos only).
+  source:
+    repoURL: https://github.com/vectorize-io/hindsight
+    targetRevision: v0.10.2
+    path: helm/hindsight
+    helm:
+      valuesObject:
+        version: "0.10.2"
+        existingSecret: hindsight-external-secret
+        # DB = dedicated CNPG cluster from hindsight-common (barman-backed).
+        postgresql:
+          enabled: false
+          external:
+            host: hindsight-postgresql-rw.hindsight.svc.cluster.local
+            port: 5432
+            database: hindsight
+            username: hindsight
+        api:
+          replicaCount: 1
+          image:
+            repository: ghcr.io/vectorize-io/hindsight-api
+            tag: 0.10.2-slim
+            pullPolicy: IfNotPresent
+          # Slim image = no local ML deps (torch/sentence-transformers/flashrank
+          # are excluded build-time); embeddings+reranking are external providers.
+          resources:
+            requests: {cpu: 250m, memory: 512Mi}
+            limits: {cpu: "2", memory: 1.5Gi}
+          env:
+            HINDSIGHT_API_VECTOR_EXTENSION: vchord
+            # Internal worker identity: hostname-based default orphans claimed
+            # tasks when the pod is replaced (no StatefulSet with worker=false).
+            HINDSIGHT_API_WORKER_ID: hindsight-api-0
+            # LLM: in-cluster LiteLLM (OpenAI-compat); ALL ops (retain/consolidate/
+            # reflect) on qwen-38-27b per Blake. Key arrives via existingSecret envFrom.
+            HINDSIGHT_API_LLM_PROVIDER: openai
+            HINDSIGHT_API_LLM_BASE_URL: http://litellm.litellm.svc.cluster.local:4000/v1
+            HINDSIGHT_API_LLM_MODEL: qwen-38-27b
+            # Embeddings: qwen-embed (Qwen3-Embedding-8B, 4096-dim -> vchord).
+            HINDSIGHT_API_EMBEDDINGS_PROVIDER: litellm
+            HINDSIGHT_API_EMBEDDINGS_LITELLM_API_BASE: http://litellm.litellm.svc.cluster.local:4000
+            HINDSIGHT_API_EMBEDDINGS_LITELLM_MODEL: qwen-embed
+            HINDSIGHT_API_EMBEDDINGS_LITELLM_DIMENSIONS: "4096"
+            # Tenant auth (API key) — clients send Authorization: Bearer <key>.
+            HINDSIGHT_API_TENANT_EXTENSION: "hindsight_api.extensions.builtin.tenant:ApiKeyTenantExtension"
+        worker:
+          enabled: false
+        controlPlane:
+          enabled: true
+          image:
+            repository: ghcr.io/vectorize-io/hindsight-control-plane
+            tag: 0.10.2
+            pullPolicy: IfNotPresent
+        # Reranker: chart-rendered CPU TEI (cross-encoder/ms-marco-MiniLM-L-6-v2);
+        # chart auto-wires HINDSIGHT_API_RERANKER_PROVIDER=tei + TEI_URL on the api.
+        tei:
+          reranker:
+            enabled: true
+          embedding:
+            enabled: false
+        metrics:
+          serviceMonitor:
+            enabled: true
+            labels:
+              release: kube-prometheus-stack
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

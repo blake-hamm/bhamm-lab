@@ -6,7 +6,7 @@ metadata:
   name: hermes
   namespace: hermes
   annotations:
-    argocd.argoproj.io/sync-wave: "21"
+    argocd.argoproj.io/sync-wave: "29"
 spec:
   selector:
     app: hermes

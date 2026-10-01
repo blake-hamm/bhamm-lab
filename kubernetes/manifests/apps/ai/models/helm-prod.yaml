@@ -670,6 +670,25 @@ spec:
                 value: "0.95"
               - name: HALOGEN_TOP_K
                 value: "20"
+              # Output-budget fixes for Hermes context compression (see PR
+              # comment): Hermes' compression summary deliberately sends no
+              # max_tokens (a hard client cap truncates partial summaries),
+              # so it ran under halogen's 8192 default while thinking (the
+              # template's xhigh) ate part of it — finish_reason=length,
+              # rejected partial summary, escalating cooldowns. Main agent
+              # turns are unaffected: they send an explicit budget and a
+              # request that sends one always wins.
+              # - 32768 budget for budget-less requests (under the 65536 cap):
+              #   covers Hermes' max summary size (~9.2K) plus a full 8K
+              #   thinking run without overflow.
+              # - 8192 thinking cap on requests that send no thinking control,
+              #   so the budget reaches the summary text instead of being
+              #   consumed by xhigh reasoning; also bounds the decode stall
+              #   window that blew Hermes' aux compression timeout.
+              - name: HALOGEN_MAX_TOKENS_DEFAULT
+                value: "32768"
+              - name: HALOGEN_MAX_THINKING_TOKENS
+                value: "8192"
             initContainers:
               - name: setup
                 # python:3.12-slim ships a proper CA store (same reasoning as

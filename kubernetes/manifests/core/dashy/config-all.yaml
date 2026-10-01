@@ -284,6 +284,20 @@ data:
         description: Visit Qdrant
         icon: hl-qdrant
         url: https://qdrant.bhamm-lab.com/dashboard
+      - title: Hermes
+        description: Visit Hermes agent dashboard
+        icon: mdi-robot
+        url: https://hermes.bhamm-lab.com/
+      - title: Hindsight
+        description: Visit Hindsight agent memory control plane
+        icon: mdi-eye
+        url: https://hindsight.bhamm-lab.com/
+        statusCheckAcceptCodes: '401'
+      - title: Firecrawl
+        description: Visit Firecrawl web extract API
+        icon: mdi-fire
+        url: https://firecrawl.bhamm-lab.com/
+        statusCheckAcceptCodes: '401'
 
     - name: Security
       icon: mdi-security

@@ -1,0 +1,99 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hindsight-common
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "26" # right after litellm (24); PushSecret shares this wave
+spec:
+  destination:
+    namespace: hindsight
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://codeberg.org/blake-hamm/bhamm-lab.git
+    targetRevision: main
+    path: kubernetes/charts/common
+    helm:
+      valuesObject:
+        name: hindsight
+        # Secret the hindsight chart consumes as existingSecret (chart REQUIRES
+        # key postgres-password via secretKeyRef; envFrom adds the rest as env).
+        # ES renders at wave 14 inside the common app, CNPG cluster at wave 17 —
+        # see push-secret-prod.yaml for the CNPG -> Vault -> here round-trip.
+        # Boot ordering note: postgres-password cannot resolve until CNPG is up
+        # and PushSecret has pushed (~a few min after provisioning); ES stays
+        # NotReady and Argo shows this app degraded until it self-reconciles.
+        externalSecrets:
+          enabled: true
+          secrets:
+            - secretKey: postgres-password
+              remoteRef:
+                key: /default/hindsight-db
+                property: password
+            - secretKey: HINDSIGHT_API_TENANT_API_KEY
+              remoteRef:
+                key: /default/hindsight
+                property: TENANT_API_KEY
+            - secretKey: HINDSIGHT_API_LLM_API_KEY
+              remoteRef:
+                key: /default/litellm
+                property: LITELLM_MASTER_KEY
+            - secretKey: HINDSIGHT_API_EMBEDDINGS_LITELLM_API_KEY
+              remoteRef:
+                key: /default/litellm
+                property: LITELLM_MASTER_KEY
+        postgresql:
+          enabled: true
+          instances: 1
+          storageSize: 5Gi
+          # vchord image (immich-proven tag): qwen-embed emits 4096-dim vectors,
+          # beyond pgvector's 2000-dim index cap — Hindsight supports vchord
+          # natively (HINDSIGHT_API_VECTOR_EXTENSION=vchord).
+          imageName: "ghcr.io/tensorchord/cloudnative-vectorchord:17.5-0.4.3"
+          sharedPreloadLibraries:
+            - "vchord.so"
+          postInitSQL:
+            - CREATE EXTENSION IF NOT EXISTS "vchord" CASCADE;
+          # Extensions must exist in the APP database (`hindsight`), but
+          # postInitSQL runs in the `postgres` database (CNPG behavior,
+          # confirmed during firecrawl #310) — so Hindsight's own migration
+          # bootstrap runs `CREATE EXTENSION IF NOT EXISTS vchord CASCADE`
+          # against its DB on startup instead. That needs elevated rights:
+          # the bundled `vector` is not marked trusted (vchord CASCADE hits
+          # 'permission denied to create extension "vector"'), so the initdb
+          # owner cannot self-serve. Same resolution as immich: CNPG-managed
+          # superuser role (ALTER ROLE only — password untouched, CNPG owns
+          # nothing else about it).
+          managed:
+            roles:
+              - name: hindsight
+                superuser: true
+                login: true
+          backup:
+            enabled: true
+          # FIRST PROVISIONING: enable=restore flips bootstrap to recovery from a
+          # barman backup that does not exist yet. Flip true only for a restore test.
+          restore:
+            enabled: false
+        # No k8up: the only PVC here is CNPG's own, covered by barman backups.
+        ingressRoutes:
+          - name: hindsight
+            ingressClass: traefik-external
+            routes:
+              - match: Host(`hindsight.bhamm-lab.com`)
+                kind: Rule
+                middlewares:
+                  - name: default-headers
+                  - name: forwardauth-authelia
+                services:
+                  - name: hindsight-control-plane
+                    scheme: http
+                    port: http
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

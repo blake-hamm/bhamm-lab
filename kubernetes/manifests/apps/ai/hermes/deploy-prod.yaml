@@ -6,7 +6,7 @@ metadata:
   name: hermes
   namespace: hermes
   annotations:
-    argocd.argoproj.io/sync-wave: "22"
+    argocd.argoproj.io/sync-wave: "30" # after hindsight api is live (26/27)
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
@@ -65,6 +65,18 @@ spec:
             # Web extract backend (self-hosted Firecrawl; keyless, in-cluster).
             - name: FIRECRAWL_API_URL
               value: "http://firecrawl-firecrawl-api.firecrawl.svc.cluster.local:3002"
+            # Hindsight memory backend (in-cluster; tenant key sent as Bearer).
+            # Plugin: `hermes plugins install hindsight`, activated per-profile
+            # via `memory.provider: hindsight` — see docs ai/hindsight.md.
+            - name: HINDSIGHT_MODE
+              value: "local_external"
+            - name: HINDSIGHT_API_URL
+              value: "http://hindsight-api.hindsight.svc.cluster.local:8888"
+            - name: HINDSIGHT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-external-secret
+                  key: HINDSIGHT_API_KEY
             # CDP endpoint for browser_exec — points the browser-harness
             # daemon at the chromium-cdp sidecar (127.0.0.1:9222). Without
             # this, the daemon's liveness check (which only scans its own

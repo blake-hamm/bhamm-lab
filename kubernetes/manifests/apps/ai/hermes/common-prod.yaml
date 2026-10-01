@@ -4,7 +4,7 @@ metadata:
   name: hermes-common
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-wave: "28" # after hindsight (26/27): hermes memory backend must exist first
 spec:
   destination:
     namespace: hermes
@@ -36,6 +36,10 @@ spec:
               remoteRef:
                 key: /default/hermes
                 property: API_SERVER_KEY
+            - secretKey: HINDSIGHT_API_KEY
+              remoteRef:
+                key: /default/hindsight
+                property: TENANT_API_KEY
         ingressRoutes:
           - name: hermes
             ingressClass: traefik-external

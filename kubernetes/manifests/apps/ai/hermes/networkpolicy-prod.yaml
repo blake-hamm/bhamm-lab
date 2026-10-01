@@ -17,7 +17,7 @@ metadata:
   name: hermes-ingress
   namespace: hermes
   annotations:
-    argocd.argoproj.io/sync-wave: "23"
+    argocd.argoproj.io/sync-wave: "31"
 spec:
   endpointSelector: {}
   ingress:
@@ -36,7 +36,7 @@ metadata:
   name: hermes-egress
   namespace: hermes
   annotations:
-    argocd.argoproj.io/sync-wave: "23"
+    argocd.argoproj.io/sync-wave: "31"
 spec:
   endpointSelector: {}
   egress:
@@ -102,6 +102,14 @@ spec:
       toPorts:
         - ports:
             - port: "3002"
+              protocol: TCP
+    # Hindsight memory API (in-cluster; tenant API key sent as Bearer).
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: hindsight
+      toPorts:
+        - ports:
+            - port: "8888"
               protocol: TCP
     # Twenty CRM server (in-cluster; mint agent MCP + API access, Bearer key).
     - toEndpoints:
