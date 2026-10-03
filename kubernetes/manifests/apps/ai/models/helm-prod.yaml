@@ -580,11 +580,11 @@ spec:
             # at parity. Serves the model's full native 262,144-token context.
             #
             # PREREQUISITES on tail (both are manual, see PR):
-            #   1. Kernel >= 7.0. The checkpoint is a read-only file mapping
-            #      registered with the GPU; on 6.18.x the driver refuses it with
-            #      `invalid argument` (halogen issue #37). Talos 1.12.6 ships
-            #      6.18.x, so this will NOT run on the current green-cluster
-            #      kernel — it needs a node booted on 7.0+.
+            #   1. Kernel with the two AMD gfx1151 SVM properties (upstream
+            #      retracted the earlier ">= 7.0" guess in 0.15.2): Linux
+            #      >= 6.18.4 for AMD's two gfx1151 fixes (halogen issue #37)
+            #      AND a kernel built with CONFIG_HSA_AMD_SVM. tail's
+            #      6.18.18-talos satisfies both, which is why the entry runs.
             #   2. BIOS UMA carve-out at its explicit MINIMUM (opposite of
             #      gufo, which wants it maxed). Halogen drives the GPU through
             #      GTT and needs the carved-out RAM back for the page cache.
@@ -598,20 +598,31 @@ spec:
             # engine starts from a warm disk; HALOGEN_DOWNLOAD stays unset (the
             # container then opens no outbound connections at all).
             #
-            # Vision tower is intentionally OFF: on a 128 GB box its ~2 GiB is
-            # the difference between the 524,288-position KV pool (two full
-            # 262K conversations resident) and 262,144 (one). Flip
-            # HALOGEN_VISION_TOWER=1 to trade the second resident conversation
-            # back for image input.
+            # Vision tower ON: image input (screenshots, error-message
+            # readings) via HALOGEN_VISION_TOWER below. Upstream budgets the
+            # tower's ~2 GiB inside the 524,288-position pool fit as of 0.15.1
+            # (#117 — the startup fit previously sized working memory ~8 GiB
+            # too high), so images no longer cost the second resident 262K
+            # conversation. Watch for `LOWERING THE POOL` in the startup log:
+            # if the fit does halve the pool, drop back to 262,144 or set
+            # HALOGEN_MAX_TOK=16384 to buy the room back. /health reports
+            # vision.enabled; a text-only deployment is unaffected either way.
+            # Cost per image (upstream-measured): ~5.5 / 11.8 / 25.3 s of
+            # prefill at 1280x800 / 1920x1080 / 2560x1440, and a 1080p frame
+            # occupies ~2,040 context tokens. Images must be sent as data:
+            # URLs or bare base64 — http(s) image URLs are refused by design
+            # so the server never makes outbound fetches on a client's behalf.
             #
-            # Memory (upstream-measured, 128 GB): ~64 GiB pinned weights +
-            # 14.4 GiB pool + 21.3 GiB working memory (MAX_TOK 32768) ~= 100
-            # GiB, leaving ~15 GiB page cache for the 47.7 GiB n-gram lookup
-            # table (streamed from disk, never resident). Concurrency: 4 slots
-            # (default) sharing the pool = two full 262K conversations resident
-            # or four at 131K; four fully-resident 262K sessions do NOT fit on
-            # 128 GB. Scale-to-zero uses halogen's /metrics, which exports the
-            # llama.cpp-compatible counters.
+            # Memory (upstream's 0.15.1+ startup fit, 128 GB): 62.1 GiB pinned
+            # v2 weights; the 524,288-position pool at MAX_TOK 32768 budgets
+            # ~29 GiB (14.4 pool + 12.4 working/slots + ~2 margin covering the
+            # vision tower scratch), leaving the rest as page cache for the
+            # 47.7 GiB n-gram lookup table (streamed from disk, never
+            # resident). Concurrency: 4 slots (default) sharing the pool = two
+            # full 262K conversations resident or four at 131K; four
+            # fully-resident 262K sessions do NOT fit on 128 GB. Scale-to-zero
+            # uses halogen's /metrics, which exports the llama.cpp-compatible
+            # counters.
             description: Qwen 3.8 Flash-Next via halogen on Strix Halo (tail, experimental)
             enabled: true
             hostIPC: true
@@ -619,10 +630,14 @@ spec:
               storage: "200Gi"
             image:
               repository: ghcr.io/peonist-ai/halogen-flash-server
-              # Pinned deliberately (upstream's own guidance). 0.15.0 makes
-              # the v2 checkpoint the default (single file, embedded draft
-              # head, ~3.5 GiB less memory than w4b+overlay).
-              tag: 0.15.0
+              # Pinned deliberately (upstream's own guidance). 0.16.2 is the
+              # current release; the v2 checkpoint stays the default. Notable
+              # between 0.15.1 and here: the fixed startup pool fit (#117,
+              # which is what makes the vision tower affordable at 524K),
+              # faster short/long prompt reads, decode speedups, prompt-cache
+              # eviction that keeps the shared system prompt, and the
+              # disk-cache restore race fix (#121).
+              tag: 0.16.2
             nodeSelector:
               kubernetes.io/hostname: prod-talos-worker-tail
             # Halogen pins the checkpoint into GPU-registered memory; the K8s
@@ -643,6 +658,14 @@ spec:
                 value: /models/cache/halogen/qwen38-flash-next-v2.hgn
               - name: HALOGEN_TOKENIZER
                 value: /models/cache/halogen/tokenizer
+              # Image input. The initContainer already pulls the sidecar
+              # (qwen38-flash-next-vision.hgn, 0.84 GiB) beside the checkpoint;
+              # this env is what switches the image path on. Explicit path
+              # rather than the `=1` beside-checkpoint discovery so the file
+              # it loads is unambiguous. To go back to text-only, delete this
+              # env (the checkpoint is byte-identical without the tower).
+              - name: HALOGEN_VISION_TOWER
+                value: /models/cache/halogen/qwen38-flash-next-vision.hgn
               # Publish the API on the chart's standard port (service, probes
               # and the LiteLLM api_base all assume 8080). The engine's own
               # port 8730 stays unpublished inside the container.
@@ -717,7 +740,7 @@ spec:
                     pip install -q --no-cache-dir --root-user-action=ignore huggingface_hub hf_transfer
                     D=/models/cache/halogen
                     mkdir -p "$D"
-                    echo "[setup] downloading halogen v2 ckpt + ngram table + tokenizer (~110 GiB)"
+                    echo "[setup] downloading halogen v2 ckpt + ngram table + vision tower + tokenizer (~111 GiB)"
                     hf download peonist-ai/halogen-qwen3.8-flash-next \
                       --revision 5cc17cea1a10b502b4a5db41d8d2b1a0f22dba26 \
                       --include 'qwen38-flash-next-v2.hgn' \
