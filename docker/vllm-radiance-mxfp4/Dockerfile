@@ -12,9 +12,11 @@
 # patch time; every RADIANCE_* gate is runtime), and hipcc compiles without a
 # device -- the community image builds its own kernels the same way.
 #
-# Build:
-#   docker build -t harbor.bhamm-lab.com/library/vllm-radiance-mxfp4:0.9.3-p0.13.0 docker/vllm-radiance-mxfp4
-# Tag convention: <radiance-base>-p<ggz14 prelude version>
+# Built by CI (automations/cicd/forgejo-docker-all.yaml: kaniko, any push
+# touching docker/) which publishes ONLY :latest to Harbor -- the version
+# pins live in the ARGs below, not in image tags, until the pipeline grows
+# per-build tagging. Manual build:
+#   docker build -t harbor.bhamm-lab.com/library/vllm-radiance-mxfp4:latest docker/vllm-radiance-mxfp4
 
 ARG RADIANCE_IMAGE=stilldeadcode/vllm-radiance:0.9.3
 # radiance-vllm-mxfp4 v0.13.0

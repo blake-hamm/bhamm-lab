@@ -4,7 +4,7 @@ The `qwen-38-27b` deployment runs on the AMD R9700 node with [radiance-vllm-mxfp
 
 ## Stack
 
-- **Image:** `harbor.bhamm-lab.com/library/vllm-radiance-mxfp4` — derived image (`docker/vllm-radiance-mxfp4/Dockerfile`) based on `stilldeadcode/vllm-radiance` with the radiance repo baked in at `/patches` (upstream mounts it at runtime instead). The patch prelude, `radiance_mxfp4_fp8.so`, libr4d (`r4d.so`) and the AITER `module_aiter_core` JIT are compiled into site-packages at image build time (none need a GPU), so containers start straight into vLLM. Tag convention: `<radiance-base>-p<ggz14 prelude version>`, e.g. `0.9.3-p0.13.0`.
+- **Image:** `harbor.bhamm-lab.com/library/vllm-radiance-mxfp4` — derived image (`docker/vllm-radiance-mxfp4/Dockerfile`) based on `stilldeadcode/vllm-radiance` with the radiance repo baked in at `/patches` (upstream mounts it at runtime instead). The patch prelude, `radiance_mxfp4_fp8.so`, libr4d (`r4d.so`) and the AITER `module_aiter_core` JIT are compiled into site-packages at image build time (none need a GPU), so containers start straight into vLLM. The docker CI pipeline (Forgejo push → kaniko) publishes it as `:latest` only; version provenance lives in the Dockerfile ARGs (`stilldeadcode/vllm-radiance:0.9.3` base, ggz14 prelude `v0.13.0`) until per-build tagging matures.
 - **Checkpoint:** `amd/Qwen3.8-27B-Quark-AWQ-MXFP4`, requantized once by `fp8_mtp.py` (AMD's release does not load as-is) plus the `tcclaviger/Qwen3.8-27B-DFlash2-FP8` drafter. Both live on the model PVC (`/models/cache`).
 - **libr4d:** pinned commit + `r4d_radiance_extras.patch`, built into the image at build time (the kernel shipped in the base image NaNs this model's gated-delta-net output).
 

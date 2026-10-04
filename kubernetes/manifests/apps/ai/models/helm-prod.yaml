@@ -2429,9 +2429,12 @@ spec:
               storage: "80Gi"
             image:
               repository: harbor.bhamm-lab.com/library/vllm-radiance-mxfp4
-              # pinned: <radiance-base>-p<ggz14 prelude>; rebuild the image first
-              # (docker/vllm-radiance-mxfp4) — patches/kernels/JIT are baked in
-              tag: 0.9.3-p0.13.0
+              # TEMP (coldstart bake test): Always so a CI-rebuilt :latest actually
+              # replaces the node-cached digest (chart default IfNotPresent never
+              # re-checks a mutated :latest). Revert to default once the docker CI
+              # pipeline grows real per-build tags (see #343).
+              tag: latest
+              pullPolicy: Always
             nodeSelector:
               kubernetes.io/hostname: prod-talos-worker-amd-r9700
             hfToken:
@@ -2440,7 +2443,8 @@ spec:
               secretKey: hf_token
             initContainers:
               - name: setup
-                image: harbor.bhamm-lab.com/library/vllm-radiance-mxfp4:0.9.3-p0.13.0
+                image: harbor.bhamm-lab.com/library/vllm-radiance-mxfp4:latest
+                imagePullPolicy: Always # TEMP with the pullPolicy test below (raw initContainer spec)
                 command:
                   - /bin/bash
                   - -lc
