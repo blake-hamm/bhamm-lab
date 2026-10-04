@@ -2429,7 +2429,9 @@ spec:
               storage: "80Gi"
             image:
               repository: harbor.bhamm-lab.com/library/vllm-radiance-mxfp4
-              tag: latest
+              # pinned: <radiance-base>-p<ggz14 prelude>; rebuild the image first
+              # (docker/vllm-radiance-mxfp4) — patches/kernels/JIT are baked in
+              tag: 0.9.3-p0.13.0
             nodeSelector:
               kubernetes.io/hostname: prod-talos-worker-amd-r9700
             hfToken:
@@ -2438,7 +2440,7 @@ spec:
               secretKey: hf_token
             initContainers:
               - name: setup
-                image: harbor.bhamm-lab.com/library/vllm-radiance-mxfp4:latest
+                image: harbor.bhamm-lab.com/library/vllm-radiance-mxfp4:0.9.3-p0.13.0
                 command:
                   - /bin/bash
                   - -lc
@@ -2446,7 +2448,6 @@ spec:
                     set -euo pipefail
                     SNAP=/models/cache/Qwen3.8-27B-MXFP4-mtpfp8
                     DRAFTER=/models/cache/Qwen3.8-27B-DFlash2-FP8
-                    R4D_DIR=/models/cache/radiance-libr4d/b9e42ab-rx6
 
                     AVAIL_GB=$(df -BG --output=avail /models/cache | tail -1 | tr -dc '0-9')
                     if [ ! -f "$SNAP/config.json" ] && [ "$AVAIL_GB" -lt 40 ]; then
@@ -2476,19 +2477,8 @@ spec:
                     else
                       echo "[setup] drafter exists: $DRAFTER"
                     fi
-
-                    if [ ! -f "$R4D_DIR/r4d.so" ]; then
-                      echo "[setup] building libr4d b9e42ab + r4d_radiance_extras.patch"
-                      rm -rf /models/cache/radiance-libr4d/.build
-                      mkdir -p /models/cache/radiance-libr4d
-                      git clone -q https://codeberg.org/StillDeadcode/libr4d.git /models/cache/radiance-libr4d/.build
-                      git -C /models/cache/radiance-libr4d/.build checkout -q b9e42ab
-                      git -C /models/cache/radiance-libr4d/.build apply /patches/r4d_radiance_extras.patch
-                      (cd /models/cache/radiance-libr4d/.build && ./build.sh)
-                      mv /models/cache/radiance-libr4d/.build "$R4D_DIR"
-                    else
-                      echo "[setup] libr4d exists: $R4D_DIR"
-                    fi
+                    # libr4d is baked into the image now (b9e42ab + extras, built at
+                    # image build time) — no clone/build here anymore.
                 env:
                   - name: HF_HOME
                     value: /models/cache/huggingface
@@ -2508,29 +2498,11 @@ spec:
                   - name: model-cache
                     mountPath: /models/cache
             command:
+              # The patch prelude, radiance_mxfp4_fp8.so, r4d.so and the AITER core JIT are
+              # baked into the image (docker/vllm-radiance-mxfp4) — nothing to do at start.
               - /bin/bash
               - -lc
               - |
-                set -e
-                SP=/opt/vllm/lib/python3.12/site-packages
-                cd /patches
-                for p in patch_quark_mxfp4 patch_tp3_pad patch_ar_maxbytes patch_topk_triton_rows \
-                    patch_dflash_calib patch_dflash_mxfp4_kv patch_rmsquant_fusion patch_verify_head \
-                    patch_kv_group_size patch_topk_composite patch_gdn_shared_build patch_dflash_selector_topk \
-                    patch_gdn_merge_inproj patch_dynwidth patch_async_dynwidth patch_step_trace \
-                    patch_ar_geometry patch_ar_3rank patch_gdn_glue; do
-                  python3 "$p.py"
-                done
-                python3 patch_qwen3_thinkoff.py \
-                  || echo "[radiance] WARNING: thinkoff patch did not apply; thinking-off requests will return empty content"
-                cp mxfp4-configs/*.json "$SP"/aiter/ops/triton/configs/gemm/
-                cp radiance_mxfp4.py radiance_gdn.py radiance_rmsquant.py radiance_drafthead.py \
-                   radiance_verifyhead.py radiance_gdnmerge.py radiance_aroverlap.py radiance_topk.py \
-                   radiance_arnq.py radiance_tp3pad.py "$SP"/
-                hipcc -O3 -w -std=c++17 -fPIC -shared --offload-arch=gfx1201 \
-                  $(python3 -m pybind11 --includes) radiance_mxfp4_fp8.hip -o "$SP"/radiance_mxfp4_fp8.so
-                cp /models/cache/radiance-libr4d/b9e42ab-rx6/r4d.so "$SP"/r4d.so
-                echo "[radiance] libr4d b9e42ab-rx6 -> $SP/r4d.so"
                 cd /
                 exec /opt/radiance_entrypoint.sh "$@"
               - _
@@ -2573,6 +2545,12 @@ spec:
               - '{"temperature":0.7,"top_p":0.95,"top_k":20}'
               - --enable-per-request-metrics
               - --trust-remote-code
+              # Cap multimodal warmup/profiling: the renderer warmup and encoder profiling
+              # build dummy inputs at these limits (was a max-size 25 s warmup + 16k-token
+              # encoder budget). width/height only affect dummy generation; count=4 is a
+              # runtime cap on images per request (raise if vision A/B ever needs more).
+              - --limit-mm-per-prompt
+              - '{"image":{"count":4,"width":1024,"height":1024}}'
               - --chat-template
               - /patches/qwen-fixed-v22.3.jinja
             env:
