@@ -29,13 +29,13 @@
             truncation_length = 3;
             truncate_to_repo = true;
             fish_style_pwd_dir_length = 2;
-            read_only = " ";
+            read_only = " ";
             format = "[$path]($style) ";
           };
 
           git_branch = {
             format = "[$symbol$branch]($style) ";
-            symbol = " ";
+            symbol = " ";
           };
 
           git_status = {
@@ -55,7 +55,7 @@
 
           nix_shell = {
             format = "[$symbol$state]($style) ";
-            symbol = " ";
+            symbol = " ";
             impure_msg = "impure";
             pure_msg = "pure";
           };
