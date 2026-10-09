@@ -45,6 +45,8 @@ RUN curl -fsSL "https://codeberg.org/ggz14/radiance-vllm-mxfp4/archive/${RADIANC
 # hipcc runs under a login shell so ROCm lands on PATH exactly as it did then.
 RUN bash -lc '\
  set -e; \
+ . /opt/rocm/envsetup.sh 2>/dev/null || true; \
+ export LD_LIBRARY_PATH="/opt/rocm/lib:${LD_LIBRARY_PATH}"; \
  SP=/opt/vllm/lib/python3.12/site-packages; \
  cd /patches; \
  for p in patch_quark_mxfp4 patch_tp3_pad patch_ar_maxbytes patch_topk_triton_rows \
@@ -62,12 +64,14 @@ RUN bash -lc '\
     radiance_arnq.py radiance_tp3pad.py "$SP"/; \
  hipcc -O3 -w -std=c++17 -fPIC -shared --offload-arch=gfx1201 \
    $(python3 -m pybind11 --includes) radiance_mxfp4_fp8.hip -o "$SP"/radiance_mxfp4_fp8.so; \
- python3 -c "import radiance_mxfp4_fp8" && echo "[build] radiance_mxfp4_fp8.so OK"'
+ python3 -c "import torch, radiance_mxfp4_fp8" && echo "[build] radiance_mxfp4_fp8.so OK"'
 
 # libr4d pinned kernels + radiance extras (previously built by the setup init
 # container onto the model PVC, then cp'd into site-packages at every start).
 RUN bash -lc '\
  set -e; \
+ . /opt/rocm/envsetup.sh 2>/dev/null || true; \
+ export LD_LIBRARY_PATH="/opt/rocm/lib:${LD_LIBRARY_PATH}"; \
  curl -fsSL "https://codeberg.org/StillDeadcode/libr4d/archive/${R4D_REPO_REF}.tar.gz" | tar xz -C /tmp; \
  cd /tmp/libr4d; \
  git apply /patches/r4d_radiance_extras.patch; \
@@ -75,7 +79,7 @@ RUN bash -lc '\
  cp r4d.so /opt/vllm/lib/python3.12/site-packages/r4d.so; \
  rm -rf /tmp/libr4d; \
  cd /; \
- python3 -c "import r4d" && echo "[build] libr4d ${R4D_REPO_REF} (rx) -> site-packages OK"'
+ python3 -c "import torch, r4d" && echo "[build] libr4d ${R4D_REPO_REF} (rx) -> site-packages OK"'
 
 # Pre-build AITER's module_aiter_core (~36 s of hipcc JIT every pod start).
 # GPU_ARCHS removes GPU detection from the path so this also works on
@@ -83,6 +87,8 @@ RUN bash -lc '\
 # valid wherever the image runs. Best-effort: on failure the runtime JIT
 # rebuilds at startup as before (aiter re-checks the .so offload archs).
 RUN bash -lc '\
+ . /opt/rocm/envsetup.sh 2>/dev/null || true; \
+ export LD_LIBRARY_PATH="/opt/rocm/lib:${LD_LIBRARY_PATH}"; \
  cd /opt/vllm/lib/python3.12/site-packages/aiter; \
  GPU_ARCHS=gfx1201 python3 -c "from aiter.jit.core import get_module; get_module(\"module_aiter_core\")" \
    && echo "[build] aiter module_aiter_core prebuilt OK" \
