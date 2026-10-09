@@ -17,6 +17,7 @@
 # pins live in the ARGs below, not in image tags, until the pipeline grows
 # per-build tagging. Manual build:
 #   docker build -t harbor.bhamm-lab.com/library/vllm-radiance-mxfp4:latest docker/vllm-radiance-mxfp4
+# (trigger bump for the docker-change workflow)
 
 ARG RADIANCE_IMAGE=stilldeadcode/vllm-radiance:0.9.3
 # radiance-vllm-mxfp4 v0.13.0
