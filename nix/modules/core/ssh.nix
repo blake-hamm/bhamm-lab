@@ -3,7 +3,7 @@
   users.users.${shared.username} = {
     openssh.authorizedKeys.keys = [
       # bhamm framework
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKsS2H4frdi7AvzkGMPMRaQ+B46Af5oaRFtNJY3uCHt blake.j.hamm@gmail.com"
+      "${shared.sshPublicKey} blake.j.hamm@gmail.com"
     ];
   };
   services.openssh = {

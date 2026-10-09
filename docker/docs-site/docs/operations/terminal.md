@@ -235,13 +235,14 @@ These commands replicate VSCode's sidebar, quick-open, and global search.
 
 | Key | Action |
 |-----|--------|
-| `<Space>e` | toggle file tree (neo-tree) |
+| `<Space>te` | toggle file tree (neo-tree) |
 | `<Space>ff` | find files (telescope) — like `Ctrl+P` |
 | `<Space>fg` | live grep (telescope) — like `Ctrl+Shift+F` |
 | `<Space>fb` | list open buffers (telescope) |
+| `<Space>tm` | toggle markdown preview |
 
 **Neo-tree** (file explorer):
-- Open with `<Space>e`, navigate with `j`/`k`
+- Open with `<Space>te`, navigate with `j`/`k`
 - `Enter` — open file in current window
 - `s` — open file in **vertical split** (tree stays left)
 - `S` — open file in horizontal split
@@ -254,7 +255,7 @@ These commands replicate VSCode's sidebar, quick-open, and global search.
 **Switching focus between tree and editor:**
 - `Ctrl+w h` — move focus to the left window (neo-tree)
 - `Ctrl+w l` — move focus to the right window (editor)
-- `<Space>e` toggles the tree and puts focus inside it automatically
+- `<Space>te` toggles the tree and puts focus inside it automatically
 
 
 **Telescope** (fuzzy finder):
@@ -265,7 +266,7 @@ These commands replicate VSCode's sidebar, quick-open, and global search.
 - `Ctrl+x` — open result in horizontal split
 - `Esc` — close telescope
 
-**The VSCode layout**: Open a directory with `nvim .`, then `<Space>e`. The tree appears on the left. Press `s` on any file to open it on the right while the tree stays visible.
+**The VSCode layout**: Open a directory with `nvim .`, then `<Space>te`. The tree appears on the left. Press `s` on any file to open it on the right while the tree stays visible.
 
 ### Code Navigation (LSP)
 
@@ -274,7 +275,10 @@ These commands require a language server (LSP) for the file type. Use them when 
 | Key | Action |
 |-----|--------|
 | `<Space>` | leader (wait for next key) |
-| `<Space>th` | toggle terminal |
+| `<Space>tt` | toggle terminal |
+| `<Space>gd` | open diffview (all changes) |
+| `<Space>gh` | file git history (diffview) |
+| `<Space>gq` | close diffview |
 | `gd` | go to definition |
 | `gr` | go to references |
 | `K` | hover documentation |

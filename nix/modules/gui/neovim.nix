@@ -48,22 +48,51 @@
           vim.git.gitsigns.codeActions.enable = true;
 
           vim.extraPlugins = {
+            markdown-preview = {
+              package = pkgs.vimPlugins.markdown-preview-nvim;
+              setup = "";
+            };
             diffview = {
               package = pkgs.vimPlugins.diffview-nvim;
               setup = ''
+                -- Single command that closes diffview then sweeps any leftover
+                -- diffview:// windows regardless of where the cursor is.
+                vim.api.nvim_create_user_command('DiffviewQuit', function()
+                  vim.cmd('DiffviewClose')
+                  vim.schedule(function()
+                    for _, win in ipairs(vim.api.nvim_list_wins()) do
+                      local buf = vim.api.nvim_win_get_buf(win)
+                      local name = vim.api.nvim_buf_get_name(buf)
+                      local ft   = vim.bo[buf].filetype
+                      if name:match('diffview://') or ft:match('^Diffview') then
+                        pcall(vim.api.nvim_win_close, win, true)
+                      end
+                    end
+                  end)
+                end, {})
+
                 require('diffview').setup {
+                  view = {
+                    default = {
+                      layout = "diff2_vertical";
+                    };
+                    file_history = {
+                      layout = "diff2_vertical";
+                    };
+                  },
                   keymaps = {
                     disable_defaults = false,
                     view = {
-                      { "n", "<leader>gq", "<cmd>DiffviewClose<CR>", { desc = "Close diffview" } },
+                      { "n", "<leader>gq", "<cmd>DiffviewQuit<CR>", { desc = "Close diffview" } },
+                      { "n", "q",          "<cmd>DiffviewQuit<CR>", { desc = "Close diffview" } },
                     },
                     file_panel = {
-                      { "n", "<leader>gq", "<cmd>DiffviewClose<CR>", { desc = "Close diffview" } },
-                      { "n", "q",          "<cmd>DiffviewClose<CR>", { desc = "Close diffview" } },
+                      { "n", "<leader>gq", "<cmd>DiffviewQuit<CR>", { desc = "Close diffview" } },
+                      { "n", "q",          "<cmd>DiffviewQuit<CR>", { desc = "Close diffview" } },
                     },
                     file_history_panel = {
-                      { "n", "<leader>gq", "<cmd>DiffviewClose<CR>", { desc = "Close diffview" } },
-                      { "n", "q",          "<cmd>DiffviewClose<CR>", { desc = "Close diffview" } },
+                      { "n", "<leader>gq", "<cmd>DiffviewQuit<CR>", { desc = "Close diffview" } },
+                      { "n", "q",          "<cmd>DiffviewQuit<CR>", { desc = "Close diffview" } },
                     },
                   },
                 }
@@ -105,14 +134,37 @@
               key = "<leader>gq";
               mode = "n";
               silent = true;
-              action = "<cmd>DiffviewClose<CR>";
+              action = "<cmd>DiffviewQuit<CR>";
               desc = "Close diffview";
             }
             {
-              key = "<leader>e";
+              key = "<leader>te";
               mode = "n";
               silent = true;
               action = "<cmd>Neotree toggle<CR>";
+              desc = "Toggle file explorer";
+            }
+            {
+              key = "<leader>tm";
+              mode = "n";
+              silent = true;
+              action = "<cmd>MarkdownPreviewToggle<CR>";
+              desc = "Toggle markdown preview";
+            }
+            {
+              key = "<leader>tt";
+              mode = "n";
+              silent = true;
+              action = "<cmd>ToggleTerm<CR>";
+              desc = "Toggle terminal";
+            }
+            # Esc exits terminal mode
+            {
+              key = "<Esc>";
+              mode = "t";
+              silent = true;
+              action = "<C-\\><C-n>";
+              desc = "Exit terminal mode";
             }
           ];
 

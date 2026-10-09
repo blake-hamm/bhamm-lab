@@ -18,6 +18,10 @@
         mouse = true;
         terminal = "tmux-256color";
 
+        plugins = with pkgs.tmuxPlugins; [
+          prefix-highlight
+        ];
+
         extraConfig = ''
           set -g renumber-windows on
           setw -g automatic-rename off
@@ -29,7 +33,7 @@
           set -g status-left-length 100
           set -g status-right-length 100
           set -g status-left "#{E:@catppuccin_status_session} "
-          set -g status-right "#{E:@catppuccin_status_application} #{E:@catppuccin_status_host}"
+          set -g status-right "#{prefix_highlight}#{E:@catppuccin_status_application} #{E:@catppuccin_status_host}"
 
           # Tell tmux the outer terminal (Ghostty) supports truecolor, underlines,
           # hyperlinks, strikethrough, and focus events.
@@ -42,6 +46,13 @@
           # Reduce mouse scroll speed in copy mode (default scrolls multiple lines)
           bind -T copy-mode WheelUpPane select-pane \; send-keys -X -N 1 scroll-up
           bind -T copy-mode WheelDownPane select-pane \; send-keys -X -N 1 scroll-down
+
+          # On mouse-select, copy to clipboard, clear selection highlight, and stay
+          # in copy mode at current scroll position (one Escape to exit).
+          # copy-pipe-and-cancel would snap to bottom; copy-pipe-no-clear leaves
+          # the selection highlighted and feels stuck.
+          bind -T copy-mode MouseDragEnd1Pane send-keys -X copy-pipe "${pkgs.wl-clipboard}/bin/wl-copy" \; send-keys -X clear-selection
+          bind -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe "${pkgs.wl-clipboard}/bin/wl-copy" \; send-keys -X clear-selection
 
           # Visual indicator for active pane in multi-pane layouts
           set -g pane-border-indicators arrows
