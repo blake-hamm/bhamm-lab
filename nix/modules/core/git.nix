@@ -11,7 +11,7 @@
     # Public-key-only allowed signers file for SSH commit signature
     # verification. Private key is never Nix-managed.
     home.file.".ssh/allowed_signers".text =
-      "blake.j.hamm@gmail.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKKsS2H4frdi7AvzkGMPMRaQ+B46Af5oaRFtNJY3uCHt\n";
+      "blake.j.hamm@gmail.com ${shared.sshPublicKey}\n";
 
     programs.git = {
       enable = true;
