@@ -100,7 +100,8 @@ When changing infrastructure code (ansible roles, tofu configs, k8s manifests, n
 
 ## Important Notes
 
-- **Never** commit any code; I will always have the last say
+- **Never** commit or push directly to `main` — all work happens on feature branches; Blake reviews every PR and merges (squash + delete branch)
+- **Never** merge a PR/MR — only Blake merges
 - **Never** run critical commands like `tofu apply` or `ansible-playbook`
 - Always run linters before committing
 - Pre-commit runs: `nixpkgs-fmt`, `yamlfmt` (Google), `shfmt`, `ansible-lint` (ansible/ only), `terraform_fmt` + `tflint` + `trivy`, `gitleaks` + `ripsecrets` (dual secret scanning), `trailing-whitespace`, `mixed-line-ending`, `forbid-tabs` (2-space indent)
