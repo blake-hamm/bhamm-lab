@@ -23,6 +23,8 @@ env:
   TFLINT_VERSION: v0.65.0
   TRIVY_VERSION: v0.76.1
   CRANE_VERSION: v0.20.2
+  # uv release tags carry no leading v (0.13.6, not v0.13.6)
+  UV_VERSION: 0.13.6
   # matches Talos v1.12.6 -> k8s 1.35; keep in sync with
   # tofu/proxmox/talos/variables.tf talos_version
   KUBE_VERSION: "1.35.0"
@@ -72,7 +74,13 @@ jobs:
     container: docker.io/alpine:3.20
     steps:
       - name: apk deps
-        run: apk add --no-cache curl
+        # gcompat: ripsecrets ships glibc-only builds (run #19: ENOENT
+        # reported as "xargs: ripsecrets: No such file or directory");
+        # gcompat provides /lib64/ld-linux-x86-64.so.2 so they exec
+        # libgcc: ripsecrets' Rust panic path needs libgcc_s.so.1 and its
+        # 12 _Unwind_* symbols (run #20), which alpine's libgcc package
+        # exports in full (verified with nm -D)
+        run: apk add --no-cache curl gcompat libgcc
       - name: Checkout (Forgejo archive endpoint; no external actions by design)
         run: |
           curl -fsSL -o /tmp/repo.tar.gz "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz"
@@ -81,14 +89,21 @@ jobs:
       - name: Download tools
         run: |
           curl -fsSL "https://github.com/gitleaks/gitleaks/releases/download/${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION#v}_linux_x64.tar.gz" | tar xz -C /usr/local/bin
-          curl -fsSL "https://github.com/sirwart/ripsecrets/releases/download/${RIPSECRETS_VERSION}/ripsecrets-${RIPSECRETS_VERSION#v}-x86_64-unknown-linux-gnu.tar.gz" | tar xz -C /usr/local/bin --strip-components=1
+          # ripsecrets tarball nests the binary in a versioned dir; busybox
+          # tar + --strip-components does not land it on PATH (run #18:
+          # exit 127). Extract to a temp dir and install whatever we find.
+          mkdir -p /tmp/rips && curl -fsSL "https://github.com/sirwart/ripsecrets/releases/download/${RIPSECRETS_VERSION}/ripsecrets-${RIPSECRETS_VERSION#v}-x86_64-unknown-linux-gnu.tar.gz" | tar xz -C /tmp/rips
+          install -m 0755 "$(find /tmp/rips -type f -name ripsecrets)" /usr/local/bin/ripsecrets
       - name: gitleaks (tree scan)
         # tree scan only, never history: 7 stale hits live in old commits
         # by design (the fixes are in the tree; history is immutable)
         run: gitleaks detect --no-git --redact
       - name: ripsecrets
-        # exclusion = WireGuard PUBLIC key false positive
-        run: find . -type f -not -path './.git/*' ! -path './ansible/roles/opnsense/tasks/wireguard.yml' -print0 | xargs -0 ripsecrets
+        # bare scan: ripsecrets skips .git itself and honors
+        # .secretsignore (the previous find|xargs exclusion pipeline
+        # silently no-op'd under alpine busybox — run #21 flagged the
+        # WireGuard public-key false positive anyway)
+        run: ripsecrets
   k8s-schemas:
     runs-on: docker
     container: docker.io/alpine:3.20
@@ -128,7 +143,9 @@ jobs:
           unzip -o /tmp/tofu.zip -d /usr/local/bin
           curl -fsSL -o /tmp/tflint.zip "https://github.com/terraform-linters/tflint/releases/download/${TFLINT_VERSION}/tflint_linux_amd64.zip"
           unzip -o /tmp/tflint.zip -d /usr/local/bin
-          curl -fsSL "https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" | tar xz -C /usr/local/bin
+          # trivy asset names drop the leading v (v0.76.1 -> 0.76.1); the
+          # v-prefixed URL 404s (run #18: curl 22 + tar short read)
+          curl -fsSL "https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}/trivy_${TRIVY_VERSION#v}_Linux-64bit.tar.gz" | tar xz -C /usr/local/bin
       - name: tofu fmt
         run: tofu fmt -check -recursive tofu/
       - name: tofu init/validate + tflint (per env)
@@ -151,19 +168,29 @@ jobs:
       # prometheus.prometheus 0.29.1 caps ansible-core at <=2.20.99; the
       # uv default (2.21) fails resolution
       ANSIBLE_CORE_SPEC: "ansible-core>=2.19,<2.20"
+      # uv auto-picks the newest CPython; ansible-core 2.19 is not
+      # 3.15-compatible (dataclasses._is_type removed in 3.15; run #20)
+      UV_PYTHON: "3.12"
     steps:
       - name: apk deps
-        # py3-pip: the spec's documented fallback for when alpine base does
-        # not ship pip; installing it up front keeps the uv step
-        # deterministic
-        run: apk add --no-cache git py3-pip
+        # git: galaxy installs lae.proxmox from a git URL. No py3-pip:
+        # alpine >=3.19 marks python externally-managed (PEP 668), so
+        # `pip install` system-wide fails by design — uv comes from its
+        # static binary instead
+        run: apk add --no-cache curl git
       - name: Checkout (Forgejo archive endpoint; no external actions by design)
         run: |
           curl -fsSL -o /tmp/repo.tar.gz "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz"
           mkdir -p "$GITHUB_WORKSPACE"
           tar xzf /tmp/repo.tar.gz -C "$GITHUB_WORKSPACE" --strip-components=1
       - name: install uv
-        run: pip install --no-cache-dir uv
+        # the musl build is REQUIRED on alpine: the gnu build is
+        # glibc-dynamic and fails exec with ENOENT, reported misleadingly
+        # as "uv: not found" (run #19). Tarball nests the binary in a
+        # versioned dir; install whatever we find.
+        run: |
+          mkdir -p /tmp/uv && curl -fsSL "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-musl.tar.gz" | tar xz -C /tmp/uv
+          install -m 0755 "$(find /tmp/uv -type f -name uv)" /usr/local/bin/uv
       - name: ansible-galaxy install
         # roles land in ansible/collections (ansible.cfg collections_path);
         # collections land in ./ansible_collections at repo root
