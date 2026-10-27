@@ -31,10 +31,6 @@ spec:
     #   Connection: "upgrade" # Set connection header for WebSockets
     # SSL Redirect and Strict Transport Security (STS)
     sslRedirect: true # Redirect HTTP to HTTPS
-    forceSTSHeader: true # Enforce Strict Transport Security (STS)
-    stsIncludeSubdomains: true # Apply STS to all subdomains
-    stsPreload: true # Include the domain in STS preload list
-    stsSeconds: 15552000 # STS max-age in seconds (6 months)
 ---
 apiVersion: traefik.io/v1alpha1
 kind: 'Middleware'

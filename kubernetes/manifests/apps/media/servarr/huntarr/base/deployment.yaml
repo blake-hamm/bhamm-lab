@@ -24,6 +24,11 @@ spec:
         fsGroupChangePolicy: "OnRootMismatch"
       containers:
         - name: huntarr
+          # Huntarr.io ended Feb 2026: ghcr.io/plexguide/huntarr returns 403 (verified
+          # 2026-10-26). No verified drop-in successor found (huntarr/huntarr on hub is
+          # not pullable anonymously; huntarr/plexguide is the PlexGuide platform, not
+          # Huntarr — OCI labels prove it). Tracked in .ci/digest-exceptions.txt until a
+          # successor is chosen (candidate: ghcr.io/elfhosted/newtarr, fork of Huntarr).
           image: ghcr.io/plexguide/huntarr:latest
           ports:
             - containerPort: 9705

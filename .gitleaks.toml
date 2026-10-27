@@ -1,0 +1,18 @@
+title = "gitleaks CI baseline"
+
+[allowlist]
+# CI tree-scan (gitleaks detect --no-git) false positives. All of these are
+# ExternalSecret key-NAME references (the secret values live in Vault/SOPS,
+# never in this repo) or OpenTofu provider variable wiring (values come from
+# CI env / Vault). Keep this list tight — no path-based entries, so a real
+# secret on any of these lines still trips the scanner.
+regexes = [
+  # ExternalSecret key name for the LLM API password (value in Vault)
+  '''passwordKey: "password"''',
+  # ExternalSecret key: lines naming s3/garage/B2 credential keys (values in Vault)
+  '''key: (s3_access_key|s3_secret_key|garage_s3_access_key|garage_s3_secret_key|B2_APPLICATION_KEY_ID|B2_APPLICATION_KEY)''',
+  # cephuser secretKey: lines naming s3/AWS/R2/B2 credential keys (values in Vault)
+  '''secretKey: (s3_access_key|s3_secret_key|AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|R2_ACCESS_KEY_ID|R2_SECRET_ACCESS_KEY|B2_APPLICATION_KEY_ID|B2_APPLICATION_KEY)''',
+  # OpenTofu: backblaze provider wired to var.b2_application_key(_id) (value from CI env)
+  '''application_key(_id)?\s+=\s*var\.b2_application_key(_id)?''',
+]

@@ -1,0 +1,78 @@
+# CI Validation Layer
+
+Every push to the [Forgejo mirror](https://git.bhamm-lab.com) runs the
+`validate` workflow (`.forgejo/workflows/validate.yml`) — visible in the
+**Actions** tab of the Forgejo UI. The Forgejo repo is a mirror of Codeberg:
+a Codeberg webhook triggers an immediate mirror sync, which fires a **push**
+event. `pull_request` never fires on a mirror, so there is no PR signal —
+a push to any branch (including feature and renovate branches) is the CI
+signal, and `workflow_dispatch` allows manual runs.
+
+All jobs run on the self-hosted dind runner (`runs-on: docker`) in a
+`docker.io/alpine:3.20` container, in parallel, with no external action
+dependencies: each job installs its tools from pinned release URLs, checks
+out the tree via the Forgejo archive endpoint, and runs its gates.
+
+## Jobs
+
+| job | what it checks | tools (pins) |
+| --- | --- | --- |
+| `lint` | `yamlfmt -lint .`, `shfmt -d -s -i 2` on every `*.sh`, trailing whitespace, tabs, CRLF | yamlfmt, shfmt |
+| `secrets` | `gitleaks detect --no-git --redact` (tree scan), `ripsecrets` over the tree | gitleaks, ripsecrets |
+| `k8s-schemas` | `kubeconform -strict -ignore-missing-schemas` over `kubernetes/manifests` | kubeconform |
+| `open-tofu` | `tofu fmt -check`, `tofu init -backend=false` + `tofu validate` + `tflint` per env, `trivy config` | opentofu, tflint, trivy |
+| `ansible` | `ansible-galaxy install -r ansible/requirements.yml`, `ansible-playbook --syntax-check ansible/main.yml` (via `uv`, `ansible-core>=2.19,<2.20` — prometheus.prometheus 0.29.1 caps ansible-core at ≤2.20.99) | uv |
+| `image-digests` | `crane digest` on every `image:` ref in `kubernetes/manifests` — the #1 renovate failure mode (unpullable digest/tag) | crane |
+
+**Pin of record:** the top-level `env:` block in
+`.forgejo/workflows/validate.yml`. Bump a version there and the matching
+download step follows. `KUBE_VERSION` must stay in sync with
+`talos_version` in `tofu/proxmox/talos/variables.tf` (Talos v1.12.6 →
+k8s 1.35).
+
+## Deliberate exclusions
+
+- **gitleaks: tree scan, never history.** 7 stale hits live in old commits
+  by design (the fixes are in the tree; history is immutable). The
+  `.gitleaks.toml` allowlist covers the 7 tree-scan false positives — all
+  ExternalSecret key-NAME references or OpenTofu provider variable wiring,
+  no real secret values.
+- **yamlfmt excludes `kubernetes/charts`**: helm template output is not
+  parseable YAML. (The pre-commit hook never saw these files because it
+  only scans touched files.)
+- **ripsecrets excludes `ansible/roles/opnsense/tasks/wireguard.yml`**:
+  WireGuard **public** key false positive.
+- **kubeconform `-ignore-missing-schemas`**: ~23 CRD kinds lack core
+  schemas (Application, Certificate, CiliumNetworkPolicy, ClusterIssuer,
+  Middleware, Vault, Workflow, Kustomization, ...).
+- **image-digests skips `harbor.bhamm-lab.com` refs**: private registry;
+  CI creds arrive later (S4). `.ci/digest-exceptions.txt` tracks
+  dead/renovate-ignore-candidate upstreams and must trend to empty.
+- **tab check excludes `.gitmodules`**: it legitimately contains tabs.
+
+## Case study: dead upstreams caught on day one
+
+The `image-digests` gate's first run surfaced two dead upstreams that had
+been silently broken in the tree:
+
+- **`minio/mc`** — MinIO stopped publishing community images and the
+  registry ref 404s. Replaced with `cgr.dev/chainguard/minio-client`
+  (maintained drop-in; the binary inside is still `mc`, so commands and
+  env are unchanged).
+- **`ghcr.io/plexguide/huntarr`** — the Huntarr.io project ended (Feb 2026) and
+  the ghcr ref returns 403. No verified drop-in successor exists yet
+  (`huntarr/plexguide` on Docker Hub is the PlexGuide platform, not Huntarr —
+  its OCI labels prove it), so the deployment is left pointing at the dead ref
+  and listed in `.ci/digest-exceptions.txt` — the app only survives on cached
+  image pulls and will fail on a fresh node. Successor decision pending (fork
+  candidate: `ghcr.io/elfhosted/newtarr`).
+
+The minio/mc replacement landed in the same PR as the gate — exactly the
+failure mode (renovate pointing at an unpullable image) the gate exists to
+catch. The huntarr case is the deliberate exception-list path.
+
+## Landing later
+
+- **#322** — `tofu plan` gate (needs S4 Vault creds).
+- **#323** — `ansible-playbook --check`.
+- **#324** — nix gate.

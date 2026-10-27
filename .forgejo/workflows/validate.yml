@@ -1,0 +1,208 @@
+name: validate
+on:
+  workflow_dispatch:
+  # the Forgejo repo is a mirror of Codeberg; mirror sync fires a push
+  # event (verified in Forgejo source: SyncPullMirror -> SyncPushCommits
+  # -> HookEventPush), and a Codeberg webhook triggers an immediate
+  # mirror-sync on push. pull_request never fires on a mirror, so this
+  # runs on every push to any branch: cheap validation, and it gives
+  # pre-merge CI signal on feature branches (including renovate pushes).
+  push:
+    branches:
+      - "*"
+# tool pins; this block is the pin of record (see
+# docker/docs-site/docs/operations/ci-validation.md). bump a version here
+# and the matching download step follows.
+env:
+  YAMLFMT_VERSION: v0.12.1
+  SHFMT_VERSION: v3.8.0
+  GITLEAKS_VERSION: v8.18.2
+  RIPSECRETS_VERSION: v0.1.8
+  KUBECONFORM_VERSION: v0.6.7
+  OPENTOFU_VERSION: v1.13.2
+  TFLINT_VERSION: v0.65.0
+  TRIVY_VERSION: v0.76.1
+  CRANE_VERSION: v0.20.2
+  # matches Talos v1.12.6 -> k8s 1.35; keep in sync with
+  # tofu/proxmox/talos/variables.tf talos_version
+  KUBE_VERSION: "1.35.0"
+jobs:
+  lint:
+    # registered label of the prod runner (default registration label)
+    runs-on: docker
+    container: docker.io/alpine:3.20
+    steps:
+      - name: apk deps
+        # grep = GNU grep: alpine's busybox grep has no -P, and without it
+        # the tab check below would silently no-op (busybox exits 2 on the
+        # unknown flag, which the ! prefix inverts into a pass)
+        run: apk add --no-cache curl bash grep
+      - name: Checkout (Forgejo archive endpoint; no external actions by design)
+        run: |
+          curl -fsSL -o /tmp/repo.tar.gz "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz"
+          mkdir -p "$GITHUB_WORKSPACE"
+          tar xzf /tmp/repo.tar.gz -C "$GITHUB_WORKSPACE" --strip-components=1
+      - name: Download tools
+        run: |
+          curl -fsSL "https://github.com/google/yamlfmt/releases/download/${YAMLFMT_VERSION}/yamlfmt_${YAMLFMT_VERSION#v}_Linux_x86_64.tar.gz" | tar xz -C /usr/local/bin
+          curl -fsSL -o /usr/local/bin/shfmt "https://github.com/mvdan/sh/releases/download/${SHFMT_VERSION}/shfmt_${SHFMT_VERSION}_linux_amd64"
+          chmod +x /usr/local/bin/shfmt
+      - name: yamlfmt (reads ./.yamlfmt from repo root)
+        run: yamlfmt -lint .
+      - name: shfmt
+        # -i 2: the repo's 2-space convention (forbid-tabs +
+        # remove-tabs --whitespaces-count 2); plain shfmt defaults to tab
+        # indentation and would fight the forbid-tabs rule
+        run: find . -name '*.sh' -not -path './.git/*' -print0 | xargs -0 shfmt -d -s -i 2
+      - name: trailing whitespace
+        # block scalar: a bare ! at the start of a YAML plain scalar is a
+        # tag indicator and would be stripped before the shell sees it
+        run: |
+          ! grep -rIn ' $' --exclude-dir=.git .
+      - name: tabs
+        # .gitmodules legitimately contains tabs -> excluded
+        run: |
+          ! grep -rIlP '\t' --exclude-dir=.git --exclude=.gitmodules .
+      - name: CRLF
+        shell: bash
+        run: |
+          ! grep -rIl "$(printf '\r')" --exclude-dir=.git .
+  secrets:
+    runs-on: docker
+    container: docker.io/alpine:3.20
+    steps:
+      - name: apk deps
+        run: apk add --no-cache curl
+      - name: Checkout (Forgejo archive endpoint; no external actions by design)
+        run: |
+          curl -fsSL -o /tmp/repo.tar.gz "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz"
+          mkdir -p "$GITHUB_WORKSPACE"
+          tar xzf /tmp/repo.tar.gz -C "$GITHUB_WORKSPACE" --strip-components=1
+      - name: Download tools
+        run: |
+          curl -fsSL "https://github.com/gitleaks/gitleaks/releases/download/${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION#v}_linux_x64.tar.gz" | tar xz -C /usr/local/bin
+          curl -fsSL "https://github.com/sirwart/ripsecrets/releases/download/${RIPSECRETS_VERSION}/ripsecrets-${RIPSECRETS_VERSION#v}-x86_64-unknown-linux-gnu.tar.gz" | tar xz -C /usr/local/bin --strip-components=1
+      - name: gitleaks (tree scan)
+        # tree scan only, never history: 7 stale hits live in old commits
+        # by design (the fixes are in the tree; history is immutable)
+        run: gitleaks detect --no-git --redact
+      - name: ripsecrets
+        # exclusion = WireGuard PUBLIC key false positive
+        run: find . -type f -not -path './.git/*' ! -path './ansible/roles/opnsense/tasks/wireguard.yml' -print0 | xargs -0 ripsecrets
+  k8s-schemas:
+    runs-on: docker
+    container: docker.io/alpine:3.20
+    steps:
+      - name: apk deps
+        run: apk add --no-cache curl
+      - name: Checkout (Forgejo archive endpoint; no external actions by design)
+        run: |
+          curl -fsSL -o /tmp/repo.tar.gz "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz"
+          mkdir -p "$GITHUB_WORKSPACE"
+          tar xzf /tmp/repo.tar.gz -C "$GITHUB_WORKSPACE" --strip-components=1
+      - name: Download tools
+        run: |
+          curl -fsSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" | tar xz -C /usr/local/bin
+      - name: kubeconform
+        # -ignore-missing-schemas: ~23 CRD kinds lack core schemas
+        # (Application, Certificate, CiliumNetworkPolicy, ClusterIssuer,
+        # ClusterSecretStore, ClusterTunnel, Middleware, PushSecret,
+        # ServiceMonitor, Vault, Workflow, WorkflowTemplate, CronWorkflow,
+        # Kustomization, ...)
+        run: find kubernetes/manifests \( -name '*.yaml' -o -name '*.yml' \) -print0 | xargs -0 kubeconform -strict -ignore-missing-schemas -kubernetes-version "$KUBE_VERSION" -summary
+  open-tofu:
+    runs-on: docker
+    container: docker.io/alpine:3.20
+    steps:
+      - name: apk deps
+        # unzip: tofu + tflint ship as zips
+        run: apk add --no-cache curl unzip
+      - name: Checkout (Forgejo archive endpoint; no external actions by design)
+        run: |
+          curl -fsSL -o /tmp/repo.tar.gz "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz"
+          mkdir -p "$GITHUB_WORKSPACE"
+          tar xzf /tmp/repo.tar.gz -C "$GITHUB_WORKSPACE" --strip-components=1
+      - name: Download tools
+        run: |
+          curl -fsSL -o /tmp/tofu.zip "https://github.com/opentofu/opentofu/releases/download/${OPENTOFU_VERSION}/tofu_${OPENTOFU_VERSION#v}_linux_amd64.zip"
+          unzip -o /tmp/tofu.zip -d /usr/local/bin
+          curl -fsSL -o /tmp/tflint.zip "https://github.com/terraform-linters/tflint/releases/download/${TFLINT_VERSION}/tflint_linux_amd64.zip"
+          unzip -o /tmp/tflint.zip -d /usr/local/bin
+          curl -fsSL "https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" | tar xz -C /usr/local/bin
+      - name: tofu fmt
+        run: tofu fmt -check -recursive tofu/
+      - name: tofu init/validate + tflint (per env)
+        # init -backend=false: stateless, no creds needed; providers come
+        # from registry.opentofu.org
+        # tflint with no ruleset file = built-in rules only (intended)
+        run: |
+          for env in backblaze cloudflare gcp kubernetes proxmox/config proxmox/garage proxmox/talos; do
+            tofu -chdir="tofu/$env" init -backend=false -input=false
+            tofu -chdir="tofu/$env" validate
+            tflint --chdir="tofu/$env" --format=compact
+          done
+      - name: trivy config
+        # trivy config exits 0 even with findings — advisory here
+        run: trivy config --quiet tofu/
+  ansible:
+    runs-on: docker
+    container: docker.io/alpine:3.20
+    env:
+      # prometheus.prometheus 0.29.1 caps ansible-core at <=2.20.99; the
+      # uv default (2.21) fails resolution
+      ANSIBLE_CORE_SPEC: "ansible-core>=2.19,<2.20"
+    steps:
+      - name: apk deps
+        # py3-pip: the spec's documented fallback for when alpine base does
+        # not ship pip; installing it up front keeps the uv step
+        # deterministic
+        run: apk add --no-cache git py3-pip
+      - name: Checkout (Forgejo archive endpoint; no external actions by design)
+        run: |
+          curl -fsSL -o /tmp/repo.tar.gz "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz"
+          mkdir -p "$GITHUB_WORKSPACE"
+          tar xzf /tmp/repo.tar.gz -C "$GITHUB_WORKSPACE" --strip-components=1
+      - name: install uv
+        run: pip install --no-cache-dir uv
+      - name: ansible-galaxy install
+        # roles land in ansible/collections (ansible.cfg collections_path);
+        # collections land in ./ansible_collections at repo root
+        run: |
+          uv run --with "$ANSIBLE_CORE_SPEC" --no-project ansible-galaxy install -r ansible/requirements.yml -p ansible/collections
+          uv run --with "$ANSIBLE_CORE_SPEC" --no-project ansible-galaxy collection install -r ansible/requirements.yml
+      - name: ansible-playbook syntax check
+        # ANSIBLE_COLLECTIONS_PATH=. : ansible.cfg collections_path points
+        # at ansible/collections only; the env var (precedence over ini)
+        # also covers ./ansible_collections where the collections step put
+        # them. Verified sequence, 2026-10-26.
+        run: ANSIBLE_CONFIG=ansible.cfg ANSIBLE_COLLECTIONS_PATH=. uv run --with "$ANSIBLE_CORE_SPEC" --no-project ansible-playbook --syntax-check ansible/main.yml
+  image-digests:
+    runs-on: docker
+    container: docker.io/alpine:3.20
+    steps:
+      - name: apk deps
+        run: apk add --no-cache curl
+      - name: Checkout (Forgejo archive endpoint; no external actions by design)
+        run: |
+          curl -fsSL -o /tmp/repo.tar.gz "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz"
+          mkdir -p "$GITHUB_WORKSPACE"
+          tar xzf /tmp/repo.tar.gz -C "$GITHUB_WORKSPACE" --strip-components=1
+      - name: Download tools
+        run: |
+          curl -fsSL "https://github.com/google/go-containerregistry/releases/download/${CRANE_VERSION}/go-containerregistry_Linux_x86_64.tar.gz" | tar xz -C /usr/local/bin
+      - name: crane digest (every image ref must resolve)
+        # harbor.bhamm-lab.com refs are skipped: private registry, CI creds
+        # arrive later (S4)
+        # .ci/digest-exceptions.txt: dead/renovate-ignore-candidate upstreams
+        # kept visible; the file must trend to empty
+        run: |
+          grep -rhoE 'image:[[:space:]]*[^" ]+' kubernetes/manifests | sed 's/^image:[[:space:]]*//' |
+            sort -u | grep -v '{' | grep -v '\$' | grep -v '^harbor\.bhamm-lab\.com' > /tmp/refs
+          while read -r ref; do
+            if grep -v '^[[:space:]]*#' .ci/digest-exceptions.txt 2>/dev/null | grep -qxF "$ref"; then
+              echo "SKIP (known upstream, tracked in .ci/digest-exceptions.txt): $ref"; continue
+            fi
+            case "$ref" in *:*) ;; *) ref="$ref:latest";; esac
+            echo "INSPECT $ref"
+            crane digest "$ref" >/dev/null || { echo "NOT PULLABLE: $ref"; exit 1; }
+          done < /tmp/refs

@@ -63,7 +63,7 @@ spec:
           - name: aws-access-key-id
           - name: aws-secret-access-key
       container:
-        image: minio/mc:RELEASE.2025-08-13T08-35-41Z
+        image: cgr.dev/chainguard/minio-client:latest
         env:
           - name: ACCESS_KEY
             valueFrom:
@@ -93,7 +93,7 @@ spec:
           - name: aws-access-key-id
           - name: aws-secret-access-key
       container:
-        image: minio/mc:RELEASE.2025-08-13T08-35-41Z
+        image: cgr.dev/chainguard/minio-client:latest
         env:
           - name: ACCESS_KEY
             valueFrom:

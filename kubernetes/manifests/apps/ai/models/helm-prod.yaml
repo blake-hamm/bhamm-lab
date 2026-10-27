@@ -1378,8 +1378,6 @@ spec:
           - name: gemma-3
             description: Mid model with multimodal support
             enabled: false
-            image:
-              tag: rocm-6.4.4
             pvc:
               storage: "60Gi"
             image:

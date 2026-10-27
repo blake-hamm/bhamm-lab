@@ -1,0 +1,11 @@
+# image-digests gate exceptions (see .forgejo/workflows/validate.yml,
+# image-digests job).
+#
+# Entries here are dead/renovate-ignore-candidate upstreams kept visible
+# rather than silently skipped. This file must trend to empty: do NOT
+# add entries casually — an entry is a standing "we know this image is
+# broken" admission.
+#
+ghcr.io/plexguide/huntarr:latest
+#   ^ Huntarr.io ended Feb 2026; registry 403. App cannot pull on fresh nodes.
+#   Pending successor decision (see deployment.yaml comment).

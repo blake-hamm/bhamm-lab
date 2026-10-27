@@ -1,2 +1,3 @@
 exclude:
-  - ./ansible
+  - ansible # literal path match (yamlfmt v0.12.1 default mode); './ansible' never matched walked paths
+  - kubernetes/charts # helm template output is not parseable YAML
