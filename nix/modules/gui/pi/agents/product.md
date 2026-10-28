@@ -1,7 +1,7 @@
 ---
 name: product
 description: Product-focused reviewer. Evaluates speed of implementation, simplicity, YAGNI, and shipping bias. Challenges gold-plating. Use when scope is creeping, deadlines matter, or the user wants to know "do we need this?"
-model: kimi-coding/kimi-for-coding
+model: opencode-go/deepseek-v4.1-flash
 thinking: medium
 systemPromptMode: append
 inheritProjectContext: true

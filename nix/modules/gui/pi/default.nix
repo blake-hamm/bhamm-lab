@@ -5,7 +5,6 @@ let
     mkdir -p "${"$"}{NPM_CONFIG_PREFIX}/lib"
     exec ${pkgs.nodejs}/bin/npm "$@"
   '';
-  kimiKeyPath = config.sops.secrets.kimi_api_key.path;
   opensenseKeyPath = config.sops.secrets.opensense_api_key.path;
   workersAiTokenPath = config.sops.secrets.pi_workers_ai.path;
 in
@@ -13,12 +12,6 @@ in
   options.cfg.pi.enable = lib.mkEnableOption "pi coding agent";
 
   config = lib.mkIf config.cfg.pi.enable {
-    # Expose Kimi API key via sops-nix
-    sops.secrets.kimi_api_key = {
-      key = "vault_secrets/external/kimi/pi-framework";
-      owner = shared.username;
-    };
-
     sops.secrets.litellm_api_key = {
       key = "vault_secrets/default/litellm/LITELLM_MASTER_KEY";
       owner = shared.username;
@@ -47,10 +40,6 @@ in
       home.file.".pi/agent/auth.json" = {
         force = true;
         text = builtins.toJSON {
-          "kimi-coding" = {
-            type = "api_key";
-            key = "!cat ${kimiKeyPath}";
-          };
           "opencode-go" = {
             type = "api_key";
             key = "!cat ${opensenseKeyPath}";
@@ -88,14 +77,14 @@ in
 
       # Pi web search settings: sane defaults for pi-web-access
       # Note: YouTube and local video analysis are disabled because they require
-      # Gemini API/Web access. With only Kimi credentials available, these features
-      # would fail. Web search still works via Exa MCP (zero-config) and Perplexity.
+      # Gemini API/Web access. With no Gemini credentials available, these
+      # features would fail. Web search still works via Exa MCP (zero-config) and Perplexity.
       home.file.".pi/web-search.json" = {
         force = true;
         text = builtins.toJSON {
           provider = "auto";
           workflow = "summary-review";
-          summaryModel = "opencode-go/deepseek-v4-flash";
+          summaryModel = "opencode-go/deepseek-v4.1-flash";
           curatorTimeoutSeconds = 20;
           githubClone = {
             enabled = true;
@@ -171,8 +160,8 @@ in
       home.file.".pi/agent/settings.json" = {
         force = true;
         text = builtins.toJSON {
-          defaultProvider = "kimi-coding";
-          defaultModel = "k3-256k";
+          defaultProvider = "opencode-go";
+          defaultModel = "deepseek-v4.1-flash";
           theme = "catppuccin-mocha";
           defaultThinkingLevel = "medium";
           quietStartup = true;
@@ -220,20 +209,20 @@ in
           subagents = {
             agentOverrides = {
               worker = {
-                model = "kimi-coding/kimi-for-coding";
+                model = "opencode-go/deepseek-v4.1-flash";
               };
               reviewer = {
-                model = "kimi-coding/kimi-for-coding";
+                model = "opencode-go/deepseek-v4.1-flash";
               };
               delegate = {
-                model = "kimi-coding/kimi-for-coding";
+                model = "opencode-go/deepseek-v4.1-flash";
                 thinking = "minimal";
               };
               oracle = {
-                model = "kimi-coding/kimi-for-coding";
+                model = "opencode-go/deepseek-v4.1-flash";
               };
               oracle-executor = {
-                model = "kimi-coding/kimi-for-coding";
+                model = "opencode-go/deepseek-v4.1-flash";
               };
             };
           };

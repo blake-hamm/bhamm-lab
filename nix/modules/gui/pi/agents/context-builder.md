@@ -2,7 +2,7 @@
 name: context-builder
 description: Analyzes requirements and codebase, generates context and meta-prompt
 tools: read, grep, find, ls, bash, write, web_search
-model: kimi-coding/kimi-for-coding
+model: opencode-go/deepseek-v4.1-flash
 thinking: medium
 systemPromptMode: replace
 inheritProjectContext: true

@@ -1,7 +1,7 @@
 ---
 name: architect
 description: Architecture-focused reviewer. Evaluates correctness, maintainability, boundaries, testing, and long-term implications. Conservative about complexity. Use when making design decisions, reviewing refactors, or assessing technical debt.
-model: kimi-coding/kimi-for-coding
+model: opencode-go/deepseek-v4.1-flash
 thinking: medium
 systemPromptMode: append
 inheritProjectContext: true

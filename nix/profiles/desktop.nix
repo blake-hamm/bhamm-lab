@@ -13,7 +13,6 @@
     precommit.enable = true;
     networking.backend = "networkmanager";
     vesktop.enable = true;
-    opencode.enable = true;
     pi.enable = true;
     neovim.enable = true;
     audio.enable = true;

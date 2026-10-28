@@ -2,7 +2,7 @@
 name: researcher
 description: Autonomous web researcher — searches, evaluates, and synthesizes a focused research brief
 tools: read, write, web_search, fetch_content, get_search_content
-model: kimi-coding/kimi-for-coding
+model: opencode-go/deepseek-v4.1-flash
 thinking: medium
 systemPromptMode: replace
 inheritProjectContext: true

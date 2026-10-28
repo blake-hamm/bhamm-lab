@@ -2,7 +2,7 @@
 name: scout
 description: Fast codebase recon that returns compressed context for handoff
 tools: read, grep, find, ls, bash, write
-model: kimi-coding/kimi-for-coding
+model: opencode-go/deepseek-v4.1-flash
 thinking: minimal
 systemPromptMode: replace
 inheritProjectContext: true
