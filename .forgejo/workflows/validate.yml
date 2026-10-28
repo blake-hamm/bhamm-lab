@@ -7,9 +7,10 @@ on:
   # mirror-sync on push. pull_request never fires on a mirror, so this
   # runs on every push to any branch: cheap validation, and it gives
   # pre-merge CI signal on feature branches (including renovate pushes).
+  # ** spans / separators; * does not — run history proved it
   push:
     branches:
-      - "*"
+      - "**"
 # tool pins; this block is the pin of record (see
 # docker/docs-site/docs/operations/ci-validation.md). bump a version here
 # and the matching download step follows.
@@ -233,3 +234,91 @@ jobs:
             echo "INSPECT $ref"
             crane digest "$ref" >/dev/null || { echo "NOT PULLABLE: $ref"; exit 1; }
           done < /tmp/refs
+  report:
+    # pull_request never fires on the mirror, so the result is pushed back
+    # over the Codeberg API (source repo: codeberg.org/blake-hamm/bhamm-lab)
+    # forgejo.* contexts (not github.*): the workflow runs on Forgejo
+    # always(): report the outcome of the jobs above, pass or fail
+    needs: [lint, secrets, k8s-schemas, open-tofu, ansible, image-digests]
+    if: always()
+    runs-on: docker
+    container: docker.io/alpine:3.20
+    timeout-minutes: 5
+    steps:
+      - name: apk deps
+        # python3: JSON parsing for the Codeberg API responses
+        run: apk add --no-cache bash curl python3
+      - name: Post result to Codeberg PR
+        shell: bash
+        env:
+          CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+          # public domain, not forgejo.server_url (renders the cluster-internal FQDN)
+          RUN_URL: https://git.bhamm-lab.com/${{ github.repository }}/actions/runs/${{ forgejo.run_id }}
+          OVERALL: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: |
+          set +eu pipefail  # runner injects -e; reporting must never fail CI
+          # tokens pasted from a browser clipboard can carry a trailing
+          # newline -> malformed Authorization header -> 401; strip all
+          # whitespace before use
+          TOK=$(printf '%s' "${CODEBERG_TOKEN:-}" | tr -d '[:space:]')
+          [ -n "$TOK" ] || { echo "no CODEBERG_TOKEN secret, skipping"; exit 0; }
+          [ "$BRANCH" = "main" ] && { echo "main push, nothing to report"; exit 0; }
+          API=https://codeberg.org/api/v1
+          api() {  # api METHOD URL [data-file] ; prints body, sets global HTTP_CODE
+            local method="$1" url="$2" data="${3:-}"
+            if [ -n "$data" ]; then
+              HTTP_CODE=$(curl -sS -o /tmp/api_body -w '%{http_code}' -X "$method" \
+                -H "Authorization: token $TOK" -H "Content-Type: application/json" --data "@$data" "$url")
+            else
+              HTTP_CODE=$(curl -sS -o /tmp/api_body -w '%{http_code}' -X "$method" \
+                -H "Authorization: token $TOK" "$url")
+            fi
+            cat /tmp/api_body
+          }
+          check() {  # check METHOD URL : non-2xx -> diagnostic, exit 0 (non-fatal)
+            case "$HTTP_CODE" in
+              2*) ;;
+              *) echo "CODEBERG API $1 $2 -> HTTP $HTTP_CODE"
+                 head -c 200 /tmp/api_body 2>/dev/null; echo
+                 echo "report failed (non-fatal)"
+                 exit 0 ;;
+            esac
+          }
+          jsonq() {  # jsonq <expr> : eval with `data` bound to /tmp/api_body;
+                    # never throws on unexpected payloads (prints empty instead)
+            python3 -c '
+          import sys, json, os
+          try:
+              data = json.load(sys.stdin)
+          except (json.JSONDecodeError, ValueError):
+              data = []
+          try:
+              print(eval(sys.argv[1]))
+          except Exception:
+              pass
+          ' "$1" < /tmp/api_body
+          }
+          # only json.load after a 2xx check (see check) so a 4xx body
+          # can never reach the parser
+          api GET "$API/repos/blake-hamm/bhamm-lab/pulls?state=open&limit=50" >/dev/null
+          check GET "$API/repos/blake-hamm/bhamm-lab/pulls?state=open&limit=50"
+          PR=$(jsonq 'next((p["number"] for p in data if p.get("head", {}).get("ref") == os.environ.get("BRANCH", "")), "")') || PR=""
+          [ -n "$PR" ] || { echo "no open PR for $BRANCH"; exit 0; }
+          if [ "$OVERALL" = "true" ]; then RESULT=':x: failed'; else RESULT=':white_check_mark: passed'; fi
+          BODY="<!-- forgejo-validate -->
+          **Forgejo CI:** $RESULT on \`$BRANCH\` — [run logs]($RUN_URL)"
+          # update the existing marker comment if present, else create
+          api GET "$API/repos/blake-hamm/bhamm-lab/issues/$PR/comments?limit=100" >/dev/null
+          check GET "$API/repos/blake-hamm/bhamm-lab/issues/$PR/comments?limit=100"
+          CID=$(jsonq 'next((c["id"] for c in data if "forgejo-validate" in (c.get("body") or "")), "")') || CID=""
+          if [ -n "$CID" ]; then
+            METHOD=PATCH; URL="$API/repos/blake-hamm/bhamm-lab/issues/comments/$CID"
+          else
+            METHOD=POST; URL="$API/repos/blake-hamm/bhamm-lab/issues/$PR/comments"
+          fi
+          python3 -c 'import sys, json
+          print(json.dumps({"body": sys.argv[1]}))' "$BODY" > /tmp/api_data
+          api "$METHOD" "$URL" /tmp/api_data >/dev/null
+          check "$METHOD" "$URL"
+          echo "posted to PR #$PR"

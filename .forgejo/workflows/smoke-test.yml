@@ -7,9 +7,10 @@ on:
   # mirror-sync on push. Run on any branch: this is cheap linting/tests,
   # and it gives pre-merge CI signal on feature branches (including
   # renovate pushes, which is fine for this workflow).
+  # ** spans / separators; * does not — run history proved it
   push:
     branches:
-      - "*"
+      - "**"
 jobs:
   smoke:
     # registered label of the prod runner (default registration label)
