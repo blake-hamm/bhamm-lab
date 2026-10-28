@@ -33,6 +33,13 @@ spec:
         grafana:
           enabled: true
           defaultDashboardsTimezone: America/Denver
+          persistence:
+            enabled: true
+            accessModes:
+              - ReadWriteOnce
+            size: 5Gi
+            annotations:
+              k8up.io/backup: "true"
           envValueFrom:
             GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
               secretKeyRef:
@@ -252,8 +259,6 @@ spec:
               volumeClaimTemplate:
                 metadata:
                   name: prometheus
-                  annotations:
-                    k8up.io/backup: "true"
                 spec:
                   accessModes: ["ReadWriteOnce"]
                   resources:

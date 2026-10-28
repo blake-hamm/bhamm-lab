@@ -111,6 +111,19 @@ spec:
         - ports:
             - port: "8888"
               protocol: TCP
+    # Grafana (monitor ns) — read-only datasource-proxy queries for the forge
+    # agent's mcp-grafana server. Viewer-role token; no other consumer.
+    # Cilium evaluates egress AFTER kube-proxy DNAT (same trap as the RGW
+    # comment above), so the port must be the grafana containerPort 3000
+    # (svc :80 -> targetPort 3000), not the service port 80.
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: monitor
+            k8s:app.kubernetes.io/name: grafana
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
     # Twenty CRM server (in-cluster; mint agent MCP + API access, Bearer key).
     - toEndpoints:
         - matchLabels:

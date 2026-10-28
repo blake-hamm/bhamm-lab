@@ -40,6 +40,10 @@ spec:
               remoteRef:
                 key: /default/hindsight
                 property: TENANT_API_KEY
+            - secretKey: GRAFANA_SERVICE_ACCOUNT_TOKEN
+              remoteRef:
+                key: /core/monitor
+                property: grafana_service_account_token
         ingressRoutes:
           - name: hermes
             ingressClass: traefik-external

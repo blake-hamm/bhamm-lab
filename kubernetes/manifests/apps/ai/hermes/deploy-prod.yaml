@@ -77,6 +77,15 @@ spec:
                 secretKeyRef:
                   name: hermes-external-secret
                   key: HINDSIGHT_API_KEY
+            # Grafana service-account token for the forge agent's mcp-grafana
+            # server (read-only, Viewer role). Optional until the token is
+            # created in the Grafana UI and added to SOPS /core/monitor.
+            - name: GRAFANA_SERVICE_ACCOUNT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-external-secret
+                  key: GRAFANA_SERVICE_ACCOUNT_TOKEN
+                  optional: true
             # CDP endpoint for browser_exec — points the browser-harness
             # daemon at the chromium-cdp sidecar (127.0.0.1:9222). Without
             # this, the daemon's liveness check (which only scans its own

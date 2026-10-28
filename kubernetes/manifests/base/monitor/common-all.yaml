@@ -17,6 +17,9 @@ spec:
     helm:
       valuesObject:
         name: monitor
+        k8up:
+          backup:
+            enabled: true
         externalSecrets:
           enabled: true
           secrets:

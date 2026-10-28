@@ -80,3 +80,7 @@ Note: Cilium's DNS proxy does not populate FQDN state on this cluster, so `toFQD
 - **Backups:** k8up backs up both PVCs (`hermes-data` cephfs RWX, `hermes-signal-cli` rbd RWO).
 - **Secrets:** `secrets.enc.json` → Vault sync workflow → ExternalSecret (`OPENAI_API_KEY` reuses the LiteLLM master key, open-webui pattern).
 - **Image upgrades:** both images pinned by digest; Renovate proposes updates. Regenerate the authz patch ConfigMap on hermes image bumps.
+
+## Observability access
+
+The forge profile has read-only access to the cluster's Grafana via the `mcp-grafana` MCP server (stdio subprocess): a Viewer-role `forge-agent` service account, token delivered through SOPS→Vault→ExternalSecret as `GRAFANA_SERVICE_ACCOUNT_TOKEN`, and `--disable-write` so no write tools are registered. All queries go through Grafana's datasource proxy, and log content is treated as untrusted input. See [monitoring](../operations/monitoring.md) for the full setup, config block, and recovery steps.
