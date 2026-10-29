@@ -218,6 +218,33 @@ jobs:
       - name: Download tools
         run: |
           curl -fsSL "https://github.com/google/go-containerregistry/releases/download/${CRANE_VERSION}/go-containerregistry_Linux_x86_64.tar.gz" | tar xz -C /usr/local/bin
+      - name: Registry login (optional)
+        env:
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          set +e  # runner injects -e; a broken login must not be worse than anonymous
+          if [ -n "$GHCR_TOKEN" ]; then
+            if printf '%s' "$GHCR_TOKEN" | crane auth login ghcr.io -u "${GHCR_USERNAME:-ghcr-login}" --password-stdin; then
+              echo "ghcr.io: logged in"
+            else
+              echo "WARNING: ghcr.io login failed; falling back to anonymous"
+            fi
+          else
+            echo "GHCR_TOKEN secret not set; anonymous ghcr pulls"
+          fi
+          if [ -n "$DOCKERHUB_USER" ] && [ -n "$DOCKERHUB_TOKEN" ]; then
+            if printf '%s' "$DOCKERHUB_TOKEN" | crane auth login docker.io -u "$DOCKERHUB_USER" --password-stdin; then
+              echo "docker.io: logged in"
+            else
+              echo "WARNING: docker.io login failed; falling back to anonymous"
+            fi
+          else
+            echo "DOCKERHUB_USER/DOCKERHUB_TOKEN not set; anonymous docker.io pulls"
+          fi
+          exit 0
       - name: crane digest (every image ref must resolve)
         # harbor.bhamm-lab.com refs are skipped: private registry, CI creds
         # arrive later (S4)
@@ -226,13 +253,38 @@ jobs:
         run: |
           grep -rhoE 'image:[[:space:]]*[^" ]+' kubernetes/manifests | sed 's/^image:[[:space:]]*//' |
             sort -u | grep -v '{' | grep -v '\$' | grep -v '^harbor\.bhamm-lab\.com' > /tmp/refs
+          digest() {  # digest <ref> : retry transient registry errors; hard-fail on 404
+            local ref="$1" err attempt=1
+            while :; do
+              if err=$(crane digest "$ref" 2>&1 >/dev/null); then
+                return 0
+              fi
+              case "$err" in
+                *NOT_FOUND*|*404*)
+                  echo "MANIFEST NOT FOUND: $ref: $err"
+                  return 1
+                  ;;
+              esac
+              if [ "$attempt" -ge 3 ]; then
+                echo "NOT PULLABLE: $ref: $err"
+                return 1
+              fi
+              echo "RETRY $attempt after transient error: $err"
+              if [ "$attempt" -eq 1 ]; then
+                sleep 10
+              else
+                sleep 30
+              fi
+              attempt=$((attempt + 1))
+            done
+          }
           while read -r ref; do
             if grep -v '^[[:space:]]*#' .ci/digest-exceptions.txt 2>/dev/null | grep -qxF "$ref"; then
               echo "SKIP (known upstream, tracked in .ci/digest-exceptions.txt): $ref"; continue
             fi
             case "$ref" in *:*) ;; *) ref="$ref:latest";; esac
             echo "INSPECT $ref"
-            crane digest "$ref" >/dev/null || { echo "NOT PULLABLE: $ref"; exit 1; }
+            digest "$ref" || exit 1
           done < /tmp/refs
   report:
     # pull_request never fires on the mirror, so the result is pushed back

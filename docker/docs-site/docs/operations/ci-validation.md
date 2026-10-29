@@ -22,7 +22,7 @@ out the tree via the Forgejo archive endpoint, and runs its gates.
 | `k8s-schemas` | `kubeconform -strict -ignore-missing-schemas` over `kubernetes/manifests` | kubeconform |
 | `open-tofu` | `tofu fmt -check`, `tofu init -backend=false` + `tofu validate` + `tflint` per env, `trivy config` | opentofu, tflint, trivy |
 | `ansible` | `ansible-galaxy install -r ansible/requirements.yml`, `ansible-playbook --syntax-check ansible/main.yml` (via `uv`, `ansible-core>=2.19,<2.20` — prometheus.prometheus 0.29.1 caps ansible-core at ≤2.20.99) | uv |
-| `image-digests` | `crane digest` on every `image:` ref in `kubernetes/manifests` — the #1 renovate failure mode (unpullable digest/tag) | crane |
+| `image-digests` | `crane digest` on every `image:` ref in `kubernetes/manifests` — the #1 renovate failure mode (unpullable digest/tag); pulls are authenticated via optional GHCR/Docker Hub creds (Forgejo secrets) and throttles (429/401) get a bounded retry (3 attempts) | crane |
 
 **Pin of record:** the top-level `env:` block in
 `.forgejo/workflows/validate.yml`. Bump a version there and the matching
@@ -70,6 +70,14 @@ been silently broken in the tree:
 The minio/mc replacement landed in the same PR as the gate — exactly the
 failure mode (renovate pointing at an unpullable image) the gate exists to
 catch. The huntarr case is the deliberate exception-list path.
+
+**Why the gate authenticates:** ghcr.io throttles anonymous manifest
+requests per egress IP, and the twin smoke+validate runs double the
+request count — anonymous pulls from the runner began getting
+UNAUTHORIZED (2026-10-29). The `GHCR_TOKEN`/`GHCR_USERNAME` and
+`DOCKERHUB_USER`/`DOCKERHUB_TOKEN` Forgejo secrets are optional: a
+missing or failed login degrades to anonymous pulls and never reddens
+CI.
 
 ## Landing later
 
