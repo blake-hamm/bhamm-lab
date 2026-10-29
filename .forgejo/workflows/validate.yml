@@ -154,7 +154,7 @@ jobs:
         # from registry.opentofu.org
         # tflint with no ruleset file = built-in rules only (intended)
         run: |
-          for env in backblaze cloudflare gcp kubernetes proxmox/config proxmox/garage proxmox/talos; do
+          for env in backblaze cloudflare gcp kubernetes proxmox/garage proxmox/talos; do
             tofu -chdir="tofu/$env" init -backend=false -input=false
             tofu -chdir="tofu/$env" validate
             tflint --chdir="tofu/$env" --format=compact

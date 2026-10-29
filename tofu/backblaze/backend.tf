@@ -1,9 +1,9 @@
 terraform {
   backend "s3" {
     bucket = "tofu-state"
-    key    = "proxmox/config/terraform.state"
+    key    = "backblaze/terraform.state"
     endpoints = {
-      s3 = "https://minio-api.bhamm-lab.com"
+      s3 = "https://rgw.bhamm-lab.com"
     }
     region                      = "main"
     skip_requesting_account_id  = true
