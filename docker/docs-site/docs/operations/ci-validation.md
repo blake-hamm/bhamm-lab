@@ -30,6 +30,40 @@ download step follows. `KUBE_VERSION` must stay in sync with
 `talos_version` in `tofu/proxmox/talos/variables.tf` (Talos v1.12.6 →
 k8s 1.35).
 
+## Vault credentials
+
+The `ci-vault-smoke` workflow
+(`.forgejo/workflows/ci-vault-smoke.yml`, `workflow_dispatch` only)
+proves the Vault → CI credential plumbing end to end.
+
+- **Auth:** the runner pod's service-account token is exchanged for a
+  Vault token via the `auth/kubernetes` mount, role `ci`
+  (`POST /v1/auth/kubernetes/login`), against `https://vault.vault:8200`
+  with `VAULT_SKIP_VERIFY=true`. The token reaches the job container
+  because job containers run via the dind sidecar (not as k8s pods):
+  the pod SA token is auto-mounted into every pod container including
+  dind, and a read-only `-v` bind in the runner's `container.options`
+  (see `kubernetes/manifests/core/forgejo/runner-helm-prod.yaml`) exposes
+  it to the job container.
+- **Role `ci`:** bound to the `git-actions-forgejo-runner` SA in the
+  `git-actions` namespace, policy `ci_secrets`, token TTL 1h. Defined in
+  `kubernetes/manifests/base/vault/cr-all.yaml` (`externalConfig.auth`),
+  applied by the bank-vaults configurer on Argo sync.
+- **Policy `ci_secrets`:** read+list on exactly
+  `secret/data/core/ceph`, `secret/data/external/proxmox`,
+  `secret/data/external/cloudflare`, `secret/data/external/opnsense`
+  (kv v2 data paths; the underlying keys are synced from
+  `secrets.enc.json` by the SOPS → Vault workflow).
+- **Smoke gate:** login succeeds, all four paths return non-empty, and
+  `tofu init` + `tofu plan` against the proof stack
+  (`tofu/proxmox/garage` — SOPS-free, every variable defaulted) succeed
+  using `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` (ceph) and
+  `PROXMOX_VE_USERNAME`/`PROXMOX_VE_PASSWORD` (proxmox) exported from
+  those reads. A non-empty plan is expected and must not fail the run.
+- **Running it:** Actions tab → `ci-vault-smoke` → *Run workflow*.
+  Rollout note: the workflow has no push trigger, so feature branches
+  get zero runs — run it manually from `main` post-merge.
+
 ## Deliberate exclusions
 
 - **gitleaks: tree scan, never history.** 7 stale hits live in old commits

@@ -1,0 +1,108 @@
+name: ci-vault-smoke
+on:
+  # workflow_dispatch only, no push trigger: the smoke needs the prod
+  # runner's SA token (Vault kubernetes auth), so it runs manually.
+  # Rollout: feature branches get zero runs; run it from main post-merge
+  # (Actions tab -> ci-vault-smoke -> Run workflow).
+  workflow_dispatch:
+# tool pins: vault matches the Vault CR image (hashicorp/vault:2.0.4);
+# opentofu matches the validate.yml pin of record
+env:
+  VAULT_VERSION: 2.0.4
+  OPENTOFU_VERSION: v1.13.2
+jobs:
+  vault-smoke:
+    # registered label of the prod runner (default registration label)
+    runs-on: docker
+    container: docker.io/alpine:3.20
+    steps:
+      - name: apk deps
+        run: apk add --no-cache curl jq unzip bash
+      - name: Checkout (Forgejo archive endpoint; no external actions by design)
+        run: |
+          curl -fsSL -o /tmp/repo.tar.gz "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz"
+          mkdir -p "$GITHUB_WORKSPACE"
+          tar xzf /tmp/repo.tar.gz -C "$GITHUB_WORKSPACE" --strip-components=1
+      - name: Download tools
+        run: |
+          # vault ships as a zip with the binary at the top level
+          curl -fsSL -o /tmp/vault.zip "https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip"
+          unzip -o /tmp/vault.zip -d /usr/local/bin
+          curl -fsSL -o /tmp/tofu.zip "https://github.com/opentofu/opentofu/releases/download/${OPENTOFU_VERSION}/tofu_${OPENTOFU_VERSION#v}_linux_amd64.zip"
+          unzip -o /tmp/tofu.zip -d /usr/local/bin
+      - name: Vault login (kubernetes auth, role ci)
+        shell: bash
+        run: |
+          set -eu pipefail
+          # no set -x anywhere in this workflow: secret values must
+          # never reach the logs
+          if ! getent hosts vault.vault >/dev/null; then
+            echo "SMOKE FINDING: vault.vault does not resolve from the job container (host-network quirk); cluster DNS path unverified"
+            exit 1
+          fi
+          [ -r /var/run/secrets/kubernetes.io/serviceaccount/token ] || {
+            echo "SA token not present in the job container (missing runner container.options bind?)"
+            exit 1
+          }
+          # the pod SA token is bound into the dind container filesystem
+          # via runner container.options; role ci is bound to the
+          # git-actions-forgejo-runner SA in the git-actions namespace.
+          # curl -k == VAULT_SKIP_VERIFY=true
+          RESP=$(curl -fsS -k -X POST \
+            -H "Content-Type: application/json" \
+            -d "{\"role\":\"ci\",\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\"}" \
+            https://vault.vault:8200/v1/auth/kubernetes/login)
+          TOKEN=$(printf '%s' "$RESP" | jq -r .auth.client_token)
+          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+            echo "VAULT LOGIN FAILED: empty client_token (check role 'ci' SA binding / policy 'ci_secrets')"
+            printf '%s' "$RESP" | head -c 400; echo
+            exit 1
+          fi
+          echo "::add-mask::$TOKEN"
+          echo "$TOKEN" > /tmp/vault-token
+          echo "vault login OK (role ci, ttl 1h)"
+      - name: Read the four allowed KV paths (key names only)
+        shell: bash
+        run: |
+          set -eu pipefail
+          TOKEN=$(cat /tmp/vault-token)
+          for p in secret/data/core/ceph secret/data/external/proxmox secret/data/external/cloudflare secret/data/external/opnsense; do
+            # kv v2 read API path; values only ever pass through jq and
+            # only key names are printed
+            KEYS=$(curl -fsS -k -H "X-Vault-Token: $TOKEN" "https://vault.vault:8200/v1/$p" | jq -r '.data.data | keys_unsorted | join(", ")')
+            if [ -z "$KEYS" ]; then
+              echo "FAIL: $p returned no keys"
+              exit 1
+            fi
+            echo "OK $p (keys: $KEYS)"
+          done
+      - name: tofu init+plan against the proof stack (tofu/proxmox/garage)
+        shell: bash
+        run: |
+          set -eu pipefail
+          TOKEN=$(cat /tmp/vault-token)
+          read_secret() {
+            curl -fsS -k -H "X-Vault-Token: $TOKEN" "https://vault.vault:8200/v1/$1" | jq -r ".data.data.$2"
+          }
+          AWS_ACCESS_KEY_ID=$(read_secret secret/data/core/ceph s3_access_key)
+          AWS_SECRET_ACCESS_KEY=$(read_secret secret/data/core/ceph s3_secret_key)
+          PROXMOX_VE_USERNAME=$(read_secret secret/data/external/proxmox PROXMOX_VE_USERNAME)
+          PROXMOX_VE_PASSWORD=$(read_secret secret/data/external/proxmox PROXMOX_VE_PASSWORD)
+          # mask before any use; values are never echoed
+          for v in "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$PROXMOX_VE_USERNAME" "$PROXMOX_VE_PASSWORD"; do
+            echo "::add-mask::$v"
+          done
+          export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY PROXMOX_VE_USERNAME PROXMOX_VE_PASSWORD
+          cd "$GITHUB_WORKSPACE/tofu/proxmox/garage"
+          tofu init -input=false
+          # gate: init+plan must SUCCEED (auth plumbing proof); a
+          # non-empty plan is expected and must not fail the step
+          PLAN_RC=0
+          tofu plan -input=false > /tmp/plan.out 2>&1 || PLAN_RC=$?
+          # last-line summary, e.g. "Plan: 1 to add, 0 to change, 0 to destroy."
+          tail -n 5 /tmp/plan.out
+          if [ "$PLAN_RC" -ne 0 ]; then
+            echo "FAIL: tofu plan exited $PLAN_RC"
+            exit "$PLAN_RC"
+          fi
+          echo "tofu init+plan OK (auth plumbing proven)"

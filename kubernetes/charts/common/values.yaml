@@ -39,7 +39,7 @@ postgresql:
       cpu: "100m"
     limits:
       memory: "1000Mi"
-      cpu: "1000m"
+      cpu: "1"
   imageName: ""
   sharedPreloadLibraries: [""]
   postInitSQL: ""

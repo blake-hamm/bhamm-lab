@@ -89,6 +89,14 @@ spec:
         rules: path "*" { capabilities = ["create", "read", "update", "delete", "list", "sudo"] }
       - name: prometheus-operator
         rules: path "sys/metrics" { capabilities = ["list", "read"] }
+      - name: ci_secrets
+        # kv v2 data paths, read+list only; consumed by the Forgejo CI
+        # smoke workflow (role ci) — key names synced from secrets.enc.json
+        rules: |
+          path "secret/data/core/ceph" { capabilities = ["read", "list"] }
+          path "secret/data/external/proxmox" { capabilities = ["read", "list"] }
+          path "secret/data/external/cloudflare" { capabilities = ["read", "list"] }
+          path "secret/data/external/opnsense" { capabilities = ["read", "list"] }
     auth:
       - type: kubernetes
         roles:
@@ -107,6 +115,14 @@ spec:
             bound_service_account_namespaces: monitor
             policies: prometheus-operator
             ttl: 4h
+          # forgejo-runner chart fullname with serviceAccount.create: true
+          # (verified via helm template at the pinned chart SHA; release
+          # name git-actions does not contain the chart name)
+          - name: ci
+            bound_service_account_names: "git-actions-forgejo-runner"
+            bound_service_account_namespaces: git-actions
+            policies: ci_secrets
+            ttl: 1h
       - type: approle
         roles:
           - name: default

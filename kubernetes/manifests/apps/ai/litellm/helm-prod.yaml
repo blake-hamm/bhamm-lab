@@ -35,7 +35,7 @@ spec:
             cpu: 250m
             memory: 1536Mi
           limits:
-            cpu: 1000m
+            cpu: 1
             memory: 3072Mi
         db:
           useExisting: true

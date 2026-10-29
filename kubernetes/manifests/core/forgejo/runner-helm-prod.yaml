@@ -43,9 +43,16 @@ spec:
                 network: host
                 enable_ipv6: false
                 privileged: false
-                options: -v /certs/client:/certs/client
+                # Job containers run via the dind sidecar, not as k8s pods:
+                # the pod's SA token is auto-mounted into every pod container
+                # (including dind), and this -v bind (resolved against the
+                # dind container filesystem, same mechanism as /certs/client)
+                # exposes it to job containers so they can authenticate to
+                # Vault via kubernetes auth (role ci).
+                options: -v /certs/client:/certs/client -v /var/run/secrets/kubernetes.io/serviceaccount/token:/var/run/secrets/kubernetes.io/serviceaccount/token:ro
                 valid_volumes:
                   - /certs/client
+                  - /var/run/secrets/kubernetes.io/serviceaccount/token
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

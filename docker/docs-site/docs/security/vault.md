@@ -13,8 +13,16 @@ To login to the vault cli run:
 vault login -method=oidc role=default
 ```
 
-There is one vault AppRole that has access to `read_secrets`. This AppRole will retire a token id that needs to be (manually) updated in gitea action secrets `VAULT_SECRET_ID`. In the future, this could be automated by building a base/default gitea action runner container. To generate vault approle secret_id, run:
-```bash
-vault read auth/approle/role/default/role-id
-vault write -f auth/approle/role/default/secret-id
-```
+## Kubernetes auth roles
+
+Workloads authenticate to Vault through the `auth/kubernetes` mount: a
+pod's service-account token is exchanged for a Vault token
+(`POST /v1/auth/kubernetes/login`). The roles live in the Vault CR's
+`externalConfig.auth` (`kubernetes/manifests/base/vault/cr-all.yaml`):
+
+- `sops` — bound to the `argo-workflow` SA in the `argo` namespace; the
+  Argo workflow that syncs SOPS-decrypted secrets into Vault.
+- `ci` — bound to the `git-actions-forgejo-runner` SA in the
+  `git-actions` namespace; read-only (`ci_secrets`) on the four secret
+  paths the Forgejo CI smoke workflow reads (see the "Vault
+  credentials" section in `operations/ci-validation.md`).

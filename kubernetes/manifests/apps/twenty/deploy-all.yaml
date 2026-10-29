@@ -85,7 +85,7 @@ spec:
               cpu: "100m"
             limits:
               memory: "4Gi"
-              cpu: "1000m"
+              cpu: "1"
           stdin: true
           tty: true
           volumeMounts:
@@ -174,7 +174,7 @@ spec:
               cpu: "100m"
             limits:
               memory: "2048Mi"
-              cpu: "1000m"
+              cpu: "1"
           stdin: true
           tty: true
       dnsPolicy: ClusterFirst
