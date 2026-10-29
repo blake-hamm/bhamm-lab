@@ -135,7 +135,13 @@ variable "cpu_cores_master" {
 }
 
 variable "cpu_cores_worker" {
-  description = "Number of CPU cores for worker nodes"
+  description = "Number of CPU cores for generic worker nodes"
+  type        = number
+  default     = 8
+}
+
+variable "cpu_cores_gpu_worker" {
+  description = "Number of CPU cores for GPU worker VMs (a310/b70)"
   type        = number
   default     = 6
 }

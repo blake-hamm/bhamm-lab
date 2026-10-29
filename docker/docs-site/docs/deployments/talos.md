@@ -41,6 +41,16 @@ export TALOSCONFIG=./tofu/proxmox/talos/result/talos-config-test.yaml
 talosctl dashboard
 ```
 
+## Rolling Reboot After CPU Changes
+
+Talos does not hot-grow CPU. After `tofu apply` changes a VM's core count, reboot each worker one at a time for the guest to see it:
+
+```bash
+kubectl drain <node> --ignore-daemonsets --delete-emptydir-data --force
+talosctl reboot -n <node-ip>
+kubectl wait --for=condition=Ready node/<node> && kubectl uncordon <node>
+```
+
 ## Bare Metal Framework Nodes
 
 Framework Desktop nodes with AMD Strix Halo APUs are deployed as bare-metal workers via `talos_machine_configuration_apply.bare_metal`. Their USB4 mesh networking configuration is declared in the `.tfvars` file:

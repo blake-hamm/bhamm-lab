@@ -42,7 +42,7 @@ locals {
     machine_tier   = "accelerated"
     host_node      = "method"
     vm_id          = var.worker_vm_id_start + var.count_worker
-    cpu            = var.cpu_cores_worker
+    cpu            = var.cpu_cores_gpu_worker
     disk_size      = var.disk_size_worker
     disk_size_user = null
     memory         = floor(var.memory_base_worker * var.proxmox_nodes[1].multiplier)
@@ -86,7 +86,7 @@ locals {
     machine_tier   = "accelerated"
     host_node      = "method"
     vm_id          = var.worker_vm_id_start + var.count_worker + 2
-    cpu            = var.cpu_cores_worker
+    cpu            = var.cpu_cores_gpu_worker
     disk_size      = var.disk_size_worker
     disk_size_user = var.disk_size_intel_b70_worker
     memory         = 32768
