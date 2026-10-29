@@ -124,6 +124,14 @@ spec:
           labels:
             release: monitor
         ingester:
+          # Fleet sweep #361: components ran BestEffort; pin a small guaranteed floor.
+          resources:
+            requests:
+              cpu: 50m
+              memory: 192Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
           extraArgs:
             - '-config.expand-env=true'
           extraEnv:
@@ -138,6 +146,13 @@ spec:
                   name: monitor-external-secret
                   key: S3_SECRET_ACCESS_KEY
         distributor:
+          resources:
+            requests:
+              cpu: 50m
+              memory: 192Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
           extraArgs:
             - '-config.expand-env=true'
           extraEnv:
@@ -152,6 +167,13 @@ spec:
                   name: monitor-external-secret
                   key: S3_SECRET_ACCESS_KEY
         querier:
+          resources:
+            requests:
+              cpu: 50m
+              memory: 192Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
           extraArgs:
             - '-config.expand-env=true'
           extraEnv:
@@ -166,6 +188,13 @@ spec:
                   name: monitor-external-secret
                   key: S3_SECRET_ACCESS_KEY
         queryFrontend:
+          resources:
+            requests:
+              cpu: 50m
+              memory: 192Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
           extraArgs:
             - '-config.expand-env=true'
           extraEnv:
@@ -181,6 +210,13 @@ spec:
                   key: S3_SECRET_ACCESS_KEY
         compactor:
           enabled: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 192Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
           extraArgs:
             - '-config.expand-env=true'
           extraEnv:

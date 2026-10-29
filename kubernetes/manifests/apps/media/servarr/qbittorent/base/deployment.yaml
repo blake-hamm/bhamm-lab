@@ -27,13 +27,14 @@ spec:
       containers:
         - name: gluetun
           image: ghcr.io/qdm12/gluetun:v3.41.1
+          # 7d sampled max sat AT the old 128Mi limit (2 restarts) — raise, not trim.
           resources:
             requests:
-              cpu: "10m"
-              memory: "64Mi"
+              cpu: "50m"
+              memory: "96Mi"
             limits:
-              cpu: "200m"
-              memory: "128Mi"
+              cpu: "500m"
+              memory: "256Mi"
           env:
             - name: VPN_SERVICE_PROVIDER
               value: protonvpn
@@ -72,8 +73,8 @@ spec:
           image: lscr.io/linuxserver/qbittorrent:5.2.2
           resources:
             requests:
-              cpu: "100m"
-              memory: "256Mi"
+              cpu: "50m"
+              memory: "128Mi"
             limits:
               cpu: "500m"
               memory: "1Gi"

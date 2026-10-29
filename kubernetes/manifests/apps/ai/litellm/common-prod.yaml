@@ -39,6 +39,14 @@ spec:
             enabled: false
         dragonfly:
           enabled: true
+          # Fleet sweep #361: p95 mem <=25MB; chart default 500m/500Mi was ~20x over.
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
         externalSecrets:
           enabled: true
           secrets:

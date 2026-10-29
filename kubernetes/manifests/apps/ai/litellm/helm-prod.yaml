@@ -28,13 +28,15 @@ spec:
         proxyConfigMap:
           name: litellm-config
           create: false
+        # Working set hit ~78% of the 2Gi limit with 23 restarts/7d: trim the
+        # cpu request, give memory real headroom.
         resources:
           requests:
-            cpu: 500m
-            memory: 1024Mi
+            cpu: 250m
+            memory: 1536Mi
           limits:
             cpu: 1000m
-            memory: 2048Mi
+            memory: 3072Mi
         db:
           useExisting: true
           database: litellm

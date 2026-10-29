@@ -18,11 +18,11 @@ spec:
       valuesObject:
         resources:
           limits:
-            cpu: 800m
+            cpu: 500m
             memory: 1024Mi
           requests:
-            cpu: 400m
-            memory: 512Mi
+            cpu: 100m
+            memory: 192Mi
         persistence:
           accessModes: ["ReadWriteOnce"]
           size: 10Gi

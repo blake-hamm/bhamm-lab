@@ -50,6 +50,15 @@ spec:
           expireHours: 24
         trivy:
           enabled: true
+          # Fleet sweep #361: scanner idles between scans; chart default 200m/512Mi over-provisioned.
+          # Limits kept at chart default — a values map replaces (not merges), so restate them.
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              cpu: 1
+              memory: 1Gi
           # gitHubToken the GitHub access token to download Trivy DB
           #
           # Trivy DB contains vulnerability information from NVD, Red Hat, and many other upstream vulnerability databases.

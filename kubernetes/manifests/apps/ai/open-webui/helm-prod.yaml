@@ -23,6 +23,14 @@ spec:
           enabled: false
         image:
           tag: v0.9.6
+        # Was BestEffort (no block): 1Gi working set, 174 restarts/7d.
+        resources:
+          requests:
+            cpu: 100m
+            memory: 1Gi
+          limits:
+            cpu: 500m
+            memory: 1536Mi
         pipelines:
           enabled: true
           extraEnvVars: []

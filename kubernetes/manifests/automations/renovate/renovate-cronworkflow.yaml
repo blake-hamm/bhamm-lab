@@ -12,6 +12,18 @@ spec:
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: 300
   workflowSpec:
+    # A starved (Pending) renovate pod made this Forbid-concurrency cron skip
+    # every later run for 81h+ (#359). Cap the workflow lifetime: a run that
+    # can't finish (or even schedule) within 2h is dead, and the next nightly
+    # proceeds instead of being skipped forever. (First night: the 1h cap
+    # killed a legitimately-long nightly run at ~60min — 2h bounds the
+    # runaway case without amputating real work.)
+    activeDeadlineSeconds: 7200
+    # Preempt queue position over default-priority app pods when CPU requests
+    # are exhausted (PriorityClass defined in automations/priority-classes-all.yaml).
+    # Workflow-spec field is podPriorityClassName; plain priorityClassName is the
+    # template-level name and gets pruned by the CRD here ("unknown field").
+    podPriorityClassName: automation-high
     securityContext:
       runAsUser: 0
       runAsGroup: 0

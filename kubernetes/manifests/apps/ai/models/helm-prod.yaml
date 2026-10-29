@@ -118,7 +118,23 @@ spec:
           extraVolumeMounts:
             - name: prometheus-dir
               mountPath: /mlflow
+          # Was BestEffort (no block): 2.3Gi working set, 289 restarts/7d.
+          resources:
+            requests:
+              cpu: 250m
+              memory: 2560Mi
+            limits:
+              cpu: "1"
+              memory: 3Gi
         phoenix-helm:
+          # Fleet sweep #361: observability sidecar; chart default 500m/1Gi request was over.
+          resources:
+            requests:
+              cpu: 100m
+              memory: 768Mi
+            limits:
+              cpu: 500m
+              memory: 2Gi
           healthChecks:
             startupProbe:
               periodSeconds: 5

@@ -1,0 +1,14 @@
+# PriorityClass for batch/automation workloads (issue #359).
+# Sits above default-priority app pods so schedulable CPU goes to CI/cron work
+# (e.g. renovate, whose starved run + Forbid policy skipped every later run),
+# and well below system-cluster-critical/system-node-critical so cluster
+# components always preempt automation.
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: automation-high
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+value: 10000
+globalDefault: false
+description: "Batch automation workloads (Argo workflows, renovate) that should not starve behind app pods."

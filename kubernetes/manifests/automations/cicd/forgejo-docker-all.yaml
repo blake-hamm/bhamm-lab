@@ -123,6 +123,13 @@ spec:
                     script:
                       image: python:3.14-alpine
                       command: [python]
+                      resources:
+                        requests:
+                          cpu: 100m
+                          memory: 128Mi
+                        limits:
+                          cpu: 500m
+                          memory: 256Mi
                       source: |
                         import json
                         import os
@@ -151,6 +158,13 @@ spec:
                     script:
                       image: alpine:3.24
                       command: [sh]
+                      resources:
+                        requests:
+                          cpu: 100m
+                          memory: 128Mi
+                        limits:
+                          cpu: 500m
+                          memory: 256Mi
                       env:
                         - name: REGISTRY
                           value: "harbor.bhamm-lab.com"
@@ -185,6 +199,17 @@ spec:
                           path: /kaniko/.docker
                     container:
                       image: gcr.io/kaniko-project/executor:v1.24.0-debug
+                      # Kaniko builds were BestEffort (no requests at all) and
+                      # competed unbounded with app workloads on the general
+                      # workers (#359). Requests schedule the build; limits
+                      # allow a real compile burst.
+                      resources:
+                        requests:
+                          cpu: 500m
+                          memory: 1Gi
+                        limits:
+                          cpu: "4"
+                          memory: 4Gi
                       command: ["/busybox/sh", "-c"]
                       args:
                         - |

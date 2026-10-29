@@ -40,8 +40,8 @@ spec:
           # Slim image = no local ML deps (torch/sentence-transformers/flashrank
           # are excluded build-time); embeddings+reranking are external providers.
           resources:
-            requests: {cpu: 250m, memory: 512Mi}
-            limits: {cpu: "2", memory: 1.5Gi}
+            requests: {cpu: 100m, memory: 512Mi}
+            limits: {cpu: "1", memory: 1.5Gi}
           env:
             HINDSIGHT_API_VECTOR_EXTENSION: vchord
             # Internal worker identity: hostname-based default orphans claimed
@@ -67,6 +67,10 @@ spec:
             repository: ghcr.io/vectorize-io/hindsight-control-plane
             tag: 0.10.2
             pullPolicy: IfNotPresent
+          # Fleet sweep #361: control plane is near-idle; chart default 250m/512Mi was over.
+          resources:
+            requests: {cpu: 50m, memory: 128Mi}
+            limits: {cpu: 500m, memory: 512Mi}
         # Reranker: chart-rendered CPU TEI (cross-encoder/ms-marco-MiniLM-L-6-v2);
         # chart auto-wires HINDSIGHT_API_RERANKER_PROVIDER=tei + TEI_URL on the api.
         tei:

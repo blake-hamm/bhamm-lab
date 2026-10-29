@@ -22,7 +22,9 @@ spec:
           rbac:
             artifactGC: true
         controller:
-          parallelism: 10
+          # 10 -> 3: CI workflow pods were piling up on the 3 general workers
+          # alongside app workloads (#359). Backlog only delays builds.
+          parallelism: 3
           workflowTTLWorkers: 32
           metricsConfig:
             enabled: true

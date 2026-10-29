@@ -63,8 +63,43 @@ spec:
         # Right-size for web_extract: /v2/scrape runs inline in the API pod,
         # so the async NuQ pipeline only needs 1 worker. Chart defaults are
         # 5x nuq-worker (15Gi req / 20Gi lim) + extract-worker.
+        # Per-role resources override the chart defaults (api 2/2+4G, workers
+        # 1/1+3-4G each); 7d cadvisor shows api peaks at 2m CPU / 0.39Gi mem,
+        # workers ~20m CPU (issue #359). Limits stay high enough for scrape
+        # bursts; requests are what schedule, so these free worker-0/1/2.
+        api:
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+        worker:
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+            limits:
+              cpu: "1"
+              memory: 1Gi
         nuqWorker:
           replicaCount: 1
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+        nuqPrefetchWorker:
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+            limits:
+              cpu: "1"
+              memory: 1Gi
         extractWorker:
           enabled: false
         # rabbitmq stays ENABLED (chart default) — required: the chart's

@@ -32,11 +32,11 @@ spec:
             - containerPort: 8080
           resources:
             limits:
-              cpu: "0.5"
-              memory: "256Mi"
+              cpu: "0.25"
+              memory: "192Mi"
             requests:
-              cpu: "0.2"
-              memory: "128Mi"
+              cpu: "0.025"
+              memory: "64Mi"
 ---
 apiVersion: v1
 kind: Service

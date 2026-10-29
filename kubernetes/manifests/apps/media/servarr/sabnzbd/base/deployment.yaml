@@ -33,7 +33,9 @@ spec:
               memory: "256Mi"
             limits:
               cpu: "1000m"
-              memory: "1Gi"
+              # 1Gi limit still OOMKilled 3x in 7d (spikes between cadvisor
+              # samples; #359). Requests stay low — limits are burst headroom.
+              memory: "2Gi"
           ports:
             - containerPort: 8080
               name: web-ui

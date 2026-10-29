@@ -32,6 +32,13 @@ spec:
           externalUrl: https://alertmanager.bhamm-lab.com
         grafana:
           enabled: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
           defaultDashboardsTimezone: America/Denver
           # Grafana's SQLite lives on an RWO RBD volume, attachable to one node
           # at a time. The chart default (RollingUpdate) deadlocks rollouts that
@@ -208,6 +215,14 @@ spec:
           fullnameOverride: "prometheus"
         prometheus:
           prometheusSpec:
+            # 15d retention on a 3-node pool; requests sized to observed steady state.
+            resources:
+              requests:
+                cpu: 500m
+                memory: 4Gi
+              limits:
+                cpu: "2"
+                memory: 6Gi
             externalUrl: https://prometheus.bhamm-lab.com
             additionalScrapeConfigs:
               - job_name: opnsense
