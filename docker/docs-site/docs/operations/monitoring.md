@@ -12,6 +12,8 @@ Stack is `kube-prometheus-stack` 77.14.0 (Grafana subchart 10.0.0), deployed via
 
 Grafana state (service accounts, tokens, alerting contact points, provisioning) lives on a 5Gi RWO PVC (RBD CSI, cluster-default storage class — no `storageClassName` set, same as Prometheus). The `monitor` namespace enables k8up backups via the common chart (`k8up.backup.enabled: true`), which — with the k8up operator's `skipWithoutAnnotation` — covers the Grafana PVC (annotated `k8up.io/backup: "true"`) only; the Prometheus volume is intentionally out of the backup set, and the k8up restore workflow is intentionally not enabled yet. Before this change Grafana used an emptyDir and every pod recreation wiped UI-created state — the `forge-agent` service account and token below depend on persistence.
 
+Because the volume is RWO (attachable to one node at a time), the Grafana deployment uses `strategy.type: Recreate`: with the chart-default RollingUpdate, a rollout scheduled onto another node deadlocks — the surge pod waits on a Multi-Attach error while `maxUnavailable: 0` keeps the old pod (volume holder) running. Recreate terminates first and accepts a ~30-60s downtime blip per rollout, the same trade prometheus-operator makes for Prometheus itself.
+
 ## Agent observability access (Grafana MCP)
 
 The forge Hermes profile has read-only access to Grafana through the `mcp-grafana` MCP server.

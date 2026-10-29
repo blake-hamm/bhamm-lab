@@ -33,6 +33,14 @@ spec:
         grafana:
           enabled: true
           defaultDashboardsTimezone: America/Denver
+          # Grafana's SQLite lives on an RWO RBD volume, attachable to one node
+          # at a time. The chart default (RollingUpdate) deadlocks rollouts that
+          # land on a different node: the surge pod sits Pending in Multi-Attach
+          # while maxUnavailable=0 blocks terminating the old pod holding the
+          # volume. Recreate detaches first (~30-60s blip), matching the
+          # Recreate strategy prometheus-operator uses for the same reason.
+          deploymentStrategy:
+            type: Recreate
           persistence:
             enabled: true
             accessModes:
