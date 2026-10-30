@@ -72,7 +72,7 @@ This is partly because [GitHub's uptime record](https://isgithubcooked.com/) lea
 
 **Security:**
 
-- Network segmentation with [OPNsense](https://opnsense.org/) and intervlan routing with TP Link Omada
+- Network segmentation with [OPNsense](https://opnsense.org/) and intervlan routing with TP Link Omada — see [Network & MTU](network.md)
 - Network-wide DNS ad-blocking, filtering and monitoring with [Pi-hole](https://pi-hole.net/) on Orange Pi Zero3
 - Secrets management with [SOPS](https://github.com/mozilla/sops) and [Vault](https://www.vaultproject.io/)
 - Automated TLS certificates with [Cert Manager](https://cert-manager.io/) and [Cloudflare](https://www.cloudflare.com/)

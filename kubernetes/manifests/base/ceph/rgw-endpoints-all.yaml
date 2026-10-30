@@ -21,9 +21,14 @@ metadata:
     argocd.argoproj.io/sync-wave: "7"
 subsets:
   - addresses:
-      - ip: 10.0.20.11
-      - ip: 10.0.20.12
-      - ip: 10.0.20.13
+      # VLAN 30 addresses, not the VLAN 20 ones: pods egress on a jumbo
+      # segment and inter-VLAN routing on the Omada switch is 1500 without
+      # ICMP fragmentation-needed, so a VLAN 20 target silently black-holes
+      # large writes and TLS 1.3 handshakes. See
+      # docker/docs-site/docs/architecture/network.md.
+      - ip: 10.0.30.11
+      - ip: 10.0.30.12
+      - ip: 10.0.30.13
     ports:
       - name: s3
         port: 7480

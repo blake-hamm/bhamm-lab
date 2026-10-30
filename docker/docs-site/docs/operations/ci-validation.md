@@ -56,10 +56,14 @@ proves the Vault → CI credential plumbing end to end.
   `secrets.enc.json` by the SOPS → Vault workflow).
 - **Smoke gate:** login succeeds, all four paths return non-empty, and
   `tofu init` + `tofu plan` against the proof stack
-  (`tofu/proxmox/garage` — SOPS-free, every variable defaulted) succeed
-  using `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` (ceph) and
+  (`tofu/proxmox/garage` — SOPS-free, every variable defaulted except
+  `proxmox_url`) succeed using
+  `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` (ceph) and
   `PROXMOX_VE_USERNAME`/`PROXMOX_VE_PASSWORD` (proxmox) exported from
   those reads. A non-empty plan is expected and must not fail the run.
+  `proxmox_url` is pinned to `https://10.0.30.11:8006` in the workflow: the
+  job runs in a pod, and a routed pod → VLAN 20 Proxmox API call is silently
+  black-holed (see [Network & MTU](../architecture/network.md)).
 - **Running it:** Actions tab → `ci-vault-smoke` → *Run workflow*.
   Rollout note: the workflow has no push trigger, so feature branches
   get zero runs — run it manually from `main` post-merge.

@@ -95,14 +95,24 @@ jobs:
           export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY PROXMOX_VE_USERNAME PROXMOX_VE_PASSWORD
           cd "$GITHUB_WORKSPACE/tofu/proxmox/garage"
           tofu init -input=false
-          # gate: init+plan must SUCCEED (auth plumbing proof); a
-          # non-empty plan is expected and must not fail the step
-          PLAN_RC=0
-          tofu plan -input=false > /tmp/plan.out 2>&1 || PLAN_RC=$?
-          # last-line summary, e.g. "Plan: 1 to add, 0 to change, 0 to destroy."
-          tail -n 5 /tmp/plan.out
-          if [ "$PLAN_RC" -ne 0 ]; then
-            echo "FAIL: tofu plan exited $PLAN_RC"
-            exit "$PLAN_RC"
+          # Plan against method's VLAN 30 address, not the stack default on
+          # VLAN 20. The job runs in a pod on a VLAN 30 node with jumbo frames
+          # (Cilium MTU 8950), while inter-VLAN traffic crosses the Omada L3
+          # switch, which routes at 1500 and emits no ICMP fragmentation-needed.
+          # A jumbo-sized segment is therefore silently dropped on the way to an
+          # inter-VLAN address: Go's TLS 1.3 ClientHello (1455 B payload, 1507 B
+          # on the wire) never arrives and the provider reports EOF after its
+          # retry budget. Staying on-link keeps the flow switched at jumbo.
+          # See docker/docs-site/docs/architecture/network.md.
+          rc=0
+          tofu plan -input=false -var proxmox_url=https://10.0.30.11:8006 -detailed-exitcode || rc=$?
+          # 0 = no changes, 2 = changes pending. The gate is "auth plumbing
+          # works", so a non-empty plan is expected and must not fail the run.
+          if [ "$rc" -eq 2 ]; then
+            echo "plan succeeded with pending changes: auth plumbing proven"
+          elif [ "$rc" -ne 0 ]; then
+            echo "FAIL: tofu plan failed (rc=$rc)"
+            exit 1
+          else
+            echo "plan succeeded, no changes: auth plumbing proven"
           fi
-          echo "tofu init+plan OK (auth plumbing proven)"

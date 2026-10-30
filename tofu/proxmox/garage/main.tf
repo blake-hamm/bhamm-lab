@@ -1,15 +1,6 @@
 provider "proxmox" {
   endpoint = var.proxmox_url
   insecure = true
-  ssh {
-    agent    = true
-    username = "root"
-    node {
-      name    = "japan"
-      address = "10.0.20.13"
-      port    = "4185"
-    }
-  }
 }
 
 data "proxmox_file" "nixos_image" {
