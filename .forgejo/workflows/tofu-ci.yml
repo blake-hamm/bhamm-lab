@@ -1,0 +1,330 @@
+name: tofu-ci
+on:
+  workflow_dispatch:
+    inputs:
+      stacks:
+        description: space-separated stack dirs from KNOWN_STACKS (e.g. proxmox/garage backblaze), or auto
+        required: false
+        default: auto
+  # mirror pushes fire per-branch; paths keeps tofu work out of every
+  # push (that is validate.yml's job). ** spans / separators; * does not
+  # (see validate.yml note).
+  push:
+    branches:
+      - "**"
+    paths:
+      - "tofu/**"
+# tool pins; the pipeline is documented in
+# docker/docs-site/docs/operations/ci-validation.md.
+# KNOWN_STACKS: every stack whose dirs the fmt/lint stages gate (stateless:
+# init -backend=false, no creds needed for ANY stack).
+# ENABLED_STACKS: subset that also gets the plan stage (needs Vault role ci
+# creds per stack; onboarding = one entry here + one case in the plan step
+# + a ci_secrets policy line when a new Vault path is required — issue #322).
+env:
+  OPENTOFU_VERSION: v1.13.2
+  TFLINT_VERSION: v0.65.0
+  TRIVY_VERSION: v0.76.1
+  KNOWN_STACKS: "backblaze cloudflare gcp kubernetes proxmox/garage proxmox/talos"
+  ENABLED_STACKS: "proxmox/garage"
+jobs:
+  detect:
+    # decides which stacks this push/dispatch runs; each matrix entry carries
+    # plan=true when the stack is also enabled for the plan stage.
+    # no checkout needed; the compare API answers changed files
+    runs-on: docker
+    container: docker.io/alpine:3.20
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.pick.outputs.matrix }}
+      any: ${{ steps.pick.outputs.any }}
+    steps:
+      - name: apk deps
+        run: apk add --no-cache curl jq bash
+      - name: Pick stacks
+        id: pick
+        shell: bash
+        env:
+          INPUT_STACKS: ${{ github.event.inputs.stacks }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -eu pipefail
+          # matrix items: {"id": job-safe id, "dir": path under tofu/, "plan": bool}
+          mk() {  # mk <dir> ; prints one matrix item
+            jq -cn --arg d "$1" --arg enable "$ENABLED_STACKS" \
+              '{id: ($d | gsub("/"; "-")), dir: $d, plan: ((($enable | split(",") | index($d)) != null))}'
+          }
+          all=$(for s in $KNOWN_STACKS; do mk "$s"; done | jq -sc '. // []')
+          m=""
+          if [ -n "${INPUT_STACKS:-}" ] && [ "$INPUT_STACKS" != "auto" ]; then
+            m='[]'
+            for s in $INPUT_STACKS; do
+              case " $KNOWN_STACKS " in
+                *" $s "*) m=$(jq -c --argjson item "$(mk "$s")" '. + [$item]' <<<"$m") ;;
+                *) echo "unknown stack '$s'; KNOWN_STACKS: $KNOWN_STACKS"; exit 1 ;;
+              esac
+            done
+          elif [ -n "${BEFORE:-}" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
+            # changed files via the Codeberg compare API (source repo of
+            # record; anonymous read). The Forgejo mirror's compare endpoint
+            # does NOT work here (404 for anon and token; verified).
+            resp=""
+            resp=$(curl -fsS "https://codeberg.org/api/v1/repos/blake-hamm/bhamm-lab/compare/${BEFORE}...${GITHUB_SHA}" 2>/dev/null || true)
+            if [ -n "$resp" ]; then
+              m=$(jq -c '
+                (.files // []) as $f
+                | ($known | split(" "))
+                | map(. as $d | {id: ($d | gsub("/"; "-")), dir: $d, plan: ((($enable | split(",") | index($d)) != null))})
+                | map(select(.dir as $s | $f | any(.[]; (.filename // "") | startswith("tofu/" + $s + "/"))))' <<<"$resp" \
+                --arg known "$KNOWN_STACKS" --arg enable "$ENABLED_STACKS")
+            fi
+          fi
+          if [ -z "$m" ]; then
+            # new branch, force-push, or compare failure: run everything known
+            echo "compare unavailable or dispatch/auto: running ALL known stacks"
+            m="$all"
+          fi
+          n=$(jq 'length' <<<"$m")
+          echo "stack matrix: $m"
+          echo "matrix=$m" >> "$GITHUB_OUTPUT"
+          if [ "$n" -gt 0 ]; then echo "any=true" >> "$GITHUB_OUTPUT"; else echo "any=false" >> "$GITHUB_OUTPUT"; fi
+  stack:
+    # one self-contained job per stack: fmt -> lint -> plan (when enabled) ->
+    # PR comment. self-contained on purpose: no cross-job output plumbing;
+    # each stack owns exactly one marker comment so matrix jobs never race
+    needs: detect
+    if: needs.detect.outputs.any == 'true'
+    runs-on: docker
+    container: docker.io/alpine:3.20
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        stack: ${{ fromJson(needs.detect.outputs.matrix) }}
+    env:
+      STACK_ID: ${{ matrix.stack.id }}
+      STACK_DIR: ${{ matrix.stack.dir }}
+      STACK_PLAN: ${{ matrix.stack.plan }}
+    steps:
+      - name: apk deps
+        # unzip: tofu + tflint ship as zips; trivy is a tarball
+        run: apk add --no-cache curl jq unzip bash python3
+      - name: Checkout (Forgejo archive endpoint; no external actions by design)
+        run: |
+          curl -fsSL -o /tmp/repo.tar.gz "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz"
+          mkdir -p "$GITHUB_WORKSPACE"
+          tar xzf /tmp/repo.tar.gz -C "$GITHUB_WORKSPACE" --strip-components=1
+      - name: Download tools
+        run: |
+          curl -fsSL -o /tmp/tofu.zip "https://github.com/opentofu/opentofu/releases/download/${OPENTOFU_VERSION}/tofu_${OPENTOFU_VERSION#v}_linux_amd64.zip"
+          unzip -o /tmp/tofu.zip -d /usr/local/bin
+          curl -fsSL -o /tmp/tflint.zip "https://github.com/terraform-linters/tflint/releases/download/${TFLINT_VERSION}/tflint_linux_amd64.zip"
+          unzip -o /tmp/tflint.zip -d /usr/local/bin
+          # trivy asset names drop the leading v (v0.76.1 -> 0.76.1); the
+          # v-prefixed URL 404s (validate.yml run #18: curl 22 + tar short read)
+          curl -fsSL "https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}/trivy_${TRIVY_VERSION#v}_Linux-64bit.tar.gz" | tar xz -C /usr/local/bin
+      - name: tofu fmt
+        id: fmt
+        shell: bash
+        run: |
+          set -eu pipefail
+          cd "$GITHUB_WORKSPACE"
+          tofu fmt -check -recursive "tofu/$STACK_DIR"
+          echo "ok=pass" >> "$GITHUB_OUTPUT"
+      - name: tofu lint (init -backend=false + validate + tflint + trivy)
+        id: lint
+        shell: bash
+        run: |
+          set -eu pipefail
+          cd "$GITHUB_WORKSPACE/tofu/$STACK_DIR"
+          # init -backend=false: stateless, no creds needed; providers come
+          # from registry.opentofu.org (moved out of validate.yml: tf gates
+          # belong on tf changes, not every push)
+          tofu init -backend=false -input=false
+          tofu validate
+          # tflint with no ruleset file = built-in rules only (intended)
+          tflint --format=compact
+          # trivy config exits 0 even with findings — advisory here
+          trivy config --quiet .
+          echo "ok=pass" >> "$GITHUB_OUTPUT"
+      - name: Vault login (kubernetes auth, role ci)
+        id: vault
+        if: matrix.stack.plan == true
+        shell: bash
+        run: |
+          set -eu pipefail
+          # no set -x anywhere in this workflow: secret values must never reach the logs
+          [ -r /var/run/secrets/kubernetes.io/serviceaccount/token ] || {
+            echo "SA token not present in the job container (missing runner container.options bind?)"
+            exit 1
+          }
+          RESP=$(curl -fsS -k -X POST \
+            -H "Content-Type: application/json" \
+            -d "{\"role\":\"ci\",\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\"}" \
+            https://vault.vault:8200/v1/auth/kubernetes/login)
+          TOKEN=$(printf '%s' "$RESP" | jq -r .auth.client_token)
+          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+            echo "VAULT LOGIN FAILED: empty client_token (check role 'ci' SA binding / policy 'ci_secrets')"
+            printf '%s' "$RESP" | head -c 400; echo
+            exit 1
+          fi
+          echo "::add-mask::$TOKEN"
+          echo "$TOKEN" > /tmp/vault-token
+          echo "vault login OK (role ci, ttl 1h)"
+      - name: tofu plan
+        id: plan
+        if: matrix.stack.plan == true
+        shell: bash
+        env:
+          # public domain, not forgejo.server_url (renders the cluster-internal FQDN);
+          # forgejo.run_id goes via run: text — the forgejo context is not
+          # available in step/job env: blocks (see validate.yml report, same pattern)
+          RUN_URL: https://git.bhamm-lab.com/${{ github.repository }}/actions/runs/${{ forgejo.run_id }}
+        run: |
+          set -eu pipefail
+          TOKEN=$(cat /tmp/vault-token)
+          read_secret() {
+            curl -fsS -k -H "X-Vault-Token: $TOKEN" "https://vault.vault:8200/v1/$1" | jq -r ".data.data.$2"
+          }
+          # credential map; one case per onboarded stack (issue #322 roadmap)
+          PLAN_EXTRA=()
+          case "$STACK_ID" in
+            proxmox-garage)
+              AWS_ACCESS_KEY_ID=$(read_secret secret/data/core/ceph s3_access_key)
+              AWS_SECRET_ACCESS_KEY=$(read_secret secret/data/core/ceph s3_secret_key)
+              PROXMOX_VE_USERNAME=$(read_secret secret/data/external/proxmox PROXMOX_VE_USERNAME)
+              PROXMOX_VE_PASSWORD=$(read_secret secret/data/external/proxmox PROXMOX_VE_PASSWORD)
+              export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY PROXMOX_VE_USERNAME PROXMOX_VE_PASSWORD
+              for v in "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$PROXMOX_VE_USERNAME" "$PROXMOX_VE_PASSWORD"; do
+                echo "::add-mask::$v"
+              done
+              # plan against method's VLAN 30 address, not the stack default on
+              # VLAN 20: the job pod is on VLAN 30 with jumbo frames (Cilium MTU
+              # 8950) while inter-VLAN routing caps at 1500 and drops jumbo-sized
+              # TLS segments silently, which the provider reports as EOF.
+              # Staying on-link keeps the flow switched at jumbo. Proven by
+              # ci-vault-smoke; see docker/docs-site/docs/architecture/network.md.
+              PLAN_EXTRA=(-var proxmox_url=https://10.0.30.11:8006)
+              ;;
+            *)
+              echo "no credential wiring for stack '$STACK_ID' (ENABLED_STACKS outpaced the plan step)"
+              exit 1
+              ;;
+          esac
+          cd "$GITHUB_WORKSPACE/tofu/$STACK_DIR"
+          tofu init -input=false
+          rc=0
+          tofu plan -input=false "${PLAN_EXTRA[@]}" -detailed-exitcode > /tmp/plan.txt 2>&1 || rc=$?
+          # rc 0 = no changes, rc 2 = changes pending. the gate is "the plan
+          # COMPUTES against real RGW state with real creds": a non-empty plan
+          # on a PR branch is expected and must not redden CI
+          if [ "$rc" -eq 0 ] || [ "$rc" -eq 2 ]; then
+            if [ "$rc" -eq 2 ]; then SUMMARY="passed (changes pending)"; else SUMMARY="passed (no changes)"; fi
+            echo "status=pass" >> "$GITHUB_OUTPUT"
+          else
+            SUMMARY="failed (rc=$rc)"
+            echo "status=fail" >> "$GITHUB_OUTPUT"
+          fi
+          echo "plan: $SUMMARY"
+          echo "summary=$SUMMARY" >> "$GITHUB_OUTPUT"
+          # trimmed plan for the comment (even on failure): head 100 + tail 60
+          # lines, hard cap 8000 chars; strip CR and any ``` fences so the
+          # fenced block cannot break out
+          {
+            echo "body<<EOF_PLAN_BODY"
+            total=$(wc -l < /tmp/plan.txt)
+            {
+              head -n 100 /tmp/plan.txt
+              if [ "$total" -gt 160 ]; then
+                echo "... ($((total - 160)) of $total lines elided) ..."
+                tail -n 60 /tmp/plan.txt
+              fi
+            } | tr -d '\r' | grep -v '```' | head -c 8000
+            echo EOF_PLAN_BODY
+          } >> "$GITHUB_OUTPUT"
+          if [ "$rc" -ne 0 ] && [ "$rc" -ne 2 ]; then
+            tail -n 30 /tmp/plan.txt
+            exit 1
+          fi
+      - name: Post status to Codeberg PR
+        # always(): a failed fmt/lint/plan is exactly the event the PR comment
+        # must report; the job still ends red via the failed step's exit
+        if: always()
+        shell: bash
+        env:
+          CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+          # public domain, not forgejo.server_url (renders the cluster-internal FQDN)
+          RUN_URL: https://git.bhamm-lab.com/${{ github.repository }}/actions/runs/${{ forgejo.run_id }}
+          FMT: ${{ steps.fmt.outputs.ok }}
+          LINT: ${{ steps.lint.outputs.ok }}
+          PLAN_STATUS: ${{ steps.plan.outputs.status }}
+          SUMMARY: ${{ steps.plan.outputs.summary }}
+          PLAN_BODY: ${{ steps.plan.outputs.body }}
+        run: |
+          set +eu pipefail  # reporting must never fail the workflow further
+          TOK=$(printf '%s' "${CODEBERG_TOKEN:-}" | tr -d '[:space:]')
+          [ -n "$TOK" ] || { echo "no CODEBERG_TOKEN secret, skipping"; exit 0; }
+          [ "$BRANCH" = "main" ] && { echo "main push, nothing to report"; exit 0; }
+          API=https://codeberg.org/api/v1
+          api() {  # api METHOD URL [data-file]; prints body, sets global HTTP_CODE
+            local method="$1" url="$2" data="${3:-}"
+            if [ -n "$data" ]; then
+              HTTP_CODE=$(curl -sS -o /tmp/api_body -w '%{http_code}' -X "$method" \
+                -H "Authorization: token $TOK" -H "Content-Type: application/json" --data "@$data" "$url")
+            else
+              HTTP_CODE=$(curl -sS -o /tmp/api_body -w '%{http_code}' -X "$method" \
+                -H "Authorization: token $TOK" "$url")
+            fi
+            cat /tmp/api_body
+          }
+          check() {  # check : non-2xx -> diagnostic, exit 0 (non-fatal)
+            case "$HTTP_CODE" in
+              2*) ;;
+              *) echo "CODEBERG API $1 $2 -> HTTP $HTTP_CODE"
+                 head -c 200 /tmp/api_body 2>/dev/null; echo
+                 echo "status comment failed (non-fatal)"
+                 exit 0 ;;
+            esac
+          }
+          # status icon: derived from step outputs (absence of an ok output
+          # means that stage failed or never ran — avoids relying on job-level
+          # status contexts that Forgejo may not render)
+          if [ -z "$PLAN_STATUS" ] && [ "$STACK_PLAN" != "true" ] && [ -n "$LINT" ]; then
+            ICON=":white_check_mark:"; DESC="fmt+lint pass (plan not enabled)"
+          elif [ -z "$LINT" ]; then
+            ICON=":x:"; DESC="fmt/lint failed (see run logs)"
+          elif [ "$PLAN_STATUS" = "pass" ]; then
+            ICON=":white_check_mark:"; DESC="fmt+lint pass · plan ${SUMMARY:-?}"
+          elif [ -n "$PLAN_STATUS" ]; then
+            ICON=":x:"; DESC="fmt+lint pass · plan ${SUMMARY:-failed}"
+          else
+            ICON=":warning:"; DESC="did not complete (see run logs)"
+          fi
+          api GET "$API/repos/blake-hamm/bhamm-lab/pulls?state=open&limit=50" >/dev/null
+          check GET "pulls"
+          PR=$(jq -r --arg b "$BRANCH" '[.[] | select(.head.ref == $b)][0].number // empty' /tmp/api_body 2>/dev/null)
+          [ -n "${PR:-}" ] || { echo "no open PR for $BRANCH"; exit 0; }
+          MARKER="<!-- forgejo-tofu-ci:${STACK_ID} -->"
+          BODY="$MARKER
+          **tofu-ci — \`$STACK_DIR\`:** $ICON $DESC on \`$BRANCH\` — [run logs]($RUN_URL)"
+          if [ -n "${PLAN_BODY:-}" ]; then
+            BODY="$BODY
+
+          \`\`\`text
+          $PLAN_BODY
+          \`\`\`"
+          fi
+          # one marker comment per stack: matrix jobs each own theirs, no races
+          api GET "$API/repos/blake-hamm/bhamm-lab/issues/$PR/comments?limit=100" >/dev/null
+          check GET "comments"
+          CID=$(jq -r --arg m "$MARKER" '[.[] | select((.body // "") | contains($m))][-1].id // empty' /tmp/api_body 2>/dev/null)
+          jq -Rs '{body: .}' <<<"$BODY" > /tmp/api_data
+          if [ -n "${CID:-}" ]; then
+            METHOD=PATCH; URL="$API/repos/blake-hamm/bhamm-lab/issues/comments/$CID"
+          else
+            METHOD=POST; URL="$API/repos/blake-hamm/bhamm-lab/issues/$PR/comments"
+          fi
+          api "$METHOD" "$URL" /tmp/api_data >/dev/null
+          check "$METHOD" "comment"
+          echo "posted tofu-ci status to PR #$PR"

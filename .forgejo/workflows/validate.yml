@@ -13,16 +13,14 @@ on:
       - "**"
 # tool pins; this block is the pin of record (see
 # docker/docs-site/docs/operations/ci-validation.md). bump a version here
-# and the matching download step follows.
+# and the matching download step follows. OpenTofu/tflint/trivy pins live in
+# tofu-ci.yml — terraform gates run on terraform changes, not every push.
 env:
   YAMLFMT_VERSION: v0.12.1
   SHFMT_VERSION: v3.8.0
   GITLEAKS_VERSION: v8.18.2
   RIPSECRETS_VERSION: v0.1.8
   KUBECONFORM_VERSION: v0.6.7
-  OPENTOFU_VERSION: v1.13.2
-  TFLINT_VERSION: v0.65.0
-  TRIVY_VERSION: v0.76.1
   CRANE_VERSION: v0.20.2
   # uv release tags carry no leading v (0.13.6, not v0.13.6)
   UV_VERSION: 0.13.6
@@ -126,42 +124,6 @@ jobs:
         # ServiceMonitor, Vault, Workflow, WorkflowTemplate, CronWorkflow,
         # Kustomization, ...)
         run: find kubernetes/manifests \( -name '*.yaml' -o -name '*.yml' \) -print0 | xargs -0 kubeconform -strict -ignore-missing-schemas -kubernetes-version "$KUBE_VERSION" -summary
-  open-tofu:
-    runs-on: docker
-    container: docker.io/alpine:3.20
-    steps:
-      - name: apk deps
-        # unzip: tofu + tflint ship as zips
-        run: apk add --no-cache curl unzip
-      - name: Checkout (Forgejo archive endpoint; no external actions by design)
-        run: |
-          curl -fsSL -o /tmp/repo.tar.gz "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz"
-          mkdir -p "$GITHUB_WORKSPACE"
-          tar xzf /tmp/repo.tar.gz -C "$GITHUB_WORKSPACE" --strip-components=1
-      - name: Download tools
-        run: |
-          curl -fsSL -o /tmp/tofu.zip "https://github.com/opentofu/opentofu/releases/download/${OPENTOFU_VERSION}/tofu_${OPENTOFU_VERSION#v}_linux_amd64.zip"
-          unzip -o /tmp/tofu.zip -d /usr/local/bin
-          curl -fsSL -o /tmp/tflint.zip "https://github.com/terraform-linters/tflint/releases/download/${TFLINT_VERSION}/tflint_linux_amd64.zip"
-          unzip -o /tmp/tflint.zip -d /usr/local/bin
-          # trivy asset names drop the leading v (v0.76.1 -> 0.76.1); the
-          # v-prefixed URL 404s (run #18: curl 22 + tar short read)
-          curl -fsSL "https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}/trivy_${TRIVY_VERSION#v}_Linux-64bit.tar.gz" | tar xz -C /usr/local/bin
-      - name: tofu fmt
-        run: tofu fmt -check -recursive tofu/
-      - name: tofu init/validate + tflint (per env)
-        # init -backend=false: stateless, no creds needed; providers come
-        # from registry.opentofu.org
-        # tflint with no ruleset file = built-in rules only (intended)
-        run: |
-          for env in backblaze cloudflare gcp kubernetes proxmox/garage proxmox/talos; do
-            tofu -chdir="tofu/$env" init -backend=false -input=false
-            tofu -chdir="tofu/$env" validate
-            tflint --chdir="tofu/$env" --format=compact
-          done
-      - name: trivy config
-        # trivy config exits 0 even with findings — advisory here
-        run: trivy config --quiet tofu/
   ansible:
     runs-on: docker
     container: docker.io/alpine:3.20
@@ -291,7 +253,7 @@ jobs:
     # over the Codeberg API (source repo: codeberg.org/blake-hamm/bhamm-lab)
     # forgejo.* contexts (not github.*): the workflow runs on Forgejo
     # always(): report the outcome of the jobs above, pass or fail
-    needs: [lint, secrets, k8s-schemas, open-tofu, ansible, image-digests]
+    needs: [lint, secrets, k8s-schemas, ansible, image-digests]
     if: always()
     runs-on: docker
     container: docker.io/alpine:3.20

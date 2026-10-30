@@ -20,13 +20,13 @@ out the tree via the Forgejo archive endpoint, and runs its gates.
 | `lint` | `yamlfmt -lint .`, `shfmt -d -s -i 2` on every `*.sh`, trailing whitespace, tabs, CRLF | yamlfmt, shfmt |
 | `secrets` | `gitleaks detect --no-git --redact` (tree scan), `ripsecrets` over the tree | gitleaks, ripsecrets |
 | `k8s-schemas` | `kubeconform -strict -ignore-missing-schemas` over `kubernetes/manifests` | kubeconform |
-| `open-tofu` | `tofu fmt -check`, `tofu init -backend=false` + `tofu validate` + `tflint` per env, `trivy config` | opentofu, tflint, trivy |
 | `ansible` | `ansible-galaxy install -r ansible/requirements.yml`, `ansible-playbook --syntax-check ansible/main.yml` (via `uv`, `ansible-core>=2.19,<2.20` — prometheus.prometheus 0.29.1 caps ansible-core at ≤2.20.99) | uv |
 | `image-digests` | `crane digest` on every `image:` ref in `kubernetes/manifests` — the #1 renovate failure mode (unpullable digest/tag); pulls are authenticated via optional GHCR/Docker Hub creds (Forgejo secrets) and throttles (429/401) get a bounded retry (3 attempts) | crane |
 
 **Pin of record:** the top-level `env:` block in
 `.forgejo/workflows/validate.yml`. Bump a version there and the matching
-download step follows. `KUBE_VERSION` must stay in sync with
+download step follows. Terraform tool pins (OpenTofu, tflint, trivy) live
+in `tofu-ci.yml` — terraform gates run on terraform changes only. `KUBE_VERSION` must stay in sync with
 `talos_version` in `tofu/proxmox/talos/variables.tf` (Talos v1.12.6 →
 k8s 1.35).
 
@@ -67,6 +67,46 @@ proves the Vault → CI credential plumbing end to end.
 - **Running it:** Actions tab → `ci-vault-smoke` → *Run workflow*.
   Rollout note: the workflow has no push trigger, so feature branches
   get zero runs — run it manually from `main` post-merge.
+
+## Tofu CI pipeline (`tofu-ci`)
+
+The `tofu-ci` workflow (`.forgejo/workflows/tofu-ci.yml`) is the
+terraform pipeline: **fmt → lint → plan**, run only when `tofu/**` files
+change (plus `workflow_dispatch` with a `stacks` input). It replaced the
+former `open-tofu` job of `validate` (terraform gates no longer fire on
+every push) and absorbs the former `tofu-plan` plan-gate workflow.
+
+- **Stack detection:** a detect job asks the Codeberg compare API which
+  files changed (the Forgejo mirror's compare endpoint 404s for
+  anonymous and token access alike) and maps them to stack dirs; new
+  branches, force-pushes, or compare failures fall back to all known
+  stacks. Dispatch input overrides.
+- **fmt + lint run for every `KNOWN_STACKS` stack** whose directory
+  changed — these stages are stateless (`tofu init -backend=false`, no
+  creds) so they cover cloudflare/talos/gcp/kubernetes today, giving
+  renovate provider PRs their gate even before those stacks are planable
+  in CI.
+- **plan runs only for `ENABLED_STACKS`** (currently `proxmox/garage`):
+  Vault kubernetes auth role `ci` (same plumbing as `ci-vault-smoke`),
+  `tofu init` against the real RGW S3 backend, `tofu plan
+  -detailed-exitcode` with **rc 0 and rc 2 both passing** — the gate
+  proves the plan *computes* with real state and creds; a non-empty plan
+  on a PR branch is expected. **No auto-apply, ever** — apply stays
+  Blake's deliberate step. Onboarding a stack to the plan stage = one
+  `ENABLED_STACKS` entry + one credential-map case (+ a `ci_secrets`
+  policy line when a new Vault path is needed). Roadmap in issue #322:
+  backblaze needs one policy line, cloudflare is blocked on the sops
+  decoupling (#372), gcp needs GCP creds seeded in Vault, kubernetes is
+  deferred (that stack *is* the sops consumer).
+- **PR comment:** one updatable marker comment per stack
+  (`<!-- forgejo-tofu-ci:<stack-id> -->`) carrying a fmt/lint/plan
+  status line and, when the plan ran, the trimmed plan diff (head 100 +
+  tail 60 lines, 8000-char cap, fenced `text` block). Reporting failures
+  never redden CI; `main` pushes post nothing.
+- **Rollout:** workflow files only run once on `main`. Post-merge proof:
+  Actions tab → `tofu-ci` → *Run workflow* (stacks=`auto`), and
+  observe natural runs on the next pushes to open renovate tf branches
+  (#305, #290, #298).
 
 ## Deliberate exclusions
 
@@ -119,6 +159,5 @@ CI.
 
 ## Landing later
 
-- **#322** — `tofu plan` gate (needs S4 Vault creds).
 - **#323** — `ansible-playbook --check`.
 - **#324** — nix gate.
