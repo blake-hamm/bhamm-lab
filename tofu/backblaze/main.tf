@@ -13,6 +13,8 @@ resource "b2_bucket" "ceph_rgw" {
   # 30-day offsite oops-window); interrupted large uploads cancel after 1 day.
   # days_from_uploading_to_hiding is deliberately NOT set: it would hide
   # current versions too. B2 applies lifecycle rules once per day.
+  # backblaze is on the tofu-ci plan allow-list (ENABLED_STACKS), so edits here
+  # get a credentialed `tofu plan` against real state on every push.
   lifecycle_rules {
     file_name_prefix                                       = ""
     days_from_hiding_to_deleting                           = 30
