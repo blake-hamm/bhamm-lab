@@ -26,7 +26,7 @@ env:
   TFLINT_VERSION: v0.65.0
   TRIVY_VERSION: v0.76.1
   KNOWN_STACKS: "backblaze cloudflare gcp kubernetes proxmox/garage proxmox/talos"
-  ENABLED_STACKS: "proxmox/garage"
+  ENABLED_STACKS: "proxmox/garage,backblaze"
 jobs:
   detect:
     # decides which stacks this push/dispatch runs; each matrix entry carries
@@ -205,6 +205,24 @@ jobs:
               # Staying on-link keeps the flow switched at jumbo. Proven by
               # ci-vault-smoke; see docker/docs-site/docs/architecture/network.md.
               PLAN_EXTRA=(-var proxmox_url=https://10.0.30.11:8006)
+              ;;
+            backblaze)
+              # backend creds: state lives on RGW like every stack
+              AWS_ACCESS_KEY_ID=$(read_secret secret/data/core/ceph s3_access_key)
+              AWS_SECRET_ACCESS_KEY=$(read_secret secret/data/core/ceph s3_secret_key)
+              # provider creds: the account's master app key. plan exercises
+              # only the read subset (listBuckets/listKeys/
+              # readBucketEncryption); the same Vault path will feed future
+              # applies, and any B2 key that can writeKeys is full-account
+              # anyway per B2 docs, so a narrower apply credential buys
+              # nothing. TF_VAR_ naming: the b2 provider reads variables
+              # (var.b2_*), unlike proxmox which reads bare env.
+              TF_VAR_b2_application_key_id=$(read_secret secret/data/external/backblaze-admin B2_APPLICATION_KEY_ID)
+              TF_VAR_b2_application_key=$(read_secret secret/data/external/backblaze-admin B2_APPLICATION_KEY)
+              export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY TF_VAR_b2_application_key_id TF_VAR_b2_application_key
+              for v in "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$TF_VAR_b2_application_key_id" "$TF_VAR_b2_application_key"; do
+                echo "::add-mask::$v"
+              done
               ;;
             *)
               echo "no credential wiring for stack '$STACK_ID' (ENABLED_STACKS outpaced the plan step)"

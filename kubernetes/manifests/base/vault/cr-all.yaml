@@ -97,6 +97,7 @@ spec:
           path "secret/data/external/proxmox" { capabilities = ["read", "list"] }
           path "secret/data/external/cloudflare" { capabilities = ["read", "list"] }
           path "secret/data/external/opnsense" { capabilities = ["read", "list"] }
+          path "secret/data/external/backblaze-admin" { capabilities = ["read", "list"] }
     auth:
       - type: kubernetes
         roles:
