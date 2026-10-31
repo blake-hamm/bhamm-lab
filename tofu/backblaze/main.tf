@@ -6,6 +6,18 @@ resource "b2_bucket" "ceph_rgw" {
     mode      = "SSE-B2"
     algorithm = "AES256"
   }
+
+  # rclone sync deletes are B2 "hide" operations and restic rewrites old packs,
+  # so without expiry every upstream delete accumulates as a billed hidden
+  # version forever. Hidden versions purge 30 days after hiding (keeps a
+  # 30-day offsite oops-window); interrupted large uploads cancel after 1 day.
+  # days_from_uploading_to_hiding is deliberately NOT set: it would hide
+  # current versions too. B2 applies lifecycle rules once per day.
+  lifecycle_rules {
+    file_name_prefix                                       = ""
+    days_from_hiding_to_deleting                           = 30
+    days_from_starting_to_canceling_unfinished_large_files = 1
+  }
 }
 
 resource "b2_application_key" "ceph_rgw" {
