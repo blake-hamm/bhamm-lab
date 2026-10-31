@@ -1,3 +1,5 @@
+# Primary offsite bucket for the Ceph RGW bucket-replication tier.
+# The RGW access key is minted in this module (see b2_application_key below).
 resource "b2_bucket" "ceph_rgw" {
   bucket_name = var.bucket_name
   bucket_type = "allPrivate"
@@ -5,6 +7,21 @@ resource "b2_bucket" "ceph_rgw" {
   default_server_side_encryption {
     mode      = "SSE-B2"
     algorithm = "AES256"
+  }
+
+  # Applied via CI (tofu-cicd apply stage); lifecycle rules live on the bucket.
+  # rclone sync deletes are B2 "hide" operations and restic rewrites old packs,
+  # so without expiry every upstream delete accumulates as a billed hidden
+  # version forever. Hidden versions purge 30 days after hiding (keeps a
+  # 30-day offsite oops-window); interrupted large uploads cancel after 1 day.
+  # days_from_uploading_to_hiding is deliberately NOT set: it would hide
+  # current versions too. B2 applies lifecycle rules once per day.
+  # backblaze is on the tofu-ci plan allow-list (ENABLED_STACKS), so edits here
+  # get a credentialed `tofu plan` against real state on every push.
+  lifecycle_rules {
+    file_name_prefix                                       = ""
+    days_from_hiding_to_deleting                           = 30
+    days_from_starting_to_canceling_unfinished_large_files = 1
   }
 }
 
@@ -24,6 +41,9 @@ resource "b2_application_key" "ceph_rgw" {
   ]
 }
 
+# State-tracked but runner-local: a CI apply (re)creates this file inside the
+# ephemeral job container; on operator machines it writes the real creds file.
+# Re-created on every CI apply: the file lives in the job container only.
 resource "local_file" "b2_creds" {
   content         = <<-EOT
     B2_APPLICATION_KEY_ID=${b2_application_key.ceph_rgw.application_key_id}

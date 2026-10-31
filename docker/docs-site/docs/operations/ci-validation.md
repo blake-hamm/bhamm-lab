@@ -26,7 +26,7 @@ out the tree via the Forgejo archive endpoint, and runs its gates.
 **Pin of record:** the top-level `env:` block in
 `.forgejo/workflows/validate.yml`. Bump a version there and the matching
 download step follows. Terraform tool pins (OpenTofu, tflint, trivy) live
-in `tofu-ci.yml` — terraform gates run on terraform changes only. `KUBE_VERSION` must stay in sync with
+in `tofu-cicd.yml` — terraform gates run on terraform changes only. `KUBE_VERSION` must stay in sync with
 `talos_version` in `tofu/proxmox/talos/variables.tf` (Talos v1.12.6 →
 k8s 1.35).
 
@@ -68,10 +68,10 @@ proves the Vault → CI credential plumbing end to end.
   Rollout note: the workflow has no push trigger, so feature branches
   get zero runs — run it manually from `main` post-merge.
 
-## Tofu CI pipeline (`tofu-ci`)
+## Tofu CI pipeline (`tofu-cicd`)
 
-The `tofu-ci` workflow (`.forgejo/workflows/tofu-ci.yml`) is the
-terraform pipeline: **fmt → lint → plan**, run only when `tofu/**` files
+The `tofu-cicd` workflow (`.forgejo/workflows/tofu-cicd.yml`) is the
+terraform pipeline: **fmt → lint → plan → apply**, run only when `tofu/**` files
 change (plus `workflow_dispatch` with a `stacks` input). It replaced the
 former `open-tofu` job of `validate` (terraform gates no longer fire on
 every push) and absorbs the former `tofu-plan` plan-gate workflow.
@@ -91,20 +91,27 @@ every push) and absorbs the former `tofu-plan` plan-gate workflow.
   `tofu init` against the real RGW S3 backend, `tofu plan
   -detailed-exitcode` with **rc 0 and rc 2 both passing** — the gate
   proves the plan *computes* with real state and creds; a non-empty plan
-  on a PR branch is expected. **No auto-apply, ever** — apply stays
-  Blake's deliberate step. Onboarding a stack to the plan stage = one
+  on a PR branch is expected. **apply follows plan for `ENABLED_STACKS`
+  on PR pushes:** after the plan stage succeeds, the reviewed plan file
+  is applied — the PR is the deployment, and the allow-list is the
+  blast-radius control (it grows one trusted stack at a time). A
+  non-empty plan on `main` post-merge means unmerged branch work
+  diverged from main — a drift signal. The PR comment marker keeps the
+  old `forgejo-tofu-ci:` prefix. Onboarding a stack to the plan stage = one
   `ENABLED_STACKS` entry + one credential-map case (+ a `ci_secrets`
   policy line when a new Vault path is needed). Roadmap in issue #322:
   backblaze needs one policy line, cloudflare is blocked on the sops
   decoupling (#372), gcp needs GCP creds seeded in Vault, kubernetes is
   deferred (that stack *is* the sops consumer).
 - **PR comment:** one updatable marker comment per stack
-  (`<!-- forgejo-tofu-ci:<stack-id> -->`) carrying a fmt/lint/plan
-  status line and, when the plan ran, the trimmed plan diff (head 100 +
-  tail 60 lines, 8000-char cap, fenced `text` block). Reporting failures
-  never redden CI; `main` pushes post nothing.
+  (`<!-- forgejo-tofu-ci:<stack-id> -->`) leading with the apply verdict
+  (resources added/changed/destroyed counts) and a collapsible apply log,
+  with the fmt/lint/plan status line beneath. The trimmed plan diff
+  (head 100 + tail 60 lines, 8000-char cap, fenced `text` block) is now
+  shown only when plan or apply failed. Reporting failures never redden
+  CI; `main` pushes post nothing.
 - **Rollout:** workflow files only run once on `main`. Post-merge proof:
-  Actions tab → `tofu-ci` → *Run workflow* (stacks=`auto`), and
+  Actions tab → `tofu-cicd` → *Run workflow* (stacks=`auto`), and
   observe natural runs on the next pushes to open renovate tf branches
   (#305, #290, #298).
 

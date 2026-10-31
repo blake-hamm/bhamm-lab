@@ -114,6 +114,12 @@ efficiency._
   - _Usage:_ Weekly rclone sync from Garage. Provides 3-2-1 backup compliance.
   - _Integration:_ Synced via Argo CronWorkflow (`ceph-rgw-backup`) running
     weekly
+  - _Lifecycle:_ Bucket-wide rule (`tofu/backblaze`) purges hidden file versions
+    30 days after hiding and cancels unfinished large uploads after 1 day. B2
+    keeps hidden versions forever by default and rclone deletes are hides, so
+    without this rule every upstream delete is billed indefinitely. Rules
+    evaluate once per day; `rclone size --json --b2-versions b2:<bucket>` shows
+    the hidden-version overhead.
 
 - **Cloudflare R2:**
   - _Role:_ Secondary/standby offsite backup tier
