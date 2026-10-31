@@ -59,11 +59,13 @@ spec:
     # Service with manual Endpoints to Proxmox hosts; Cilium KPR translates
     # ClusterIP:80 -> backend:7480 BEFORE egress policy enforcement, so the
     # policy must match the backend CIDR + targetPort (7480), not the
-    # service port. toServices cannot match here.
+    # service port. toServices cannot match here. The Endpoints are the VLAN 30
+    # Proxmox addresses (10.0.30.11-13) since the MTU-blackhole fix (#371), per
+    # kubernetes/manifests/base/ceph/rgw-endpoints-all.yaml.
     - toCIDR:
-        - 10.0.20.11/32
-        - 10.0.20.12/32
-        - 10.0.20.13/32
+        - 10.0.30.11/32
+        - 10.0.30.12/32
+        - 10.0.30.13/32
       toPorts:
         - ports:
             - port: "7480"
