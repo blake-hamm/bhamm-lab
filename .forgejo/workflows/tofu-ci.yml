@@ -275,17 +275,23 @@ jobs:
             ( cd "$GITHUB_WORKSPACE/tofu/$dir"
               tofu init -input=false
               rc=0
-              tofu plan -input=false "${PLAN_EXTRA[@]}" -detailed-exitcode > /tmp/plan.txt 2>&1 || rc=$?
-              # rc 0 = no changes, rc 2 = changes pending. the gate is "the plan
-              # COMPUTES against real RGW state with real creds": a non-empty
-              # plan on a PR branch is expected and must not redden CI
+              # -out saves a binary plan; tofu STILL prints a human plan to stdout
+              # (captured: it is the only diagnostic when plan itself fails). The
+              # `tofu show` calls below re-render the SAVED plan without refresh
+              # lines, provider preamble, or the "didn't use -out" footer.
+              tofu plan -input=false "${PLAN_EXTRA[@]}" -detailed-exitcode -out "/tmp/$fid.tfplan" > /tmp/plan-raw.txt 2>&1 || rc=$?
               if [ "$rc" -eq 0 ] || [ "$rc" -eq 2 ]; then
                 if [ "$rc" -eq 2 ]; then SUMMARY="passed (changes pending)"; else SUMMARY="passed (no changes)"; fi
                 echo "status=pass summary=$SUMMARY" > "/tmp/results/$fid.plan"
+                if ! tofu show -no-color "/tmp/$fid.tfplan" > /tmp/plan.txt 2>/dev/null; then
+                  cp /tmp/plan-raw.txt /tmp/plan.txt
+                fi
+                tofu show -json "/tmp/$fid.tfplan" > "/tmp/$fid.plan.json" 2>/dev/null || rm -f "/tmp/$fid.plan.json"
               else
                 SUMMARY="failed (rc=$rc)"
                 echo "status=fail summary=$SUMMARY" > "/tmp/results/$fid.plan"
                 rc_all=1
+                cp /tmp/plan-raw.txt /tmp/plan.txt
               fi
               echo "plan $dir: $SUMMARY"
               # trimmed plan for the comment (even on failure): head 100 + tail
@@ -300,6 +306,56 @@ jobs:
                   fi
                 } | tr -d '\r' | grep -v '```' | head -c 8000
               } > "/tmp/results/$fid.planbody"
+              # one line per changed resource; ATTRIBUTE NAMES ONLY -- attribute
+              # values can be sensitive and must never reach a public PR comment.
+              rm -f "/tmp/results/$fid.summary"
+              if [ -f "/tmp/$fid.plan.json" ]; then
+                python3 - "/tmp/$fid.plan.json" > "/tmp/results/$fid.summary" <<'PYEOF' || rm -f "/tmp/results/$fid.summary"
+          import json, sys
+          try:
+              d = json.load(open(sys.argv[1]))
+          except Exception:
+              sys.exit(1)
+          adds = ups = dels = reps = 0
+          rows = []
+          for r in d.get("resource_changes", []):
+              a = r.get("change", {}).get("actions", [])
+              if a in (["no-op"], []):
+                  continue
+              b = r["change"].get("before") or {}
+              af = r["change"].get("after") or {}
+              if a == ["create"]:
+                  sym = "+"
+                  adds += 1
+              elif a == ["delete"]:
+                  sym = "-"
+                  dels += 1
+              elif "create" in a and "delete" in a:
+                  sym = "±"
+                  reps += 1
+              else:
+                  sym = "~"
+                  ups += 1
+              detail = ""
+              if sym in ("~", "±"):
+                  ka, kb = set(b), set(af)
+                  parts = ["+" + k for k in sorted(kb - ka)]
+                  parts += ["~" + k for k in sorted(k for k in ka & kb if b.get(k) != af.get(k))]
+                  parts += ["-" + k for k in sorted(ka - kb)]
+                  parts = [p for p in parts if p[1:] not in ("id", "content_base64sha256",
+                            "content_base64sha512", "content_md5", "content_sha1",
+                            "content_sha256", "content_sha512")]
+                  if len(parts) > 6:
+                      parts = parts[:6] + ["..."]
+                  detail = " — " + ", ".join(parts) if parts else ""
+              rows.append("`%s %s`%s" % (sym, r.get("address", "?"), detail))
+          head = "Plan: %d to add, %d to change, %d to destroy" % (adds, ups, dels)
+          if reps:
+              head += " (%d forces replacement)" % reps
+          print(head)
+          print("\n".join("- " + x for x in rows) if rows else "No changes.")
+          PYEOF
+              fi
             )
           done
           exit $rc_all
@@ -366,13 +422,32 @@ jobs:
             MARKER="<!-- forgejo-tofu-ci:$fid -->"
             BODY="$MARKER
           **tofu-ci — \`$dir\`:** $ICON $DESC on \`$BRANCH\` — [run logs]($RUN_URL)"
+            PSUM=$(cat "/tmp/results/$fid.summary" 2>/dev/null)
             PLANBODY=$(cat "/tmp/results/$fid.planbody" 2>/dev/null)
-            if [ -n "$PLANBODY" ]; then
+            if [ -n "$PSUM" ]; then
               BODY="$BODY
+
+          $PSUM"
+            fi
+            if [ -n "$PLANBODY" ]; then
+              if [ -n "$PSUM" ]; then
+                # summary up top; the raw diff collapses
+                BODY="$BODY
+
+          <details><summary>full plan diff</summary>
+
+          \`\`\`text
+          $PLANBODY
+          \`\`\`
+
+          </details>"
+              else
+                BODY="$BODY
 
           \`\`\`text
           $PLANBODY
           \`\`\`"
+              fi
             fi
             api GET "$API/repos/blake-hamm/bhamm-lab/issues/$PR/comments?limit=100" >/dev/null
             check GET "comments"
