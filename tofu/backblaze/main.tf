@@ -1,3 +1,5 @@
+# Primary offsite bucket for the Ceph RGW bucket-replication tier.
+# The RGW access key is minted in this module (see b2_application_key below).
 resource "b2_bucket" "ceph_rgw" {
   bucket_name = var.bucket_name
   bucket_type = "allPrivate"
