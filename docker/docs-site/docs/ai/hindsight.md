@@ -51,6 +51,11 @@ Per profile (inside the pod, `~/.hermes/hindsight/config.json` or `hermes memory
 - `bank_id_template: "hermes-{profile}"` → one memory bank per profile (forge/mint/peak)
 - `memory_mode: hybrid` → auto-recall before each turn + auto-retain after, plus `hindsight_retain/recall/reflect` tools
 - `timeout: 240` — the plugin's client default (120s) trips while `qwen-embed` cold-starts from zeroscaling (wake takes minutes; retain waits on the server-side extraction round-trip client-side). 240s is the settled value.
+- **Cold-start patience (issue #381):** the first call after idle 500'd at ~124s — the CPU TEI reranker queue starved (4×30s give-up) while `qwen-embed` woke from scale-to-zero (52–75s). Four `api.env` knobs in `helm-prod.yaml` raise the API's internal waits so one patient call returns 2xx:
+  - `HINDSIGHT_API_RERANKER_TEI_HTTP_TIMEOUT=240` — per-request socket-read timeout (default 30s) for the TEI rerank call.
+  - `HINDSIGHT_API_RERANKER_1_PROVIDER=rrf` — failover chain member: if TEI still exhausts, return un-reranked RRF order instead of 500.
+  - `HINDSIGHT_API_EMBEDDINGS_RETRY_BUDGET=180` / `HINDSIGHT_API_EMBEDDINGS_MAX_RETRIES=6` — retry window sized to survive the 52–75s `qwen-embed` wake.
+  - Residual known gap: the embed client's socket timeout is hardcoded 60s upstream (no knob in 0.10.2/main).
 - **PITFALL (multiplex gateway):** with `gateway.multiplex_profiles: true` the plugin resolves `HINDSIGHT_MODE` / `HINDSIGHT_API_URL` / `HINDSIGHT_API_KEY` through the per-profile secret scope (fail-closed `get_secret`), so the pod-level env from the Deployment is **inert**. Without these three in the profile's own `.env`, the plugin silently falls back to its built-in `http://localhost:8888` default and every retain/recall fails with connection refused. Activation per profile = append the trio to `profiles/<p>/.env` (API key = the same `/default/hindsight` tenant key):
 
   ```bash

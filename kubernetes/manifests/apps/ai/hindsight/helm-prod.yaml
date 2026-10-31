@@ -59,6 +59,14 @@ spec:
             HINDSIGHT_API_EMBEDDINGS_LITELLM_DIMENSIONS: "4096"
             # Tenant auth (API key) — clients send Authorization: Bearer <key>.
             HINDSIGHT_API_TENANT_EXTENSION: "hindsight_api.extensions.builtin.tenant:ApiKeyTenantExtension"
+            # Cold-start patience (issue #381): first recall after idle used to 500 at
+            # ~124s (TEI rerank 4x30s give-up) while qwen-embed woke (52-75s) and the
+            # CPU TEI reranker queue drained. Raise internal waits so one patient call
+            # returns 2xx; fail over to un-reranked RRF order if TEI still exhausts.
+            HINDSIGHT_API_RERANKER_TEI_HTTP_TIMEOUT: "240"
+            HINDSIGHT_API_RERANKER_1_PROVIDER: rrf
+            HINDSIGHT_API_EMBEDDINGS_RETRY_BUDGET: "180"
+            HINDSIGHT_API_EMBEDDINGS_MAX_RETRIES: "6"
         worker:
           enabled: false
         controlPlane:
