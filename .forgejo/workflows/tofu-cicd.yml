@@ -36,9 +36,9 @@ env:
   KNOWN_STACKS: "backblaze cloudflare gcp kubernetes proxmox/garage proxmox/talos"
   # ENABLED_STACKS are planned; only APPLY_STACKS may be applied on PR push
   # (PR-as-deployment). proxmox/talos is plan-only until its plans prove
-  # stable (#322).
-  ENABLED_STACKS: "proxmox/garage backblaze cloudflare proxmox/talos"
-  APPLY_STACKS: "proxmox/garage backblaze cloudflare"
+  # stable; gcp graduated to apply after its first plans proved clean.
+  ENABLED_STACKS: "proxmox/garage backblaze cloudflare proxmox/talos gcp"
+  APPLY_STACKS: "proxmox/garage backblaze cloudflare gcp"
 jobs:
   detect:
     # decides which stacks this push/dispatch gates; emits plain space-
@@ -176,6 +176,9 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
+          # defense in depth: an inherited xtrace would echo every fetched
+          # credential the moment it lands in a variable
+          set +x
           mkdir -p /tmp/results
           rc_all=0
           for dir in $STACKS; do
@@ -225,29 +228,62 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
+          # defense in depth: an inherited xtrace would echo every fetched
+          # credential the moment it lands in a variable
+          set +x
           [ -n "${PLANS:-}" ] || { echo "no plan-enabled stacks in this run"; exit 0; }
           TOKEN=$(cat /tmp/vault-token)
           read_secret() {
             # bracket accessor via --arg: unquoted hyphenated keys (terraform-token) are a jq compile error
             curl -fsS -k -H "X-Vault-Token: $TOKEN" "https://vault.vault:8200/v1/$1" | jq -r --arg p "$2" '.data.data[$p]'
           }
-          mask() { for v in "$@"; do echo "::add-mask::$v"; done; }
+          mask() {
+            # The runner consumes ::add-mask:: directives ONE physical line at
+            # a time: echoing a MULTI-LINE value as `::add-mask::$v`
+            # registers only its first line and leaks every remaining line as
+            # plain stdout (run 288: the gcp SA JSON private key printed in the
+            # job log). Register each line separately instead: directive lines
+            # never reach the log, and each registered line is redacted if it
+            # reappears in later output.
+            local v line
+            for v in "$@"; do
+              while IFS= read -r line; do
+                # >=8 chars: single-punctuation lines (braces) would mask
+                # every brace in the remaining log; they carry no secret
+                # material (key PEM / base64 lines are always long).
+                if [ "${#line}" -ge 8 ]; then echo "::add-mask::$line"; fi
+              done <<< "$v"
+            done
+          }
+          grab() {  # grab VAR_NAME vault-path property
+            # Read + mask BEFORE the value is exported or used. mask runs here,
+            # OUTSIDE the command substitution: an ::add-mask:: line echoed
+            # inside a command substitution is captured into the value instead
+            # of reaching the runner log.
+            local v
+            v=$(read_secret "$2" "$3")
+            mask "$v"
+            printf -v "$1" '%s' "$v"
+          }
           rc_all=0
           for dir in $PLANS; do
             fid=$(echo "$dir" | tr '/' '-')
             # clear any env a previous stack's arm exported so state never
             # bleeds between plans
-            unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY PROXMOX_VE_USERNAME PROXMOX_VE_PASSWORD NUT_PASSWORD
+            unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY PROXMOX_VE_USERNAME PROXMOX_VE_PASSWORD NUT_PASSWORD GOOGLE_CREDENTIALS
             unset TF_VAR_b2_application_key_id TF_VAR_b2_application_key
             unset TF_VAR_cloudflare_api_token TF_VAR_cloudflare_account_id TF_VAR_tunnel_secret
             PLAN_EXTRA=()
             case "$dir" in
               proxmox/garage)
-                export AWS_ACCESS_KEY_ID=$(read_secret secret/data/core/ceph s3_access_key)
-                export AWS_SECRET_ACCESS_KEY=$(read_secret secret/data/core/ceph s3_secret_key)
-                export PROXMOX_VE_USERNAME=$(read_secret secret/data/external/proxmox PROXMOX_VE_USERNAME)
-                export PROXMOX_VE_PASSWORD=$(read_secret secret/data/external/proxmox PROXMOX_VE_PASSWORD)
-                mask "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$PROXMOX_VE_USERNAME" "$PROXMOX_VE_PASSWORD"
+                grab AWS_ACCESS_KEY_ID secret/data/core/ceph s3_access_key
+                export AWS_ACCESS_KEY_ID
+                grab AWS_SECRET_ACCESS_KEY secret/data/core/ceph s3_secret_key
+                export AWS_SECRET_ACCESS_KEY
+                grab PROXMOX_VE_USERNAME secret/data/external/proxmox PROXMOX_VE_USERNAME
+                export PROXMOX_VE_USERNAME
+                grab PROXMOX_VE_PASSWORD secret/data/external/proxmox PROXMOX_VE_PASSWORD
+                export PROXMOX_VE_PASSWORD
                 # plan against method's VLAN 30 address, not the stack default on
                 # VLAN 20: the job pod is on VLAN 30 with jumbo frames (Cilium MTU
                 # 8950) while inter-VLAN routing caps at 1500 and drops jumbo-sized
@@ -264,18 +300,24 @@ jobs:
                 # var file ('green' survives only in legacy cluster
                 # naming, not in workspaces; no green.tfvars since #330).
                 # backend creds: state lives on RGW like every stack
-                export AWS_ACCESS_KEY_ID=$(read_secret secret/data/core/ceph s3_access_key)
-                export AWS_SECRET_ACCESS_KEY=$(read_secret secret/data/core/ceph s3_secret_key)
-                export PROXMOX_VE_USERNAME=$(read_secret secret/data/external/proxmox PROXMOX_VE_USERNAME)
-                export PROXMOX_VE_PASSWORD=$(read_secret secret/data/external/proxmox PROXMOX_VE_PASSWORD)
-                export NUT_PASSWORD=$(read_secret secret/data/core/orangepi password)
-                mask "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$PROXMOX_VE_USERNAME" "$PROXMOX_VE_PASSWORD" "$NUT_PASSWORD"
+                grab AWS_ACCESS_KEY_ID secret/data/core/ceph s3_access_key
+                export AWS_ACCESS_KEY_ID
+                grab AWS_SECRET_ACCESS_KEY secret/data/core/ceph s3_secret_key
+                export AWS_SECRET_ACCESS_KEY
+                grab PROXMOX_VE_USERNAME secret/data/external/proxmox PROXMOX_VE_USERNAME
+                export PROXMOX_VE_USERNAME
+                grab PROXMOX_VE_PASSWORD secret/data/external/proxmox PROXMOX_VE_PASSWORD
+                export PROXMOX_VE_PASSWORD
+                grab NUT_PASSWORD secret/data/core/orangepi password
+                export NUT_PASSWORD
                 PLAN_EXTRA=(-var proxmox_url=https://10.0.30.11:8006 -var-file=prod.tfvars -var nut_password="$NUT_PASSWORD")
                 ;;
               backblaze)
                 # backend creds: state lives on RGW like every stack
-                export AWS_ACCESS_KEY_ID=$(read_secret secret/data/core/ceph s3_access_key)
-                export AWS_SECRET_ACCESS_KEY=$(read_secret secret/data/core/ceph s3_secret_key)
+                grab AWS_ACCESS_KEY_ID secret/data/core/ceph s3_access_key
+                export AWS_ACCESS_KEY_ID
+                grab AWS_SECRET_ACCESS_KEY secret/data/core/ceph s3_secret_key
+                export AWS_SECRET_ACCESS_KEY
                 # provider creds: the account's master app key. plan exercises
                 # only the read subset (listBuckets/listKeys/
                 # readBucketEncryption); the same Vault path will feed future
@@ -283,24 +325,41 @@ jobs:
                 # anyway per B2 docs, so a narrower apply credential buys
                 # nothing. TF_VAR_ naming: the b2 provider reads variables
                 # (var.b2_*), unlike proxmox which reads bare env.
-                export TF_VAR_b2_application_key_id=$(read_secret secret/data/external/backblaze-admin B2_APPLICATION_KEY_ID)
-                export TF_VAR_b2_application_key=$(read_secret secret/data/external/backblaze-admin B2_APPLICATION_KEY)
-                mask "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$TF_VAR_b2_application_key_id" "$TF_VAR_b2_application_key"
+                grab TF_VAR_b2_application_key_id secret/data/external/backblaze-admin B2_APPLICATION_KEY_ID
+                export TF_VAR_b2_application_key_id
+                grab TF_VAR_b2_application_key secret/data/external/backblaze-admin B2_APPLICATION_KEY
+                export TF_VAR_b2_application_key
                 ;;
               cloudflare)
                 # backend creds: state lives on RGW like every stack
-                export AWS_ACCESS_KEY_ID=$(read_secret secret/data/core/ceph s3_access_key)
-                export AWS_SECRET_ACCESS_KEY=$(read_secret secret/data/core/ceph s3_secret_key)
+                grab AWS_ACCESS_KEY_ID secret/data/core/ceph s3_access_key
+                export AWS_ACCESS_KEY_ID
+                grab AWS_SECRET_ACCESS_KEY secret/data/core/ceph s3_secret_key
+                export AWS_SECRET_ACCESS_KEY
                 # provider creds: Vault external/cloudflare (ci_secrets policy
                 # already grants read+list). Property names match the plaintext
                 # key names in secrets.enc.json synced by the sops->vault job.
                 # Passed via PLAN_EXTRA -var flags (not TF_VAR_ env) so values
                 # never linger in the job env between stacks.
-                CF_API_TOKEN=$(read_secret secret/data/external/cloudflare terraform-token)
-                CF_ACCOUNT_ID=$(read_secret secret/data/external/cloudflare account-id)
-                CF_TUNNEL_SECRET=$(read_secret secret/data/external/cloudflare tunnel_secret)
-                mask "$CF_API_TOKEN" "$CF_ACCOUNT_ID" "$CF_TUNNEL_SECRET"
+                grab CF_API_TOKEN secret/data/external/cloudflare terraform-token
+                grab CF_ACCOUNT_ID secret/data/external/cloudflare account-id
+                grab CF_TUNNEL_SECRET secret/data/external/cloudflare tunnel_secret
                 PLAN_EXTRA=(-var cloudflare_api_token="$CF_API_TOKEN" -var cloudflare_account_id="$CF_ACCOUNT_ID" -var tunnel_secret="$CF_TUNNEL_SECRET")
+                ;;
+              gcp)
+                # backend creds: state lives on RGW like every stack
+                grab AWS_ACCESS_KEY_ID secret/data/core/ceph s3_access_key
+                export AWS_ACCESS_KEY_ID
+                grab AWS_SECRET_ACCESS_KEY secret/data/core/ceph s3_secret_key
+                export AWS_SECRET_ACCESS_KEY
+                # provider creds: least-priv service-account JSON synced from
+                # SOPS to Vault external/gcp-cicd (property google_credentials). The
+                # google provider consumes GOOGLE_CREDENTIALS natively as the
+                # JSON string, so this is bare env (not TF_VAR_): providers.tf
+                # wires only project/region; project_id has a stack default.
+                # gcp is in APPLY_STACKS: PR-as-deployment applies it on push.
+                grab GOOGLE_CREDENTIALS secret/data/external/gcp-cicd google_credentials
+                export GOOGLE_CREDENTIALS
                 ;;
               *)
                 echo "no credential wiring for stack '$dir' (ENABLED_STACKS outpaced the plan step)"

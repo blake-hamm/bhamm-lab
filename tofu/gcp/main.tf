@@ -1,3 +1,4 @@
+# Enrolled in the tofu-cicd plan+apply gate (#322).
 resource "google_project_iam_member" "storage_service_account_kms" {
   project = var.project_id
   role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"

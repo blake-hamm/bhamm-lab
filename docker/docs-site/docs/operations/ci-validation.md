@@ -50,10 +50,12 @@ proves the Vault → CI credential plumbing end to end.
   `kubernetes/manifests/base/vault/cr-all.yaml` (`externalConfig.auth`),
   applied by the bank-vaults configurer on Argo sync.
 - **Policy `ci_secrets`:** read+list on exactly
-  `secret/data/core/ceph`, `secret/data/external/proxmox`,
-  `secret/data/external/cloudflare`, `secret/data/external/opnsense`
-  (kv v2 data paths; the underlying keys are synced from
-  `secrets.enc.json` by the SOPS → Vault workflow).
+  `secret/data/core/ceph`, `secret/data/core/orangepi`,
+  `secret/data/external/proxmox`, `secret/data/external/cloudflare`,
+  `secret/data/external/opnsense`, `secret/data/external/backblaze-admin`,
+  and `secret/data/external/gcp-cicd` (kv v2 data paths, all synced from
+  `secrets.enc.json` by the SOPS → Vault workflow; `external/gcp-cicd`
+  holds the plan-only GCP SA key at property `google_credentials`).
 - **Smoke gate:** login succeeds, all four paths return non-empty, and
   `tofu init` + `tofu plan` against the proof stack
   (`tofu/proxmox/garage` — SOPS-free, every variable defaulted except
@@ -87,30 +89,32 @@ every push) and absorbs the former `tofu-plan` plan-gate workflow.
   renovate provider PRs their gate even before those stacks are planable
   in CI.
 - **plan runs only for `ENABLED_STACKS`** (currently `proxmox/garage`,
-  `backblaze`, `cloudflare`, `proxmox/talos`):
+  `backblaze`, `cloudflare`, `proxmox/talos`, `gcp`):
   Vault kubernetes auth role `ci` (same plumbing as `ci-vault-smoke`),
   `tofu init` against the real RGW S3 backend, `tofu plan
   -detailed-exitcode` with **rc 0 and rc 2 both passing** — the gate
   proves the plan *computes* with real state and creds; a non-empty plan
   on a PR branch is expected. CI creds come from the role `ci` Vault
   paths: `core/ceph` (S3 backend), `external/proxmox`,
-  `external/backblaze-admin`, `external/cloudflare`, and `core/orangepi`
-  (`nut_password` for `proxmox/talos`). **apply follows plan for
+  `external/backblaze-admin`, `external/cloudflare`, `core/orangepi`
+  (`nut_password` for `proxmox/talos`), and `external/gcp-cicd`
+  (`GOOGLE_CREDENTIALS` for `gcp`). **apply follows plan for
   `APPLY_STACKS` on PR pushes** (currently `proxmox/garage`, `backblaze`,
   `cloudflare`): after the plan stage succeeds, the saved plan file is
   applied — the PR is the deployment, and the allow-list is the
   blast-radius control (it grows one trusted stack at a time). A
   plan-enabled stack that is not in `APPLY_STACKS` records `plan-only`
   and skips apply. `proxmox/talos` is plan-only until its plans prove
-  stable; its CI plans run against OpenTofu workspace `prod` (the live
+  stable, and `gcp` is enrolled plan-only as well (#322); talos CI plans
+  run against OpenTofu workspace `prod` (the live
   cluster state), and a missing workspace fails the run loud rather than
   auto-creating empty state. A non-empty plan on `main` post-merge means
   unmerged branch work diverged from main — a drift signal. The PR
   comment marker keeps the old `forgejo-tofu-ci:` prefix. Onboarding a
   stack to the plan stage = one `ENABLED_STACKS` entry + one
   credential-map case (+ a `ci_secrets` policy line when a new Vault
-  path is needed). Remaining in issue #322: gcp needs GCP creds seeded
-  in Vault, kubernetes is deferred (that stack *is* the sops consumer).
+  path is needed). Remaining in issue #322: only the deferred
+  `kubernetes` stack (that stack *is* the sops consumer).
 - **PR comment:** one updatable marker comment per stack
   (`<!-- forgejo-tofu-ci:<stack-id> -->`) leading with the apply verdict
   (resources added/changed/destroyed counts) and a collapsible apply log,

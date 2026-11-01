@@ -64,7 +64,7 @@ The local-backend stacks upload their local state.
   ```
 
   See `docker/docs-site/docs/deployments/talos.md` for the same convention per environment.
-- **gcp:** the `google` provider uses Application Default Credentials — run `gcloud auth application-default login` once, then pass `-var project_id=... -var region=...` at plan/apply.
+- **gcp:** the `google` provider uses Application Default Credentials locally — run `gcloud auth application-default login` once, then pass `-var project_id=... -var region=...` at plan/apply. CI plans this stack plan-only as `tofu-gcp-plan@deep-contact-445917-i9`; its key lives at Vault kv `external/gcp-cicd` (property `google_credentials`, synced from `secrets.enc.json`) and is exported as `GOOGLE_CREDENTIALS`. The SA holds exactly three read-only predefined roles — `roles/browser` (project + project-policy read), `roles/cloudkms.viewer` (keyring/cryptokey + cryptokey-policy read), `roles/iam.serviceAccountViewer` (SA + SA-key read). `iam.serviceAccountKeys.get` in that last role is load-bearing: without it the provider reads a 403 as "key deleted", drops both managed keys from state, and plans a bogus recreate. `iam.googleapis.com` and `cloudresourcemanager.googleapis.com` must stay enabled on the project — service-account callers get `SERVICE_DISABLED` from both even while a human owner still reads them fine.
 - **cloudflare:** pass `-var cloudflare_api_token=... -var cloudflare_account_id=... -var tunnel_secret=...` (values from Vault). CI now plans this stack from the same Vault kv path `external/cloudflare` (keys `terraform-token`, `account-id`, `tunnel_secret`).
 - **backblaze:** pass `-var b2_application_key_id=... -var b2_application_key=...` plus the bucket/key name vars (values from Vault).
 
