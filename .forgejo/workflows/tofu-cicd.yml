@@ -34,7 +34,11 @@ env:
   TFLINT_VERSION: v0.65.0
   TRIVY_VERSION: v0.76.1
   KNOWN_STACKS: "backblaze cloudflare gcp kubernetes proxmox/garage proxmox/talos"
-  ENABLED_STACKS: "proxmox/garage backblaze cloudflare"
+  # ENABLED_STACKS are planned; only APPLY_STACKS may be applied on PR push
+  # (PR-as-deployment). proxmox/talos is plan-only until its plans prove
+  # stable (#322).
+  ENABLED_STACKS: "proxmox/garage backblaze cloudflare proxmox/talos"
+  APPLY_STACKS: "proxmox/garage backblaze cloudflare"
 jobs:
   detect:
     # decides which stacks this push/dispatch gates; emits plain space-
@@ -233,7 +237,7 @@ jobs:
             fid=$(echo "$dir" | tr '/' '-')
             # clear any env a previous stack's arm exported so state never
             # bleeds between plans
-            unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY PROXMOX_VE_USERNAME PROXMOX_VE_PASSWORD
+            unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY PROXMOX_VE_USERNAME PROXMOX_VE_PASSWORD NUT_PASSWORD
             unset TF_VAR_b2_application_key_id TF_VAR_b2_application_key
             unset TF_VAR_cloudflare_api_token TF_VAR_cloudflare_account_id TF_VAR_tunnel_secret
             PLAN_EXTRA=()
@@ -251,6 +255,22 @@ jobs:
                 # Staying on-link keeps the flow switched at jumbo. Proven by
                 # ci-vault-smoke; see docker/docs-site/docs/architecture/network.md.
                 PLAN_EXTRA=(-var proxmox_url=https://10.0.30.11:8006)
+                ;;
+              proxmox/talos)
+                # Same VLAN-30 jumbo-frame workaround as proxmox/garage (see
+                # its comment). The plan step passes no -var-file (garage
+                # relies on bare -vars + provider defaults), so talos passes
+                # prod.tfvars explicitly -- the live (prod) environment's
+                # var file ('green' survives only in legacy cluster
+                # naming, not in workspaces; no green.tfvars since #330).
+                # backend creds: state lives on RGW like every stack
+                export AWS_ACCESS_KEY_ID=$(read_secret secret/data/core/ceph s3_access_key)
+                export AWS_SECRET_ACCESS_KEY=$(read_secret secret/data/core/ceph s3_secret_key)
+                export PROXMOX_VE_USERNAME=$(read_secret secret/data/external/proxmox PROXMOX_VE_USERNAME)
+                export PROXMOX_VE_PASSWORD=$(read_secret secret/data/external/proxmox PROXMOX_VE_PASSWORD)
+                export NUT_PASSWORD=$(read_secret secret/data/core/orangepi password)
+                mask "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$PROXMOX_VE_USERNAME" "$PROXMOX_VE_PASSWORD" "$NUT_PASSWORD"
+                PLAN_EXTRA=(-var proxmox_url=https://10.0.30.11:8006 -var-file=prod.tfvars -var nut_password="$NUT_PASSWORD")
                 ;;
               backblaze)
                 # backend creds: state lives on RGW like every stack
@@ -290,7 +310,31 @@ jobs:
                 ;;
             esac
             ( cd "$GITHUB_WORKSPACE/tofu/$dir"
-              tofu init -input=false
+              # Workspace pin: proxmox/talos state lives in the named
+              # workspace 'prod' (S3 backend, no workspace_key_prefix ->
+              # key env:/prod/proxmox/talos/terraform.state); every other
+              # stack uses the default workspace. A future 'test'
+              # workspace/cluster for the same stack is a one-line addition.
+              TOFU_WS=""
+              case "$dir" in
+                proxmox/talos) TOFU_WS="prod" ;;
+              esac
+              if [ -n "$TOFU_WS" ]; then
+                # backend init WITHOUT TF_WORKSPACE: pointing TF_WORKSPACE at
+                # a workspace missing from the backend silently auto-creates
+                # it with empty state and the plan would try to create the
+                # whole cluster. So: init, list, assert, THEN pin.
+                tofu init -input=false
+                if ! tofu workspace list | grep -qw "$TOFU_WS"; then
+                  echo "FATAL: tofu workspace '$TOFU_WS' does not exist in the backend for $dir; refusing to plan (TF_WORKSPACE would auto-create it with empty state)"
+                  echo "status=fail summary=workspace $TOFU_WS missing" > "/tmp/results/$fid.plan"
+                  exit 1
+                fi
+                export TF_WORKSPACE="$TOFU_WS"
+                tofu init -reconfigure -input=false
+              else
+                tofu init -input=false
+              fi
               rc=0
               # -out saves a binary plan; tofu STILL prints a human plan to stdout
               # (captured: it is the only diagnostic when plan itself fails). The
@@ -376,15 +420,18 @@ jobs:
           print("\n".join("- " + x for x in rows) if rows else "No changes.")
           PYEOF
               fi
-              # PR = deployment: ENABLED_STACKS doubles as the apply allow-list
-              # (the Vault credential wiring above is the blast-radius control).
+              # PR = deployment: APPLY_STACKS is the apply allow-list (the
+              # Vault credential wiring above is the blast-radius control).
+              # ENABLED_STACKS only plans: a stack with pending changes that
+              # is not in APPLY_STACKS records plan-only and skips apply.
               # Apply the SAVED plan file: what the PR comment shows is exactly
               # what runs. No -var flags here -- variables are baked into the
               # plan file. rc==0 means no changes: nothing to apply.
               # Apply stdout stays OUT of the PR comment (apply output can echo
               # sensitive attribute values); only the 'Apply complete!' counts
               # line is quoted. Full log lives in the run-logs link.
-              if [ "$rc" -eq 2 ]; then
+              case " $APPLY_STACKS " in *" $dir "*) APPLY_OK=1 ;; *) APPLY_OK=0 ;; esac
+              if [ "$rc" -eq 2 ] && [ "$APPLY_OK" = "1" ]; then
                 # apply output: tee into the job log too. tofu masks sensitive
                 # attributes itself ((sensitive value)) and `apply <planfile>`
                 # prints progress lines, not raw diffs -- safe for the log; the
@@ -414,6 +461,10 @@ jobs:
                   } | tr -d '\r' | grep -v '```' | head -c 8000
                 } > "/tmp/results/$fid.applybody"
               fi
+              elif [ "$rc" -eq 2 ]; then
+                # plan-only: changes pending, but this stack is not in
+                # APPLY_STACKS -- record the distinct status, skip apply
+                echo "status=plan-only summary=plan-only (apply disabled)" > "/tmp/results/$fid.apply"
               else
                 echo "status=skip summary=no changes" > "/tmp/results/$fid.apply"
               fi
@@ -474,6 +525,7 @@ jobs:
                     # the APPLY outcome is the headline, not the plan preview
                     case "$APPSTATE" in
                       status=pass*) ICON=":white_check_mark:"; DESC="fmt+lint pass · plan ok · APPLIED: ${APPSTATE#*summary=}";;
+                      status=plan-only*) ICON=":warning:"; DESC="fmt+lint pass · plan ok · PLAN-ONLY: ${APPSTATE#*summary=}";;
                       status=skip*) ICON=":white_check_mark:"; DESC="fmt+lint pass · nothing to apply (plan clean)";;
                       status=fail*) ICON=":x:"; DESC="fmt+lint pass · APPLY FAILED (see run logs)";;
                       *) ICON=":white_check_mark:"; DESC="fmt+lint pass · plan ${PLANSTATE#*summary=} (apply did not run)";;
@@ -514,9 +566,10 @@ jobs:
           \`\`\`
 
           </details>"
-            elif [ -n "$PLANBODY" ] && [ "$ICON" = ":x:" ]; then
-              # no apply output and the run went red: show the plan diff so
-              # a failed plan is still diagnosable from the comment
+            elif [ -n "$PLANBODY" ] && { [ "$ICON" = ":x:" ] || [ "$ICON" = ":warning:" ]; }; then
+              # no apply output and the run went red or is plan-only: show
+              # the plan diff so the pending changes are reviewable from the
+              # comment
               BODY="$BODY
 
           <details><summary>plan diff (apply did not run)</summary>

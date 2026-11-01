@@ -94,6 +94,7 @@ spec:
         # smoke workflow (role ci) — key names synced from secrets.enc.json
         rules: |
           path "secret/data/core/ceph" { capabilities = ["read", "list"] }
+          path "secret/data/core/orangepi" { capabilities = ["read", "list"] }
           path "secret/data/external/proxmox" { capabilities = ["read", "list"] }
           path "secret/data/external/cloudflare" { capabilities = ["read", "list"] }
           path "secret/data/external/opnsense" { capabilities = ["read", "list"] }

@@ -1,6 +1,14 @@
 resource "proxmox_virtual_environment_vm" "this" {
   for_each = { for k, v in local.all_nodes : k => v if v.is_vm }
 
+  lifecycle {
+    # Enrollment guardrail for the tofu-cicd plan/apply gate (#322): CI must never
+    # destroy/replace cluster VMs. To do a deliberate rebuild (e.g. via
+    # replace_triggered_by in cluster.tf), temporarily remove this block in the
+    # change that performs the rebuild.
+    prevent_destroy = true
+  }
+
   name      = each.value.hostname
   node_name = each.value.host_node
   vm_id     = each.value.vm_id

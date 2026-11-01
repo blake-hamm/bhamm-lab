@@ -64,6 +64,10 @@ sequenceDiagram
     rgw->>cnpg: Restore CNPG Databases
 ```
 
+## State & Admin Config Recovery
+
+The `tofu-state` bucket (including the talos stack state at `env:/prod/proxmox/talos/terraform.state`) is covered by the ceph-rgw→Garage→B2 backup chain above, so the crown-jewel recovery chain is: B2/Garage backup → state → machine secrets → talosconfig → kubeconfig. For the state layout and the one-time `state rm` of the old `local_file` entries see [OpenTofu](../operations/tofu.md); for the admin-config re-mint procedure see [Talos](../deployments/talos.md).
+
 ## Recovery Source Order
 
 1. **Garage** (local VM, fastest) — primary restore source

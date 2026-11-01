@@ -30,6 +30,12 @@ variable "environment" {
   type        = string
 }
 
+variable "nut_password" {
+  description = "NUT upsmon password sourced from Vault kv path /core/orangepi, property \"password\" (supplied by CI via TF_VAR_nut_password or -var)"
+  type        = string
+  sensitive   = true
+}
+
 variable "count_master" {
   description = "Number of talos master nodes"
   type        = number

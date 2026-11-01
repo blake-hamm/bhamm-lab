@@ -100,7 +100,7 @@ resource "talos_machine_configuration_apply" "bare_metal" {
       configFiles = [
         {
           content   = <<-EOT
-            MONITOR cyberpower@10.0.9.4 1 nut-admin ${local.nut_password} secondary
+            MONITOR cyberpower@10.0.9.4 1 nut-admin ${var.nut_password} secondary
             SHUTDOWNCMD "/sbin/poweroff"
             MINSUPPLIES 1
             POLLFREQ 5
