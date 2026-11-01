@@ -2373,7 +2373,7 @@ spec:
                 cpu: "4"
                 memory: "110Gi"
             nodeSelector:
-              kubernetes.io/hostname: prod-talos-worker-tail
+              kubernetes.io/hostname: prod-talos-worker-nose
           - name: qwen-36-27b
             description: High quality dense MTP model for general chat
             enabled: false
