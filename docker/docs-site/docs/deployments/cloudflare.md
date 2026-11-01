@@ -13,22 +13,23 @@ This manages my Cloudflare resources, including R2 storage buckets (standby) and
 ### Zero Trust Tunnel
 - **Static Site Tunnel**: Creates a Cloudflare Zero Trust tunnel named `bhamm-lab-site`
 - **Secure Connectivity**: Provides encrypted tunnel access to internal resources
-- **Secret Management**: Uses SOPS to securely manage tunnel secrets from Vault
+- **Secret Management**: `tunnel_secret` is a required variable sourced from Vault `external/cloudflare`
 
 ## Configuration
 
 ### Required Providers
 - **Cloudflare Provider**: Version ~> 5 for Cloudflare API access
-- **SOPS Provider**: Version 1.2.0 for secrets management
 
 ### Required Variables
 - `cloudflare_api_token`: API token for Cloudflare authentication
 - `cloudflare_account_id`: Cloudflare account ID for resource scoping
+- `tunnel_secret`: Base64 Cloudflare tunnel secret (required; a missing value must hard-error, never silently rotate the live tunnel secret)
+
+All three are sourced from Vault `external/cloudflare` (keys `terraform-token`, `account-id`, `tunnel_secret`).
 
 ### Secrets Management
-- **Source**: Retrieves secrets from `../../secrets.enc.json`
-- **Vault Integration**: Accesses `vault_secrets.external.cloudflare.tunnel_secret`
-- **Security**: Uses SOPS for encrypted secret management
+- **Source**: Vault kv path `external/cloudflare` (synced from SOPS by the sops->vault job)
+- **Passing**: `-var` flags or `TF_VAR_*` env; CI passes `-var` per plan so values never linger in job env
 
 ## Usage
 

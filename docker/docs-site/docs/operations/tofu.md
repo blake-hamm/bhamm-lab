@@ -53,7 +53,7 @@ The local-backend stacks upload their local state.
 
   See `docker/docs-site/docs/deployments/talos.md` for the same convention per environment.
 - **gcp:** the `google` provider uses Application Default Credentials — run `gcloud auth application-default login` once, then pass `-var project_id=... -var region=...` at plan/apply.
-- **cloudflare:** pass `-var cloudflare_api_token=... -var cloudflare_account_id=...` (values from Vault).
+- **cloudflare:** pass `-var cloudflare_api_token=... -var cloudflare_account_id=... -var tunnel_secret=...` (values from Vault). CI now plans this stack from the same Vault kv path `external/cloudflare` (keys `terraform-token`, `account-id`, `tunnel_secret`).
 - **backblaze:** pass `-var b2_application_key_id=... -var b2_application_key=...` plus the bucket/key name vars (values from Vault).
 
 ## Workspace Seeding (talos + kubernetes only)

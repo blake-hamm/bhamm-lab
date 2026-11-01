@@ -34,7 +34,7 @@ env:
   TFLINT_VERSION: v0.65.0
   TRIVY_VERSION: v0.76.1
   KNOWN_STACKS: "backblaze cloudflare gcp kubernetes proxmox/garage proxmox/talos"
-  ENABLED_STACKS: "proxmox/garage backblaze"
+  ENABLED_STACKS: "proxmox/garage backblaze cloudflare"
 jobs:
   detect:
     # decides which stacks this push/dispatch gates; emits plain space-
@@ -224,7 +224,8 @@ jobs:
           [ -n "${PLANS:-}" ] || { echo "no plan-enabled stacks in this run"; exit 0; }
           TOKEN=$(cat /tmp/vault-token)
           read_secret() {
-            curl -fsS -k -H "X-Vault-Token: $TOKEN" "https://vault.vault:8200/v1/$1" | jq -r ".data.data.$2"
+            # bracket accessor via --arg: unquoted hyphenated keys (terraform-token) are a jq compile error
+            curl -fsS -k -H "X-Vault-Token: $TOKEN" "https://vault.vault:8200/v1/$1" | jq -r --arg p "$2" '.data.data[$p]'
           }
           mask() { for v in "$@"; do echo "::add-mask::$v"; done; }
           rc_all=0
@@ -234,6 +235,7 @@ jobs:
             # bleeds between plans
             unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY PROXMOX_VE_USERNAME PROXMOX_VE_PASSWORD
             unset TF_VAR_b2_application_key_id TF_VAR_b2_application_key
+            unset TF_VAR_cloudflare_api_token TF_VAR_cloudflare_account_id TF_VAR_tunnel_secret
             PLAN_EXTRA=()
             case "$dir" in
               proxmox/garage)
@@ -264,6 +266,21 @@ jobs:
                 export TF_VAR_b2_application_key_id=$(read_secret secret/data/external/backblaze-admin B2_APPLICATION_KEY_ID)
                 export TF_VAR_b2_application_key=$(read_secret secret/data/external/backblaze-admin B2_APPLICATION_KEY)
                 mask "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$TF_VAR_b2_application_key_id" "$TF_VAR_b2_application_key"
+                ;;
+              cloudflare)
+                # backend creds: state lives on RGW like every stack
+                export AWS_ACCESS_KEY_ID=$(read_secret secret/data/core/ceph s3_access_key)
+                export AWS_SECRET_ACCESS_KEY=$(read_secret secret/data/core/ceph s3_secret_key)
+                # provider creds: Vault external/cloudflare (ci_secrets policy
+                # already grants read+list). Property names match the plaintext
+                # key names in secrets.enc.json synced by the sops->vault job.
+                # Passed via PLAN_EXTRA -var flags (not TF_VAR_ env) so values
+                # never linger in the job env between stacks.
+                CF_API_TOKEN=$(read_secret secret/data/external/cloudflare terraform-token)
+                CF_ACCOUNT_ID=$(read_secret secret/data/external/cloudflare account-id)
+                CF_TUNNEL_SECRET=$(read_secret secret/data/external/cloudflare tunnel_secret)
+                mask "$CF_API_TOKEN" "$CF_ACCOUNT_ID" "$CF_TUNNEL_SECRET"
+                PLAN_EXTRA=(-var cloudflare_api_token="$CF_API_TOKEN" -var cloudflare_account_id="$CF_ACCOUNT_ID" -var tunnel_secret="$CF_TUNNEL_SECRET")
                 ;;
               *)
                 echo "no credential wiring for stack '$dir' (ENABLED_STACKS outpaced the plan step)"
