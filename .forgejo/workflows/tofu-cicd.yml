@@ -35,10 +35,11 @@ env:
   TRIVY_VERSION: v0.76.1
   KNOWN_STACKS: "backblaze cloudflare gcp kubernetes proxmox/garage proxmox/talos"
   # ENABLED_STACKS are planned; only APPLY_STACKS may be applied on PR push
-  # (PR-as-deployment). proxmox/talos is plan-only until its plans prove
-  # stable; gcp graduated to apply after its first plans proved clean.
+  # (PR-as-deployment). Every ENABLED stack is now apply-eligible:
+  # proxmox/talos graduated once its CI plans proved stable (VMs carry
+  # prevent_destroy); gcp graduated after its first plans proved clean.
   ENABLED_STACKS: "proxmox/garage backblaze cloudflare proxmox/talos gcp"
-  APPLY_STACKS: "proxmox/garage backblaze cloudflare gcp"
+  APPLY_STACKS: "proxmox/garage backblaze cloudflare proxmox/talos gcp"
 jobs:
   detect:
     # decides which stacks this push/dispatch gates; emits plain space-
