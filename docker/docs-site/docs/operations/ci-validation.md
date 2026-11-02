@@ -100,13 +100,15 @@ push.
   `external/backblaze-admin`, `external/cloudflare`, `core/orangepi`
   (`nut_password` for `proxmox/talos`), and `external/gcp-cicd`
   (`GOOGLE_CREDENTIALS` for `gcp`). **apply follows plan for
-  `APPLY_STACKS` on PR pushes** (see `APPLY_STACKS` in
-  `.forgejo/workflows/tofu-cicd.yml`): after the plan stage succeeds, the saved plan file is
+  `APPLY_STACKS` on PR pushes** (currently all five ENABLED stacks:
+  `proxmox/garage`, `backblaze`, `cloudflare`, `proxmox/talos`, `gcp`):
+  after the plan stage succeeds, the saved plan file is
   applied — the PR is the deployment, and the allow-list is the
   blast-radius control (it grows one trusted stack at a time). A
   plan-enabled stack that is not in `APPLY_STACKS` records `plan-only`
-  and skips apply. `proxmox/talos` is plan-only until its plans prove
-  stable, and `gcp` is planned and applied as well; talos CI plans
+  and skips apply. `proxmox/talos` enrolled in the apply allow-list
+  after its CI plans proved stable; its cluster VMs carry
+  `prevent_destroy` so a CI apply cannot destroy them. talos CI plans
   run against OpenTofu workspace `prod` (the live
   cluster state), and a missing workspace fails the run loud rather than
   auto-creating empty state. A non-empty plan on `main` post-merge means
