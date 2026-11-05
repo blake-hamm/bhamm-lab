@@ -74,9 +74,9 @@ proves the Vault → CI credential plumbing end to end.
 
 The `tofu-cicd` workflow (`.forgejo/workflows/tofu-cicd.yml`) is the
 terraform pipeline: **fmt → lint → plan → apply**, run only when `tofu/**` files
-change (plus `workflow_dispatch` with a `stacks` input). It replaced the
-former `open-tofu` job of `validate` (terraform gates no longer fire on
-every push) and absorbs the former `tofu-plan` plan-gate workflow.
+change (plus `workflow_dispatch` with a `stacks` input). Terraform gates
+run only on `tofu/**` changes (plus `workflow_dispatch`), not on every
+push.
 
 - **Stack detection:** a detect job asks the Codeberg compare API which
   files changed (the Forgejo mirror's compare endpoint 404s for
@@ -88,8 +88,9 @@ every push) and absorbs the former `tofu-plan` plan-gate workflow.
   creds) so they cover cloudflare/talos/gcp/kubernetes today, giving
   renovate provider PRs their gate even before those stacks are planable
   in CI.
-- **plan runs only for `ENABLED_STACKS`** (currently `proxmox/garage`,
-  `backblaze`, `cloudflare`, `proxmox/talos`, `gcp`):
+- **plan runs only for `ENABLED_STACKS`** (see `ENABLED_STACKS` in
+  `.forgejo/workflows/tofu-cicd.yml` — the workflow env block is the
+  source of truth):
   Vault kubernetes auth role `ci` (same plumbing as `ci-vault-smoke`),
   `tofu init` against the real RGW S3 backend, `tofu plan
   -detailed-exitcode` with **rc 0 and rc 2 both passing** — the gate
@@ -99,13 +100,13 @@ every push) and absorbs the former `tofu-plan` plan-gate workflow.
   `external/backblaze-admin`, `external/cloudflare`, `core/orangepi`
   (`nut_password` for `proxmox/talos`), and `external/gcp-cicd`
   (`GOOGLE_CREDENTIALS` for `gcp`). **apply follows plan for
-  `APPLY_STACKS` on PR pushes** (currently `proxmox/garage`, `backblaze`,
-  `cloudflare`): after the plan stage succeeds, the saved plan file is
+  `APPLY_STACKS` on PR pushes** (see `APPLY_STACKS` in
+  `.forgejo/workflows/tofu-cicd.yml`): after the plan stage succeeds, the saved plan file is
   applied — the PR is the deployment, and the allow-list is the
   blast-radius control (it grows one trusted stack at a time). A
   plan-enabled stack that is not in `APPLY_STACKS` records `plan-only`
   and skips apply. `proxmox/talos` is plan-only until its plans prove
-  stable, and `gcp` is enrolled plan-only as well (#322); talos CI plans
+  stable, and `gcp` is planned and applied as well; talos CI plans
   run against OpenTofu workspace `prod` (the live
   cluster state), and a missing workspace fails the run loud rather than
   auto-creating empty state. A non-empty plan on `main` post-merge means
@@ -113,8 +114,7 @@ every push) and absorbs the former `tofu-plan` plan-gate workflow.
   comment marker keeps the old `forgejo-tofu-ci:` prefix. Onboarding a
   stack to the plan stage = one `ENABLED_STACKS` entry + one
   credential-map case (+ a `ci_secrets` policy line when a new Vault
-  path is needed). Remaining in issue #322: only the deferred
-  `kubernetes` stack (that stack *is* the sops consumer).
+  path is needed.
 - **PR comment:** one updatable marker comment per stack
   (`<!-- forgejo-tofu-ci:<stack-id> -->`) leading with the apply verdict
   (resources added/changed/destroyed counts) and a collapsible apply log,
@@ -124,11 +124,16 @@ every push) and absorbs the former `tofu-plan` plan-gate workflow.
   CI; `main` pushes post nothing.
 - **Rollout:** workflow files only run once on `main`. Post-merge proof:
   Actions tab → `tofu-cicd` → *Run workflow* (stacks=`auto`), and
-  observe natural runs on the next pushes to open renovate tf branches
-  (#305, #290, #298).
+  observe natural runs on the next pushes that touch `tofu/**` (e.g.
+  renovate terraform-provider PRs).
 
 ## Deliberate exclusions
 
+- **`tofu-cicd` excludes the `kubernetes` stack from plan/apply**: that
+  stack *is* the sops/Vault consumer (chicken-and-egg); planning it
+  would need a prod-cluster kubeconfig CI deliberately does not hold, and
+  its value is lowest since it rarely changes. It still gets fmt/lint
+  coverage via `KNOWN_STACKS`.
 - **gitleaks: tree scan, never history.** 7 stale hits live in old commits
   by design (the fixes are in the tree; history is immutable). The
   `.gitleaks.toml` allowlist covers the 7 tree-scan false positives — all
@@ -143,8 +148,8 @@ every push) and absorbs the former `tofu-plan` plan-gate workflow.
   schemas (Application, Certificate, CiliumNetworkPolicy, ClusterIssuer,
   Middleware, Vault, Workflow, Kustomization, ...).
 - **image-digests skips `harbor.bhamm-lab.com` refs**: private registry;
-  CI creds arrive later (S4). `.ci/digest-exceptions.txt` tracks
-  dead/renovate-ignore-candidate upstreams and must trend to empty.
+  CI has no harbor creds (skipped by design). `.ci/digest-exceptions.txt`
+  tracks dead/renovate-ignore-candidate upstreams and must trend to empty.
 - **tab check excludes `.gitmodules`**: it legitimately contains tabs.
 
 ## Case study: dead upstreams caught on day one
@@ -176,7 +181,6 @@ UNAUTHORIZED (2026-10-29). The `GHCR_TOKEN`/`GHCR_USERNAME` and
 missing or failed login degrades to anonymous pulls and never reddens
 CI.
 
-## Landing later
+## Not yet gated
 
-- **#323** — `ansible-playbook --check`.
-- **#324** — nix gate.
+- `ansible-playbook --check` and `nix flake check` gates are not implemented yet.

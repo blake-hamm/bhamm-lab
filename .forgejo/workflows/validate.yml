@@ -14,7 +14,7 @@ on:
 # tool pins; this block is the pin of record (see
 # docker/docs-site/docs/operations/ci-validation.md). bump a version here
 # and the matching download step follows. OpenTofu/tflint/trivy pins live in
-# tofu-ci.yml — terraform gates run on terraform changes, not every push.
+# tofu-cicd.yml — terraform gates run on terraform changes, not every push.
 env:
   YAMLFMT_VERSION: v0.12.1
   SHFMT_VERSION: v3.8.0
@@ -208,8 +208,7 @@ jobs:
           fi
           exit 0
       - name: crane digest (every image ref must resolve)
-        # harbor.bhamm-lab.com refs are skipped: private registry, CI creds
-        # arrive later (S4)
+        # harbor.bhamm-lab.com refs are skipped: private registry not reachable with CI creds (skipped by design)
         # .ci/digest-exceptions.txt: dead/renovate-ignore-candidate upstreams
         # kept visible; the file must trend to empty
         run: |

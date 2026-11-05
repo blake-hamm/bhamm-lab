@@ -340,6 +340,6 @@ orchestration._
 - **Argo CD/Events/Workflows:**
   - _Role:_ CI pipelines and backup/restore orchestration
   - _Usage:_ Build/test container images on push
-- **Renovate [not yet implemented]:**
+- **Renovate:**
   - _Role:_ Dependency updates
   - _Coverage:_ Helm charts, container images, Terraform modules

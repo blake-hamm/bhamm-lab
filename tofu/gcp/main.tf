@@ -1,4 +1,4 @@
-# Enrolled in the tofu-cicd plan+apply gate (#322).
+# Planned and applied by the tofu-cicd CI gate; creds come from Vault.
 resource "google_project_iam_member" "storage_service_account_kms" {
   project = var.project_id
   role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"

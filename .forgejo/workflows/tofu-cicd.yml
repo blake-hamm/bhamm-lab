@@ -13,8 +13,8 @@ on:
   # push: native `paths` gate (Forgejo diffs the pushed range). ONE blind
   # spot: the Codeberg->Forgejo mirror syncs a NEW branch as a push with
   # before=0000, and Forgejo then evaluates paths against ONLY the tip
-  # commit's own diff -- tofu changes in parent commits vanish (#378 proved
-  # the silent skip). Branch creation is therefore owned by the `create`
+  # commit's own diff -- tofu changes in parent commits vanish (a silent
+  # skip was observed and proved this). Branch creation is therefore owned by the `create`
   # trigger below; detect no-ops push events with before=0000 so the two
   # never double-run. ** spans / separators; * does not (validate.yml note).
   push:
@@ -298,7 +298,7 @@ jobs:
                 # relies on bare -vars + provider defaults), so talos passes
                 # prod.tfvars explicitly -- the live (prod) environment's
                 # var file ('green' survives only in legacy cluster
-                # naming, not in workspaces; no green.tfvars since #330).
+                # naming, not in workspaces; no green.tfvars).
                 # backend creds: state lives on RGW like every stack
                 grab AWS_ACCESS_KEY_ID secret/data/core/ceph s3_access_key
                 export AWS_ACCESS_KEY_ID
