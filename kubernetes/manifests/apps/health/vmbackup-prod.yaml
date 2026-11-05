@@ -1,0 +1,117 @@
+# Nightly vmbackup of the single-node VictoriaMetrics (health ns) to Ceph RGW:
+# s3://health-vmbackup/<timestamp>. Follows the documented single-node snapshot
+# flow (https://docs.victoriametrics.com/vmbackup/): vmbackup creates an
+# instant snapshot via the VM HTTP API (-snapshot.createURL), uploads the
+# snapshot to S3, then deletes the snapshot — the VM pod keeps running
+# throughout (no downtime). Snapshots live under <storageDataPath>/snapshots
+# as hard/soft links, so the backup pod reads them through the shared
+# health-vm-data PVC. S3-compatible (Ceph RGW) addressing per
+# https://docs.victoriametrics.com/guides/connecting-vm-components-to-cloud-storage/:
+# -customS3Endpoint for the endpoint, path-style addressing (the default for
+# custom endpoints, -s3ForcePathStyle defaults to true), credentials via the
+# AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY env vars.
+#
+# Co-scheduling: health-vm-data is RWO (attached to one node at a time). The
+# podAffinity below pins the backup pod to the node running the health-vm pod
+# so the volume is already attached there (no nodeAffinity possible: the VM
+# pod has no node label to match). If the VM pod is mid-Recreate the volume
+# detaches and this run fails; it simply retries next night
+# (concurrencyPolicy: Forbid).
+#
+# Egress: the health-egress CiliumNetworkPolicy (endpointSelector {}) already
+# allows this pod to kube-dns, health-vm:8428 (snapshot API) and the RGW
+# backends 10.0.30.11-13:7480 — the selector-less external-rgw.ceph.svc:80 is
+# rewritten by Cilium KPR to backend:7480 before egress enforcement, so the
+# policy (and this pod) target 7480, not the service port.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: health-vm-backup
+  namespace: health
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "14"
+spec:
+  refreshInterval: 30m
+  secretStoreRef:
+    name: vault-backend
+    kind: ClusterSecretStore
+  target:
+    name: health-vm-backup
+  data:
+    - secretKey: AWS_ACCESS_KEY_ID
+      remoteRef:
+        key: /core/ceph
+        property: s3_access_key
+    - secretKey: AWS_SECRET_ACCESS_KEY
+      remoteRef:
+        key: /core/ceph
+        property: s3_secret_key
+---
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: health-vm-backup
+  namespace: health
+  annotations:
+    argocd.argoproj.io/sync-wave: "25"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  # 04:17 UTC nightly
+  schedules:
+    - "17 4 * * *"
+  timezone: UTC
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  workflowSpec:
+    serviceAccountName: argo-workflow
+    entrypoint: main
+    activeDeadlineSeconds: 3600
+    templates:
+      - name: main
+        affinity:
+          podAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchLabels:
+                    app: health-vm
+                topologyKey: kubernetes.io/hostname
+        volumes:
+          - name: health-vm-data
+            persistentVolumeClaim:
+              claimName: health-vm-data
+        container:
+          # Same release as the running VM (vm-prod.yaml pins v1.155.0); the
+          # vmbackup image tag v1.155.0 was verified on Docker Hub.
+          image: docker.io/victoriametrics/vmbackup:v1.155.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - -storageDataPath=/storage
+            - -snapshot.createURL=http://health-vm.health.svc.cluster.local:8428/snapshot/create
+            - -customS3Endpoint=http://external-rgw.ceph.svc.cluster.local:80
+            # Argo v4 exposes per-strftime-char variables off
+            # workflow.creationTimestamp (operator.go), so the path is a UTC
+            # timestamp like 20261105T041700Z (the API stores it in UTC).
+            - -dst=s3://health-vmbackup/{{workflow.creationTimestamp.Y}}{{workflow.creationTimestamp.m}}{{workflow.creationTimestamp.d}}T{{workflow.creationTimestamp.H}}{{workflow.creationTimestamp.M}}{{workflow.creationTimestamp.S}}Z
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: health-vm-backup
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: health-vm-backup
+                  key: AWS_SECRET_ACCESS_KEY
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          volumeMounts:
+            - mountPath: /storage
+              name: health-vm-data

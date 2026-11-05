@@ -16,7 +16,7 @@ spec:
             arguments:
               parameters:
                 - name: bucket-names
-                  value: '["tofu-state","loki-data","argo-artifacts","cnpg-backups","k8up-backups", "beyond-vibes", "mlflow", "proxmox-backup-server"]'
+                  value: '["tofu-state","loki-data","argo-artifacts","cnpg-backups","k8up-backups", "beyond-vibes", "mlflow", "proxmox-backup-server", "health-vmbackup"]'
                 - name: endpoint-url
                   value: http://external-rgw.ceph.svc.cluster.local:80
                 - name: aws-region
