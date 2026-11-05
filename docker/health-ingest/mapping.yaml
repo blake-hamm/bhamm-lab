@@ -1,0 +1,26 @@
+# HAE type name -> metric name (optional scale in the trailing comment)
+#
+# Line format (parsed by main.py without a YAML library):
+#   "Type Name": metric_name  # scale: 1/3600
+#
+# HAE type names not listed here pass through as
+# health_value{type=<sanitized-slug-of-name>}.
+"Heart Rate Variability": hrv_ms
+"Resting Heart Rate": rhr_bpm
+"Heart Rate": heart_rate_bpm
+# HAE reports sleep durations in seconds -> hours
+"Time in Bed": sleep_hours # scale: 1/3600
+"Time in Awake": awake_hours # scale: 1/3600
+"Oxygen Saturation": spo2_pct
+"Body Mass": weight_kg
+"Daily Steps": steps
+"Total steps": steps
+# RingConn (appears as an Apple Health data source)
+"Ring Steps": steps
+"Ring Sleep Score": ring_sleep_score
+# Suunto watch
+"Suunto Steps": steps
+# eufy air monitor
+"eufy Air Quality": aqi
+"eufy CO2": co2_ppm
+"eufy Temperature": temperature_c
