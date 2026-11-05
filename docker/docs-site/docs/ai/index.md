@@ -20,7 +20,7 @@ The software stack is built on Kubernetes and leverages a set of interconnected 
 
 - **`llama.cpp`:** This is the inference engine used to run the language models. It is highly optimized for running on various hardware, including the AMD GPUs used in this setup.
 
-- **`litellm`:** This provides a unified OpenAI-compatible API for all the deployed models. It acts as a central gateway, routing requests to the appropriate `llama.cpp` instance based on the model name. This allows any application that can talk to the OpenAI API to use the local models. It is also exposed externally for use by external applications, such as `roo code`.
+- **`litellm`:** This provides a unified OpenAI-compatible API for all the deployed models. It acts as a central gateway, routing requests to the appropriate `llama.cpp` instance based on the model name. This allows any application that can talk to the OpenAI API to use the local models. It is also exposed externally for use by external applications, such as `roo code`. The `deepseek-v4.1-flash` group is subscription-backed: OpenCode Go primary (`order: 1`) with OpenRouter fallback (`order: 2`); both API keys live in Vault `/default/litellm`, and `router_settings.cooldown_time: 60` parks Go for 60s after a monthly-cap 429 before the fallback chain re-probes it.
 
 - **`Open WebUI`:** This is the primary user interface for interacting with the language models. It's a user-friendly chat interface that connects to `litellm`'s OpenAI-compatible endpoint.
 
