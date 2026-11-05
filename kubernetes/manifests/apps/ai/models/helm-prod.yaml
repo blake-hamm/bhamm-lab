@@ -39,6 +39,27 @@ spec:
                   api_base: http://qwen-38-flash-halogen.models.svc.cluster.local:8080/v1
                   api_key: "dummy"
                   temperature: 0
+              # deepseek-v4.1-flash: subscription-backed group. OpenCode Go
+              # primary (order 1), OpenRouter credits fallback (order 2).
+              # order is deterministic, failure-driven failover (verified in
+              # LiteLLM v1.108.0 source); a 429 from the monthly Go cap
+              # cools the deployment and drains traffic to OpenRouter with
+              # auto-recovery probes. Both deployments must set order.
+              - model_name: deepseek-v4.1-flash
+                litellm_params:
+                  model: openai/deepseek-v4.1-flash
+                  api_base: https://opencode.ai/inference/go/openai/v1
+                  api_key: os.environ/OPENCODE_API_KEY
+                  order: 1
+                  timeout: 1800
+                  stream_timeout: 1800
+              - model_name: deepseek-v4.1-flash
+                litellm_params:
+                  model: openrouter/deepseek/deepseek-v4.1-flash
+                  api_key: os.environ/OPENROUTER_API_KEY
+                  order: 2
+                  timeout: 1800
+                  stream_timeout: 1800
             config:
               litellm_settings:
                 request_timeout: 1800
@@ -64,6 +85,9 @@ spec:
                 timeout: 1800
                 num_retries: 0
                 routing_strategy: simple-shuffle
+                # Go cap exhaustion returns 429; park the capped deployment
+                # for 60s instead of hammering it every 5s (default).
+                cooldown_time: 60
                 redis_host: os.environ/REDIS_HOST
                 redis_port: os.environ/REDIS_PORT
                 redis_password: os.environ/REDIS_PASSWORD
