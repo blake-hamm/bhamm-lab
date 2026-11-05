@@ -84,6 +84,16 @@ spec:
               secretKeyRef:
                 name: litellm-external-secret
                 key: QDRANT_API_KEY
+          - name: OPENCODE_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: litellm-external-secret
+                key: OPENCODE_API_KEY
+          - name: OPENROUTER_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: litellm-external-secret
+                key: OPENROUTER_API_KEY
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true
