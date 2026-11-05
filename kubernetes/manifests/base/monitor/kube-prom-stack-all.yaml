@@ -185,6 +185,9 @@ spec:
               opnsense:
                 url: https://codeberg.org/blake-hamm/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/opnsense.json
                 token: ''
+              health:
+                url: https://codeberg.org/blake-hamm/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/health.json
+                token: ''
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
@@ -201,6 +204,11 @@ spec:
             - name: Loki
               type: loki
               url: http://loki-distributed-gateway
+              access: proxy
+            - name: health-vm
+              type: prometheus
+              uid: health-vm
+              url: http://health-vm.health.svc.cluster.local:8428
               access: proxy
         nodeExporter:
           enabled: true
