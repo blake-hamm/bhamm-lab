@@ -1,0 +1,87 @@
+# Netpol for the health namespace. Cilium runs default enforcement mode
+# (policies only apply where selected), so this scopes to health.
+#
+# NOTE: Cilium's DNS proxy does NOT populate FQDN state on this cluster
+# (Envoy-external transparent proxy: 0 redirects, empty FQDN cache), so
+# `toFQDNs` rules grant nothing in practice. Prefer explicit in-cluster
+# selectors / service rules (here) or CIDRs.
+#
+# Default-deny is implicit: any CiliumNetworkPolicy selecting these endpoints
+# flips Cilium to deny-by-default for all non-matching traffic. No separate
+# empty default-deny CNP needed (an empty ingress+egress CNP is rejected as
+# invalid by Cilium).
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: health-ingress
+  namespace: health
+  annotations:
+    argocd.argoproj.io/sync-wave: "31"
+spec:
+  endpointSelector: {}
+  ingress:
+    # Ingest API (8080) via traefik only
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: traefik
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    # VictoriaMetrics (8428) from within the namespace (ingest writes,
+    # future scrape shim)
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: health
+      toPorts:
+        - ports:
+            - port: "8428"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: health-egress
+  namespace: health
+  annotations:
+    argocd.argoproj.io/sync-wave: "31"
+spec:
+  endpointSelector: {}
+  egress:
+    # DNS (kube-dns) — required for everything below
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # VictoriaMetrics (in-cluster; ingest writes, future scrape shim).
+    # Cilium evaluates egress AFTER kube-proxy DNAT, so the port is the
+    # containerPort 8428, not a service port.
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: health
+      toPorts:
+        - ports:
+            - port: "8428"
+              protocol: TCP
+    # Ceph RGW S3 (future vmbackup offsite target). external-rgw is a
+    # selector-less Service with manual Endpoints to Proxmox hosts; Cilium
+    # KPR translates ClusterIP:80 -> backend:7480 BEFORE egress policy
+    # enforcement, so the policy must match the backend CIDR + targetPort
+    # (7480), not the service port. toServices cannot match here. The
+    # Endpoints are the VLAN 30 Proxmox addresses (10.0.30.11-13) since the
+    # MTU-blackhole fix (#371), per
+    # kubernetes/manifests/base/ceph/rgw-endpoints-all.yaml.
+    - toCIDR:
+        - 10.0.30.11/32
+        - 10.0.30.12/32
+        - 10.0.30.13/32
+      toPorts:
+        - ports:
+            - port: "7480"
+              protocol: TCP

@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: health-vm
+  namespace: health
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  selector:
+    matchLabels:
+      app: health-vm
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 120s

@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: health-vm-data
+  namespace: health
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: csi-rbd-sc
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: health-vm
+  name: health-vm
+  namespace: health
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  # RWO PVC: RollingUpdate deadlocks (surge pod Pending in Multi-Attach while
+  # the old pod still holds the volume) — same reason as the Grafana
+  # deploymentStrategy in base/monitor/kube-prom-stack-all.yaml. Recreate
+  # detaches first (~30-60s blip).
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: health-vm
+  template:
+    metadata:
+      labels:
+        app: health-vm
+    spec:
+      volumes:
+        - name: health-vm-data
+          persistentVolumeClaim:
+            claimName: health-vm-data
+      containers:
+        - name: health-vm
+          image: docker.io/victoriametrics/victoria-metrics:v1.155.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - -storageDataPath=/storage
+            - -retentionPeriod=10y
+            - -httpListenAddr=:8428
+          ports:
+            - containerPort: 8428
+              name: metrics
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8428
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8428
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          volumeMounts:
+            - mountPath: /storage
+              name: health-vm-data
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: health-vm
+  name: health-vm
+  namespace: health
+  annotations:
+    argocd.argoproj.io/sync-wave: "21"
+spec:
+  selector:
+    app: health-vm
+  ports:
+    - name: metrics
+      port: 8428
+      targetPort: 8428
+      protocol: TCP

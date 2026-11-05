@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: health-ingest
+  name: health-ingest
+  namespace: health
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  selector:
+    matchLabels:
+      app: health-ingest
+  template:
+    metadata:
+      labels:
+        app: health-ingest
+    spec:
+      containers:
+        - name: health-ingest
+          # Image built by the Argo kaniko sensor on docker/ pushes; Harbor
+          # pull-through at the Talos level, no imagePullSecrets needed.
+          image: harbor.bhamm-lab.com/library/health-ingest:latest
+          imagePullPolicy: Always
+          env:
+            - name: INGEST_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: health-external-secret
+                  key: INGEST_TOKEN
+            - name: VM_URL
+              value: "http://health-vm.health.svc.cluster.local:8428"
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: health-ingest
+  name: health-ingest
+  namespace: health
+  annotations:
+    argocd.argoproj.io/sync-wave: "21"
+spec:
+  selector:
+    app: health-ingest
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
