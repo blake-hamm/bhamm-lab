@@ -73,16 +73,25 @@ proves the Vault → CI credential plumbing end to end.
 ## Tofu CI pipeline (`tofu-cicd`)
 
 The `tofu-cicd` workflow (`.forgejo/workflows/tofu-cicd.yml`) is the
-terraform pipeline: **fmt → lint → plan → apply**, run only when `tofu/**` files
-change (plus `workflow_dispatch` with a `stacks` input). Terraform gates
-run only on `tofu/**` changes (plus `workflow_dispatch`), not on every
-push.
+terraform pipeline: **fmt → lint → plan → apply**. It fires on **every**
+branch push (plus `workflow_dispatch` with a `stacks` input, and a
+`create` event that owns branch-creation gating) — not because the work
+is needed everywhere, but because a required status pattern that never
+posts reads as *missing* on Forgejo and blocks merges forever, so exactly
+one cheap context must land on every SHA (see
+[Commit statuses and automerge policy](#commit-statuses-and-automerge-policy)).
+The heavy stages stay internally gated on the detect output, so a
+tofu-clean push costs one small detect job + one status post.
 
 - **Stack detection:** a detect job asks the Codeberg compare API which
   files changed (the Forgejo mirror's compare endpoint 404s for
   anonymous and token access alike) and maps them to stack dirs; new
   branches, force-pushes, or compare failures fall back to all known
-  stacks. Dispatch input overrides.
+  stacks. Dispatch input overrides. A changed `tofu/**` file that
+  matches no known stack dir — `tofu/.terraform-version` (the pin of
+  record: bumping it changes the planner itself), shared modules — is
+  treated as touching **every** enabled stack: full plan coverage across
+  all stacks is the evidence for shared changes.
 - **fmt + lint run for every `KNOWN_STACKS` stack** whose directory
   changed — these stages are stateless (`tofu init -backend=false`, no
   creds) so they cover cloudflare/talos/gcp/kubernetes today, giving
@@ -112,22 +121,52 @@ push.
   run against OpenTofu workspace `prod` (the live
   cluster state), and a missing workspace fails the run loud rather than
   auto-creating empty state. A non-empty plan on `main` post-merge means
-  unmerged branch work diverged from main — a drift signal. The PR
-  comment marker keeps the old `forgejo-tofu-ci:` prefix. Onboarding a
+  unmerged branch work diverged from main — a drift signal. Onboarding a
   stack to the plan stage = one `ENABLED_STACKS` entry + one
   credential-map case (+ a `ci_secrets` policy line when a new Vault
   path is needed.
-- **PR comment:** one updatable marker comment per stack
-  (`<!-- forgejo-tofu-ci:<stack-id> -->`) leading with the apply verdict
-  (resources added/changed/destroyed counts) and a collapsible apply log,
-  with the fmt/lint/plan status line beneath. The trimmed plan diff
-  (head 100 + tail 60 lines, 8000-char cap, fenced `text` block) is now
-  shown only when plan or apply failed. Reporting failures never redden
-  CI; `main` pushes post nothing.
+- **No PR comments:** the pipeline posts commit statuses only — no
+  marker comments on the PR. The full plan and apply logs live in the
+  run logs (linked from each status). A missing `CODEBERG_TOKEN`
+  secret fails the run loudly, and `main` pushes post no statuses.
 - **Rollout:** workflow files only run once on `main`. Post-merge proof:
   Actions tab → `tofu-cicd` → *Run workflow* (stacks=`auto`), and
   observe natural runs on the next pushes that touch `tofu/**` (e.g.
   renovate terraform-provider PRs).
+
+### Commit statuses and automerge policy
+
+Both gates publish Codeberg **commit statuses** on branch pushes:
+`ci/validate` from the validate workflow, and from tofu-cicd either one
+`cicd/tofu:<stack>` context per **touched plan-enabled stack** or — on a
+push whose diff touches nothing under `tofu/` — exactly one
+`cicd/tofu:no-changes` (success, "no tofu changes - nothing to plan").
+A SHA that touches tofu posts only its per-stack verdicts, never the
+no-changes context. The no-changes post exists because Forgejo's branch
+protection treats a required glob that matches zero statuses as pending
+forever: `cicd/tofu:**` must find a match on every SHA for automerge and
+non-admin merges to ever proceed. Statuses are quiet by design: a stack
+posts only when the change actually touched it — `plan ok` (plan-only or
+no changes), `plan ok; applied` (apply ran), or a failure description.
+Untouched stacks post nothing, and there is no
+`unmapped` context: shared/unmapped tofu files (including
+`.terraform-version`) replan every enabled stack instead. Statuses are
+**pending-first**: on a tofu-touching push, right after detection the run
+claims `pending` ("plan in progress") for every context it will
+finalize, before any plan work starts — so a run killed mid-pipeline
+leaves pending (never green) contexts. Branch protection requires the
+patterns `ci/validate` and `cicd/tofu:**`.
+
+`renovate.json` keys its terraform-manager automerge policy on those
+required contexts (automerge fires only when every matched required
+context is success): provider/core **patch/minor** bumps outside 0.x
+pinning merge automatically (squash) once every context is green;
+**majors** and any change under the cluster-core talos path are labeled
+`risk-high` and held for review; 0.x provider bumps (Renovate classes
+them minor, but 0.x minors are breaking-class) hold as `risk-med`.
+Everything outside the terraform managers keeps today's never-automerge
+behavior. The OpenTofu core version itself is pinned in
+`tofu/.terraform-version`, which the CI reads as its pin of record.
 
 ## Deliberate exclusions
 

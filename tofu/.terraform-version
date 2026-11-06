@@ -1,0 +1,4 @@
+# OpenTofu version pin of record, read by CI (tofu-cicd + ci-vault-smoke).
+# terraform-version-manager format (no leading v). Renovate's
+# terraform-version manager bumps this file; see renovate.json.
+1.13.2

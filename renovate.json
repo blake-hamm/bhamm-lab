@@ -100,6 +100,41 @@
       "enabled": false,
       "matchManagers": ["npm"],
       "matchPaths": ["docker/site/**"]
+    },
+    {
+      "description": "OpenTofu/core patch+minor bumps automerge once plan-gate contexts are green (non-0.x)",
+      "matchManagers": ["terraform", "terraform-version", "terraform-requiredVersion", "terraform-lockfile"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "matchCurrentVersion": "!/^0/",
+      "labels": ["dependencies", "risk-low"],
+      "automerge": true,
+      "platformAutomerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
+      "description": "0.x terraform deps: Renovate classes every bump as minor — treat as breaking-class, hold",
+      "matchManagers": ["terraform", "terraform-version", "terraform-requiredVersion", "terraform-lockfile"],
+      "matchCurrentVersion": "/^0/",
+      "labels": ["dependencies", "risk-med"],
+      "automerge": false,
+      "platformAutomerge": false
+    },
+    {
+      "description": "Terraform majors stay open for human review (never suppressed)",
+      "matchManagers": ["terraform", "terraform-version", "terraform-requiredVersion", "terraform-lockfile"],
+      "matchUpdateTypes": ["major"],
+      "labels": ["dependencies", "risk-high"],
+      "automerge": false,
+      "platformAutomerge": false
+    },
+    {
+      "description": "Cluster-core terraform (proxmox/talos) never automerges regardless of semver tier",
+      "matchManagers": ["terraform", "terraform-version", "terraform-requiredVersion", "terraform-lockfile"],
+      "matchFilePaths": ["**/tofu/proxmox/talos/**"],
+      "labels": ["dependencies", "risk-high"],
+      "automerge": false,
+      "platformAutomerge": false
     }
   ],
 
