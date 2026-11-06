@@ -10,18 +10,33 @@ on:
         # field (GitHub defaults to string silently; Forgejo does not).
         type: string
         default: auto
-  # push: native `paths` gate (Forgejo diffs the pushed range). ONE blind
-  # spot: the Codeberg->Forgejo mirror syncs a NEW branch as a push with
-  # before=0000, and Forgejo then evaluates paths against ONLY the tip
-  # commit's own diff -- tofu changes in parent commits vanish (#378 proved
-  # the silent skip). Branch creation is therefore owned by the `create`
+  # push: fires on EVERY branch push -- no `paths` filter, and this is a
+  # necessity, not an oversight. Forgejo's branch protection treats a
+  # required glob that matches ZERO statuses on a SHA as PENDING
+  # ("some required checks are missing"), which blocks automerge and
+  # non-admin merges forever. If the workflow skipped tofu-clean pushes,
+  # the required pattern cicd/tofu:** would never be satisfiable on those
+  # SHAs. So exactly ONE cheap context must land on every SHA: a
+  # tofu-clean push posts only `${STATUS_PREFIX}:no-changes` (success)
+  # from the detect job. The HEAVY pipeline (fmt/lint/plan/apply) stays
+  # internally gated: detect compares main...head via the Codeberg
+  # compare API and every downstream job is conditional on the touched-
+  # stack outputs, so a tofu-clean push costs one small detect job + one
+  # status post -- seconds, not minutes. On a tofu-touching push the run
+  # claims PENDING for every context it will finalize (one per touched
+  # plan-enabled stack) BEFORE any gate work starts, so a run killed
+  # mid-pipeline leaves PENDING contexts, never a stale green. Stacks
+  # this change did not touch post NOTHING -- a quiet UI, no green noise.
+  # ONE blind spot remains: the Codeberg->Forgejo mirror syncs a NEW
+  # branch as a push with before=0000, and the compare in detect needs
+  # the real base -- tofu changes in parent commits would vanish if the
+  # tip commit were all that was considered (a silent skip was observed
+  # and proved this). Branch creation is therefore owned by the `create`
   # trigger below; detect no-ops push events with before=0000 so the two
   # never double-run. ** spans / separators; * does not (validate.yml note).
   push:
     branches:
       - "**"
-    paths:
-      - "tofu/**"
   # Fires exactly once per new ref synced by the mirror (~40s after the
   # branch appears on Forgejo; both branches and tags -- detect filters
   # ref_type). Payload carries ref_type + branch-tip sha but NO file diff
@@ -30,19 +45,32 @@ on:
   # tofu changes in ANY commit of the new branch, not just the tip.
   create:
 env:
+  # fallback pin only; the pin of record is tofu/.terraform-version
   OPENTOFU_VERSION: v1.13.2
   TFLINT_VERSION: v0.65.0
   TRIVY_VERSION: v0.76.1
   KNOWN_STACKS: "backblaze cloudflare gcp kubernetes proxmox/garage proxmox/talos"
   # ENABLED_STACKS are planned; only APPLY_STACKS may be applied on PR push
-  # (PR-as-deployment). proxmox/talos is plan-only until its plans prove
-  # stable; gcp graduated to apply after its first plans proved clean.
+  # (PR-as-deployment). Every ENABLED stack is now apply-eligible:
+  # proxmox/talos graduated once its CI plans proved stable (VMs carry
+  # prevent_destroy); gcp graduated after its first plans proved clean.
   ENABLED_STACKS: "proxmox/garage backblaze cloudflare proxmox/talos gcp"
-  APPLY_STACKS: "proxmox/garage backblaze cloudflare gcp"
+  APPLY_STACKS: "proxmox/garage backblaze cloudflare proxmox/talos gcp"
+  # single source of truth for the commit-status context prefix: contexts
+  # are <prefix>:<stack-id-with-slashes-as-dashes>, posted only for stacks
+  # the change actually touched, plus exactly one <prefix>:no-changes on
+  # tofu-clean pushes (the always-post context that keeps the required
+  # glob satisfiable on every SHA). Branch protection required-check
+  # pattern: cicd/tofu:** (glob).
+  STATUS_PREFIX: "cicd/tofu"
 jobs:
   detect:
     # decides which stacks this push/dispatch gates; emits plain space-
-    # separated stack-dir lists (fmt/lint set + plan-enabled subset).
+    # separated stack-dir lists (fmt/lint set + plan-enabled subset) plus
+    # a no_changes flag: compare succeeded and NOTHING under tofu/ changed.
+    # On a tofu-clean push the ci job (fmt/lint/plan/apply) is skipped
+    # entirely and detect itself posts the single ${STATUS_PREFIX}:no-changes
+    # status that keeps the required glob satisfiable on every SHA.
     # deliberately NOT a matrix: Forgejo 12.0.1 act collapses fromJson-built
     # matrices into ONE leg with an empty matrix (false green, run 170) and
     # leaves matrix.* unset in step-level if:. String outputs + shell loops
@@ -54,7 +82,7 @@ jobs:
     outputs:
       stacks: ${{ steps.pick.outputs.stacks }}
       plan: ${{ steps.pick.outputs.plan }}
-      any: ${{ steps.pick.outputs.any }}
+      no_changes: ${{ steps.pick.outputs.no_changes }}
     steps:
       - name: apk deps
         run: apk add --no-cache curl jq bash
@@ -71,7 +99,13 @@ jobs:
           stacks=""
           plan=""
           note=""
+          shared=false
+          no_changes=false
           pick() {  # pick <dir>; appends to fmt/lint set, +plan set if enabled
+            # dedup: the shared-file rule re-picks every enabled stack and
+            # a branch can ALSO touch a specific stack dir -- a doubled
+            # entry would fmt/plan the same stack twice
+            case " $stacks " in *" $1 "*) return 0 ;; esac
             stacks="$stacks $1"
             case " $ENABLED_STACKS " in *" $1 "*) plan="$plan $1" ;; esac
           }
@@ -107,6 +141,14 @@ jobs:
                     | .[]' <<<"$resp" --arg known "$KNOWN_STACKS"); do
                   pick "$d"
                 done
+              while IFS= read -r f; do
+                hit=0
+                for s in $KNOWN_STACKS; do case "$f" in "tofu/$s/"*) hit=1; break ;; esac; done
+                [ "$hit" = "0" ] && shared=true
+              done < <(jq -r '.files[]?.filename // empty | select(startswith("tofu/"))' <<<"$resp" 2>/dev/null)
+                # compare succeeded: zero files under tofu/ => tofu-clean
+                # (compare-unavailable fallback above never reaches here)
+                [ "$(jq -r '[.files[]? | select((.filename // "") | startswith("tofu/"))] | length' <<<"$resp")" = "0" ] && no_changes=true
                 note="create: compare main...tip"
               else
                 for d in $KNOWN_STACKS; do pick "$d"; done
@@ -130,24 +172,83 @@ jobs:
                   | .[]' <<<"$resp" --arg known "$KNOWN_STACKS"); do
                 pick "$d"
               done
+              while IFS= read -r f; do
+                hit=0
+                for s in $KNOWN_STACKS; do case "$f" in "tofu/$s/"*) hit=1; break ;; esac; done
+                [ "$hit" = "0" ] && shared=true
+              done < <(jq -r '.files[]?.filename // empty | select(startswith("tofu/"))' <<<"$resp" 2>/dev/null)
+              # compare succeeded: zero files under tofu/ => tofu-clean
+              [ "$(jq -r '[.files[]? | select((.filename // "") | startswith("tofu/"))] | length' <<<"$resp")" = "0" ] && no_changes=true
               note="push: compare $BASE...head"
             else
               for d in $KNOWN_STACKS; do pick "$d"; done
               note="compare unavailable: ALL stacks"
             fi
           fi
+          if [ "$shared" = "true" ]; then
+            # any changed tofu/** file outside a known stack dir (the
+            # .terraform-version pin of record, shared modules) changes
+            # the planner or inputs for EVERY stack: conservative default
+            # is to replan ALL ENABLED stacks -- that full plan coverage
+            # IS the evidence, and nothing posts outside the touched set.
+            for d in $ENABLED_STACKS; do pick "$d"; done
+            note="$note + shared tofu files: all-enabled replan"
+          fi
           stacks=$(echo $stacks); plan=$(echo $plan)
-          echo "stacks: [$stacks] plan: [$plan] ($note)"
+          echo "stacks: [$stacks] plan: [$plan] no_changes=$no_changes ($note)"
           echo "stacks=$stacks" >> "$GITHUB_OUTPUT"
           echo "plan=$plan" >> "$GITHUB_OUTPUT"
-          if [ -n "$stacks" ]; then echo "any=true" >> "$GITHUB_OUTPUT"; else echo "any=false" >> "$GITHUB_OUTPUT"; fi
+          echo "no_changes=$no_changes" >> "$GITHUB_OUTPUT"
+      - name: Post no-changes status (tofu-clean push)
+        # exactly one cheap context on every tofu-clean SHA: Forgejo's
+        # branch protection treats a required glob matching ZERO statuses
+        # as pending-forever, so cicd/tofu:** must always find a match.
+        # Posted ONLY when the compare succeeded and nothing under tofu/
+        # changed; a SHA that touches tofu posts only its per-stack
+        # verdicts (ci job), never this context. main pushes post nothing
+        # (same rule as every other status step here).
+        if: steps.pick.outputs.no_changes == 'true'
+        shell: bash
+        env:
+          CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+          # public domain, not forgejo.server_url (renders the cluster-internal FQDN)
+          RUN_URL: https://git.bhamm-lab.com/${{ github.repository }}/actions/runs/${{ forgejo.run_id }}
+        run: |
+          set +eu pipefail  # reporting must never fail the workflow further
+          TOK=$(printf '%s' "${CODEBERG_TOKEN:-}" | tr -d '[:space:]')
+          if [ -z "$TOK" ]; then
+            echo "FATAL: CODEBERG_TOKEN secret missing/empty."
+            echo "The ${STATUS_PREFIX}:no-changes status cannot be published; required checks would wedge."
+            echo "Silent-skip was removed on purpose: a missing secret must redden the gate, not hide it."
+            exit 1
+          fi
+          [ "$BRANCH" = "main" ] && { echo "main push, nothing to report"; exit 0; }
+          ctx="${STATUS_PREFIX}:no-changes"
+          data=$(jq -cn --arg state success --arg url "$RUN_URL" \
+            --arg desc 'no tofu changes - nothing to plan' --arg ctx "$ctx" \
+            '{state: $state, target_url: $url, description: $desc, context: $ctx}')
+          HTTP_CODE=$(curl -sS -o /tmp/nc_body -w '%{http_code}' -X POST \
+            -H "Authorization: token $TOK" -H "Content-Type: application/json" \
+            --data "$data" "https://codeberg.org/api/v1/repos/blake-hamm/bhamm-lab/statuses/$GITHUB_SHA")
+          case "$HTTP_CODE" in
+            2*) echo "status $ctx=success" ;;
+            *) echo "CODEBERG status POST $ctx -> HTTP $HTTP_CODE"
+               head -c 200 /tmp/nc_body 2>/dev/null; echo
+               exit 1 ;;
+          esac
   ci:
     # one self-contained job for the whole run: fmt -> lint per changed
-    # stack, then Vault login + plan for the plan-enabled subset, then one
-    # marker comment per stack on the PR. loops over plain strings because
+    # stack, then Vault login + plan for the plan-enabled subset, then the
+    # final commit statuses replacing the pending claims posted before any
+    # gate work. loops over plain strings because
     # dynamic matrices are broken on this Forgejo (see detect comment).
     needs: detect
-    if: needs.detect.outputs.any == 'true'
+    # heavy pipeline: never runs on a tofu-clean push (detect posts the
+    # single no-changes status itself) or on tag create events -- empty
+    # STACKS means there is nothing to gate, so skip checkout + tools
+    # entirely instead of looping over nothing.
+    if: needs.detect.outputs.stacks != ''
     runs-on: docker
     container: docker.io/alpine:3.20
     timeout-minutes: 40
@@ -158,6 +259,53 @@ jobs:
       - name: apk deps
         # unzip: tofu + tflint ship as zips; trivy is a tarball
         run: apk add --no-cache curl jq unzip bash python3
+      - name: Claim pending statuses (pending-first)
+        # pending-first: claim PENDING for exactly the contexts this run
+        # will finalize -- one per plan-enabled touched stack -- before any
+        # gate work starts. Each gets its final verdict at the end of the
+        # run. A run killed mid-pipeline therefore leaves PENDING contexts
+        # -- never a stale success, never silence -- so required checks
+        # stay unsatisfiable until real verdicts land. Stacks this change
+        # did not touch post NOTHING (quiet UI).
+        shell: bash
+        env:
+          CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+          # public domain, not forgejo.server_url (renders the cluster-internal FQDN)
+          RUN_URL: https://git.bhamm-lab.com/${{ github.repository }}/actions/runs/${{ forgejo.run_id }}
+        run: |
+          set +eu pipefail  # reporting must never fail the workflow further
+          TOK=$(printf '%s' "${CODEBERG_TOKEN:-}" | tr -d '[:space:]')
+          if [ -z "$TOK" ]; then
+            echo "FATAL: CODEBERG_TOKEN secret missing/empty."
+            echo "The per-stack commit statuses cannot be published; required checks would wedge."
+            echo "Silent-skip was removed on purpose: a missing secret must redden the gate, not hide it."
+            exit 1
+          fi
+          [ "$BRANCH" = "main" ] && { echo "main push, nothing to report"; exit 0; }
+          API=https://codeberg.org/api/v1
+          PENDING_FAIL=0
+          post_status() {  # post_status <context> <state> <description>
+            python3 -c 'import sys, json
+          print(json.dumps({"state": sys.argv[1], "target_url": sys.argv[2], "description": sys.argv[3], "context": sys.argv[4]}))' "$2" "$RUN_URL" "$3" "$1" > /tmp/pstatus
+            HTTP_CODE=$(curl -sS -o /tmp/pbody -w '%{http_code}' -X POST \
+              -H "Authorization: token $TOK" -H "Content-Type: application/json" \
+              --data "@/tmp/pstatus" "$API/repos/blake-hamm/bhamm-lab/statuses/$GITHUB_SHA")
+            case "$HTTP_CODE" in
+              2*) echo "pending status $1=$2" ;;
+              *) echo "CODEBERG status POST $1 -> HTTP $HTTP_CODE"
+                 head -c 200 /tmp/pbody 2>/dev/null; echo
+                 PENDING_FAIL=1 ;;
+            esac
+          }
+          for sdir in $PLANS; do
+            sfid=$(echo "$sdir" | tr '/' '-')
+            post_status "${STATUS_PREFIX}:$sfid" pending "plan in progress"
+          done
+          if [ "$PENDING_FAIL" = "1" ]; then
+            echo "FATAL: one or more pending statuses could not be published (token scope? see diagnostics above)"
+            exit 1
+          fi
       - name: Checkout (Forgejo archive endpoint; no external actions by design)
         run: |
           curl -fsSL -o /tmp/repo.tar.gz "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz"
@@ -165,7 +313,14 @@ jobs:
           tar xzf /tmp/repo.tar.gz -C "$GITHUB_WORKSPACE" --strip-components=1
       - name: Download tools
         run: |
-          curl -fsSL -o /tmp/tofu.zip "https://github.com/opentofu/opentofu/releases/download/${OPENTOFU_VERSION}/tofu_${OPENTOFU_VERSION#v}_linux_amd64.zip"
+          # pin of record: tofu/.terraform-version (read from the checkout);
+          # the workflow env value is only a fallback for refs predating it.
+          OTV="${OPENTOFU_VERSION}"
+          if [ -f "$GITHUB_WORKSPACE/tofu/.terraform-version" ]; then
+            fv=$(grep -v '^[[:space:]]*#' "$GITHUB_WORKSPACE/tofu/.terraform-version" | tr -d '[:space:]')
+            if [ -n "$fv" ]; then case "$fv" in v*) OTV="$fv" ;; *) OTV="v$fv" ;; esac; fi
+          fi
+          curl -fsSL -o /tmp/tofu.zip "https://github.com/opentofu/opentofu/releases/download/${OTV}/tofu_${OTV#v}_linux_amd64.zip"
           unzip -o /tmp/tofu.zip -d /usr/local/bin
           curl -fsSL -o /tmp/tflint.zip "https://github.com/terraform-linters/tflint/releases/download/${TFLINT_VERSION}/tflint_linux_amd64.zip"
           unzip -o /tmp/tflint.zip -d /usr/local/bin
@@ -298,7 +453,7 @@ jobs:
                 # relies on bare -vars + provider defaults), so talos passes
                 # prod.tfvars explicitly -- the live (prod) environment's
                 # var file ('green' survives only in legacy cluster
-                # naming, not in workspaces; no green.tfvars since #330).
+                # naming, not in workspaces; no green.tfvars).
                 # backend creds: state lives on RGW like every stack
                 grab AWS_ACCESS_KEY_ID secret/data/core/ceph s3_access_key
                 export AWS_ACCESS_KEY_ID
@@ -395,106 +550,34 @@ jobs:
                 tofu init -input=false
               fi
               rc=0
-              # -out saves a binary plan; tofu STILL prints a human plan to stdout
-              # (captured: it is the only diagnostic when plan itself fails). The
-              # `tofu show` calls below re-render the SAVED plan without refresh
-              # lines, provider preamble, or the "didn't use -out" footer.
-              # tee doubles output into the job log (troubleshooting surface);
-              # the file still feeds tofu show + JSON summary rendering.
+              # -out saves a binary plan (what apply later runs); tofu prints
+              # the human plan to stdout and tee doubles it into the job log
+              # -- the run log is the diagnostic surface.
               tofu plan -input=false "${PLAN_EXTRA[@]}" -detailed-exitcode -out "/tmp/$fid.tfplan" > >(tee /tmp/plan-raw.txt) 2>&1 || rc=$?
               wait
               if [ "$rc" -eq 0 ] || [ "$rc" -eq 2 ]; then
                 if [ "$rc" -eq 2 ]; then SUMMARY="passed (changes pending)"; else SUMMARY="passed (no changes)"; fi
                 echo "status=pass summary=$SUMMARY" > "/tmp/results/$fid.plan"
-                if ! tofu show -no-color "/tmp/$fid.tfplan" > /tmp/plan.txt 2>/dev/null; then
-                  cp /tmp/plan-raw.txt /tmp/plan.txt
-                fi
-                tofu show -json "/tmp/$fid.tfplan" > "/tmp/$fid.plan.json" 2>/dev/null || rm -f "/tmp/$fid.plan.json"
               else
                 SUMMARY="failed (rc=$rc)"
                 echo "status=fail summary=$SUMMARY" > "/tmp/results/$fid.plan"
                 rc_all=1
-                cp /tmp/plan-raw.txt /tmp/plan.txt
               fi
               echo "plan $dir: $SUMMARY"
-              # trimmed plan for the comment (even on failure): head 100 + tail
-              # 60 lines, cap 8000 chars; strip CR and ``` fences
-              {
-                total=$(wc -l < /tmp/plan.txt)
-                {
-                  head -n 100 /tmp/plan.txt
-                  if [ "$total" -gt 160 ]; then
-                    echo "... ($((total - 160)) of $total lines elided) ..."
-                    tail -n 60 /tmp/plan.txt
-                  fi
-                } | tr -d '\r' | grep -v '```' | head -c 8000
-              } > "/tmp/results/$fid.planbody"
-              # one line per changed resource; ATTRIBUTE NAMES ONLY -- attribute
-              # values can be sensitive and must never reach a public PR comment.
-              rm -f "/tmp/results/$fid.summary"
-              if [ -f "/tmp/$fid.plan.json" ]; then
-                python3 - "/tmp/$fid.plan.json" > "/tmp/results/$fid.summary" <<'PYEOF' || rm -f "/tmp/results/$fid.summary"
-          import json, sys
-          try:
-              d = json.load(open(sys.argv[1]))
-          except Exception:
-              sys.exit(1)
-          adds = ups = dels = reps = 0
-          rows = []
-          for r in d.get("resource_changes", []):
-              a = r.get("change", {}).get("actions", [])
-              if a in (["no-op"], []):
-                  continue
-              b = r["change"].get("before") or {}
-              af = r["change"].get("after") or {}
-              if a == ["create"]:
-                  sym = "+"
-                  adds += 1
-              elif a == ["delete"]:
-                  sym = "-"
-                  dels += 1
-              elif "create" in a and "delete" in a:
-                  sym = "±"
-                  reps += 1
-              else:
-                  sym = "~"
-                  ups += 1
-              detail = ""
-              if sym in ("~", "±"):
-                  ka, kb = set(b), set(af)
-                  parts = ["+" + k for k in sorted(kb - ka)]
-                  parts += ["~" + k for k in sorted(k for k in ka & kb if b.get(k) != af.get(k))]
-                  parts += ["-" + k for k in sorted(ka - kb)]
-                  parts = [p for p in parts if p[1:] not in ("id", "content_base64sha256",
-                            "content_base64sha512", "content_md5", "content_sha1",
-                            "content_sha256", "content_sha512")]
-                  if len(parts) > 6:
-                      parts = parts[:6] + ["..."]
-                  detail = " — " + ", ".join(parts) if parts else ""
-              rows.append("`%s %s`%s" % (sym, r.get("address", "?"), detail))
-          head = "Plan: %d to add, %d to change, %d to destroy" % (adds, ups, dels)
-          if reps:
-              head += " (%d forces replacement)" % reps
-          print(head)
-          print("\n".join("- " + x for x in rows) if rows else "No changes.")
-          PYEOF
-              fi
               # PR = deployment: APPLY_STACKS is the apply allow-list (the
               # Vault credential wiring above is the blast-radius control).
               # ENABLED_STACKS only plans: a stack with pending changes that
               # is not in APPLY_STACKS records plan-only and skips apply.
-              # Apply the SAVED plan file: what the PR comment shows is exactly
+              # Apply the SAVED plan file: what the plan rendered is exactly
               # what runs. No -var flags here -- variables are baked into the
               # plan file. rc==0 means no changes: nothing to apply.
-              # Apply stdout stays OUT of the PR comment (apply output can echo
-              # sensitive attribute values); only the 'Apply complete!' counts
-              # line is quoted. Full log lives in the run-logs link.
+              # The commit status carries only the verdict; the full apply log
+              # lives in the run logs.
               case " $APPLY_STACKS " in *" $dir "*) APPLY_OK=1 ;; *) APPLY_OK=0 ;; esac
               if [ "$rc" -eq 2 ] && [ "$APPLY_OK" = "1" ]; then
-                # apply output: tee into the job log too. tofu masks sensitive
+                # apply output: tee into the job log. tofu masks sensitive
                 # attributes itself ((sensitive value)) and `apply <planfile>`
-                # prints progress lines, not raw diffs -- safe for the log; the
-                # PR comment still quotes ONLY the counts line below.
+                # prints progress lines, not raw diffs -- safe for the log.
                 tofu apply -input=false "/tmp/$fid.tfplan" > >(tee /tmp/apply.txt) 2>&1
                 arc=$?
                 wait
@@ -505,21 +588,6 @@ jobs:
                   echo "status=fail summary=apply failed (see run logs)" > "/tmp/results/$fid.apply"
                   rc_all=1
                 fi
-              # apply log for the PR comment (this IS the outcome headline now):
-              # head 60 + tail 40 lines, cap 8000; tofu masks sensitive values
-              # in its own output, and ``` fences are stripped.
-              if [ -f /tmp/apply.txt ]; then
-                {
-                  total=$(wc -l < /tmp/apply.txt)
-                  {
-                    head -n 60 /tmp/apply.txt
-                    if [ "$total" -gt 100 ]; then
-                      echo "... ($((total - 100)) of $total lines elided) ..."
-                      tail -n 40 /tmp/apply.txt
-                    fi
-                  } | tr -d '\r' | grep -v '```' | head -c 8000
-                } > "/tmp/results/$fid.applybody"
-              fi
               elif [ "$rc" -eq 2 ]; then
                 # plan-only: changes pending, but this stack is not in
                 # APPLY_STACKS -- record the distinct status, skip apply
@@ -530,9 +598,10 @@ jobs:
             )
           done
           exit $rc_all
-      - name: Post status to Codeberg PR
-        # always(): a failed fmt/lint/plan is exactly the event the PR comment
-        # must report; the job still ends red via the failed step's exit
+      - name: Finalize commit statuses on Codeberg
+        # always(): a failed fmt/lint/plan is exactly the event the commit
+        # statuses must report; the job still ends red via the failed step's
+        # exit. Replaces the pending claims posted before gate work.
         if: always()
         shell: bash
         env:
@@ -543,7 +612,12 @@ jobs:
         run: |
           set +eu pipefail  # reporting must never fail the workflow further
           TOK=$(printf '%s' "${CODEBERG_TOKEN:-}" | tr -d '[:space:]')
-          [ -n "$TOK" ] || { echo "no CODEBERG_TOKEN secret, skipping"; exit 0; }
+          if [ -z "$TOK" ]; then
+            echo "FATAL: CODEBERG_TOKEN secret missing/empty."
+            echo "The per-stack commit statuses cannot be published; required checks would wedge."
+            echo "Silent-skip was removed on purpose: a missing secret must redden the gate, not hide it."
+            exit 1
+          fi
           [ "$BRANCH" = "main" ] && { echo "main push, nothing to report"; exit 0; }
           API=https://codeberg.org/api/v1
           api() {  # api METHOD URL [data-file]; prints body, sets global HTTP_CODE
@@ -557,98 +631,49 @@ jobs:
             fi
             cat /tmp/api_body
           }
-          check() {  # check : non-2xx -> diagnostic, exit 0 (non-fatal)
+          # --- final verdicts: replace the pending claims posted before
+          # gate work, one per plan-enabled touched stack -- the exact set
+          # the pending step claimed. Untouched stacks and touched-but-not
+          # plan-enabled stacks post nothing. Branch pushes only (main
+          # exited above); statuses key on SHA. ---
+          STATUS_FAIL=0
+          post_status() {  # post_status <context> <state> <description>
+            python3 -c 'import sys, json
+          print(json.dumps({"state": sys.argv[1], "target_url": sys.argv[2], "description": sys.argv[3], "context": sys.argv[4]}))' "$2" "$RUN_URL" "$3" "$1" > /tmp/status_data
+            api POST "$API/repos/blake-hamm/bhamm-lab/statuses/$GITHUB_SHA" /tmp/status_data >/dev/null
             case "$HTTP_CODE" in
-              2*) ;;
-              *) echo "CODEBERG API $1 $2 -> HTTP $HTTP_CODE"
+              2*) echo "status $1=$2" ;;
+              *) echo "CODEBERG status POST $1 -> HTTP $HTTP_CODE"
                  head -c 200 /tmp/api_body 2>/dev/null; echo
-                 echo "status comment failed (non-fatal)"
-                 exit 0 ;;
+                 STATUS_FAIL=1 ;;
             esac
           }
-          api GET "$API/repos/blake-hamm/bhamm-lab/pulls?state=open&limit=50" >/dev/null
-          check GET "pulls"
-          PR=$(jq -r --arg b "$BRANCH" '[.[] | select(.head.ref == $b)][0].number // empty' /tmp/api_body 2>/dev/null)
-          [ -n "${PR:-}" ] || { echo "no open PR for $BRANCH"; exit 0; }
-          for dir in $STACKS; do
-            fid=$(echo "$dir" | tr '/' '-')
-            ICON=":warning:"; DESC="did not complete (see run logs)"
-            FMTLINT=$(cat "/tmp/results/$fid.fmtlint" 2>/dev/null)
-            case " $PLANS " in *" $dir "*) PLANNED=1 ;; *) PLANNED=0 ;; esac
-            PLANSTATE=$(cat "/tmp/results/$fid.plan" 2>/dev/null)
-            APPSTATE=$(cat "/tmp/results/$fid.apply" 2>/dev/null)
-            if [ "${FMTLINT#fmt=pass lint=pass}" = "" ]; then
-              if [ "$PLANNED" = "1" ]; then
-                case "$PLANSTATE" in
-                  status=pass*)
-                    # the APPLY outcome is the headline, not the plan preview
-                    case "$APPSTATE" in
-                      status=pass*) ICON=":white_check_mark:"; DESC="fmt+lint pass · plan ok · APPLIED: ${APPSTATE#*summary=}";;
-                      status=plan-only*) ICON=":warning:"; DESC="fmt+lint pass · plan ok · PLAN-ONLY: ${APPSTATE#*summary=}";;
-                      status=skip*) ICON=":white_check_mark:"; DESC="fmt+lint pass · nothing to apply (plan clean)";;
-                      status=fail*) ICON=":x:"; DESC="fmt+lint pass · APPLY FAILED (see run logs)";;
-                      *) ICON=":white_check_mark:"; DESC="fmt+lint pass · plan ${PLANSTATE#*summary=} (apply did not run)";;
-                    esac;;
-                  status=fail*) ICON=":x:"; DESC="fmt+lint pass · plan ${PLANSTATE#*summary=} (no apply attempted)";;
-                esac
-              else
-                ICON=":white_check_mark:"; DESC="fmt+lint pass (plan not enabled)"
-              fi
-            elif [ "${FMTLINT#fmt=pass}" != "" ]; then
-              ICON=":x:"; DESC="fmt failed (see run logs)"
-            elif echo "$FMTLINT" | grep -q 'lint=pass'; then
-              ICON=":x:"; DESC="lint failed (see run logs)"
-            fi
-            # marker prefix predates the tofu-cicd rename; keep for comment dedupe
-            MARKER="<!-- forgejo-tofu-ci:$fid -->"
-            BODY="$MARKER
-          **tofu-cicd — \`$dir\`:** $ICON $DESC on \`$BRANCH\` — [run logs]($RUN_URL)"
-            PSUM=$(cat "/tmp/results/$fid.summary" 2>/dev/null)
-            APPLYBODY=$(cat "/tmp/results/$fid.applybody" 2>/dev/null)
-            PLANBODY=$(cat "/tmp/results/$fid.planbody" 2>/dev/null)
-            # headline = apply verdict (DESC above); from the plan summary keep
-            # ONLY the per-resource bullets -- drop the 'Plan:' head line.
-            PBULLETS=$(printf '%s\n' "$PSUM" | tail -n +2)
-            if [ -n "$PBULLETS" ]; then
-              BODY="$BODY
-
-          $PBULLETS"
-            fi
-            if [ -n "$APPLYBODY" ]; then
-              # apply details ARE the evidence: what tofu actually did
-              BODY="$BODY
-
-          <details><summary>apply log</summary>
-
-          \`\`\`text
-          $APPLYBODY
-          \`\`\`
-
-          </details>"
-            elif [ -n "$PLANBODY" ] && { [ "$ICON" = ":x:" ] || [ "$ICON" = ":warning:" ]; }; then
-              # no apply output and the run went red or is plan-only: show
-              # the plan diff so the pending changes are reviewable from the
-              # comment
-              BODY="$BODY
-
-          <details><summary>plan diff (apply did not run)</summary>
-
-          \`\`\`text
-          $PLANBODY
-          \`\`\`
-
-          </details>"
-            fi
-            api GET "$API/repos/blake-hamm/bhamm-lab/issues/$PR/comments?limit=100" >/dev/null
-            check GET "comments"
-            CID=$(jq -r --arg m "$MARKER" '[.[] | select((.body // "") | contains($m))][-1].id // empty' /tmp/api_body 2>/dev/null)
-            jq -Rs '{body: .}' <<<"$BODY" > /tmp/api_data
-            if [ -n "${CID:-}" ]; then
-              METHOD=PATCH; URL="$API/repos/blake-hamm/bhamm-lab/issues/comments/$CID"
+          # PLANS is exactly the set the pending step claimed: touched AND
+          # plan-enabled. Untouched stacks post nothing; a touched-but-not
+          # plan-enabled stack (kubernetes) has no credential/plan path, so
+          # it also posts nothing (fmt/lint still gate the job's exit code).
+          for sdir in $PLANS; do
+            sfid=$(echo "$sdir" | tr '/' '-')
+            sfmt=$(cat "/tmp/results/$sfid.fmtlint" 2>/dev/null)
+            splan=$(cat "/tmp/results/$sfid.plan" 2>/dev/null)
+            sapply=$(cat "/tmp/results/$sfid.apply" 2>/dev/null)
+            if [ -z "$sfmt" ] || [ -z "$splan" ]; then
+              sstate=failure; sdesc="$sdir: did not complete (see run logs)"
+            elif [ "$sfmt" != "fmt=pass lint=pass" ]; then
+              sstate=failure; sdesc="$sdir: fmt or lint failed"
+            elif [ "${splan#status=pass}" != "$splan" ]; then
+              case "$sapply" in
+                status=fail*) sstate=failure; sdesc="$sdir: apply failed (see run logs)" ;;
+                status=plan-only*) sstate=success; sdesc="$sdir: plan ok (apply disabled)" ;;
+                status=skip*) sstate=success; sdesc="$sdir: plan ok" ;;
+                *) sstate=success; sdesc="$sdir: plan ok; applied" ;;
+              esac
             else
-              METHOD=POST; URL="$API/repos/blake-hamm/bhamm-lab/issues/$PR/comments"
+              sstate=failure; sdesc="$sdir: plan failed (rc not 0 or 2)"
             fi
-            api "$METHOD" "$URL" /tmp/api_data >/dev/null
-            check "$METHOD" "comment"
-            echo "posted tofu-ci status for $dir to PR #$PR"
+            post_status "${STATUS_PREFIX}:$sfid" "$sstate" "$sdesc"
           done
+          if [ "$STATUS_FAIL" = "1" ]; then
+            echo "FATAL: one or more commit statuses could not be published (token scope? see diagnostics above)"
+            exit 1
+          fi

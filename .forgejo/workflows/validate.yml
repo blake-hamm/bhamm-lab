@@ -14,7 +14,7 @@ on:
 # tool pins; this block is the pin of record (see
 # docker/docs-site/docs/operations/ci-validation.md). bump a version here
 # and the matching download step follows. OpenTofu/tflint/trivy pins live in
-# tofu-ci.yml — terraform gates run on terraform changes, not every push.
+# tofu-cicd.yml — terraform gates run on terraform changes, not every push.
 env:
   YAMLFMT_VERSION: v0.12.1
   SHFMT_VERSION: v3.8.0
@@ -208,8 +208,7 @@ jobs:
           fi
           exit 0
       - name: crane digest (every image ref must resolve)
-        # harbor.bhamm-lab.com refs are skipped: private registry, CI creds
-        # arrive later (S4)
+        # harbor.bhamm-lab.com refs are skipped: private registry not reachable with CI creds (skipped by design)
         # .ci/digest-exceptions.txt: dead/renovate-ignore-candidate upstreams
         # kept visible; the file must trend to empty
         run: |
@@ -276,7 +275,12 @@ jobs:
           # newline -> malformed Authorization header -> 401; strip all
           # whitespace before use
           TOK=$(printf '%s' "${CODEBERG_TOKEN:-}" | tr -d '[:space:]')
-          [ -n "$TOK" ] || { echo "no CODEBERG_TOKEN secret, skipping"; exit 0; }
+          if [ -z "$TOK" ]; then
+            echo "FATAL: CODEBERG_TOKEN secret missing/empty."
+            echo "The ci/validate commit status cannot be published; required checks would wedge."
+            echo "Silent-skip was removed on purpose: a missing secret must redden the gate, not hide it."
+            exit 1
+          fi
           [ "$BRANCH" = "main" ] && { echo "main push, nothing to report"; exit 0; }
           API=https://codeberg.org/api/v1
           api() {  # api METHOD URL [data-file] ; prints body, sets global HTTP_CODE
@@ -313,6 +317,19 @@ jobs:
               pass
           ' "$1" < /tmp/api_body
           }
+          # --- commit status ci/validate (branch pushes only; main already
+          # exited above; statuses key on SHA, so no PR lookup here) ---
+          if [ "$OVERALL" = "true" ]; then SSTATE=failure; SDESC="validate: one or more gate jobs failed"; else SSTATE=success; SDESC="validate: all gate jobs passed"; fi
+          python3 -c 'import sys, json
+          print(json.dumps({"state": sys.argv[1], "target_url": sys.argv[2], "description": sys.argv[3], "context": "ci/validate"}))' "$SSTATE" "$RUN_URL" "$SDESC" > /tmp/status_data
+          api POST "$API/repos/blake-hamm/bhamm-lab/statuses/$GITHUB_SHA" /tmp/status_data >/dev/null
+          case "$HTTP_CODE" in
+            2*) echo "status ci/validate=$SSTATE posted" ;;
+            *) echo "CODEBERG status POST -> HTTP $HTTP_CODE"
+               head -c 200 /tmp/api_body 2>/dev/null; echo
+               echo "FATAL: could not publish the ci/validate commit status"
+               exit 1 ;;
+          esac
           # only json.load after a 2xx check (see check) so a 4xx body
           # can never reach the parser
           api GET "$API/repos/blake-hamm/bhamm-lab/pulls?state=open&limit=50" >/dev/null

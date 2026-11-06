@@ -6,7 +6,7 @@ on:
   # (Actions tab -> ci-vault-smoke -> Run workflow).
   workflow_dispatch:
 # tool pins: vault matches the Vault CR image (hashicorp/vault:2.0.4);
-# opentofu matches the validate.yml pin of record
+# opentofu pin comes from tofu/.terraform-version (env is fallback)
 env:
   VAULT_VERSION: 2.0.4
   OPENTOFU_VERSION: v1.13.2
@@ -28,7 +28,14 @@ jobs:
           # vault ships as a zip with the binary at the top level
           curl -fsSL -o /tmp/vault.zip "https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip"
           unzip -o /tmp/vault.zip -d /usr/local/bin
-          curl -fsSL -o /tmp/tofu.zip "https://github.com/opentofu/opentofu/releases/download/${OPENTOFU_VERSION}/tofu_${OPENTOFU_VERSION#v}_linux_amd64.zip"
+          # pin of record: tofu/.terraform-version (read from the checkout);
+          # the workflow env value is only a fallback for refs predating it.
+          OTV="${OPENTOFU_VERSION}"
+          if [ -f "$GITHUB_WORKSPACE/tofu/.terraform-version" ]; then
+            fv=$(grep -v '^[[:space:]]*#' "$GITHUB_WORKSPACE/tofu/.terraform-version" | tr -d '[:space:]')
+            if [ -n "$fv" ]; then case "$fv" in v*) OTV="$fv" ;; *) OTV="v$fv" ;; esac; fi
+          fi
+          curl -fsSL -o /tmp/tofu.zip "https://github.com/opentofu/opentofu/releases/download/${OTV}/tofu_${OTV#v}_linux_amd64.zip"
           unzip -o /tmp/tofu.zip -d /usr/local/bin
       - name: Vault login (kubernetes auth, role ci)
         shell: bash
