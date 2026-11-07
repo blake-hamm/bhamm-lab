@@ -7,7 +7,7 @@ let
 in
 {
   options.cfg.monitoring = {
-    enable = mkEnableOption "Prometheus exporters and Promtail log shipping";
+    enable = mkEnableOption "Prometheus exporters and Alloy log shipping";
 
     nodeExporter = {
       enable = mkOption {
@@ -48,11 +48,11 @@ in
       };
     };
 
-    promtail = {
+    logs = {
       enable = mkOption {
         type = types.bool;
         default = true;
-        description = "Enable Promtail journald log shipping to Loki";
+        description = "Ship the systemd journal to Loki with Grafana Alloy";
       };
       lokiUrl = mkOption {
         type = types.str;
@@ -82,33 +82,38 @@ in
       openFirewall = true;
     };
 
-    services.promtail = mkIf cfg.promtail.enable {
+    # promtail was removed from nixpkgs in 26.05 (end of life), alloy is the
+    # replacement. The config lives in /etc/alloy so it can be reloaded.
+    services.alloy = mkIf cfg.logs.enable {
       enable = true;
-      configuration = {
-        server = {
-          http_listen_port = 9080;
-          grpc_listen_port = 0;
-        };
-        clients = [{
-          url = cfg.promtail.lokiUrl;
-        }];
-        scrape_configs = [{
-          job_name = "journal";
-          journal = {
-            max_age = "12h";
-            labels = {
-              job = "systemd-journal";
-              host = config.networking.hostName;
-            };
-          };
-          relabel_configs = [
-            {
-              source_labels = [ "__journal__systemd_unit" ];
-              target_label = "unit";
-            }
-          ];
-        }];
-      };
+    };
+
+    environment.etc."alloy/config.alloy" = mkIf cfg.logs.enable {
+      text = ''
+        loki.relabel "journal" {
+          rule {
+            source_labels = ["__journal__systemd_unit"]
+            target_label  = "unit"
+          }
+          forward_to = []
+        }
+
+        loki.source.journal "journal" {
+          max_age       = "12h"
+          relabel_rules = loki.relabel.journal.rules
+          labels = {
+            job  = "systemd-journal",
+            host = "${config.networking.hostName}",
+          }
+          forward_to = [loki.write.loki.receiver]
+        }
+
+        loki.write "loki" {
+          endpoint {
+            url = "${cfg.logs.lokiUrl}"
+          }
+        }
+      '';
     };
   };
 }

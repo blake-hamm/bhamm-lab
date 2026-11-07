@@ -11,7 +11,7 @@ This is for my framework mainboard, also known as AMD Strix Halo (Ryzen AI Max+ 
 
 ## USB4 Point-to-Point Networking
 
-The two Strix Halo nodes are connected via rear USB4-C ports (40 Gbps) for distributed llama.cpp inference.
+The Strix Halo nodes are connected via rear USB4-C ports (40 Gbps) for distributed llama.cpp inference. Both are bare-metal Talos workers — `tail` was previously managed as a NixOS host and that config is gone, but the node itself is live in `tofu/proxmox/talos/prod.tfvars`.
 
 ### Talos Configuration
 

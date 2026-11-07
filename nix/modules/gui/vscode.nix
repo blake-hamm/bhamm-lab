@@ -1,4 +1,4 @@
-{ config, lib, inputs, shared, pkgs-unstable, ... }:
+{ config, lib, shared, pkgs, ... }:
 
 {
   options.cfg.vscode.enable = lib.mkOption {
@@ -13,9 +13,9 @@
 
       programs.vscode = {
         enable = true;
-        package = pkgs-unstable.vscodium;
+        package = pkgs.vscodium;
         profiles.default = {
-          extensions = with pkgs-unstable.vscode-extensions; [
+          extensions = with pkgs.vscode-extensions; [
             ms-python.python
             ms-python.isort
             ms-python.black-formatter

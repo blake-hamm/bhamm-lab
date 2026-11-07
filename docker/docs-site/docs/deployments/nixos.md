@@ -42,7 +42,7 @@ nix develop .#aarch64-linux
 ```bash
 # To rebuild:
 colmena apply-local --sudo
-colmena apply --on tail --impure
+colmena apply --on garage --impure
 
 # https://nix-community.github.io/nixos-anywhere/
 

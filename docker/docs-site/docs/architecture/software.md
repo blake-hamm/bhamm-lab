@@ -316,7 +316,7 @@ orchestration._
   - _Coverage:_ Node/VM metrics, Ceph cluster, Kubernetes resources
 - **Loki:**
   - _Role:_ Log aggregation
-  - _Sources:_ Proxmox, Talos, Opnsense and application logs via Promtail
+  - _Sources:_ Proxmox, Talos, Opnsense and application logs via Grafana Alloy
 - **Alertmanager:**
   - _Role:_ Incident routing
   - _Triggers:_ Ceph OSD down, storage >90% full, pod crash loops

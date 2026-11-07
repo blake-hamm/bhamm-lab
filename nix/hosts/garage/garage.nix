@@ -5,7 +5,7 @@
   # Garage S3 Object Storage
   services.garage = {
     enable = true;
-    package = inputs.garage-upstream.packages.${pkgs.system}.default;
+    package = inputs.garage-upstream.packages.${pkgs.stdenv.hostPlatform.system}.default;
     environmentFile = config.sops.templates."garage-env".path;
     extraEnvironment = {
       GARAGE_DEFAULT_BUCKET = "ceph-rgw";
@@ -119,9 +119,9 @@
         export GARAGE_DEFAULT_SECRET_KEY=$(cat "${config.sops.secrets.garage_s3_secret_key.path}")
 
         if [ ! -d /var/lib/garage/meta ]; then
-          exec ${inputs.garage-upstream.packages.${pkgs.system}.default}/bin/garage server --single-node --default-bucket
+          exec ${inputs.garage-upstream.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/garage server --single-node --default-bucket
         else
-          exec ${inputs.garage-upstream.packages.${pkgs.system}.default}/bin/garage server
+          exec ${inputs.garage-upstream.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/garage server
         fi
       '');
     };

@@ -15,7 +15,12 @@ Break work into verifiable chunks. Stop at checkpoints:
 - Before finishing → run linters/tests/dry-run, confirm no regressions
 
 ## 3. Simple & Tasteful
-Minimum code. No speculative features. No single-use abstractions.
+Minimum code, minimum words. No filler, full sentences, technical terms exact.
+No speculative features. No single-use abstractions.
+Reuse first: existing code → stdlib or platform → installed dependency → new code.
+Grep all callers before editing a shared function.
+Never cut validation, error handling, or security.
+Non-trivial logic leaves one small test.
 Match existing style. Every changed line traces directly to the request.
 Remove only orphans your changes created.
 
