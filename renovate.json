@@ -131,7 +131,7 @@
     {
       "description": "Cluster-core terraform (proxmox/talos) never automerges regardless of semver tier",
       "matchManagers": ["terraform", "terraform-version", "terraform-requiredVersion", "terraform-lockfile"],
-      "matchFilePaths": ["**/tofu/proxmox/talos/**"],
+      "matchFileNames": ["tofu/proxmox/talos/**"],
       "labels": ["dependencies", "risk-high"],
       "automerge": false,
       "platformAutomerge": false
