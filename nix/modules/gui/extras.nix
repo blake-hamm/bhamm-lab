@@ -1,13 +1,13 @@
 { inputs
 , shared
 , pkgs
-, pkgs-unstable
 , config
 , lib
 , ...
 }: {
   imports = [
     inputs.home-manager.nixosModules.home-manager
+    inputs.brave.nixosModules.default
   ];
   config = lib.mkIf config.cfg.gnome.enable {
     nixpkgs.config.permittedInsecurePackages = [
@@ -19,10 +19,10 @@
         dbeaver-bin
         virt-manager
         obs-studio
-        brave
-        pkgs-unstable.signal-desktop
+        brave # from inputs.brave overlay (dropped from nixpkgs 26.05)
+        signal-desktop
         telegram-desktop
-        wasistlos
+        karere # wasistlos replacement (removed in 26.05)
         vlc
         uv
         krita

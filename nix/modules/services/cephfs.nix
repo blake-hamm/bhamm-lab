@@ -162,6 +162,7 @@ in
     # Post-wake: restart automount to recover from autofs pipe errors
     systemd.services.cephfs-bhamm-wake = {
       description = "Restart CephFS automount after wake";
+      wants = [ "network-online.target" ];
       after = [ "suspend.target" "hibernate.target" "hybrid-sleep.target" "network-online.target" ];
       wantedBy = [ "suspend.target" "hibernate.target" "hybrid-sleep.target" ];
       serviceConfig = {

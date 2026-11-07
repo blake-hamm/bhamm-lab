@@ -29,7 +29,7 @@ in
 
     home-manager.users.${shared.username} = { config, lib, ... }: {
       home.packages = [
-        inputs.llm-agents.packages.${pkgs.system}.pi
+        inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.pi
         pkgs.nodejs # pi needs npm to resolve packages
         pkgs.ffmpeg # pi-web-access video frame extraction
         pkgs.yt-dlp # pi-web-access YouTube stream URLs
@@ -105,124 +105,57 @@ in
         };
       };
 
-      # Global AGENTS.md: Karpathy principles + caveman-lite + delegation hints
+      # Global AGENTS.md: Karpathy principles + conciseness + delegation hints
       home.file.".pi/agent/AGENTS.md" = {
         force = true;
         source = ./agents.md;
       };
 
       # Global skills
-      home.file.".pi/agent/skills/council/SKILL.md" = {
-        force = true;
-        source = ./skills/council/SKILL.md;
-      };
       home.file.".pi/agent/skills/interview/SKILL.md" = {
         force = true;
         source = ./skills/interview/SKILL.md;
       };
 
-      # Custom subagents (override builtins to suppress cwd output files)
-      home.file.".pi/agent/agents/scout.md" = {
-        force = true;
-        source = ./agents/scout.md;
-      };
+      # Custom subagents. scout and researcher are not defined here: the
+      # pi-subagents builtins cover them, and their output files land under the
+      # session artifact dir rather than the working directory.
       home.file.".pi/agent/agents/planner.md" = {
         force = true;
         source = ./agents/planner.md;
-      };
-      home.file.".pi/agent/agents/researcher.md" = {
-        force = true;
-        source = ./agents/researcher.md;
       };
       home.file.".pi/agent/agents/context-builder.md" = {
         force = true;
         source = ./agents/context-builder.md;
       };
-      home.file.".pi/agent/agents/architect.md" = {
-        force = true;
-        source = ./agents/architect.md;
-      };
-      home.file.".pi/agent/agents/product.md" = {
-        force = true;
-        source = ./agents/product.md;
-      };
 
-      # Pi caveman: default to lite mode
-      home.file.".pi/agent/caveman.json" = {
-        force = true;
-        text = builtins.toJSON {
-          defaultLevel = "lite";
-          showStatus = true;
-        };
-      };
-
-      # Pi settings: defaults and behavior
+      # Pi settings: non-default overrides only — leave everything else at its
+      # built-in default so future pi releases can tune them.
       home.file.".pi/agent/settings.json" = {
         force = true;
         text = builtins.toJSON {
           defaultProvider = "opencode-go";
           defaultModel = "deepseek-v4.1-flash";
           theme = "catppuccin-mocha";
-          defaultThinkingLevel = "medium";
           quietStartup = true;
           collapseChangelog = true;
           enableInstallTelemetry = false;
-          enableSkillCommands = true;
-
-          compaction = {
-            enabled = true;
-            reserveTokens = 16384;
-            keepRecentTokens = 20000;
-          };
-
-          retry = {
-            enabled = true;
-            maxRetries = 3;
-            baseDelayMs = 2000;
-            maxDelayMs = 60000;
-          };
-
-          steeringMode = "one-at-a-time";
-          followUpMode = "one-at-a-time";
-          transport = "websocket";
-
-          terminal = {
-            showImages = true;
-            imageWidthCells = 60;
-            clearOnShrink = false;
-          };
-
-          images = {
-            autoResize = true;
-            blockImages = false;
-          };
 
           npmCommand = [ "${piNpm}" ];
           packages = [
             "npm:pi-web-access"
             "npm:pi-subagents"
-            "npm:pi-rewind"
-            "git:github.com/jonjonrankin/pi-caveman"
-            "npm:@devkade/pi-plan"
+            "npm:pi-rewind-hook"
           ];
 
           subagents = {
+            defaultModel = "opencode-go/deepseek-v4.1-flash";
             agentOverrides = {
-              worker = {
-                model = "opencode-go/deepseek-v4.1-flash";
+              researcher = {
+                extensions = [ "npm:pi-web-access" ];
               };
-              reviewer = {
-                model = "opencode-go/deepseek-v4.1-flash";
-              };
-              delegate = {
-                model = "opencode-go/deepseek-v4.1-flash";
-                thinking = "minimal";
-              };
-              oracle = {
-                model = "opencode-go/deepseek-v4.1-flash";
-              };
-              oracle-executor = {
-                model = "opencode-go/deepseek-v4.1-flash";
+              context-builder = {
+                extensions = [ "npm:pi-web-access" ];
               };
             };
           };

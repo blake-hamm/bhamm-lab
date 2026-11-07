@@ -2,11 +2,10 @@
   description = "Nix config";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
 
     colmena = {
-      url = "github:zhaofengli/colmena/349b035a5027f23d88eeb3bc41085d7ee29f18ed";
+      url = "github:zhaofengli/colmena/v0.5.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -16,13 +15,26 @@
     };
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.11";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    catppuccin.url = "github:catppuccin/nix/release-25.11";
+    catppuccin = {
+      url = "github:catppuccin/nix/release-26.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    sops-nix.url = "github:Mic92/sops-nix";
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # brave was dropped from nixpkgs 26.05 (no committer maintainer); community
+    # continuation of the same package by its former nixpkgs maintainer.
+    brave = {
+      url = "git+https://codeberg.org/buckley310/brave-browser-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     llm-agents.url = "github:numtide/llm-agents.nix";
 
@@ -32,14 +44,19 @@
     };
 
     garage-upstream = {
-      url = "github:deuxfleurs-org/garage/v2.3.0";
+      url = "github:deuxfleurs-org/garage/v2.5.0";
     };
 
+    # No upstream releases; rev pinned 2026-11-05 and bumped by hand.
     nixos-hardware = {
-      url = "github:NixOS/nixos-hardware/2096f3f411ce46e88a79ae4eafcfc9df8ed41c61";
+      url = "github:NixOS/nixos-hardware/d645c71a58dbae3eb17ff551a07aea13a541cb1a";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nvf.url = "github:notashelf/nvf";
+    nvf = {
+      url = "github:notashelf/nvf";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
   };
 
@@ -47,10 +64,6 @@
     let
       shared = import ./nix/lib;
       pkgs = import inputs.nixpkgs {
-        system = shared.system;
-        config.allowUnfree = true;
-      };
-      pkgs-unstable = import inputs.nixpkgs-unstable {
         system = shared.system;
         config.allowUnfree = true;
       };
@@ -63,7 +76,6 @@
           nodeNixpkgs = gen.generateNodeNixpkgs;
           specialArgs = {
             inherit self inputs shared;
-            inherit pkgs-unstable;
           };
           nodeSpecialArgs = gen.generateNodeSpecialArgs;
         };
@@ -98,7 +110,6 @@
             specialArgs = {
               host = "minimal-iso";
               inherit self inputs shared;
-              inherit pkgs-unstable;
             };
           };
 
@@ -112,7 +123,6 @@
             specialArgs = {
               host = "proxmox-image";
               inherit self inputs shared;
-              inherit pkgs-unstable;
             };
           };
 

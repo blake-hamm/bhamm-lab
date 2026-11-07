@@ -1,6 +1,6 @@
 { pkgs, inputs }:
 pkgs.mkShell {
-  buildInputs = with pkgs; [
+  packages = with pkgs; [
     pre-commit
     vault
     kubectl
@@ -11,7 +11,6 @@ pkgs.mkShell {
     inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena
     poetry
     sops
-    mkdocs
     ansible
     ansible-lint
     sshpass
@@ -19,7 +18,6 @@ pkgs.mkShell {
     terraform
     tflint
     trivy
-    terrascan
     restic
     openssl
     google-cloud-sdk
@@ -35,10 +33,8 @@ pkgs.mkShell {
     wl-clipboard
     inputs.nixos-anywhere.packages.${pkgs.stdenv.hostPlatform.system}.default
     hugo
-  ];
-
-  packages = [
-    (pkgs.python3.withPackages (python-pkgs: [
+    # mkdocs itself comes from the python environment below
+    (python3.withPackages (python-pkgs: [
       python-pkgs.mkdocs-material
       python-pkgs.hvac
       python-pkgs.httpx
@@ -47,8 +43,11 @@ pkgs.mkShell {
   ];
 
   shellHook = ''
-    # Install ansible galaxy requirements
-    ansible-galaxy install -r ansible/requirements.yml
+    # Install ansible galaxy requirements, but only when the file changed
+    stamp=.git/ansible-galaxy.stamp
+    if [ ! -f "$stamp" ] || [ ansible/requirements.yml -nt "$stamp" ]; then
+      ansible-galaxy install -r ansible/requirements.yml && touch "$stamp"
+    fi
 
     # Define python interpreter for ansible
     export NIX_PYTHON_INTERPRETER=$(which python)
