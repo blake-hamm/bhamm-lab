@@ -11,9 +11,15 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    repoURL: https://github.com/BerriAI/litellm.git
-    targetRevision: v1.90.3
-    path: deploy/charts/litellm-helm
+    # OCI chart repo: the BerriAI git monorepo removed
+    # deploy/charts/litellm-helm after v1.92.0, so the git repoURL+path
+    # source cannot serve >= v1.93.0. Chart version == app version.
+    # Never retarget 1.107.0 (supply-chain compromise).
+    repoURL: oci://ghcr.io/berriai/litellm-helm
+    targetRevision: "1.108.0"
+    # Required: Argo CD validates that a source has path or chart. OCI Helm
+    # charts are extracted (single top-level dir flattened), so this is ".".
+    path: "."
     helm:
       valuesObject:
         replicaCount: 1
@@ -81,6 +87,16 @@ spec:
               secretKeyRef:
                 name: litellm-external-secret
                 key: QDRANT_API_KEY
+          - name: OPENCODE_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: litellm-external-secret
+                key: OPENCODE_API_KEY
+          - name: OPENROUTER_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: litellm-external-secret
+                key: OPENROUTER_API_KEY
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

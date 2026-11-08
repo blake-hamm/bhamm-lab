@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://codeberg.org/blake-hamm/bhamm-lab.git
-    targetRevision: main
+    targetRevision: feature/litellm-subscriptions
     path: kubernetes/charts/common
     helm:
       valuesObject:
@@ -62,6 +62,14 @@ spec:
               remoteRef:
                 key: /default/qdrant
                 property: API_KEY
+            - secretKey: OPENCODE_API_KEY
+              remoteRef:
+                key: /default/litellm
+                property: OPENCODE_API_KEY
+            - secretKey: OPENROUTER_API_KEY
+              remoteRef:
+                key: /default/litellm
+                property: OPENROUTER_API_KEY
   syncPolicy:
     syncOptions:
       - ApplyOutOfSyncOnly=true

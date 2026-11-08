@@ -12,9 +12,9 @@ spec:
     namespace: models
   source:
     repoURL: https://github.com/blake-hamm/kube-ai-stack.git
-    # TEMP (litellm-titler alias): points at the chart feature branch that adds
-    # global.litellm.extraModels; flip back to main after the chart PR merges.
-    targetRevision: feature/litellm-extra-models
+    # Track chart main; global.litellm.extraModels landed upstream in
+    # blake-hamm/kube-ai-stack PR #76.
+    targetRevision: main
     path: charts/kube-ai-stack
     helm:
       valuesObject:
@@ -39,6 +39,154 @@ spec:
                   api_base: http://qwen-38-flash-halogen.models.svc.cluster.local:8080/v1
                   api_key: "dummy"
                   temperature: 0
+              # Role-semantic model groups (#401): consumers point at a role,
+              # never a model. Go legs first (allowance is use-it-or-lose-it),
+              # OpenRouter credits are the overflow leg, local hardware is the
+              # sunk-cost tail. order is deterministic, failure-driven failover
+              # (verified in LiteLLM v1.108.0 source); a 429 from a monthly Go
+              # cap cools the deployment and drains traffic to the next leg
+              # with auto-recovery probes. Every leg in a group carries order.
+              # reasoning_effort is the group DEFAULT (a client-sent effort
+              # wins); never use Anthropic thinking.budget_tokens or static
+              # thinking: on openai/ legs. x-opencode-session is per-group so
+              # the Go shim keeps prompt-cache lanes isolated per role.
+              - model_name: main
+                litellm_params:
+                  model: openai/deepseek-v4.1-flash
+                  api_base: https://opencode.ai/inference/go/openai/v1
+                  api_key: os.environ/OPENCODE_API_KEY
+                  extra_headers:
+                    x-opencode-session: bhamm-litellm-main
+                    x-opencode-request: bhamm-litellm-main
+                  reasoning_effort: high
+                  order: 1
+                  timeout: 1800
+                  stream_timeout: 1800
+              - model_name: main
+                litellm_params:
+                  model: openrouter/deepseek/deepseek-v4.1-flash
+                  api_key: os.environ/OPENROUTER_API_KEY
+                  reasoning_effort: high
+                  order: 2
+                  timeout: 1800
+                  stream_timeout: 1800
+              - model_name: main
+                litellm_params:
+                  model: openai/qwen-38-flash-halogen
+                  api_base: http://qwen-38-flash-halogen.models.svc.cluster.local:8080/v1
+                  api_key: "dummy"
+                  reasoning_effort: high
+                  order: 3
+                  timeout: 1800
+                  stream_timeout: 1800
+              - model_name: worker
+                litellm_params:
+                  model: openai/deepseek-v4.1-flash
+                  api_base: https://opencode.ai/inference/go/openai/v1
+                  api_key: os.environ/OPENCODE_API_KEY
+                  extra_headers:
+                    x-opencode-session: bhamm-litellm-worker
+                    x-opencode-request: bhamm-litellm-worker
+                  reasoning_effort: low
+                  order: 1
+                  timeout: 1800
+                  stream_timeout: 1800
+              - model_name: worker
+                litellm_params:
+                  model: openrouter/deepseek/deepseek-v4.1-flash
+                  api_key: os.environ/OPENROUTER_API_KEY
+                  reasoning_effort: low
+                  order: 2
+                  timeout: 1800
+                  stream_timeout: 1800
+              - model_name: worker
+                litellm_params:
+                  model: openai/qwen-38-flash-halogen
+                  api_base: http://qwen-38-flash-halogen.models.svc.cluster.local:8080/v1
+                  api_key: "dummy"
+                  reasoning_effort: low
+                  order: 3
+                  timeout: 1800
+                  stream_timeout: 1800
+              - model_name: smart
+                litellm_params:
+                  model: openai/glm-5.3
+                  api_base: https://opencode.ai/inference/go/openai/v1
+                  api_key: os.environ/OPENCODE_API_KEY
+                  extra_headers:
+                    x-opencode-session: bhamm-litellm-smart
+                    x-opencode-request: bhamm-litellm-smart
+                  reasoning_effort: high
+                  order: 1
+                  timeout: 1800
+                  stream_timeout: 1800
+              - model_name: smart
+                litellm_params:
+                  model: openrouter/z-ai/glm-5.3
+                  api_key: os.environ/OPENROUTER_API_KEY
+                  reasoning_effort: high
+                  order: 2
+                  timeout: 1800
+                  stream_timeout: 1800
+              - model_name: smart
+                litellm_params:
+                  model: openai/qwen-38-27b
+                  api_base: http://qwen-38-27b.models.svc.cluster.local:8080/v1
+                  api_key: "dummy"
+                  reasoning_effort: high
+                  order: 3
+                  timeout: 1800
+                  stream_timeout: 1800
+              - model_name: heavy
+                litellm_params:
+                  model: openai/kimi-k3
+                  api_base: https://opencode.ai/inference/go/openai/v1
+                  api_key: os.environ/OPENCODE_API_KEY
+                  extra_headers:
+                    x-opencode-session: bhamm-litellm-heavy
+                    x-opencode-request: bhamm-litellm-heavy
+                  reasoning_effort: max
+                  order: 1
+                  timeout: 1800
+                  stream_timeout: 1800
+              - model_name: heavy
+                litellm_params:
+                  model: openrouter/moonshotai/kimi-k3
+                  api_key: os.environ/OPENROUTER_API_KEY
+                  reasoning_effort: max
+                  order: 2
+                  timeout: 1800
+                  stream_timeout: 1800
+              - model_name: heavy
+                litellm_params:
+                  model: openai/qwen-38-27b
+                  api_base: http://qwen-38-27b.models.svc.cluster.local:8080/v1
+                  api_key: "dummy"
+                  reasoning_effort: max
+                  order: 3
+                  timeout: 1800
+                  stream_timeout: 1800
+              # aux: local-only lane. order 1 mirrors the titler alias
+              # (temperature 0 pinned: halogen needs it for strict JSON
+              # schema output), order 2 is the 27b spare. No reasoning_effort
+              # — inherits the local server defaults.
+              - model_name: aux
+                litellm_params:
+                  model: openai/qwen-38-flash-halogen
+                  api_base: http://qwen-38-flash-halogen.models.svc.cluster.local:8080/v1
+                  api_key: "dummy"
+                  temperature: 0
+                  order: 1
+                  timeout: 1800
+                  stream_timeout: 1800
+              - model_name: aux
+                litellm_params:
+                  model: openai/qwen-38-27b
+                  api_base: http://qwen-38-27b.models.svc.cluster.local:8080/v1
+                  api_key: "dummy"
+                  order: 2
+                  timeout: 1800
+                  stream_timeout: 1800
             config:
               litellm_settings:
                 request_timeout: 1800
@@ -58,12 +206,16 @@ spec:
                 store_model_in_db: True
                 store_prompts_in_spend_logs: True
                 health_check_interval: 1800
+                disable_model_info_refresh: True
               router_settings:
                 debug_level: "INFO"
                 allowed_fails: 999
                 timeout: 1800
                 num_retries: 0
                 routing_strategy: simple-shuffle
+                # Go cap exhaustion returns 429; park the capped deployment
+                # for 60s instead of hammering it every 5s (default).
+                cooldown_time: 60
                 redis_host: os.environ/REDIS_HOST
                 redis_port: os.environ/REDIS_PORT
                 redis_password: os.environ/REDIS_PASSWORD
@@ -375,7 +527,7 @@ spec:
                 memory: "110Gi"
           - name: qwen-36-a3b
             description: High quality MoE model for general chat
-            enabled: true
+            enabled: false
             pvc:
               storage: "40Gi"
             image:
@@ -1993,7 +2145,7 @@ spec:
             # a Prometheus gauge. The worker follows the coordinator's replicas
             # (mirrors rpc-tail following minimax-m27).
             description: DeepSeek V4.1 Flash coordinator (ds4, nose) + worker (tail)
-            enabled: true
+            enabled: false
             hostNetwork: true
             hostIPC: true
             pvc:
@@ -2205,7 +2357,7 @@ spec:
             # minimax-m27): when the coordinator scales to zero, the worker does
             # too; when the coordinator scales up, the worker follows.
             description: DeepSeek V4.1 Flash worker (ds4, tail)
-            enabled: true
+            enabled: false
             hostNetwork: true
             hostIPC: true
             pvc:
