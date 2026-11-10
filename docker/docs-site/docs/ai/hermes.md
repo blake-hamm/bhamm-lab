@@ -50,7 +50,7 @@ Key design constraints from the upstream image:
 Signal runs as a sidecar container (`ghcr.io/asamk/signal-cli`, JVM tag — the GraalVM `-native` build mangles QR output, see signal-cli #2073) in single-account daemon mode on `:8080`. Hermes reaches it via the `hermes` Service, not loopback (separate container netns).
 
 - Session data lives on the `hermes-signal-cli` rbd PVC at `/var/lib/signal-cli` (note: with `--config`, account data is at `<config>/data/accounts.json`, not the `$HOME` default).
-- Channel policy: DMs (including Note-to-Self) are dropped (`SIGNAL_ALLOWED_USERS=none`); a dedicated "hermes" Signal group is the only live channel (`SIGNAL_GROUP_ALLOWED_USERS`). Group authz relies on a backport of upstream PR #44706, mounted via `authz-patch-configmap-prod.yaml` — tied to the pinned image digest; regenerate on image bump, delete once the PR ships.
+- Channel policy: DMs (including Note-to-Self) are dropped (`SIGNAL_ALLOWED_USERS=none`); a dedicated "hermes" Signal group is the only live channel (`SIGNAL_GROUP_ALLOWED_USERS`).
 - **Linking** is built into the sidecar entrypoint: if no account exists on the PVC, it runs `signal-cli link` and logs the `tsdevice:` URI. QR-ify locally (`qrencode -t ANSIUTF8 '<uri>'`) and scan from the phone; the same process then execs the daemon. Do not run `signal-cli receive`/`listAccounts` while the daemon is up — concurrent access corrupts the account DB.
 
 ### Boot race (known issue)
@@ -72,14 +72,14 @@ Note: Cilium's DNS proxy does not populate FQDN state on this cluster, so `toFQD
 
 ### Browser automation
 
-`browser_exec` (browser-use harness) attaches to a CDP Chromium at `http://127.0.0.1:9222`. A `chromium-cdp` sidecar container runs the Playwright headless-shell that ships in the image — the harness never launches it on its own (bare launch opens no CDP port, and its auto-launch/liveness checks only recognize standard chrome/chromium/brave/edge binary names). The daemon is pointed at the sidecar via the `BU_CDP_URL=http://127.0.0.1:9222` env var (set on the container; covers all profiles). Pod-local, so no NetPol impact. The binary path is pinned to the image's playwright cache revision; **re-verify on every image bump**.
+`browser_exec` (browser-use harness) attaches to a CDP Chromium at `http://127.0.0.1:9222`. A `chromium-cdp` sidecar container runs the Chrome for Testing build that ships in the image — the harness never launches it on its own (bare launch opens no CDP port, and its auto-launch/liveness checks only recognize standard chrome/chromium/brave/edge binary names). The daemon is pointed at the sidecar via the `BU_CDP_URL=http://127.0.0.1:9222` env var (set on the container; covers all profiles). Pod-local, so no NetPol impact. The sidecar resolves the binary at start from `/etc/hermes/chromium-executable-path`, an image hook that names Chrome for Testing 145 at `/opt/hermes/tools/chromium-1208/chrome-linux64/chrome`; no per-image playwright revision is baked into the manifest, so a base-image bump needs no edit here.
 
 ## Operations
 
 - **Config changes:** `hermes config set` writes `/opt/data/config.yaml` but does not reload the running gateway — restart the pod (or kill the gateway PID) to apply. This bit us with `model.api_mode chat_completions`: llama-server rejects Responses-API payloads (`Cannot determine type of 'item'`), and the fix did not take effect until a restart.
 - **Backups:** k8up backs up both PVCs (`hermes-data` cephfs RWX, `hermes-signal-cli` rbd RWO).
 - **Secrets:** `secrets.enc.json` → Vault sync workflow → ExternalSecret (`OPENAI_API_KEY` reuses the LiteLLM master key, open-webui pattern).
-- **Image upgrades:** both images pinned by digest; Renovate proposes updates. Regenerate the authz patch ConfigMap on hermes image bumps.
+- **Image upgrades:** both containers run `harbor.bhamm-lab.com/library/hermes:latest` with `imagePullPolicy: Always`, rebuilt by the docker/ push pipeline; the upstream tag lives only in `docker/hermes/Dockerfile`. The pin chain is upstream tag -> harbor `:latest` -> `pullPolicy: Always`, so a `:latest` rebuild is a deployment input: build and push the image before the pods restart, or a pod that boots first runs without the baked hindsight deps.
 
 ## Observability access
 

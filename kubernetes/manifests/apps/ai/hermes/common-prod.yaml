@@ -19,7 +19,7 @@ spec:
         name: hermes
         pvc:
           - name: hermes-data
-            storageSize: 10Gi
+            storageSize: 25Gi
         k8up:
           backup:
             enabled: true

@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://codeberg.org/blake-hamm/bhamm-lab.git
-    targetRevision: feature/litellm-subscriptions
+    targetRevision: feature/hermes-v0.23.0-pvc-bump
     path: kubernetes/manifests/apps
     directory:
       recurse: true

@@ -30,8 +30,13 @@ spec:
           # NOTE: image starts as root (s6-overlay PID 1); stage2-hook chowns
           # /opt/data then drops services to hermes (UID 10000) via s6-setuidgid.
           # Do NOT set runAsNonRoot / drop ALL caps — stage2 needs them.
-          image: nousresearch/hermes-agent:v2026.9.24@sha256:fca358f12efd65bfaaca05884166f15c0e2788375ca30d77061ac1ebc96452b7
-          imagePullPolicy: IfNotPresent
+          # Derived from nousresearch/hermes-agent:v0.23.0 by docker/hermes/Dockerfile,
+          # which adds the hindsight plugin's python deps (they belong in this venv and
+          # the pod overlay loses runtime installs). Built and pushed to :latest by
+          # forgejo-docker-all on any docker/ change, so pull Always.
+          # Bump the Dockerfile FROM by hand: upstream moved off date-stamped tags.
+          image: harbor.bhamm-lab.com/library/hermes:latest
+          imagePullPolicy: Always
           args:
             - gateway
             - run
@@ -118,20 +123,21 @@ spec:
             - mountPath: /opt/data
               name: hermes-data
         # CDP endpoint for browser_exec (browser-use harness attaches via
-        # 127.0.0.1:9222). Reuses the headless Chromium the image ships —
-        # the harness never launches it on its own (bare launch opens no
-        # CDP port). Binary path is pinned to the playwright cache
-        # revision: RE-VERIFY ON IMAGE BUMP (chromium_headless_shell-1243).
+        # 127.0.0.1:9222). The harness never launches a browser on its own
+        # (bare launch opens no CDP port), so a browser must be listening.
+        # The image ships Chrome for Testing and records its path in
+        # /etc/hermes/chromium-executable-path — resolve it at start so this
+        # sidecar does not need a per-image baked revision. Verified 2026-11-09
+        # on v0.23.0: Chrome/145.0.7632.6 serves /json/version with --headless=new.
+        # The disable-* flags only silence container noise (no dbus, GPU or Google
+        # services here): Vulkan/dawn, GCM registration, component updates.
         - name: chromium-cdp
-          image: nousresearch/hermes-agent:v2026.9.24@sha256:fca358f12efd65bfaaca05884166f15c0e2788375ca30d77061ac1ebc96452b7
-          imagePullPolicy: IfNotPresent
+          image: harbor.bhamm-lab.com/library/hermes:latest
+          imagePullPolicy: Always
           command:
-            - /opt/hermes/.playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell
-          args:
-            - --no-sandbox
-            - --disable-dev-shm-usage
-            - --remote-debugging-port=9222
-            - --user-data-dir=/tmp/chromium-cdp
+            - /bin/sh
+            - -c
+            - exec "$(cat /etc/hermes/chromium-executable-path)" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --disable-background-networking --disable-component-update --disable-sync --disable-features=Translate,MediaRouter --no-first-run --no-default-browser-check --remote-debugging-port=9222 --user-data-dir=/tmp/chromium-cdp
           resources:
             requests:
               memory: "256Mi"
@@ -140,7 +146,11 @@ spec:
               memory: "512Mi"
               cpu: "500m"
       securityContext:
-        # Hermes container (root) chowns /opt/data in stage2.
-        fsGroup: 1000
+        # Must match the "hermes" account's GID (10000 in v0.23.0; it was 1000 in
+        # v2026.9.x). Hermes refuses to start a turn when $HERMES_HOME is group-
+        # writable by a group that is not its own: gateway_runtime_discovery raises
+        # unsafe_control_permissions and the dashboard chat silently fails to reply.
+        fsGroup: 10000
+        fsGroupChangePolicy: OnRootMismatch
       dnsPolicy: ClusterFirst
       restartPolicy: Always
