@@ -185,6 +185,10 @@ spec:
               opnsense:
                 url: https://codeberg.org/blake-hamm/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/opnsense.json
                 token: ''
+              health:
+                url: https://codeberg.org/blake-hamm/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/health.json
+                token: ''
+                datasource: VictoriaMetrics
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
@@ -202,6 +206,16 @@ spec:
               type: loki
               url: http://loki-distributed-gateway
               access: proxy
+            # Explicit uid: the health dashboard JSON references it by uid, so
+            # an auto-generated one would break every panel.
+            - name: VictoriaMetrics
+              uid: VictoriaMetrics
+              type: prometheus
+              url: http://health-vm-victoria-metrics-single-server.health.svc:8428
+              access: proxy
+              jsonData:
+                # Matches the HAE posting cadence.
+                timeInterval: 15m
         nodeExporter:
           enabled: true
           operatingSystems:
