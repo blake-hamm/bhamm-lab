@@ -1,0 +1,71 @@
+# Netpol for the health namespace (VictoriaMetrics single, plus the k8up
+# backup pods that back up its PVC). Same shape as
+# apps/ai/hermes/networkpolicy-prod.yaml.
+#
+# Cilium runs default enforcement mode: any CNP selecting these endpoints
+# flips the namespace to deny-by-default for traffic no rule matches, so the
+# egress allow-list below IS the default-deny egress. An empty
+# ingress+egress CNP is rejected as invalid by Cilium, hence no separate
+# empty default-deny object.
+#
+# Phase 1 has exactly one workload (the vmsingle StatefulSet); k8up's job
+# pods land in this namespace too and are selected by endpointSelector: {},
+# so the DNS / kube-apiserver / RGW rules below serve both.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: health-ingress
+  namespace: health
+  annotations:
+    argocd.argoproj.io/sync-wave: "21"
+spec:
+  endpointSelector: {}
+  ingress:
+    # Prometheus scrape only (ServiceMonitor -> pod :8428). Nothing else in
+    # Phase 1 talks to vmsingle: ingest arrives in Phase 2.
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: monitor
+      toPorts:
+        - ports:
+            - port: "8428"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: health-egress
+  namespace: health
+  annotations:
+    argocd.argoproj.io/sync-wave: "21"
+spec:
+  endpointSelector: {}
+  egress:
+    # DNS (kube-dns) — required for everything below
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # Kubernetes API — k8up backup jobs patch their CR status / read secrets
+    - toEntities:
+        - kube-apiserver
+    # Ceph RGW S3 (onsite backup target for the k8up restic repository).
+    # external-rgw is a selector-less Service with manual Endpoints to the
+    # Proxmox hosts; Cilium KPR translates ClusterIP:80 -> backend:7480
+    # BEFORE egress enforcement, so match the backend CIDRs + 7480, not the
+    # service port. Endpoints per
+    # kubernetes/manifests/base/ceph/rgw-endpoints-all.yaml (VLAN 30).
+    - toCIDR:
+        - 10.0.30.11/32
+        - 10.0.30.12/32
+        - 10.0.30.13/32
+      toPorts:
+        - ports:
+            - port: "7480"
+              protocol: TCP

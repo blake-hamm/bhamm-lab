@@ -1,0 +1,77 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: health-vm
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: health
+  source:
+    repoURL: https://victoriametrics.github.io/helm-charts
+    chart: victoria-metrics-single
+    # Pinned, not `latest` (helm search repo vm/victoria-metrics-single
+    # --versions, re-verified 2026-11-11): chart 0.51.0 ships VictoriaMetrics
+    # v1.156.0. An unpinned chart silently rolls the vmsingle image.
+    targetRevision: 0.51.0
+    helm:
+      valuesObject:
+        server:
+          # Passive long-term store; Apple Health series are tiny but permanent.
+          retentionPeriod: 10y
+          persistentVolume:
+            enabled: true
+            size: 10Gi
+            # csi-rbd-sc is the cluster-default StorageClass (RWO block).
+            # csi-cephfs-sc is RWX-only and wrong for a single-writer TSDB.
+            storageClassName: csi-rbd-sc
+            annotations:
+              k8up.io/backup: "true"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 192Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          # PSA `restricted`: the chart defaults are `securityContext:
+          # {enabled: true}` / `podSecurityContext: {enabled: true}` with the
+          # rest of the map empty, and the upstream image has no USER (runs as
+          # root), so every field below is ours. runAsUser/fsGroup 1000 lets the
+          # RBD volume be written without root.
+          podSecurityContext:
+            enabled: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            fsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          securityContext:
+            enabled: true
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            # readOnlyRootFilesystem deliberately left unset: vmsingle writes
+            # its data dir under /storage (the PVC), and a read-only rootfs was
+            # not verified against the image's other writable paths.
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+                - ALL
+          # Chart's built-in ServiceMonitor (templates/monitor.yaml). Renders
+          # ServiceMonitor health-vm-victoria-metrics-single-server, scraping
+          # Service health-vm-victoria-metrics-single-server on port `http`
+          # (8428), path /metrics. kube-prometheus-stack runs with
+          # serviceMonitorSelectorNilUsesHelmValues=false, so no release label.
+          serviceMonitor:
+            enabled: true
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
