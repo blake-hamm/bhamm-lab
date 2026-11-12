@@ -87,6 +87,15 @@ sys.exit(1 if missing else 0)'
 # Only the venv and the package: no build cache, no uv binary, no pip.
 COPY --from=builder --chown=10001:10001 /app /app
 
+# Each FROM resets the working directory, so the builder's WORKDIR /app does not
+# carry over. uvicorn resolves "receiver.app" relative to cwd, so the runtime
+# stage needs it back explicitly.
+WORKDIR /app
+
+# A module-path regression must fail the build, not the pod: this exercises the
+# same import path uvicorn uses at startup.
+RUN /app/.venv/bin/python -c "import receiver.app"
+
 USER 10001
 
 EXPOSE 8080
@@ -94,4 +103,6 @@ EXPOSE 8080
 # --no-access-log: the receiver must emit exactly ONE INFO line per accepted
 # POST (the structural fingerprint log); uvicorn's access log would add a
 # second line per request and has no value here.
-CMD ["uvicorn", "receiver.app:app", "--host", "0.0.0.0", "--port", "8080", "--no-access-log"]
+# --app-dir /app makes the import root explicit, so the app is importable
+# regardless of the working directory.
+CMD ["uvicorn", "receiver.app:app", "--app-dir", "/app", "--host", "0.0.0.0", "--port", "8080", "--no-access-log"]
