@@ -20,7 +20,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY main.py .
+COPY receiver ./receiver
 
 RUN useradd --uid 10001 --no-create-home --no-user-group \
     --shell /usr/sbin/nologin receiver
@@ -32,4 +32,4 @@ EXPOSE 8080
 # --no-access-log: the receiver must emit exactly ONE INFO line per accepted
 # POST (the structural fingerprint log); uvicorn's access log would add a
 # second line per request and has no value here.
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--no-access-log"]
+CMD ["uvicorn", "receiver.app:app", "--host", "0.0.0.0", "--port", "8080", "--no-access-log"]
