@@ -9,7 +9,8 @@ Deploy Renovate as a self-hosted bot using an Argo Workflows `CronWorkflow`, kee
 - **Execution:** Argo Workflows `CronWorkflow` in namespace `argo`
 - **Platform:** Codeberg via Renovate's `forgejo` platform module
 - **Auth:** Dedicated bot account + PAT stored in SOPS → Vault → External Secret
-- **Cache:** PVC mounted at `/tmp/renovate/cache` for repo/package metadata between runs
+- **Cache:** `repositoryCache: enabled` with `cacheDir: /tmp/renovate/cache` (the PVC mount) in the global `config.js` — without it every run is a cold PR scan that 504s against Codeberg's front proxy
+- **Image:** pinned by tag+digest (`renovate/renovate:43.288.0@sha256:3b72fc…e5f6`) so a floating major tag cannot change behaviour between nightly runs. Nothing auto-bumps this pin: Renovate's managers extract images from Dockerfiles and helm values, not from `kubernetes/manifests` (same blind spot as #302), so bumping it is a manual commit.
 - **Config:** `config.js` injected via ConfigMap; `renovate.json` in repo root
 - **Observability:** Argo UI, Prometheus workflow metrics, logs in existing stack
 - **GitOps:** Manifests deployed via the existing `automations` ArgoCD Application
