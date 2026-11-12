@@ -17,3 +17,13 @@ RUN set -eux; \
       "hindsight-client>=0.10.1,<2" \
       "hindsight-embed>=0.10.1,<2"; \
     rm -rf /tmp/uv-cache
+
+# The base image ships uv under a version-suffixed path, so `uv` is not on PATH.
+# Expose it (and uvx) so the agent can invoke it directly instead of globbing
+# /opt/hermes/tools/uv-*/uv.
+RUN set -eux; \
+    uv=$(ls -d /opt/hermes/tools/uv-*/uv | head -1); \
+    ln -sf "$uv" /usr/local/bin/uv; \
+    ln -sf "$(dirname "$uv")/uvx" /usr/local/bin/uvx; \
+    uv --version; \
+    uvx --version
