@@ -47,7 +47,7 @@ spec:
             - name: INGEST_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: health-receiver-secret
+                  name: health-external-secret
                   key: INGEST_TOKEN
             - name: VM_URL
               value: http://health-vm-victoria-metrics-single-server.health.svc:8428
