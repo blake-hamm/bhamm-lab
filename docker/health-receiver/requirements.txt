@@ -1,0 +1,6 @@
+fastapi==0.162.5
+uvicorn[standard]==0.54.0
+httpx==0.28.1
+# ijson streams data.metrics.item so one metric object is materialised at a
+# time; json.loads() on a 13.7 MB export peaks at ~591 MB RSS.
+ijson==3.6.0
