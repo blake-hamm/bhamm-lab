@@ -13,4 +13,10 @@ data:
       repositories: ['blake-hamm/bhamm-lab'],
       onboarding: false,
       gitAuthor: 'Renovate Bot <renovate@bhamm-lab.com>',
+      // Without the repo cache every nightly run is a COLD scan of all 290 PRs at
+      // limit=100, which blows Codeberg's ~45s front-proxy budget and 504s (#405).
+      repositoryCache: 'enabled',
+      // Renovate's effective default cacheDir (baseDir /tmp/renovate + /cache);
+      // set explicitly so it stays in lockstep with the PVC mountPath.
+      cacheDir: '/tmp/renovate/cache',
     };
