@@ -8,9 +8,10 @@
 # ingress+egress CNP is rejected as invalid by Cilium, hence no separate
 # empty default-deny object.
 #
-# Phase 1 has exactly one workload (the vmsingle StatefulSet); k8up's job
-# pods land in this namespace too and are selected by endpointSelector: {},
-# so the DNS / kube-apiserver / RGW rules below serve both.
+# Phase 1 workloads: the vmsingle StatefulSet and the ingest receiver (its own
+# narrower policy at the bottom of this file); k8up's job pods land in this
+# namespace too and are selected by endpointSelector: {}, so the DNS /
+# kube-apiserver / RGW rules below serve both.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -68,4 +69,40 @@ spec:
       toPorts:
         - ports:
             - port: "7480"
+              protocol: TCP
+---
+# Ingest receiver (phase 1). Separate object, narrower selector: the existing
+# rules above select endpointSelector {} (vmsingle + k8up), so extending them
+# would open :8080 on vmsingle as well. Cilium policies are additive, so the
+# DNS / apiserver egress already allowed above still applies to this pod and is
+# deliberately NOT repeated here.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: health-receiver
+  namespace: health
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  endpointSelector:
+    matchLabels:
+      app: health-receiver
+  ingress:
+    # HAE POSTs arrive through Traefik only.
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: traefik
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+  egress:
+    # Synchronous Influx write to the in-cluster vmsingle (Service
+    # health-vm-victoria-metrics-single-server:8428).
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: health
+      toPorts:
+        - ports:
+            - port: "8428"
               protocol: TCP

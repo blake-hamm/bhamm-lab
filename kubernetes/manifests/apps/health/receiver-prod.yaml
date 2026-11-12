@@ -1,0 +1,106 @@
+# Health Auto Export ingest receiver (phase 1).
+#
+# Synced by prod-apps (app-of-apps, path kubernetes/manifests/apps, include
+# `{**all.yaml,**prod.yaml}`, recurse) so this file is picked up with no
+# registration step. Wave 22: after the vmsingle Application (20) and the
+# networkpolicies (21); the ExternalSecret is wave 14 (chart convention), so
+# the Secret exists before this pod starts.
+#
+# PSA `restricted` is enforced on the namespace, hence every field below.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: health-receiver
+  namespace: health
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: health-receiver
+  template:
+    metadata:
+      labels:
+        app: health-receiver
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: receiver
+          # Built from docker/health-receiver/ by the docker/ push pipeline.
+          image: harbor.bhamm-lab.com/library/health-receiver:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            # Bearer token HAE must send. Fail-closed: no token, no start.
+            - name: INGEST_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: health-receiver-secret
+                  key: INGEST_TOKEN
+            - name: VM_URL
+              value: http://health-vm-victoria-metrics-single-server.health.svc:8428
+          # /healthz is auth-free and never touches VictoriaMetrics: a VM blip
+          # must surface as a 502 on ingest, not as an unready pod.
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          # 128Mi request: measured peak RSS of the full stream-translate-
+          # serialise path on a real 13.7 MB export (92,357 points) is ~115 MB.
+          # 512Mi limit leaves room for an HAE range with workouts attached.
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: health-receiver
+  namespace: health
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  type: ClusterIP
+  selector:
+    app: health-receiver
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP

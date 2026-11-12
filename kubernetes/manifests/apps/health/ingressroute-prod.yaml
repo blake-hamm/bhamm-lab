@@ -1,0 +1,31 @@
+# Ingress for the ingest receiver.
+#
+# Deliberately NOT health-ingest.bhamm-lab.com: the retired Argo Events
+# IngressRoute still claims that host until phase 2, and two IngressRoutes for
+# one host conflict. The wildcard ClusterTunnel already publishes
+# *.bhamm-lab.com, so no DNS change is needed for the new name.
+#
+# entryPoints: websecure — `traefik-external` is the Traefik *ingressClass*
+# (helm-all.yaml providers.kubernetesCRD.ingressClass), not an entryPoint name.
+# The common chart renders the same shape (kubernetes/charts/common/templates/
+# ingress-route.yaml); this app has no chart, so the object is spelled out.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: health-receiver
+  namespace: health
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`health-receiver.bhamm-lab.com`)
+      kind: Rule
+      services:
+        - name: health-receiver
+          kind: Service
+          port: 8080
+          scheme: http
+  tls: {}
