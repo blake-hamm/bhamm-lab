@@ -1,0 +1,6 @@
+# Build context is the package plus the project files, nothing else.
+*
+!pyproject.toml
+!uv.lock
+!receiver/
+!receiver/**

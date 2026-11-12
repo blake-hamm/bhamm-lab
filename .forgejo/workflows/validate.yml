@@ -22,8 +22,8 @@ env:
   RIPSECRETS_VERSION: v0.1.8
   KUBECONFORM_VERSION: v0.6.7
   CRANE_VERSION: v0.20.2
-  # uv release tags carry no leading v (0.13.6, not v0.13.6)
-  UV_VERSION: 0.13.6
+  # uv release tags carry no leading v (0.13.7, not v0.13.7)
+  UV_VERSION: 0.13.7
   # matches Talos v1.12.6 -> k8s 1.35; keep in sync with
   # tofu/proxmox/talos/variables.tf talos_version
   KUBE_VERSION: "1.35.0"

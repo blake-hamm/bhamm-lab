@@ -1,0 +1,24 @@
+[project]
+name = "health-receiver"
+version = "0.2.0"
+description = "Health Auto Export -> VictoriaMetrics streaming receiver"
+# 3.15 is the target; uv downloads the interpreter itself (uv python install).
+requires-python = ">=3.15"
+dependencies = [
+  "fastapi==0.162.5",
+  # plain uvicorn on purpose: uvicorn[standard] additionally pulls uvloop,
+  # httptools, watchfiles, websockets and pyyaml. All five are compiled
+  # extensions we do not need at ~96 requests/day, and each one is extra CVE
+  # surface plus build risk on a brand-new CPython.
+  "uvicorn==0.54.0",
+  "httpx==0.28.1",
+  # ijson streams data.metrics.item so one metric object is materialised at a
+  # time; json.loads() on a 13.7 MB export peaks at ~591 MB RSS.
+  "ijson==3.6.0",
+]
+
+# Application, not a library: there is nothing to build or install. Keeps
+# `uv sync --no-install-project` meaningful and the image free of a build
+# backend.
+[tool.uv]
+package = false
