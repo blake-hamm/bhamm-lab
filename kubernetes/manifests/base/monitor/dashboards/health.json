@@ -154,7 +154,7 @@
             "uid": "VictoriaMetrics"
           },
           "editorMode": "code",
-          "expr": "max_over_time(health_value{type=\"steps\",source=~\"$source\"}[24h])",
+          "expr": "max_over_time(health_value{type=\"step_count\",source=~\"$source\"}[24h])",
           "interval": "",
           "legendFormat": "Steps today",
           "range": true,
@@ -247,7 +247,7 @@
             "uid": "VictoriaMetrics"
           },
           "editorMode": "code",
-          "expr": "max_over_time(health_value{type=\"steps\",source=~\"$source\"}[24h])",
+          "expr": "max_over_time(health_value{type=\"step_count\",source=~\"$source\"}[24h])",
           "interval": "",
           "legendFormat": "{{source}}",
           "range": true,
@@ -823,7 +823,7 @@
             "uid": "VictoriaMetrics"
           },
           "editorMode": "code",
-          "expr": "health_value{type=\"heart_rate_bpm\",source=~\"$source\"}",
+          "expr": "health_value{type=\"heart_rate\",source=~\"$source\"}",
           "interval": "",
           "legendFormat": "Heart rate",
           "range": true,
