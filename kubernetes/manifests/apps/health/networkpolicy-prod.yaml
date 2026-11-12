@@ -22,11 +22,19 @@ metadata:
 spec:
   endpointSelector: {}
   ingress:
-    # Prometheus scrape only (ServiceMonitor -> pod :8428). Nothing else in
-    # Phase 1 talks to vmsingle: ingest arrives in Phase 2.
+    # Two admitted sources, both scoped to 8428/TCP:
+    #   - namespace monitor: Prometheus scrapes vmsingle (ServiceMonitor -> pod :8428)
+    #   - namespace health:  the health-receiver pod writes Influx line protocol to
+    #                        :8428 synchronously on every accepted POST
+    # The receiver runs in this same namespace, so a namespace selector (not an
+    # app selector) is what admits it. endpointSelector: {} means this policy
+    # governs every pod in the namespace, so the rule is scoped by destination
+    # port rather than by source.
     - fromEndpoints:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: monitor
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: health
       toPorts:
         - ports:
             - port: "8428"
@@ -88,10 +96,17 @@ spec:
     matchLabels:
       app: health-receiver
   ingress:
-    # HAE POSTs arrive through Traefik only.
+    # HAE POSTs arrive by two paths, both to 8080/TCP:
+    #   - cloudflared (namespace cloudflare-operator-system) dials the Service
+    #     ClusterIP directly: the TunnelBinding target is
+    #     http://health-receiver.health.svc.cluster.local:8080, so the public
+    #     path is pod-to-pod and never touches Traefik.
+    #   - Traefik serves the IngressRoute for the same host in-cluster.
     - fromEndpoints:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: traefik
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cloudflare-operator-system
       toPorts:
         - ports:
             - port: "8080"
