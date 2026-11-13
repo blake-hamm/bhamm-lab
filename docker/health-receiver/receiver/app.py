@@ -3,8 +3,12 @@
 Replaces the retired Argo Events ingest path. HAE POSTs one JSON document; we
 stream it with ijson, translate to Influx line protocol, and write it to
 VictoriaMetrics in a SINGLE request. 2xx is returned ONLY after that write is
-accepted: no queue, no retry loop, no buffering. If VictoriaMetrics is down the
-caller gets a 502 and can see the failure.
+accepted: no queue, no buffering. If VictoriaMetrics stays down the caller gets
+a 502 and can see the failure.
+
+Two guards sit in front of that write. A document with an unattributable series
+is refused with 422 before anything is sent. A connection-level failure or a 5xx
+is retried twice (0.5s, 1.0s); a 4xx never is.
 
 Measurements written in phase 1:
 
@@ -19,6 +23,7 @@ heartRateNotifications are counted and reported but NOT stored yet; each one
 gets its own translate_* function when it is added.
 """
 
+import asyncio
 import gzip
 import hmac
 
@@ -30,9 +35,34 @@ from fastapi.responses import JSONResponse
 from .config import INGEST_TOKEN, LOG, TIMEOUT, TOP_LEVEL_ARRAYS, WRITE_URL
 from .shape import shape_dump
 from .stream import Stats, lines_from_body
+from .validate import find_violation
 
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 client = httpx.AsyncClient(timeout=TIMEOUT)
+
+WRITE_HEADERS = {"Content-Type": "text/plain", "Content-Encoding": "gzip"}
+# Sleep before attempt 2 and attempt 3. A 4xx is never retried: the request is
+# malformed and would fail identically, so the error has to surface.
+RETRY_DELAYS = (0.5, 1.0)
+RETRY_ERRORS = (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout)
+
+
+async def write(payload: bytes) -> httpx.Response:
+    """POST the body, retrying connection failures and 5xx up to 3 attempts."""
+    attempt = 1
+    while True:
+        try:
+            response = await client.post(WRITE_URL, content=payload, headers=WRITE_HEADERS)
+        except RETRY_ERRORS as exc:
+            if attempt > len(RETRY_DELAYS):
+                raise
+            LOG.warning("retry attempt=%d error=%s", attempt, type(exc).__name__)
+        else:
+            if response.status_code // 100 != 5 or attempt > len(RETRY_DELAYS):
+                return response
+            LOG.warning("retry attempt=%d status=%d", attempt, response.status_code)
+        await asyncio.sleep(RETRY_DELAYS[attempt - 1])
+        attempt += 1
 
 
 def authorized(request: Request) -> bool:
@@ -60,17 +90,25 @@ async def ingest(request: Request):
         LOG.warning("rejected bytes=%d reason=%s", len(body), reason)
         return JSONResponse({"error": "malformed json", "reason": reason}, status_code=400)
 
+    # Refuse an unattributable series here: line() would silently drop the
+    # empty tag and the write would still return 200.
+    violation = find_violation(lines)
+    if violation:
+        measurement, tag = violation
+        LOG.warning("rejected missing_tag measurement=%s tag=%s", measurement, tag)
+        return JSONResponse(
+            {"accepted": False, "error": "missing required tag",
+             "measurement": measurement, "tag": tag},
+            status_code=422,
+        )
+
     # compresslevel pinned: CPython 3.15 changed gzip.compress's default from 9
     # to 6, which would inflate the wire payload (291k -> 344k on a real
     # export). Pinning keeps the bytes identical across interpreter upgrades.
     payload = gzip.compress("\n".join(lines).encode(), compresslevel=9)
     arrays = arrays_log(st)
     try:
-        response = await client.post(
-            WRITE_URL,
-            content=payload,
-            headers={"Content-Type": "text/plain", "Content-Encoding": "gzip"},
-        )
+        response = await write(payload)
     except httpx.HTTPError as exc:
         LOG.info(
             "failed bytes=%d samples=0 samples_skipped=%d types=%d workouts=%d "
