@@ -49,6 +49,8 @@ WORKOUT_FIELDS = {
     "activeEnergyBurned": "active_energy",
     "totalEnergy": "total_energy",
     "distance": "distance",
+    "speed": "speed",
+    "stepCadence": "step_cadence",
     "avgSpeed": "avg_speed",
     "maxSpeed": "max_speed",
     "elevationUp": "elevation_up",

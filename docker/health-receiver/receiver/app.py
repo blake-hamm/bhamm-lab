@@ -11,6 +11,8 @@ Measurements written in phase 1:
   health_value          one point per metric sample (existing dashboard schema)
   health_workout        one point per workout, timestamp = start
   health_workout_series per-sample workout arrays (heart rate, energy, ...)
+  health_workout_split  one point per split lap per nested metric (pace, ...)
+  health_workout_activity one point per activity per nested metric
 
 stateOfMind / medications / symptoms / cycleTracking / ecg /
 heartRateNotifications are counted and reported but NOT stored yet; each one
