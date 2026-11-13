@@ -22,6 +22,12 @@ spec:
         server:
           # Passive long-term store; Apple Health series are tiny but permanent.
           retentionPeriod: 10y
+          # Dedup at 1ms is safe: VictoriaMetrics stores millisecond precision
+          # and health samples are 1/s, so no legitimate sample can collapse;
+          # identical re-POSTs of the same document (same ms timestamp) do.
+          # This makes a repeated HAE POST idempotent instead of 3x the rows.
+          extraArgs:
+            dedup.minScrapeInterval: 1ms
           persistentVolume:
             enabled: true
             size: 10Gi
