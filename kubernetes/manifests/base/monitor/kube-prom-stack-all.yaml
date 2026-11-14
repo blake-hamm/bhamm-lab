@@ -187,7 +187,7 @@ spec:
                 token: ''
               # branch-pinned while this stack is under test; re-point at main before merge
               health:
-                url: https://codeberg.org/blake-hamm/bhamm-lab/raw/branch/feature/health-receiver/kubernetes/manifests/base/monitor/dashboards/health.json
+                url: https://codeberg.org/blake-hamm/bhamm-lab/raw/branch/main/kubernetes/manifests/base/monitor/dashboards/health.json
                 token: ''
                 datasource: VictoriaMetrics
           dashboardProviders:
