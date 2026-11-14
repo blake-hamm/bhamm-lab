@@ -22,9 +22,8 @@ spec:
           rbac:
             artifactGC: true
         controller:
-          # 10 -> 3: CI workflow pods were piling up on the 3 general workers
-          # alongside app workloads (#359). Backlog only delays builds.
-          parallelism: 3
+          # 10: a 3-slot ceiling is below the daily 07:00 UTC burst of 9-12 *-onsite-backup CronWorkflow submissions and starves other workflows behind ~1h CI runs
+          parallelism: 10
           workflowTTLWorkers: 32
           metricsConfig:
             enabled: true
