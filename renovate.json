@@ -14,6 +14,7 @@
   "prConcurrentLimit": 10,
 
   "schedule": ["every weekday before 6am"],
+  "fetchChangeLogs": "off",
 
   "packageRules": [
     {

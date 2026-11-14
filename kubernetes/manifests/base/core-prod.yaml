@@ -9,8 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://codeberg.org/blake-hamm/bhamm-lab.git
-    # dangling pin to a deleted branch; testing from this branch, re-pin to main before merge
-    targetRevision: feature/health-receiver
+    targetRevision: main
     path: kubernetes/manifests/core
     directory:
       recurse: true

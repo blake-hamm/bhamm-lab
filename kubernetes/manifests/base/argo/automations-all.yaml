@@ -9,8 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://codeberg.org/blake-hamm/bhamm-lab.git
-    # TEMP test flip for #405: deploy this branch's renovate config.js before merge; Blake re-pins to main in the Argo UI after the squash-merge (no revert commit).
-    targetRevision: fix/renovate-runtime-reliability
+    targetRevision: main
     path: kubernetes/manifests/automations
     directory:
       recurse: true
