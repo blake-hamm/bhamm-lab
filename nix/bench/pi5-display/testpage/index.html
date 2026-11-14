@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Pi 5 Touch Display 2 bench</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    background: #0b0b0f; color: #f2f2f2;
+    font-family: system-ui, sans-serif;
+    overflow: hidden;
+    touch-action: none;
+    -webkit-user-select: none; user-select: none;
+    cursor: none;
+  }
+  #trail { position: fixed; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  #hud {
+    position: fixed; left: 28px; top: 24px;
+    font-size: 30px; line-height: 1.35;
+    font-variant-numeric: tabular-nums;
+    z-index: 3;
+  }
+  #hud .mode { font-size: 46px; font-weight: 700; color: #7ee0ff; }
+  #hud .label { color: #8a8a99; font-size: 22px; text-transform: uppercase; letter-spacing: 2px; }
+  #hud .ip { font-size: 34px; color: #b6ffb6; }
+  #clock {
+    position: fixed; right: 28px; top: 18px; text-align: right;
+    font-size: 64px; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    z-index: 3;
+  }
+  #clock .date { display: block; font-size: 24px; font-weight: 400; color: #8a8a99; }
+  #status {
+    position: fixed; left: 0; right: 0; bottom: 26px; text-align: center;
+    font-size: 34px; font-weight: 700; letter-spacing: 1px; z-index: 3;
+  }
+  #status.pass { color: #0b0b0f; background: #46e07a; padding: 10px 0; }
+  #touchread { font-size: 24px; color: #8a8a99; }
+</style>
+</head>
+<body>
+<canvas id="trail"></canvas>
+
+<div id="hud">
+  <div class="mode"><span id="wh">0 x 0</span></div>
+  <div class="label">css px</div>
+  <div>dpr <span id="dpr">0</span> &middot; <span id="orient">?</span></div>
+  <div class="label" style="margin-top:14px">ipv4</div>
+  <div class="ip" id="ips">-</div>
+  <div id="touchread" style="margin-top:10px">touch: -</div>
+</div>
+
+<div id="clock"><span id="time">--:--:--</span><span class="date" id="date">-</span></div>
+
+<div id="status">TARGETS 0 / 4</div>
+
+<script>
+"use strict";
+
+// Injected at image build time by the bench-page systemd service.
+var HOST_IPS = "__HOST_IPS__";
+
+var corners = ["TL", "TR", "BL", "BR"];
+var hits = { TL: false, TR: false, BL: false, BR: false };
+var TARGET_R = 74;
+var CENTER_R = 90;
+
+var canvas = document.getElementById("trail");
+var ctx = canvas.getContext("2d");
+var W = 0, H = 0, DPR = 1;
+var paths = {};
+
+function targets() {
+  var p = TARGET_R + 26;
+  return {
+    TL: { x: p, y: p },
+    TR: { x: W - p, y: p },
+    BL: { x: p, y: H - p },
+    BR: { x: W - p, y: H - p }
+  };
+}
+
+function allHit() {
+  return corners.every(function (c) { return hits[c]; });
+}
+
+function status() {
+  var el = document.getElementById("status");
+  if (allHit()) {
+    el.textContent = "PASS - ALL FOUR CORNERS HIT (tap centre to reset)";
+    el.className = "pass";
+  } else {
+    var n = corners.filter(function (c) { return hits[c]; }).length;
+    el.textContent = "TARGETS " + n + " / 4";
+    el.className = "";
+  }
+}
+
+function drawTargets() {
+  var t = targets();
+  var colours = { TL: "#ff6b6b", TR: "#ffd166", BL: "#4dd4ff", BR: "#8affc1" };
+  corners.forEach(function (c) {
+    var p = t[c];
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, TARGET_R, 0, Math.PI * 2);
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = hits[c] ? colours[c] : "#5a5a6a";
+    ctx.stroke();
+    if (hits[c]) {
+      ctx.fillStyle = colours[c];
+      ctx.globalAlpha = 0.25;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    ctx.fillStyle = hits[c] ? colours[c] : "#5a5a6a";
+    ctx.font = "700 40px system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(c, p.x, p.y);
+  });
+
+  // Centre reset affordance.
+  ctx.beginPath();
+  ctx.arc(W / 2, H / 2, 34, 0, Math.PI * 2);
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = "#3a3a48";
+  ctx.stroke();
+  ctx.fillStyle = "#3a3a48";
+  ctx.font = "700 22px system-ui, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("RST", W / 2, H / 2);
+}
+
+function paint() {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  drawTargets();
+}
+
+function layout() {
+  DPR = window.devicePixelRatio || 1;
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = Math.round(W * DPR);
+  canvas.height = Math.round(H * DPR);
+  document.getElementById("wh").textContent = W + " x " + H;
+  document.getElementById("dpr").textContent = DPR;
+  document.getElementById("orient").textContent =
+    H >= W ? "portrait" : "landscape";
+  var ips = HOST_IPS.trim().split(/\s+/).filter(function (s) { return s.length > 0; });
+  document.getElementById("ips").textContent = ips.length ? ips.join("  ") : "no global ipv4";
+  paint();
+}
+
+function hitTest(x, y) {
+  var t = targets();
+  var got = null;
+  corners.forEach(function (c) {
+    var p = t[c];
+    var dx = x - p.x, dy = y - p.y;
+    if (dx * dx + dy * dy <= TARGET_R * TARGET_R) got = c;
+  });
+  if (got) {
+    hits[got] = true;
+    status();
+    paint();
+    return true;
+  }
+  var cx = x - W / 2, cy = y - H / 2;
+  if (cx * cx + cy * cy <= CENTER_R * CENTER_R) {
+    corners.forEach(function (c) { hits[c] = false; });
+    status();
+    paint();
+    return true;
+  }
+  return false;
+}
+
+function onDown(e) {
+  var x = e.clientX, y = e.clientY;
+  document.getElementById("touchread").textContent =
+    "touch: " + Math.round(x) + "," + Math.round(y) + " (" + e.pointerType + ")";
+  hitTest(x, y);
+  paths[e.pointerId] = [{ x: x, y: y }];
+  ctx.beginPath();
+  ctx.arc(x, y, 4, 0, Math.PI * 2);
+  ctx.fillStyle = "#ffffff";
+  ctx.fill();
+}
+
+function onMove(e) {
+  var p = paths[e.pointerId];
+  if (!p) return;
+  var last = p[p.length - 1];
+  var x = e.clientX, y = e.clientY;
+  p.push({ x: x, y: y });
+  if (p.length > 400) p.shift();
+  ctx.beginPath();
+  ctx.moveTo(last.x, last.y);
+  ctx.lineTo(x, y);
+  ctx.lineWidth = 10;
+  ctx.lineCap = "round";
+  ctx.strokeStyle = "hsl(" + ((e.pointerId * 67) % 360) + ", 100%, 62%)";
+  ctx.stroke();
+}
+
+function onUp(e) {
+  delete paths[e.pointerId];
+}
+
+function tick() {
+  var now = new Date();
+  document.getElementById("time").textContent = now.toLocaleTimeString();
+  document.getElementById("date").textContent = now.toLocaleDateString();
+}
+
+window.addEventListener("resize", layout);
+window.addEventListener("orientationchange", layout);
+window.addEventListener("pointerdown", onDown);
+window.addEventListener("pointermove", onMove);
+window.addEventListener("pointerup", onUp);
+window.addEventListener("pointercancel", onUp);
+window.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+
+layout();
+status();
+tick();
+setInterval(tick, 250);
+</script>
+</body>
+</html>
