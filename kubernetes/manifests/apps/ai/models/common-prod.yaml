@@ -34,7 +34,7 @@ spec:
                 property: s3_secret_key
         postgresql:
           enabled: true
-          storageSize: 20Gi
+          storageSize: 50Gi
           backup:
             enabled: true
           restore:
