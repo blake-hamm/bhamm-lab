@@ -154,7 +154,7 @@
             "uid": "VictoriaMetrics"
           },
           "editorMode": "code",
-          "expr": "max_over_time(health_value{type=\"step_count\",source=~\"$source\"}[24h])",
+          "expr": "max(sum_over_time(health_value_value{type=\"step_count\",source=~\"$source\"}[24h]))",
           "interval": "",
           "legendFormat": "Steps today",
           "range": true,
@@ -247,7 +247,7 @@
             "uid": "VictoriaMetrics"
           },
           "editorMode": "code",
-          "expr": "max_over_time(health_value{type=\"step_count\",source=~\"$source\"}[24h])",
+          "expr": "sum by (source) (sum_over_time(health_value_value{type=\"step_count\",source=~\"$source\"}[7d]))",
           "interval": "",
           "legendFormat": "{{source}}",
           "range": true,
@@ -256,7 +256,8 @@
       ],
       "title": "Steps, 7d",
       "transparent": true,
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "Rolling 7-day step total per source. Rows are per-interval step increments, so they must be summed, not max()'d."
     },
     {
       "collapsed": false,
@@ -343,7 +344,7 @@
             "uid": "VictoriaMetrics"
           },
           "editorMode": "code",
-          "expr": "max_over_time(health_value{type=\"sleep_hours\",source=~\"$source\"}[24h])",
+          "expr": "health_value_value{type=\"sleep_hours\",source=~\"$source\"}",
           "interval": "",
           "legendFormat": "{{source}}",
           "range": true,
@@ -352,7 +353,8 @@
       ],
       "title": "Time in bed",
       "transparent": true,
-      "type": "bargauge"
+      "type": "bargauge",
+      "description": "No data: sleep_hours has 1 orphan sample in 90d (one-off backfill). No live sleep pipeline."
     },
     {
       "datasource": {
@@ -437,7 +439,7 @@
             "uid": "VictoriaMetrics"
           },
           "editorMode": "code",
-          "expr": "health_value{type=\"awake_hours\",source=~\"$source\"}",
+          "expr": "health_value_value{type=\"awake_hours\",source=~\"$source\"}",
           "interval": "",
           "legendFormat": "Time awake",
           "range": true,
@@ -446,7 +448,8 @@
       ],
       "title": "Time awake",
       "transparent": true,
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "No data: no awake_hours type has ever been ingested. No live sleep pipeline."
     },
     {
       "datasource": {
@@ -530,7 +533,7 @@
             "uid": "VictoriaMetrics"
           },
           "editorMode": "code",
-          "expr": "health_value{type=\"ring_sleep_score\",source=~\"$source\"}",
+          "expr": "health_value_value{type=\"sleep_score\",source=~\"$source\"}",
           "interval": "",
           "legendFormat": "RingConn sleep score",
           "range": true,
@@ -539,7 +542,8 @@
       ],
       "title": "RingConn sleep score",
       "transparent": true,
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "No data: ring_sleep_score never existed; sleep_score has 1 orphan sample in 90d."
     },
     {
       "collapsed": false,
@@ -637,7 +641,7 @@
             "uid": "VictoriaMetrics"
           },
           "editorMode": "code",
-          "expr": "health_value{type=\"hrv_ms\",source=~\"$source\"}",
+          "expr": "health_value_value{type=\"hrv_ms\",source=~\"$source\"}",
           "interval": "",
           "legendFormat": "HRV",
           "range": true,
@@ -646,7 +650,8 @@
       ],
       "title": "HRV",
       "transparent": true,
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "No data: hrv_ms has 1 orphan sample in 90d. No HRV pipeline is running."
     },
     {
       "datasource": {
@@ -730,7 +735,7 @@
             "uid": "VictoriaMetrics"
           },
           "editorMode": "code",
-          "expr": "health_value{type=\"rhr_bpm\",source=~\"$source\"}",
+          "expr": "health_value_value{type=\"rhr_bpm\",source=~\"$source\"}",
           "interval": "",
           "legendFormat": "Resting heart rate",
           "range": true,
@@ -739,7 +744,8 @@
       ],
       "title": "Resting heart rate",
       "transparent": true,
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "No data: rhr_bpm has 1 orphan sample in 90d. Resting HR is not being ingested."
     },
     {
       "datasource": {
@@ -823,16 +829,17 @@
             "uid": "VictoriaMetrics"
           },
           "editorMode": "code",
-          "expr": "health_value{type=\"heart_rate\",source=~\"$source\"}",
+          "expr": "health_value_value{type=\"heart_rate\",source=~\"$source\"}",
           "interval": "",
-          "legendFormat": "Heart rate",
+          "legendFormat": "{{source}}",
           "range": true,
           "refId": "A"
         }
       ],
       "title": "Heart rate",
       "transparent": true,
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "Heart rate is reported under several provenance sources (e.g. iPhone, apple_watch). The legend is labelled by the source label so each line is distinguishable."
     },
     {
       "collapsed": false,
@@ -900,7 +907,7 @@
               }
             ]
           },
-          "unit": "masskg"
+          "unit": "masslb"
         },
         "overrides": []
       },
@@ -930,16 +937,17 @@
             "uid": "VictoriaMetrics"
           },
           "editorMode": "code",
-          "expr": "health_value{type=\"weight_kg\",source=~\"$source\"}",
+          "expr": "health_value_value{type=\"weight_body_mass\",source=~\"$source\"}",
           "interval": "",
           "legendFormat": "Weight",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Weight",
+      "title": "Weight (lb)",
       "transparent": true,
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "Stored unit is lb (label unit=\"lb\"), from eufy_Life. Panel unit is masslb so the suffix matches the stored values."
     },
     {
       "datasource": {
@@ -1025,7 +1033,7 @@
             "uid": "VictoriaMetrics"
           },
           "editorMode": "code",
-          "expr": "health_value{type=\"spo2_pct\",source=~\"$source\"}",
+          "expr": "health_value_value{type=\"spo2_pct\",source=~\"$source\"}",
           "interval": "",
           "legendFormat": "Oxygen saturation",
           "range": true,
@@ -1034,300 +1042,8 @@
       ],
       "title": "Oxygen saturation",
       "transparent": true,
-      "type": "timeseries"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 36
-      },
-      "id": 15,
-      "panels": [],
-      "title": "Environment",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "VictoriaMetrics"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": 86400000,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 0,
-        "y": 37
-      },
-      "id": 16,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "VictoriaMetrics"
-          },
-          "editorMode": "code",
-          "expr": "health_value{type=\"aqi\",source=~\"$source\"}",
-          "interval": "",
-          "legendFormat": "Air quality (AQI)",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Air quality (AQI)",
-      "transparent": true,
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "VictoriaMetrics"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": 86400000,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "ppm"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 8,
-        "y": 37
-      },
-      "id": 17,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "VictoriaMetrics"
-          },
-          "editorMode": "code",
-          "expr": "health_value{type=\"co2_ppm\",source=~\"$source\"}",
-          "interval": "",
-          "legendFormat": "CO2",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "CO2",
-      "transparent": true,
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "VictoriaMetrics"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": 86400000,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 37
-      },
-      "id": 18,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "VictoriaMetrics"
-          },
-          "editorMode": "code",
-          "expr": "health_value{type=\"temperature_c\",source=~\"$source\"}",
-          "interval": "",
-          "legendFormat": "Temperature",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Temperature",
-      "transparent": true,
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "No data: spo2_pct has 1 orphan sample in 90d. No SpO2 pipeline is running."
     },
     {
       "collapsed": false,
@@ -1405,7 +1121,7 @@
             "uid": "VictoriaMetrics"
           },
           "editorMode": "code",
-          "expr": "time() - max(timestamp(health_value))",
+          "expr": "time() - max(timestamp(last_over_time(health_value_value{source=~\"$source\"}[7d])))",
           "instant": true,
           "legendFormat": "__auto",
           "range": false,
@@ -1414,7 +1130,8 @@
       ],
       "title": "Age of newest sample",
       "transparent": true,
-      "type": "stat"
+      "type": "stat",
+      "description": "last_over_time is required: a bare instant query at now sees only samples inside the ~5m lookback and returns empty when ingest pauses."
     },
     {
       "datasource": {
@@ -1470,7 +1187,7 @@
             "uid": "VictoriaMetrics"
           },
           "editorMode": "code",
-          "expr": "sum(count_over_time(health_value[1h]))",
+          "expr": "sum(count_over_time(health_value_value{source=~\"$source\"}[1h]))",
           "instant": true,
           "legendFormat": "__auto",
           "range": false,
@@ -1537,7 +1254,7 @@
             "uid": "VictoriaMetrics"
           },
           "editorMode": "code",
-          "expr": "count by (source) (health_value)",
+          "expr": "sum by (source) (count_over_time(health_value_value{source=~\"$source\"}[7d]))",
           "format": "table",
           "instant": true,
           "range": false,
@@ -1584,7 +1301,7 @@
           "type": "prometheus",
           "uid": "VictoriaMetrics"
         },
-        "definition": "label_values(health_value, source)",
+        "definition": "label_values(health_value_value, source)",
         "includeAll": true,
         "label": "Source",
         "multi": true,
@@ -1592,7 +1309,7 @@
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(health_value, source)",
+          "query": "label_values(health_value_value, source)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
