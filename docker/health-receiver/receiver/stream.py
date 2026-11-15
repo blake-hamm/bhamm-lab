@@ -14,9 +14,6 @@ from .config import UNSTORED_ARRAYS
 from .metrics import translate_metric
 from .workouts import translate_workout
 
-# How many leading items of an unstored array are sampled for key names.
-SHAPE_SAMPLE = 5
-
 
 class Stats:
     """Counters and accumulated lines for one request. Never logs values."""
@@ -31,7 +28,6 @@ class Stats:
         self.metric_entries = 0
         self.types: set[str] = set()
         self.skipped_types: dict[str, int] = {}
-        self.shapes: dict[str, set[str]] = {}
 
     def skip(self, metric: str) -> None:
         self.skipped += 1
@@ -45,6 +41,19 @@ def _items(body: bytes, prefix: str) -> Iterator[Any]:
     return ijson.items(io.BytesIO(body), prefix, use_float=True)
 
 
+def _count_arrays(body: bytes, st: Stats) -> None:
+    """Count every item of the unstored arrays in ONE pass. Each of these used
+    to be its own full ijson parse, so a body was parsed eight times."""
+    wanted = {f"data.{key}.item" for key in UNSTORED_ARRAYS}
+    counts = dict.fromkeys(UNSTORED_ARRAYS, 0)
+    for prefix, event, _ in ijson.parse(io.BytesIO(body), use_float=True):
+        if event == "start_map" and prefix in wanted:
+            counts[prefix.split(".")[1]] += 1
+    for key, count in counts.items():
+        if count:
+            st.arrays[key] = count
+
+
 def lines_from_body(body: bytes) -> tuple[list[str], Stats]:
     """One metric (or workout) object materialised at a time. Raises
     ijson.JSONError / UnicodeDecodeError on a malformed document."""
@@ -56,16 +65,7 @@ def lines_from_body(body: bytes) -> tuple[list[str], Stats]:
     for workout in _items(body, "data.workouts.item"):
         if isinstance(workout, dict):
             translate_workout(workout, st)
-    for key in UNSTORED_ARRAYS:
-        count = 0
-        keys: set[str] = set()
-        for item in _items(body, f"data.{key}.item"):
-            count += 1
-            if count <= SHAPE_SAMPLE and isinstance(item, dict):
-                keys |= {str(k) for k in item}
-        if count:
-            st.arrays[key] = count
-            st.shapes.setdefault(key, set()).update(keys)
+    _count_arrays(body, st)
     if st.metric_entries:
         st.arrays["metrics"] = st.metric_entries
     return st.lines, st

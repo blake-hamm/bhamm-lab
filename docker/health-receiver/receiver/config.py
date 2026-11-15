@@ -22,7 +22,7 @@ VM_URL = os.environ.get(
     "VM_URL", "http://health-vm-victoria-metrics-single-server.health.svc:8428"
 ).rstrip("/")
 WRITE_URL = f"{VM_URL}/write"
-TIMEOUT = httpx.Timeout(30.0)
+TIMEOUT = httpx.Timeout(120.0)
 
 TOP_LEVEL_ARRAYS = (
     "metrics",

@@ -45,11 +45,6 @@ def translate_metric(entry: dict, st: "Stats") -> None:
         st.skip(metric)
         return
 
-    keys = st.shapes.setdefault(f"metrics.{metric}", set())
-    for point in data[:5]:
-        if isinstance(point, dict):
-            keys |= {str(k) for k in point}
-
     for point in data:
         if not isinstance(point, dict):
             st.skip(metric)

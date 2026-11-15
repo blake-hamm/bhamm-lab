@@ -33,6 +33,7 @@ import httpx
 import ijson
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 
 from .config import INGEST_TOKEN, LOG, TIMEOUT, TOP_LEVEL_ARRAYS, WRITE_URL
 from .shape import shape_dump
@@ -58,9 +59,12 @@ WRITE_HEADERS = {"Content-Type": "text/plain", "Content-Encoding": "gzip"}
 # Sleep before attempt 2 and attempt 3. A 4xx is never retried: the request is
 # malformed and would fail identically, so the error has to surface.
 RETRY_DELAYS = (0.5, 1.0)
-RETRY_ERRORS = (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout)
+RETRY_ERRORS = (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout, httpx.WriteTimeout)
 
 
+# compresslevel pinned: CPython 3.15 changed gzip.compress's default from 9
+# to 6, which would inflate the wire payload (291k -> 344k on a real
+# export). Pinning keeps the bytes identical across interpreter upgrades.
 def gzip_lines(lines: list[str], level: int = 9) -> bytes:
     """Compress line by line: joining + encoding ~100k lines first costs two
     extra copies of the whole payload, which is what OOM-killed the pod at
@@ -72,6 +76,17 @@ def gzip_lines(lines: list[str], level: int = 9) -> bytes:
                 gz.write(b"\n")
             gz.write(text.encode())
     return buf.getvalue()
+
+
+def translate(body: bytes) -> tuple[bytes | None, Stats, tuple[str, str] | None]:
+    """All CPU work in one threadpool hop: ijson parse, tag validation, gzip.
+    On the event loop this blocks /healthz long enough for the liveness probe
+    to kill the pod during a 7-day body."""
+    lines, st = lines_from_body(body)
+    violation = find_violation(lines)
+    if violation:
+        return None, st, violation
+    return gzip_lines(lines), st, None
 
 
 async def write(payload: bytes) -> httpx.Response:
@@ -119,10 +134,10 @@ async def ingest(request: Request):
     body = await request.body()  # no size cap by design
     started = time.perf_counter()
     try:
-        lines, st = lines_from_body(body)
+        payload, st, violation = await run_in_threadpool(translate, body)
     except (ijson.JSONError, UnicodeDecodeError) as exc:
         reason = str(exc).splitlines()[0][:200] if str(exc) else type(exc).__name__
-        LOG.warning("rejected bytes=%d reason=%s", len(body), reason)
+        LOG.warning("rejected req=%s bytes=%d reason=%s", rid, len(body), reason)
         return JSONResponse({"error": "malformed json", "reason": reason}, status_code=400)
     ms = int((time.perf_counter() - started) * 1000)
     LOG.info("parsed req=%s ms=%d samples=%d workouts=%d types=%d rss_mib=%d",
@@ -130,20 +145,15 @@ async def ingest(request: Request):
 
     # Refuse an unattributable series here: line() would silently drop the
     # empty tag and the write would still return 200.
-    violation = find_violation(lines)
     if violation:
         measurement, tag = violation
-        LOG.warning("rejected missing_tag measurement=%s tag=%s", measurement, tag)
+        LOG.warning("rejected req=%s missing_tag measurement=%s tag=%s", rid, measurement, tag)
         return JSONResponse(
             {"accepted": False, "error": "missing required tag",
              "measurement": measurement, "tag": tag},
             status_code=422,
         )
 
-    # compresslevel pinned: CPython 3.15 changed gzip.compress's default from 9
-    # to 6, which would inflate the wire payload (291k -> 344k on a real
-    # export). Pinning keeps the bytes identical across interpreter upgrades.
-    payload = gzip_lines(lines)
     arrays = arrays_log(st)
     try:
         response = await write(payload)

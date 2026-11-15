@@ -54,7 +54,6 @@ def durations(entry: dict) -> dict[str, float | None]:
 
 
 def translate_workout(workout: dict, st: "Stats") -> None:
-    st.shapes.setdefault("workouts", set()).update(str(k) for k in workout)
     start_ns = parse_time_ns(workout.get("start"))
     if start_ns is None:
         st.skip("workout")
