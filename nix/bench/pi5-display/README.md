@@ -98,6 +98,35 @@ git -C bhamm-lab checkout feature/pi-display-bench
 
 Open a shell in that directory ("the repo root" below), then continue.
 
+### Binary cache (do this first)
+
+The Raspberry Pi vendor kernel (`linux-rpi`) is not on `cache.nixos.org`.
+Upstream publishes it at https://nixos-raspberrypi.cachix.org. The repo root
+`flake.nix` now declares that cache in its `nixConfig`, but Nix only applies a
+flake's `nixConfig` when you pass `--accept-flake-config` or when the substituter
+is trusted in the system `nix.conf`. Without one of the two, the kernel is built
+from source with QEMU-emulated aarch64, which takes hours.
+
+Option A, one shot. This is the build command from below with
+`--accept-flake-config` added; it needs root, or a user listed in
+`trusted-users`:
+
+```bash
+nix build .#nixosConfigurations.pi5-bench-image.config.system.build.sdImage --accept-flake-config
+```
+
+Option B, permanent on the build machine. Add both lines to
+`/etc/nix/nix.conf`, or the same settings via `nix.settings` in that host's
+NixOS configuration:
+
+```
+extra-substituters = https://nixos-raspberrypi.cachix.org
+extra-trusted-public-keys = nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI=
+```
+
+Symptom: if the log shows `building '/nix/store/...-linux-rpi-....drv'` instead
+of `copying path`, you are compiling the kernel and the cache is not in use.
+
 Then, still at the repo root:
 
 ```bash
@@ -112,10 +141,8 @@ Result: `./result/sd-image/nixos-image-sd-card-*.img.zst`
 zstdcat result/sd-image/nixos-image-sd-card-*.img.zst | sudo dd of=/dev/sdX bs=4M status=progress conv=fsync
 ```
 
-The vendor kernel comes from the `nixos-raspberrypi` cache, so the build should
-not compile a kernel. If it starts to, the cache was not trusted: pass
-`--accept-flake-config`, or check that the flake's `nixConfig` substituters are
-reachable.
+With the cache trusted the build copies the vendor kernel rather than compiling
+it. If it starts compiling anyway, see the binary cache subsection above.
 
 If `nix build` refuses to work at all with an "experimental Nix feature
 'nix-command' is disabled" error, enable flakes on that machine once (for
