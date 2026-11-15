@@ -1,24 +1,30 @@
-# Path B: nixos-raspberrypi.
+# Pi 5 bench: nixos-raspberrypi.
 #
-# Kernel/display stack under test: nixos-raspberrypi's own pinned nixpkgs +
-# vendor kernel (linux_rpi5 from its overlay) + the RP1 display module, booted
-# firmware-direct by boot.loader.raspberry-pi.bootloader = "kernel" (no U-Boot,
-# no extlinux).
+# Kernel/display stack: nixos-raspberrypi's own pinned nixpkgs + vendor kernel
+# (linux_rpi5 from its overlay) + the RP1 display module, booted firmware-direct
+# by boot.loader.raspberry-pi.bootloader = "kernel" (no U-Boot, no extlinux).
 #
-# Question this path answers: does the panel come up when the bootloader hands
-# the firmware-patched device tree straight to Linux, with display_auto_detect
-# left at its default?
-{ lib, ... }:
+# Question this answers: does the panel come up when the bootloader hands the
+# firmware-patched device tree straight to Linux, with display_auto_detect left
+# at its default?
+{ lib, nixos-raspberrypi, ... }:
 
 {
-  # raspberry-pi-5.base, raspberry-pi-5.display-rp1 and sd-image are imported
-  # from the flake input in flake.nix so the module paths stay greppable there.
+  # Board support, the DSI/RP1 display module and the kiosk layer are imported
+  # here so the root flake only has to add the sd-image module and this file.
+  # `nixos-raspberrypi` arrives in specialArgs from
+  # inputs.nixos-raspberrypi.lib.nixosSystem in the root flake.
+  imports = with nixos-raspberrypi.nixosModules; [
+    raspberry-pi-5.base
+    raspberry-pi-5.display-rp1
+    ./kiosk.nix
+  ];
 
   # Firmware-direct boot of the generation kernel. The sd-image module already
   # selects this for variant 5; restated because the bench depends on it.
   boot.loader.raspberry-pi.bootloader = lib.mkForce "kernel";
 
-  networking.hostName = "pi5-bench-b";
+  networking.hostName = "pi5-bench";
 
   # nixos-raspberrypi renders config.txt from hardware.raspberry-pi.config,
   # which has a different shape from nixos-hardware's configtxt.settings:

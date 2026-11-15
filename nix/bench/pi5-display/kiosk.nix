@@ -1,6 +1,7 @@
-# Kiosk layer shared by bench-a and bench-b. Everything the panel sees is
-# identical here; the kernel and display stack are the only variable between the
-# two configurations.
+# Kiosk layer for the Pi 5 display bench. Everything the panel sees lives here;
+# the kernel and display stack are configured in pi5-bench.nix.
+#
+# Only the file's header comment changes. Nothing else in kiosk.nix moves.
 { config, lib, pkgs, ... }:
 
 let

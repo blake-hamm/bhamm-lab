@@ -53,6 +53,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # raspberry-pi-5 bench: ships its own pinned nixpkgs and vendor kernel, so
+    # no nixpkgs follows here on purpose.
+    nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
+
     nvf = {
       url = "github:notashelf/nvf";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -148,6 +152,19 @@
               host = "orangepi-zero3-backup";
               inherit self inputs shared;
             };
+          };
+
+          # Raspberry Pi 5 + Touch Display 2 bring-up bench. Built from the repo
+          # root like the images above:
+          #   nix build .#nixosConfigurations.pi5-bench-image.config.system.build.sdImage
+          # Constructed with nixos-raspberrypi's own lib and nixpkgs (per that
+          # flake's README), not nixpkgs.lib.nixosSystem: the board needs the
+          # vendor kernel, and there is deliberately no nixpkgs follows.
+          pi5-bench-image = inputs.nixos-raspberrypi.lib.nixosSystem {
+            modules = [
+              inputs.nixos-raspberrypi.nixosModules.sd-image
+              ./nix/bench/pi5-display/pi5-bench.nix
+            ];
           };
         } // (nixpkgs.lib.mapAttrs (_: node: node) hive.nodes);
     };
