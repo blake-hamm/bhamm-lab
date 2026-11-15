@@ -68,18 +68,21 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 20
             timeoutSeconds: 3
-            failureThreshold: 3
-            # Measured: the full stream-translate-serialise path on an hourly body peaks
-            # near 115 MB RSS, but the daily "Previous 7 Days" body tipped the container
-            # past its old 512Mi limit and was OOMKilled (20 restarts in 6 days, working
-            # set peak 504 MiB). Serialisation is now incremental, so the payload no
-            # longer exists as three copies; 1Gi is headroom, not a requirement.
+            failureThreshold: 6
+            # Measured on the daily "Previous 7 Days" body (204.5 MiB): CPU was the wall,
+            # not memory. The container was pinned at exactly 0.5002 cores with 48% of CFS
+            # periods throttled, and the liveness probe SIGKILLed it twice mid-body (~98 s
+            # and ~109 s in, reason Error, exit 137 - not OOMKilled), so zero requests
+            # completed. Memory sat at 730/1024 MiB: explicitly not the constraint. One
+            # whole core removes the throttle (written as the integer 1 - 1000m makes
+            # Argo compare unequal against the canonicalised value forever); 1Gi stays as
+            # headroom, not a requirement.
           resources:
             requests:
               cpu: 50m
               memory: 256Mi
             limits:
-              cpu: 500m
+              cpu: 1
               memory: 1Gi
           securityContext:
             runAsNonRoot: true
