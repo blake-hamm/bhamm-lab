@@ -14,7 +14,7 @@ LOG = logging.getLogger("health-receiver")
 _handler = logging.StreamHandler(sys.stdout)
 _handler.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
 LOG.addHandler(_handler)
-LOG.setLevel(logging.INFO)
+LOG.setLevel(os.environ.get("LOG_LEVEL", "INFO").upper())
 LOG.propagate = False
 
 INGEST_TOKEN = os.environ.get("INGEST_TOKEN", "")

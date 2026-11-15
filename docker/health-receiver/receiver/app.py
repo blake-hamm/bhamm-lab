@@ -27,6 +27,7 @@ import asyncio
 import gzip
 import hmac
 import io
+import time
 
 import httpx
 import ijson
@@ -36,10 +37,22 @@ from fastapi.responses import JSONResponse
 from .config import INGEST_TOKEN, LOG, TIMEOUT, TOP_LEVEL_ARRAYS, WRITE_URL
 from .shape import shape_dump
 from .stream import Stats, lines_from_body
+from .telemetry import Watchdog, peak_mib, req_id, rss_mib
 from .validate import find_violation
 
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
+# Import-time thread is fine: the app runs as a single-process uvicorn, so this
+# starts exactly once and dies with the process.
+Watchdog().start()
 client = httpx.AsyncClient(timeout=TIMEOUT)
+
+
+@app.exception_handler(Exception)
+async def unhandled(request: Request, exc: Exception):
+    LOG.error("crash req=%s stage=%s error=%s", getattr(request.state, "req", "-"),
+              "handler", type(exc).__name__)
+    return JSONResponse({"error": "internal"}, status_code=500)
+
 
 WRITE_HEADERS = {"Content-Type": "text/plain", "Content-Encoding": "gzip"}
 # Sleep before attempt 2 and attempt 3. A 4xx is never retried: the request is
@@ -93,16 +106,27 @@ def arrays_log(st: Stats) -> str:
 
 @app.post("/")
 async def ingest(request: Request):
+    rid = req_id()
+    request.state.req = rid
     if not authorized(request):
+        LOG.warning("unauthorized req=%s", rid)
         return JSONResponse({"error": "unauthorized"}, status_code=401)
 
+    LOG.info("start req=%s bytes_hdr=%s ua=%r", rid,
+             request.headers.get("content-length", "-"),
+             (request.headers.get("user-agent") or "")[:60])
+
     body = await request.body()  # no size cap by design
+    started = time.perf_counter()
     try:
         lines, st = lines_from_body(body)
     except (ijson.JSONError, UnicodeDecodeError) as exc:
         reason = str(exc).splitlines()[0][:200] if str(exc) else type(exc).__name__
         LOG.warning("rejected bytes=%d reason=%s", len(body), reason)
         return JSONResponse({"error": "malformed json", "reason": reason}, status_code=400)
+    ms = int((time.perf_counter() - started) * 1000)
+    LOG.info("parsed req=%s ms=%d samples=%d workouts=%d types=%d rss_mib=%d",
+             rid, ms, st.samples, st.workouts, len(st.types), rss_mib())
 
     # Refuse an unattributable series here: line() would silently drop the
     # empty tag and the write would still return 200.
@@ -124,11 +148,11 @@ async def ingest(request: Request):
     try:
         response = await write(payload)
     except httpx.HTTPError as exc:
-        LOG.info(
-            "failed bytes=%d samples=0 samples_skipped=%d types=%d workouts=%d "
-            "arrays=%s upstream_error=%s",
-            len(body), st.skipped, len(st.types), st.workouts, arrays,
-            type(exc).__name__,
+        LOG.error(
+            "failed req=%s stage=%s bytes=%d samples=%d samples_skipped=%d types=%d "
+            "workouts=%d arrays=%s upstream_error=%s",
+            rid, "write", len(body), st.samples, st.skipped, len(st.types), st.workouts,
+            arrays, type(exc).__name__,
         )
         return JSONResponse(
             {"accepted": False, "error": "victoriametrics unreachable",
@@ -137,11 +161,11 @@ async def ingest(request: Request):
         )
 
     if response.status_code // 100 != 2:
-        LOG.info(
-            "failed bytes=%d samples=0 samples_skipped=%d types=%d workouts=%d "
-            "arrays=%s vm_status=%d",
-            len(body), st.skipped, len(st.types), st.workouts, arrays,
-            response.status_code,
+        LOG.error(
+            "failed req=%s stage=%s bytes=%d samples=%d samples_skipped=%d types=%d "
+            "workouts=%d arrays=%s vm_status=%d",
+            rid, "vm_status", len(body), st.samples, st.skipped, len(st.types),
+            st.workouts, arrays, response.status_code,
         )
         return JSONResponse(
             {"accepted": False, "error": "victoriametrics rejected write",
@@ -150,8 +174,10 @@ async def ingest(request: Request):
         )
 
     LOG.info(
-        "accepted bytes=%d samples=%d samples_skipped=%d types=%d workouts=%d arrays=%s",
-        len(body), st.samples, st.skipped, len(st.types), st.workouts, arrays,
+        "accepted req=%s ms=%d bytes=%d samples=%d samples_skipped=%d types=%d "
+        "workouts=%d arrays=%s rss_mib=%d peak_mib=%d",
+        rid, ms, len(body), st.samples, st.skipped, len(st.types), st.workouts, arrays,
+        rss_mib(), peak_mib(),
     )
     if st.skipped_types:
         LOG.info("skipped by type %s", ",".join(
