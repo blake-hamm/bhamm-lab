@@ -26,6 +26,7 @@ gets its own translate_* function when it is added.
 import asyncio
 import gzip
 import hmac
+import io
 
 import httpx
 import ijson
@@ -45,6 +46,19 @@ WRITE_HEADERS = {"Content-Type": "text/plain", "Content-Encoding": "gzip"}
 # malformed and would fail identically, so the error has to surface.
 RETRY_DELAYS = (0.5, 1.0)
 RETRY_ERRORS = (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout)
+
+
+def gzip_lines(lines: list[str], level: int = 9) -> bytes:
+    """Compress line by line: joining + encoding ~100k lines first costs two
+    extra copies of the whole payload, which is what OOM-killed the pod at
+    a 512Mi limit. mtime=0 keeps the header reproducible."""
+    buf = io.BytesIO()
+    with gzip.GzipFile(fileobj=buf, mode="wb", compresslevel=level, mtime=0) as gz:
+        for index, text in enumerate(lines):
+            if index:
+                gz.write(b"\n")
+            gz.write(text.encode())
+    return buf.getvalue()
 
 
 async def write(payload: bytes) -> httpx.Response:
@@ -105,7 +119,7 @@ async def ingest(request: Request):
     # compresslevel pinned: CPython 3.15 changed gzip.compress's default from 9
     # to 6, which would inflate the wire payload (291k -> 344k on a real
     # export). Pinning keeps the bytes identical across interpreter upgrades.
-    payload = gzip.compress("\n".join(lines).encode(), compresslevel=9)
+    payload = gzip_lines(lines)
     arrays = arrays_log(st)
     try:
         response = await write(payload)

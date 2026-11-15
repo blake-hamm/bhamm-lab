@@ -69,16 +69,18 @@ spec:
             periodSeconds: 20
             timeoutSeconds: 3
             failureThreshold: 3
-          # 128Mi request: measured peak RSS of the full stream-translate-
-          # serialise path on a real 13.7 MB export (92,357 points) is ~115 MB.
-          # 512Mi limit leaves room for an HAE range with workouts attached.
+            # Measured: the full stream-translate-serialise path on an hourly body peaks
+            # near 115 MB RSS, but the daily "Previous 7 Days" body tipped the container
+            # past its old 512Mi limit and was OOMKilled (20 restarts in 6 days, working
+            # set peak 504 MiB). Serialisation is now incremental, so the payload no
+            # longer exists as three copies; 1Gi is headroom, not a requirement.
           resources:
             requests:
               cpu: 50m
-              memory: 128Mi
+              memory: 256Mi
             limits:
               cpu: 500m
-              memory: 512Mi
+              memory: 1Gi
           securityContext:
             runAsNonRoot: true
             runAsUser: 10001
