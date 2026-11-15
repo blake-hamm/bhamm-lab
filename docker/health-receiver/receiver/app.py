@@ -2,13 +2,14 @@
 
 Replaces the retired Argo Events ingest path. HAE POSTs one JSON document; we
 stream it with ijson, translate to Influx line protocol, and write it to
-VictoriaMetrics in a SINGLE request. 2xx is returned ONLY after that write is
+VictoriaMetrics in 250k-line chunks. 2xx is returned ONLY after every chunk is
 accepted: no queue, no buffering. If VictoriaMetrics stays down the caller gets
 a 502 and can see the failure.
 
 Two guards sit in front of that write. A document with an unattributable series
 is refused with 422 before anything is sent. A connection-level failure or a 5xx
-is retried twice (0.5s, 1.0s); a 4xx never is.
+is retried twice (0.5s, 1.0s); a 4xx never is. A connection VictoriaMetrics
+closes without answering is NOT retried: that size rejection is deterministic.
 
 Measurements written in phase 1:
 
@@ -60,7 +61,11 @@ WRITE_HEADERS = {"Content-Type": "text/plain", "Content-Encoding": "gzip"}
 # malformed and would fail identically, so the error has to surface.
 RETRY_DELAYS = (0.5, 1.0)
 RETRY_ERRORS = (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout, httpx.WriteTimeout)
-
+# VM aborts a write whose DECOMPRESSED body exceeds -influx.maxRequestSize (64 MiB
+# default, unset in this cluster). A day of second-level samples renders ~1.38M
+# lines (~131 MB), so the write is split. 250k lines ≈ 22 MB of line protocol:
+# 2.9x under the cap.
+CHUNK_LINES = 250_000
 
 # compresslevel pinned: CPython 3.15 changed gzip.compress's default from 9
 # to 6, which would inflate the wire payload (291k -> 344k on a real
@@ -78,15 +83,18 @@ def gzip_lines(lines: list[str], level: int = 9) -> bytes:
     return buf.getvalue()
 
 
-def translate(body: bytes) -> tuple[bytes | None, Stats, tuple[str, str] | None]:
+def translate(body: bytes) -> tuple[list[bytes] | None, Stats, tuple[str, str] | None]:
     """All CPU work in one threadpool hop: ijson parse, tag validation, gzip.
-    On the event loop this blocks /healthz long enough for the liveness probe
-    to kill the pod during a 7-day body."""
+    Chunked because VictoriaMetrics refuses a decompressed body over 64 MiB;
+    returning compressed chunks also frees the full line list when this returns."""
     lines, st = lines_from_body(body)
     violation = find_violation(lines)
     if violation:
         return None, st, violation
-    return gzip_lines(lines), st, None
+    if not lines:
+        return [gzip_lines(lines)], st, None
+    return [gzip_lines(lines[i:i + CHUNK_LINES])
+            for i in range(0, len(lines), CHUNK_LINES)], st, None
 
 
 async def write(payload: bytes) -> httpx.Response:
@@ -134,7 +142,7 @@ async def ingest(request: Request):
     body = await request.body()  # no size cap by design
     started = time.perf_counter()
     try:
-        payload, st, violation = await run_in_threadpool(translate, body)
+        chunks, st, violation = await run_in_threadpool(translate, body)
     except (ijson.JSONError, UnicodeDecodeError) as exc:
         reason = str(exc).splitlines()[0][:200] if str(exc) else type(exc).__name__
         LOG.warning("rejected req=%s bytes=%d reason=%s", rid, len(body), reason)
@@ -155,39 +163,56 @@ async def ingest(request: Request):
         )
 
     arrays = arrays_log(st)
+    total = len(chunks)
+    sent = 0
+    chunk_no = 0
+    response = None
     try:
-        response = await write(payload)
+        for index, chunk in enumerate(chunks, 1):
+            chunk_no = index
+            response = await write(chunk)
+            if response.status_code // 100 != 2:
+                break
+            sent = index
     except httpx.HTTPError as exc:
+        # A closed connection is not "unreachable": VM hangs up when it refuses
+        # the body, so retrying the same bytes would fail identically.
+        closed = isinstance(exc, (httpx.ReadError, httpx.RemoteProtocolError))
         LOG.error(
             "failed req=%s stage=%s bytes=%d samples=%d samples_skipped=%d types=%d "
-            "workouts=%d arrays=%s upstream_error=%s",
+            "workouts=%d arrays=%s chunk=%d/%d chunks_ok=%d upstream_error=%s%s",
             rid, "write", len(body), st.samples, st.skipped, len(st.types), st.workouts,
-            arrays, type(exc).__name__,
+            arrays, chunk_no, total, sent, type(exc).__name__,
+            " reason=upstream_closed_connection" if closed else "",
         )
         return JSONResponse(
-            {"accepted": False, "error": "victoriametrics unreachable",
-             "reason": type(exc).__name__},
+            {"accepted": False,
+             "error": "victoriametrics closed the connection" if closed
+             else "victoriametrics unreachable",
+             "reason": type(exc).__name__, "chunks_ok": sent},
             status_code=502,
         )
 
-    if response.status_code // 100 != 2:
+    if response is not None and response.status_code // 100 != 2:
         LOG.error(
             "failed req=%s stage=%s bytes=%d samples=%d samples_skipped=%d types=%d "
-            "workouts=%d arrays=%s vm_status=%d",
+            "workouts=%d arrays=%s chunk=%d/%d chunks_ok=%d vm_status=%d",
             rid, "vm_status", len(body), st.samples, st.skipped, len(st.types),
-            st.workouts, arrays, response.status_code,
+            st.workouts, arrays, chunk_no, total, sent, response.status_code,
         )
         return JSONResponse(
             {"accepted": False, "error": "victoriametrics rejected write",
-             "vm_status": response.status_code, "vm_body": response.text[:500]},
+             "vm_status": response.status_code, "vm_body": response.text[:500],
+             "chunks_ok": sent},
             status_code=502,
         )
 
     LOG.info(
         "accepted req=%s ms=%d bytes=%d samples=%d samples_skipped=%d types=%d "
-        "workouts=%d arrays=%s rss_mib=%d peak_mib=%d",
+        "workouts=%d arrays=%s chunks=%d chunks_ok=%d payload_bytes=%d "
+        "rss_mib=%d peak_mib=%d",
         rid, ms, len(body), st.samples, st.skipped, len(st.types), st.workouts, arrays,
-        rss_mib(), peak_mib(),
+        total, sent, sum(len(c) for c in chunks), rss_mib(), peak_mib(),
     )
     if st.skipped_types:
         LOG.info("skipped by type %s", ",".join(
