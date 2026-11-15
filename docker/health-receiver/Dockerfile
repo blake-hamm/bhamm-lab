@@ -1,4 +1,5 @@
 # Apple Health Auto Export -> VictoriaMetrics ingest receiver.
+# Build marker: 2026-11-15 — forces a rebuild when a branch-push fails to trigger forgejo-docker-changes.
 #
 # Multi-stage on purpose. Harbor's Trivy scan of the previous single-stage image
 # reported 54 HIGH findings; 5 of them were fixable, and all 5 came from the pip
