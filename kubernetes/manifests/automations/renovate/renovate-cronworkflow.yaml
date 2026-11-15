@@ -46,8 +46,11 @@ spec:
                 secretKeyRef:
                   name: argo-external-secret
                   key: github-com-token
+            # Renovate logs the pulls?limit= request and its label-sync decisions only at debug;
+            # temporarily raised to diagnose label application and PR-cache behaviour (Refs #411, #405),
+            # set back to info once diagnosed.
             - name: LOG_LEVEL
-              value: info
+              value: debug
           volumeMounts:
             - name: renovate-config
               mountPath: /opt/renovate
