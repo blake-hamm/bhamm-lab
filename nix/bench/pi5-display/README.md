@@ -4,41 +4,42 @@ Throwaway bench for bringing up the official Raspberry Pi Touch Display 2
 (7 inch, 720x1280 native portrait, DSI0, Goodix GT911 touch) on a Raspberry Pi 5
 (4 GB) with a Brave kiosk on top.
 
-This directory is a self-contained sub-flake. It is deliberately not under
-`nix/hosts/` (the colmena auto-discovery would register it as a node), it is not
-imported from the root `flake.nix`, and nothing here is deployed. Delete it once
-the question below is answered.
+This directory is a set of plain NixOS modules, not a flake. It is deliberately
+not under `nix/hosts/` (the colmena auto-discovery would register it as a node)
+and nothing here is deployed. It is wired into the root `flake.nix` as the
+`pi5-bench-image` configuration so the image builds from the repo root exactly
+like the Orange Pi SD images do. Delete the directory and that one attribute
+once the question below is answered.
 
-Question: which stack actually lights the panel, and what does it look like when
-it does?
+Question: what does the panel actually look like when `nixos-raspberrypi`'s
+vendor kernel and firmware bring it up?
 
-- Path A (`bench-a`): nixos-hardware `raspberry-pi/5` with the Foundation
-  `linux-rpi` kernel, booted the nixpkgs SD-image way (firmware -> U-Boot ->
-  extlinux), relying on the firmware's `display_auto_detect=1`.
-- Path B (`bench-b`): `nixos-raspberrypi` (`raspberry-pi-5.base` +
-  `raspberry-pi-5.display-rp1`) with its own pinned nixpkgs and vendor kernel,
-  firmware-direct boot (`boot.loader.raspberry-pi.bootloader = "kernel"`).
+There is one configuration: `nixos-raspberrypi` (`raspberry-pi-5.base` +
+`raspberry-pi-5.display-rp1`) with its own pinned nixpkgs and vendor kernel,
+firmware-direct boot (`boot.loader.raspberry-pi.bootloader = "kernel"`).
 
-Both share `kiosk.nix` byte for byte, so the kernel and display stack are the
-only variable.
+The earlier "path A" (nixos-hardware `raspberry-pi/5` with the Foundation
+`linux-rpi` kernel, booted the nixpkgs SD-image way through U-Boot) was
+withdrawn and deleted: comparing the two paths no longer decided anything, since
+nixos-hardware's pinned revision has no `deviceTreeOverlays` option and
+`display-rp1` only sets an X11 OutputClass, which is inert under the kiosk's
+Wayland session. Do not resurrect it.
 
 ## Status of this harness (read before trusting it)
 
-- Neither configuration has been built or booted yet. That is the point of the
-  bench; the first run is the test.
-- No `flake.lock` is committed: the agent box that wrote this had no Nix, so the
-  lock is created by the first `nix build` on the Pi. Commit it back if you want
-  the pins recorded.
-- The nixos-hardware revision pinned by the root flake exposes
-  `hardware.raspberry-pi.configtxt.{settings,file}` only. There is no
-  `deviceTreeOverlays` option at that revision, so overlay lines are written as
-  `settings.<filter>.dtoverlay = [ ... ]` instead (lists replace, they do not
-  merge).
+- Nothing here has been built or booted yet. That is the point of the bench; the
+  first run is the test.
+- The `nixos-raspberrypi` input was added to the root `flake.nix` on a machine
+  with no Nix, so `flake.lock` does not contain it yet. The first
+  `nix build` resolves and writes it, which leaves `flake.lock` modified in the
+  tree. Commit that updated `flake.lock` back on this branch once the image
+  builds, and do not commit it before then.
 - `nixos-raspberrypi` is pinned to its `main` branch. The module names used here
   (`raspberry-pi-5.base`, `raspberry-pi-5.display-rp1`, `sd-image`) were read
-  from that flake's `nixosModules` output, and `display-rp1` only sets an X11
-  `OutputClass` for the RP1 drivers. It is harmless under Wayland, but do not
-  expect it to do anything for the kiosk.
+  from that flake's `nixosModules` output.
+- Footnote, not a reason for the choice: `display-rp1` only sets an X11
+  `OutputClass` for the RP1 drivers. It is harmless under the kiosk's Wayland
+  session, but do not expect it to do anything for what the panel shows.
 
 ## Prerequisites
 
@@ -47,7 +48,8 @@ only variable.
 - Active cooler or heatsink. This bench runs a kiosk for an hour and then
   measures temperature.
 - Two SD cards (16 GB is plenty) and a USB SD reader.
-- Ethernet cable on the same LAN as your workstation (DHCP).
+- Ethernet cable on the same LAN as your workstation. The bench takes a DHCP
+  lease; it does not use the production `10.0.20.22` address.
 
 ## Step 1 - get any aarch64 NixOS onto the Pi
 
@@ -77,56 +79,48 @@ ssh nixos@nixos.local
 ```
 
 A `nixos-raspberrypi` installer image is equally acceptable here, and it is the
-better starting point for path B because its binary cache already holds the
-vendor kernel.
+better starting point because its binary cache already holds the vendor kernel.
 
-## Step 2 - build the bench image on the Pi, dd it to the second card
+## Step 2 - build the bench image from the repo root
 
-Builds are native aarch64 only; there is no cross-build path in this repo. Run
-these on the Pi, not on the workstation.
+Builds are native `aarch64-linux` only; there is no cross-build path in this
+repo. An `aarch64-linux` builder (native on-device, QEMU binfmt, or a remote
+builder) is required.
+
+These commands run from the repo root against the root flake, exactly like the
+Orange Pi SD-image commands in the operations docs.
 
 ```
 nix-shell -p git
 git clone https://codeberg.org/blake-hamm/bhamm-lab.git
-cd bhamm-lab
-git checkout feature/pi-display-bench
-cd nix/bench/pi5-display
+git -C bhamm-lab checkout feature/pi-display-bench
 ```
 
-Path A:
+Open a shell in that directory ("the repo root" below), then continue.
 
-```
-nix --extra-experimental-features 'nix-command flakes' build \
-  .#nixosConfigurations.bench-a.config.system.build.sdImage
-```
+Then, still at the repo root:
 
-Path B:
-
-```
-nix --extra-experimental-features 'nix-command flakes' build \
-  .#nixosConfigurations.bench-b.config.system.build.sdImage
+```bash
+nix build .#nixosConfigurations.pi5-bench-image.config.system.build.sdImage
 ```
 
-Path A compiles the Foundation `linux-rpi` 6.12 kernel, which is not in any
-binary cache. On a 4 GB Pi that is a multi-hour build and it will happily OOM.
-Before starting it, put a 4 GB swapfile on a USB stick and cap parallelism:
+Result: `./result/sd-image/nixos-image-sd-card-*.img.zst`
 
-```
-sudo fallocate -l 4G /swapfile && sudo chmod 600 /swapfile
-sudo mkswap /swapfile && sudo swapon /swapfile
-export NIX_CONFIG='max-jobs = 3'
+**Flash to SD card** (verify `/dev/sdX` with `lsblk`):
+
+```bash
+zstdcat result/sd-image/nixos-image-sd-card-*.img.zst | sudo dd of=/dev/sdX bs=4M status=progress conv=fsync
 ```
 
-Path B pulls the kernel from the `nixos-raspberrypi` cache and should be quick.
+The vendor kernel comes from the `nixos-raspberrypi` cache, so the build should
+not compile a kernel. If it starts to, the cache was not trusted: pass
+`--accept-flake-config`, or check that the flake's `nixConfig` substituters are
+reachable.
 
-Write the image to the second card:
-
-```
-ls -l result/sd-image/
-lsblk
-sudo dd if="$(ls result/sd-image/*.img | head -1)" of=/dev/sdX bs=4M status=progress conv=fsync
-sync
-```
+If `nix build` refuses to work at all with an "experimental Nix feature
+'nix-command' is disabled" error, enable flakes on that machine once (for
+example `experimental-features = nix-command flakes` in
+`/etc/nix/nix.conf`); the commands in this runbook then run unmodified.
 
 ## Step 3 - boot the bench card
 
@@ -140,11 +134,11 @@ Read the address off the panel and log in (the root password is `bench`; this is
 a desk bench, change it if it ever leaves the desk):
 
 ```
-ssh root@192.168.1.50   # substitute the address shown on the panel
+ssh root@192.168.1.50   # substitute the DHCP address shown on the panel
 ```
 
 If the panel stays dark, read the address from the router's DHCP leases or plug
-in a monitor on HDMI, then continue to step 4 and 5.
+in a monitor on HDMI, then continue to steps 4 and 5.
 
 ## Step 4 - checks to run and record
 
@@ -200,10 +194,11 @@ Four-corner test: tap all four targets, expect `PASS`, tap the centre circle to
 reset, then repeat once after rotating the panel if you changed rotation
 parameters.
 
-## Step 5 - if the panel stays dark on path A
+## Step 5 - if the panel stays dark
 
-The firmware is meant to detect the display and apply the overlay by itself. If
-it does not, add the overlay explicitly and reboot:
+The firmware is meant to detect the display and apply the overlay by itself
+(`display_auto_detect=1` is nixos-raspberrypi's default and is left untouched).
+If it does not, add the overlay explicitly and reboot:
 
 ```
 sudo mount /boot/firmware
@@ -223,22 +218,16 @@ sync
 sudo reboot
 ```
 
-The same change lives in `bench-a.nix` as the commented
-`hardware.raspberry-pi.configtxt.settings.all.dtoverlay` block; on path B it is
-`hardware.raspberry-pi.config.all.dt-overlays.vc4-kms-dsi-ili9881-7inch` in
-`bench-b.nix`. Editing `/boot/firmware/config.txt` and rebooting is faster than
-rebuilding an image, which is why it is the documented flip.
+The same change lives in `pi5-bench.nix` as the commented
+`hardware.raspberry-pi.config.all.dt-overlays.vc4-kms-dsi-ili9881-7inch` block.
+Editing `/boot/firmware/config.txt` and rebooting is faster than rebuilding an
+image, which is why it is the documented flip.
 
-One known confounder on path A: the nixpkgs SD image boots through U-Boot, and
-U-Boot loads the device tree itself. A firmware-applied DSI overlay may not
-survive that hand-off. If the overlay line changes nothing on path A but does
-work on path B, that is the difference, not the kernel choice. Confirm with
-`ls /proc/device-tree/ | grep -i dsi` on both paths.
+After the first successful boot, iterate without reflashing (from the repo root,
+on the bench itself):
 
-After the first successful boot, iterate without reflashing:
-
-```
-sudo nixos-rebuild switch --flake /path/to/bhamm-lab/nix/bench/pi5-display#bench-a
+```bash
+sudo nixos-rebuild switch --flake .#pi5-bench-image
 ```
 
 `config.txt` changes are the exception: the firmware partition is not rebuilt by
@@ -248,10 +237,9 @@ sudo nixos-rebuild switch --flake /path/to/bhamm-lab/nix/bench/pi5-display#bench
 
 Fill this in as you go. Leave a cell as `?` rather than guessing.
 
-| path | panel came up | mode reported | touch works | rotation params needed | dmesg errors | peak temp | notes |
-|------|---------------|---------------|-------------|------------------------|--------------|-----------|-------|
-| A    | y / n         |               | y / n       |                        |              |           |       |
-| B    | y / n         |               | y / n       |                        |              |           |       |
+| panel came up | mode reported | touch works | rotation params needed | dmesg errors | peak temp | notes |
+|---------------|---------------|-------------|------------------------|--------------|-----------|-------|
+| y / n         |               | y / n       |                        |              |           |       |
 
 ## How to report back
 
