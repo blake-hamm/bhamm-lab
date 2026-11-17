@@ -25,8 +25,11 @@ let
     deployment = {
       inherit (hostModule.deploy) tags targetHost;
       allowLocalDeployment = hostModule.deploy.allowLocalDeployment or false;
-      targetUser = shared.username;
-      targetPort = shared.sshPort;
+      # Per-host overrides for hosts that are not on the shared SSH settings yet
+      # (pi-display: bench sshd on 22, no bhamm user). Every other host omits
+      # these attrs and keeps the shared values, unchanged.
+      targetUser = hostModule.deploy.targetUser or shared.username;
+      targetPort = hostModule.deploy.targetPort or shared.sshPort;
     };
     imports = [ (lib.removeAttrs hostModule [ "deploy" "system" ]) ];
   };

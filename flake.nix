@@ -88,9 +88,24 @@
           nixpkgs = import nixpkgs {
             system = shared.system;
           };
-          nodeNixpkgs = gen.generateNodeNixpkgs;
+          nodeNixpkgs = gen.generateNodeNixpkgs // {
+            # Deliberate, visible exception to "every node uses the repo
+            # nixpkgs": the Pi 5 vendor kernel and the nixos-raspberrypi module
+            # set are written against that flake's own pinned nixpkgs (currently
+            # nixos-26.05), so this node must evaluate entirely on it. Every
+            # other node keeps gen.generateNodeNixpkgs untouched.
+            pi-display = import inputs.nixos-raspberrypi.inputs.nixpkgs {
+              system = "aarch64-linux";
+              config.allowUnfree = true;
+            };
+          };
           specialArgs = {
             inherit self inputs shared;
+            # Module argument required by nixos-raspberrypi's board modules
+            # (raspberry-pi-5.base, nixpkgs-rpi): its own lib.nixosSystem
+            # injects it, plain lib.evalModules in the hive does not. Unused by
+            # every other node.
+            nixos-raspberrypi = inputs.nixos-raspberrypi;
           };
           nodeSpecialArgs = gen.generateNodeSpecialArgs;
         };
@@ -165,17 +180,21 @@
             };
           };
 
-          # Raspberry Pi 5 + Touch Display 2 bring-up bench. Built from the repo
+          # Raspberry Pi 5 + Touch Display 2 kiosk host. Built from the repo
           # root like the images above:
-          #   nix build .#nixosConfigurations.pi5-bench-image.config.system.build.sdImage
+          #   nix build .#nixosConfigurations.pi-display-image.config.system.build.sdImage
           # Constructed with nixos-raspberrypi's own lib and nixpkgs (per that
           # flake's README), not nixpkgs.lib.nixosSystem: the board needs the
           # vendor kernel, and there is deliberately no nixpkgs follows.
-          pi5-bench-image = inputs.nixos-raspberrypi.lib.nixosSystem {
+          pi-display-image = inputs.nixos-raspberrypi.lib.nixosSystem {
             modules = [
               inputs.nixos-raspberrypi.nixosModules.sd-image
-              ./nix/bench/pi5-display/pi5-bench.nix
+              ./nix/hosts/pi-display/sd-image.nix
             ];
+            specialArgs = {
+              host = "pi-display";
+              inherit self inputs shared;
+            };
           };
         } // (nixpkgs.lib.mapAttrs (_: node: node) hive.nodes);
     };
