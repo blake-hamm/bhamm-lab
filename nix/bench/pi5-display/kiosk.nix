@@ -64,11 +64,20 @@ in
     extraGroups = [ "video" "render" "input" ];
   };
 
+  # greetd exits 1 with "default_session contains no command" and gets
+  # restarted every 5s if only initial_session is set, so both tables carry the
+  # same labwc command. initial_session is the autologin path.
   services.greetd = {
     enable = true;
-    settings.initial_session = {
-      command = "${pkgs.labwc}/bin/labwc";
-      user = kioskUser;
+    settings = {
+      default_session = {
+        command = "${pkgs.labwc}/bin/labwc";
+        user = kioskUser;
+      };
+      initial_session = {
+        command = "${pkgs.labwc}/bin/labwc";
+        user = kioskUser;
+      };
     };
   };
 
