@@ -5,8 +5,10 @@
 # by boot.loader.raspberry-pi.bootloader = "kernel" (no U-Boot, no extlinux).
 #
 # Question this answers: does the panel come up when the bootloader hands the
-# firmware-patched device tree straight to Linux, with display_auto_detect left
-# at its default?
+# firmware-patched device tree straight to Linux? Answer from the live bench:
+# no. display_auto_detect=1 is set, but the firmware does not apply the panel
+# overlay on this setup (no DSI connector, no ili9881 module, no Goodix touch),
+# so the overlay is enabled explicitly below.
 { lib, nixos-raspberrypi, ... }:
 
 {
@@ -31,23 +33,31 @@
   # <filter>.options.<key>.{enable,value} and <filter>.dt-overlays.<name>.
   #
   # display_auto_detect=1 and dtoverlay=vc4-kms-v3d are defaults from
-  # nixos-raspberrypi's modules/configtxt.nix and are left untouched: that is
-  # the behaviour under test.
+  # nixos-raspberrypi's modules/configtxt.nix and are left untouched.
   #
-  # If the panel stays dark, add the overlay explicitly:
-  #   hardware.raspberry-pi.config.all.dt-overlays.vc4-kms-dsi-ili9881-7inch = {
-  #     enable = true;
-  #     params = {
-  #       sizex = { enable = true; value = 720; };
-  #       sizey = { enable = true; value = 1280; };
-  #       swapxy = { enable = true; value = 0; };
-  #       invx = { enable = true; value = 0; };
-  #       invy = { enable = true; value = 0; };
-  #     };
-  #   };
+  # Firmware autodetect does NOT enable this panel here: the generated
+  # config.txt carries display_auto_detect=1 and no ili9881 overlay, and the
+  # live system shows no DSI connector and no ili9881/goodix modules. The
+  # overlay is therefore required, not optional.
   #
-  # On a running bench the same edit is a config.txt edit plus reboot:
-  #   sudo mount /boot/firmware
-  #   sudoedit /boot/firmware/config.txt
-  #   sudo reboot
+  # vc4-kms-dsi-ili9881-7inch defaults to DSI1 and i2c_csi_dsi, which is the
+  # CAM/DISP 1 connector the ribbon is on. Add `dsi0 = { enable = true; };` to
+  # params only if the ribbon moves to CAM/DISP 0 (DSI0/i2c_csi_dsi0).
+  hardware.raspberry-pi.config.all.dt-overlays.vc4-kms-dsi-ili9881-7inch = {
+    enable = true;
+    params = {
+      sizex = {
+        enable = true;
+        value = 720;
+      };
+      sizey = {
+        enable = true;
+        value = 1280;
+      };
+      rotation = {
+        enable = true;
+        value = 0;
+      };
+    };
+  };
 }

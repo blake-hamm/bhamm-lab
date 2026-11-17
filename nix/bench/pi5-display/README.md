@@ -1,7 +1,7 @@
 # Pi 5 + Touch Display 2 bench harness
 
 Throwaway bench for bringing up the official Raspberry Pi Touch Display 2
-(7 inch, 720x1280 native portrait, DSI0, Goodix GT911 touch) on a Raspberry Pi 5
+(7 inch, 720x1280 native portrait, DSI1, Goodix GT911 touch) on a Raspberry Pi 5
 (4 GB) with a Brave kiosk on top.
 
 This directory is a set of plain NixOS modules, not a flake. It is deliberately
@@ -27,8 +27,11 @@ Wayland session. Do not resurrect it.
 
 ## Status of this harness (read before trusting it)
 
-- Nothing here has been built or booted yet. That is the point of the bench; the
-  first run is the test.
+- The image has booted on the bench (kernel 6.18.59, nixos-raspberrypi vendor
+  kernel, firmware-direct boot). Two bugs came out of that boot and are fixed on
+  this branch: greetd exited 1 for lack of a `default_session` command, and the
+  DSI panel needed the `vc4-kms-dsi-ili9881-7inch` overlay enabled by hand.
+  Re-verify both after rebuilding; nothing here has been rebuilt since.
 - The `nixos-raspberrypi` input was added to the root `flake.nix` on a machine
   with no Nix, so `flake.lock` does not contain it yet. The first
   `nix build` resolves and writes it, which leaves `flake.lock` modified in the
@@ -151,8 +154,11 @@ example `experimental-features = nix-command flakes` in
 
 ## Step 3 - boot the bench card
 
-Power off, swap cards, connect the display ribbon to DSI0 and the touch ribbon
-to the CSI/display connector as per the Touch Display 2 instructions, power on.
+Power off, swap cards, connect the display ribbon to the CAM/DISP 1 connector
+(DSI1) and the touch ribbon to the CSI/display connector as per the Touch
+Display 2 instructions, power on. The `vc4-kms-dsi-ili9881-7inch` overlay
+defaults to DSI1, so CAM/DISP 1 is the right port; CAM/DISP 0 (DSI0) only works
+with the overlay's `dsi0` parameter set.
 
 The panel should show the test page: window size, devicePixelRatio, orientation,
 the host IPv4 address, a clock, a touch trail, and four corner targets.
@@ -221,11 +227,16 @@ Four-corner test: tap all four targets, expect `PASS`, tap the centre circle to
 reset, then repeat once after rotating the panel if you changed rotation
 parameters.
 
-## Step 5 - if the panel stays dark
+## Step 5 - if the panel stays dark anyway
 
-The firmware is meant to detect the display and apply the overlay by itself
-(`display_auto_detect=1` is nixos-raspberrypi's default and is left untouched).
-If it does not, add the overlay explicitly and reboot:
+Firmware autodetect was measured on this bench and does NOT enable the panel:
+the generated `config.txt` has `display_auto_detect=1` but no ili9881 overlay,
+and the live system came up with no DSI connector and no `ili9881`/`goodix`
+modules. `pi5-bench.nix` therefore enables the overlay explicitly, so the image
+built from this branch already contains it.
+
+If the panel still stays dark, check that the overlay actually reached the
+boot partition, then add it by hand and reboot:
 
 ```
 sudo mount /boot/firmware
@@ -245,10 +256,10 @@ sync
 sudo reboot
 ```
 
-The same change lives in `pi5-bench.nix` as the commented
-`hardware.raspberry-pi.config.all.dt-overlays.vc4-kms-dsi-ili9881-7inch` block.
-Editing `/boot/firmware/config.txt` and rebooting is faster than rebuilding an
-image, which is why it is the documented flip.
+The same change lives in `pi5-bench.nix` as
+`hardware.raspberry-pi.config.all.dt-overlays.vc4-kms-dsi-ili9881-7inch` (enabled
+by default now). Editing `/boot/firmware/config.txt` and rebooting is faster than
+rebuilding an image, which is why it is the documented flip.
 
 After the first successful boot, iterate without reflashing (from the repo root,
 on the bench itself):
