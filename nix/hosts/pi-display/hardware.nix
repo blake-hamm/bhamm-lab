@@ -1,10 +1,10 @@
 # Raspberry Pi 5 (4 GB) + official Touch Display 2 (7", 720x1280, DSI1).
 #
 # Unlike the other hosts' hardware.nix this file is not nixos-generate-config
-# output: the board is firmware-direct booted from SD, so there are no
-# filesystems or initrd modules to declare here (the vendor sd-image module
-# owns the partition layout). What lives here is the board support module, the
-# kernel/firmware overlays and the display wiring.
+# output: the board is firmware-direct booted from SD, the filesystems are
+# declared once in config.nix (shared with the colmena node) and the initrd
+# module set comes from the vendor board module. What lives here is the board
+# support module, the kernel/firmware overlays and the display wiring.
 { config, lib, pkgs, nixos-raspberrypi, ... }:
 
 {

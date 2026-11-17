@@ -52,6 +52,56 @@ in
 {
   networking.hostName = "pi-display";
 
+  # Root and firmware filesystems. The SD image gets these from
+  # nixpkgs' installer/sd-card/sd-image.nix, but the colmena node does not
+  # import that module and NixOS asserts on a system with no root filesystem
+  # ("The 'fileSystems' option does not specify your root file system").
+  # Declaring them in this file - the one both the image and the node import -
+  # keeps a single source of truth and lets `colmena apply` install a
+  # generation onto the real firmware partition instead of a plain directory
+  # on the root filesystem.
+  #
+  # Everything here is lib.mkDefault on purpose. In the image the sd-image
+  # module defines device/fsType at normal priority and nvmd's
+  # sd-image-raspberrypi.nix overrides the firmware options with lib.mkForce,
+  # so those definitions still win unchanged there (mkDefault never conflicts
+  # with a plain definition and always loses to it); the node, which has only
+  # these, gets the same values.
+  #
+  # The labels are the sd-image option defaults at the nixpkgs revision locked
+  # in flake.lock (sdImage.rootVolumeLabel = "NIXOS_SD",
+  # sdImage.firmwarePartitionName = "FIRMWARE"). They cannot be written as
+  # config.sdImage.* here because those options only exist when the sd-image
+  # module is imported. If either sdImage option is ever overridden in
+  # sd-image.nix, the matching label here must change in the same commit.
+  fileSystems = {
+    "/" = {
+      device = lib.mkDefault "/dev/disk/by-label/NIXOS_SD";
+      fsType = lib.mkDefault "ext4";
+      options = lib.mkDefault [ "noatime" ];
+    };
+
+    "/boot/firmware" = {
+      device = lib.mkDefault "/dev/disk/by-label/FIRMWARE";
+      fsType = lib.mkDefault "vfat";
+      # Same set nvmd's sd-image module forces: automount on first access so
+      # switch-to-configuration can write config.txt/kernels/overlays without
+      # an explicit mount, and unmount after a minute idle.
+      options = lib.mkDefault [
+        "noatime"
+        "noauto"
+        "x-systemd.automount"
+        "x-systemd.idle-timeout=1min"
+      ];
+    };
+  };
+
+  # Mirrors sd-image.nix so the node's initrd is built from the same module
+  # set as the image's. Not a boot requirement on its own: the bcm2712 vendor
+  # kernel builds the SDHCI/MMC and ext4 drivers in (=y), so stage-1 does not
+  # need modules to mount the root partition.
+  hardware.enableAllHardware = lib.mkDefault true;
+
   boot.kernelParams = lib.mkAfter [ "consoleblank=0" ];
 
   zramSwap.enable = true;

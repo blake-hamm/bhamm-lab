@@ -16,7 +16,7 @@ demand and a local test page served on port 8080.
 | file | role |
 |------|------|
 | `default.nix` | colmena node: `system`, `deploy` attrs, module list |
-| `config.nix` | kiosk stack (greetd/labwc/brave/wvkbd), test page, zram, thermals - shared by image and deploy |
+| `config.nix` | kiosk stack (greetd/labwc/brave/wvkbd), test page, zram, thermals, the `/` + `/boot/firmware` filesystems - shared by image and deploy |
 | `hardware.nix` | board support module, vendor kernel/firmware overlays, DSI overlay, bootloader |
 | `sd-image.nix` | SD image bits (`compressImage`) on top of the vendor sd-image module |
 | `index.html`, `policies.json` | served test page and Brave managed policy |
