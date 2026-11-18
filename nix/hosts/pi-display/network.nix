@@ -1,0 +1,66 @@
+# Network interfaces for the Pi 5 kiosk host.
+#
+# profiles/sbc.nix sets cfg.networking.backend to "networkd" and the network
+# module emits no DHCP client for an interface it was never told about, so both
+# NICs are declared here. end0 stays on DHCP permanently: it is the recovery
+# path (and colmena's deploy target) and sits on a different subnet than wlan0,
+# so there is no same-subnet ARP flux between them.
+{ config, lib, ... }:
+
+{
+  cfg.networking.interfaces = {
+    end0 = { mode = "dhcp"; };
+
+    # Static on the metal VLAN. wpa_supplicant owns L2 (association) for wlan0
+    # and systemd-networkd owns L3 for the same device, so declaring the
+    # interface here is what gives it an address.
+    wlan0 = {
+      mode = "static";
+      address = "10.0.20.22";
+      prefixLength = 24;
+      gateway = "10.0.20.1";
+      # Unioned into networking.nameservers by the network module; resolv.conf
+      # is generated from that list, so end0's DHCP-offered DNS is unused.
+      nameservers = [ "10.0.9.2" ];
+      # Above systemd's DHCP default-route metric (1024) so the wired link stays
+      # the primary path while plugged in. Use 100 to prefer WiFi instead.
+      metric = 2048;
+    };
+  };
+
+  # networking.wireless.interfaces is deliberately left empty: the module then
+  # auto-detects the wlan device and installs a udev rule that restarts the unit
+  # if brcmfmac probes late.
+  networking.wireless = {
+    enable = true;
+    # ext_password file: NAME=PASSWORD lines, rendered from sops below. The PSK
+    # never enters the nix store or the world-readable wpa_supplicant config.
+    secretsFile = config.sops.templates."wpa_supplicant-secrets".path;
+    networks.Polk_Metal.pskRaw = "ext:polk_metal_psk";
+  };
+
+  sops.secrets.wifi_psk.key = "vault_secrets/core/pi-display/wifi_psk";
+
+  sops.templates."wpa_supplicant-secrets" = {
+    content = ''
+      polk_metal_psk=${config.sops.placeholder.wifi_psk}
+    '';
+    # wpa_supplicant.service runs as the wpa_supplicant user (hardening is on by
+    # default) and bind-mounts this file read-only, so root:root 0400 would be
+    # unreadable to it.
+    owner = "wpa_supplicant";
+    group = "wpa_supplicant";
+    mode = "0400";
+    restartUnits = [ "wpa_supplicant.service" ];
+  };
+
+  # cfg80211 reads this from the kernel command line; the world regulatory
+  # domain otherwise lets the driver hide or under-power channels.
+  boot.kernelParams = lib.mkAfter [ "cfg80211.ieee80211_regdom=US" ];
+
+  # An unassociated wlan0 is legitimate. The network module sets
+  # networking.useDHCP = false, which makes networkd-wait-online require every
+  # managed link, so one unassociated wlan0 would hold network-online.target for
+  # up to 120s.
+  systemd.network.wait-online.anyInterface = true;
+}

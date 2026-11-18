@@ -1,23 +1,14 @@
-# Kiosk display configuration for the Pi 5 Touch Display 2 host.
+# Kiosk display host config for the Pi 5 Touch Display 2.
 #
-# Used by both sd-image.nix (initial image) and default.nix (deployment), the
-# same split the Orange Pi hosts use. Hardware, kernel and firmware wiring lives
-# in hardware.nix; the panel's kiosk session lives in kiosk.nix and its debug
-# page in page.nix.
-#
-# This file holds the host's shared storage/network facts for sd-image.nix and
-# default.nix; the kiosk session is in kiosk.nix, the debug page in page.nix.
-# Hardware, kernel and panel wiring live in hardware.nix; the shared
-# desktop-free module set (core, network, ssh) comes from profiles/sbc.nix.
+# Imported by both sd-image.nix (initial image) and default.nix (deployment).
+# Hardware, kernel and panel wiring live in hardware.nix, the kiosk session in
+# kiosk.nix, the debug page in page.nix, and the network interfaces - wired and
+# wireless - in network.nix. The shared desktop-free module set (core, network,
+# ssh) comes from profiles/sbc.nix.
 { config, lib, pkgs, ... }:
 
 {
-  imports = [ ../../profiles/sbc.nix ./kiosk.nix ./page.nix ];
-
-  # sbc.nix switches cfg.networking.backend to networkd, and the network module
-  # emits no DHCP client for an interface it was never told about, so the wired
-  # NIC must be declared or the host comes up with no address at all.
-  cfg.networking.interfaces.end0 = { mode = "dhcp"; };
+  imports = [ ../../profiles/sbc.nix ./kiosk.nix ./network.nix ./page.nix ];
 
   # Root and firmware filesystems. The SD image gets these from
   # nixpkgs' installer/sd-card/sd-image.nix, but the colmena node does not
