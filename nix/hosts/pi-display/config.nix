@@ -50,7 +50,14 @@ let
   '';
 in
 {
+  imports = [ ../../profiles/sbc.nix ];
+
   networking.hostName = "pi-display";
+
+  # sbc.nix switches cfg.networking.backend to networkd, and the network module
+  # emits no DHCP client for an interface it was never told about, so the wired
+  # NIC must be declared or the host comes up with no address at all.
+  cfg.networking.interfaces.end0 = { mode = "dhcp"; };
 
   # Root and firmware filesystems. The SD image gets these from
   # nixpkgs' installer/sd-card/sd-image.nix, but the colmena node does not
