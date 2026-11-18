@@ -29,6 +29,28 @@
   # the firmware handing its patched device tree straight to Linux.
   boot.loader.raspberry-pi.bootloader = lib.mkForce "kernel";
 
+  # nix/modules/core/boot.nix (imported via profiles/sbc.nix) defines these at
+  # normal priority, so they win over nvmd's lib.mkDefault and must be forced
+  # back to this board's values:
+  #
+  #   boot.kernelPackages = pkgs.<generic mainline linuxPackages>
+  #     -> a generic aarch64 mainline kernel: no linux-rpi, none of the RP1 DSI
+  #        patches, no vendor device trees. The build still succeeds and the
+  #        board boots, so nothing reports the loss - the panel just never
+  #        comes back. This one is silent.
+  #
+  #   boot.loader.systemd-boot.enable = mkDefault true
+  #     -> a second definition of system.build.installBootLoader, which is a
+  #        hard evaluation error ("Only one bootloader can be enabled at a
+  #        time"). This one is loud.
+  #
+  # Same expression nvmd's raspberry-pi-5 module defaults to.
+  boot.kernelPackages =
+    lib.mkForce
+      nixos-raspberrypi.packages.${pkgs.stdenv.hostPlatform.system}.linuxPackages_rpi5;
+  boot.loader.systemd-boot.enable = lib.mkForce false;
+  boot.loader.efi.canTouchEfiVariables = lib.mkForce false;
+
   # nixos-raspberrypi renders config.txt from hardware.raspberry-pi.config,
   # which has a different shape from nixos-hardware's configtxt.settings:
   # <filter>.options.<key>.{enable,value} and <filter>.dt-overlays.<name>.
