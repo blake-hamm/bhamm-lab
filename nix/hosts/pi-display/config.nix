@@ -4,11 +4,10 @@
 # same split the Orange Pi hosts use. Hardware, kernel and firmware wiring lives
 # in hardware.nix; everything the panel actually shows lives here.
 #
-# Shared repo modules (nix/profiles/*.nix -> nix/modules) are deliberately NOT
-# imported yet: every profile pulls in core/ssh.nix, which moves sshd to port
-# 4185 and drops password auth. Doing that on a headless SBC in the same change
-# as a structural refactor risks locking SSH out for good. Staged for the next
-# apply - see the README.
+# This file is the pi-display host's shared config: the kiosk session and the
+# filesystems both sd-image.nix and default.nix need. Hardware, kernel and panel
+# wiring live in hardware.nix; the shared desktop-free module set (core,
+# network, ssh) comes from profiles/sbc.nix.
 { config, lib, pkgs, ... }:
 
 let
@@ -51,8 +50,6 @@ let
 in
 {
   imports = [ ../../profiles/sbc.nix ];
-
-  networking.hostName = "pi-display";
 
   # sbc.nix switches cfg.networking.backend to networkd, and the network module
   # emits no DHCP client for an interface it was never told about, so the wired
@@ -114,14 +111,6 @@ in
   zramSwap.enable = true;
 
   hardware.graphics.enable = true;
-
-  # TEMPORARY, while SSH reachability is unchanged on purpose: plain sshd on
-  # port 22 with root reachable. Replaced wholesale by core/ssh.nix (4185,
-  # key-only, AllowUsers) in the next change.
-  services.openssh = {
-    enable = true;
-    settings.PermitRootLogin = "yes";
-  };
 
   # Desk-side debug login while the panel has no working scanout. Hash is of
   # "bench". Goes away with core/ssh.nix + sops.
@@ -208,9 +197,5 @@ in
     wvkbd
   ];
 
-  time.timeZone = "UTC";
-
   networking.firewall.allowedTCPPorts = [ 8080 ];
-
-  system.stateVersion = "25.11";
 }
