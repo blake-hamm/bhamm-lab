@@ -70,10 +70,15 @@
   # "bench". Goes away with core/ssh.nix + sops.
   users.users.root.initialHashedPassword = "$6$benchbench$L/SWrobNRkV.iUB93gv.PJywy/QX4wzN1m2YZYeF.uBbRUYLgodycFkml5WWSUxFf4eG/3lJwiGVvvDLD8/76.";
 
+  # Link and resolver diagnostics: the box is headless in the kitchen, so a
+  # missing binary means a trip back to the bench.
   environment.systemPackages = with pkgs; [
+    dnsutils
     evtest
     iproute2
+    iw
     libraspberrypi
     python3
+    tcpdump
   ];
 }

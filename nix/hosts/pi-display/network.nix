@@ -19,9 +19,9 @@
       address = "10.0.20.22";
       prefixLength = 24;
       gateway = "10.0.20.1";
-      # Unioned into networking.nameservers by the network module; resolv.conf
-      # is generated from that list, so end0's DHCP-offered DNS is unused.
-      nameservers = [ "10.0.9.2" ];
+      # OPNsense's resolver, on the same VLAN. There is no metal -> lan rule,
+      # so the lan resolver has no path once end0 is unplugged.
+      nameservers = [ "10.0.20.1" ];
       # Above systemd's DHCP default-route metric (1024) so the wired link stays
       # the primary path while plugged in. Use 100 to prefer WiFi instead.
       metric = 2048;
