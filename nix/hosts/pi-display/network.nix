@@ -36,7 +36,12 @@
     # ext_password file: NAME=PASSWORD lines, rendered from sops below. The PSK
     # never enters the nix store or the world-readable wpa_supplicant config.
     secretsFile = config.sops.templates."wpa_supplicant-secrets".path;
-    networks.Polk_Metal.pskRaw = "ext:polk_metal_psk";
+    networks.Polk_Metal = {
+      # The AP disables SSID broadcast; without scan_ssid=1 wpa_supplicant never
+      # sends the directed probe and the network is never found.
+      hidden = true;
+      pskRaw = "ext:polk_metal_psk";
+    };
   };
 
   sops.secrets.wifi_psk.key = "vault_secrets/core/pi-display/wifi_psk";
