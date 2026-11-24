@@ -29,10 +29,19 @@ spec:
           image: lscr.io/linuxserver/sabnzbd:latest
           resources:
             requests:
-              cpu: "50m"
+              # 50m gave this pod ~5% of a core's CFS share, so it was starved
+              # whenever the node was busy. 250m tracks the bursty-but-idle
+              # profile better without reserving a full core.
+              cpu: "250m"
               memory: "256Mi"
             limits:
-              cpu: "1"
+              # Post-processing (par2 verify/repair + unpack) is CPU bound.
+              # At 1 CPU the cgroup sat at its quota ~79% of CFS periods during
+              # a repair, starving the NNTP decoder and the web UI. Paired with
+              # SABnzbd's "Extra PAR2 Parameters = -t2" (set in the GUI, lives
+              # on the sabnzbd-config PVC) so par2 cannot spawn one thread per
+              # node core inside this quota.
+              cpu: "2"
               # 1Gi limit still OOMKilled 3x in 7d (spikes between cadvisor
               # samples; #359). Requests stay low — limits are burst headroom.
               memory: "2Gi"
