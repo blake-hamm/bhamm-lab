@@ -29,13 +29,17 @@ spec:
           image: lscr.io/linuxserver/radarr:6.2.1
           resources:
             requests:
-              cpu: "50m"
+              cpu: "250m"
               memory: "256Mi"
             limits:
-              cpu: "500m"
+              # CPU is idle between imports, so this is burst headroom for the
+              # same cross-volume copy + MediaInfo work sonarr does; 500m
+              # queues that behind throttling for the whole import.
+              cpu: "2"
               # 512Mi limit OOMKilled during imports (same between-sample
-              # spike pattern as sonarr in #363). Limits are burst headroom.
-              memory: "1Gi"
+              # spike pattern as sonarr in #363) and the idle plateau is now
+              # ~540Mi, leaving one import burst of headroom at 1Gi.
+              memory: "2Gi"
           ports:
             - containerPort: 7878
           volumeMounts:
