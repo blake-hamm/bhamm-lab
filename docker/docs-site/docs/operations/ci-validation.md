@@ -30,6 +30,33 @@ in `tofu-cicd.yml` — terraform gates run on terraform changes only. `KUBE_VERS
 `talos_version` in `tofu/proxmox/talos/variables.tf` (Talos v1.12.6 →
 k8s 1.35).
 
+## Docker image builds (`forgejo-docker-changes`)
+
+`docker/<name>/Dockerfile` is the trigger contract for the image pipeline:
+the Argo Events sensor `forgejo-docker-changes`
+(`kubernetes/manifests/automations/cicd/forgejo-docker-all.yaml`) turns a
+mirror push into one kaniko build per changed `docker/<dir>` and publishes
+`harbor.bhamm-lab.com/library/<dir>:latest` — the only tag it produces. A
+push whose diff touches nothing under `docker/` builds nothing.
+
+The push that **creates** a branch is the special case: the mirror's first
+sync of a new ref carries an empty commit list and an all-zero `before`, so
+there are no added/modified paths to read. The sensor accepts exactly that
+push, and the `extract-dockerfiles` step resolves the changed paths from the
+Codeberg compare API (`/repos/blake-hamm/bhamm-lab/compare/main...<sha>`) —
+the mirror's own compare endpoint 404s. A compare call that fails or returns
+no files fails the workflow rather than submitting an empty build matrix, so
+the run's red state is the failure signal. Every branch creation submits one
+run; when the compare finds no `docker/` paths the matrix is empty and the
+run is a no-op.
+
+Sync is webhook-driven with a fallback poll: a Codeberg webhook triggers an
+immediate mirror sync, and the mirror also polls every `3h0m0s`
+(`mirror_interval` on `git.bhamm-lab.com`). If the webhook does not fire, a
+push — including a brand-new branch — can stay invisible to CI for up to
+three hours, which looks exactly like a broken pipeline until the ref shows
+up on the mirror.
+
 ## Vault credentials
 
 The `ci-vault-smoke` workflow
