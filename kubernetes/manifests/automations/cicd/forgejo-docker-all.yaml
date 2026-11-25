@@ -17,8 +17,10 @@ spec:
         script: |-
           -- A push that CREATES a branch carries no commit data (empty commit
           -- list, all-zero "before"). Accept it so the changed paths can be
-          -- resolved from the compare API below. Tag creations stay out: they
-          -- would reach clone-repo as a refs/tags/ branch.
+          -- resolved from the compare API below. Zero-commit tag creations stay
+          -- out: this guard also requires an all-zero "before" and a
+          -- refs/heads/ ref. A tag push that carries commits is left to the
+          -- commit loop further down.
           if (event.body.commits == nil or #event.body.commits == 0)
               and string.match(event.body.before or "", "^0+$")
               and string.sub(event.body.ref or "", 1, 11) == "refs/heads/" then
@@ -186,10 +188,13 @@ spec:
                                     changed = json.load(resp)
                             except Exception as exc:
                                 sys.exit('ERROR: compare request failed for %s: %s' % (url, exc))
-                            files = changed.get('files') or []
-                            if not files:
-                                sys.exit('ERROR: compare returned no files for %s' % url)
-                            docker_files = dockerfiles([f['filename'] for f in files])
+                            if not isinstance(changed, dict) or 'files' not in changed:
+                                sys.exit('ERROR: compare returned no file list for %s' % url)
+                            # Only added/modified entries are build targets: a removed path has no
+                            # Dockerfile left to build.
+                            files = changed['files'] or []
+                            docker_files = dockerfiles([f['filename'] for f in files
+                                                        if f.get('status') in ('added', 'modified')])
 
                         print(json.dumps(docker_files))
                   - name: prepare-docker-config
