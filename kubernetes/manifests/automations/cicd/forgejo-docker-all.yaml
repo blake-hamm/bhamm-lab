@@ -15,8 +15,18 @@ spec:
       eventName: push
       filters:
         script: |-
+          -- A push that CREATES a branch carries no commit data (empty commit
+          -- list, all-zero "before"). Accept it so the changed paths can be
+          -- resolved from the compare API below. Tag creations stay out: they
+          -- would reach clone-repo as a refs/tags/ branch.
+          if (event.body.commits == nil or #event.body.commits == 0)
+              and string.match(event.body.before or "", "^0+$")
+              and string.sub(event.body.ref or "", 1, 11) == "refs/heads/" then
+              return true
+          end
+
           -- Check all commits for docker/ path changes
-          for _, commit in ipairs(event.body.commits) do
+          for _, commit in ipairs(event.body.commits or {}) do
               -- Check added files
               for _, path in ipairs(commit.added) do
                   if string.sub(path, 1, 7) == "docker/" then
@@ -60,6 +70,8 @@ spec:
                     - name: repoUrl
                     - name: branch
                     - name: git-sha
+                    - name: before
+                    - name: after
                 templates:
                   - name: main
                     inputs:
@@ -68,6 +80,8 @@ spec:
                         - name: repoUrl
                         - name: branch
                         - name: git-sha
+                        - name: before
+                        - name: after
                     dag:
                       tasks:
                         - name: forgejo-status
@@ -86,6 +100,8 @@ spec:
                             parameters:
                               - name: commits
                                 value: "{{inputs.parameters.commits}}"
+                              - name: after
+                                value: "{{inputs.parameters.after}}"
                         - name: clone-repo
                           templateRef:
                             name: clone-repo
@@ -115,6 +131,7 @@ spec:
                     inputs:
                       parameters:
                         - name: commits
+                        - name: after
                       artifacts:
                         - name: input-json
                           path: /tmp/input.json
@@ -123,6 +140,9 @@ spec:
                     script:
                       image: python:3.14-alpine
                       command: [python]
+                      env:
+                        - name: AFTER_SHA
+                          value: "{{inputs.parameters.after}}"
                       resources:
                         requests:
                           cpu: 100m
@@ -133,19 +153,43 @@ spec:
                       source: |
                         import json
                         import os
+                        import sys
+                        import urllib.request
+
+                        COMPARE_URL = 'https://codeberg.org/api/v1/repos/blake-hamm/bhamm-lab/compare/main...'
 
                         with open('/tmp/input.json', 'r') as f:
                             commits = json.load(f)
 
-                        docker_files = []
-                        for commit in commits:
-                            for path in commit.get('added', []) + commit.get('modified', []):
+                        def dockerfiles(paths):
+                            found = []
+                            for path in paths:
                                 parts = path.split('/')
                                 if len(parts) >= 2 and parts[0] == 'docker':
-                                    dir_name = parts[1]
-                                    dockerfile_path = os.path.join('docker', dir_name, 'Dockerfile')
-                                    if dockerfile_path not in docker_files:
-                                        docker_files.append(dockerfile_path)
+                                    dockerfile_path = os.path.join('docker', parts[1], 'Dockerfile')
+                                    if dockerfile_path not in found:
+                                        found.append(dockerfile_path)
+                            return found
+
+                        if commits:
+                            docker_files = []
+                            for commit in commits:
+                                for path in dockerfiles(commit.get('added', []) + commit.get('modified', [])):
+                                    if path not in docker_files:
+                                        docker_files.append(path)
+                        else:
+                            # A push that creates a branch carries no commit data; resolve the changed
+                            # paths through the Codeberg compare API (the mirror's own endpoint 404s).
+                            url = COMPARE_URL + os.environ['AFTER_SHA']
+                            try:
+                                with urllib.request.urlopen(url, timeout=30) as resp:
+                                    changed = json.load(resp)
+                            except Exception as exc:
+                                sys.exit('ERROR: compare request failed for %s: %s' % (url, exc))
+                            files = changed.get('files') or []
+                            if not files:
+                                sys.exit('ERROR: compare returned no files for %s' % url)
+                            docker_files = dockerfiles([f['filename'] for f in files])
 
                         print(json.dumps(docker_files))
                   - name: prepare-docker-config
@@ -257,7 +301,17 @@ spec:
                 transformation:
                   template: '{{ .Input | replace "refs/heads/" "" }}'
               dest: spec.arguments.parameters.2.value
+            # head_commit is null on a push that creates a ref (the mirror sends no
+            # commit data), so the status SHA comes from the pushed tip instead.
             - src:
                 dependencyName: forgejo-push-event
-                dataKey: body.head_commit.id
+                dataKey: body.after
               dest: spec.arguments.parameters.3.value
+            - src:
+                dependencyName: forgejo-push-event
+                dataKey: body.before
+              dest: spec.arguments.parameters.4.value
+            - src:
+                dependencyName: forgejo-push-event
+                dataKey: body.after
+              dest: spec.arguments.parameters.5.value
