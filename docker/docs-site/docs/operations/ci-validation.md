@@ -44,11 +44,12 @@ sync of a new ref carries an empty commit list and an all-zero `before`, so
 there are no added/modified paths to read. The sensor accepts exactly that
 push, and the `extract-dockerfiles` step resolves the changed paths from the
 Codeberg compare API (`/repos/blake-hamm/bhamm-lab/compare/main...<sha>`) —
-the mirror's own compare endpoint 404s. A compare call that fails or returns
-no files fails the workflow rather than submitting an empty build matrix, so
-the run's red state is the failure signal. Every branch creation submits one
-run; when the compare finds no `docker/` paths the matrix is empty and the
-run is a no-op.
+the mirror's own compare endpoint 404s. A compare call that fails — a request
+error, a non-JSON body, or a response with no file list — fails the workflow
+rather than looking like a successful no-op, so the run's red state is the
+failure signal. A compare that succeeds with no changed files at all, or with
+no `docker/` paths among those changed, is a legitimate no-op: the run submits
+normally with an empty matrix and builds nothing.
 
 Sync is webhook-driven with a fallback poll: a Codeberg webhook triggers an
 immediate mirror sync, and the mirror also polls every `3h0m0s`
